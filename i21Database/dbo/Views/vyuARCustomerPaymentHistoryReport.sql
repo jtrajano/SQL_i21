@@ -18,6 +18,7 @@ SELECT DISTINCT
 	 , I.intInvoiceId	 
 	 , I.intCompanyLocationId
 	 , Item.intCommodityId
+	 , dblUnappliedAmount = ISNULL(P.dblUnappliedAmount, 0)
 FROM tblARInvoice I
 	LEFT JOIN (tblARPayment P INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId 
 							  LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) 
@@ -31,13 +32,15 @@ WHERE I.ysnPosted = 1 AND P.ysnPosted = 1
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')) AS A
 LEFT JOIN 
-(SELECT grandDblAmountPaid = SUM(dblAmountPaid)
-	 , intTotalCount	   = COUNT(*)
-	 , intEntityCustomer   = intEntityCustomerId
+(SELECT grandDblAmountPaid		= SUM(dblAmountPaid)
+	 , grandDblUnappliedAmount	= SUM(dblUnappliedAmount)
+	 , intTotalCount			= COUNT(*)
+	 , intEntityCustomer		= intEntityCustomerId
 FROM
 (SELECT DISTINCT
 	   intEntityCustomerId
-	 , dblAmountPaid	 
+	 , dblAmountPaid
+	 , dblUnappliedAmount
 FROM tblARPayment P 
 	INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
 WHERE P.ysnPosted = 1) AS TBL

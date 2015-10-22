@@ -2672,6 +2672,12 @@
     <Build Include="dbo\Stored Procedures\uspTRGenerateQuotes.sql" />
     <Build Include="dbo\Views\vyuTRQuoteSelection.sql" />
     <Build Include="dbo\Functions\fnICGetRunningQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetCustomerCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetCustomerRefundCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetFiscalSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetNoRefundCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetRefundCalculation.sql" />
+    <Build Include="dbo\Tables\tblSMLetterUpload.sql" />
     <Build Include="dbo\Views\vyuTMVirtualMeterBilling.sql" />
     <Build Include="dbo\Functions\fnTMGetSpecialPricingPriceTable.sql" />
   </ItemGroup>

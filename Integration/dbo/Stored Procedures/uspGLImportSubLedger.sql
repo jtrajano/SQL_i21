@@ -44,7 +44,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		)
 
 			INSERT INTO  @tmpID (ID,glije_date,glije_acct_no,glije_period,glije_src_no)
-    			SELECT A4GLIdentity,glije_date,glije_acct_no,glije_period,glije_src_no FROM glijemst WITH (HOLDLOCK)
+    			SELECT A4GLIdentity,glije_date,glije_acct_no,glije_period,glije_src_no FROM glijemst 
+				WITH (HOLDLOCK)
     			WHERE glije_period between @startingPeriod and @endingPeriod
     			
 
@@ -136,32 +137,28 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		WHERE glije_uid=@uid
 
     		--DEFAULTS THE POST DATE TO glije_date
-    		UPDATE tblGLIjemst SET glije_postdate = glije_dte WHERE glije_uid=@uid
+			UPDATE tblGLIjemst SET glije_postdate = glije_dte WHERE glije_uid=@uid
+
+			--UPDATES THE POSTDATE TO MAX GROUP BY SOURCE ID AND SOURCE SYSTEM
+			UPDATE a SET glije_postdate = b.postdate FROM tblGLIjemst a JOIN
+			(SELECT MAX(glije_postdate) as postdate,glije_src_no,glije_src_sys FROM tblGLIjemst WHERE glije_uid = @uid GROUP BY glije_src_no, glije_src_sys ) b
+			ON a.glije_src_no = b.glije_src_no AND a.glije_src_sys = b.glije_src_sys
+			where glije_uid = @uid
+
 
     		DECLARE @id INT, @dte DATETIME, @glije_period INT,@intFiscalYearId INT,@glije_acct_no DECIMAL(16,8)
     		DECLARE @year NVARCHAR(4) ,@period NVARCHAR(4),@intFiscalPeriodId INT,@dateStart DATETIME, @dateEnd DATETIME ,@ysnStatus BIT
 
-    		--VALIDATES EVERY ROW AND SAVES THE ERROR IN tblGLIjemst glije_error_desc COLUMN FOR later use
     		--DETERMINES THE glije_postdate VALUE . IF glije_date is not within the period then glije_postdate value is enddate
-    		DECLARE cursor_tbl CURSOR FOR SELECT glije_dte,glije_period FROM tblGLIjemst WHERE glije_uid = @uid GROUP BY glije_period,glije_dte
+    		DECLARE cursor_tbl CURSOR FOR SELECT glije_postdate,glije_period FROM tblGLIjemst WHERE glije_uid = @uid GROUP BY glije_period,glije_postdate
     		OPEN cursor_tbl
     		FETCH NEXT FROM cursor_tbl INTO @dte,@glije_period
     		WHILE @@FETCH_STATUS = 0
     		BEGIN
-
-
-    			SELECT @year = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),1,4), @period = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),5,2)
+			SELECT @year = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),1,4), @period = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),5,2)
     			SELECT TOP 1 @intFiscalYearId= intFiscalYearId,@ysnStatus = ysnStatus FROM tblGLFiscalYear WHERE strFiscalYear = @year
-    			--NO FISCAL YEAR MATCHED IN IRELY
-    			IF @ysnStatus IS NULL
-    					UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because origin fiscal year is not in the scope of iRely fiscal year'' WHERE glije_uid=@uid
-    					and glije_period = @glije_period
-    			ELSE
-
-    			IF @ysnStatus = 1
-    			BEGIN
+    		
     				SELECT @intFiscalPeriodId = dbo.fnGeti21FiscalPeriodIdFromOriginPeriod(@intFiscalYearId,@period)
-
     				IF @intFiscalPeriodId IS NOT NULL
     					BEGIN
 
@@ -173,20 +170,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     									UPDATE tblGLIjemst SET glije_postdate = @dateEnd  WHERE
     									glije_uid=@uid and glije_period = @period and glije_dte = @dte
     							END
-    						ELSE
-    							UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because iRely fiscal period is closed.'' WHERE
-    							glije_uid=@uid and glije_period = @period and glije_dte = @dte
     					END
-    				-- NO MATCHED PERIOD WITHIN THE FISCAL YEAR
-    				ELSE
-    					UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because origin fiscal year is not in the scope of iRely fiscal year.'' WHERE
-    					glije_uid=@uid and glije_period = @period and glije_dte = @dte
-    			END
-    			-- FISCAL YEAR IS NOT OPEN
-    			ELSE
-    				UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because iRely fiscal year is closed.'' WHERE
-    				glije_uid=@uid and glije_period = @period and glije_dte = @dte
-    			Cont:
     			FETCH NEXT FROM cursor_tbl INTO @dte,@glije_period
     		END
     		CLOSE cursor_tbl
@@ -195,7 +179,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		DECLARE @postdate DATE,@intJournalId INT,@strJournalId VARCHAR(10),
     				@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
     				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(16,4),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
-    				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),@totalDebit DECIMAL(18,2),@totalCredit DECIMAL(18,2),
+    				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),
+					--@totalDebit DECIMAL(18,2),
+					--@totalCredit DECIMAL(18,2),
     				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0
 
     		-- INSERTS INTO THE tblGLJournal GROUPED BY glije_postdate COLUMN in tblGLIjemst
@@ -216,7 +202,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     			SELECT @intJournalId = @@IDENTITY
     			SET @journalCount = @journalCount +1
-    			select @totalCredit =0, @totalDebit = 0,@isValid =1
+    			--select @totalCredit =0, @totalDebit = 0,
+				SET @isValid =1
 
     			DECLARE cursor_gldetail CURSOR LOCAL FOR SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
     			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period
@@ -252,7 +239,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 						  ,[strJournalId]
 						  ,[blnCorrection])
 					SELECT @importLogId,
-						''Unable to Post because account id in origin is not on i21 Crossreference.'',
+						''Unable to Post because account id in origin is not on i21 Cross Reference.'',
 						glije_period,
 						glije_src_no,
 						glije_src_sys,
@@ -308,7 +295,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				ELSE
     				    SELECT @creditUnit +=@glije_units,@creditUnitInLBS += @glije_units,@debitUnit = 0,@debitUnitInLBS = 0
 
-    				SELECT @totalCredit += @credit, @totalDebit +=@debit
+    				--SELECT @totalCredit += @credit, @totalDebit +=@debit
 
     				INSERT INTO tblGLJournalDetail (intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
     				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument,strOriginTable, strSourceKey)
@@ -316,66 +303,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc,''tblGLIjemst'', A4GLIdentity
     				 FROM tblGLIjemst WHERE glije_id=@id
 
-    				IF @glije_error_desc IS NOT NULL
-    				BEGIN
-    					IF @importLogId = 0
-    						EXEC uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId, @version, @importLogId OUTPUT
-						INSERT INTO tblGLCOAImportLogDetail ([intImportLogId]
-						  ,[strEventDescription]
-						  ,[strPeriod]
-						  ,[strSourceNumber]
-						  ,[strSourceSystem]
-						  ,[strFiscalYear]
-						  ,[strFiscalYearPeriod]
-						  ,[strExternalId]
-						  ,[strLineNumber]
-						  ,[strTransactionDate]
-						  ,[strTransactionTime]
-						  ,[strReference]
-						  ,[strDocument]
-						  ,[strComments]
-						  ,[strDebitCredit]
-						  ,[decAmount]
-						  ,[decUnits]
-						  ,[strJournalId]
-						  ,[blnCorrection])
-						SELECT @importLogId,
-							@glije_error_desc,
-							glije_period,
-							glije_src_no,
-							glije_src_sys,
-							SUBSTRING(CAST(glije_period AS NCHAR(10)),1,4),
-							SUBSTRING(CAST(glije_period AS NCHAR(10)),5,2),
-							glije_acct_no,
-							glije_line_no,
-							glije_date,
-							STUFF( STUFF(glije_time,3,0,'':''),6,0,'':''),
-							glije_ref,
-							glije_doc,
-							glije_comments,
-							glije_dr_cr_ind,
-							glije_amt,
-							glije_units,
-							@strJournalId,
-							CASE WHEN UPPER(RTRIM(glije_correcting)) = ''Y'' THEN 1 ELSE 0 END
-							FROM tblGLIjemst 
-    						WHERE glije_id = @id
-    						SET @isValid = 0
-    					END
     				FETCH NEXT FROM cursor_gldetail INTO @id,@glije_acct_no,@glije_date,@glije_amt,@glije_units,@glije_dr_cr_ind,@glije_correcting,
     				@glije_error_desc,@glije_period
     			END
     			CLOSE cursor_gldetail
     			DEALLOCATE cursor_gldetail
-
-
-    			IF @totalCredit <> @totalDebit
-    			BEGIN
-    				IF @importLogId = 0
-    					EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
-    				EXEC uspGLCreateImportLogDetail @importLogId,''Unable to Post because transaction is out of balance.'',@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
-    				SET @isValid = 0
-    			END
     			IF @isCOAPresent = 0 SET @isValid = 0
     			IF @isValid = 1
     			BEGIN
@@ -409,13 +341,6 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				END
 
     			END
-    			ELSE
-    				BEGIN
-    					IF @importLogId = 0
-    						EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
-    					UPDATE tblGLCOAImportLog SET strEvent = ''Failed Transaction'' WHERE intImportLogId = @importLogId
-    				END
-
     			FETCH NEXT FROM cursor_postdate INTO @postdate,@glije_src_sys,@glije_src_no
     			END
     			CLOSE cursor_postdate

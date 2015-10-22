@@ -7,5 +7,5 @@
 	[dtmLastActivityDate] DATETIME NULL,
     [dblVolume] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
-    CONSTRAINT [PK_tblPATCategoryVolume] PRIMARY KEY ([intCategoryVolumeId]) 
+    CONSTRAINT [PK_tblPATCustomerVolume] PRIMARY KEY ([intCategoryVolumeId]) 
 )

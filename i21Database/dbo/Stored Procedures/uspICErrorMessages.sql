@@ -310,7 +310,7 @@ EXEC sp_addmessage 80058,11,@strmessage,'us_english','False'
 
 -- was 51178
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80059) EXEC sp_dropmessage 80059, 'us_english'	
-SET @strmessage = 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
+SET @strmessage = 'Lot Move requires a negative Adjust Qty on %s as stock for the move.'
 EXEC sp_addmessage 80059,11,@strmessage,'us_english','False'
 
 -- was 51180 (in 1530 Dev -> Prod)

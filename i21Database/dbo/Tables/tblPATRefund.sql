@@ -7,6 +7,7 @@
 		[dblServiceFee] [numeric](18, 6) NULL,
 		[dblCashCutoffAmount] [numeric](18, 6) NULL,
 		[dblFedWithholdingPercentage] [numeric](18, 6) NULL,
+		[ysnPosted] BIT NULL DEFAULT 0,
 		[intConcurrencyId] [int] NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATRefund] PRIMARY KEY ([intRefundId])
 	)

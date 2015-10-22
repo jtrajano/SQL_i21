@@ -55,7 +55,7 @@ BEGIN
 	
 	IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
 	BEGIN
-		DELETE FROM tblGLForBatchPosting WHERE dtmDateEntered < DATEADD(day,-2, GETDATE())
+		DELETE FROM tblGLForBatchPosting 
 		SELECT @guid = NEWID()
 		
 		INSERT INTO 
