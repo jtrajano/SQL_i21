@@ -14,6 +14,7 @@ SELECT
 	,Alloc.strPContractNumber
 	,Alloc.intPContractSeq
 	,PS.dblPAllocatedQty
+	,ShipContract.intItemId as intPItemId
 	,Alloc.strPItemUOM
 	,Alloc.strPItemNo
 	,Alloc.strPItemDescription
@@ -21,6 +22,7 @@ SELECT
 	,Alloc.intPUnitMeasureId
 
 	,PS.dblSAllocatedQty
+	,Alloc.intSItemId
 	,Alloc.strSItemUOM
 	,Alloc.strSContractNumber
 	,Alloc.strSalesContractNumber
@@ -33,4 +35,5 @@ SELECT
 	,Alloc.dblSCashPrice
 
 FROM tblLGShipmentPurchaseSalesContract PS
+LEFT JOIN tblLGShipmentContractQty ShipContract On ShipContract.intShipmentContractQtyId = PS.intShipmentContractQtyId
 LEFT JOIN vyuLGAllocatedContracts Alloc ON Alloc.intAllocationDetailId = PS.intAllocationDetailId

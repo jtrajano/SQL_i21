@@ -27,6 +27,7 @@ SELECT
 	,PCT.strContractNumber as strPurchaseContractNumber
 	,PCT.intContractSeq as intPContractSeq
 	,strPContractNumber = Cast(PCT.strContractNumber as VarChar(100)) + '/' + Cast(PCT.intContractSeq as VarChar(100))
+	,PCT.intItemId as intPItemId
 	,PCT.strItemUOM as strPItemUOM
 	,PCT.strItemNo as strPItemNo
 	,PCT.strItemDescription as strPItemDescription
@@ -57,6 +58,7 @@ SELECT
 	,SCT.strContractNumber as strSalesContractNumber
 	,SCT.intContractSeq as intSContractSeq
 	,strSContractNumber = Cast(SCT.strContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
+	,SCT.intItemId as intSItemId
 	,SCT.strItemUOM as strSItemUOM
 	,SCT.strItemNo as strSItemNo
 	,SCT.strItemDescription as strSItemDescription
