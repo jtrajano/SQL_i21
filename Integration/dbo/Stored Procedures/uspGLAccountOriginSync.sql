@@ -98,7 +98,7 @@ BEGIN
 				SELECT 
 					CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)),
 					CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16)),						
-					(CASE WHEN (SELECT TOP 1 1 FROM tblGLAccountSegment WHERE intAccountSegmentId = (TOP 1 select intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = ''Primary'')))) > 0
+					(CASE WHEN (SELECT TOP 1 1 FROM tblGLAccountSegment WHERE intAccountSegmentId = (SELECT TOP 1 intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = ''Primary'')))) > 0
 								THEN (SELECT TOP 1 SUBSTRING(tblGLAccountSegment.strDescription,0,30) FROM tblGLAccountSegment WHERE intAccountSegmentId = (select TOP 1 intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = ''Primary''))))
 							ELSE SUBSTRING(tblGLAccount.strDescription,0,30) END) as AccountDescription,
 					@LegacyType_update,
