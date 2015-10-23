@@ -7,7 +7,16 @@
 		[dblServiceFee] [numeric](18, 6) NULL,
 		[dblCashCutoffAmount] [numeric](18, 6) NULL,
 		[dblFedWithholdingPercentage] [numeric](18, 6) NULL,
+		[dblPurchaseVolume] [numeric](18,6) NULL,
+		[dblSaleVolume] [numeric](18,6) NULL,
+		[dblEquityRefund] [numeric](18,6) NULL,
+		[dblCashRefund] [numeric](18,6) NULL,
+		[dblLessFWT] [numeric](18,6) NULL,
+		[dblLessService] [numeric](18,6) NULL,
+		[dblCheckAmount] [numeric](18,6) NULL,
+		[dblNoRefund] [numeric](18,6) NULL,
 		[ysnPosted] BIT NULL DEFAULT 0,
+		[ysnPrinted] BIT NULL DEFAULT 0,
 		[intConcurrencyId] [int] NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATRefund] PRIMARY KEY ([intRefundId])
 	)
