@@ -1064,6 +1064,42 @@ BEGIN
 	VALUES(1,'Weighted Average')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFBudgetType WHERE intBudgetTypeId = 1)
+BEGIN
+    INSERT INTO tblMFBudgetType(intBudgetTypeId,strName,strDescription)
+    VALUES(1,'B','Budget')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBudgetType WHERE intBudgetTypeId = 2)
+BEGIN
+    INSERT INTO tblMFBudgetType(intBudgetTypeId,strName,strDescription)
+    VALUES(2,'A','Affordability')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBudgetType WHERE intBudgetTypeId = 3)
+BEGIN
+    INSERT INTO tblMFBudgetType(intBudgetTypeId,strName,strDescription)
+    VALUES(3,'M','Month Average')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBudgetType WHERE intBudgetTypeId = 4)
+BEGIN
+    INSERT INTO tblMFBudgetType(intBudgetTypeId,strName,strDescription)
+    VALUES(4,'V','Variance')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBudgetType WHERE intBudgetTypeId = 5)
+BEGIN
+    INSERT INTO tblMFBudgetType(intBudgetTypeId,strName,strDescription)
+    VALUES(5,'P','Total Pounds')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBudgetType WHERE intBudgetTypeId = 6)
+BEGIN
+    INSERT INTO tblMFBudgetType(intBudgetTypeId,strName,strDescription)
+    VALUES(6,'I','Impact (USD)')
+END
+GO
 DELETE
 FROM tblMFManufacturingProcessRunDuration
 WHERE intManufacturingProcessRunDurationId IN (

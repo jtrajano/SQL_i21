@@ -2683,6 +2683,11 @@
     <Build Include="dbo\Views\vyuARGetItemComponents.sql" />
     <Build Include="dbo\Views\vyuLGShipmentHeader.sql" />
     <Build Include="dbo\Views\vyuARGetRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBudgets.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveBudget.sql" />
+    <Build Include="dbo\Tables\tblMFBudgetLog.sql" />
+    <Build Include="dbo\Tables\tblMFBudget.sql" />
+    <Build Include="dbo\Tables\tblMFBudgetType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
