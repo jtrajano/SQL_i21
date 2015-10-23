@@ -71,6 +71,7 @@ Type the overview for the table here.
 		[strCounted] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intCountGroupId] INT NULL, 
 		[ysnCountedDaily] BIT NULL DEFAULT ((0)), 
+		[ysnLockedInventory] BIT NULL DEFAULT ((0)),
 		[intSort] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 

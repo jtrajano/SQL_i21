@@ -7,9 +7,15 @@ SELECT
 	Item.strItemNo,
 	strItemDescription = Item.strDescription,
 	strType = Item.strType,
+	Item.intCategoryId,
+	strCategory = Category.strCategoryCode,
+	Item.intCommodityId,
+	strCommodity = Commodity.strCommodityCode,
 	strLotTracking = Item.strLotTracking,
 	intLocationId = Location.intCompanyLocationId,
 	StockUOM.intItemLocationId,
+	ItemLoc.intCountGroupId,
+	CountGroup.strCountGroup,
 	Location.strLocationName,
 	StockUOM.intItemUOMId,
 	UOM.strUnitMeasure,
@@ -29,7 +35,10 @@ SELECT
 	ysnStockUnit = ItemUOM.ysnStockUnit
 FROM tblICItemStockUOM StockUOM
 LEFT JOIN tblICItem Item ON Item.intItemId = StockUOM.intItemId
+LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
+LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId
+LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = ItemLoc.intCountGroupId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLoc.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = StockUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
