@@ -821,7 +821,7 @@ BEGIN
 		,ysnTMProcessed = 0
 	INTO #tmpVirtualMeterInvoiceDetail
 	FROM tblARInvoiceDetail
-	WHERE intInvoiceId = 68
+	WHERE intInvoiceId = @InvoiceId
 		AND intSiteId IS NOT NULL
 		AND ISNULL(ysnLeaseBilling,0) <> 1
 		AND ISNULL(ysnVirtualMeterReading,0) = 1
