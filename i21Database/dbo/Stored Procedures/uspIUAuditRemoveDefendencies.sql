@@ -98,7 +98,6 @@ BEGIN
 	BEGIN
 		DECLARE @DropIndexScript NVARCHAR(MAX)
 		SET @DropIndexScript = 'DROP INDEX [' + @IndexName + '] ON ' + @Table
-		PRINT(@DropIndexScript)
 		EXEC sp_executesql @DropIndexScript
 		FETCH NEXT FROM Cursor_OwnIndex into @IndexName
 	END	
