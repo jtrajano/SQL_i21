@@ -132,7 +132,7 @@ BEGIN
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT 
 			,@strBatchId AS NVARCHAR(20)
-			,@intUserId AS INT
+			,@intEntityUserSecurityId AS INT
 			,@intTransactionTypeId AS INT 
 			,@GLEntries AS RecapTableType 
 		
@@ -165,7 +165,7 @@ BEGIN
 		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@intTransactionTypeId
 	END 
 

@@ -117,7 +117,7 @@ BEGIN
 				,strTransactionForm
 				,intLotId
 				,dtmCreated
-				,intCreatedUserId
+				,intCreatedEntityId
 				,intConcurrencyId
 		)
 		SELECT 	intItemId = @StickyGrains
@@ -138,7 +138,7 @@ BEGIN
 				,strTransactionForm = 'Inventory Transfer'
 				,intLotId = NULL 
 				,dtmCreated = GETDATE()
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 
 		-- Delete Inventory In-Transit from the G/L account setup to simulate a missing contra account id
@@ -157,12 +157,12 @@ BEGIN
 	-- Act
 	BEGIN 
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
-				,@intUserId AS INT = 1		
+				,@intEntityUserSecurityId AS INT = 1		
 
 		EXEC dbo.uspICCreateGLEntries
 			@strBatchId
 			,@AccountCategoryName_InventoryInTransit
-			,@intUserId
+			,@intEntityUserSecurityId
 			,NULL
 	END 
 END

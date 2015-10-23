@@ -26,7 +26,7 @@ BEGIN
 	DECLARE @strBatchId AS NVARCHAR(20)
 	DECLARE @intTransactionId AS INT
 	DECLARE @strTransactionId AS NVARCHAR(40)
-	DECLARE @intUserId AS INT
+	DECLARE @intEntityUserSecurityId AS INT
 
 	DECLARE @GLDetail AS dbo.RecapTableType 
 
@@ -154,7 +154,7 @@ BEGIN
 	SET @strBatchId = 'BATCH-0000003'
 	SET @intTransactionId = 1
 	SET @strTransactionId = 'InvShip-00001'
-	SET @intUserId = 1
+	SET @intEntityUserSecurityId = 1
 
 	-- Setup the expected data. 
 	-- Reverse the posted GL entries
@@ -552,7 +552,7 @@ BEGIN
 		@intTransactionId
 		,@strTransactionId
 		,@strBatchId
-		,@intUserId
+		,@intEntityUserSecurityId
 END 
 
 -- Act
@@ -561,7 +561,7 @@ BEGIN
 	SET @strBatchId = 'BATCH-0000004'
 	SET @intTransactionId = 1
 	SET @strTransactionId = 'InvRcpt-00001'
-	SET @intUserId = 1
+	SET @intEntityUserSecurityId = 1
 
 	-- BEGIN Reverse the posted GL entries
 	INSERT INTO dbo.expectedGLDetail (
@@ -742,7 +742,7 @@ BEGIN
 		@intTransactionId
 		,@strTransactionId
 		,@strBatchId
-		,@intUserId
+		,@intEntityUserSecurityId
 END
 
 -- Assert

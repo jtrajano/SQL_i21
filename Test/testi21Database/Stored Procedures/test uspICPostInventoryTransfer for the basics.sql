@@ -10,8 +10,7 @@ BEGIN
 		DECLARE @ysnPost AS BIT
 		DECLARE @ysnRecap AS BIT
 		DECLARE @strTransactionId AS NVARCHAR(40)
-		DECLARE @intUserId AS INT
-		DECLARE @intEntityId AS INT 
+		DECLARE @intEntityUserSecurityId AS INT		
 	END 
 
 	-- Assert
@@ -25,8 +24,7 @@ BEGIN
 			@ysnPost
 			,@ysnRecap
 			,@strTransactionId
-			,@intUserId
-			,@intEntityId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

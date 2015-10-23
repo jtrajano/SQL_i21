@@ -14,7 +14,6 @@ BEGIN
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'ADJ-1'
-		DECLARE @intUserId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
 
 		-- Add a spy for uspICPostInventoryAdjustmentLotStatusChange
@@ -33,7 +32,6 @@ BEGIN
 			@ysnPost
 			,@ysnRecap
 			,@strTransactionId
-			,@intUserId
 			,@intEntityId
 	END 
 

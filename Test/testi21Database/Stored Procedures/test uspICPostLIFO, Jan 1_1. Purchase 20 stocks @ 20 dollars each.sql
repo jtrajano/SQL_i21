@@ -63,7 +63,7 @@ BEGIN
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
 			,@strTransactionForm AS NVARCHAR(255)
-			,@intUserId AS INT
+			,@intEntityUserSecurityId AS INT
 
 		SET	@intItemId = @WetGrains
 		SET @intItemLocationId = @NewHaven
@@ -80,7 +80,7 @@ BEGIN
 		SET @strTransactionId = 'PURCHASE-00001'
 		SET @strBatchId = 'BATCH-00001'
 		SET @intTransactionTypeId = @PurchaseTransactionType
-		SET @intUserId = 1
+		SET @intEntityUserSecurityId = 1
 
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
@@ -103,7 +103,7 @@ BEGIN
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
-			[intCreatedUserId] INT NULL, 
+			[intCreatedEntityId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1
 		)
 
@@ -128,7 +128,7 @@ BEGIN
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
-			[intCreatedUserId] INT NULL, 
+			[intCreatedEntityId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1 	
 		)
 		
@@ -160,7 +160,7 @@ BEGIN
 				,[strBatchId]
 				,[intTransactionTypeId]
 				,[intLotId]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]
 		)
 		SELECT	[intInventoryTransactionId] = 1
@@ -183,7 +183,7 @@ BEGIN
 				,[strBatchId] = @strBatchId
 				,[intTransactionTypeId] = @PurchaseTransactionType
 				,[intLotId] = NULL 
-				,[intCreatedUserId] = @intUserId
+				,[intCreatedEntityId] = @intEntityUserSecurityId
 				,[intConcurrencyId]	= 1
 	END 
 	
@@ -208,7 +208,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Assert
@@ -235,7 +235,7 @@ BEGIN
 				,[strBatchId]
 				,[intTransactionTypeId]
 				,[intLotId]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]
 		)
 		SELECT	[intInventoryTransactionId]
@@ -258,7 +258,7 @@ BEGIN
 				,[strBatchId]
 				,[intTransactionTypeId]
 				,[intLotId]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]	
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId

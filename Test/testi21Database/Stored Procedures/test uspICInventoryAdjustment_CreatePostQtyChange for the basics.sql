@@ -147,7 +147,7 @@ BEGIN
 			,@dblNewUnitCost				= NULL
 			,@intSourceId					= NULL 
 			,@intSourceTransactionTypeId	= NULL 
-			,@intUserId						= NULL
+			,@intEntityUserSecurityId		= NULL
 			,@intInventoryAdjustmentId		= NULL
 	END 	
 

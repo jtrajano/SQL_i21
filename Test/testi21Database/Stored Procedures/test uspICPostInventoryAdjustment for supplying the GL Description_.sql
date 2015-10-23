@@ -6,7 +6,6 @@ BEGIN
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'ADJ-3'
-		DECLARE @intUserId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @strGLDescription AS NVARCHAR(255) 
 
@@ -19,7 +18,6 @@ BEGIN
 			@ysnPost
 			,@ysnRecap
 			,@strTransactionId
-			,@intUserId
 			,@intEntityId
 	END 
 

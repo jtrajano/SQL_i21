@@ -168,7 +168,7 @@ BEGIN
 
 		EXEC dbo.uspICAddSalesOrderToInventoryShipment
 			@SalesOrderId = 1
-			,@intEntitySecurityUserId = @intEntityId
+			,@intEntityUserSecurityId = @intEntityId
 			,@InventoryShipmentId = @InventoryShipmentIdResult OUTPUT			
 	END 
 

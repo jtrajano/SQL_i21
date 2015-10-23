@@ -150,7 +150,7 @@ BEGIN
 			,@intNewLotStatusId				= @LOT_STATUS_Active -- Invalid status. Item is already active. 
 			,@intSourceId					= 1 
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
-			,@intUserId						= 1
+			,@intEntityUserSecurityId		= 1
 			,@intInventoryAdjustmentId		= NULL
 	END 	
 

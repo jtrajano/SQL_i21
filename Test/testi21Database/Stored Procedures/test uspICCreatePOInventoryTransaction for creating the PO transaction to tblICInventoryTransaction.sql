@@ -118,7 +118,7 @@ BEGIN
 			[intRelatedTransactionId] INT NULL,
 			[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
-			[intCreatedUserId] INT NULL
+			[intCreatedEntityId] INT NULL
 		)
 
 		CREATE TABLE actual (
@@ -144,7 +144,7 @@ BEGIN
 			[intRelatedTransactionId] INT NULL,
 			[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
-			[intCreatedUserId] INT NULL
+			[intCreatedEntityId] INT NULL
 		)
 
 		DECLARE @intTransactionTypeId AS INT 
@@ -155,7 +155,7 @@ BEGIN
 		FROM	tblICInventoryTransactionType 
 		WHERE	strName = 'Purchase Order'
 
-		DECLARE @intUserId AS INT = 98
+		DECLARE @intEntityUserSecurityId AS INT = 98
 
 		-- Setup the expected data
 		INSERT INTO expected (
@@ -180,7 +180,7 @@ BEGIN
 				,intRelatedTransactionId
 				,strRelatedTransactionId
 				,strTransactionForm
-				,intCreatedUserId
+				,intCreatedEntityId
 		)
 		SELECT	intItemId					= @WetGrains
 				,intItemLocationId			= @WetGrains_DefaultLocation
@@ -203,7 +203,7 @@ BEGIN
 				,intRelatedTransactionId	= NULL 
 				,strRelatedTransactionId	= NULL 
 				,strTransactionForm			= @TransactionTypeName
-				,intCreatedUserId			= @intUserId
+				,intCreatedEntityId			= @intEntityUserSecurityId
 		UNION ALL 
 		SELECT	intItemId					= @PremiumGrains
 				,intItemLocationId			= @PremiumGrains_DefaultLocation
@@ -226,12 +226,12 @@ BEGIN
 				,intRelatedTransactionId	= NULL 
 				,strRelatedTransactionId	= NULL 
 				,strTransactionForm			= @TransactionTypeName
-				,intCreatedUserId			= @intUserId
+				,intCreatedEntityId			= @intEntityUserSecurityId
 	END
 
 	-- Act
 	BEGIN 
-		EXEC dbo.uspICCreatePOInventoryTransaction @intInventoryReceiptId, @intUserId
+		EXEC dbo.uspICCreatePOInventoryTransaction @intInventoryReceiptId, @intEntityUserSecurityId
 	END 
 
 	-- Assert
@@ -259,7 +259,7 @@ BEGIN
 				,intRelatedTransactionId
 				,strRelatedTransactionId
 				,strTransactionForm
-				,intCreatedUserId
+				,intCreatedEntityId
 		)
 		SELECT	intInventoryTransactionId
 				,intItemId
@@ -283,7 +283,7 @@ BEGIN
 				,intRelatedTransactionId
 				,strRelatedTransactionId
 				,strTransactionForm
-				,intCreatedUserId
+				,intCreatedEntityId
 		FROM	dbo.tblICInventoryTransaction
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

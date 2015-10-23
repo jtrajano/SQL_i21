@@ -36,13 +36,13 @@ BEGIN
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@intTransactionId AS INT = 329393 -- non-existing id. 
 				,@strTransactionId AS NVARCHAR(40) = 'gibberish' -- gibberish value. 
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 
 		EXEC dbo.uspICUnpostStorage
 			@intTransactionId
 			,@strTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

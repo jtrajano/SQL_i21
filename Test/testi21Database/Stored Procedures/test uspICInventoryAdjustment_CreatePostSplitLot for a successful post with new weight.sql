@@ -172,7 +172,7 @@ BEGIN
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId					= 1  
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
-			,@intUserId						= 1 
+			,@intEntityUserSecurityId		= 1 
 			,@intInventoryAdjustmentId		= @intInventoryAdjustmentId OUTPUT  
 	END 
 	

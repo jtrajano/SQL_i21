@@ -179,8 +179,7 @@ BEGIN
 			@ysnPost = 1
 			,@ysnRecap = 0
 			,@strTransactionId = 'INVTRN-2'
-			,@intUserId = 1
-			,@intEntityId = 1
+			,@intEntityUserSecurityId = 1
 	END 
 
 	-- Assert

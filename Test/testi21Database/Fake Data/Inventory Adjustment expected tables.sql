@@ -143,7 +143,7 @@ BEGIN
 		,ysnReleasedToWarehouse		BIT 
 		,ysnProduced				BIT 
 		,dtmDateCreated				DATETIME NULL
-		,intCreatedUserId			INT NULL
+		,intCreatedEntityId			INT NULL
 		,intConcurrencyId			INT NULL 
 	)
 
@@ -181,7 +181,7 @@ BEGIN
 		,ysnReleasedToWarehouse		BIT 
 		,ysnProduced				BIT 
 		,dtmDateCreated				DATETIME NULL
-		,intCreatedUserId			INT NULL
+		,intCreatedEntityId			INT NULL
 		,intConcurrencyId			INT NULL 
 	)
 END

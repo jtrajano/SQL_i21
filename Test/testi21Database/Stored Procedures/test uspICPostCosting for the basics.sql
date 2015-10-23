@@ -48,7 +48,7 @@ BEGIN
 		DECLARE @ItemsToPost AS ItemCostingTableType;
 		DECLARE @strBatchId AS NVARCHAR(20);
 		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods';
-		DECLARE @intUserId AS INT = 1;
+		DECLARE @intEntityUserSecurityId AS INT = 1;
 
 		-- Setup the items to post
 		-- (None for the basic setup)
@@ -62,7 +62,7 @@ BEGIN
 			@ItemsToPost
 			,@strBatchId 
 			,@strAccountToCounterInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
 		ALTER TABLE actual 

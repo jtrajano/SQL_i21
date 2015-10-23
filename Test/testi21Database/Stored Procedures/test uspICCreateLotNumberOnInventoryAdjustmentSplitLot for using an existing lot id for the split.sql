@@ -125,7 +125,7 @@ BEGIN
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
 		DECLARE @intTransactionId AS INT = 13 -- ADJ-13
-		DECLARE @intUserId AS INT = 1
+		DECLARE @intEntityUserSecurityId AS INT = 1
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
@@ -172,7 +172,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICCreateLotNumberOnInventoryAdjustmentSplitLot
 			@intTransactionId
-	 		,@intUserId
+	 		,@intEntityUserSecurityId
 	END
 
 	-- Assert 

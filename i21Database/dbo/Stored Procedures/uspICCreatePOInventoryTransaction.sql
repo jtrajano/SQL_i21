@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreatePOInventoryTransaction]
 	@intInventoryReceiptId AS INT
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -140,7 +140,7 @@ BEGIN
 			,ysnIsUnposted
 			,strTransactionForm
 			,dtmCreated
-			,intCreatedUserId
+			,intCreatedEntityId
 			,intConcurrencyId
 	)
 	SELECT 	intItemId 
@@ -162,7 +162,7 @@ BEGIN
 			,ysnIsUnposted			= 0
 			,strTransactionForm		= @TransactionTypeName
 			,dtmCreated				= GETDATE()
-			,intCreatedUserId		= @intUserId
+			,intCreatedEntityId		= @intEntityUserSecurityId
 			,intConcurrencyId		= 1
 	FROM	#tmpPurchaseOrderItems Items 
 END

@@ -27,7 +27,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -40,14 +40,14 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
 		-- Create a fake data for tblICInventoryActualCost
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryActualCost
-			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 			No record.
 			***************************************************************************************************************************************************************************************************************/
@@ -62,7 +62,7 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6) = 33.19
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
 				,@RemainingQty AS NUMERIC(18,6)
@@ -80,7 +80,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[strActualCostId] = @strActualCostId
@@ -91,12 +91,12 @@ BEGIN
 				,[dblStockIn] = 0
 				,[dblStockOut] = ABS(@dblSoldQty)
 				,[dblCost] = @dblCost
-				,[intCreatedUserId] = @intUserId
+				,[intCreatedEntityId] = @intEntityUserSecurityId
 				,[intConcurrencyId] = 1
 
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like:  
-		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		new		1           1                 2014-01-03 00:00:00.000 0.000000                                10.000000                               33.190000                               1                1
 				***************************************************************************************************************************************************************************************************************/
@@ -119,7 +119,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
@@ -146,7 +146,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[strActualCostId]
@@ -157,7 +157,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryActualCost
 		WHERE	intItemId = @intItemId

@@ -147,7 +147,7 @@ BEGIN
 			@intTransactionId INT = 11
 			,@strBatchId NVARCHAR(50) = 'BATCH-XXXX1'
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY NVARCHAR(50) = 'Inventory Adjustment'
-			,@intUserId INT = 1
+			,@intEntityUserSecurityId INT = 1
 			,@strAdjustmentDescription AS NVARCHAR(255) = ''
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
@@ -238,7 +238,7 @@ BEGIN
 				@intTransactionId
 				,@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@strAdjustmentDescription
 
 		INSERT INTO actual (

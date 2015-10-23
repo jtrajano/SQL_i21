@@ -34,7 +34,7 @@ BEGIN
 		-- Create a fake data for tblICInventoryLot
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryLot
-			intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+			intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedEntityId intConcurrencyId
 			----------- ----------------- --------	--------------	--------------	-----------	---------------- ----------------
 			3           3                 12345		77.000000		25.000000		13.000000	1                1
 			3           3                 12345		0.000000		56.000000		14.000000	1                1
@@ -52,7 +52,7 @@ BEGIN
 			,[dblStockOut]
 			,[dblCost]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @PremiumGrains
@@ -64,7 +64,7 @@ BEGIN
 				,[dblStockOut] = 25
 				,[dblCost] = 13.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
@@ -76,7 +76,7 @@ BEGIN
 				,[dblStockOut] = 56
 				,[dblCost] = 14.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL
 		SELECT	[intItemId] = @PremiumGrains
@@ -88,7 +88,7 @@ BEGIN
 				,[dblStockOut] = 30
 				,[dblCost] = 15.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL
 		SELECT	[intItemId] = @PremiumGrains
@@ -100,7 +100,7 @@ BEGIN
 				,[dblStockOut] = 25
 				,[dblCost] = 14.75
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 
 		CREATE TABLE expected (
@@ -112,7 +112,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -125,7 +125,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -139,7 +139,7 @@ BEGIN
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6)				= 200
 				,@dblCost AS NUMERIC(18,6)			= 22
-				,@intUserId AS INT					= 1
+				,@intEntityUserSecurityId AS INT					= 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40) = 'NewStock-00001'
 				,@intTransactionId AS INT			= 5
@@ -162,7 +162,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @PremiumGrains
@@ -173,7 +173,7 @@ BEGIN
 				,[dblStockIn] = 77
 				,[dblStockOut] = 25
 				,[dblCost] = 13.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
@@ -184,7 +184,7 @@ BEGIN
 				,[dblStockIn] = 56
 				,[dblStockOut] = 56
 				,[dblCost] = 14.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @PremiumGrains
@@ -195,7 +195,7 @@ BEGIN
 				,[dblStockIn] = 30
 				,[dblStockOut] = 30
 				,[dblCost] = 15.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @PremiumGrains
@@ -206,7 +206,7 @@ BEGIN
 				,[dblStockIn] = 25
 				,[dblStockOut] = 25
 				,[dblCost] = 14.75
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 		
 		SELECT	[intItemId] = @PremiumGrains
@@ -217,13 +217,13 @@ BEGIN
 				,[dblStockIn] = 200
 				,[dblStockOut] = 86
 				,[dblCost] = 22
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 
 
 		/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
-		_m_		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- --------	--------------	--------------	-----------	---------------- ----------------
 		upt		3           3                 12345		77.000000		25.000000		13.000000	1                1
 		upt		3           3                 12345		56.000000		56.000000		14.000000	1                1
@@ -255,7 +255,7 @@ BEGIN
 				,@intStorageLocationId
 				,@dblQty
 				,@dblCost
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@FullQty
 				,@TotalQtyOffset
 				,@strTransactionId
@@ -307,7 +307,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -319,7 +319,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLot
 		WHERE	intItemId = @intItemId

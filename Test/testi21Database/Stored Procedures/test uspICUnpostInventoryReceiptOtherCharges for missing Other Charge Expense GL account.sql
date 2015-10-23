@@ -231,7 +231,7 @@ BEGIN
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT = 14 -- 'INVRCPT-XXXX14'
 			,@strBatchId AS NVARCHAR(20) = 'BATCH-100001'
-			,@intUserId AS INT = 1
+			,@intEntityUserSecurityId AS INT = 1
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
@@ -244,7 +244,7 @@ BEGIN
 		EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@intTransactionTypeId
 	END 
  

@@ -15,7 +15,7 @@
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT
-	,@intUserId AS INT 
+	,@intEntityUserSecurityId AS INT 
 	,@intInventoryAdjustmentId AS INT OUTPUT	
 AS
 
@@ -47,7 +47,6 @@ DECLARE @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
 
 DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@strAdjustmentNo AS NVARCHAR(40)
-		,@intEntityId AS INT 
 		,@intLotId AS INT 
 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -156,13 +155,6 @@ SET @dtmDate = ISNULL(@dtmDate, GETDATE());
 
 
 ------------------------------------------------------------------------------------------------------------------------------------
--- Retrieve the entity id of the user id
-------------------------------------------------------------------------------------------------------------------------------------
-SELECT	@intEntityId = [intEntityUserSecurityId]
-FROM	dbo.tblSMUserSecurity
-WHERE	[intEntityUserSecurityId] = @intUserId
-
-------------------------------------------------------------------------------------------------------------------------------------
 -- Create the header record
 ------------------------------------------------------------------------------------------------------------------------------------
 BEGIN 
@@ -188,7 +180,7 @@ BEGIN
 			,strDescription				= ''
 			,intSort					= 1
 			,ysnPosted					= 0
-			,intEntityId				= @intEntityId
+			,intEntityId				= @intEntityUserSecurityId
 			,intConcurrencyId			= 1
 			,dtmPostedDate				= NULL 
 			,dtmUnpostedDate			= NULL	
@@ -271,8 +263,7 @@ BEGIN
 		@ysnPost = 1
 		,@ysnRecap = 0
 		,@strTransactionId = @strAdjustmentNo
-		,@intUserId = @intUserId
-		,@intEntityId = @intEntityId
+		,@intEntityUserSecurityId = @intEntityUserSecurityId
 END 
 
 _Exit: 

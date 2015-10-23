@@ -14,7 +14,7 @@ BEGIN
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
 			,[dtmCreated] DATETIME 
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -27,7 +27,7 @@ BEGIN
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
 			,[dtmCreated] DATETIME 
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -41,7 +41,7 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
-				,@intUserId AS INT
+				,@intEntityUserSecurityId AS INT
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6)
 				,@QtyOffset AS NUMERIC(18,6)
@@ -60,7 +60,7 @@ BEGIN
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId			 
-			,@intUserId 
+			,@intEntityUserSecurityId 
 			,@RemainingQty OUTPUT 
 			,@CostUsed OUTPUT
 			,@QtyOffset OUTPUT 
@@ -75,7 +75,7 @@ BEGIN
 				,[dblStockOut]
 				,[dblCost] 
 				,[dtmCreated] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -87,7 +87,7 @@ BEGIN
 				,[dblStockOut]
 				,[dblCost] 
 				,[dtmCreated] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	tblICInventoryActualCost
 		WHERE	intItemId = @intItemId

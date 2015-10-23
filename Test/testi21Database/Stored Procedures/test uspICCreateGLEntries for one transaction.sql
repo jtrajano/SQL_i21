@@ -127,7 +127,7 @@ BEGIN
 				,@strTransactionId AS NVARCHAR(40) = 'PURCHASE-00001'
 				,@strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 
 		INSERT INTO tblICInventoryTransaction (
 				intItemId
@@ -147,7 +147,7 @@ BEGIN
 				,intTransactionTypeId
 				,intLotId
 				,dtmCreated
-				,intCreatedUserId
+				,intCreatedEntityId
 				,intConcurrencyId
 				,strTransactionForm
 		)
@@ -168,7 +168,7 @@ BEGIN
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL 
 				,dtmCreated = GETDATE()
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 				,strTransactionForm = 'Inventory Receipt'
 
@@ -245,7 +245,6 @@ BEGIN
 			,strJournalLineDescription	
 			,intJournalLineNo			
 			,ysnIsUnposted				
-			,intUserId					
 			,intEntityId				
 			,strTransactionId			
 			,intTransactionId			
@@ -271,7 +270,6 @@ BEGIN
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1
 			,intEntityId				= 1
 			,strTransactionId			= @strTransactionId
 			,intTransactionId			= 1
@@ -298,7 +296,6 @@ BEGIN
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1
 			,intEntityId				= 1
 			,strTransactionId			= @strTransactionId
 			,intTransactionId			= 1
@@ -315,7 +312,7 @@ BEGIN
 		EXEC dbo.uspICCreateGLEntries
 			@strBatchId
 			,@UseGLAccount_ContraInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 			,NULL
 	END 
 

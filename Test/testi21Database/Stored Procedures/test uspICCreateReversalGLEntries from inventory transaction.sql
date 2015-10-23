@@ -100,7 +100,6 @@ BEGIN
 				,strJournalLineDescription
 				,intJournalLineNo
 				,ysnIsUnposted
-				,intUserId
 				,intEntityId
 				,strTransactionId
 				,intTransactionId
@@ -126,7 +125,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo = 10
 				,ysnIsUnposted = 1
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId = 'SALE-100000'
 				,intTransactionId = 1 
@@ -153,7 +151,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo = 10
 				,ysnIsUnposted = 1
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId = 'SALE-100000'
 				,intTransactionId = 1
@@ -182,7 +179,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo = 11
 				,ysnIsUnposted = 1
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId = 'PURCHASE-100000'
 				,intTransactionId = 1 
@@ -209,7 +205,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo = 11
 				,ysnIsUnposted = 1
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId = 'PURCHASE-100000'
 				,intTransactionId = 1 
@@ -237,7 +232,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo = 12
 				,ysnIsUnposted = 1
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId = 'PURCHASE-100000'
 				,intTransactionId = 1 
@@ -264,7 +258,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo = 12
 				,ysnIsUnposted = 1
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId = 'PURCHASE-100000'
 				,intTransactionId = 1
@@ -281,14 +274,14 @@ BEGIN
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-100001'
 				,@intTransactionId AS INT = 1
 				,@strTransactionId AS NVARCHAR(40) = 'SALE-100000'
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 
 		INSERT INTO actual 
 		EXEC dbo.uspICCreateReversalGLEntries
 			@strBatchId
 			,@intTransactionId
 			,@strTransactionId
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
 		ALTER TABLE actual 

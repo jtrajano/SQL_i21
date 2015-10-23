@@ -12,8 +12,7 @@ BEGIN
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 1
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'INVSHIP-XXXXX1'
-		DECLARE @intUserId AS INT = 1
-		DECLARE @intEntityId AS INT  = 1
+		DECLARE @intEntityUserSecurityId AS INT = 1
 
 		-- Add a spy for uspICPostStorage
 		EXEC tSQLt.SpyProcedure 'dbo.uspICPostStorage';		
@@ -25,8 +24,7 @@ BEGIN
 			@ysnPost
 			,@ysnRecap
 			,@strTransactionId
-			,@intUserId
-			,@intEntityId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Assert 

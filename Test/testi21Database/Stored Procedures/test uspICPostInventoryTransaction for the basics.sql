@@ -29,7 +29,7 @@ BEGIN
 				,@intRelatedTransactionId AS INT
 				,@strRelatedTransactionId AS NVARCHAR(40)
 				,@strTransactionForm AS NVARCHAR (255)
-				,@intUserId AS INT
+				,@intEntityUserSecurityId AS INT
 				,@InventoryTransactionIdentityId AS INT
 				,@intCostingMethod INT
 
@@ -65,7 +65,7 @@ BEGIN
 			,intRelatedTransactionId INT
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
-			,intUserId INT
+			,intCreatedEntityId INT
 			,intCostingMethod INT
 		)
 
@@ -94,7 +94,7 @@ BEGIN
 			,intRelatedTransactionId INT
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
-			,intUserId INT
+			,intCreatedEntityId INT
 			,intCostingMethod INT
 		)
 	END 
@@ -126,7 +126,7 @@ BEGIN
 				,@intRelatedTransactionId
 				,@strRelatedTransactionId
 				,@strTransactionForm
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@intCostingMethod
 				,@InventoryTransactionIdentityId OUTPUT 
 	END 

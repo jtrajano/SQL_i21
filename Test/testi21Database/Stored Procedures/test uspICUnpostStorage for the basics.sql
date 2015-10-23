@@ -36,13 +36,13 @@ BEGIN
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@intTransactionId AS INT 
 				,@strTransactionId AS NVARCHAR(40)
-				,@intUserId AS INT 
+				,@intEntityUserSecurityId AS INT 
 
 		EXEC dbo.uspICUnpostStorage
 			@intTransactionId
 			,@strTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

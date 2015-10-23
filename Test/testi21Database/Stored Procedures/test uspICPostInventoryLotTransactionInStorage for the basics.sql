@@ -21,7 +21,7 @@ BEGIN
 				,@intLotStatusId INT 
 				,@intTransactionTypeId INT	
 				,@strTransactionForm NVARCHAR (255)
-				,@intUserId INT
+				,@intEntityUserSecurityId INT
 				,@SourceInventoryLotStorageId INT 
 				,@InventoryLotTransactionStorageId INT  
 				,@intLocationId INT 
@@ -59,7 +59,7 @@ BEGIN
 			,intRelatedTransactionId INT
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
-			,intUserId INT
+			,intEntityUserSecurityId INT
 		)
 
 		CREATE TABLE actual (
@@ -88,7 +88,7 @@ BEGIN
 			,intRelatedTransactionId INT
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
-			,intUserId INT
+			,intEntityUserSecurityId INT
 		)
 	END 
 	
@@ -112,7 +112,7 @@ BEGIN
 			,@intLotStatusId 
 			,@intTransactionTypeId 
 			,@strTransactionForm 
-			,@intUserId 
+			,@intEntityUserSecurityId 
 			,@SourceInventoryLotStorageId  
 			,@InventoryLotTransactionStorageId OUTPUT 
 	END 

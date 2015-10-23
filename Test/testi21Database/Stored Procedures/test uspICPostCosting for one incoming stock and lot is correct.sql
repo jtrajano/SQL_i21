@@ -119,36 +119,36 @@ BEGIN
 
 		-- Create the expected and actual tables. 
 		CREATE TABLE expected (
-				[intLotId]				INT 		
-				,[intItemId]			INT
-				,[intLocationId]		INT
-				,[intItemLocationId]	INT
-				,[intItemUOMId]			INT
-				,[strLotNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,[intSubLocationId]		INT
-				,[intStorageLocationId]	INT
-				,[dblQty]				NUMERIC(18,6)
-				,[dblLastCost]			NUMERIC(18,6)
-				,[dtmExpiryDate]		DATETIME
-				,[strLotAlias]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,[intLotStatusId]		INT
-				,[intParentLotId]		INT
-				,[intSplitFromLotId]	INT
-				,[dblGrossWeight]		NUMERIC(18,6) NULL
-				,[dblWeight]			NUMERIC(18,6)
-				,[intWeightUOMId]		INT
-				,[dblWeightPerQty]		NUMERIC(38,20)
-				,[intOriginId]			INT
-				,[strBOLNo]				NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,[strVessel]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,[strReceiptNumber]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,[strMarkings]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-				,[strNotes]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-				,[intEntityVendorId]	INT
-				,[strVendorLotNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,[intVendorLocationId]	INT
-				,[strVendorLocation]	NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,[strContractNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				[intLotId]					INT 		
+				,[intItemId]				INT
+				,[intLocationId]			INT
+				,[intItemLocationId]		INT
+				,[intItemUOMId]				INT
+				,[strLotNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,[intSubLocationId]			INT
+				,[intStorageLocationId]		INT
+				,[dblQty]					NUMERIC(18,6)
+				,[dblLastCost]				NUMERIC(18,6)
+				,[dtmExpiryDate]			DATETIME
+				,[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,[intLotStatusId]			INT
+				,[intParentLotId]			INT
+				,[intSplitFromLotId]		INT
+				,[dblGrossWeight]			NUMERIC(18,6) NULL
+				,[dblWeight]				NUMERIC(18,6)
+				,[intWeightUOMId]			INT
+				,[dblWeightPerQty]			NUMERIC(38,20)
+				,[intOriginId]				INT
+				,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+				,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+				,[intEntityVendorId]		INT
+				,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,[intVendorLocationId]		INT
+				,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,[dtmManufacturedDate]		DATETIME
 				,[ysnReleasedToWarehouse]	BIT
 				,[ysnProduced]				BIT
@@ -156,7 +156,7 @@ BEGIN
 				,[intOwnershipType]			INT
 				,[intGradeId]				INT
 				,[dtmDateCreated]			DATETIME
-				,[intCreatedUserId]			INT
+				,[intCreatedEntityId]		INT
 				,[intConcurrencyId]			INT
 		)
 
@@ -169,7 +169,7 @@ BEGIN
 		DECLARE @ItemsForPost AS ItemCostingTableType;
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001';
 		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods';
-		DECLARE @intUserId AS INT = 1;
+		DECLARE @intEntityUserSecurityId AS INT = 1;
 
 		-- Setup the items to post
 		INSERT INTO @ItemsForPost (  
@@ -210,8 +210,86 @@ BEGIN
 				,intStorageLocationId	= @StorageLocation
 
 		-- Setup the expected lot data
-		INSERT INTO expected 
-		SELECT	*
+		INSERT INTO expected (
+				[intLotId]					
+				,[intItemId]				
+				,[intLocationId]			
+				,[intItemLocationId]		
+				,[intItemUOMId]				
+				,[strLotNumber]				
+				,[intSubLocationId]			
+				,[intStorageLocationId]		
+				,[dblQty]					
+				,[dblLastCost]				
+				,[dtmExpiryDate]			
+				,[strLotAlias]				
+				,[intLotStatusId]			
+				,[intParentLotId]			
+				,[intSplitFromLotId]		
+				,[dblGrossWeight]			
+				,[dblWeight]				
+				,[intWeightUOMId]			
+				,[dblWeightPerQty]			
+				,[intOriginId]				
+				,[strBOLNo]					
+				,[strVessel]				
+				,[strReceiptNumber]			
+				,[strMarkings]				
+				,[strNotes]					
+				,[intEntityVendorId]		
+				,[strVendorLotNo]			
+				,[intVendorLocationId]		
+				,[strVendorLocation]		
+				,[strContractNo]			
+				,[dtmManufacturedDate]		
+				,[ysnReleasedToWarehouse]	
+				,[ysnProduced]				
+				,[ysnStorage]				
+				,[intOwnershipType]			
+				,[intGradeId]				
+				,[dtmDateCreated]			
+				,[intCreatedEntityId]		
+				,[intConcurrencyId]				
+		) 
+		SELECT	[intLotId]					
+				,[intItemId]				
+				,[intLocationId]			
+				,[intItemLocationId]		
+				,[intItemUOMId]				
+				,[strLotNumber]				
+				,[intSubLocationId]			
+				,[intStorageLocationId]		
+				,[dblQty]					
+				,[dblLastCost]				
+				,[dtmExpiryDate]			
+				,[strLotAlias]				
+				,[intLotStatusId]			
+				,[intParentLotId]			
+				,[intSplitFromLotId]		
+				,[dblGrossWeight]			
+				,[dblWeight]				
+				,[intWeightUOMId]			
+				,[dblWeightPerQty]			
+				,[intOriginId]				
+				,[strBOLNo]					
+				,[strVessel]				
+				,[strReceiptNumber]			
+				,[strMarkings]				
+				,[strNotes]					
+				,[intEntityVendorId]		
+				,[strVendorLotNo]			
+				,[intVendorLocationId]		
+				,[strVendorLocation]		
+				,[strContractNo]			
+				,[dtmManufacturedDate]		
+				,[ysnReleasedToWarehouse]	
+				,[ysnProduced]				
+				,[ysnStorage]				
+				,[intOwnershipType]			
+				,[intGradeId]				
+				,[dtmDateCreated]			
+				,[intCreatedEntityId]		
+				,[intConcurrencyId]		
 		FROM	dbo.tblICLot
 
 		UPDATE	expected
@@ -227,10 +305,89 @@ BEGIN
 			@ItemsForPost
 			,@strBatchId 
 			,@strAccountToCounterInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 
-		INSERT INTO actual 
-		SELECT	*
+		INSERT INTO actual (
+				[intLotId]					
+				,[intItemId]				
+				,[intLocationId]			
+				,[intItemLocationId]		
+				,[intItemUOMId]				
+				,[strLotNumber]				
+				,[intSubLocationId]			
+				,[intStorageLocationId]		
+				,[dblQty]					
+				,[dblLastCost]				
+				,[dtmExpiryDate]			
+				,[strLotAlias]				
+				,[intLotStatusId]			
+				,[intParentLotId]			
+				,[intSplitFromLotId]		
+				,[dblGrossWeight]			
+				,[dblWeight]				
+				,[intWeightUOMId]			
+				,[dblWeightPerQty]			
+				,[intOriginId]				
+				,[strBOLNo]					
+				,[strVessel]				
+				,[strReceiptNumber]			
+				,[strMarkings]				
+				,[strNotes]					
+				,[intEntityVendorId]		
+				,[strVendorLotNo]			
+				,[intVendorLocationId]		
+				,[strVendorLocation]		
+				,[strContractNo]			
+				,[dtmManufacturedDate]		
+				,[ysnReleasedToWarehouse]	
+				,[ysnProduced]				
+				,[ysnStorage]				
+				,[intOwnershipType]			
+				,[intGradeId]				
+				,[dtmDateCreated]			
+				,[intCreatedEntityId]		
+				,[intConcurrencyId]					
+		)
+		SELECT	
+				[intLotId]					
+				,[intItemId]				
+				,[intLocationId]			
+				,[intItemLocationId]		
+				,[intItemUOMId]				
+				,[strLotNumber]				
+				,[intSubLocationId]			
+				,[intStorageLocationId]		
+				,[dblQty]					
+				,[dblLastCost]				
+				,[dtmExpiryDate]			
+				,[strLotAlias]				
+				,[intLotStatusId]			
+				,[intParentLotId]			
+				,[intSplitFromLotId]		
+				,[dblGrossWeight]			
+				,[dblWeight]				
+				,[intWeightUOMId]			
+				,[dblWeightPerQty]			
+				,[intOriginId]				
+				,[strBOLNo]					
+				,[strVessel]				
+				,[strReceiptNumber]			
+				,[strMarkings]				
+				,[strNotes]					
+				,[intEntityVendorId]		
+				,[strVendorLotNo]			
+				,[intVendorLocationId]		
+				,[strVendorLocation]		
+				,[strContractNo]			
+				,[dtmManufacturedDate]		
+				,[ysnReleasedToWarehouse]	
+				,[ysnProduced]				
+				,[ysnStorage]				
+				,[intOwnershipType]			
+				,[intGradeId]				
+				,[dtmDateCreated]			
+				,[intCreatedEntityId]		
+				,[intConcurrencyId]	
 		FROM	dbo.tblICLot
 	END 
 

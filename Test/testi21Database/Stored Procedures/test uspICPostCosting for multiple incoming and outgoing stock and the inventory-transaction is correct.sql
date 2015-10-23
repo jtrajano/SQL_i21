@@ -78,7 +78,7 @@ BEGIN
 		DECLARE @ItemsToPost AS ItemCostingTableType;
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001';
 		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods';
-		DECLARE @intUserId AS INT = 1;
+		DECLARE @intEntityUserSecurityId AS INT = 1;
 
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost (
@@ -279,7 +279,7 @@ BEGIN
 				,strBatchId 
 				,intTransactionTypeId 
 				,intLotId 
-				,intCreatedUserId 
+				,intCreatedEntityId 
 				,intConcurrencyId 
 		)
 		-- Purchase 1: 100 @ $14.00
@@ -299,7 +299,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- SALE 1: 30 
 		UNION ALL 
@@ -319,7 +319,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- SALE 2: 35
 		UNION ALL 
@@ -339,7 +339,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- SALE 3: 45
 		UNION ALL 
@@ -359,7 +359,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- SALE 4: 132
 		UNION ALL 
@@ -379,7 +379,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- Purchase 2: 20 @ $15.50
 		UNION ALL 
@@ -399,7 +399,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- Write-off sold
 		UNION ALL 
@@ -419,7 +419,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @WRITE_OFF_SOLD
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- Revalue sold
 		UNION ALL 
@@ -439,7 +439,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @REVALUE_SOLD
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- Auto-Negative
 		UNION ALL 
@@ -459,7 +459,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @AUTO_NEGATIVE
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- Purchase 3: 22 @16.50
 		UNION ALL 
@@ -479,7 +479,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- Write-off sold
 		UNION ALL 
@@ -499,7 +499,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @WRITE_OFF_SOLD
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- Revalue sold
 		UNION ALL 
@@ -519,7 +519,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @REVALUE_SOLD
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 		-- No auto negative because the stock is zero. 
 		-- Purchase 3: 100 @ $18.00
@@ -540,7 +540,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 	END 
 	
@@ -551,7 +551,7 @@ BEGIN
 			@ItemsToPost
 			,@strBatchId 
 			,@strAccountToCounterInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		INSERT INTO actual (
 				intItemId 
@@ -570,7 +570,7 @@ BEGIN
 				,strBatchId 
 				,intTransactionTypeId 
 				,intLotId 
-				,intCreatedUserId 
+				,intCreatedEntityId 
 				,intConcurrencyId 		
 		)
 		SELECT	intItemId 
@@ -589,7 +589,7 @@ BEGIN
 				,strBatchId 
 				,intTransactionTypeId 
 				,intLotId 
-				,intCreatedUserId 
+				,intCreatedEntityId 
 				,intConcurrencyId 
 		FROM	dbo.tblICInventoryTransaction
 		WHERE	strBatchId = 'BATCH-000001'

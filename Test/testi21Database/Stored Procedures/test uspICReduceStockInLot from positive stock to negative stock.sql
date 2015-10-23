@@ -35,7 +35,7 @@ BEGIN
 		-- Create a fake data for tblICInventoryLot
 		/***************************************************************************************************************************************************************************************************************
 		The initial data in tblICInventoryLot
-		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedEntityId intConcurrencyId
 		----------- ----------------- --------	--------------	--------------	-----------	---------------- ----------------
 		1           1                 12345		100.000000		0.000000		11.440000	1                1
 		***************************************************************************************************************************************************************************************************************/
@@ -50,7 +50,7 @@ BEGIN
 			,[dblStockOut]
 			,[dblCost]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		)
 		SELECT	[intItemId]				= @WetGrains
@@ -62,7 +62,7 @@ BEGIN
 				,[dblStockOut]			= 0
 				,[dblCost]				= 11.44
 				,[dtmCreated]			= GETDATE()
-				,[intCreatedUserId]		= 1
+				,[intCreatedEntityId]		= 1
 				,[intConcurrencyId]		= 1
 
 		-- Create the expected and actual tables 
@@ -75,7 +75,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -88,7 +88,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -104,7 +104,7 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6)				= 45.66
 				,@strTransactionId AS NVARCHAR(40)		= 'NEWSTOCK-00002'
 				,@intTransactionId AS INT				= 2
-				,@intUserId AS INT						= 1
+				,@intEntityUserSecurityId AS INT		= 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
 				,@RemainingQty AS NUMERIC(18,6) 
@@ -122,7 +122,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId]				= @WetGrains
@@ -133,7 +133,7 @@ BEGIN
 				,[dblStockIn]			= 100
 				,[dblStockOut]			= 100
 				,[dblCost]				= 11.44
-				,[intCreatedUserId]		= 1
+				,[intCreatedEntityId]		= 1
 				,[intConcurrencyId]		= 2
 		UNION ALL
 		SELECT	[intItemId]				= @WetGrains
@@ -144,13 +144,13 @@ BEGIN
 				,[dblStockIn]			= 0
 				,[dblStockOut]			= 25
 				,[dblCost]				= 45.66
-				,[intCreatedUserId]		= 1
+				,[intCreatedEntityId]		= 1
 				,[intConcurrencyId]		= 1
 
 
 		/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
-		_m_		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- --------	--------------	--------------	-----------	---------------- ----------------
 		upt		1           1                 12345		100.000000		100.000000		11.440000	1                2
 		new		1           1                 12345		0.000000		25.000000		45.660000	1                2
@@ -179,7 +179,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
@@ -223,7 +223,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -235,7 +235,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLot
 		WHERE	intItemId = @intItemId

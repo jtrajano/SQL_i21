@@ -150,7 +150,7 @@ BEGIN
 			,@dtmNewExpiryDate				= '10/05/2015'
 			,@intSourceId					= 1 
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
-			,@intUserId						= 1
+			,@intEntityUserSecurityId		= 1
 			,@intInventoryAdjustmentId		= NULL
 	END 	
 

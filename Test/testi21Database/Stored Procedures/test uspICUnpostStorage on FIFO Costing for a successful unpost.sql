@@ -57,13 +57,13 @@ BEGIN
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-100001'
 				,@intTransactionId AS INT = 6
 				,@strTransactionId AS NVARCHAR(40) = 'INVRCT-00006'
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 
 		EXEC dbo.uspICUnpostStorage
 			@intTransactionId
 			,@strTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		-- Setup the expected data
 		DECLARE @intTransactionTypeId AS INT

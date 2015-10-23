@@ -152,7 +152,7 @@ BEGIN
 			,@dtmNewExpiryDate				= NULL -- Invalid new expiry date. 
 			,@intSourceId					= 1 
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
-			,@intUserId						= 1
+			,@intEntityUserSecurityId		= 1
 			,@intInventoryAdjustmentId		= NULL
 	END 	
 

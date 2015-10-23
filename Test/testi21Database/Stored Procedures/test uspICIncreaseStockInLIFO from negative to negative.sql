@@ -32,7 +32,7 @@ BEGIN
 		-- Create a fake data for tblICInventoryLIFO
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryLIFO
-			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 			3           3                 2014-01-15 00:00:00.000 0.000000                                30.000000                               15.000000                               1                1
 			3           3                 2014-01-14 00:00:00.000 0.000000                                56.000000                               14.000000                               1                1
@@ -47,7 +47,7 @@ BEGIN
 			,[dblStockOut]
 			,[dblCost]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		)
 		-- Sold to negative
@@ -59,7 +59,7 @@ BEGIN
 				,[dblStockOut] = 30
 				,[dblCost] = 15.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		-- Sold to negative
 		UNION ALL 
@@ -71,7 +71,7 @@ BEGIN
 				,[dblStockOut] = 56
 				,[dblCost] = 14.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		-- Sold to negative
 		UNION ALL 
@@ -83,7 +83,7 @@ BEGIN
 				,[dblStockOut] = 77
 				,[dblCost] = 13.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 
 		CREATE TABLE expected (
@@ -94,7 +94,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -106,7 +106,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -117,7 +117,7 @@ BEGIN
 				,@dtmDate AS DATETIME			= 'January 16, 2014'
 				,@dblQty NUMERIC(18,6)			= 100
 				,@dblCost AS NUMERIC(18,6)		= 22
-				,@intUserId AS INT				= 1
+				,@intEntityUserSecurityId AS INT				= 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
@@ -139,7 +139,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		-- Incoming stock is fully consumed by the negative stocks
@@ -150,7 +150,7 @@ BEGIN
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
 				,[dblCost] = 22
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		-- There is a full offset to the negative stock
 		UNION ALL 
@@ -161,7 +161,7 @@ BEGIN
 				,[dblStockIn] = 30
 				,[dblStockOut] = 30
 				,[dblCost] = 15.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		-- There is a full offset to the negative stock
 		UNION ALL 
@@ -172,7 +172,7 @@ BEGIN
 				,[dblStockIn] = 56
 				,[dblStockOut] = 56
 				,[dblCost] = 14.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		-- There is a partial offset to the negative stock
 		UNION ALL 		
@@ -183,12 +183,12 @@ BEGIN
 				,[dblStockIn] = 14
 				,[dblStockOut] = 77
 				,[dblCost] = 13.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 				
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like:  
-		_m_		intItemId   intItemLocationId     dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId     dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		new		3           3                 2014-01-16 00:00:00.000 100.000000                              100.000000                              22.000000                               1                1
 		upt		3           3                 2014-01-15 00:00:00.000 30.000000                               30.000000                               15.000000                               1                1
@@ -216,7 +216,7 @@ BEGIN
 				,@dtmDate
 				,@dblQty
 				,@dblCost
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@FullQty
 				,@TotalQtyOffset
 				,@strTransactionId
@@ -277,7 +277,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -288,7 +288,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLIFO
 		WHERE	intItemId = @intItemId

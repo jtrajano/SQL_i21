@@ -29,7 +29,6 @@ BEGIN
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 1
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'Dummy-000001'
-		DECLARE @intUserId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
@@ -100,7 +99,6 @@ BEGIN
 			@ysnPost
 			,@ysnRecap
 			,@strTransactionId
-	 		,@intUserId
 			,@intEntityId
 			
 		INSERT INTO actual (dblDebit, dblCredit) 

@@ -112,7 +112,7 @@ BEGIN
 				,intLotId
 				,strTransactionForm
 				,dtmCreated
-				,intCreatedUserId
+				,intCreatedEntityId
 				,intConcurrencyId
 		)
 		SELECT 	intItemId = @StickyGrains
@@ -133,7 +133,7 @@ BEGIN
 				,intLotId = NULL 
 				,strTransactionForm = 'Inventory Shipment'
 				,dtmCreated = GETDATE()
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 
 		-- Delete Write-Off Sold from the G/L account setup to simulate a missing account id
@@ -154,12 +154,12 @@ BEGIN
 
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-				,@intUserId AS INT = 1		
+				,@intEntityUserSecurityId AS INT = 1		
 
 		EXEC dbo.uspICCreateGLEntries
 			@strBatchId
 			,@UseGLAccount_ContraInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 			,NULL
 	END 
 END

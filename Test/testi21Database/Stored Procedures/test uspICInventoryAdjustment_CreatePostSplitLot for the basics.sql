@@ -157,7 +157,7 @@ BEGIN
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId					= NULL 
 			,@intSourceTransactionTypeId	= NULL 
-			,@intUserId						= NULL 
+			,@intEntityUserSecurityId		= NULL 
 			,@intInventoryAdjustmentId		= NULL 
 	END 	
 

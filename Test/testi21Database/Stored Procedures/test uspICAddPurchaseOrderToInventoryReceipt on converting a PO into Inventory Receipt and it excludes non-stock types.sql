@@ -127,7 +127,6 @@ BEGIN
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
-				,intCreatedUserId
 				,intEntityId
 		INTO	expected_tblICInventoryReceipt
 		FROM	dbo.tblICInventoryReceipt
@@ -154,24 +153,38 @@ BEGIN
 		---------------------------------------------------------
 		-- Header
 		---------------------------------------------------------
-		INSERT INTO expected_tblICInventoryReceipt 
-		SELECT strReceiptNumber = 'INVRCT-1000'
-				,dtmReceiptDate = dbo.fnRemoveTimeOnDate(GETDATE())
-				,intEntityVendorId = @Vendor_CoolAmish
-				,strReceiptType = @ReceiptType_PurchaseOrder
-				,intItemLocationId = @Default_Location
-				,strVendorRefNo = N'This is a reference'
-				,intShipViaId = @ShipVia_UPS
-				,intCurrencyId = @Currency_USD
-				,intFreightTermId = @FreightTerm
-				,dblInvoiceAmount = ((10 - 0) * 50.00) + ((5-0) * 100.00)
-				,ysnInvoicePaid = 0
-				,intConcurrencyId = 1
-				,intEntityId = @intEntityId
+		INSERT INTO expected_tblICInventoryReceipt (
+			strReceiptNumber		
+			,dtmReceiptDate		
+			,intEntityVendorId	
+			,strReceiptType		
+			,intLocationId	
+			,strVendorRefNo		
+			,intShipViaId		
+			,intCurrencyId		
+			,intFreightTermId	
+			,dblInvoiceAmount	
+			,ysnInvoicePaid		
+			,intConcurrencyId	
+			,intEntityId					
+		)
+		SELECT strReceiptNumber		= 'INVRCT-1000'
+				,dtmReceiptDate		= dbo.fnRemoveTimeOnDate(GETDATE())
+				,intEntityVendorId	= @Vendor_CoolAmish
+				,strReceiptType		= @ReceiptType_PurchaseOrder
+				,intLocationId		= @Default_Location
+				,strVendorRefNo		= N'This is a reference'
+				,intShipViaId		= @ShipVia_UPS
+				,intCurrencyId		= @Currency_USD
+				,intFreightTermId	= @FreightTerm
+				,dblInvoiceAmount	= ((10 - 0) * 50.00) + ((5-0) * 100.00)
+				,ysnInvoicePaid		= 0
+				,intConcurrencyId	= 1
+				,intEntityId		= @intEntityId
 		
-		---------------------------------------------------------
-		-- Detail 
-		---------------------------------------------------------
+		-----------------------------------------------------------
+		---- Detail 
+		-----------------------------------------------------------
 		INSERT INTO expected_tblICInventoryReceiptItem 
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 1

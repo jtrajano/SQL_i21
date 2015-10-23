@@ -5,7 +5,6 @@ BEGIN
 	BEGIN 
 		DECLARE	@ysnPost BIT = NULL 
 				,@intTransactionId INT = NULL 
-				,@intUserId  INT  = NULL 
 				,@intEntityId INT  = NULL
 	END 
 
@@ -19,7 +18,6 @@ BEGIN
 		EXEC dbo.uspICPostInventoryReceiptIntegrations 
 				@ysnPost
 				,@intTransactionId
-				,@intUserId
 				,@intEntityId
 	END 
 

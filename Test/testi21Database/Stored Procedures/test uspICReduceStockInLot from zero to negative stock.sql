@@ -20,7 +20,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -33,7 +33,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -49,7 +49,7 @@ BEGIN
 		-- Create a fake data for tblICInventoryLot
 		/***************************************************************************************************************************************************************************************************************
 		The initial data in tblICInventoryLot
-		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedEntityId intConcurrencyId
 		----------- ----------------- --------	--------------	--------------	-----------	---------------- ----------------
 		* No Record 
 		***************************************************************************************************************************************************************************************************************/
@@ -66,7 +66,7 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6)			= 33.19
 				,@strTransactionId AS NVARCHAR(40)	= 'NEWSTOCK-00001'
 				,@intTransactionId AS INT			= 1
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
 				,@RemainingQty AS NUMERIC(18,6)
@@ -84,7 +84,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId]					= @intItemId
@@ -95,12 +95,12 @@ BEGIN
 				,[dblStockIn]				= 0
 				,[dblStockOut]				= ABS(@dblSoldQty)
 				,[dblCost]					= @dblCost
-				,[intCreatedUserId]			= @intUserId
+				,[intCreatedEntityId]		= @intEntityUserSecurityId
 				,[intConcurrencyId]			= 1
 
 		/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
-		_m_		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId intLotId	dblStockIn		dblStockOut		dblCost		intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- --------	--------------	--------------	-----------	---------------- ----------------
 		upt		1           1                 12345		0.000000		10.000000		33.19000	1                2
 		***************************************************************************************************************************************************************************************************************/								
@@ -125,7 +125,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
@@ -152,7 +152,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -164,7 +164,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLot
 		WHERE	intItemId = @intItemId

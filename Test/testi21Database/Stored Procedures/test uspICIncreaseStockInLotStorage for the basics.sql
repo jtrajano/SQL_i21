@@ -22,7 +22,7 @@ BEGIN
 			[intTransactionId] INT,
 			[dtmCreated] DATETIME, 
 			[ysnIsUnposted] BIT, 
-			[intCreatedUserId] INT, 
+			[intCreatedEntityId] INT, 
 			[intConcurrencyId] INT, 
 		)
 
@@ -42,7 +42,7 @@ BEGIN
 			[intTransactionId] INT,
 			[dtmCreated] DATETIME, 
 			[ysnIsUnposted] BIT, 
-			[intCreatedUserId] INT, 
+			[intCreatedEntityId] INT, 
 			[intConcurrencyId] INT, 
 		)
 
@@ -58,7 +58,7 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
-				,@intUserId AS INT
+				,@intEntityUserSecurityId AS INT
 				,@RemainingQty AS NUMERIC(18,6)
 				,@CostUsed AS NUMERIC(18,6)
 				,@NewInventoryLotStorageId AS INT
@@ -78,7 +78,7 @@ BEGIN
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@NewInventoryLotStorageId OUTPUT 
 
 		INSERT INTO actual (
@@ -96,7 +96,7 @@ BEGIN
 				,[intTransactionId] 
 				,[dtmCreated]
 				,[ysnIsUnposted]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -114,7 +114,7 @@ BEGIN
 				,[intTransactionId] 
 				,[dtmCreated]
 				,[ysnIsUnposted]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLotStorage
 		WHERE	intItemId = @intItemId

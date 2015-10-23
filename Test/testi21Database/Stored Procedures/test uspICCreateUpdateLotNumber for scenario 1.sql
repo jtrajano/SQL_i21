@@ -28,7 +28,7 @@ BEGIN
 		EXEC [testi21Database].[Fake inventory items]
 
 		DECLARE @Items AS ItemLotTableType
-		DECLARE @intUserId AS INT 
+		DECLARE @intEntityUserSecurityId AS INT 
 		DECLARE @intLotStatusId AS INT
 
 		DECLARE	@intLotId					AS INT 
@@ -88,7 +88,7 @@ BEGIN
 			,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 			,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-			,[intEntityVendorId]				INT 
+			,[intEntityVendorId]		INT 
 			,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[intVendorLocationId]		INT 
 			,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS 
@@ -97,7 +97,7 @@ BEGIN
 			,[ysnReleasedToWarehouse]	BIT 
 			,[ysnProduced]				BIT 
 			,[dtmDateCreated]			DATETIME 
-			,[intCreatedUserId]			INT 
+			,[intCreatedEntityId]		INT 
 			,[dblGrossWeight]			NUMERIC(18,6)
 		)
 
@@ -217,6 +217,7 @@ BEGIN
 				,strVendorLotNo
 				,intVendorLocationId
 				,dblGrossWeight
+				,intCreatedEntityId
 		)
 		SELECT	intLotId				= 1
 				,strLotNumber			= @strLotNumber
@@ -239,17 +240,18 @@ BEGIN
 				,strReceiptNumber		= @strReceiptNumber
 				,strMarkings			= @strMarkings
 				,strNotes				= @strNotes
-				,intEntityVendorId			= @intEntityVendorId
+				,intEntityVendorId		= @intEntityVendorId
 				,strVendorLotNo			= @strVendorLotNo
 				,intVendorLocationId	= @intVendorLocationId
 				,dblGrossWeight			= @dblGrossWeight
+				,intCreatedEntityId		= @intEntityUserSecurityId
 	END 
 
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICCreateUpdateLotNumber
 			@Items
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@intLotStatusId
 	END 
 
@@ -281,6 +283,7 @@ BEGIN
 				,strVendorLotNo
 				,intVendorLocationId
 				,dblGrossWeight
+				,intCreatedEntityId
 		)
 		SELECT	intLotId				
 				,strLotNumber			
@@ -307,6 +310,7 @@ BEGIN
 				,strVendorLotNo			
 				,intVendorLocationId
 				,dblGrossWeight
+				,intCreatedEntityId
 		FROM dbo.tblICLot 
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

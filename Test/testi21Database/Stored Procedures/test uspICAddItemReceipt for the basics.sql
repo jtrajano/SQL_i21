@@ -5,7 +5,7 @@ BEGIN
 	BEGIN 
 		DECLARE @ReceiptDataToCreate AS ReceiptStagingTable
 				,@OtherCharges AS ReceiptOtherChargesTableType
-				,@intUserId AS INT 
+				,@intEntityUserSecurityId AS INT 
 	END 
 	
 	-- Assert
@@ -20,7 +20,7 @@ BEGIN
 		EXEC dbo.uspICAddItemReceipt
 			@ReceiptDataToCreate
 			,@OtherCharges
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Assert

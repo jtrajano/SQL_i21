@@ -40,7 +40,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -53,7 +53,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -67,7 +67,7 @@ BEGIN
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6)				= 40
 				,@dblCost AS NUMERIC(18,6)			= 88.77
-				,@intUserId AS INT = 1
+				,@intEntitySecurityEntityId AS INT = 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'
 				,@intTransactionId AS INT			= 4
@@ -90,7 +90,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @PremiumGrains
@@ -101,12 +101,12 @@ BEGIN
 				,[dblStockIn] = 40
 				,[dblStockOut] = 0
 				,[dblCost] = 88.77
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 
 		/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
-		_m_		intItemId   intItemLocationId intLotId	dblStockIn	dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId intLotId	dblStockIn	dblStockOut		dblCost		intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- ---------	-----------	------------	---------	---------------- ----------------
 		new		3           3                 12345		40.000000	0.000000		88.770000	1                1
 		***************************************************************************************************************************************************************************************************************/							
@@ -135,7 +135,7 @@ BEGIN
 				,@intStorageLocationId
 				,@dblQty
 				,@dblCost
-				,@intUserId
+				,@intEntitySecurityEntityId
 				,@FullQty
 				,@TotalQtyOffset
 				,@strTransactionId
@@ -171,7 +171,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -183,7 +183,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLot
 		WHERE	intItemId = @intItemId

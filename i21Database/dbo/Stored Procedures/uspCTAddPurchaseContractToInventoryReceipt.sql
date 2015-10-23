@@ -162,7 +162,7 @@ INSERT INTO tblICInventoryReceiptCharge
 		intEntityVendorId,
 		dblAmount,
 		strAllocateCostBy,
-		strCostBilledBy,
+--		strCostBilledBy,
 		intSort,
 		intConcurrencyId
 )
@@ -175,7 +175,7 @@ SELECT	@InventoryReceiptId,
 		CC.intVendorId,
 		NULL,
 		NULL,
-		'Vendor',
+--		'Vendor',
 		NULL,
 		1
 FROM	tblCTContractCost CC

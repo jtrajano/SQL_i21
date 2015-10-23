@@ -6,7 +6,7 @@ BEGIN
 		EXEC [testi21Database].[Fake inventory items]
 
 		DECLARE @Items AS ItemLotTableType
-		DECLARE @intUserId AS INT 
+		DECLARE @intEntityUserSecurityId AS INT 
 		DECLARE @intLotStatusId AS INT
 
 		CREATE TABLE expected (
@@ -43,7 +43,7 @@ BEGIN
 			[ysnReleasedToWarehouse]	BIT DEFAULT((0)),
 			[ysnProduced]				BIT DEFAULT((0)),
 			[dtmDateCreated]			DATETIME NULL,
-			[intCreatedUserId]			INT NULL,
+			[intCreatedEntityId]		INT NULL,
 			[intConcurrencyId]			INT NULL DEFAULT ((1)),	
 			[dblGrossWeight]			NUMERIC(18,6) NULL,
 		)
@@ -57,7 +57,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICCreateUpdateLotNumber
 			@Items
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@intLotStatusId
 	END 
 

@@ -43,8 +43,7 @@ BEGIN
 	BEGIN 
 		DECLARE	@ysnPost BIT = 1 
 				,@intTransactionId INT = 1
-				,@intUserId  INT  = 1
-				,@intEntityId INT  = 1
+				,@intEntityUserSecurityId  INT  = 1
 	END 
 		
 	-- Act
@@ -52,8 +51,7 @@ BEGIN
 		EXEC dbo.uspICPostInventoryShipmentIntegrations 
 				@ysnPost
 				,@intTransactionId
-				,@intUserId
-				,@intEntityId
+				,@intEntityUserSecurityId
 	END 
 
 	-- Assert 

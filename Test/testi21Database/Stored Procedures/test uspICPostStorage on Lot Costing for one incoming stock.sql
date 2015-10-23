@@ -197,7 +197,7 @@ BEGIN
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
 		DECLARE @strBatchId AS NVARCHAR(20);
-		DECLARE @intUserId AS INT = 1;
+		DECLARE @intEntityUserSecurityId AS INT = 1;
 		DECLARE @intTransactionTypeId AS INT 
 		DECLARE @intNewLotId AS INT = 1999
 
@@ -255,7 +255,7 @@ BEGIN
 		EXEC dbo.uspICPostStorage
 			@ItemsToPost
 			,@strBatchId 
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Assert

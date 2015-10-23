@@ -28,7 +28,7 @@ BEGIN
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
 			,@strTransactionForm AS NVARCHAR(255)
-			,@intUserId AS INT
+			,@intEntityUserSecurityId AS INT
 
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
@@ -50,7 +50,7 @@ BEGIN
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
 			[dtmCreated] DATETIME NULL, 
-			[intCreatedUserId] INT NULL, 
+			[intCreatedEntityId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
 
@@ -74,7 +74,7 @@ BEGIN
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
 			[dtmCreated] DATETIME NULL, 
-			[intCreatedUserId] INT NULL, 
+			[intCreatedEntityId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
 	END 
@@ -102,7 +102,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		INSERT INTO actual (
 				[intInventoryTransactionId]
@@ -124,7 +124,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[dtmCreated]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]
 		)
 		SELECT	[intInventoryTransactionId]
@@ -146,7 +146,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[dtmCreated]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]		
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId

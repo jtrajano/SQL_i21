@@ -14,7 +14,6 @@ BEGIN
 		DECLARE @ysnPost AS BIT
 		DECLARE @ysnRecap AS BIT
 		DECLARE @strTransactionId AS NVARCHAR(40)
-		DECLARE @intUserId AS INT
 		DECLARE @intEntityId AS INT 
 	END 
 
@@ -29,7 +28,6 @@ BEGIN
 			@ysnPost
 			,@ysnRecap
 			,@strTransactionId
-			,@intUserId
 			,@intEntityId
 	END 
 

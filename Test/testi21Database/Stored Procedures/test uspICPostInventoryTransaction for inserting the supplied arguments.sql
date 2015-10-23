@@ -33,7 +33,7 @@ BEGIN
 				,@intRelatedTransactionId AS INT			= 19
 				,@strRelatedTransactionId AS NVARCHAR(40)	= '20'
 				,@strTransactionForm AS NVARCHAR (255)		= '21'
-				,@intUserId AS INT							= 22
+				,@intEntityUserSecurityId AS INT							= 22
 				,@InventoryTransactionIdentityId AS INT		= 23
 				,@intCostingMethod AS INT					= 24
 
@@ -62,7 +62,7 @@ BEGIN
 			,intRelatedTransactionId INT
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
-			,intCreatedUserId INT
+			,intCreatedEntityId INT
 			,intCostingMethod INT
 		)
 
@@ -91,7 +91,7 @@ BEGIN
 			,intRelatedTransactionId INT
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
-			,intCreatedUserId INT
+			,intCreatedEntityId INT
 			,intCostingMethod INT
 		)
 
@@ -120,7 +120,7 @@ BEGIN
 			,intRelatedTransactionId
 			,strRelatedTransactionId
 			,strTransactionForm 
-			,intCreatedUserId
+			,intCreatedEntityId
 			,intCostingMethod 
 		)
 		SELECT			
@@ -148,7 +148,7 @@ BEGIN
 			,intRelatedTransactionId			= @intRelatedTransactionId
 			,strRelatedTransactionId			= @strRelatedTransactionId
 			,strTransactionForm					= @strTransactionForm
-			,intCreatedUserId					= @intUserId
+			,intCreatedEntityId					= @intEntityUserSecurityId
 			,intCostingMethod					= @intCostingMethod
 
 	END 
@@ -180,7 +180,7 @@ BEGIN
 				,@intRelatedTransactionId
 				,@strRelatedTransactionId
 				,@strTransactionForm
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@intCostingMethod
 				,@InventoryTransactionIdentityId OUTPUT 
 	END 
@@ -212,7 +212,7 @@ BEGIN
 			,intRelatedTransactionId
 			,strRelatedTransactionId
 			,strTransactionForm 
-			,intCreatedUserId
+			,intCreatedEntityId
 			,intCostingMethod		
 		)
 		SELECT
@@ -240,7 +240,7 @@ BEGIN
 			,intRelatedTransactionId
 			,strRelatedTransactionId
 			,strTransactionForm 
-			,intCreatedUserId
+			,intCreatedEntityId
 			,intCostingMethod 
 		FROM dbo.tblICInventoryTransaction
 

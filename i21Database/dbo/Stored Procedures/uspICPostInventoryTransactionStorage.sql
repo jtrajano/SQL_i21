@@ -55,7 +55,7 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[intStorageLocationId]
 		,[ysnIsUnposted]
 		,[dtmCreated] 
-		,[intCreatedUserId] 
+		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
 		,[intInventoryCostBucketStorageId]
 )

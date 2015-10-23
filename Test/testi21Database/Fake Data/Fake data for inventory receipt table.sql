@@ -134,7 +134,7 @@ BEGIN
 			,@dtmDate AS DATETIME
 			,@InventoryReceiptTypeId AS INT = 4
 			,@intEntityId AS INT = 1
-			,@intUserId AS INT = 1
+			--,@intUserId AS INT = 1
 			,@intContractId AS INT
 
 			,@intEntityVendorId_ReceiptVendor AS INT = 1
@@ -211,7 +211,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -411,7 +411,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -541,7 +541,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -666,7 +666,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 	END
@@ -706,7 +706,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -827,7 +827,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -947,7 +947,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -1053,7 +1053,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -1201,7 +1201,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -1349,7 +1349,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -1498,7 +1498,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -1663,7 +1663,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -1842,7 +1842,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId				
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
@@ -2038,7 +2038,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 				,intEntityVendorId		= @intEntityVendorId_ReceiptVendor
 		SET @intReceiptNumber = SCOPE_IDENTITY();
@@ -2196,7 +2196,7 @@ BEGIN
 				,intCurrencyId			= @BaseCurrencyId
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
-				,intCreatedUserId		= @intUserId
+				,intCreatedUserId		= NULL -- @intUserId
 				,ysnPosted				= 0
 				,intEntityVendorId		= @intEntityVendorId_ReceiptVendor
 		SET @intReceiptNumber = SCOPE_IDENTITY();

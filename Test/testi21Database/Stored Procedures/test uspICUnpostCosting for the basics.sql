@@ -44,14 +44,14 @@ BEGIN
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@intTransactionId AS INT 
 				,@strTransactionId AS NVARCHAR(40)
-				,@intUserId AS INT 
+				,@intEntityUserSecurityId AS INT 
 
 		INSERT INTO actual 
 		EXEC dbo.uspICUnpostCosting
 			@intTransactionId
 			,@strTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
 		ALTER TABLE actual 

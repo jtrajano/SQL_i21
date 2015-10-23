@@ -72,7 +72,7 @@ BEGIN
 		DECLARE @ItemsToPost AS ItemCostingTableType;
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001';
 		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods';
-		DECLARE @intUserId AS INT = 1;
+		DECLARE @intEntityUserSecurityId AS INT = 10;
 
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost (
@@ -130,7 +130,7 @@ BEGIN
 			@ItemsToPost
 			,@strBatchId 
 			,@strAccountToCounterInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		-- We expect a new Item Stock record is inserted since  record for Wet Grains and Default Location does not exists. 
 		INSERT INTO actual (

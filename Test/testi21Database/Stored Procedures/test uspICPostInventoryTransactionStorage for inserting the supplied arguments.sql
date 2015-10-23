@@ -30,8 +30,8 @@ BEGIN
 				,@intTransactionTypeId INT					= 18
 				,@intLotId INT								= 19
 				,@strTransactionForm NVARCHAR (255)			= '20'
-				,@intUserId INT								= 21
-				,@SourceCostBucketStorageId INT			= 22
+				,@intEntityUserSecurityId INT				= 21
+				,@SourceCostBucketStorageId INT				= 22
 				,@InventoryTransactionIdStorageId INT		= 23
 
 		CREATE TABLE expected (
@@ -59,7 +59,7 @@ BEGIN
 			[ysnIsUnposted] BIT,
 			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS,
 			[dtmCreated] DATETIME, 
-			[intCreatedUserId] INT, 
+			[intCreatedEntityId] INT, 
 			[intConcurrencyId] INT, 
 		)
 
@@ -88,7 +88,7 @@ BEGIN
 			[ysnIsUnposted] BIT,
 			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS,
 			[dtmCreated] DATETIME, 
-			[intCreatedUserId] INT, 
+			[intCreatedEntityId] INT, 
 			[intConcurrencyId] INT, 
 		)
 
@@ -117,7 +117,7 @@ BEGIN
 			,[ysnIsUnposted] 
 			,[strTransactionForm] 
 			,[dtmCreated] 
-			,[intCreatedUserId] 
+			,[intCreatedEntityId] 
 			,[intConcurrencyId] 
 		)
 		SELECT 
@@ -139,13 +139,13 @@ BEGIN
 			,[intTransactionId]						= @intTransactionId
 			,[intTransactionDetailId]				= @intTransactionDetailId
 			,[strTransactionId]						= @strTransactionId
-			,[intInventoryCostBucketStorageId]	= @SourceCostBucketStorageId
+			,[intInventoryCostBucketStorageId]		= @SourceCostBucketStorageId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= @intTransactionTypeId
 			,[ysnIsUnposted]						= 0
 			,[strTransactionForm]					= @strTransactionForm
 			,[dtmCreated]							= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[intCreatedUserId]						= @intUserId
+			,[intCreatedEntityId]					= @intEntityUserSecurityId
 			,[intConcurrencyId] 					= 1
 	END 
 	
@@ -173,7 +173,7 @@ BEGIN
 				,@intTransactionTypeId 
 				,@intLotId 
 				,@strTransactionForm 
-				,@intUserId 
+				,@intEntityUserSecurityId 
 				,@SourceCostBucketStorageId 
 				,@InventoryTransactionIdStorageId OUTPUT 
 	END 
@@ -205,7 +205,7 @@ BEGIN
 			,[ysnIsUnposted] 
 			,[strTransactionForm] 
 			,[dtmCreated] 
-			,[intCreatedUserId] 
+			,[intCreatedEntityId] 
 			,[intConcurrencyId] 		
 		)
 		SELECT
@@ -233,7 +233,7 @@ BEGIN
 			,[ysnIsUnposted] 
 			,[strTransactionForm] 
 			,dbo.fnRemoveTimeOnDate(dtmCreated)
-			,[intCreatedUserId] 
+			,[intCreatedEntityId] 
 			,[intConcurrencyId] 
 		FROM dbo.tblICInventoryTransactionStorage
 

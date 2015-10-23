@@ -26,7 +26,7 @@ BEGIN
 	DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-0000003'
 	DECLARE @intTransactionId AS INT = 1
 	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvRcpt-00001'
-	DECLARE @intUserId AS INT = 1
+	DECLARE @intEntityUserSecurityId AS INT = 1
 	DECLARE @GLDetail AS dbo.RecapTableType
 		
 	DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
@@ -585,7 +585,7 @@ BEGIN
 		@intTransactionId
 		,@strTransactionId
 		,@strBatchId
-		,@intUserId
+		,@intEntityUserSecurityId
 END 
 
 -- Assert

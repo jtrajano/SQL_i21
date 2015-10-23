@@ -261,7 +261,6 @@ BEGIN
 	DECLARE @dtmDate AS DATETIME;
 	DECLARE @InventoryReceiptTypeId AS INT = 4;
 	DECLARE @intEntityId AS INT = 1;
-	DECLARE @intUserId AS INT = 1;
 
 
 	-- Create mock data for the starting number 

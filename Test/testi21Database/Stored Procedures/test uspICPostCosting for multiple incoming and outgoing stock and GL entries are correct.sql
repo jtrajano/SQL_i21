@@ -86,7 +86,7 @@ BEGIN
 		DECLARE @ItemsToPost AS ItemCostingTableType;  
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001';  
 		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods';  
-		DECLARE @intUserId AS INT = 1;  
+		DECLARE @intEntityUserSecurityId AS INT = 1;  
 
 		-- Setup the items to post  
 		INSERT INTO @ItemsToPost (
@@ -287,7 +287,6 @@ BEGIN
 				,strJournalLineDescription  
 				,intJournalLineNo  
 				,ysnIsUnposted  
-				,intUserId  
 				,intEntityId  
 				,strTransactionId  
 				,intTransactionId  
@@ -314,7 +313,6 @@ BEGIN
 				,strJournalLineDescription = ''  
 				,intJournalLineNo  = 6
 				,ysnIsUnposted = 0  
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId  = 'PURCHASE-000001'  
 				,intTransactionId  = 1  
@@ -343,7 +341,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 6
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1
 				,strTransactionId  = 'PURCHASE-000001'  
 				,intTransactionId  = 1  
@@ -373,7 +370,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 7
 				,ysnIsUnposted = 0  
-				,intUserId = 1
 				,intEntityId = 1
 				,strTransactionId  = 'SALE-000001'  
 				,intTransactionId  = 1  
@@ -402,7 +398,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 7
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'SALE-000001'  
 				,intTransactionId  = 1  
@@ -432,7 +427,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 8
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'SALE-000002'  
 				,intTransactionId  = 1  
@@ -461,7 +455,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo  = 8
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'SALE-000002'  
 				,intTransactionId  = 1  
@@ -491,7 +484,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 9
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'SALE-000003'  
 				,intTransactionId  = 1  
@@ -520,7 +512,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 9
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'SALE-000003'  
 				,intTransactionId  = 1  
@@ -550,7 +541,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 10
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'SALE-000004'  
 				,intTransactionId  = 1  
@@ -579,7 +569,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 10
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'SALE-000004'  
 				,intTransactionId  = 1  
@@ -609,7 +598,6 @@ BEGIN
 				,strJournalLineDescription = ''  
 				,intJournalLineNo  = 11
 				,ysnIsUnposted = 0  
-				,intUserId = 1   
 				,intEntityId = 1   
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -638,7 +626,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 11
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -668,7 +655,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 12
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -697,7 +683,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 12
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -727,7 +712,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 13
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -756,7 +740,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 13
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -786,7 +769,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 14
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -815,7 +797,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 14
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
@@ -845,7 +826,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 15
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
@@ -874,7 +854,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 15
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
@@ -904,7 +883,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 16
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
@@ -933,7 +911,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 16
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
@@ -963,7 +940,6 @@ BEGIN
 				,strJournalLineDescription = ''
 				,intJournalLineNo  = 17
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
@@ -992,7 +968,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 17
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
@@ -1024,7 +999,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 18
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000004'  
 				,intTransactionId  = 1  
@@ -1053,7 +1027,6 @@ BEGIN
 				,strJournalLineDescription = '' 
 				,intJournalLineNo  = 18
 				,ysnIsUnposted = 0  
-				,intUserId = 1 
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000004'  
 				,intTransactionId  = 1  
@@ -1073,7 +1046,7 @@ BEGIN
 		@ItemsToPost  
 		,@strBatchId   
 		,@strAccountToCounterInventory  
-		,@intUserId  
+		,@intEntityUserSecurityId  
 
 		-- Remove the column dtmDateEntered. We don't need to assert it.   
 		ALTER TABLE actual   

@@ -75,7 +75,7 @@ BEGIN
 		-- Create a fake data for tblICInventoryLIFOStorage
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryLIFOStorage
-			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 			1           1                 2014-01-15 00:00:00.000 100.000000                              0.000000                                15.000000                               1                1
 			1           1                 2014-01-14 00:00:00.000 100.000000                              0.000000                                14.000000                               1                1
@@ -93,7 +93,7 @@ BEGIN
 			,[dblStockOut]
 			,[dblCost]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @WetGrains
@@ -104,7 +104,7 @@ BEGIN
 				,[dblStockOut] = 0
 				,[dblCost] = 10.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
@@ -115,7 +115,7 @@ BEGIN
 				,[dblStockOut] = 0
 				,[dblCost] = 11.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
@@ -126,7 +126,7 @@ BEGIN
 				,[dblStockOut] = 0
 				,[dblCost] = 12.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
@@ -137,7 +137,7 @@ BEGIN
 				,[dblStockOut] = 0
 				,[dblCost] = 13.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
@@ -148,7 +148,7 @@ BEGIN
 				,[dblStockOut] = 0
 				,[dblCost] = 14.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
@@ -159,7 +159,7 @@ BEGIN
 				,[dblStockOut] = 0
 				,[dblCost] = 15.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 
 		-- Create the expected and actual tables 
@@ -171,7 +171,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -183,7 +183,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -196,7 +196,7 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6)					= 9.50
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
-				,@intUserId AS INT
+				,@intEntityUserSecurityId AS INT
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
 				,@SourceInventoryLIFOStorageId AS INT 
@@ -212,7 +212,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @WetGrains
@@ -222,7 +222,7 @@ BEGIN
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
 				,[dblCost] = 15.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
@@ -232,7 +232,7 @@ BEGIN
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
 				,[dblCost] = 14.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
@@ -242,7 +242,7 @@ BEGIN
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
 				,[dblCost] = 13.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
@@ -252,7 +252,7 @@ BEGIN
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
 				,[dblCost] = 12.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
@@ -262,7 +262,7 @@ BEGIN
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
 				,[dblCost] = 11.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
@@ -272,12 +272,12 @@ BEGIN
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
 				,[dblCost] = 10.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like:  
-		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		upt 	1           1                 2014-01-15 00:00:00.000 100.000000                              100.000000                              15.000000                               1                2
 		upt		1           1                 2014-01-14 00:00:00.000 100.000000                              100.000000                              14.000000                               1                2
@@ -315,7 +315,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId 
 				,@intTransactionId 
-				,@intUserId 
+				,@intEntityUserSecurityId 
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 				,@SourceInventoryLIFOStorageId OUTPUT 
@@ -429,7 +429,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT
@@ -440,7 +440,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLIFOStorage
 		WHERE	intItemId = @intItemId

@@ -55,7 +55,7 @@ BEGIN
 				,[intConcurrencyId]		= 1
 
 		DECLARE @Items AS ItemLotTableType
-		DECLARE @intUserId AS INT 
+		DECLARE @intEntityUserSecurityId AS INT 
 		DECLARE @intLotStatusId AS INT
 
 		DECLARE	@intLotId					AS INT 
@@ -125,7 +125,7 @@ BEGIN
 			,[ysnReleasedToWarehouse]	BIT 
 			,[ysnProduced]				BIT 
 			,[dtmDateCreated]			DATETIME 
-			,[intCreatedUserId]			INT 
+			,[intCreatedEntityId]		INT 
 			,[dblGrossWeight]			NUMERIC(18,6)
 		)
 
@@ -247,6 +247,7 @@ BEGIN
 				,strVendorLotNo
 				,intVendorLocationId
 				,dblGrossWeight
+				,intCreatedEntityId
 		)
 		SELECT	intLotId				= 1
 				,strLotNumber			= 'LOT-10000'
@@ -274,13 +275,14 @@ BEGIN
 				,strVendorLotNo			= @strVendorLotNo
 				,intVendorLocationId	= @intVendorLocationId
 				,dblGrossWeight			= @dblGrossWeight
+				,intCreatedEntityId		= @intEntityUserSecurityId
 	END 
 	
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICCreateUpdateLotNumber
 			@Items
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@intLotStatusId
 	END 
 
@@ -313,6 +315,7 @@ BEGIN
 				,strVendorLotNo
 				,intVendorLocationId
 				,dblGrossWeight
+				,intCreatedEntityId
 		)
 		SELECT	intLotId				
 				,strLotNumber			
@@ -340,6 +343,7 @@ BEGIN
 				,strVendorLotNo			
 				,intVendorLocationId
 				,dblGrossWeight
+				,intCreatedEntityId
 		FROM dbo.tblICLot 
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

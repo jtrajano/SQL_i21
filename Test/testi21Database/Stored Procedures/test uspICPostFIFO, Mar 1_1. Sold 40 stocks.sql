@@ -61,7 +61,7 @@ BEGIN
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
 			,@strTransactionForm AS NVARCHAR(255)
-			,@intUserId AS INT
+			,@intEntityUserSecurityId AS INT
 
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
@@ -84,7 +84,7 @@ BEGIN
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
-			[intCreatedUserId] INT NULL, 
+			[intCreatedEntityId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
 
@@ -109,7 +109,7 @@ BEGIN
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
-			[intCreatedUserId] INT NULL, 
+			[intCreatedEntityId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 
@@ -137,7 +137,7 @@ BEGIN
 			SET @strTransactionId = 'PURCHASE-00001'
 			SET @strBatchId = 'BATCH-00001'
 			SET @intTransactionTypeId = @PurchaseTransactionType
-			SET @intUserId = 1
+			SET @intEntityUserSecurityId = 1
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -160,7 +160,7 @@ BEGIN
 					,[strBatchId]
 					,[intTransactionTypeId]
 					,[intLotId]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
 			SELECT	[intInventoryTransactionId] = 1
@@ -183,7 +183,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 			
 			-- Re-insert the expected data in tblICInventoryTransaction
@@ -207,7 +207,7 @@ BEGIN
 					,[strBatchId]
 					,[intTransactionTypeId]
 					,[intLotId]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @WetGrains
@@ -229,7 +229,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 			
 			-- Update expected data in tblICItemStock
@@ -253,7 +253,7 @@ BEGIN
 					,dblStockIn
 					,dblStockOut
 					,dblCost
-					,intCreatedUserId
+					,intCreatedEntityId
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
@@ -263,7 +263,7 @@ BEGIN
 					,dblStockIn = 20
 					,dblStockOut = 0
 					,dblCost = 20 
-					,intCreatedUserId = @intUserId
+					,intCreatedEntityId = @intEntityUserSecurityId
 					,intConcurrencyId = 1
 		END 
 
@@ -284,7 +284,7 @@ BEGIN
 			SET @strTransactionId = 'PURCHASE-00002'
 			SET @strBatchId = 'BATCH-00002'
 			SET @intTransactionTypeId = @PurchaseTransactionType
-			SET @intUserId = 2
+			SET @intEntityUserSecurityId = 2
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -307,7 +307,7 @@ BEGIN
 					,[strBatchId]
 					,[intTransactionTypeId]
 					,[intLotId]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
 			SELECT	[intInventoryTransactionId] = 2
@@ -330,7 +330,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
 			-- Re-insert the expected data in tblICInventoryTransaction
@@ -354,7 +354,7 @@ BEGIN
 					,[strBatchId]
 					,[intTransactionTypeId]
 					,[intLotId]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
@@ -376,7 +376,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 			
 			-- Update expected data in tblICItemStock
@@ -400,7 +400,7 @@ BEGIN
 					,dblStockIn
 					,dblStockOut
 					,dblCost
-					,intCreatedUserId
+					,intCreatedEntityId
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
@@ -410,7 +410,7 @@ BEGIN
 					,dblStockIn = 20
 					,dblStockOut = 0
 					,dblCost = 21 
-					,intCreatedUserId = @intUserId
+					,intCreatedEntityId = @intEntityUserSecurityId
 					,intConcurrencyId = 1						
 		END 
 
@@ -431,7 +431,7 @@ BEGIN
 			SET @strTransactionId = 'PURCHASE-00003'
 			SET @strBatchId = 'BATCH-00003'
 			SET @intTransactionTypeId = @PurchaseTransactionType
-			SET @intUserId = 3
+			SET @intEntityUserSecurityId = 3
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -454,7 +454,7 @@ BEGIN
 					,[strBatchId]
 					,[intTransactionTypeId]
 					,[intLotId]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
 			SELECT	[intInventoryTransactionId] = 3
@@ -477,7 +477,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
 			-- Re-insert the expected data in tblICInventoryTransaction
@@ -501,7 +501,7 @@ BEGIN
 					,[strBatchId]
 					,[intTransactionTypeId]
 					,[intLotId]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
@@ -523,7 +523,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 			
 			-- Update expected data in tblICItemStock
@@ -547,7 +547,7 @@ BEGIN
 					,dblStockIn
 					,dblStockOut
 					,dblCost
-					,intCreatedUserId
+					,intCreatedEntityId
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
@@ -557,7 +557,7 @@ BEGIN
 					,dblStockIn = 20
 					,dblStockOut = 0
 					,dblCost = 21.75 
-					,intCreatedUserId = @intUserId
+					,intCreatedEntityId = @intEntityUserSecurityId
 					,intConcurrencyId = 1							
 		END
 
@@ -578,7 +578,7 @@ BEGIN
 			SET @strTransactionId = 'SALES-00001'
 			SET @strBatchId = 'BATCH-00004'
 			SET @intTransactionTypeId = @SalesTransactionType
-			SET @intUserId = 3
+			SET @intEntityUserSecurityId = 3
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -601,7 +601,7 @@ BEGIN
 					,[strBatchId]
 					,[intTransactionTypeId]
 					,[intLotId]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
 			SELECT	[intInventoryTransactionId] = 4
@@ -624,7 +624,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @intTransactionTypeId
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 			UNION ALL
 			SELECT	[intInventoryTransactionId] = 5
@@ -647,7 +647,7 @@ BEGIN
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @intTransactionTypeId
 					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
+					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
 			-- Insert expected data for tblICInventoryFIFOOut
@@ -688,7 +688,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Assert
@@ -715,7 +715,7 @@ BEGIN
 				,[strBatchId]
 				,[intTransactionTypeId]
 				,[intLotId]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]
 		)
 		SELECT	[intInventoryTransactionId]
@@ -738,7 +738,7 @@ BEGIN
 				,[strBatchId]
 				,[intTransactionTypeId]
 				,[intLotId]
-				,[intCreatedUserId]
+				,[intCreatedEntityId]
 				,[intConcurrencyId]
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId

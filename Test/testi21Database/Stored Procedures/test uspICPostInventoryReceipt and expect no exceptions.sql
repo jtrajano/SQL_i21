@@ -30,7 +30,7 @@ BEGIN
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'INVRCPT-XXXXX2'
-		DECLARE @intUserId AS INT = 1
+		DECLARE @intEntityUserSecurityId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
@@ -56,8 +56,7 @@ BEGIN
 			@ysnPost
 			,@ysnRecap
 			,@strTransactionId
-	 		,@intUserId
-			,@intEntityId		
+	 		,@intEntityUserSecurityId
 	END 	
 
 	-- Clean-up: remove the tables used in the unit test

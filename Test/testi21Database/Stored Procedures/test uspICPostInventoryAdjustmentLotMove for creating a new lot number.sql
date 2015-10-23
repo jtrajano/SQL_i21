@@ -137,7 +137,7 @@ BEGIN
 		DECLARE	@intTransactionId AS INT = 7
 				,@strBatchId AS NVARCHAR(50) = 'BATCH-XXX1'
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment'
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 				,@strAdjustmentDescription AS NVARCHAR(255)
 
 		-- Change the all split lot into lot merge type
@@ -233,7 +233,7 @@ BEGIN
 				@intTransactionId
 				,@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@strAdjustmentDescription
 	END 
 

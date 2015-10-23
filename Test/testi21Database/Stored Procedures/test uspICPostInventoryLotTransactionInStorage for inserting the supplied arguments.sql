@@ -27,7 +27,7 @@ BEGIN
 				,@intLotStatusId INT 
 				,@intTransactionTypeId INT	
 				,@strTransactionForm NVARCHAR (255)
-				,@intUserId INT
+				,@intEntityUserSecurityId INT
 				,@SourceInventoryLotStorageId INT 
 				,@InventoryLotTransactionStorageId INT  
 				,@intLocationId INT 
@@ -48,7 +48,7 @@ BEGIN
 				,@intLotStatusId		= 13
 				,@intTransactionTypeId	= 14
 				,@strTransactionForm	= '15'
-				,@intUserId				= 16
+				,@intEntityUserSecurityId				= 16
 				,@SourceInventoryLotStorageId			= 17
 				,@InventoryLotTransactionStorageId	= 18 
 				,@intLocationId			= 1
@@ -74,7 +74,7 @@ BEGIN
 			[ysnIsUnposted] BIT,
 			[intInventoryCostBucketStorageId] INT, 
 			[dtmCreated] DATETIME, 
-			[intCreatedUserId] INT, 
+			[intCreatedEntityId] INT, 
 			[intConcurrencyId] INT 
 		)
 
@@ -99,7 +99,7 @@ BEGIN
 			[ysnIsUnposted] BIT,
 			[intInventoryCostBucketStorageId] INT, 
 			[dtmCreated] DATETIME, 
-			[intCreatedUserId] INT, 
+			[intCreatedEntityId] INT, 
 			[intConcurrencyId] INT
 		)
 
@@ -124,7 +124,7 @@ BEGIN
 			,[ysnIsUnposted]
 			,[intInventoryCostBucketStorageId]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		)
 		SELECT 
@@ -148,7 +148,7 @@ BEGIN
 			,[ysnIsUnposted]							= 0
 			,[intInventoryCostBucketStorageId]		= @SourceInventoryLotStorageId
 			,[dtmCreated]								= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[intCreatedUserId]							= @intUserId
+			,[intCreatedEntityId]							= @intEntityUserSecurityId
 			,[intConcurrencyId]							= 1
 	END 
 	
@@ -172,7 +172,7 @@ BEGIN
 			,@intLotStatusId 
 			,@intTransactionTypeId 
 			,@strTransactionForm 
-			,@intUserId 
+			,@intEntityUserSecurityId 
 			,@SourceInventoryLotStorageId  
 			,@InventoryLotTransactionStorageId OUTPUT 
 
@@ -201,7 +201,7 @@ BEGIN
 			,[ysnIsUnposted]
 			,[intInventoryCostBucketStorageId]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		)
 		SELECT
@@ -225,7 +225,7 @@ BEGIN
 			,[ysnIsUnposted]
 			,[intInventoryCostBucketStorageId]
 			,dbo.fnRemoveTimeOnDate(dtmCreated)
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		FROM dbo.tblICInventoryLotTransactionStorage
 

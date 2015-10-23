@@ -91,7 +91,7 @@ BEGIN
 				,intLotId
 				,strTransactionForm
 				,dtmCreated
-				,intCreatedUserId
+				,intCreatedEntityId
 				,intConcurrencyId
 		)
 		SELECT 	intItemId = @StickyGrains
@@ -112,7 +112,7 @@ BEGIN
 				,intLotId = NULL 
 				,strTransactionForm = 'Inventory Shipment'
 				,dtmCreated = GETDATE()
-				,intCreatedUserId = 1
+				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 
 		-- Create the expected and actual tables. 
@@ -142,7 +142,6 @@ BEGIN
 			,strJournalLineDescription
 			,intJournalLineNo
 			,ysnIsUnposted
-			,intUserId
 			,intEntityId
 			,strTransactionId
 			,intTransactionId
@@ -168,7 +167,6 @@ BEGIN
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1
 			,intEntityId				= 1
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
@@ -197,7 +195,6 @@ BEGIN
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1
 			,intEntityId				= 1
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
@@ -214,13 +211,13 @@ BEGIN
 
 		DECLARE	@strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 
 		INSERT INTO actual 
 		EXEC dbo.uspICCreateGLEntries
 			@strBatchId
 			,@UseGLAccount_ContraInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 			,NULL
 			
 		-- Remove the column dtmDateEntered. We don't need to assert it. 

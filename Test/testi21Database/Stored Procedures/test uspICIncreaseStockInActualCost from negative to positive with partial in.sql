@@ -32,7 +32,7 @@ BEGIN
 		-- Create a fake data for tblICInventoryActualCost
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryActualCost
-			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 			3           3                 2014-01-13 00:00:00.000 77.000000                               25.000000                               13.000000                               1                1
 			3           3                 2014-01-14 00:00:00.000 0.000000								  56.000000                               14.000000                               1                1
@@ -49,7 +49,7 @@ BEGIN
 			,[dblStockOut]
 			,[dblCost]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 		)
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -61,7 +61,7 @@ BEGIN
 				,[dblStockOut] = 25
 				,[dblCost] = 14.75
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 		
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -73,7 +73,7 @@ BEGIN
 				,[dblStockOut] = 30
 				,[dblCost] = 15.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -85,7 +85,7 @@ BEGIN
 				,[dblStockOut] = 56
 				,[dblCost] = 14.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -97,7 +97,7 @@ BEGIN
 				,[dblStockOut] = 77
 				,[dblCost] = 13.00
 				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 
 		CREATE TABLE expected (
@@ -109,7 +109,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -122,7 +122,7 @@ BEGIN
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
-			,[intCreatedUserId] INT 
+			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
 
@@ -134,7 +134,7 @@ BEGIN
 				,@dtmDate AS DATETIME			= 'January 16, 2014'
 				,@dblQty NUMERIC(18,6)			= 200
 				,@dblCost AS NUMERIC(18,6)		= 22
-				,@intUserId AS INT				= 1
+				,@intEntityUserSecurityId AS INT = 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
@@ -157,7 +157,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -168,7 +168,7 @@ BEGIN
 				,[dblStockIn] = 77
 				,[dblStockOut] = 77
 				,[dblCost] = 13.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -179,7 +179,7 @@ BEGIN
 				,[dblStockIn] = 56
 				,[dblStockOut] = 56
 				,[dblCost] = 14.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -190,7 +190,7 @@ BEGIN
 				,[dblStockIn] = 30
 				,[dblStockOut] = 30
 				,[dblCost] = 15.00
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -201,7 +201,7 @@ BEGIN
 				,[dblStockIn] = 25
 				,[dblStockOut] = 25
 				,[dblCost] = 14.75
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 2
 		UNION ALL 		
 		SELECT	[strActualCostId] = 'ID TO BE SUPPLIED'
@@ -212,12 +212,12 @@ BEGIN
 				,[dblStockIn] = 200
 				,[dblStockOut] = 138
 				,[dblCost] = 22
-				,[intCreatedUserId] = 1
+				,[intCreatedEntityId] = 1
 				,[intConcurrencyId] = 1
 
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
-		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedEntityId intConcurrencyId
 		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		upt		3           3                 2014-01-13 00:00:00.000 77.000000                               77.000000                               13.000000                               1                2
 		upt		3           3                 2014-01-14 00:00:00.000 56.000000                               56.000000                               14.000000                               1                2
@@ -248,7 +248,7 @@ BEGIN
 				,@dtmDate
 				,@dblQty
 				,@dblCost
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@FullQty
 				,@TotalQtyOffset
 				,@strTransactionId
@@ -320,7 +320,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		)
 		SELECT	[strActualCostId]
@@ -331,7 +331,7 @@ BEGIN
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
-				,[intCreatedUserId] 
+				,[intCreatedEntityId] 
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryActualCost
 		WHERE	intItemId = @intItemId

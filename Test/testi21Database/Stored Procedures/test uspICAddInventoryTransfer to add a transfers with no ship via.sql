@@ -146,7 +146,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE @TransferEntries AS InventoryTransferStagingTable
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 10
 	END 
 	
 	-- Act 	
@@ -217,7 +217,7 @@ BEGIN
 
 		EXEC dbo.uspICAddInventoryTransfer
 			@TransferEntries
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 
 	-- Assert

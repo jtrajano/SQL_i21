@@ -21,7 +21,7 @@ BEGIN
 		EXEC dbo.uspICProcessToInventoryShipment
 			 @intSourceTransactionId = NULL
 			 ,@strSourceType = 'Sales Order'
-			 ,@intUserId = NULL
+			 ,@intEntityUserSecurityId = NULL
 			 ,@InventoryShipmentId = NULL 
 
 		-- Assert

@@ -26,7 +26,7 @@ BEGIN
 	DECLARE @strBatchId AS NVARCHAR(20)
 	DECLARE @intTransactionId AS INT = 1
 	DECLARE @strTransactionId AS NVARCHAR(40)
-	DECLARE @intUserId AS INT = 1
+	DECLARE @intEntityUserSecurityId AS INT = 1
 	DECLARE @GLDetail AS dbo.RecapTableType 
 
 	DECLARE @AUTO_NEGATIVE AS INT = 1
@@ -564,7 +564,7 @@ BEGIN
 			@intTransactionId
 			,@strTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 	-- End: Unpost Add Stock 
 	
@@ -734,7 +734,7 @@ BEGIN
 			@intTransactionId
 			,@strTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 	END 
 	-- End: Unpost Sell Stock
 END 

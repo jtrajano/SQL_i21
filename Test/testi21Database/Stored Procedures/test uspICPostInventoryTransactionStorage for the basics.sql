@@ -25,7 +25,7 @@ BEGIN
 				,@intTransactionTypeId INT
 				,@intLotId INT
 				,@strTransactionForm NVARCHAR (255)
-				,@intUserId INT
+				,@intEntityUserSecurityId INT
 				,@SourceCostBucketStorageId INT 
 				,@InventoryTransactionIdStorageId INT  
 
@@ -117,7 +117,7 @@ BEGIN
 				,@intTransactionTypeId 
 				,@intLotId 
 				,@strTransactionForm 
-				,@intUserId 
+				,@intEntityUserSecurityId 
 				,@SourceCostBucketStorageId 
 				,@InventoryTransactionIdStorageId OUTPUT 
 	END 

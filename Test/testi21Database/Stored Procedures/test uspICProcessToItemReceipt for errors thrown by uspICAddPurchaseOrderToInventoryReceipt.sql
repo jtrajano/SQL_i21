@@ -18,10 +18,12 @@ BEGIN
 		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50000 
 
 		EXEC dbo.uspICProcessToItemReceipt
-			 @intSourceTransactionId = NULL
-			 ,@strSourceType = 'Purchase Order'
-			 ,@intUserId = NULL
-			 ,@InventoryReceiptId = NULL 
+			@intSourceTransactionId = NULL
+			,@strSourceType = 'Purchase Order'
+			,@intEntityUserSecurityId = NULL
+			,@InventoryReceiptId = NULL 
+			,@TransactionSourceType = 0
+			,@TransactionSourceId = NULL
 
 		-- Assert
 		BEGIN 

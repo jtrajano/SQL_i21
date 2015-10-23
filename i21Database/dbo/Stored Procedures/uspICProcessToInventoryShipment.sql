@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICProcessToInventoryShipment]
 	@intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
-	,@intUserId AS INT 
+	,@intEntityUserSecurityId AS INT 
 	,@InventoryShipmentId AS INT OUTPUT 
 AS
 
@@ -54,7 +54,7 @@ BEGIN TRY
 	BEGIN 
 		EXEC dbo.uspICAddSalesOrderToInventoryShipment 
 			@intSourceTransactionId, 
-			@intUserId, 
+			@intEntityUserSecurityId, 
 			@InventoryShipmentId OUTPUT; 
 	END
 

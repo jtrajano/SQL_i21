@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddSalesOrderToInventoryShipment]
 	@SalesOrderId AS INT
-	,@intEntitySecurityUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@InventoryShipmentId AS INT OUTPUT 
 AS
 
@@ -82,7 +82,7 @@ BEGIN
 				,strReceivedBy				= NULL 
 				,strComment					= SO.strComments
 				,ysnPosted					= 0 
-				,intEntityId				= @intEntitySecurityUserId
+				,intEntityId				= @intEntityUserSecurityId
 				,intConcurrencyId			= 1
 		FROM	dbo.tblSOSalesOrder SO
 		WHERE	SO.intSalesOrderId = @SalesOrderId

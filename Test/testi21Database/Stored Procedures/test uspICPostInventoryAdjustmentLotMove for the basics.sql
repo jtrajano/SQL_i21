@@ -9,7 +9,7 @@ BEGIN
 		DECLARE	@intTransactionId AS INT
 				,@strBatchId AS NVARCHAR(50)
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50)
-				,@intUserId AS INT
+				,@intEntityUserSecurityId AS INT
 				,@strAdjustmentDescription AS NVARCHAR(255)
 	END 
 
@@ -24,7 +24,7 @@ BEGIN
 				@intTransactionId
 				,@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@strAdjustmentDescription
 	END 
 END 

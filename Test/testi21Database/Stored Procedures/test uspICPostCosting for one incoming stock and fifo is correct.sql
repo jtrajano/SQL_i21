@@ -67,7 +67,7 @@ BEGIN
 		DECLARE @ItemsToPost AS ItemCostingTableType;
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001';
 		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods';
-		DECLARE @intUserId AS INT = 1;
+		DECLARE @intEntityUserSecurityId AS INT = 1;
 
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost (
@@ -143,7 +143,7 @@ BEGIN
 			@ItemsToPost
 			,@strBatchId 
 			,@strAccountToCounterInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 
 		INSERT INTO actual (
 				intItemId

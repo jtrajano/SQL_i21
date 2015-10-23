@@ -5,8 +5,7 @@ BEGIN
 	BEGIN 
 		DECLARE	@ysnPost BIT = NULL 
 				,@intTransactionId INT = NULL 
-				,@intUserId  INT  = NULL 
-				,@intEntityId INT  = NULL
+				,@intEntityUserSecurityId  INT  = NULL 
 	END 
 
 	-- Assert
@@ -19,8 +18,7 @@ BEGIN
 		EXEC dbo.uspICPostInventoryShipmentIntegrations 
 				@ysnPost
 				,@intTransactionId
-				,@intUserId
-				,@intEntityId
+				,@intEntityUserSecurityId
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

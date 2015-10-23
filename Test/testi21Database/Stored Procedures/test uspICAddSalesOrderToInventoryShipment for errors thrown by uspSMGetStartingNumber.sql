@@ -21,7 +21,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICAddSalesOrderToInventoryShipment
 			@SalesOrderId = NULL
-			,@intUserId = NULL
+			,@intEntityUserSecurityId = NULL
 			,@InventoryShipmentId = NULL 
 	END 
 END

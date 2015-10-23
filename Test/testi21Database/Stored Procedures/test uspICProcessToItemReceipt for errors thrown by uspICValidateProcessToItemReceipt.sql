@@ -20,7 +20,7 @@ BEGIN
 		EXEC dbo.uspICProcessToItemReceipt
 			 @intSourceTransactionId = NULL
 			 ,@strSourceType = NULL
-			 ,@intUserId = NULL
+			 ,@intEntityUserSecurityId = NULL
 			 ,@InventoryReceiptId = NULL 
 
 		-- Assert

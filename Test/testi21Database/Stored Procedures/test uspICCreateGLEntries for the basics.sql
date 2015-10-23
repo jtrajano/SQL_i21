@@ -49,13 +49,13 @@ BEGIN
 	BEGIN 
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 
 		INSERT INTO actual 
 		EXEC dbo.uspICCreateGLEntries
 			@strBatchId
 			,@UseGLAccount_ContraInventory
-			,@intUserId
+			,@intEntityUserSecurityId
 			,NULL
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 

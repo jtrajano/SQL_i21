@@ -180,7 +180,7 @@ BEGIN
 	BEGIN 
 		DECLARE @ReceiptDataToCreate AS ReceiptStagingTable
 				,@ReceiptOtherCharges AS ReceiptOtherChargesTableType
-				,@intUserId AS INT 
+				,@intEntityUserSecurityId AS INT 
 	END 
 	
 	-- Act 	
@@ -249,7 +249,7 @@ BEGIN
 		EXEC dbo.uspICAddItemReceipt
 			@ReceiptDataToCreate
 			,@ReceiptOtherCharges
-			,@intUserId
+			,@intEntityUserSecurityId
 
 	END 
 

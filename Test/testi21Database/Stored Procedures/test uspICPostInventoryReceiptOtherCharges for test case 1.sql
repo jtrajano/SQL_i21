@@ -231,7 +231,6 @@ BEGIN
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT = 15 -- 'INVRCPT-XXXX15'
 			,@strBatchId AS NVARCHAR(20) = 'BATCH-100001'
-			,@intUserId AS INT = 1
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
@@ -265,7 +264,7 @@ BEGIN
 		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
-			,@intUserId
+			,1
 			,@intTransactionTypeId
 	END 
 
@@ -289,7 +288,7 @@ BEGIN
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
 			,[ysnIsUnposted]
-			,[intUserId]
+			-- ,[intUserId]
 			,[intEntityId]
 			,[strTransactionId]
 			,[intTransactionId]
@@ -316,7 +315,7 @@ BEGIN
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 35
 			,[ysnIsUnposted]			= 0
-			,[intUserId]				= 1
+			-- ,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'
 			,[intTransactionId]			= 15
@@ -343,7 +342,7 @@ BEGIN
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 35
 			,[ysnIsUnposted]			= 0
-			,[intUserId]				= 1
+			-- ,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'
 			,[intTransactionId]			= 15
@@ -370,7 +369,7 @@ BEGIN
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 36
 			,[ysnIsUnposted]			= 0
-			,[intUserId]				= 1
+			-- ,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'
 			,[intTransactionId]			= 15
@@ -397,7 +396,7 @@ BEGIN
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 36
 			,[ysnIsUnposted]			= 0
-			,[intUserId]				= 1
+			-- ,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'
 			,[intTransactionId]			= 15
@@ -427,7 +426,7 @@ BEGIN
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
 			,[ysnIsUnposted]
-			,[intUserId]
+			-- ,[intUserId]
 			,[intEntityId]
 			,[strTransactionId]
 			,[intTransactionId]
@@ -454,7 +453,7 @@ BEGIN
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
 			,[ysnIsUnposted]
-			,[intUserId]
+			-- ,[intUserId]
 			,[intEntityId]
 			,[strTransactionId]
 			,[intTransactionId]

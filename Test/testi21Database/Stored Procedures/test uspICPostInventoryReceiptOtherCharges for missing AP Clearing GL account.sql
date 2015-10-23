@@ -231,7 +231,6 @@ BEGIN
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT = 14 -- 'INVRCPT-XXXX14'
 			,@strBatchId AS NVARCHAR(20) = 'BATCH-100001'
-			,@intUserId AS INT = 1
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
@@ -259,11 +258,10 @@ BEGIN
 		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
-			,@intUserId
+			,1
 			,@intTransactionTypeId
 	END 
  
-
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

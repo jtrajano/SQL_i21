@@ -152,7 +152,7 @@ BEGIN
 			,@intNewLotStatusId				= @LOT_STATUS_Quarantine 
 			,@intSourceId					= NULL  -- Invalid source transaction id
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
-			,@intUserId						= 1
+			,@intEntityUserSecurityId		= 1
 			,@intInventoryAdjustmentId		= NULL
 	END 	
 

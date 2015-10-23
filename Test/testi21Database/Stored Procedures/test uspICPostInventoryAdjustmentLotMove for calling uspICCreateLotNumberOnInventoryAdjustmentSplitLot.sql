@@ -9,7 +9,7 @@ BEGIN
 		DECLARE	@intTransactionId AS INT = 7
 				,@strBatchId AS NVARCHAR(50) = 'BATCH-XXX1'
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment'
-				,@intUserId AS INT = 1
+				,@intEntityUserSecurityId AS INT = 1
 				,@strAdjustmentDescription AS NVARCHAR(255)
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
@@ -21,19 +21,19 @@ BEGIN
 
 		CREATE TABLE actual (
 			intTransactionId INT
-			,intUserId INT
+			,intEntityUserSecurityId INT
 		)
 		
 		CREATE TABLE expected (
 			intTransactionId INT
-			,intUserId INT
+			,intEntityUserSecurityId INT
 		)
 
 		-- Add a spy for uspICCreateLotNumberOnInventoryAdjustmentSplitLot
 		EXEC tSQLt.SpyProcedure 'dbo.uspICCreateLotNumberOnInventoryAdjustmentSplitLot';		
 
 		-- Setup the expected parameter for uspICPostInventoryAdjustment
-		INSERT INTO expected (intTransactionId, intUserId) VALUES (@intTransactionId, @intUserId)
+		INSERT INTO expected (intTransactionId, intEntityUserSecurityId) VALUES (@intTransactionId, @intEntityUserSecurityId)
 	END 
 
 	-- Constant for Adjustment Types
@@ -57,7 +57,7 @@ BEGIN
 				@intTransactionId
 				,@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@strAdjustmentDescription
 	END 
 
@@ -66,10 +66,10 @@ BEGIN
 		-- Get the actual 
 		INSERT INTO actual (
 			intTransactionId
-			,intUserId 
+			,intEntityUserSecurityId 
 		) 
 		SELECT	intTransactionId
-				,intUserId
+				,intEntityUserSecurityId
 		FROM	dbo.uspICCreateLotNumberOnInventoryAdjustmentSplitLot_SpyProcedureLog	
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
