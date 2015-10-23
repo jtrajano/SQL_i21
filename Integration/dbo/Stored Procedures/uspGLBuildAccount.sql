@@ -10,7 +10,7 @@ BEGIN
 	EXEC('
 		CREATE PROCEDURE  [dbo].[uspGLBuildAccount]
 			@intUserId INT,
-			@intCurrencyId INT
+			@intCurrencyId INT = 0
 		AS
 
 		SET QUOTED_IDENTIFIER OFF
@@ -18,8 +18,17 @@ BEGIN
 		SET NOCOUNT ON
 
 		-- +++++ INSERT ACCOUNT Id +++++ --
-		INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountCategoryId], [intAccountUnitId],[ysnSystem],[ysnActive])
-		SELECT strAccountId, 
+		IF @intCurrencyId = 0
+			SELECT TOP 1 @intCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
+		IF ISNULL(@intCurrencyId, 0)= 0
+		BEGIN
+			RAISERROR(''Functional Currency is not setup properly'', 16, 1);
+			RETURN
+		END
+
+		-- +++++ INSERT ACCOUNT Id +++++ --
+		INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountCategoryId], [intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
+		SELECT strAccountId,
 			   strDescription,
 			   intAccountGroupId,
 			   intAccountCategoryId,
@@ -46,7 +55,7 @@ BEGIN
 		IF (select SUM(intLength) from tblGLAccountStructure where strType = ''Segment'') <= 8
 		BEGIN
 			INSERT INTO tblGLCOACrossReference ([inti21Id],[stri21Id],[strExternalId], [strCurrentExternalId], [strCompanyId], [intConcurrencyId])
-			SELECT (SELECT intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
+			SELECT (SELECT TOP 1 intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
 				   B.strAccountId as stri21Id,
 				   CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50))  + ''.'' + REPLICATE(''0'',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = ''Segment'')) + B.strSegment as strExternalId , 	   
 				   B.strPrimary + ''-'' + REPLICATE(''0'',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = ''Segment'')) + B.strSegment as strCurrentExternalId,
@@ -60,7 +69,7 @@ BEGIN
 		BEGIN
 			-- HANDLE OUT OF STANDARD ACCOUNT STRUCTURE (e.i REPowell)
 			INSERT INTO tblGLCOACrossReference ([inti21Id],[stri21Id],[strExternalId], [strCurrentExternalId], [strCompanyId], [intConcurrencyId])
-			SELECT (SELECT intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
+			SELECT (SELECT TOP 1 intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
 				   B.strAccountId as stri21Id,
 				   CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = ''Segment''  order by intSort)) + ''.'' + 
 						REPLICATE(''0'',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = ''Segment'' and intAccountStructureId <> (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = ''Segment'' order by intSort))) +  
