@@ -2682,6 +2682,7 @@
     <Build Include="dbo\Views\vyuLGDropShipmentDetails.sql" />
     <Build Include="dbo\Views\vyuARGetItemComponents.sql" />
     <Build Include="dbo\Views\vyuLGShipmentHeader.sql" />
+    <Build Include="dbo\Views\vyuARGetRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

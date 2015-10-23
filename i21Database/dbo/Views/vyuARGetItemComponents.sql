@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARGetItemComponents]
 AS
-SELECT R.intItemId
+SELECT R.intRecipeId
+	 , R.intItemId
      , RI.intItemId AS intComponentItemId	 
 	 , I.strItemNo
 	 , I.strDescription	 
@@ -18,7 +19,8 @@ INNER JOIN vyuARItemUOM UOM ON RI.intUOMId = UOM.intItemUOMId
 
 UNION ALL
 
-SELECT I.intItemId
+SELECT intRecipeId = NULL
+	 , I.intItemId
      , IB.intBundleItemId AS intComponentItemId	 
 	 , I.strItemNo
 	 , IB.strDescription	 
