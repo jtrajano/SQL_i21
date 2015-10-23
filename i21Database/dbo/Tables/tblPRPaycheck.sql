@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPRPaycheck](
 	[intPaycheckId] [int] NOT NULL IDENTITY,
 	[strPaycheckId] [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intEmployeeId] INT NOT NULL,
+	[intEntityEmployeeId] INT NOT NULL,
 	[dtmPayDate] [datetime] NOT NULL,
 	[strPayPeriod] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateFrom] [datetime] NOT NULL,
@@ -23,7 +23,7 @@
 	[dtmCreated] [datetime] NOT NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY],
- CONSTRAINT [FK_tblPRPaycheck_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]),
+ CONSTRAINT [FK_tblPRPaycheck_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]),
  CONSTRAINT [FK_tblPRPaycheck_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 ) ON [PRIMARY]
 GO
@@ -100,7 +100,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPRPaycheck',
     @level2type = N'COLUMN',
-    @level2name = N'intEmployeeId'
+    @level2name = N'intEntityEmployeeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Pay Date',

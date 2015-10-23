@@ -46,7 +46,7 @@ EXEC uspSMGetStartingNumber 32, @strPaycheckId OUT
 /* Create Paycheck Header */
 INSERT INTO [dbo].[tblPRPaycheck]
 	([strPaycheckId]
-	,[intEmployeeId]
+	,[intEntityEmployeeId]
 	,[dtmPayDate]
 	,[strPayPeriod]
 	,[dtmDateFrom]
@@ -148,7 +148,7 @@ SELECT
 	,[intSort]
 	,1
 FROM [dbo].[tblPREmployeeTax]
-WHERE [intEmployeeId] = @intEmployee
+WHERE [intEntityEmployeeId] = @intEmployee
   AND [ysnDefault] = 1
 
 /* Create Paycheck Earnings and Taxes*/
@@ -187,13 +187,13 @@ intEmployeeEarningId = CASE WHEN (intEmployeeEarningLinkId IS NULL)
 								THEN intEmployeeEarningId 
 							ELSE 
 								(SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
-								 WHERE intTypeEarningId = E.intEmployeeEarningLinkId AND intEmployeeId = @intEmployee) 
+								 WHERE intTypeEarningId = E.intEmployeeEarningLinkId AND [intEntityEmployeeId] = @intEmployee) 
 							END
 ,dblAmount = CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime'))
 					THEN dblAmount * ISNULL((SELECT TOP 1 B.dblAmount FROM tblPREmployeeEarning B 
-										 WHERE B.intTypeEarningId = E.intEmployeeEarningLinkId AND E.intEmployeeId = @intEmployee),
+										 WHERE B.intTypeEarningId = E.intEmployeeEarningLinkId AND E.[intEntityEmployeeId] = @intEmployee),
 										 ISNULL((SELECT TOP 1 C.dblAmount FROM tblPRTypeEarning C 
-										  WHERE C.intTypeEarningId = E.intEmployeeEarningLinkId AND E.intEmployeeId = @intEmployee), 0))
+										  WHERE C.intTypeEarningId = E.intEmployeeEarningLinkId AND E.[intEntityEmployeeId] = @intEmployee), 0))
 				  ELSE
 						dblAmount
 				  END
@@ -207,7 +207,7 @@ intEmployeeEarningId = CASE WHEN (intEmployeeEarningLinkId IS NULL)
 ,intAccountId
 ,intSort
 FROM tblPREmployeeEarning E
-WHERE intEmployeeId = @intEmployee
+WHERE [intEntityEmployeeId] = @intEmployee
 	AND E.ysnDefault = 1
 	AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END) E
 LEFT JOIN 
@@ -276,7 +276,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 						FROM tblPRTimecard 
 						WHERE intEmployeeEarningId = @intEmployeeEarningId
 						AND ysnApproved = 1 AND intPaycheckId IS NULL
-						AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
+						AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 					), 0)
@@ -301,7 +301,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 							FROM tblPRTimecard 
 							WHERE intEmployeeEarningId = @intEmployeeEarningId
 							AND ysnApproved = 1 AND intPaycheckId IS NULL
-							AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
+							AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 						), 0)
@@ -319,7 +319,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,@intSort
 			,1
 		FROM tblPREmployeeEarning
-		WHERE intEmployeeId = @intEmployee
+		WHERE [intEntityEmployeeId] = @intEmployee
 		  AND intEmployeeEarningId = @intEmployeeEarningId
 
 		/* Get the Created Paycheck Earning Id*/
@@ -355,7 +355,7 @@ DECLARE @intEmployeeDeductionId INT
 /* Insert Deductions to Temp Table for iteration */
 SELECT tblPREmployeeDeduction.intEmployeeDeductionId 
 INTO #tmpDeductions FROM tblPREmployeeDeduction 
-WHERE intEmployeeId = @intEmployee 
+WHERE [intEntityEmployeeId] = @intEmployee 
 
 /* Add Each Deduction to Paycheck */
 WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
@@ -398,7 +398,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			,[intSort]
 			,1
 		FROM tblPREmployeeDeduction
-		WHERE intEmployeeId = @intEmployee
+		WHERE [intEntityEmployeeId] = @intEmployee
 		  AND intEmployeeDeductionId = @intEmployeeDeductionId
 		  AND ysnDefault = 1
 
@@ -430,7 +430,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 		UPDATE tblPRTimecard 
 		SET intPaycheckId = @intPaycheckId
 		WHERE ysnApproved = 1 AND intPaycheckId IS NULL
-		AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
+		AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 

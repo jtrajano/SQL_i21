@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeEarning] (
     [intEmployeeEarningId]		INT				IDENTITY (1, 1) NOT NULL,
-    [intEmployeeId]				INT             NOT NULL,
+    [intEntityEmployeeId]				INT             NOT NULL,
     [intTypeEarningId]			INT             NOT NULL,
     [strCalculationType]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]					NUMERIC (18, 6) DEFAULT ((0)) NULL,
@@ -15,7 +15,7 @@
     [intConcurrencyId]			INT             DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPREmployeeEarning] PRIMARY KEY CLUSTERED ([intEmployeeEarningId] ASC),
     CONSTRAINT [FK_tblPREmployeeEarning_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblPREmployeeEarning_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeEarning_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId]),
 	CONSTRAINT [FK_tblPREmployeeEarning_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [dbo].[tblPRPayGroup] ([intPayGroupId])
 );
@@ -23,7 +23,7 @@
 
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeEarning] ON [dbo].[tblPREmployeeEarning] ([intEmployeeId], [intTypeEarningId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeEarning] ON [dbo].[tblPREmployeeEarning] ([intEntityEmployeeId], [intTypeEarningId]) WITH (IGNORE_DUP_KEY = OFF)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -42,7 +42,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
-    @level2name = N'intEmployeeId'
+    @level2name = N'intEntityEmployeeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Earning Type Id',

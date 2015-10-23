@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeTax] (
     [intEmployeeTaxId]    INT             IDENTITY (1, 1) NOT NULL,
-    [intEmployeeId]       INT             NOT NULL,
+    [intEntityEmployeeId] INT             NOT NULL,
     [intTypeTaxId]        INT             NOT NULL,
     [strCalculationType]  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strFilingStatus]     NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
@@ -25,7 +25,7 @@
     CONSTRAINT [PK_tblPREmployeeTax] PRIMARY KEY CLUSTERED ([intEmployeeTaxId] ASC),
     CONSTRAINT [FK_tblPREmployeeTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblPREmployeeTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblPREmployeeTax_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeTax_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
 );
 
@@ -33,7 +33,7 @@
 GO
 
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTax] ON [dbo].[tblPREmployeeTax] ([intEmployeeId], [intTypeTaxId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTax] ON [dbo].[tblPREmployeeTax] ([intEntityEmployeeId], [intTypeTaxId]) WITH (IGNORE_DUP_KEY = OFF)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -52,7 +52,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
-    @level2name = N'intEmployeeId'
+    @level2name = N'intEntityEmployeeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Tax Type Id',

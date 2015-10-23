@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeTimeOff] (
     [intEmployeeTimeOffId] INT             IDENTITY (1, 1) NOT NULL,
-    [intEmployeeId]        INT             NOT NULL,
+    [intEntityEmployeeId]  INT             NOT NULL,
     [intTypeTimeOffId]     INT             NOT NULL,
     [dblRate]              NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblRa__73341951] DEFAULT ((0)) NULL,
     [dblPerPeriod]         NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblPe__74283D8A] DEFAULT ((0)) NULL,
@@ -16,7 +16,7 @@
     [intSort]              INT             NULL,
     [intConcurrencyId]     INT             CONSTRAINT [DF__tblPREmpl__intCo__7CBD838B] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPREmployeeTimeOff] PRIMARY KEY CLUSTERED ([intEmployeeTimeOffId] ASC),
-    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeTimeOff_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [dbo].[tblPRTypeTimeOff] ([intTypeTimeOffId])
 );
 
@@ -25,7 +25,7 @@
 
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTimeOff] ON [dbo].[tblPREmployeeTimeOff] ([intEmployeeId], [intTypeTimeOffId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTimeOff] ON [dbo].[tblPREmployeeTimeOff] ([intEntityEmployeeId], [intTypeTimeOffId]) WITH (IGNORE_DUP_KEY = OFF)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -44,7 +44,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = N'intEmployeeId'
+    @level2name = N'intEntityEmployeeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Time Off Type Id',

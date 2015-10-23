@@ -2,7 +2,7 @@
 AS
 SELECT DISTINCT	PC.intPaycheckId, 
 				PC.strPaycheckId, 
-				PC.intEmployeeId, 
+				PC.[intEntityEmployeeId], 
 				PC.dtmPayDate,
 				CM.strReferenceNo, 
 				PC.dblGross,

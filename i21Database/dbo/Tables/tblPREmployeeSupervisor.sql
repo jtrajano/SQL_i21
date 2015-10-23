@@ -1,12 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeSupervisor]
 (
 	[intEmployeeSupervisorId] INT NOT NULL IDENTITY, 
-    [intEmployeeId] INT NOT NULL, 
+    [intEntityEmployeeId] INT NOT NULL, 
     [intSupervisorId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblPREmployeeSupervisor] PRIMARY KEY ([intEmployeeSupervisorId]),
-	CONSTRAINT [FK_tblPREmployeeSupervisor_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPREmployeeSupervisor_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPREmployeeSupervisor_tblPREmployee_Supervisor] FOREIGN KEY ([intSupervisorId]) REFERENCES [tblPREmployee]([intEntityEmployeeId])
 )
 
@@ -27,7 +27,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeSupervisor',
     @level2type = N'COLUMN',
-    @level2name = N'intEmployeeId'
+    @level2name = N'intEntityEmployeeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Employee Supervisor',

@@ -20,7 +20,7 @@ DECLARE @intPaycheckId INT
 
 /* Get Paycheck Details */
 SELECT @intPaycheckId = intPaycheckId
-	  ,@intEmployeeId = intEmployeeId
+	  ,@intEmployeeId = [intEntityEmployeeId]
 	  ,@strTransactionId = strPaycheckId
 	  ,@dtmPayDate = dtmPayDate
 FROM tblPRPaycheck 
@@ -83,7 +83,7 @@ BEGIN
 			,[dblExchangeRate]			= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = BA.intCurrencyId)
 			,[dtmDate]					= @dtmPayDate
 			,[strPayee]					= (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = @intEmployeeId)
-			,[intPayeeId]				= PC.intEmployeeId
+			,[intPayeeId]				= PC.[intEntityEmployeeId]
 			,[strAddress]				= BA.strAddress
 			,[strZipCode]				= BA.strZipCode
 			,[strCity]					= BA.strCity
@@ -103,7 +103,7 @@ BEGIN
 			,[intBankStatementImportId]	= 1
 			,[intBankFileAuditId]		= NULL
 			,[strSourceSystem]			= 'PR'
-			,[intEntityId]				= PC.intEmployeeId
+			,[intEntityId]				= PC.[intEntityEmployeeId]
 			,[intCreatedUserId]			= @intUserId
 			,[intCompanyLocationId]		= NULL
 			,[dtmCreated]				= GETDATE()
@@ -872,7 +872,7 @@ IF (@isSuccessful <> 0)
 							SET	dblHoursUsed = dblHoursUsed + A.dblHours
 							FROM tblPRPaycheckEarning A
 							WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
-								AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
+								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 								AND A.intPaycheckId = @intPaycheckId
 					END
 			END
@@ -891,7 +891,7 @@ IF (@isSuccessful <> 0)
 							SET	dblHoursUsed = dblHoursUsed - A.dblHours
 							FROM tblPRPaycheckEarning A
 							WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
-								AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
+								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 								AND A.intPaycheckId = @intPaycheckId
 
 						SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId

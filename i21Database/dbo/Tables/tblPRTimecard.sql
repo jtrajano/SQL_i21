@@ -2,7 +2,7 @@
 (
 	[intTimecardId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [dtmDate] DATETIME NOT NULL, 
-    [intEmployeeId] INT NOT NULL, 
+    [intEntityEmployeeId] INT NOT NULL, 
 	[dtmDateIn] DATETIME NULL, 
     [dtmTimeIn] DATETIME NULL, 
 	[dtmDateOut] DATETIME NULL,
@@ -45,7 +45,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPRTimecard',
     @level2type = N'COLUMN',
-    @level2name = N'intEmployeeId'
+    @level2name = N'intEntityEmployeeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Time In',

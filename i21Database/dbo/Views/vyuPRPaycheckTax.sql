@@ -13,7 +13,7 @@ FROM (SELECT tblPRPaycheckTax.intPaycheckId,
 			 tblPRPaycheckTax.dblTotal, 
 			 tblPRPaycheckTax.strPaidBy FROM tblPRPaycheckTax 
 		LEFT JOIN tblPRTypeTax ON tblPRPaycheckTax.intTypeTaxId = tblPRTypeTax.intTypeTaxId) tblPRPaycheckTax
-LEFT JOIN (SELECT tblPRPaycheck.intEmployeeId
+LEFT JOIN (SELECT tblPRPaycheck.[intEntityEmployeeId]
 		, tblPRPaycheckTax.intPaycheckId
 		, tblPRPaycheckTax.intTypeTaxId 
 		, dblTotal 
