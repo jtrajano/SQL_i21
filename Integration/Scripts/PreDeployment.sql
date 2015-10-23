@@ -30,6 +30,8 @@
 :r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginReallocation.sql"
+:r "..\dbo\Views\vyuGLPTDrillDownDifference.sql"
+
 
 -- FINANCIAL REPORT DESIGNER
 :r "..\dbo\Stored Procedures\uspFRDImportOriginDesign.sql"

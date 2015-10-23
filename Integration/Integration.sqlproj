@@ -298,5 +298,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql" />
+    <None Include="dbo\Views\vyuGLPTDrillDownDifference.sql" />
   </ItemGroup>
 </Project>
