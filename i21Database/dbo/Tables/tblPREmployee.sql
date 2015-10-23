@@ -7,6 +7,7 @@
 	[strLastName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strNameSuffix] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
+	[dtmOriginalDateHired] [datetime] NULL,
 	[dtmDateHired] [datetime] NULL,
 	[dtmBirthDate] [datetime] NULL,
 	[strGender] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
@@ -169,7 +170,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strGender'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Date Hired',
+    @value = N'Last Date Hired',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -394,3 +395,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'intRank'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Original Date Hired',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmOriginalDateHired'
