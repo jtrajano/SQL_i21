@@ -75,7 +75,7 @@ BEGIN
 
 				DECLARE @primarylen INT
 				SELECT @primarylen  = max(len(glact_acct1_8))from glactmst 
-
+				DELETE FROM [tblGLOriginAccounts]
 					INSERT INTO [dbo].[tblGLOriginAccounts]
 						   ([glact_acct1_8]
 						   ,[glact_acct9_16]

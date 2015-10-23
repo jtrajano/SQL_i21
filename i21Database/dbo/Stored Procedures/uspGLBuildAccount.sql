@@ -1,12 +1,20 @@
 ﻿
 	CREATE PROCEDURE  [dbo].[uspGLBuildAccount]
-		@intUserId INT,
-		@intCurrencyId INT
+			@intUserId INT,
+			@intCurrencyId INT = 0
 	AS
-
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
+
+	-- +++++ INSERT ACCOUNT Id +++++ --
+	IF @intCurrencyId = 0
+		SELECT TOP 1 @intCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
+	IF ISNULL(@intCurrencyId, 0)= 0
+	BEGIN
+		RAISERROR('Functional Currency is not setup properly', 16, 1);
+		RETURN
+	END
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
 	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
