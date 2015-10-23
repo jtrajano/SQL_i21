@@ -8,6 +8,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         'Inventory.store.BufferedCountGroup',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.ItemStockUOMView',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered'
     ],
@@ -62,6 +63,9 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                     name: 'intStatus'
                 }
             ]
+        },
+        itemList: {
+            type: 'icitemstockuomview'
         }
     },
 

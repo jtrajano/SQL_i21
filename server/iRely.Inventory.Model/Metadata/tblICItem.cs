@@ -481,9 +481,15 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public string strType { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategory { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodity { get; set; }
         public string strLotTracking { get; set; }
         public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
+        public int? intCountGroupId { get; set; }
+        public string strCountGroup { get; set; }
         public string strLocationName { get; set; }
         public int? intItemUOMId { get; set; }
         public string strUnitMeasure { get; set; }
