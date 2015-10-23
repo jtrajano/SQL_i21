@@ -4193,6 +4193,14 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityUserSecurityId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1e2f5698-00a4-4c4c-aa7f-a6e0f03f06bf" ChangeDateTime="10/02/2015 08:26:09">
+    <Property Name="ElementName" Value="[dbo].[tblPREmployee].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPREmployee]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityEmployeeId]" />
+  </Operation>
+</Operations>
   <Operation Name="Rename Refactor" Key="f8225152-b63c-43dc-b92d-e160a9db9636" ChangeDateTime="10/23/2015 03:25:04">
     <Property Name="ElementName" Value="[dbo].[tblPREmployeeDeduction].[intEmployeeId]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
