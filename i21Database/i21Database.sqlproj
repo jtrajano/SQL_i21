@@ -2681,6 +2681,7 @@
     <Build Include="dbo\Views\vyuTMVirtualMeterBilling.sql" />
     <Build Include="dbo\Functions\fnTMGetSpecialPricingPriceTable.sql" />
     <Build Include="dbo\Views\vyuLGDropShipmentDetails.sql" />
+    <Build Include="dbo\Views\vyuARGetItemComponents.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
