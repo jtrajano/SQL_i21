@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPATCompanyPreference](
 	[intCompanyPreferenceId] [int] IDENTITY(1,1) NOT NULL,
+	[ysnPatronageEnabled] BIT NULL ,
 	[intGrainDiscountId] [int] NULL,
 	[intGrainStorageId] [int] NULL,
 	[intServiceChargeId] [int] NULL,
