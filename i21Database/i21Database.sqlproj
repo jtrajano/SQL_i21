@@ -2694,6 +2694,7 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MInquiryTransaction.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquiryBasisDetail.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquiryLatestMarketPrice.sql" />
+    <Build Include="dbo\Views\vyuCTFuturesMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
