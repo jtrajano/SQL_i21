@@ -5,12 +5,10 @@
 	[strRecordName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
     [intM2MBasisId] INT NOT NULL, 
     [intFutureSettlementPriceId] INT NOT NULL, 
-    [intQuantityUOM] INT NOT NULL, 
+    [intUnitMeasureId] INT NOT NULL, 
     [intPriceItemUOMId] INT NOT NULL, 
     [intCurrencyId] INT NOT NULL, 
-    [dtmContractDateUpTo] DATETIME NULL, 
-    [dtmAllocationDateUpTo] DATETIME NULL, 
-    [dtmPricedDateUpTo] DATETIME NULL, 
+    [dtmTransactionUpTo] DATETIME NULL, 
     [strRateType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intCommodityId] INT NULL, 
     [intCompanyLocationId] INT NULL, 
@@ -21,5 +19,6 @@
 	CONSTRAINT [FK_tblRKM2MInquiry_tblSMCurrency_intCurrencyId] FOREIGN KEY(intCurrencyId)REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
 	CONSTRAINT [FK_tblRKM2MInquiry_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [dbo].[tblICCommodity] ([intCommodityId]), 
 	CONSTRAINT [FK_tblRKM2MInquiry_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY(intCompanyLocationId)REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId),
-	CONSTRAINT [FK_tblRKM2MInquiry_tblARMarketZone_intMarketZoneId] FOREIGN KEY(intMarketZoneId)REFERENCES [dbo].[tblARMarketZone] (intMarketZoneId)
+	CONSTRAINT [FK_tblRKM2MInquiry_tblARMarketZone_intMarketZoneId] FOREIGN KEY(intMarketZoneId)REFERENCES [dbo].[tblARMarketZone] (intMarketZoneId),
+	CONSTRAINT [FK_tblRKM2MInquiry_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY(intUnitMeasureId)REFERENCES [dbo].[tblICUnitMeasure] (intUnitMeasureId)
 )

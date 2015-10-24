@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuRKUnrealizedPnL  
 AS  
 
-
+ 
 SELECT *,(GrossPnL-dblFutCommission) NetPnL from (  
 SELECT (convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)))*dblContractSize GrossPnL,isnull(((Long1-MatchLong)*dblPrice),0) LongWaitedPrice,  
 isnull((Long1-MatchLong),0) as dblLong,isnull(Sell1-MatchShort,0) as dblShort, isnull(((Sell1-MatchShort)*dblPrice),0) ShortWaitedPrice,  
@@ -92,7 +92,3 @@ SELECT  intFutOptTransactionId,
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId  
   )t1)t1 WHERE MatchLong = intOriginalQty or MatchShort = intOriginalQty 
-    
-  
-
-  

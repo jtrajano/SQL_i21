@@ -2688,6 +2688,12 @@
     <Build Include="dbo\Tables\tblMFBudgetLog.sql" />
     <Build Include="dbo\Tables\tblMFBudget.sql" />
     <Build Include="dbo\Tables\tblMFBudgetType.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MGetClosingPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetM2MBasisOnDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MInquirySummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MInquiryTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKM2MInquiryBasisDetail.sql" />
+    <Build Include="dbo\Tables\tblRKM2MInquiryLatestMarketPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
