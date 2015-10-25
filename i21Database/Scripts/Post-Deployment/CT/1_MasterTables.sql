@@ -113,6 +113,10 @@ BEGIN
 	INSERT INTO tblCTPricingType
 	SELECT 4,'TBD',1	
 END
+ELSE
+BEGIN
+	UPDATE tblCTPricingType SET strPricingType = 'Unit' WHERE intPricingTypeId = 4
+END
 GO
 
 GO
