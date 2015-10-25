@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "icfactoryunittype",
         "designer|userClassName": "FactoryUnitType",
-        "height": 398,
+        "height": 371,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -37,18 +37,19 @@
             "codeClass": null,
             "userConfig": {
                 "autoShow": true,
-                "bodyBorder": false,
+                "bodyBorder": null,
                 "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
-                "header": false,
+                "header": null,
                 "height": null,
                 "itemId": "frmFactoryUnitType",
                 "layout": "hbox",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
+                "ui": "i21-form",
                 "url": null,
                 "width": null
             },
@@ -66,6 +67,7 @@
                         "container|padding": "0 0 0 1",
                         "designer|displayName": "toolbar",
                         "dock": "top",
+                        "ui": "i21-toolbar",
                         "width": 588
                     },
                     "name": "MyToolbar36",
@@ -80,17 +82,14 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-new",
                                 "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton99",
                             "designerId": "82b1593f-25c2-4f9c-b63b-b6909c4584b0"
@@ -104,16 +103,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-save",
                                 "itemId": "btnSave",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton100",
                             "designerId": "cac8c2f3-03e5-4f71-8c11-c5ba887a2335"
@@ -127,16 +123,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-search",
                                 "itemId": "btnSearch",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton101",
                             "designerId": "f6509521-d99d-4527-8db2-77e51794f888"
@@ -150,16 +143,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-delete",
                                 "itemId": "btnDelete",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton102",
                             "designerId": "7ef14052-5294-451c-a626-f8b5478a61ff"
@@ -173,34 +163,16 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-undo",
                                 "itemId": "btnUndo",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton103",
                             "designerId": "77e99837-b5aa-47bd-942f-1d6354a19640"
-                        },
-                        {
-                            "type": "Ext.toolbar.Separator",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": "separator",
-                                "height": 30,
-                                "layout|flex": null
-                            },
-                            "name": "MySeparator37",
-                            "designerId": "a03f1399-79a2-41f2-a7d4-7ad254fb3bb2"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -211,16 +183,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-close",
                                 "itemId": "btnClose",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton104",
                             "designerId": "b5730a56-9311-4767-a2ab-1d5dd2ee4e3c"
@@ -483,7 +452,7 @@
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Dimension UOM",
                                                 "itemId": "cboDimensionUom",
-                                                "labelWidth": 90,
+                                                "labelWidth": 98,
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null,
@@ -515,7 +484,7 @@
                                                 "fieldStyle": "text-align:right",
                                                 "hideTrigger": true,
                                                 "itemId": "txtHeight",
-                                                "labelWidth": 90,
+                                                "labelWidth": 98,
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null
@@ -536,7 +505,7 @@
                                                 "fieldStyle": "text-align:right",
                                                 "hideTrigger": true,
                                                 "itemId": "txtDepth",
-                                                "labelWidth": 90,
+                                                "labelWidth": 98,
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null
@@ -557,7 +526,7 @@
                                                 "fieldStyle": "text-align:right",
                                                 "hideTrigger": true,
                                                 "itemId": "txtWidth",
-                                                "labelWidth": 90,
+                                                "labelWidth": 98,
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null
@@ -579,7 +548,7 @@
                                                 "fieldStyle": "text-align:right",
                                                 "hideTrigger": true,
                                                 "itemId": "txtPalletStack",
-                                                "labelWidth": 90,
+                                                "labelWidth": 98,
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null
@@ -601,7 +570,7 @@
                                                 "fieldStyle": "text-align:right",
                                                 "hideTrigger": true,
                                                 "itemId": "txtPalletColumns",
-                                                "labelWidth": 90,
+                                                "labelWidth": 98,
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null
@@ -623,7 +592,7 @@
                                                 "fieldStyle": "text-align:right",
                                                 "hideTrigger": true,
                                                 "itemId": "txtPalletRows",
-                                                "labelWidth": 90,
+                                                "labelWidth": 98,
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null
@@ -653,7 +622,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging17",
+                    "name": "statusbarpaging15",
                     "designerId": "1d4ebb2b-904c-462e-8f22-e82f1e2a5bad",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

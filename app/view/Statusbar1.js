@@ -19,7 +19,6 @@ Ext.define('Inventory.view.Statusbar1', {
 
     requires: [
         'Ext.button.Button',
-        'Ext.toolbar.Separator',
         'Ext.form.Label',
         'Ext.toolbar.Fill'
     ],
@@ -52,9 +51,6 @@ Ext.define('Inventory.view.Statusbar1', {
             itemId: 'btnFieldName',
             iconCls: 'small-light-bulb-off',
             tooltip: 'Click to display table/field name tooltips'
-        },
-        {
-            xtype: 'tbseparator'
         },
         {
             xtype: 'label',

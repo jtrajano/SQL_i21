@@ -20,7 +20,6 @@ Ext.define('Inventory.view.PickLot', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.grid.Panel',
@@ -46,9 +45,8 @@ Ext.define('Inventory.view.PickLot', {
             autoShow: true,
             itemId: 'frmPickLots',
             margin: -1,
-            bodyBorder: false,
+            ui: 'i21-form',
             bodyPadding: 3,
-            header: false,
             trackResetOnLoad: true,
             layout: {
                 type: 'vbox',
@@ -58,6 +56,7 @@ Ext.define('Inventory.view.PickLot', {
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -67,27 +66,15 @@ Ext.define('Inventory.view.PickLot', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnAdd',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Add'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]

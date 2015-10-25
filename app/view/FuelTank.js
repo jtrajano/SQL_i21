@@ -22,8 +22,8 @@ Ext.define('Inventory.view.FuelTank', {
         'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
-        'Ext.button.Button',
-        'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.grid.column.Date',
@@ -49,6 +49,7 @@ Ext.define('Inventory.view.FuelTank', {
                         autoShow: true,
                         itemId: 'frmFuelTank',
                         margin: -1,
+                        ui: 'i21-form',
                         bodyPadding: 3,
                         trackResetOnLoad: true,
                         layout: {
@@ -59,6 +60,7 @@ Ext.define('Inventory.view.FuelTank', {
                             {
                                 xtype: 'toolbar',
                                 dock: 'top',
+                                ui: 'i21-toolbar',
                                 width: 588,
                                 layout: {
                                     type: 'hbox',
@@ -68,38 +70,22 @@ Ext.define('Inventory.view.FuelTank', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnSave',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-save',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Save'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnUndo',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-undo',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Undo'
-                                    },
-                                    {
-                                        xtype: 'tbseparator',
-                                        height: 30
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnClose',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-close',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Close'
                                     }
                                 ]
@@ -112,88 +98,105 @@ Ext.define('Inventory.view.FuelTank', {
                         ],
                         items: [
                             {
-                                xtype: 'gridpanel',
+                                xtype: 'tabpanel',
                                 flex: 1,
-                                itemId: 'grdFuelTank',
-                                dockedItems: [
+                                itemId: 'tabFuelTank',
+                                activeTab: 0,
+                                plain: true,
+                                items: [
                                     {
-                                        xtype: 'toolbar',
-                                        dock: 'top',
-                                        componentCls: 'x-toolbar-default-grid',
-                                        itemId: 'tlbGridOptions',
+                                        xtype: 'panel',
+                                        bodyPadding: 5,
+                                        title: 'Details',
                                         layout: {
-                                            type: 'hbox',
-                                            padding: '0 0 0 1'
+                                            type: 'vbox',
+                                            align: 'stretch'
                                         },
                                         items: [
                                             {
-                                                xtype: 'button',
-                                                tabIndex: -1,
-                                                itemId: 'btnDeleteFuelTank',
-                                                iconCls: 'small-delete',
-                                                text: 'Remove'
-                                            },
-                                            {
-                                                xtype: 'tbseparator'
-                                            },
-                                            {
-                                                xtype: 'filter1'
+                                                xtype: 'gridpanel',
+                                                flex: 1,
+                                                itemId: 'grdFuelTank',
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        componentCls: 'i21-toolbar-grid',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteFuelTank',
+                                                                iconCls: 'small-remove',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 82,
+                                                        dataIndex: 'string',
+                                                        text: 'Store Name'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 81,
+                                                        dataIndex: 'string',
+                                                        text: 'Fuel Tank No.'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 85,
+                                                        text: 'Tank Capacity'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 92,
+                                                        text: 'Current Volume'
+                                                    },
+                                                    {
+                                                        xtype: 'datecolumn',
+                                                        width: 78,
+                                                        text: 'Last Update'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 96,
+                                                        text: 'Last Update Shift'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 108,
+                                                        dataIndex: 'string',
+                                                        text: 'Tax Department No.'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvFuelTank'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                })
                                             }
                                         ]
                                     }
-                                ],
-                                columns: [
-                                    {
-                                        xtype: 'gridcolumn',
-                                        width: 82,
-                                        dataIndex: 'string',
-                                        text: 'Store Name'
-                                    },
-                                    {
-                                        xtype: 'gridcolumn',
-                                        width: 81,
-                                        dataIndex: 'string',
-                                        text: 'Fuel Tank No.'
-                                    },
-                                    {
-                                        xtype: 'gridcolumn',
-                                        dataIndex: 'string',
-                                        text: 'Description',
-                                        flex: 1
-                                    },
-                                    {
-                                        xtype: 'numbercolumn',
-                                        width: 85,
-                                        text: 'Tank Capacity'
-                                    },
-                                    {
-                                        xtype: 'numbercolumn',
-                                        width: 92,
-                                        text: 'Current Volume'
-                                    },
-                                    {
-                                        xtype: 'datecolumn',
-                                        width: 78,
-                                        text: 'Last Update'
-                                    },
-                                    {
-                                        xtype: 'numbercolumn',
-                                        width: 96,
-                                        text: 'Last Update Shift'
-                                    },
-                                    {
-                                        xtype: 'gridcolumn',
-                                        width: 108,
-                                        dataIndex: 'string',
-                                        text: 'Tax Department No.'
-                                    }
-                                ],
-                                viewConfig: {
-                                    itemId: 'grvFuelTank'
-                                },
-                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                    selType: 'checkboxmodel'
-                                })
+                                ]
                             }
                         ]
                     }

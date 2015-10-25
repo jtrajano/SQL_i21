@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "inventorycountgroup",
         "designer|userClassName": "InventoryCountGroup",
-        "height": 422,
+        "height": 384,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -22,7 +22,7 @@
         "minimizable": null,
         "reference": null,
         "title": "Inventory Count Group",
-        "width": 456
+        "width": 466
     },
     "name": "ContractDocument1",
     "designerId": "91b8f386-0350-4266-9ceb-f8c80198ac34",
@@ -38,18 +38,19 @@
             "codeClass": null,
             "userConfig": {
                 "autoShow": true,
-                "bodyBorder": false,
+                "bodyBorder": null,
                 "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
-                "header": false,
+                "header": null,
                 "height": null,
                 "itemId": "frmInventoryCountGroup",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
+                "ui": "i21-form",
                 "url": null,
                 "width": null
             },
@@ -67,6 +68,7 @@
                         "container|padding": "0 0 0 1",
                         "designer|displayName": "toolbar",
                         "dock": "top",
+                        "ui": "i21-toolbar",
                         "width": 588
                     },
                     "name": "MyToolbar35",
@@ -81,17 +83,14 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-new",
                                 "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton93",
                             "designerId": "9f878486-10cc-4301-b047-cd24f2eae7ba"
@@ -105,16 +104,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-save",
                                 "itemId": "btnSave",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton94",
                             "designerId": "d35da742-47b4-4067-a5f2-ba82d21521b5"
@@ -128,16 +124,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-search",
                                 "itemId": "btnSearch",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton95",
                             "designerId": "d301b4e9-8456-4690-9d7c-83e32ead8b8e"
@@ -151,16 +144,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-delete",
                                 "itemId": "btnDelete",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton96",
                             "designerId": "2a9820c3-4724-4cd4-981d-74034705a2e9"
@@ -174,34 +164,16 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-undo",
                                 "itemId": "btnUndo",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton97",
                             "designerId": "53634263-823f-4161-ae5c-4459db8c4ae1"
-                        },
-                        {
-                            "type": "Ext.toolbar.Separator",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": "separator",
-                                "height": 30,
-                                "layout|flex": null
-                            },
-                            "name": "MySeparator36",
-                            "designerId": "16f3ff78-f0d8-425c-a046-b64109c5c75f"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -212,16 +184,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-close",
                                 "itemId": "btnClose",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton98",
                             "designerId": "51f3f9a1-f34c-4c56-9632-55ac021bdfba"
@@ -523,7 +492,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging113",
                     "designerId": "5f645857-eb50-4702-8a6e-970a15d31272",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

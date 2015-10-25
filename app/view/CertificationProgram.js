@@ -21,7 +21,6 @@ Ext.define('Inventory.view.CertificationProgram', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.Checkbox',
@@ -52,6 +51,7 @@ Ext.define('Inventory.view.CertificationProgram', {
             autoShow: true,
             itemId: 'frmCertificationProgram',
             margin: -1,
+            ui: 'i21-form',
             bodyBorder: false,
             bodyPadding: 3,
             header: false,
@@ -64,6 +64,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -73,71 +74,43 @@ Ext.define('Inventory.view.CertificationProgram', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Search'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -168,7 +141,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                             items: [
                                 {
                                     xtype: 'container',
-                                    margin: '0 0 10 0',
+                                    margin: '0 0 5 0',
                                     layout: 'hbox',
                                     items: [
                                         {
@@ -184,20 +157,20 @@ Ext.define('Inventory.view.CertificationProgram', {
                                                     flex: 1.2,
                                                     itemId: 'txtCertificationProgram',
                                                     fieldLabel: 'Certification Program',
-                                                    labelWidth: 120
+                                                    labelWidth: 128
                                                 },
                                                 {
                                                     xtype: 'textfield',
                                                     flex: 2,
                                                     itemId: 'txtIssuingOrganization',
                                                     fieldLabel: 'Issuing Organization',
-                                                    labelWidth: 120
+                                                    labelWidth: 128
                                                 },
                                                 {
                                                     xtype: 'textfield',
                                                     itemId: 'txtCertificationID',
                                                     fieldLabel: 'Certification ID',
-                                                    labelWidth: 120
+                                                    labelWidth: 128
                                                 }
                                             ]
                                         },
@@ -251,7 +224,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
-                                            componentCls: 'x-toolbar-default-grid',
+                                            componentCls: 'i21-toolbar-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -262,11 +235,8 @@ Ext.define('Inventory.view.CertificationProgram', {
                                                     xtype: 'button',
                                                     tabIndex: -1,
                                                     itemId: 'btnDeleteCertificationProgram',
-                                                    iconCls: 'small-delete',
+                                                    iconCls: 'small-remove',
                                                     text: 'Remove'
-                                                },
-                                                {
-                                                    xtype: 'tbseparator'
                                                 },
                                                 {
                                                     xtype: 'filter1'

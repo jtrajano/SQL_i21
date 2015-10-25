@@ -21,7 +21,6 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
@@ -39,8 +38,6 @@ Ext.define('Inventory.view.InventoryShipment', {
 
     height: 700,
     hidden: false,
-    minHeight: 510,
-    minWidth: 1100,
     width: 1100,
     layout: 'fit',
     collapsible: true,
@@ -55,18 +52,18 @@ Ext.define('Inventory.view.InventoryShipment', {
                 items: [
                     {
                         xtype: 'form',
-                        height: 350,
                         itemId: 'frmInventoryShipment',
                         margin: -1,
-                        width: 450,
+                        ui: 'i21-form',
                         layout: 'fit',
-                        bodyPadding: 5,
+                        bodyPadding: 3,
                         dockedItems: [
                             {
                                 xtype: 'toolbar',
                                 dock: 'top',
                                 formBind: true,
                                 itemId: 'payBillsDetailToolbar',
+                                ui: 'i21-toolbar',
                                 width: 588,
                                 layout: {
                                     type: 'hbox',
@@ -76,130 +73,78 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnNew',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-new',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'New'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnSave',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-save',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Save'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnSearch',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-search',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Search'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnDelete',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-delete',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Delete'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnUndo',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-undo',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Undo'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnPrint',
-                                        width: 52,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-print',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Print'
-                                    },
-                                    {
-                                        xtype: 'tbseparator',
-                                        height: 30
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnShip',
-                                        width: 52,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-ship-via',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Ship'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnRecap',
-                                        width: 59,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-recap',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Recap'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnInvoice',
-                                        width: 59,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-invoice',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Invoice'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnCustomer',
-                                        width: 61,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-customer',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Customer'
-                                    },
-                                    {
-                                        xtype: 'tbseparator',
-                                        height: 30
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnClose',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-close',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Close'
                                     }
                                 ]
@@ -778,39 +723,36 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertItem',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnPickLots',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Pick Lots'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnViewItem',
-                                                                                iconCls: 'small-view',
+                                                                                iconCls: 'small-open',
                                                                                 text: 'View Item'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnQuality',
-                                                                                iconCls: 'small-view',
+                                                                                iconCls: 'small-open',
                                                                                 text: 'Quality'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnRemoveItem',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -1436,11 +1378,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnRemoveLot',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -1651,11 +1590,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnRemoveSplit',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -1758,18 +1694,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnInsertCharge',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnRemoveCharge',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'

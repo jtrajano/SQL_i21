@@ -86,20 +86,6 @@
             "designerId": "db860dc7-2ef2-4f78-9b68-cedff068cfbe"
         },
         {
-            "type": "Ext.toolbar.Separator",
-            "reference": {
-                "name": "items",
-                "type": "array"
-            },
-            "codeClass": null,
-            "userConfig": {
-                "designer|displayName": "separator",
-                "layout|flex": null
-            },
-            "name": "MySeparator59",
-            "designerId": "4ae1b61e-4b2f-4362-962b-a7843859aac7"
-        },
-        {
             "type": "Ext.form.Label",
             "reference": {
                 "name": "items",

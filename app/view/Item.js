@@ -20,7 +20,6 @@ Ext.define('Inventory.view.Item', {
     requires: [
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
-        'Ext.toolbar.Separator',
         'Ext.form.Panel',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
@@ -42,124 +41,12 @@ Ext.define('Inventory.view.Item', {
 
     height: 650,
     hidden: false,
-    minHeight: 650,
-    minWidth: 950,
     width: 950,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
     title: 'Inventory Items',
     maximizable: true,
-
-    dockedItems: [
-        {
-            xtype: 'toolbar',
-            dock: 'top',
-            layout: {
-                type: 'hbox',
-                padding: '0 0 0 1'
-            },
-            items: [
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnNew',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-new',
-                    scale: 'large',
-                    text: 'New'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnSave',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-save',
-                    scale: 'large',
-                    text: 'Save'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnFind',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-search',
-                    scale: 'large',
-                    text: 'Search'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnDelete',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-delete',
-                    scale: 'large',
-                    text: 'Delete'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnUndo',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-undo',
-                    scale: 'large',
-                    text: 'Undo'
-                },
-                {
-                    xtype: 'tbseparator',
-                    height: 30
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnDuplicate',
-                    width: 60,
-                    iconAlign: 'top',
-                    iconCls: 'large-duplicate',
-                    scale: 'large',
-                    text: 'Duplicate'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    hidden: true,
-                    itemId: 'btnBuildAssembly',
-                    width: 90,
-                    iconAlign: 'top',
-                    iconCls: 'large-build',
-                    scale: 'large',
-                    text: 'Build Assembly'
-                },
-                {
-                    xtype: 'tbseparator',
-                    height: 30
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnClose',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-close',
-                    scale: 'large',
-                    text: 'Close'
-                }
-            ]
-        }
-    ],
 
     initConfig: function(instanceConfig) {
         var me = this,
@@ -168,17 +55,91 @@ Ext.define('Inventory.view.Item', {
                     {
                         xtype: 'form',
                         autoShow: true,
-                        height: 350,
                         itemId: 'frmItem',
                         margin: -1,
-                        width: 450,
-                        bodyBorder: false,
-                        bodyPadding: 5,
-                        header: false,
+                        ui: 'i21-form',
+                        bodyPadding: 3,
                         layout: {
                             type: 'vbox',
                             align: 'stretch'
                         },
+                        dockedItems: [
+                            {
+                                xtype: 'toolbar',
+                                flex: 1,
+                                dock: 'top',
+                                ui: 'i21-toolbar',
+                                layout: {
+                                    type: 'hbox',
+                                    padding: '0 0 0 1'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnNew',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'New'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnSave',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Save'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnFind',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Search'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnDelete',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Delete'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnUndo',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Undo'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnDuplicate',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Duplicate'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        hidden: true,
+                                        itemId: 'btnBuildAssembly',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Build Assembly'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        itemId: 'btnClose',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Close'
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'ipagingstatusbar',
+                                itemId: 'tlbStatusbarPaging',
+                                flex: 1,
+                                dock: 'bottom'
+                            }
+                        ],
                         items: [
                             {
                                 xtype: 'tabpanel',
@@ -536,14 +497,14 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnInsertUom',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteUom',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
                                                             },
                                                             {
@@ -552,9 +513,6 @@ Ext.define('Inventory.view.Item', {
                                                                 itemId: 'btnLoadUOM',
                                                                 iconCls: 'small-download',
                                                                 text: 'Load UOM'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -908,25 +866,22 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnAddRequiredAccounts',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Add Required'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertGlAccounts',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteGlAccounts',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -1068,32 +1023,29 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnAddLocation',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnAddMultipleLocation',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Add Multiple'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnEditLocation',
-                                                                                iconCls: 'small-view',
+                                                                                iconCls: 'small-open',
                                                                                 text: 'View'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteLocation',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcombobox',
@@ -1125,9 +1077,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 fieldLabel: 'Copy Location',
                                                                                 displayField: 'strLocationName',
                                                                                 valueField: 'intItemLocationId'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             }
                                                                         ]
                                                                     }
@@ -1806,18 +1755,15 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnInsertCategories',
-                                                                                        iconCls: 'small-add',
+                                                                                        iconCls: 'small-insert',
                                                                                         text: 'Insert'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteCategories',
-                                                                                        iconCls: 'small-delete',
+                                                                                        iconCls: 'small-remove',
                                                                                         text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'tbseparator'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
@@ -1893,18 +1839,15 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnInsertSLA',
-                                                                                        iconCls: 'small-add',
+                                                                                        iconCls: 'small-insert',
                                                                                         text: 'Insert'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteSLA',
-                                                                                        iconCls: 'small-delete',
+                                                                                        iconCls: 'small-remove',
                                                                                         text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'tbseparator'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
@@ -2272,7 +2215,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                                 itemId: 'cboWeightUOM',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Weight UOM',
-                                                                                                                labelWidth: 87,
+                                                                                                                labelWidth: 90,
                                                                                                                 displayField: 'strUnitMeasure',
                                                                                                                 valueField: 'intUnitMeasureId'
                                                                                                             }
@@ -2301,7 +2244,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                                 itemId: 'txtMaterialPack',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Material Pack',
-                                                                                                                labelWidth: 87
+                                                                                                                labelWidth: 90
                                                                                                             }
                                                                                                         ]
                                                                                                     },
@@ -2326,7 +2269,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                                 itemId: 'txtInnerUnits',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Inner Units',
-                                                                                                                labelWidth: 87,
+                                                                                                                labelWidth: 90,
                                                                                                                 fieldStyle: 'text-align:right',
                                                                                                                 hideTrigger: true
                                                                                                             }
@@ -2355,7 +2298,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                                 itemId: 'txtUnitsPerLayer',
                                                                                                                 margin: '0 0 0 5',
                                                                                                                 fieldLabel: 'Units per Layer',
-                                                                                                                labelWidth: 87,
+                                                                                                                labelWidth: 90,
                                                                                                                 fieldStyle: 'text-align:right',
                                                                                                                 hideTrigger: true
                                                                                                             }
@@ -2591,58 +2534,58 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'numberfield',
                                                                                         itemId: 'txtRiskScore',
                                                                                         fieldLabel: 'Risk Score',
-                                                                                        labelWidth: 125,
+                                                                                        labelWidth: 130,
                                                                                         hideTrigger: true
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
                                                                                         itemId: 'txtDensity',
                                                                                         fieldLabel: 'Density',
-                                                                                        labelWidth: 125,
+                                                                                        labelWidth: 130,
                                                                                         hideTrigger: true
                                                                                     },
                                                                                     {
                                                                                         xtype: 'datefield',
                                                                                         itemId: 'dtmDateAvailable',
                                                                                         fieldLabel: 'Date Available',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 130
                                                                                     },
                                                                                     {
                                                                                         xtype: 'checkboxfield',
                                                                                         itemId: 'chkMinorIngredient',
                                                                                         fieldLabel: 'Minor Ingredient',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 130
                                                                                     },
                                                                                     {
                                                                                         xtype: 'checkboxfield',
                                                                                         itemId: 'chkExternalItem',
                                                                                         fieldLabel: 'External Item',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 130
                                                                                     },
                                                                                     {
                                                                                         xtype: 'textfield',
                                                                                         itemId: 'txtExternalGroup',
                                                                                         fieldLabel: 'External Group',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 130
                                                                                     },
                                                                                     {
                                                                                         xtype: 'checkboxfield',
                                                                                         itemId: 'chkSellableItem',
                                                                                         fieldLabel: 'Sellable Item',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 130
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
                                                                                         itemId: 'txtMinimumStockWeeks',
                                                                                         fieldLabel: 'Minmum Stock Weeks',
-                                                                                        labelWidth: 125,
+                                                                                        labelWidth: 130,
                                                                                         hideTrigger: true
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
                                                                                         itemId: 'txtFullContainerSize',
                                                                                         fieldLabel: 'Full Container Size',
-                                                                                        labelWidth: 125,
+                                                                                        labelWidth: 130,
                                                                                         hideTrigger: true
                                                                                     }
                                                                                 ]
@@ -2682,11 +2625,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteUPC',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Delete'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -2803,18 +2743,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertContractItem',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteContractItem',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -3014,18 +2951,15 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnInsertDocumentAssociation',
-                                                                                        iconCls: 'small-add',
+                                                                                        iconCls: 'small-insert',
                                                                                         text: 'Insert'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteDocumentAssociation',
-                                                                                        iconCls: 'small-delete',
+                                                                                        iconCls: 'small-remove',
                                                                                         text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'tbseparator'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
@@ -3103,18 +3037,15 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnInsertCertification',
-                                                                                        iconCls: 'small-add',
+                                                                                        iconCls: 'small-insert',
                                                                                         text: 'Insert'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteCertification',
-                                                                                        iconCls: 'small-delete',
+                                                                                        iconCls: 'small-remove',
                                                                                         text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'tbseparator'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
@@ -3203,18 +3134,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertCustomerXref',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteCustomerXref',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -3362,18 +3290,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertVendorXref',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteVendorXref',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -3740,18 +3665,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertMFT',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteMFT',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -3800,8 +3722,8 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colMFTTaxDescription',
+                                                                        dataIndex: 'string',
                                                                         text: 'Description',
                                                                         flex: 1
                                                                     },
@@ -3851,15 +3773,15 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colMFTProductCodeDescription',
+                                                                        dataIndex: 'string',
                                                                         text: 'Product Code Description',
                                                                         flex: 2
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colMFTProductCodeGroup',
+                                                                        dataIndex: 'string',
                                                                         text: 'Product Code Group',
                                                                         flex: 2
                                                                     }
@@ -3982,18 +3904,15 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnInsertPricing',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeletePricing',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -4175,18 +4094,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertPricingLevel',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeletePricingLevel',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -4454,11 +4370,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteSpecialPricing',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -4754,9 +4667,6 @@ Ext.define('Inventory.view.Item', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
                                                             {
                                                                 xtype: 'filter1'
                                                             }
@@ -5145,18 +5055,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertCommodityCost',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteCommodityCost',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -5296,18 +5203,15 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnInsertAssembly',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteAssembly',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -5481,18 +5385,15 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnInsertBundle',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteBundle',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -5612,7 +5513,6 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colBundleUnit',
-                                                        width: 45,
                                                         align: 'right',
                                                         text: 'Unit',
                                                         editor: {
@@ -5691,18 +5591,15 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnInsertKit',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteKit',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -5770,18 +5667,15 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnInsertKitDetail',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteKitDetail',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -5977,18 +5871,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertFactory',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteFactory',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -6076,18 +5967,15 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnInsertManufacturingCellAssociation',
-                                                                                iconCls: 'small-add',
+                                                                                iconCls: 'small-insert',
                                                                                 text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteManufacturingCellAssociation',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -6188,11 +6076,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteOwner',
-                                                                                iconCls: 'small-delete',
+                                                                                iconCls: 'small-remove',
                                                                                 text: 'Delete'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
                                                                             },
                                                                             {
                                                                                 xtype: 'filter1'
@@ -6316,14 +6201,6 @@ Ext.define('Inventory.view.Item', {
                                         ]
                                     }
                                 ]
-                            }
-                        ],
-                        dockedItems: [
-                            {
-                                xtype: 'ipagingstatusbar',
-                                itemId: 'tlbStatusbarPaging',
-                                flex: 1,
-                                dock: 'bottom'
                             }
                         ]
                     }

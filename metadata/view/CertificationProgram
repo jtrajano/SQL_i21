@@ -49,6 +49,7 @@
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
+                "ui": "i21-form",
                 "url": null,
                 "width": null
             },
@@ -66,6 +67,7 @@
                         "container|padding": "0 0 0 1",
                         "designer|displayName": "toolbar",
                         "dock": "top",
+                        "ui": "i21-toolbar",
                         "width": 588
                     },
                     "name": "MyToolbar36",
@@ -80,16 +82,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-new",
                                 "itemId": "btnNew",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton89",
                             "designerId": "2b0fbf37-9307-4eff-964c-d7980ac0f080"
@@ -103,16 +102,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-save",
                                 "itemId": "btnSave",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton100",
                             "designerId": "75e3e931-70f0-4679-943b-7120ec03e465"
@@ -126,16 +122,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-delete",
                                 "itemId": "btnDelete",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton88",
                             "designerId": "41f749b3-5f3d-49bb-919b-b3b58cbbde91"
@@ -149,16 +142,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-search",
                                 "itemId": "btnSearch",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton101",
                             "designerId": "e6fe59ba-1f12-4c41-91bc-f86169b97714"
@@ -172,34 +162,16 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-undo",
                                 "itemId": "btnUndo",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton103",
                             "designerId": "2be0883e-d30c-4b01-9adb-830ca4ea9a1b"
-                        },
-                        {
-                            "type": "Ext.toolbar.Separator",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": "separator",
-                                "height": 30,
-                                "layout|flex": null
-                            },
-                            "name": "MySeparator37",
-                            "designerId": "45f595de-5032-4924-b0f8-625f9fe32e6b"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -210,16 +182,13 @@
                             "codeClass": null,
                             "userConfig": {
                                 "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-close",
                                 "itemId": "btnClose",
                                 "layout|flex": null,
-                                "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
-                                "width": 45
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
                             },
                             "name": "MyButton104",
                             "designerId": "c6df4e60-38c1-4c05-a869-86db7a04a2e9"
@@ -280,7 +249,7 @@
                                         "layout": "hbox",
                                         "layout|flex": null,
                                         "layout|margins": null,
-                                        "margin": "0 0 10 0"
+                                        "margin": "0 0 5 0"
                                     },
                                     "name": "MyContainer57",
                                     "designerId": "d098b127-1c0a-4040-b455-9f879ad27346",
@@ -315,7 +284,7 @@
                                                         "designer|createAlias": null,
                                                         "fieldLabel": "Certification Program",
                                                         "itemId": "txtCertificationProgram",
-                                                        "labelWidth": 120,
+                                                        "labelWidth": 128,
                                                         "layout|flex": 1.2,
                                                         "name": null
                                                     },
@@ -344,7 +313,7 @@
                                                         "designer|createAlias": null,
                                                         "fieldLabel": "Issuing Organization",
                                                         "itemId": "txtIssuingOrganization",
-                                                        "labelWidth": 120,
+                                                        "labelWidth": 128,
                                                         "layout|flex": 2,
                                                         "layout|margins": null,
                                                         "margin": null,
@@ -375,7 +344,7 @@
                                                         "designer|createAlias": null,
                                                         "fieldLabel": "Certification ID",
                                                         "itemId": "txtCertificationID",
-                                                        "labelWidth": 120,
+                                                        "labelWidth": 128,
                                                         "layout|flex": null,
                                                         "name": null
                                                     },
@@ -502,7 +471,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "componentCls": "x-toolbar-default-grid",
+                                                "componentCls": "i21-toolbar-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -519,7 +488,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
+                                                        "iconCls": "small-remove",
                                                         "itemId": "btnDeleteCertificationProgram",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -527,20 +496,6 @@
                                                     },
                                                     "name": "MyButton87",
                                                     "designerId": "92df4513-e8a4-43a1-a406-2db252f18924"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator35",
-                                                    "designerId": "fa31065b-ed9a-48fe-a1ba-c394f225313e"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -552,7 +507,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter130",
+                                                    "name": "filter152",
                                                     "designerId": "264fa430-47fb-419b-9c59-83d13bd35b5f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -870,7 +825,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging117",
                     "designerId": "24cec6a2-4a25-4a94-b646-9410f4905c67",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

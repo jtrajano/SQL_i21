@@ -17,8 +17,8 @@
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 650,
-        "minWidth": 950,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "mixins": null,
         "reference": null,
@@ -30,239 +30,6 @@
     "viewModelInstanceId": "b320bf44-45ff-473f-94a9-356ec5e70c21",
     "cn": [
         {
-            "type": "Ext.toolbar.Toolbar",
-            "reference": {
-                "name": "dockedItems",
-                "type": "array"
-            },
-            "codeClass": null,
-            "userConfig": {
-                "container|padding": "0 0 0 1",
-                "designer|displayName": "toolbar",
-                "dock": "top",
-                "width": null
-            },
-            "name": "MyToolbar",
-            "designerId": "76b180be-b7ce-479d-8f48-96a2e7c4aea2",
-            "cn": [
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-new",
-                        "itemId": "btnNew",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "New",
-                        "width": 45
-                    },
-                    "name": "MyButton3",
-                    "designerId": "4a4f3937-ff71-49b1-b65b-a661f620fa49"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-save",
-                        "itemId": "btnSave",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Save",
-                        "width": 45
-                    },
-                    "name": "MyButton4",
-                    "designerId": "a202b728-6388-4adc-98af-1bb2c03f321d"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-search",
-                        "itemId": "btnFind",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Search",
-                        "width": 45
-                    },
-                    "name": "MyButton5",
-                    "designerId": "aa2d3fb0-3922-4e42-9c76-a5c7c694e3d9"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-delete",
-                        "itemId": "btnDelete",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Delete",
-                        "width": 45
-                    },
-                    "name": "MyButton6",
-                    "designerId": "3897f18a-16e8-45d6-a8fd-1502fcf9687e"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-undo",
-                        "itemId": "btnUndo",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Undo",
-                        "width": 45
-                    },
-                    "name": "MyButton7",
-                    "designerId": "74e6a34e-84ed-4e8c-9941-c1e47d4490af"
-                },
-                {
-                    "type": "Ext.toolbar.Separator",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": "separator",
-                        "height": 30,
-                        "layout|flex": null
-                    },
-                    "name": "MySeparator1",
-                    "designerId": "043e9a45-3d88-45fb-b083-a619b5d07ca3"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-duplicate",
-                        "itemId": "btnDuplicate",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Duplicate",
-                        "width": 60
-                    },
-                    "name": "MyButton8",
-                    "designerId": "5d1fd672-1ffb-4812-943a-378a5df3e2ad"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "hidden": true,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-build",
-                        "itemId": "btnBuildAssembly",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Build Assembly",
-                        "width": 90
-                    },
-                    "name": "MyButton16",
-                    "designerId": "9c1f776c-197f-46c5-9263-521c23dc524d"
-                },
-                {
-                    "type": "Ext.toolbar.Separator",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": "separator",
-                        "height": 30,
-                        "layout|flex": null
-                    },
-                    "name": "MySeparator2",
-                    "designerId": "9110e6ea-b8e8-413d-b3a1-9abec1e960cb"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-close",
-                        "itemId": "btnClose",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Close",
-                        "width": 45
-                    },
-                    "name": "MyButton9",
-                    "designerId": "674cbf27-40d1-45bc-b7b1-1f15f8f16f03"
-                }
-            ]
-        },
-        {
             "type": "Ext.form.Panel",
             "reference": {
                 "name": "items",
@@ -271,23 +38,205 @@
             "codeClass": null,
             "userConfig": {
                 "autoShow": true,
-                "bodyBorder": false,
-                "bodyPadding": 5,
+                "bodyBorder": null,
+                "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
-                "header": false,
-                "height": 350,
+                "header": null,
+                "height": null,
                 "itemId": "frmItem",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
+                "ui": "i21-form",
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm",
             "designerId": "80d25cf0-00cd-41f1-9e78-8e3351e0e9ed",
             "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "layout|flex": 1,
+                        "ui": "i21-toolbar",
+                        "width": null
+                    },
+                    "name": "MyToolbar",
+                    "designerId": "76b180be-b7ce-479d-8f48-96a2e7c4aea2",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "New",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton3",
+                            "designerId": "4a4f3937-ff71-49b1-b65b-a661f620fa49"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton4",
+                            "designerId": "a202b728-6388-4adc-98af-1bb2c03f321d"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnFind",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton5",
+                            "designerId": "aa2d3fb0-3922-4e42-9c76-a5c7c694e3d9"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton6",
+                            "designerId": "3897f18a-16e8-45d6-a8fd-1502fcf9687e"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton7",
+                            "designerId": "74e6a34e-84ed-4e8c-9941-c1e47d4490af"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnDuplicate",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Duplicate",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton8",
+                            "designerId": "5d1fd672-1ffb-4812-943a-378a5df3e2ad"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "hidden": true,
+                                "icon": null,
+                                "itemId": "btnBuildAssembly",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Build Assembly",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton16",
+                            "designerId": "9c1f776c-197f-46c5-9263-521c23dc524d"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton9",
+                            "designerId": "674cbf27-40d1-45bc-b7b1-1f15f8f16f03"
+                        }
+                    ]
+                },
                 {
                     "type": "Ext.tab.Panel",
                     "reference": {
@@ -995,7 +944,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-add",
+                                                        "iconCls": "small-insert",
                                                         "itemId": "btnInsertUom",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -1013,7 +962,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
+                                                        "iconCls": "small-remove",
                                                         "itemId": "btnDeleteUom",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -1041,20 +990,6 @@
                                                     "designerId": "5723e7c2-036e-481a-abba-3447c92c2e3c"
                                                 },
                                                 {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator4",
-                                                    "designerId": "8020bc4f-c1d1-4be9-baa4-e637b9425cff"
-                                                },
-                                                {
                                                     "type": "linkedinstance",
                                                     "reference": {
                                                         "name": "items",
@@ -1064,7 +999,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter112",
                                                     "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1851,7 +1786,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnAddRequiredAccounts",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -1869,7 +1804,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertGlAccounts",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -1887,7 +1822,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteGlAccounts",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -1895,20 +1830,6 @@
                                                                     },
                                                                     "name": "MyButton22",
                                                                     "designerId": "22fb44bd-42b6-4655-8d4d-7e7219dac9f8"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator11",
-                                                                    "designerId": "652fb5fe-a3c3-4c49-9b0b-e72eb7e738ac"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -1920,7 +1841,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter11",
+                                                                    "name": "filter113",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2207,7 +2128,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnAddLocation",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -2225,7 +2146,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnAddMultipleLocation",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -2243,7 +2164,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-view",
+                                                                        "iconCls": "small-open",
                                                                         "itemId": "btnEditLocation",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -2261,7 +2182,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteLocation",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -2269,20 +2190,6 @@
                                                                     },
                                                                     "name": "MyButton12",
                                                                     "designerId": "9b44714c-ce79-461b-9414-31b77161aff4"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator3",
-                                                                    "designerId": "b22917bf-17a1-47c8-b8ab-b680dd0c7702"
                                                                 },
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",
@@ -2337,20 +2244,6 @@
                                                                             "type": "string"
                                                                         }
                                                                     ]
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator13",
-                                                                    "designerId": "4d3f4f21-b688-4e2d-b581-2b95e9b71c9f"
                                                                 }
                                                             ]
                                                         },
@@ -3822,7 +3715,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-add",
+                                                                                "iconCls": "small-insert",
                                                                                 "itemId": "btnInsertCategories",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -3840,7 +3733,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-delete",
+                                                                                "iconCls": "small-remove",
                                                                                 "itemId": "btnDeleteCategories",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -3848,20 +3741,6 @@
                                                                             },
                                                                             "name": "MyButton12",
                                                                             "designerId": "e4039042-f4bb-4d2b-84e7-ca78de54a9c4"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.toolbar.Separator",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "designer|displayName": "separator",
-                                                                                "layout|flex": null
-                                                                            },
-                                                                            "name": "MySeparator3",
-                                                                            "designerId": "9ea2ef5e-9c1f-478f-8dd2-4e2861d15ff3"
                                                                         },
                                                                         {
                                                                             "type": "linkedinstance",
@@ -3873,7 +3752,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter12",
+                                                                            "name": "filter114",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4024,7 +3903,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-add",
+                                                                                "iconCls": "small-insert",
                                                                                 "itemId": "btnInsertSLA",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -4042,7 +3921,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-delete",
+                                                                                "iconCls": "small-remove",
                                                                                 "itemId": "btnDeleteSLA",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -4050,20 +3929,6 @@
                                                                             },
                                                                             "name": "MyButton12",
                                                                             "designerId": "eb2b8306-30fe-4859-b3db-67ed3b9cfb54"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.toolbar.Separator",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "designer|displayName": "separator",
-                                                                                "layout|flex": null
-                                                                            },
-                                                                            "name": "MySeparator3",
-                                                                            "designerId": "4ae06993-214d-4dba-ae63-5352d4cab3a8"
                                                                         },
                                                                         {
                                                                             "type": "linkedinstance",
@@ -4075,7 +3940,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter13",
+                                                                            "name": "filter115",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4835,7 +4700,7 @@
                                                                                                         "displayField": "strUnitMeasure",
                                                                                                         "fieldLabel": "Weight UOM",
                                                                                                         "itemId": "cboWeightUOM",
-                                                                                                        "labelWidth": 87,
+                                                                                                        "labelWidth": 90,
                                                                                                         "layout|flex": 1,
                                                                                                         "layout|margins": null,
                                                                                                         "margin": "0 0 0 5",
@@ -4901,7 +4766,7 @@
                                                                                                     "userConfig": {
                                                                                                         "fieldLabel": "Material Pack",
                                                                                                         "itemId": "txtMaterialPack",
-                                                                                                        "labelWidth": 87,
+                                                                                                        "labelWidth": 90,
                                                                                                         "layout|flex": 1,
                                                                                                         "layout|margins": null,
                                                                                                         "margin": "0 0 0 5"
@@ -4956,7 +4821,7 @@
                                                                                                         "fieldStyle": "text-align:right",
                                                                                                         "hideTrigger": true,
                                                                                                         "itemId": "txtInnerUnits",
-                                                                                                        "labelWidth": 87,
+                                                                                                        "labelWidth": 90,
                                                                                                         "layout|flex": 1,
                                                                                                         "layout|margins": null,
                                                                                                         "margin": "0 0 0 5"
@@ -5014,7 +4879,7 @@
                                                                                                         "fieldStyle": "text-align:right",
                                                                                                         "hideTrigger": true,
                                                                                                         "itemId": "txtUnitsPerLayer",
-                                                                                                        "labelWidth": 87,
+                                                                                                        "labelWidth": 90,
                                                                                                         "layout|flex": 1,
                                                                                                         "layout|margins": null,
                                                                                                         "margin": "0 0 0 5"
@@ -5539,7 +5404,7 @@
                                                                                 "fieldLabel": "Risk Score",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtRiskScore",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyNumberField64",
@@ -5557,7 +5422,7 @@
                                                                                 "fieldLabel": "Density",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtDensity",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyNumberField65",
@@ -5573,7 +5438,7 @@
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Date Available",
                                                                                 "itemId": "dtmDateAvailable",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyDateField3",
@@ -5590,7 +5455,7 @@
                                                                                 "boxLabel": null,
                                                                                 "fieldLabel": "Minor Ingredient",
                                                                                 "itemId": "chkMinorIngredient",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyCheckbox37",
@@ -5607,7 +5472,7 @@
                                                                                 "boxLabel": null,
                                                                                 "fieldLabel": "External Item",
                                                                                 "itemId": "chkExternalItem",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyCheckbox38",
@@ -5623,7 +5488,7 @@
                                                                             "userConfig": {
                                                                                 "fieldLabel": "External Group",
                                                                                 "itemId": "txtExternalGroup",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyTextField25",
@@ -5640,7 +5505,7 @@
                                                                                 "boxLabel": null,
                                                                                 "fieldLabel": "Sellable Item",
                                                                                 "itemId": "chkSellableItem",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyCheckbox39",
@@ -5658,7 +5523,7 @@
                                                                                 "fieldLabel": "Minmum Stock Weeks",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtMinimumStockWeeks",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyNumberField66",
@@ -5676,7 +5541,7 @@
                                                                                 "fieldLabel": "Full Container Size",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtFullContainerSize",
-                                                                                "labelWidth": 125,
+                                                                                "labelWidth": 130,
                                                                                 "layout|flex": null
                                                                             },
                                                                             "name": "MyNumberField67",
@@ -5759,7 +5624,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteUPC",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -5767,20 +5632,6 @@
                                                                     },
                                                                     "name": "MyButton13",
                                                                     "designerId": "4884dbec-f165-42d5-90f6-cd21524bbe59"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator4",
-                                                                    "designerId": "cb4b12c9-e117-45e9-af49-7c5f307842b7"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -5792,7 +5643,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter116",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6040,7 +5891,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertContractItem",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -6058,7 +5909,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteContractItem",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -6066,20 +5917,6 @@
                                                                     },
                                                                     "name": "MyButton14",
                                                                     "designerId": "d8a246dc-c7a7-4479-9e5b-fdcca1443cf7"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator5",
-                                                                    "designerId": "1e6b9719-af98-4d40-a65b-c27a1484948e"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -6091,7 +5928,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter117",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6541,7 +6378,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-add",
+                                                                                "iconCls": "small-insert",
                                                                                 "itemId": "btnInsertDocumentAssociation",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -6559,7 +6396,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-delete",
+                                                                                "iconCls": "small-remove",
                                                                                 "itemId": "btnDeleteDocumentAssociation",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -6567,20 +6404,6 @@
                                                                             },
                                                                             "name": "MyButton15",
                                                                             "designerId": "b56f397f-4dee-468e-a953-99fce172bdb6"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.toolbar.Separator",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "designer|displayName": "separator",
-                                                                                "layout|flex": null
-                                                                            },
-                                                                            "name": "MySeparator6",
-                                                                            "designerId": "1fb488b7-3e1d-4ec7-b4cd-088b92b1b291"
                                                                         },
                                                                         {
                                                                             "type": "linkedinstance",
@@ -6592,7 +6415,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter16",
+                                                                            "name": "filter118",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6747,7 +6570,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-add",
+                                                                                "iconCls": "small-insert",
                                                                                 "itemId": "btnInsertCertification",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -6765,7 +6588,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-delete",
+                                                                                "iconCls": "small-remove",
                                                                                 "itemId": "btnDeleteCertification",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
@@ -6773,20 +6596,6 @@
                                                                             },
                                                                             "name": "MyButton15",
                                                                             "designerId": "2f2c0c81-98cd-40e1-a753-c4c701e5278f"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.toolbar.Separator",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "designer|displayName": "separator",
-                                                                                "layout|flex": null
-                                                                            },
-                                                                            "name": "MySeparator6",
-                                                                            "designerId": "f0213470-9d50-4c28-9bad-29cbaed6333d"
                                                                         },
                                                                         {
                                                                             "type": "linkedinstance",
@@ -6798,7 +6607,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter17",
+                                                                            "name": "filter119",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6981,7 +6790,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertCustomerXref",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -6999,7 +6808,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteCustomerXref",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -7007,20 +6816,6 @@
                                                                     },
                                                                     "name": "MyButton14",
                                                                     "designerId": "f5eae1aa-3682-42b5-a78e-4964ab403000"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator5",
-                                                                    "designerId": "7eab44cf-8e07-4ce5-bf8a-a7118c33318e"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -7032,7 +6827,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter18",
+                                                                    "name": "filter120",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7344,7 +7139,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertVendorXref",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -7362,7 +7157,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteVendorXref",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -7370,20 +7165,6 @@
                                                                     },
                                                                     "name": "MyButton15",
                                                                     "designerId": "85755b19-49b7-4f19-9acf-78f8ecdb8b43"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator6",
-                                                                    "designerId": "70dcfde3-055b-4087-abda-0b10cb2e90e0"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -7395,7 +7176,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter19",
+                                                                    "name": "filter121",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -8157,7 +7938,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertMFT",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -8175,7 +7956,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteMFT",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -8183,20 +7964,6 @@
                                                                     },
                                                                     "name": "MyButton14",
                                                                     "designerId": "20ebad68-9049-4cf2-9a10-a148c9475f72"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator5",
-                                                                    "designerId": "30b03faf-72a8-4147-b448-6b66f70bfabc"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -8665,7 +8432,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-add",
+                                                        "iconCls": "small-insert",
                                                         "itemId": "btnInsertPricing",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -8683,7 +8450,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
+                                                        "iconCls": "small-remove",
                                                         "itemId": "btnDeletePricing",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -8691,20 +8458,6 @@
                                                     },
                                                     "name": "MyButton18",
                                                     "designerId": "9448f42a-a69c-4a60-8d16-996e1269632a"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator7",
-                                                    "designerId": "f4fab350-397a-4c3e-a9cb-fb70dfd6b11a"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -8716,7 +8469,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter110",
+                                                    "name": "filter123",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -9174,7 +8927,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertPricingLevel",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -9192,7 +8945,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeletePricingLevel",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -9200,20 +8953,6 @@
                                                                     },
                                                                     "name": "MyButton19",
                                                                     "designerId": "3dbdbe3c-dd00-4664-9c5d-6405217bffc7"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator8",
-                                                                    "designerId": "ebf7455e-7de2-4c9c-b3e6-5d30f94f3877"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -9225,7 +8964,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter111",
+                                                                    "name": "filter124",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -9827,7 +9566,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteSpecialPricing",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -9835,20 +9574,6 @@
                                                                     },
                                                                     "name": "MyButton20",
                                                                     "designerId": "ec448158-1470-407e-963a-a58306f7ef24"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator9",
-                                                                    "designerId": "70ebe7ba-ae24-4500-a42f-48c426168b22"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -9860,7 +9585,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter112",
+                                                                    "name": "filter125",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10539,20 +10264,6 @@
                                             "designerId": "7f499762-9870-484d-b684-39ff66efc1e9",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator10",
-                                                    "designerId": "abae0567-ff50-4fcd-b969-ce55da4d9538"
-                                                },
-                                                {
                                                     "type": "linkedinstance",
                                                     "reference": {
                                                         "name": "items",
@@ -10562,7 +10273,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter126",
                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -11339,7 +11050,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertCommodityCost",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -11357,7 +11068,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteCommodityCost",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -11365,20 +11076,6 @@
                                                                     },
                                                                     "name": "MyButton20",
                                                                     "designerId": "68f2e7fb-25d6-452b-9a2b-52b9add2f94a"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator9",
-                                                                    "designerId": "b541c4be-dc22-416c-a5ab-d5a297565bc5"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -11390,7 +11087,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter114",
+                                                                    "name": "filter127",
                                                                     "designerId": "74ebd405-7763-4163-a329-69eecae2fbea",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -11700,7 +11397,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-add",
+                                                        "iconCls": "small-insert",
                                                         "itemId": "btnInsertAssembly",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -11718,7 +11415,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
+                                                        "iconCls": "small-remove",
                                                         "itemId": "btnDeleteAssembly",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -11726,20 +11423,6 @@
                                                     },
                                                     "name": "MyButton23",
                                                     "designerId": "5590de42-2f37-4883-b30e-2e73ed991115"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator12",
-                                                    "designerId": "bb9a8a40-4ef8-4dc2-86f1-982e5c90d056"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -11751,7 +11434,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter115",
+                                                    "name": "filter128",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12092,7 +11775,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-add",
+                                                        "iconCls": "small-insert",
                                                         "itemId": "btnInsertBundle",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -12110,7 +11793,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
+                                                        "iconCls": "small-remove",
                                                         "itemId": "btnDeleteBundle",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -12118,20 +11801,6 @@
                                                     },
                                                     "name": "MyButton23",
                                                     "designerId": "4c08a5ff-66d5-4639-8dc6-dfacbc736360"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator12",
-                                                    "designerId": "e02d0688-b266-4f70-84ef-e3133e7249ae"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -12143,7 +11812,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter116",
+                                                    "name": "filter129",
                                                     "designerId": "336a12a5-7629-4f16-aedc-1c6511cd8165",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12382,7 +12051,7 @@
                                                 "align": "right",
                                                 "itemId": "colBundleUnit",
                                                 "text": "Unit",
-                                                "width": 45
+                                                "width": null
                                             },
                                             "name": "MyNumberColumn21",
                                             "designerId": "14fa3b89-1f25-4172-9745-fd39c1321235",
@@ -12565,7 +12234,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-add",
+                                                        "iconCls": "small-insert",
                                                         "itemId": "btnInsertKit",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -12583,7 +12252,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
+                                                        "iconCls": "small-remove",
                                                         "itemId": "btnDeleteKit",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -12591,20 +12260,6 @@
                                                     },
                                                     "name": "MyButton23",
                                                     "designerId": "20614b56-1a5e-4b0a-b03b-d93197f341de"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator12",
-                                                    "designerId": "b86cc7c5-bdd9-4d6b-8984-fe7fb9ff43fa"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -12616,7 +12271,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter117",
+                                                    "name": "filter130",
                                                     "designerId": "49a9508d-505d-4de5-977b-f8ebc7227c15",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12765,7 +12420,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-add",
+                                                        "iconCls": "small-insert",
                                                         "itemId": "btnInsertKitDetail",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -12783,7 +12438,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
+                                                        "iconCls": "small-remove",
                                                         "itemId": "btnDeleteKitDetail",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
@@ -12791,20 +12446,6 @@
                                                     },
                                                     "name": "MyButton23",
                                                     "designerId": "8e8422f3-7e0a-49a4-b3dd-442700e5e85f"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator12",
-                                                    "designerId": "aff14960-37d0-4355-a5ea-9fadbc4afcd3"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -12816,7 +12457,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter131",
                                                     "designerId": "6e3091f8-4c8b-4ab7-bb33-40607d9656f6",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -13236,7 +12877,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertFactory",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -13254,7 +12895,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteFactory",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -13262,20 +12903,6 @@
                                                                     },
                                                                     "name": "MyButton19",
                                                                     "designerId": "0d5caa6f-bce7-4d7c-b761-3c5dbe38fbad"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator8",
-                                                                    "designerId": "d9cd13b8-a0ab-4451-9197-17676156c50d"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -13287,7 +12914,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter119",
+                                                                    "name": "filter132",
                                                                     "designerId": "2bbc0808-5b40-4515-bf7e-466c3903a1c4",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13472,7 +13099,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
+                                                                        "iconCls": "small-insert",
                                                                         "itemId": "btnInsertManufacturingCellAssociation",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -13490,7 +13117,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteManufacturingCellAssociation",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -13498,20 +13125,6 @@
                                                                     },
                                                                     "name": "MyButton19",
                                                                     "designerId": "e23eea3c-9ba2-48cf-9445-c3ef34456b8e"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator8",
-                                                                    "designerId": "7407c057-c50f-4688-a3ba-00365a58c58a"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -13523,7 +13136,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter120",
+                                                                    "name": "filter133",
                                                                     "designerId": "f1bbb210-cf31-4fe7-8040-6808d9375e23",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13750,7 +13363,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-delete",
+                                                                        "iconCls": "small-remove",
                                                                         "itemId": "btnDeleteOwner",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
@@ -13758,20 +13371,6 @@
                                                                     },
                                                                     "name": "MyButton20",
                                                                     "designerId": "fab5128b-b5a0-4326-b9c3-aad4063f902a"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.toolbar.Separator",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|displayName": "separator",
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MySeparator9",
-                                                                    "designerId": "a2c78a15-7d21-445c-9768-3650bb22b120"
                                                                 },
                                                                 {
                                                                     "type": "linkedinstance",
@@ -13783,7 +13382,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter121",
+                                                                    "name": "filter134",
                                                                     "designerId": "49a6fdf8-831b-4540-9826-f339161f9600",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -14107,7 +13706,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging16",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

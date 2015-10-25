@@ -20,7 +20,6 @@ Ext.define('Inventory.view.FactoryUnitType', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
@@ -29,7 +28,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 398,
+    height: 371,
     hidden: false,
     width: 637,
     layout: 'fit',
@@ -44,9 +43,8 @@ Ext.define('Inventory.view.FactoryUnitType', {
             autoShow: true,
             itemId: 'frmFactoryUnitType',
             margin: -1,
-            bodyBorder: false,
+            ui: 'i21-form',
             bodyPadding: 3,
-            header: false,
             trackResetOnLoad: true,
             layout: {
                 type: 'hbox',
@@ -56,6 +54,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -65,71 +64,43 @@ Ext.define('Inventory.view.FactoryUnitType', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Search'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -258,7 +229,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                             ],
                                             itemId: 'cboDimensionUom',
                                             fieldLabel: 'Dimension UOM',
-                                            labelWidth: 90,
+                                            labelWidth: 98,
                                             displayField: 'strUnitMeasure',
                                             valueField: 'intUnitMeasureId'
                                         },
@@ -266,7 +237,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                             xtype: 'numberfield',
                                             itemId: 'txtHeight',
                                             fieldLabel: 'Height',
-                                            labelWidth: 90,
+                                            labelWidth: 98,
                                             fieldStyle: 'text-align:right',
                                             hideTrigger: true
                                         },
@@ -274,7 +245,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                             xtype: 'numberfield',
                                             itemId: 'txtDepth',
                                             fieldLabel: 'Depth',
-                                            labelWidth: 90,
+                                            labelWidth: 98,
                                             fieldStyle: 'text-align:right',
                                             hideTrigger: true
                                         },
@@ -282,7 +253,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                             xtype: 'numberfield',
                                             itemId: 'txtWidth',
                                             fieldLabel: 'Width',
-                                            labelWidth: 90,
+                                            labelWidth: 98,
                                             fieldStyle: 'text-align:right',
                                             hideTrigger: true
                                         },
@@ -290,7 +261,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                             xtype: 'numberfield',
                                             itemId: 'txtPalletStack',
                                             fieldLabel: 'Pallet Stack',
-                                            labelWidth: 90,
+                                            labelWidth: 98,
                                             fieldStyle: 'text-align:right',
                                             hideTrigger: true,
                                             allowDecimals: false
@@ -299,7 +270,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                             xtype: 'numberfield',
                                             itemId: 'txtPalletColumns',
                                             fieldLabel: 'Pallet Columns',
-                                            labelWidth: 90,
+                                            labelWidth: 98,
                                             fieldStyle: 'text-align:right',
                                             hideTrigger: true,
                                             allowDecimals: false
@@ -308,7 +279,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                                             xtype: 'numberfield',
                                             itemId: 'txtPalletRows',
                                             fieldLabel: 'Pallet Rows',
-                                            labelWidth: 90,
+                                            labelWidth: 98,
                                             fieldStyle: 'text-align:right',
                                             hideTrigger: true,
                                             allowDecimals: false

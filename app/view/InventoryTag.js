@@ -20,8 +20,8 @@ Ext.define('Inventory.view.InventoryTag', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.button.Button',
-        'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.Checkbox',
         'Ext.form.field.TextArea',
         'Ext.toolbar.Paging'
@@ -42,18 +42,15 @@ Ext.define('Inventory.view.InventoryTag', {
             autoShow: true,
             itemId: 'frmInventoryTag',
             margin: -1,
-            bodyBorder: false,
-            bodyPadding: 10,
-            header: false,
+            ui: 'i21-form',
+            layout: 'fit',
+            bodyPadding: 3,
             trackResetOnLoad: true,
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
             dockedItems: [
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -63,71 +60,43 @@ Ext.define('Inventory.view.InventoryTag', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Search'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -135,55 +104,73 @@ Ext.define('Inventory.view.InventoryTag', {
                 {
                     xtype: 'ipagingstatusbar',
                     itemId: 'pagingtoolbar',
-                    flex: 1,
                     dock: 'bottom'
                 }
             ],
             items: [
                 {
-                    xtype: 'container',
-                    flex: 1.25,
-                    margin: '0 5 0 0',
-                    width: 1014,
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
+                    xtype: 'tabpanel',
+                    itemId: 'tabInventoryTag',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'container',
-                            margin: '0 0 5 0',
-                            layout: 'hbox',
+                            xtype: 'panel',
+                            bodyPadding: 5,
+                            title: 'Details',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
                             items: [
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtTagNumber',
-                                    width: 300,
-                                    fieldLabel: 'Tag Number',
-                                    labelWidth: 90
-                                },
-                                {
-                                    xtype: 'checkboxfield',
-                                    itemId: 'chkHAZMATMessage',
-                                    margin: '0 0 0 5',
-                                    fieldLabel: 'HAZMAT Message',
-                                    labelWidth: 110
+                                    xtype: 'container',
+                                    flex: 1.25,
+                                    margin: '0 5 0 0',
+                                    width: 1014,
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'container',
+                                            margin: '0 0 5 0',
+                                            layout: 'hbox',
+                                            items: [
+                                                {
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtTagNumber',
+                                                    width: 300,
+                                                    fieldLabel: 'Tag Number',
+                                                    labelWidth: 90
+                                                },
+                                                {
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkHAZMATMessage',
+                                                    margin: '0 0 0 5',
+                                                    fieldLabel: 'HAZMAT Message',
+                                                    labelWidth: 110
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtDescription',
+                                            fieldLabel: 'Description',
+                                            labelWidth: 90
+                                        },
+                                        {
+                                            xtype: 'textareafield',
+                                            flex: 1,
+                                            itemId: 'txtMessage',
+                                            fieldLabel: 'Message',
+                                            labelWidth: 90,
+                                            grow: true
+                                        }
+                                    ]
                                 }
                             ]
-                        },
-                        {
-                            xtype: 'textfield',
-                            itemId: 'txtDescription',
-                            fieldLabel: 'Description',
-                            labelWidth: 90
-                        },
-                        {
-                            xtype: 'textareafield',
-                            flex: 1,
-                            itemId: 'txtMessage',
-                            fieldLabel: 'Message',
-                            labelWidth: 90,
-                            grow: true
                         }
                     ]
                 }

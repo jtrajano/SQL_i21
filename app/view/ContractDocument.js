@@ -20,19 +20,16 @@ Ext.define('Inventory.view.ContractDocument', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.button.Button',
-        'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
-    height: 275,
+    height: 268,
     hidden: false,
-    maxHeight: 275,
-    minHeight: 275,
-    minWidth: 400,
-    width: 400,
+    width: 451,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -43,22 +40,17 @@ Ext.define('Inventory.view.ContractDocument', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmContractDocument',
             margin: -1,
-            width: 450,
-            bodyBorder: false,
-            bodyPadding: 10,
-            header: false,
+            ui: 'i21-form',
+            layout: 'fit',
+            bodyPadding: 3,
             trackResetOnLoad: true,
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
             dockedItems: [
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -68,71 +60,43 @@ Ext.define('Inventory.view.ContractDocument', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Search'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -140,89 +104,107 @@ Ext.define('Inventory.view.ContractDocument', {
                 {
                     xtype: 'ipagingstatusbar',
                     itemId: 'pagingtoolbar',
-                    flex: 1,
                     dock: 'bottom'
                 }
             ],
             items: [
                 {
-                    xtype: 'container',
-                    flex: 1.25,
-                    margin: '0 5 0 0',
-                    width: 1014,
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
+                    xtype: 'tabpanel',
+                    itemId: 'tabContractDocument',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'textfield',
-                            itemId: 'txtDocumentName',
-                            fieldLabel: 'Document Name',
-                            labelWidth: 105
-                        },
-                        {
-                            xtype: 'textfield',
-                            itemId: 'txtDescription',
-                            fieldLabel: 'Description',
-                            labelWidth: 105
-                        },
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
+                            xtype: 'panel',
+                            bodyPadding: 5,
+                            title: 'Details',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
                                 {
-                                    dataIndex: 'intDocumentType',
-                                    dataType: 'numeric',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strDescription',
-                                    dataType: 'string',
-                                    text: 'Document Type',
-                                    flex: 1
+                                    xtype: 'container',
+                                    flex: 1.25,
+                                    margin: '0 5 0 0',
+                                    width: 1014,
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtDocumentName',
+                                            fieldLabel: 'Document Name',
+                                            labelWidth: 105
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtDescription',
+                                            fieldLabel: 'Description',
+                                            labelWidth: 105
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intDocumentType',
+                                                    dataType: 'numeric',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Document Type',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboDocumentType',
+                                            width: 170,
+                                            fieldLabel: 'Document Type',
+                                            labelWidth: 105,
+                                            displayField: 'strDescription',
+                                            valueField: 'intDocumentType'
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intCommodityId',
+                                                    dataType: 'numeric',
+                                                    text: 'Commodity Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strCommodityCode',
+                                                    dataType: 'string',
+                                                    text: 'Commodity Code',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboCommodity',
+                                            width: 170,
+                                            fieldLabel: 'Commodity',
+                                            labelWidth: 105,
+                                            displayField: 'strCommodityCode',
+                                            valueField: 'intCommodityId'
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkStandard',
+                                            fieldLabel: 'Standard',
+                                            labelWidth: 105
+                                        }
+                                    ]
                                 }
-                            ],
-                            itemId: 'cboDocumentType',
-                            width: 170,
-                            fieldLabel: 'Document Type',
-                            labelWidth: 105,
-                            displayField: 'strDescription',
-                            valueField: 'intDocumentType'
-                        },
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
-                                {
-                                    dataIndex: 'intCommodityId',
-                                    dataType: 'numeric',
-                                    text: 'Commodity Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strCommodityCode',
-                                    dataType: 'string',
-                                    text: 'Commodity Code',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strDescription',
-                                    dataType: 'string',
-                                    text: 'Description',
-                                    flex: 1
-                                }
-                            ],
-                            itemId: 'cboCommodity',
-                            width: 170,
-                            fieldLabel: 'Commodity',
-                            labelWidth: 105,
-                            displayField: 'strCommodityCode',
-                            valueField: 'intCommodityId'
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkStandard',
-                            fieldLabel: 'Standard',
-                            labelWidth: 105
+                            ]
                         }
                     ]
                 }

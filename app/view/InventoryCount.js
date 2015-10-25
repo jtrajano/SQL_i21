@@ -21,7 +21,6 @@ Ext.define('Inventory.view.InventoryCount', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
@@ -52,9 +51,8 @@ Ext.define('Inventory.view.InventoryCount', {
             autoShow: true,
             itemId: 'frmInventoryCount',
             margin: -1,
-            bodyBorder: false,
+            ui: 'i21-form',
             bodyPadding: 3,
-            header: false,
             trackResetOnLoad: true,
             layout: {
                 type: 'vbox',
@@ -64,6 +62,7 @@ Ext.define('Inventory.view.InventoryCount', {
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -73,119 +72,71 @@ Ext.define('Inventory.view.InventoryCount', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 55,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 55,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnPrintCountSheets',
-                            width: 120,
-                            iconAlign: 'top',
-                            iconCls: 'large-print',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Print Count Sheets'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnLockInventory',
-                            width: 95,
-                            iconAlign: 'top',
-                            iconCls: 'large-lock-closed',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Lock Inventory'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnPost',
-                            width: 60,
-                            iconAlign: 'top',
-                            iconCls: 'large-post',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Post'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnRecap',
-                            width: 60,
-                            iconAlign: 'top',
-                            iconCls: 'large-recap',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Recap'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnRecount',
-                            width: 60,
-                            iconAlign: 'top',
-                            iconCls: 'large-starting-number',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Recount'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -576,7 +527,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
-                                            componentCls: 'x-toolbar-default-grid',
+                                            componentCls: 'i21-toolbar-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -587,18 +538,15 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     xtype: 'button',
                                                     tabIndex: -1,
                                                     itemId: 'btnInsert',
-                                                    iconCls: 'small-add',
+                                                    iconCls: 'small-insert',
                                                     text: 'Insert'
                                                 },
                                                 {
                                                     xtype: 'button',
                                                     tabIndex: -1,
                                                     itemId: 'btnRemove',
-                                                    iconCls: 'small-delete',
+                                                    iconCls: 'small-remove',
                                                     text: 'Remove'
-                                                },
-                                                {
-                                                    xtype: 'tbseparator'
                                                 },
                                                 {
                                                     xtype: 'filter1'

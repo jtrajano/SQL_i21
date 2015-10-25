@@ -21,7 +21,6 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.Date',
@@ -50,9 +49,8 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
             autoShow: true,
             itemId: 'frmBuildAssemblyBlend',
             margin: -1,
-            bodyBorder: false,
+            ui: 'i21-form',
             bodyPadding: 3,
-            header: false,
             trackResetOnLoad: true,
             layout: {
                 type: 'vbox',
@@ -62,6 +60,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -71,120 +70,72 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Search'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnPrint',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-print',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Print'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnPost',
-                            width: 50,
-                            iconAlign: 'top',
-                            iconCls: 'large-post',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Post'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             hidden: true,
                             itemId: 'btnDuplicate',
-                            width: 60,
-                            iconAlign: 'top',
-                            iconCls: 'large-duplicate',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Duplicate'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnRecap',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-recap',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Recap'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -438,7 +389,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
-                                            componentCls: 'x-toolbar-default-grid',
+                                            componentCls: 'i21-toolbar-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -449,18 +400,15 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                                     xtype: 'button',
                                                     tabIndex: -1,
                                                     itemId: 'btnViewItem',
-                                                    iconCls: 'small-view',
+                                                    iconCls: 'small-open',
                                                     text: 'View Item'
                                                 },
                                                 {
                                                     xtype: 'button',
                                                     tabIndex: -1,
                                                     itemId: 'btnRemove',
-                                                    iconCls: 'small-delete',
+                                                    iconCls: 'small-remove',
                                                     text: 'Remove'
-                                                },
-                                                {
-                                                    xtype: 'tbseparator'
                                                 },
                                                 {
                                                     xtype: 'filter1'

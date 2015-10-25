@@ -20,7 +20,6 @@ Ext.define('Inventory.view.ItemLocation', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
@@ -31,7 +30,6 @@ Ext.define('Inventory.view.ItemLocation', {
 
     height: 725,
     hidden: false,
-    minHeight: 725,
     width: 1012,
     layout: 'fit',
     collapsible: true,
@@ -45,85 +43,57 @@ Ext.define('Inventory.view.ItemLocation', {
             autoShow: true,
             itemId: 'frmItemLocation',
             margin: -1,
+            ui: 'i21-form',
             layout: 'fit',
-            bodyBorder: false,
             bodyPadding: 3,
-            header: false,
             trackResetOnLoad: true,
             dockedItems: [
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     items: [
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Search'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -307,7 +277,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             flex: 1,
                                                             itemId: 'cboCostingMethod',
                                                             fieldLabel: 'Costing Method',
-                                                            labelWidth: 90,
+                                                            labelWidth: 95,
                                                             displayField: 'strDescription',
                                                             valueField: 'intCostingMethodId'
                                                         },
@@ -350,7 +320,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                     flex: 1,
                                                                     itemId: 'cboSubLocation',
                                                                     fieldLabel: 'Sub Location',
-                                                                    labelWidth: 90,
+                                                                    labelWidth: 95,
                                                                     displayField: 'strSubLocationName',
                                                                     valueField: 'intCompanyLocationSubLocationId'
                                                                 },
@@ -418,7 +388,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             flex: 1,
                                                             itemId: 'cboReceiveUom',
                                                             fieldLabel: 'Purchase UOM',
-                                                            labelWidth: 90,
+                                                            labelWidth: 95,
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'intItemUOMId'
                                                         }

@@ -21,7 +21,6 @@ Ext.define('Inventory.view.Commodity', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.Checkbox',
@@ -56,6 +55,7 @@ Ext.define('Inventory.view.Commodity', {
                         autoShow: true,
                         itemId: 'frmCommodity',
                         margin: -1,
+                        ui: 'i21-form',
                         bodyBorder: false,
                         bodyPadding: 3,
                         header: false,
@@ -67,6 +67,7 @@ Ext.define('Inventory.view.Commodity', {
                             {
                                 xtype: 'toolbar',
                                 dock: 'top',
+                                ui: 'i21-toolbar',
                                 width: 588,
                                 layout: {
                                     type: 'hbox',
@@ -76,71 +77,43 @@ Ext.define('Inventory.view.Commodity', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnNew',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-new',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'New'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnSave',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-save',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Save'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnFind',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-search',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Search'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnDelete',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-delete',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Delete'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnUndo',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-undo',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Undo'
-                                    },
-                                    {
-                                        xtype: 'tbseparator',
-                                        height: 30
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnClose',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-close',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Close'
                                     }
                                 ]
@@ -218,7 +191,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         itemId: 'txtDecimalsOnDpr',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Decimals on DPR',
-                                                                        labelWidth: 95,
+                                                                        labelWidth: 101,
                                                                         fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     }
@@ -622,7 +595,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -633,11 +606,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteUom',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'filter1'
@@ -752,7 +722,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -763,24 +733,21 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteOrigins',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveUpOrigins',
-                                                                        iconCls: 'small-up',
+                                                                        iconCls: 'small-arrow-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveDownOrigins',
-                                                                        iconCls: 'small-down',
+                                                                        iconCls: 'small-arrow-down',
                                                                         text: 'Down'
                                                                     }
                                                                 ]
@@ -823,7 +790,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -834,24 +801,21 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteProductTypes',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveUpProductTypes',
-                                                                        iconCls: 'small-up',
+                                                                        iconCls: 'small-arrow-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveDownProductTypes',
-                                                                        iconCls: 'small-down',
+                                                                        iconCls: 'small-arrow-down',
                                                                         text: 'Down'
                                                                     }
                                                                 ]
@@ -894,7 +858,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -905,24 +869,21 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteRegions',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveUpRegions',
-                                                                        iconCls: 'small-up',
+                                                                        iconCls: 'small-arrow-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveDownRegions',
-                                                                        iconCls: 'small-down',
+                                                                        iconCls: 'small-arrow-down',
                                                                         text: 'Down'
                                                                     }
                                                                 ]
@@ -965,7 +926,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -976,24 +937,21 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteClasses',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveUpClasses',
-                                                                        iconCls: 'small-up',
+                                                                        iconCls: 'small-arrow-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveDownClasses',
-                                                                        iconCls: 'small-down',
+                                                                        iconCls: 'small-arrow-down',
                                                                         text: 'Down'
                                                                     }
                                                                 ]
@@ -1046,7 +1004,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -1057,24 +1015,21 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteSeasons',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveUpSeasons',
-                                                                        iconCls: 'small-up',
+                                                                        iconCls: 'small-arrow-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveDownSeasons',
-                                                                        iconCls: 'small-down',
+                                                                        iconCls: 'small-arrow-down',
                                                                         text: 'Down'
                                                                     }
                                                                 ]
@@ -1117,7 +1072,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -1128,24 +1083,21 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteGrades',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveUpGrades',
-                                                                        iconCls: 'small-up',
+                                                                        iconCls: 'small-arrow-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveDownGrades',
-                                                                        iconCls: 'small-down',
+                                                                        iconCls: 'small-arrow-down',
                                                                         text: 'Down'
                                                                     }
                                                                 ]
@@ -1188,7 +1140,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
+                                                                componentCls: 'i21-toolbar-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -1199,24 +1151,21 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnDeleteProductLines',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveUpProductLines',
-                                                                        iconCls: 'small-up',
+                                                                        iconCls: 'small-arrow-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnMoveDownProductLines',
-                                                                        iconCls: 'small-down',
+                                                                        iconCls: 'small-arrow-down',
                                                                         text: 'Down'
                                                                     }
                                                                 ]
@@ -1284,7 +1233,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        componentCls: 'x-toolbar-default-grid',
+                                                        componentCls: 'i21-toolbar-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -1295,11 +1244,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteQualitySpecifications',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -1423,7 +1369,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        componentCls: 'x-toolbar-default-grid',
+                                                        componentCls: 'i21-toolbar-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -1434,11 +1380,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteFutureExchange',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -1532,7 +1475,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        componentCls: 'x-toolbar-default-grid',
+                                                        componentCls: 'i21-toolbar-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -1543,11 +1486,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteFutureMonth',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -1632,7 +1572,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        componentCls: 'x-toolbar-default-grid',
+                                                        componentCls: 'i21-toolbar-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -1643,11 +1583,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteGlAccounts',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'

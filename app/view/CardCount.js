@@ -22,8 +22,8 @@ Ext.define('Inventory.view.CardCount', {
         'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
-        'Ext.button.Button',
-        'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
@@ -44,22 +44,17 @@ Ext.define('Inventory.view.CardCount', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmCardCount',
             margin: -1,
-            width: 450,
-            bodyBorder: false,
-            bodyPadding: 10,
-            header: false,
+            ui: 'i21-form',
+            layout: 'fit',
+            bodyPadding: 3,
             trackResetOnLoad: true,
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
             dockedItems: [
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -69,149 +64,155 @@ Ext.define('Inventory.view.CardCount', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnFetch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-fetch',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Fetch'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
                 },
                 {
                     xtype: 'statusbar1',
-                    flex: 1,
                     dock: 'bottom'
                 }
             ],
             items: [
                 {
-                    xtype: 'container',
-                    margin: '0 0 8 0',
-                    layout: 'hbox',
+                    xtype: 'tabpanel',
+                    itemId: 'tabCardCount',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'textfield',
-                            flex: 1,
-                            itemId: 'txtCountNumber',
-                            margin: '0 5 0 0',
-                            fieldLabel: 'Count No',
-                            labelWidth: 60
-                        },
-                        {
-                            xtype: 'combobox',
-                            flex: 1,
-                            itemId: 'cboFrom',
-                            margin: '0 5 0 0',
-                            fieldLabel: 'From',
-                            labelWidth: 35
-                        },
-                        {
-                            xtype: 'combobox',
-                            flex: 1,
-                            itemId: 'cboTo',
-                            margin: '0 5 0 0',
-                            fieldLabel: 'To',
-                            labelWidth: 30
-                        }
-                    ]
-                },
-                {
-                    xtype: 'gridpanel',
-                    flex: 1,
-                    itemId: 'grdCardCount',
-                    dockedItems: [
-                        {
-                            xtype: 'toolbar',
-                            dock: 'top',
-                            componentCls: 'x-toolbar-default-grid',
-                            itemId: 'tlbGridOptions',
+                            xtype: 'panel',
+                            bodyPadding: 5,
+                            title: 'Details',
                             layout: {
-                                type: 'hbox',
-                                padding: '0 0 0 1'
+                                type: 'vbox',
+                                align: 'stretch'
                             },
                             items: [
                                 {
-                                    xtype: 'filter1'
+                                    xtype: 'container',
+                                    margin: '0 0 8 0',
+                                    layout: 'hbox',
+                                    items: [
+                                        {
+                                            xtype: 'textfield',
+                                            flex: 1,
+                                            itemId: 'txtCountNumber',
+                                            margin: '0 5 0 0',
+                                            fieldLabel: 'Count No',
+                                            labelWidth: 60
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            flex: 1,
+                                            itemId: 'cboFrom',
+                                            margin: '0 5 0 0',
+                                            fieldLabel: 'From',
+                                            labelWidth: 35
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            flex: 1,
+                                            itemId: 'cboTo',
+                                            margin: '0 5 0 0',
+                                            fieldLabel: 'To',
+                                            labelWidth: 30
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'gridpanel',
+                                    flex: 1,
+                                    itemId: 'grdCardCount',
+                                    dockedItems: [
+                                        {
+                                            xtype: 'toolbar',
+                                            dock: 'top',
+                                            componentCls: 'i21-toolbar-grid',
+                                            itemId: 'tlbGridOptions',
+                                            layout: {
+                                                type: 'hbox',
+                                                padding: '0 0 0 1'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'filter1'
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Item',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Lot ID'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Count Card No.'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            width: 83,
+                                            dataIndex: 'string',
+                                            text: 'No. of Pallets'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            width: 80,
+                                            dataIndex: 'string',
+                                            text: 'Qty per Pallet'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            width: 88,
+                                            dataIndex: 'string',
+                                            text: 'Physical Count'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            width: 66,
+                                            dataIndex: 'string',
+                                            text: 'UOM'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Entered By'
+                                        }
+                                    ],
+                                    viewConfig: {
+                                        itemId: 'grvCardCount'
+                                    },
+                                    selModel: {
+                                        selType: 'checkboxmodel'
+                                    }
                                 }
                             ]
                         }
-                    ],
-                    columns: [
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'string',
-                            text: 'Item',
-                            flex: 1
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'string',
-                            text: 'Description',
-                            flex: 1
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'string',
-                            text: 'Lot ID'
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'string',
-                            text: 'Count Card No.'
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            width: 83,
-                            dataIndex: 'string',
-                            text: 'No. of Pallets'
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            width: 80,
-                            dataIndex: 'string',
-                            text: 'Qty per Pallet'
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            width: 88,
-                            dataIndex: 'string',
-                            text: 'Physical Count'
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            width: 66,
-                            dataIndex: 'string',
-                            text: 'UOM'
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'string',
-                            text: 'Entered By'
-                        }
-                    ],
-                    viewConfig: {
-                        itemId: 'grvCardCount'
-                    },
-                    selModel: {
-                        selType: 'checkboxmodel'
-                    }
+                    ]
                 }
             ]
         }

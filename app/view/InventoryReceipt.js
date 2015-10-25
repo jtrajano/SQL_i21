@@ -21,7 +21,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.Date',
@@ -58,6 +57,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                         xtype: 'form',
                         itemId: 'frmInventoryReceipt',
                         margin: -1,
+                        ui: 'i21-form',
                         layout: 'fit',
                         bodyPadding: 3,
                         dockedItems: [
@@ -66,6 +66,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                 dock: 'top',
                                 formBind: true,
                                 itemId: 'payBillsDetailToolbar',
+                                ui: 'i21-toolbar',
                                 width: 588,
                                 layout: {
                                     type: 'hbox',
@@ -75,128 +76,78 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnNew',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-new',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'New'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnSave',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-save',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Save'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnSearch',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-search',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Search'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnDelete',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-delete',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Delete'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnUndo',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-undo',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Undo'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnPrint',
-                                        width: 52,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-print',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Print'
-                                    },
-                                    {
-                                        xtype: 'tbseparator',
-                                        height: 30
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnReceive',
-                                        iconAlign: 'top',
-                                        iconCls: 'large-generate-invoice',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Receive'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnRecap',
-                                        iconAlign: 'top',
-                                        iconCls: 'large-recap',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Recap'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnBill',
-                                        width: 50,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-bill',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Bill'
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnVendor',
-                                        width: 50,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-vendor',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Vendor'
-                                    },
-                                    {
-                                        xtype: 'tbseparator',
-                                        height: 30
                                     },
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnClose',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-close',
-                                        scale: 'large',
+                                        ui: 'i21-button-toolbar-small',
                                         text: 'Close'
                                     }
                                 ]
@@ -370,6 +321,37 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 75
                                                     },
                                                     {
+                                                        xtype: 'gridcombobox',
+                                                        columns: [
+                                                            {
+                                                                dataIndex: 'intCurrencyID',
+                                                                dataType: 'numeric',
+                                                                text: 'Currency Id',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                dataIndex: 'strCurrency',
+                                                                dataType: 'string',
+                                                                text: 'Currency',
+                                                                flex: 1
+                                                            },
+                                                            {
+                                                                dataIndex: 'strDescription',
+                                                                dataType: 'string',
+                                                                text: 'Description',
+                                                                flex: 1
+                                                            }
+                                                        ],
+                                                        itemId: 'cboCurrency',
+                                                        margin: '0 5 0 0',
+                                                        width: 60,
+                                                        fieldLabel: 'Currency',
+                                                        labelAlign: 'top',
+                                                        labelWidth: 105,
+                                                        displayField: 'strCurrency',
+                                                        valueField: 'intCurrencyID'
+                                                    },
+                                                    {
                                                         xtype: 'textfield',
                                                         itemId: 'txtReceiptNumber',
                                                         width: 100,
@@ -423,7 +405,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         ],
                                                                         itemId: 'cboSourceType',
                                                                         fieldLabel: 'Source Type',
-                                                                        labelWidth: 110,
+                                                                        labelWidth: 115,
                                                                         displayField: 'strSourceType',
                                                                         valueField: 'intSourceType'
                                                                     },
@@ -431,7 +413,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'numberfield',
                                                                         itemId: 'txtBlanketReleaseNumber',
                                                                         fieldLabel: 'Blanket Release No',
-                                                                        labelWidth: 110,
+                                                                        labelWidth: 115,
                                                                         hideTrigger: true,
                                                                         allowDecimals: false
                                                                     },
@@ -439,7 +421,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtVendorRefNumber',
                                                                         fieldLabel: 'Vendor Ref No',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 115
                                                                     }
                                                                 ]
                                                             },
@@ -601,38 +583,26 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intCurrencyID',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Currency Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strCurrency',
-                                                                                dataType: 'string',
-                                                                                text: 'Currency',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboCurrency',
-                                                                        fieldLabel: 'Currency',
-                                                                        labelWidth: 95,
-                                                                        displayField: 'strCurrency',
-                                                                        valueField: 'intCurrencyID'
-                                                                    },
-                                                                    {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtVessel',
                                                                         fieldLabel: 'Vessel',
                                                                         labelWidth: 95
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Allocate Freight',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboAllocateFreight',
+                                                                        fieldLabel: 'Allocate Freight',
+                                                                        labelWidth: 95,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
@@ -682,8 +652,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'toolbar',
                                                                                 dock: 'top',
-                                                                                componentCls: 'x-toolbar-default-grid',
-                                                                                itemId: 'tlbGridOptions',
+                                                                                itemId: 'tlbToolbarGrid',
                                                                                 layout: {
                                                                                     type: 'hbox',
                                                                                     padding: '0 0 0 1'
@@ -693,39 +662,36 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnInsertInventoryReceipt',
-                                                                                        iconCls: 'small-add',
+                                                                                        iconCls: 'small-insert',
                                                                                         text: 'Insert'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnViewItem',
-                                                                                        iconCls: 'small-view',
+                                                                                        iconCls: 'small-open',
                                                                                         text: 'View Item'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnQuality',
-                                                                                        iconCls: 'small-view',
+                                                                                        iconCls: 'small-open',
                                                                                         text: 'Quality'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnTaxDetails',
-                                                                                        iconCls: 'small-view',
+                                                                                        iconCls: 'small-open',
                                                                                         text: 'View Tax Details'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnRemoveInventoryReceipt',
-                                                                                        iconCls: 'small-delete',
+                                                                                        iconCls: 'small-remove',
                                                                                         text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'tbseparator'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
@@ -1522,24 +1488,18 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         text: 'Lot Tracking'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'tbseparator'
-                                                                                    },
-                                                                                    {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnInsertLot',
-                                                                                        iconCls: 'small-add',
+                                                                                        iconCls: 'small-insert',
                                                                                         text: 'Insert'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnRemoveLot',
-                                                                                        iconCls: 'small-delete',
+                                                                                        iconCls: 'small-remove',
                                                                                         text: 'Remove'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'tbseparator'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
@@ -2010,7 +1970,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -2030,9 +1989,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 itemId: 'btnClearAll',
                                                                 iconCls: 'small-select-none',
                                                                 text: 'Clear All'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -2097,7 +2053,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                componentCls: 'x-toolbar-default-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -2108,22 +2063,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnInsertCharge',
-                                                                        iconCls: 'small-add',
+                                                                        iconCls: 'small-insert',
                                                                         text: 'Insert'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
                                                                         itemId: 'btnRemoveCharge',
-                                                                        iconCls: 'small-delete',
+                                                                        iconCls: 'small-remove',
                                                                         text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'button',
-                                                                        tabIndex: -1,
-                                                                        itemId: 'btnViewOtherCharge',
-                                                                        iconCls: 'small-view',
-                                                                        text: 'View Other Charge'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
@@ -2131,9 +2079,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'btnCalculateCharges',
                                                                         iconCls: 'small-calculator',
                                                                         text: 'Calculate'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'tbseparator'
                                                                     },
                                                                     {
                                                                         xtype: 'filter1'
@@ -2573,7 +2518,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -2584,7 +2528,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnCreateTasksPutAway',
-                                                                iconCls: 'small-add',
+                                                                iconCls: 'small-insert',
                                                                 text: 'Create Tasks'
                                                             },
                                                             {
@@ -2598,7 +2542,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteAllPutAway',
-                                                                iconCls: 'small-delete',
+                                                                iconCls: 'small-remove',
                                                                 text: 'Delete All'
                                                             },
                                                             {
@@ -2607,9 +2551,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 itemId: 'btnRefreshPutAway',
                                                                 iconCls: 'small-refresh',
                                                                 text: 'Refresh'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
                                                             },
                                                             {
                                                                 xtype: 'filter1'

@@ -21,7 +21,6 @@ Ext.define('Inventory.view.Reason', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
@@ -48,9 +47,8 @@ Ext.define('Inventory.view.Reason', {
             autoShow: true,
             itemId: 'frmReason',
             margin: -1,
-            bodyBorder: false,
+            ui: 'i21-form',
             bodyPadding: 3,
-            header: false,
             trackResetOnLoad: true,
             layout: {
                 type: 'vbox',
@@ -60,6 +58,7 @@ Ext.define('Inventory.view.Reason', {
                 {
                     xtype: 'toolbar',
                     dock: 'top',
+                    ui: 'i21-toolbar',
                     width: 588,
                     layout: {
                         type: 'hbox',
@@ -69,71 +68,43 @@ Ext.define('Inventory.view.Reason', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'New'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Save'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Search'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Delete'
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
                         },
                         {
                             xtype: 'button',
                             tabIndex: -1,
-                            height: 57,
                             itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
+                            ui: 'i21-button-toolbar-small',
                             text: 'Close'
                         }
                     ]
@@ -245,7 +216,7 @@ Ext.define('Inventory.view.Reason', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
-                                            componentCls: 'x-toolbar-default-grid',
+                                            componentCls: 'i21-toolbar-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -256,18 +227,15 @@ Ext.define('Inventory.view.Reason', {
                                                     xtype: 'button',
                                                     tabIndex: -1,
                                                     itemId: 'btnAddWorkCenterMapping',
-                                                    iconCls: 'small-add',
+                                                    iconCls: 'small-insert',
                                                     text: 'Insert'
                                                 },
                                                 {
                                                     xtype: 'button',
                                                     tabIndex: -1,
                                                     itemId: 'btnEditWorkCenterMapping',
-                                                    iconCls: 'small-view',
+                                                    iconCls: 'small-open',
                                                     text: 'Open'
-                                                },
-                                                {
-                                                    xtype: 'tbseparator'
                                                 },
                                                 {
                                                     xtype: 'filter1'
