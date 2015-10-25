@@ -6,11 +6,13 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@intContractDetailId	INT,
-			@dblCashPrice			NUMERIC(9,4),
-			@intPricingTypeId		INT
+	DECLARE @ErrMsg						NVARCHAR(MAX),
+			@intContractDetailId		INT,
+			@dblCashPrice				NUMERIC(9,4),
+			@intPricingTypeId			INT,
+			@ysnMultiplePriceFixation	BIT
 	
+	SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	
 	WHILE ISNULL(@intContractDetailId,0) > 0
@@ -31,6 +33,14 @@ BEGIN TRY
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 
+	IF ISNULL(@ysnMultiplePriceFixation,0) = 0
+	BEGIN
+		UPDATE	PF
+		SET		PF.intTotalLots = CAST(CD.dblNoOfLots AS INT)
+		FROM	tblCTPriceFixation	PF
+		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
+		WHERE	CD.intContractHeaderId = @intContractHeaderId
+	END
 	
 
 END TRY
