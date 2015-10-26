@@ -93,7 +93,7 @@ SELECT C.intManufacturingCellId
 	,SL.dtmChangeoverEndDate
 	,SL.dtmPlannedStartDate
 	,SL.dtmPlannedEndDate
-	,SL.intExecutionOrder
+	,ISNULL(SL.intExecutionOrder,W.intExecutionOrder) intExecutionOrder
 	,SL.intChangeoverDuration
 	,SL.intSetupDuration
 	,SL.strComments
