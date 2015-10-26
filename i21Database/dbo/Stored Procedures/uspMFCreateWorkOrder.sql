@@ -351,20 +351,22 @@ BEGIN TRY
 		,CL.intCreatedUserId
 		,CL.dtmCreated
 		,(
-			SELECT TOP 1 intPreferenceId
+			SELECT TOP 1 intPickPreferenceId
 			FROM dbo.tblWHPickPreference
 			WHERE ysnDefault = 1
 			)
 		,CL.dblIssuedQuantity
 		,ISNULL((
-				SELECT MAX(intUnitPerLayer)
-				FROM tblWHSKU S
-				WHERE S.intLotId = CL.intLotId
+				--SELECT MAX(intUnitPerLayer)
+				--FROM tblWHSKU S
+				--WHERE S.intLotId = CL.intLotId
+				NULL
 				), I.intUnitPerLayer)
 		,ISNULL((
-				SELECT MAX(intLayerPerPallet)
-				FROM tblWHSKU S1
-				WHERE S1.intLotId = CL.intLotId
+				--SELECT MAX(intLayerPerPallet)
+				--FROM tblWHSKU S1
+				--WHERE S1.intLotId = CL.intLotId
+				NULL
 				), I.intLayerPerPallet)
 		,intSequenceNo
 		,CL.dblIssuedQuantity
