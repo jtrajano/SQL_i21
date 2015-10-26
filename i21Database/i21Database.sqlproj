@@ -2757,6 +2757,7 @@
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
     <None Include="Scripts\Post-Deployment\Common\ErrorMessages.sql" />
     <None Include="i21Database_1.publish.xml" />
+    <None Include="Scripts\Post-Deployment\EM\013_SetDefaultLocationToActive.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
