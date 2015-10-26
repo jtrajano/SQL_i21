@@ -330,7 +330,7 @@ BEGIN TRY
 		,intReceiptQtyUOMId
 		,intLastUpdateId
 		,dtmLastUpdateOn
-		,intPreferenceId
+		--,intPreferenceId
 		,dblRequiredQty
 		,intUnitsPerLayer
 		,intLayersPerPallet
@@ -350,11 +350,11 @@ BEGIN TRY
 		,CL.intItemIssuedUOMId
 		,CL.intCreatedUserId
 		,CL.dtmCreated
-		,(
-			SELECT TOP 1 intPickPreferenceId
-			FROM dbo.tblWHPickPreference
-			WHERE ysnDefault = 1
-			)
+		--,(
+		--	SELECT TOP 1 intPickPreferenceId
+		--	FROM dbo.tblWHPickPreference
+		--	WHERE ysnDefault = 1
+		--	)
 		,CL.dblIssuedQuantity
 		,ISNULL((
 				--SELECT MAX(intUnitPerLayer)
