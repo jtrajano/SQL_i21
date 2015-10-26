@@ -106,7 +106,7 @@ BEGIN
 		declare @newId int
 		while exists(select top 1 1 from #tmpNullSecurity)
 		begin
-			select top 1 @intNullId = intUserSecurityID, @name = strFullName 
+			select top 1 @intNullId = intUserSecurityID, @Name = strFullName 
 			from #tmpNullSecurity
 
 			insert into tblEntity(strName, strContactNumber)
