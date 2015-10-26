@@ -338,3 +338,7 @@ EXEC sp_addmessage 80064,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80065) EXEC sp_dropmessage 80065, 'us_english'	
 SET @strmessage = 'The %s is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.'
 EXEC sp_addmessage 80065,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80066) EXEC sp_dropmessage 80066, 'us_english'	
+SET @strmessage = 'Inventory Count is ongoing for Item %s and is locked under Location %s.'
+EXEC sp_addmessage 80066,11,@strmessage,'us_english','False'
