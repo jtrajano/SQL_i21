@@ -542,7 +542,7 @@ BEGIN TRY
 				,intReceiptQtyUOMId
 				,intLastUpdateId
 				,dtmLastUpdateOn
-				,intPreferenceId
+				--,intPreferenceId
 				,dblRequiredQty
 				,intUnitsPerLayer
 				,intLayersPerPallet
@@ -561,11 +561,11 @@ BEGIN TRY
 				,PL.intPhysicalItemUOMId
 				,PL.intCreatedUserId
 				,PL.dtmCreated
-				,(
-					SELECT TOP 1 intPreferenceId
-					FROM dbo.tblWHPickPreference
-					WHERE ysnDefault = 1
-					)
+				--,(
+				--	SELECT TOP 1 intPickPreferenceId
+				--	FROM dbo.tblWHPickPreference
+				--	WHERE ysnDefault = 1
+				--	)
 				,PL.dblPhysicalCount
 				,PL.intUnitPerLayer
 				,PL.intLayerPerPallet
