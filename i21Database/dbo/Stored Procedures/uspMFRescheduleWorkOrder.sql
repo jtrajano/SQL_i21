@@ -1197,6 +1197,59 @@ BEGIN TRY
 		AND MC.intManufacturingCellId = @intManufacturingCellId
 		AND SL.dtmPlannedStartDate >= @dtmFromDate
 		AND SL.dtmPlannedEndDate <= @dtmToDate
+	UNION
+SELECT W.intManufacturingCellId
+	,MC.strCellName
+	,W.intWorkOrderId
+	,W.strWorkOrderNo
+	,NULL dblQuantity
+	,NULL dblBalanceQuantity
+	,NULL strWorkOrderComment
+	,NULL dtmExpectedDate
+	,NULL dtmEarliestDate
+	,NULL dtmLatestDate
+	,NULL intItemId
+	,NULL strItemNo
+	,NULL strDescription
+	,NULL intItemUOMId
+	,NULL intUnitMeasureId
+	,NULL strUnitMeasure
+	,NULL strAdditive
+	,NULL strAdditiveDesc
+	,NULL intStatusId
+	,NULL strStatusName
+	,SR.strBackColorName
+	,SC.intDuration
+	,SC.dtmChangeoverStartDate
+	,SC.dtmChangeoverEndDate
+	,NULL strScheduleComment
+	,SL.intExecutionOrder
+	,CONVERT(BIT,0) ysnFrozen
+	,NULL intShiftId
+	,NULL strShiftName
+	,NULL OrderLineItemId
+	,CONVERT(BIT,0) AS ysnAlternateLine
+	,0 AS intByWhichDate
+	,NULL AS strCustOrderNo
+	,SR.strName AS strChangeover
+	,SC.intDuration AS intLeadTime
+	,NULL AS strCustomer
+FROM dbo.tblMFWorkOrder W
+JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId 
+JOIN @tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId
+JOIN dbo.tblMFScheduleRule SR on SR.intScheduleRuleId =SC.intScheduleRuleId
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId 
+WHERE W.intLocationId = @intLocationId
+	AND W.intManufacturingCellId = (
+		CASE 
+			WHEN @intManufacturingCellId =0
+				THEN W.intManufacturingCellId
+			ELSE @intManufacturingCellId
+			END
+		)
+	AND SC.dtmChangeoverStartDate >= @dtmFromDate
+	AND SC.dtmChangeoverEndDate <= @dtmToDate
+	Order by SL.intExecutionOrder
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
