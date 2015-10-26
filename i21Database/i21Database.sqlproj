@@ -2716,6 +2716,7 @@
     <Build Include="dbo\User Defined Types\VoucherDetailReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceiptPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateVoucherDetailReceiptPO.sql" />
+    <Build Include="dbo\Views\vyuARShippedItemDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
