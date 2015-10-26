@@ -200,28 +200,28 @@ SET @batchIdUsed = @batchId
 			BEGIN
 
 
-				----Undeposited Funds Account
-				--INSERT INTO 
-				--	@ARReceivableInvalidData
-				--SELECT 
-				--	'The Undeposited Funds account in Company Company Location - ' + CL.strLocationName  + ' was not set.'
-				--	,'Receivable'
-				--	,A.strRecordNumber
-				--	,@batchId
-				--	,A.intPaymentId
-				--FROM
-				--	tblARPayment A
-				--INNER JOIN
-				--	tblARPaymentDetail D
-				--		ON A.intPaymentId = D.intPaymentId
-				--INNER JOIN
-				--	tblSMCompanyLocation CL
-				--		ON A.intLocationId = CL.intCompanyLocationId 
-				--INNER JOIN
-				--	@ARReceivablePostData P
-				--		ON A.intPaymentId = P.intPaymentId						 
-				--WHERE
-				--	ISNULL(CL.intUndepositedFundsAccountId,0)  = 0
+				--Undeposited Funds Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The Undeposited Funds account in Company Company Location - ' + CL.strLocationName  + ' was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblARPaymentDetail D
+						ON A.intPaymentId = D.intPaymentId
+				INNER JOIN
+					tblSMCompanyLocation CL
+						ON A.intLocationId = CL.intCompanyLocationId 
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				WHERE
+					ISNULL(CL.intUndepositedFundsId,0)  = 0
 								
 				--Sales Discount Account
 				INSERT INTO 
@@ -933,24 +933,24 @@ IF @post = 1
 		--FROM @ARReceivablePostData A
 		--WHERE EXISTS(SELECT * FROM @ZeroPayment B WHERE A.intPaymentId = B.intPaymentId)
 		
-	--BEGIN TRY
-	--	UPDATE 
-	--		tblARPayment
-	--	SET 
-	--		intAccountId = C.intUndepositedFundsAccountId
-	--	FROM
-	--		tblARPayment P								
-	--	INNER JOIN 
-	--		tblSMCompanyLocation C
-	--			ON P.intLocationId = C.intCompanyLocationId
-	--	WHERE
-	--		P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-	--		AND ISNULL(C.intUndepositedFundsAccountId,0) <> 0					
-	--END TRY
-	--BEGIN CATCH	
-	--	SELECT @ErrorMerssage = ERROR_MESSAGE()										
-	--	GOTO Do_Rollback
-	--END CATCH
+	BEGIN TRY
+		UPDATE 
+			tblARPayment
+		SET 
+			intAccountId = C.intUndepositedFundsId
+		FROM
+			tblARPayment P								
+		INNER JOIN 
+			tblSMCompanyLocation C
+				ON P.intLocationId = C.intCompanyLocationId
+		WHERE
+			P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+			AND ISNULL(C.intUndepositedFundsId,0) <> 0					
+	END TRY
+	BEGIN CATCH	
+		SELECT @ErrorMerssage = ERROR_MESSAGE()										
+		GOTO Do_Rollback
+	END CATCH
 		
 	BEGIN TRY
 			  		 
@@ -1575,28 +1575,28 @@ IF @recap = 0
 			--OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
 			--)
 			
-			--DELETE FROM tblCMUndepositedFund
-			--WHERE
-			--	intUndepositedFundId IN 
-			--	(
-			--	SELECT 
-			--		B.intUndepositedFundId
-			--	FROM
-			--		tblARPayment A
-			--	INNER JOIN
-			--		@ARReceivablePostData P
-			--			ON A.intPaymentId = P.intPaymentId
-			--	INNER JOIN
-			--		tblCMUndepositedFund B 
-			--			ON A.intPaymentId = B.intSourceTransactionId 
-			--			AND A.strRecordNumber = B.strSourceTransactionId
-			--	LEFT OUTER JOIN
-			--		tblCMBankTransactionDetail TD
-			--			ON B.intUndepositedFundId = TD.intUndepositedFundId
-			--	WHERE 
-			--		B.strSourceSystem = 'AR'
-			--		AND TD.intUndepositedFundId IS NULL
-			--	)
+			DELETE FROM tblCMUndepositedFund
+			WHERE
+				intUndepositedFundId IN 
+				(
+				SELECT 
+					B.intUndepositedFundId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblCMUndepositedFund B 
+						ON A.intPaymentId = B.intSourceTransactionId 
+						AND A.strRecordNumber = B.strSourceTransactionId
+				LEFT OUTER JOIN
+					tblCMBankTransactionDetail TD
+						ON B.intUndepositedFundId = TD.intUndepositedFundId
+				WHERE 
+					B.strSourceSystem = 'AR'
+					AND TD.intUndepositedFundId IS NULL
+				)
 				
 			
 			----VOID IF CHECK PAYMENT
