@@ -2375,6 +2375,8 @@
     <Build Include="dbo\Views\vyuTRQuoteView.sql" />
     <Build Include="dbo\Functions\fnTMGetSpecialPricingPriceTable.sql" />
     <Build Include="dbo\Functions\fnICGetRunningQuantity.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
+    <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
