@@ -95,7 +95,7 @@ SELECT W.intManufacturingCellId
 	,CONVERT(BIT,0) AS ysnAlternateLine
 	,0 AS intByWhichDate
 	,NULL AS strCustOrderNo
-	,NULL AS strChangeover
+	,SR.strName AS strChangeover
 	,SC.intDuration AS intLeadTime
 	,NULL AS strCustomer
 FROM dbo.tblMFWorkOrder W

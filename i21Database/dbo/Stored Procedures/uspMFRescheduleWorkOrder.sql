@@ -463,6 +463,7 @@ BEGIN TRY
 						WHERE dtmPlannedEndDate BETWEEN @dtmShiftStartTime
 								AND @dtmShiftEndTime
 							AND ysnPicked = 0
+							AND dtmPlannedEndDate<>@dtmShiftEndTime
 						)
 				BEGIN
 					SELECT TOP 1 @dtmPlannedStartDate = MIN(dtmPlannedEndDate)
@@ -471,6 +472,7 @@ BEGIN TRY
 					WHERE dtmPlannedEndDate BETWEEN @dtmShiftStartTime
 							AND @dtmShiftEndTime
 						AND ysnPicked = 0
+						AND dtmPlannedEndDate<>@dtmShiftEndTime
 
 					UPDATE @tblMFScheduleWorkOrder
 					SET ysnPicked = 1
