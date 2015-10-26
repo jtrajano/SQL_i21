@@ -44,7 +44,7 @@ BEGIN
 			BEGIN				
 				
 				DECLARE @minId int				
-				declare @counts			INT
+				declare @COUNTS			INT
 				declare @cmdevent			nvarchar(max)
 		
 				SET @COUNTS = ' + cast(@eventcount as nvarchar)+ '

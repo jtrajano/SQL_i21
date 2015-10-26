@@ -4256,4 +4256,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityEmployeeId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="778a1a94-8a9f-41f4-937e-05c59f196bac" ChangeDateTime="10/26/2015 01:33:54">
+    <Property Name="ElementName" Value="[dbo].[tblPATIssueStock]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblPATCustomerStock]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="17b29e69-65c4-469c-9e34-feb1bd68b5d9" ChangeDateTime="10/26/2015 01:34:50">
+    <Property Name="ElementName" Value="[dbo].[tblPATCustomerStock].[strStockType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPATCustomerStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStockStatus" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e1782b5a-7690-4745-8f9c-b264b2a81db7" ChangeDateTime="10/26/2015 01:34:57">
+    <Property Name="ElementName" Value="[dbo].[tblPATCustomerStock].[strStockStatus]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPATCustomerStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strActivityStatus" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fb0f37ef-b195-4fae-8f3d-d42f8a1e7a4b" ChangeDateTime="10/26/2015 02:33:16">
+    <Property Name="ElementName" Value="[dbo].[tblPATCustomerStock].[intIssueStockId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPATCustomerStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCustomerStockId" />
+  </Operation>
 </Operations>

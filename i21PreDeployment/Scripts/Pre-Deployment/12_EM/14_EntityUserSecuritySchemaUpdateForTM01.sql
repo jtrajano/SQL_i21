@@ -47,22 +47,22 @@ BEGIN
 			BEGIN				
 				
 				DECLARE @minId int				
-				declare @counts			INT
+				declare @COUNTS			INT
 				declare @cmdevent			nvarchar(max)
 		
-				SET @counts = ' + cast(@eventcount as nvarchar)+ '
+				SET @COUNTS = ' + cast(@eventcount as nvarchar)+ '
 				select @minId = ' + cast(@minatureevent as nvarchar)+ '
 
 				SET @cmdevent = ''UPDATE tblTMEvent SET intUserID = A.intEntityUserSecurityId
 					FROM tblSMUserSecurity A
 					WHERE tblTMEvent.intUserID = A.intUserSecurityIdOld
 						AND A.intUserSecurityIdOld IS NOT NULL 
-						AND intEventID > '' + cast(@minId as nvarchar) + '' and intEventID <= '' + cast((@minId + @counts ) as nvarchar)
+						AND intEventID > '' + cast(@minId as nvarchar) + '' and intEventID <= '' + cast((@minId + @COUNTS ) as nvarchar)
 		
 				--PRINT @minId
 				SET @FinalDestinationCommand =  @cmdevent			
 
-				SET @minId  = @minId + @counts		
+				SET @minId  = @minId + @COUNTS		
 				
 			END
 			'
