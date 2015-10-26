@@ -703,6 +703,17 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 76
+			,[strTransactionType]	= N'Inventory Count'
+			,[strPrefix]			= N'InvCount-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inventory Count')
+
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 77
 			,[strTransactionType]	= N'Adjustment1099'
 			,[strPrefix]			= N'ADJ1099-'
 			,[intNumber]			= 1
@@ -711,15 +722,6 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjustment1099')
 
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 76
-			,[strTransactionType]	= N'Inventory Count'
-			,[strPrefix]			= N'InvCount-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Inventory'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inventory Count')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
