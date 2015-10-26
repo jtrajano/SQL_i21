@@ -722,6 +722,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjustment1099')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 78
+			,[strTransactionType]	= N'Parent Lot Number'
+			,[strPrefix]			= N'PLOT-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Parent Lot Number')
+
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
