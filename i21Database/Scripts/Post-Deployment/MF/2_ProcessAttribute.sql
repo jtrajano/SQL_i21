@@ -789,3 +789,22 @@ BEGIN
 	UPDATE tblMFAttribute SET intAttributeDataTypeId=2,ysnMultiSelect=NULL,strSQL=NULL WHERE intAttributeId = 37
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 38
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 38
+		,'Product Case Code Scanning Required at Production'
+		,5
+		,1
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
