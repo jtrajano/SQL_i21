@@ -2,6 +2,9 @@
 	@userId INT,
 	@vendorId INT,
 	@voucherPODetails AS VoucherPODetail READONLY,
+	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
+	@voucherDetailReceiptPO AS [VoucherDetailReceipt] READONLY,
+	@shipTo INT= NULL,
 	@billId INT OUTPUT
 AS
 BEGIN
@@ -16,6 +19,11 @@ BEGIN TRY
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
+
+	IF NOT EXISTS(SELECT 1 FROM tblAPVendor WHERE intEntityVendorId = @vendorId)
+	BEGIN
+		RAISERROR('Vendor does not exists.', 16, 1);
+	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
 	EXEC uspSMGetStartingNumber 9, @billRecordNumber OUTPUT
@@ -78,14 +86,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContactId]			=	A.[intContactId],
 		[intOrderById]			=	A.[intOrderById],
 		[intCurrencyId]			=	A.[intCurrencyId]
-	FROM dbo.fnAPCreateBillData(@userId, @vendorId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT) A
+	FROM dbo.fnAPCreateBillData(@vendorId, @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @shipTo) A
 
 	SET @billId = SCOPE_IDENTITY()
 
 	--Add details
-	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails
-	EXEC uspAPUpdateVoucherTax @billId
-	EXEC uspAPUpdateVoucherContract @billId
+	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO
+	--EXEC uspAPUpdateVoucherTax @billId
+	--EXEC uspAPUpdateVoucherContract @billId
 
 	IF @transCount = 0 COMMIT TRANSACTION
 
@@ -103,6 +111,7 @@ BEGIN CATCH
 	SET @ErrorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()
 	SET @ErrorLine     = ERROR_LINE()
+	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
 END

@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateVoucherDetail]
 	@billId INT,
-	@voucherPODetails AS VoucherPODetail READONLY
+	@voucherPODetails AS VoucherPODetail READONLY,
+	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
+	@voucherDetailReceiptPO AS [VoucherDetailReceipt] READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,60 +13,23 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-CREATE TABLE #tmpCreatedBillDetail (
-	[intBillDetailId] [INT]
-	UNIQUE ([intBillDetailId])
-);
-
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
 	IF EXISTS(SELECT 1 FROM @voucherPODetails)
 	BEGIN
-		INSERT INTO tblAPBillDetail(
-			[intBillId]						,
-			[strMiscDescription]			,
-			[strComment]					,
-			[intAccountId]					,
-			[intItemId]						,
-			[intInventoryReceiptItemId]		,
-			[intInventoryReceiptChargeId]   ,
-			[intPurchaseDetailId]			,
-			[intContractHeaderId]			,
-			[intContractDetailId]			,
-			[intPrepayTypeId]				,
-			[dblTotal]						,
-			[dblQtyContract]				,
-			[dblContractCost]				,
-			[dblQtyOrdered]					,
-			[dblQtyReceived]				,
-			[dblDiscount]					,
-			[dblCost]						,
-			[dblTax]						,
-			[dblPrepayPercentage]			,
-			[int1099Form]					,
-			[int1099Category]				,
-			[ysn1099Printed]				,
-			[intLineNo]						,
-			[intTaxGroupId]					
-		)
-		OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail
-		SELECT
-			[intBillId]						=	@billId							,
-			[strMiscDescription]			=	A.[strMiscDescription]			,
-			[strComment]					=	A.[strComment]					,
-			[intAccountId]					=	ISNULL(A.[intAccountId], [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')),
-			[intItemId]						=	A.[intItemId]					,
-			[intPurchaseDetailId]			=	A.[intPurchaseDetailId]			,
-			[dblTotal]						=	(A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)),
-			[dblQtyOrdered]					=	A.[dblQtyReceived]				,
-			[dblQtyReceived]				=	A.[dblQtyReceived]				,
-			[dblDiscount]					=	A.[dblDiscount]					,
-			[dblCost]						=	A.[dblCost]						,
-			[intLineNo]						=	A.[intLineNo]					,
-			[intTaxGroupId]					=	A.[intTaxGroupId]					
-		FROM @voucherPODetails A
+		EXEC uspAPCreateVoucherPODetail @billId, @voucherPODetails
 	END
+
+	IF EXISTS(SELECT 1 FROM @voucherNonInvDetails)
+	BEGIN
+		EXEC uspAPCreateVoucherNonInvDetail @billId, @voucherNonInvDetails
+	END
+
+	IF EXISTS(SELECT 1 FROM @voucherDetailReceiptPO)
+	BEGIN
+		EXEC uspAPCreateVoucherDetailReceiptPO @billId, @voucherDetailReceiptPO
+	END 
 
 IF @transCount = 0 COMMIT TRANSACTION
 
@@ -82,5 +47,6 @@ BEGIN CATCH
 	SET @ErrorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()
 	SET @ErrorLine     = ERROR_LINE()
+	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH

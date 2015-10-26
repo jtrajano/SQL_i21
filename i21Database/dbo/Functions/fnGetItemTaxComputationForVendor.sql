@@ -22,10 +22,10 @@ RETURNS @returntable TABLE
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[ysnSeparateOnInvoice]			BIT
 	,[intTaxAccountId]				INT
-	,[ysnTaxAdjusted]				BIT
+	,[ysnTaxAdjusted]				BIT DEFAULT 0
 	,[ysnCheckoffTax]				BIT
 	,[strTaxCode]					NVARCHAR(100)						
-	,[ysnTaxExempt]					BIT
+	,[ysnTaxExempt]					BIT DEFAULT 0
 	,[strTaxGroup]					NVARCHAR(100)
 )
 AS
@@ -53,7 +53,7 @@ BEGIN
 			,[strTaxCode]					NVARCHAR(100)						
 			,[ysnTaxExempt]					BIT
 			,[strTaxGroup]					NVARCHAR(100)
-			,[ysnTaxAdjusted]				BIT
+			,[ysnTaxAdjusted]				BIT DEFAULT 0
 			,[ysnComputed]					BIT
 			)
 			

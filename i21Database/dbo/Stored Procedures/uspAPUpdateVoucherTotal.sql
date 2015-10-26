@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherTotal]
-	@voucherId INT
+	@voucherIds AS Id READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -16,29 +16,38 @@ DECLARE @shipToId INT;
 
 IF @transCount = 0 BEGIN TRANSACTION
 
-	IF (SELECT ysnPosted FROM tblAPBill WHERE intBillId = @voucherId) = 1
+	IF (SELECT TOP 1 ysnPosted FROM tblAPBill WHERE intBillId IN (SELECT intId FROM @voucherIds)) = 1
 	BEGIN
-		RAISERROR('Voucher was already posted.', 16, 1);
+		RAISERROR('Data contains posted vouchers', 16, 1);
 	END
 
 	--UPDATE DETAIL TOTAL
 	UPDATE A
 		SET A.dblTotal = (A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100))
 	FROM tblAPBillDetail A
-	WHERE A.intBillId = @voucherId
+	INNER JOIN @voucherIds B ON A.intBillId = B.intId
+
+	--UPDATE PAYMENT
+	UPDATE A
+		SET A.dblPayment = PrePayment.dblTotalPrePayment
+	FROM tblAPBill A
+	INNER JOIN @voucherIds B ON A.intBillId = B.intId
+	OUTER APPLY (
+		SELECT SUM(dblAmountApplied) dblTotalPrePayment FROM tblAPAppliedPrepaidAndDebit C WHERE C.intBillId = B.intId
+	) PrePayment
+	WHERE PrePayment.dblTotalPrePayment IS NOT NULL
 
 	--UPDATE HEADER TOTAL
 	UPDATE A
-		SET A.dblPayment = PrePayment.dblTotalPrePayment
-		,A.dblTotal = (DetailTotal.dblTotal + DetailTotal.dblTotalTax) - PrePayment.dblTotalPrePayment
+		SET A.dblTotal = (DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment
+		,A.dblSubtotal = (DetailTotal.dblTotal)
+		,A.dblAmountDue = (DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment
 	FROM tblAPBill A
+	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (
-		SELECT SUM(dblTax) dblTotalTax, SUM(dblTotal) dblTotal FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId
+		SELECT SUM(dblTax) dblTotalTax, SUM(dblTotal) dblTotal FROM tblAPBillDetail C WHERE C.intBillId = B.intId
 	) DetailTotal
-	OUTER APPLY (
-		SELECT SUM(dblAmountApplied) dblTotalPrePayment FROM tblAPAppliedPrepaidAndDebit C WHERE A.intBillId = C.intBillId
-	) PrePayment
-	WHERE A.intBillId = @voucherId
+	WHERE DetailTotal.dblTotal IS NOT NULL
 
 IF @transCount = 0 COMMIT TRANSACTION
 

@@ -2656,7 +2656,6 @@
     <Build Include="dbo\Functions\fnAPCreateVoucherDetailData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTax.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherContract.sql" />
-    <Build Include="dbo\Functions\fnAPCreateBillData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryCount.sql" />
     <Build Include="dbo\Tables\tblICInventoryCountDetail.sql" />
@@ -2705,6 +2704,18 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayable.sql" />
     <Build Include="dbo\User Defined Types\VoucherPODetail.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherPODetail.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePODetailQtyToReceive.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailTax.sql" />
+    <Build Include="dbo\Functions\fnAPCreateBillData.sql" />
+    <Build Include="dbo\User Defined Types\Id.sql" />
+    <Build Include="dbo\Tables\tblAP1099Category.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailNonInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherNonInvDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidatePODetailData.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceiptPO.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateVoucherDetailReceiptPO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2768,6 +2779,7 @@
     <None Include="i21Database_1.publish.xml" />
     <None Include="Scripts\Post-Deployment\EM\013_SetDefaultLocationToActive.sql" />
     <None Include="Scripts\Post-Deployment\AP\CreateVoucherPayable.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

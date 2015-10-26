@@ -97,16 +97,16 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strTaxableByOtherTaxes]=	D.[strTaxableByOtherTaxes]	,
 		[strCalculationMethod]	=	D.[strCalculationMethod]	,
 		[dblRate]				=	D.[dblRate]					,
-		[intAccountId]			=	D.[intAccountId]			,
+		[intAccountId]			=	D.[intTaxAccountId]			,
 		[dblTax]				=	D.[dblTax]					,
 		[dblAdjustedTax]		=	D.[dblAdjustedTax]			,
 		[ysnTaxAdjusted]		=	D.[ysnTaxAdjusted]			,
-		[ysnSeparateOnBill]		=	D.[ysnSeparateOnBill]		,
-		[ysnCheckOffTax]		=	D.[ysnCheckOffTax]			
+		[ysnSeparateOnBill]		=	D.[ysnSeparateOnInvoice]	,
+		[ysnCheckOffTax]		=	D.[ysnCheckoffTax]			
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	INNER JOIN tblICInventoryReceitpItem C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
-	INNER JOIN tblICInventoryReceitpItemTax D ON C.intInventoryReceiptItemId = D.intInventoryReceiptItemId
+	INNER JOIN tblICInventoryReceiptItem C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+	INNER JOIN tblICInventoryReceiptItemTax D ON C.intInventoryReceiptItemId = D.intInventoryReceiptItemId
 	WHERE C.dblTax > 0
 
 	--GET TAXES FOR MISCELLANEOUS ITEM OF PO WITH TAX
@@ -119,7 +119,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			SUM(CASE WHEN B.ysnTaxAdjusted = 1 THEN B.dblAdjustedTax ELSE B.dblTax END) dblTax
 		FROM tblAPBillDetailTax B WHERE B.intBillDetailId = A.intBillDetailId
 	) TaxAmount
-	WHERE A.intBillId = @billId
+	WHERE A.intBillId = @billId AND TaxAmount.dblTax IS NOT NULL
 
 	UPDATE A
 		SET A.dblTax = TaxAmount.dblTax
@@ -129,7 +129,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			SUM(dblTax) AS dblTax, SUM(dblTotal) dblTotal 
 		FROM tblAPBillDetail WHERE intBillId = A.intBillId
 	) TaxAmount
-	WHERE intBillId = @billId
+	WHERE intBillId = @billId AND TaxAmount.dblTax IS NOT NULL
 
 	EXEC uspAPUpdateVoucherTotal @billId
 

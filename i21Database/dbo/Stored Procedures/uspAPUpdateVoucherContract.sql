@@ -11,6 +11,7 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @voucherIds AS Id;
 
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -49,7 +50,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 	) IndexPrice
 	WHERE A.intBillId = @billId
 
-	EXEC uspAPUpdateVoucherTotal @billId
+	INSERT INTO @voucherIds
+	SELECT @billId
+	EXEC uspAPUpdateVoucherTotal @voucherIds
 
 IF @transCount = 0 COMMIT TRANSACTION
 

@@ -69,6 +69,7 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
+	DECLARE @currentDate DATETIME = GETDATE()
 	DECLARE @userLocation INT;
 	DECLARE @term INT;
 	DECLARE @shipFrom INT;
@@ -139,6 +140,7 @@ BEGIN
 	INSERT @returntable
 	(
 		[intTermsId]			,
+		[dtmDate]				,
 		[dtmDueDate]			,
 		[intAccountId]			,
 		[intEntityId]			,
@@ -167,7 +169,8 @@ BEGIN
 	)
 	SELECT 
 		@term, 
-		ISNULL(dbo.fnGetDueDateBasedOnTerm(GETDATE(), @term), GETDATE()),
+		@currentDate,
+		dbo.fnGetDueDateBasedOnTerm(@currentDate, @term),
 		@apAccount,
 		@userId,
 		@vendorId,

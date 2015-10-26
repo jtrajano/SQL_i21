@@ -123,6 +123,7 @@ BEGIN
 					WHERE B.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 							AND (B.intAccountId IS NULL AND B.intAccountId = 0))
 
+		--VALIDATION FOR RECEIPT
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
 			'The item "' + C.strItemNo + '" on this transaction was already billed.',
@@ -144,6 +145,21 @@ BEGIN
 				WHERE E.dblOpenReceive = E.dblBillQty
 			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+
+		--VALIDATION FOR MISCELLANEOUS ITEM
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'The item "' + D.strItemNo + '" on this transaction was already billed.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN tblPOPurchaseDetail C ON B.intPurchaseDetailId = C.intPurchaseDetailId
+			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+		WHERE C.dblQtyOrdered = C.dblQtyReceived
+		AND D.strType IN ('Service','Software','Non-Inventory','Other Charge')
+		AND A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 
 		--DO NOT ALLOW TO POST IF BILL ITEMS HAVE ASSOCIATED ITEM RECEIPT AND AND ITEM RECEIPT IS NOT POSTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

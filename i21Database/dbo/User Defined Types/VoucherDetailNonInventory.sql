@@ -1,38 +1,47 @@
-﻿CREATE TYPE [dbo].[VoucherPODetail] AS TABLE
+﻿CREATE TYPE [dbo].[VoucherDetailNonInventory] AS TABLE
 (
     [intAccountId]					INT             NULL,
-	[intPurchaseDetailId]			INT             NOT NULL,
+	[intItemId]						INT             NULL,
+	[strMiscDescription]			NVARCHAR(500)	NULL,
     [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
-    [dblDiscount]					DECIMAL(18, 6)	NULL DEFAULT 0, 
+    [dblDiscount]					DECIMAL(18, 6)	NOT NULL DEFAULT 0, 
     [dblCost]						DECIMAL(18, 6)	NULL, 
-    [intTaxGroupId]					INT NULL,
-	PRIMARY KEY CLUSTERED ([intPurchaseDetailId] ASC)  
+    [intTaxGroupId]					INT NULL
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-	@value = N'Account to use on voucher transaction. Default to vendor expense account setup of item.',
+	@value = N'Account to use on voucher transaction. Default to general account setup of item.',
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo',
 	@level1type = N'TYPE',
-	@level1name = N'VoucherPODetail',
+	@level1name = N'VoucherDetailNonInventory',
 	@level2type = N'COLUMN',
 	@level2name = N'intAccountId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-	@value = N'Purchase Order Detail primary key.',
+	@value = N'Item Id.',
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo',
 	@level1type = N'TYPE',
-	@level1name = N'VoucherPODetail',
+	@level1name = N'VoucherDetailNonInventory',
 	@level2type = N'COLUMN',
-	@level2name = N'intPurchaseDetailId'
+	@level2name = N'intItemId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-	@value = N'Quantity received. Default to item ordered less received.',
+	@value = N'Miscellaneous description.',
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo',
 	@level1type = N'TYPE',
-	@level1name = N'VoucherPODetail',
+	@level1name = N'VoucherDetailNonInventory',
+	@level2type = N'COLUMN',
+	@level2name = N'strMiscDescription'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+	@value = N'Quantity received. Default to minimum order setup of item.',
+	@level0type = N'SCHEMA',
+	@level0name = N'dbo',
+	@level1type = N'TYPE',
+	@level1name = N'VoucherDetailNonInventory',
 	@level2type = N'COLUMN',
 	@level2name = N'dblQtyReceived'
 GO
@@ -41,16 +50,16 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo',
 	@level1type = N'TYPE',
-	@level1name = N'VoucherPODetail',
+	@level1name = N'VoucherDetailNonInventory',
 	@level2type = N'COLUMN',
 	@level2name = N'dblDiscount'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-	@value = N'Cost of item. Default to cost on purchase.',
+	@value = N'Cost of item. Default to cost on purchase. Default to last cost setup of item',
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo',
 	@level1type = N'TYPE',
-	@level1name = N'VoucherPODetail',
+	@level1name = N'VoucherDetailNonInventory',
 	@level2type = N'COLUMN',
 	@level2name = N'dblCost'
 GO
@@ -59,7 +68,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo',
 	@level1type = N'TYPE',
-	@level1name = N'VoucherPODetail',
+	@level1name = N'VoucherDetailNonInventory',
 	@level2type = N'COLUMN',
 	@level2name = N'intTaxGroupId'
 GO
