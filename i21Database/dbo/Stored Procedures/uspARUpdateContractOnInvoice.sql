@@ -41,6 +41,7 @@ BEGIN TRY
 		,[intServiceChargeAccountId]
 		,[intInventoryShipmentItemId]
 		,[intSalesOrderDetailId]
+		,[intShipmentPurchaseSalesContractId]
 		,[intSiteId]
 		,[strBillingBy]
 		,[dblPercentFull]
