@@ -16,7 +16,7 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLot
 	,@intStorageLocationId AS INT
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@FullQty AS NUMERIC(18,6) 
 	,@TotalQtyOffset AS NUMERIC(18,6)
 	,@strTransactionId AS NVARCHAR(40)
@@ -112,7 +112,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[strTransactionId]
 		,[intTransactionId]
 		,[dtmCreated]
-		,[intCreatedUserId]
+		,[intCreatedEntityId]
 		,[intConcurrencyId]
 	)
 	VALUES (
@@ -129,7 +129,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@strTransactionId
 		,@intTransactionId
 		,GETDATE()
-		,@intUserId
+		,@intEntityUserSecurityId
 		,1	
 	)
 ;
@@ -156,7 +156,7 @@ BEGIN
 		,[strTransactionId]
 		,[intTransactionId]
 		,[dtmCreated]
-		,[intCreatedUserId]
+		,[intCreatedEntityId]
 		,[intConcurrencyId]
 	)
 	VALUES (
@@ -173,7 +173,7 @@ BEGIN
 		,@strTransactionId
 		,@intTransactionId
 		,GETDATE()
-		,@intUserId
+		,@intEntityUserSecurityId
 		,1	
 	)
 

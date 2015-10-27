@@ -2,8 +2,7 @@
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
-	,@intUserId  INT  = NULL   
-	,@intEntityId INT  = NULL    
+	,@intEntityUserSecurityId AS INT = NULL 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -60,14 +59,6 @@ BEGIN
 	WHERE	strShipmentNumber = @strTransactionId  
 END  
 
--- Read the user preference  
-BEGIN  
-	SELECT	@ysnAllowUserSelfPost = 1  
-	FROM	dbo.tblSMPreferences   
-	WHERE	strPreference = 'AllowUserSelfPost'   
-			AND LOWER(RTRIM(LTRIM(strValue))) = 'true'    
-			AND intUserID = @intUserId  
-END   
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
@@ -104,7 +95,9 @@ BEGIN
 END   
 
 -- Check Company preference: Allow User Self Post  
-IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0   
+IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
+	AND @intEntityUserSecurityId <> @intCreatedEntityId 
+	AND @ysnRecap = 0 
 BEGIN   
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	IF @ysnPost = 1   
@@ -323,7 +316,7 @@ BEGIN
 					@ItemsForPost  
 					,@strBatchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@intUserId
+					,@intEntityUserSecurityId
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
@@ -409,7 +402,7 @@ BEGIN
 			EXEC	@intReturnValue = dbo.uspICPostStorage
 					@StorageItemsForPost  
 					,@strBatchId  
-					,@intUserId
+					,@intEntityUserSecurityId
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
@@ -455,7 +448,7 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId	
+				,@intEntityUserSecurityId	
 				,@ysnRecap
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -498,8 +491,7 @@ BEGIN
 	EXEC dbo.uspICPostInventoryShipmentIntegrations
 			@ysnPost
 			,@intTransactionId 
-			,@intUserId 
-			,@intEntityId
+			,@intEntityUserSecurityId
 
 	-- Mark stock reservation as posted (or unposted)
 	EXEC dbo.uspICPostStockReservation
@@ -521,7 +513,7 @@ BEGIN
 	EXEC	dbo.uspSMAuditLog 
 			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Shipment. 
 			,@screenName = 'Inventory.view.InventoryShipment'       -- Screen Namespace
-			,@entityId = @intEntityId                               -- Entity Id.
+			,@entityId = @intEntityUserSecurityId				    -- Entity Id.
 			,@actionType = @actionType                              -- Action Type
 			,@changeDescription = @strDescription					-- Description
 			,@fromValue = ''										-- Previous Value

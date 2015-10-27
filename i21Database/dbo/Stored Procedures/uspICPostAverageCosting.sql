@@ -50,7 +50,7 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -123,7 +123,7 @@ BEGIN
 				,@intRelatedTransactionId = NULL 
 				,@strRelatedTransactionId = NULL 
 				,@strTransactionForm = @strTransactionForm
-				,@intUserId = @intUserId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@intCostingMethod = @AVERAGECOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
@@ -140,7 +140,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
@@ -196,7 +196,7 @@ BEGIN
 				,@intRelatedTransactionId = NULL 
 				,@strRelatedTransactionId = NULL 
 				,@strTransactionForm = @strTransactionForm
-				,@intUserId = @intUserId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
 				,@intCostingMethod = @AVERAGECOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT			
 
@@ -210,7 +210,7 @@ BEGIN
 				,@dtmDate
 				,@dblAddQty
 				,@dblCost
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@FullQty
 				,@TotalQtyOffset
 				,@strTransactionId
@@ -255,7 +255,7 @@ BEGIN
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
 						,@strTransactionForm = @strTransactionForm
-						,@intUserId = @intUserId
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@intCostingMethod = @AVERAGECOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
@@ -285,7 +285,7 @@ BEGIN
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
 						,@strTransactionForm = @strTransactionForm
-						,@intUserId = @intUserId
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@intCostingMethod = @AVERAGECOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 			END
@@ -355,7 +355,7 @@ BEGIN
 					,@intRelatedTransactionId = NULL
 					,@strRelatedTransactionId = NULL 
 					,@strTransactionForm = @strTransactionForm
-					,@intUserId = @intUserId
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@intCostingMethod = @AVERAGECOST
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 		END 

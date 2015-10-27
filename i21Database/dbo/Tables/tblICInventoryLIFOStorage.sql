@@ -85,6 +85,7 @@ Tracks all non-company owned stocks in a LIFO manner. Records are physically arr
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
+		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLIFOStorage] PRIMARY KEY NONCLUSTERED ([intInventoryLIFOStorageId]) 
 	)

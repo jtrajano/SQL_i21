@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateLotNumberOnInventoryAdjustmentSplitLot]
 	@intTransactionId INT 
-	,@intUserId INT = NULL 
+	,@intEntityUserSecurityId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -150,7 +150,7 @@ BEGIN
 
 	EXEC @intErrorFoundOnCreateUpdateLotNumber = dbo.uspICCreateUpdateLotNumber 
 		@ItemsThatNeedLotId
-		,@intUserId
+		,@intEntityUserSecurityId
 
 	IF @intErrorFoundOnCreateUpdateLotNumber <> 0
 		RETURN @intErrorFoundOnCreateUpdateLotNumber;

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateUpdateLotNumber]
 	@ItemsForLot ItemLotTableType READONLY 
-	,@intUserId AS INT 
+	,@intEntityUserSecurityId AS INT 
 	,@intLotStatusId AS INT = 1 -- (1: is Active, 2: is On Hold, 3: Quarantine) 
 AS
 
@@ -516,7 +516,7 @@ BEGIN
 				,ysnReleasedToWarehouse
 				,ysnProduced
 				,dtmDateCreated
-				,intCreatedUserId
+				,intCreatedEntityId
 				,intConcurrencyId
 				,intOwnershipType
 				,dblGrossWeight
@@ -554,7 +554,7 @@ BEGIN
 				,@ysnReleasedToWarehouse
 				,@ysnProduced
 				,GETDATE()
-				,@intUserId
+				,@intEntityUserSecurityId
 				,1
 				,@intOwnershipType
 				,@dblGrossWeight

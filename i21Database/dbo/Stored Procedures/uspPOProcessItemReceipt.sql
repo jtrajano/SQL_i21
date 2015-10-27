@@ -38,13 +38,10 @@ END
 -- Add code to lock-out editing of the purchase order after it has been processed.
   
 -- Call inventory stored procedure to process your transaction into "Item Receipt"
-
-DECLARE @icUserId INT = (SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId);
-
 EXEC dbo.uspICProcessToItemReceipt
 	@intSourceTransactionId = @poId
 	,@strSourceType = 'Purchase Order'
-	,@intUserId = @icUserId
+	,@intEntityUserSecurityId = @userId
 	,@InventoryReceiptId = @itemReceiptId OUTPUT
 
 IF @@ERROR > 0 

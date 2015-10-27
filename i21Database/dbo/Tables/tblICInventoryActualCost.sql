@@ -86,6 +86,7 @@ Tracks all stocks in a Actual-Cost manner. Records are physically arranged in an
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
+		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryActualCost] PRIMARY KEY NONCLUSTERED ([intInventoryActualCostId]) 
 	)

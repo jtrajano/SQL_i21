@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddSalesOrderToInventoryShipment]
 	@SalesOrderId AS INT
-	,@intUserId AS INT
+	,@intEntitySecurityUserId AS INT
 	,@InventoryShipmentId AS INT OUTPUT 
 AS
 
@@ -56,7 +56,6 @@ BEGIN
 				,strComment
 				,ysnPosted
 				,intEntityId
-				,intCreatedUserId
 				,intConcurrencyId
 		)
 		SELECT	strShipmentNumber			= @ShipmentNumber
@@ -83,8 +82,7 @@ BEGIN
 				,strReceivedBy				= NULL 
 				,strComment					= SO.strComments
 				,ysnPosted					= 0 
-				,intEntityId				= dbo.fnGetUserEntityId(@intUserId) 
-				,intCreatedUserId			= @intUserId
+				,intEntityId				= @intEntitySecurityUserId
 				,intConcurrencyId			= 1
 		FROM	dbo.tblSOSalesOrder SO
 		WHERE	SO.intSalesOrderId = @SalesOrderId

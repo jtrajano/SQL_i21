@@ -86,6 +86,7 @@ Tracks all stocks in a LIFO manner. Records are physically arranged in a LIFO ma
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
+		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLIFO] PRIMARY KEY NONCLUSTERED ([intInventoryLIFOId]) )
 	GO

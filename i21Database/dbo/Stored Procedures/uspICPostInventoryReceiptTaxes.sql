@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICPostInventoryReceiptTaxes]
 	@intInventoryReceiptId AS INT 
 	,@strBatchId AS NVARCHAR(20)
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
 AS
 
@@ -143,8 +143,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
-			,intUserId					= @intUserId 
-			,intEntityId				= @intUserId 
+			,intUserId					= NULL -- @intUserId 
+			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -175,8 +175,8 @@ BEGIN
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
-			,intUserId					= @intUserId 
-			,intEntityId				= @intUserId 
+			,intUserId					= NULL -- @intUserId 
+			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName

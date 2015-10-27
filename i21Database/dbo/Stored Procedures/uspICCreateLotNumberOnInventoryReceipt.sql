@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateLotNumberOnInventoryReceipt]
 	@strTransactionId NVARCHAR(40) = NULL   
-	,@intUserId INT
+	,@intEntityUserSecurityId INT
 	,@ysnPost BIT
 AS
 
@@ -210,7 +210,7 @@ BEGIN
 
 	EXEC @intErrorFoundOnCreateUpdateLotNumber = dbo.uspICCreateUpdateLotNumber 
 		@ItemsThatNeedLotId
-		,@intUserId
+		,@intEntityUserSecurityId
 
 	IF @intErrorFoundOnCreateUpdateLotNumber <> 0
 		RETURN @intErrorFoundOnCreateUpdateLotNumber;

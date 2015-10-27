@@ -159,10 +159,10 @@ BEGIN
 			,[intConcurrencyId]		= 1	
 
 	INSERT INTO dbo.tblSMUserSecurity (
-		intEntityId
+		intEntityUserSecurityId
 		,strUserName
 	)
-	SELECT intEntityId = 1
+	SELECT intEntityUserSecurityId = 1
 			,strUserName = 'i21User'
 
 	-- Create mock data for Lot Numbers

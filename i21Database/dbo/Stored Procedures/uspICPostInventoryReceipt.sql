@@ -2,8 +2,7 @@
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
-	,@intUserId  INT  = NULL   
-	,@intEntityId INT  = NULL    
+	,@intEntityUserSecurityId AS INT = NULL 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -61,15 +60,7 @@ BEGIN
 	FROM	dbo.tblICInventoryReceipt   
 	WHERE	strReceiptNumber = @strTransactionId  
 END  
-
--- Read the user preference  
-BEGIN  
-	SELECT	@ysnAllowUserSelfPost = 1  
-	FROM	dbo.tblSMPreferences   
-	WHERE	strPreference = 'AllowUserSelfPost'   
-			AND LOWER(RTRIM(LTRIM(strValue))) = 'true'    
-			AND intUserID = @intUserId  
-END   
+  
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
@@ -110,7 +101,9 @@ BEGIN
 END   
 
 -- Check Company preference: Allow User Self Post  
-IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0   
+IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
+	AND @intEntityUserSecurityId <> @intCreatedEntityId 
+	AND @ysnRecap = 0   
 BEGIN   
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	IF @ysnPost = 1   
@@ -194,7 +187,7 @@ BEGIN
 
 	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryReceipt 
 			@strTransactionId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@ysnPost
 
 	IF @intCreateUpdateLotError <> 0
@@ -246,7 +239,7 @@ BEGIN
 		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@INVENTORY_RECEIPT_TYPE
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -421,7 +414,7 @@ BEGIN
 					@ItemsForPost  
 					,@strBatchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@intUserId
+					,@intEntityUserSecurityId
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
@@ -541,7 +534,7 @@ BEGIN
 			EXEC	@intReturnValue = dbo.uspICPostStorage
 					@StorageItemsForPost  
 					,@strBatchId  
-					,@intUserId
+					,@intEntityUserSecurityId
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
@@ -579,7 +572,7 @@ BEGIN
 		EXEC dbo.uspICPostInventoryReceiptTaxes 
 			@intTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@INVENTORY_RECEIPT_TYPE
 			
 	END 
@@ -625,7 +618,7 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@ysnRecap
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -662,7 +655,7 @@ BEGIN
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
 				@intTransactionId
 				,@strBatchId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@INVENTORY_RECEIPT_TYPE	
 				
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -700,7 +693,7 @@ BEGIN
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
 				,@strBatchId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@INVENTORY_RECEIPT_TYPE	
 						
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -770,8 +763,7 @@ BEGIN
 	EXEC dbo.uspICPostInventoryReceiptIntegrations
 		@ysnPost
 		,@intTransactionId
-		,@intUserId
-		,@intEntityId
+		,@intEntityUserSecurityId
 
 	COMMIT TRAN @TransactionName
 END 
@@ -787,7 +779,7 @@ BEGIN
 	EXEC	dbo.uspSMAuditLog 
 			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Receipt. 
 			,@screenName = 'Inventory.view.InventoryReceipt'        -- Screen Namespace
-			,@entityId = @intEntityId                               -- Entity Id.
+			,@entityId = @intEntityUserSecurityId					-- Entity Id.
 			,@actionType = @actionType                              -- Action Type
 			,@changeDescription = @strDescription					-- Description
 			,@fromValue = ''										-- Previous Value

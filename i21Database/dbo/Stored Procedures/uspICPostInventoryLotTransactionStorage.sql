@@ -15,7 +15,7 @@
 	,@intLotStatusId INT 
 	,@intTransactionTypeId INT	
 	,@strTransactionForm NVARCHAR (255)
-	,@intUserId INT
+	,@intEntityUserSecurityId INT
 	,@SourceInventoryLotStorageId INT 
 	,@InventoryLotTransactionStorageId INT OUTPUT 
 AS
@@ -49,7 +49,7 @@ INSERT INTO dbo.tblICInventoryLotTransactionStorage (
 		,[ysnIsUnposted]
 		,[intInventoryCostBucketStorageId]
 		,[dtmCreated]
-		,[intCreatedUserId]
+		,[intCreatedEntityId]
 		,[intConcurrencyId]
 )
 SELECT	[intItemId]								= @intItemId
@@ -70,9 +70,9 @@ SELECT	[intItemId]								= @intItemId
 		,[intLotStatusId]						= @intLotStatusId
 		,[strTransactionForm]					= @strTransactionForm
 		,[ysnIsUnposted]						= 0 
-		,[intInventoryCostBucketStorageId]	= @SourceInventoryLotStorageId
+		,[intInventoryCostBucketStorageId]		= @SourceInventoryLotStorageId
 		,[dtmCreated]							= GETDATE()
-		,[intCreatedUserId]						= @intUserId
+		,[intCreatedEntityId]					= @intEntityUserSecurityId
 		,[intConcurrencyId]						= 1
 FROM	dbo.tblICItemLocation ItemLocation
 WHERE	@intItemId IS NOT NULL

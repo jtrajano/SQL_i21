@@ -2,7 +2,7 @@
 	@intTransactionId INT = NULL
 	,@strBatchId NVARCHAR(50)
 	,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY NVARCHAR(50)
-	,@intUserId INT 
+	,@intEntityUserSecurityId INT 
 	,@strAdjustmentDescription AS NVARCHAR(255)
 AS  
   
@@ -148,7 +148,7 @@ BEGIN
 			@MergeLotSource  
 			,@strBatchId  
 			,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-			,@intUserId
+			,@intEntityUserSecurityId
 END
 
 --------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ BEGIN
 
 	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryAdjustmentSplitLot 
 			@intTransactionId
-			,@intUserId
+			,@intEntityUserSecurityId
 
 	IF @intCreateUpdateLotError <> 0 RETURN -1
 	
@@ -472,5 +472,5 @@ BEGIN
 			@MergeToTargetLot  
 			,@strBatchId  
 			,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-			,@intUserId
+			,@intEntityUserSecurityId
 END

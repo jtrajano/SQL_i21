@@ -17,7 +17,7 @@
 CREATE PROCEDURE [dbo].[uspICPostStorage]
 	@ItemsStorage AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -159,7 +159,7 @@ BEGIN
 				,@strBatchId
 				,@intTransactionTypeId
 				,@strTransactionForm
-				,@intUserId
+				,@intEntityUserSecurityId
 	END
 	ELSE IF @CostingMethod IN (@FIFO, @AVERAGECOST)
 	BEGIN 
@@ -182,7 +182,7 @@ BEGIN
 				,@strBatchId 
 				,@intTransactionTypeId 
 				,@strTransactionForm
-				,@intUserId 
+				,@intEntityUserSecurityId 
 	END 
 	ELSE IF @CostingMethod IN (@LIFO)
 	BEGIN 
@@ -205,7 +205,7 @@ BEGIN
 				,@strBatchId 
 				,@intTransactionTypeId 
 				,@strTransactionForm
-				,@intUserId 
+				,@intEntityUserSecurityId 
 	END
 
 	-- Update the Lot's Qty and Weights. 

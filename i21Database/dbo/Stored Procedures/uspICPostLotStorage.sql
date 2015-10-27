@@ -22,7 +22,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotStorage]
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255) 
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -65,7 +65,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 				,@UpdatedInventoryLotStorageId OUTPUT
@@ -96,8 +96,8 @@ BEGIN
 					,@intTransactionTypeId					= @intTransactionTypeId
 					,@intLotId								= @intLotId
 					,@strTransactionForm					= @strTransactionForm
-					,@intUserId								= @intUserId
-					,@SourceCostBucketStorageId			= @UpdatedInventoryLotStorageId
+					,@intEntityUserSecurityId				= @intEntityUserSecurityId
+					,@SourceCostBucketStorageId				= @UpdatedInventoryLotStorageId
 					,@InventoryTransactionIdStorageId		= @NewInventoryLotStorageTransactionId OUTPUT 
 			
 			-- Reduce the remaining qty
@@ -122,7 +122,7 @@ BEGIN
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@NewInventoryLotStorageId OUTPUT 
 		IF @@ERROR <> 0 GOTO _Exit
 			
@@ -147,8 +147,8 @@ BEGIN
 				,@intTransactionTypeId					= @intTransactionTypeId
 				,@intLotId								= @intLotId
 				,@strTransactionForm					= @strTransactionForm
-				,@intUserId								= @intUserId
-				,@SourceCostBucketStorageId			= @NewInventoryLotStorageId
+				,@intEntityUserSecurityId				= @intEntityUserSecurityId
+				,@SourceCostBucketStorageId				= @NewInventoryLotStorageId
 				,@InventoryTransactionIdStorageId		= @NewInventoryLotStorageTransactionId OUTPUT 						
 	END 
 END 

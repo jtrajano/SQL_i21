@@ -14,7 +14,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFOStorage]
 	,@dblCost AS NUMERIC(18,6)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
 	,@SourceInventoryFIFOStorageId AS INT OUTPUT

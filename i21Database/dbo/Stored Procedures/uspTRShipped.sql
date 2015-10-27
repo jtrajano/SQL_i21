@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRShipped]
 	@ItemsFromInventoryShipment ShipmentItemTableType READONLY 
+	,@intEntityUserSecurityId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF

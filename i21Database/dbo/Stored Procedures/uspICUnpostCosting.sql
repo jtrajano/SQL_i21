@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[uspICUnpostCosting]
 	@intTransactionId AS INT
 	,@strTransactionId AS NVARCHAR(40)
 	,@strBatchId AS NVARCHAR(20)
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@ysnRecap AS BIT = 0 
 AS
 
@@ -172,7 +172,7 @@ BEGIN
 			,[strRelatedTransactionId]
 			,[strTransactionForm]
 			,[dtmCreated]
-			,[intCreatedUserId]
+			,[intCreatedEntityId]
 			,[intConcurrencyId]
 	)			
 	SELECT	
@@ -200,7 +200,7 @@ BEGIN
 			,[strRelatedTransactionId]				= ActualTransaction.strRelatedTransactionId
 			,[strTransactionForm]					= ActualTransaction.strTransactionForm
 			,[dtmCreated]							= GETDATE()
-			,[intCreatedUserId]						= @intUserId
+			,[intCreatedEntityId]						= @intEntityUserSecurityId
 			,[intConcurrencyId]						= 1
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
@@ -249,7 +249,7 @@ BEGIN
 			,[strTransactionForm]		= ActualTransaction.strTransactionForm
 			,[ysnIsUnposted]			= 1
 			,[dtmCreated]				= GETDATE()
-			,[intCreatedUserId]			= @intUserId
+			,[intCreatedEntityId]		= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
@@ -407,7 +407,7 @@ BEGIN
 					,[strRelatedTransactionId]
 					,[strTransactionForm]
 					,[dtmCreated]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)			
 		SELECT	
@@ -435,7 +435,7 @@ BEGIN
 				,[strRelatedTransactionId]				= NULL 
 				,[strTransactionForm]					= InvTrans.strTransactionForm
 				,[dtmCreated]							= GETDATE()
-				,[intCreatedUserId]						= @intUserId
+				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
@@ -473,5 +473,5 @@ EXEC dbo.uspICCreateReversalGLEntries
 	@strBatchId
 	,@intTransactionId
 	,@strTransactionId
-	,@intUserId
+	,@intEntityUserSecurityId
 ;

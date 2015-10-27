@@ -19,6 +19,7 @@ This table summarizes the total stocks (for both ins and outs) of item per locat
 		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
+		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryStockSummary] PRIMARY KEY ([intInventoryStockSummaryId]),
 		CONSTRAINT [UK_tblICInventoryStockSummary] UNIQUE CLUSTERED ([intItemId], [intLocationId])

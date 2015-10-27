@@ -86,6 +86,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
+		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryFIFOStorage] PRIMARY KEY NONCLUSTERED ([intInventoryFIFOStorageId]) 
 	)

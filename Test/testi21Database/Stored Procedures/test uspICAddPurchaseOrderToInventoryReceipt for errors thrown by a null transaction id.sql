@@ -11,7 +11,7 @@ BEGIN
 
 		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt
 			@PurchaseOrderId = NULL
-			,@intUserId = NULL
+			,@intEntityUserSecurityId = NULL
 			,@InventoryReceiptId = NULL 
 	END 
 END

@@ -24,7 +24,7 @@ CREATE PROCEDURE [dbo].[uspICPostCosting]
 	@ItemsToPost AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 AS
 
@@ -173,7 +173,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId
+			,@intEntityUserSecurityId
 	END
 
 	-- FIFO 
@@ -198,7 +198,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId;
+			,@intEntityUserSecurityId;
 	END
 
 	-- LIFO 
@@ -223,7 +223,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId;
+			,@intEntityUserSecurityId;
 	END
 
 	-- LOT 
@@ -249,7 +249,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId;
+			,@intEntityUserSecurityId;
 	END
 
 	-- ACTUAL COST 
@@ -275,7 +275,7 @@ BEGIN
 			,@strBatchId 
 			,@intTransactionTypeId 
 			,@strTransactionForm 
-			,@intUserId 
+			,@intEntityUserSecurityId 
 			;
 	END
 
@@ -405,6 +405,6 @@ BEGIN
 	EXEC dbo.uspICCreateGLEntries 
 		@strBatchId
 		,@strAccountToCounterInventory
-		,@intUserId
+		,@intEntityUserSecurityId
 		,@strGLDescription
 END 

@@ -2,7 +2,7 @@
 	@strBatchId AS NVARCHAR(20)
 	,@intTransactionId AS INT
 	,@strTransactionId AS NVARCHAR(40)
-	,@intUserId AS INT	
+	,@intEntityUserSecurityId AS INT	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -108,8 +108,8 @@ BEGIN
 			,strJournalLineDescription	= GLEntries.strJournalLineDescription
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= @intUserId 
-			,intEntityId				= @intUserId 
+			,intUserId					= NULL -- @intUserId 
+			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 			,strTransactionId			= GLEntries.strTransactionId
 			,intTransactionId			= GLEntries.intTransactionId
 			,strTransactionType			= GLEntries.strTransactionType
@@ -154,8 +154,8 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= @intUserId 
-			,intEntityId				= @intUserId 
+			,intUserId					= NULL -- @intUserId 
+			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AUTO_NEGATIVE_TransactionType
@@ -192,8 +192,8 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= @intUserId 
-			,intEntityId				= @intUserId 
+			,intUserId					= NULL -- @intUserId 
+			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AUTO_NEGATIVE_TransactionType

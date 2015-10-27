@@ -196,14 +196,12 @@ BEGIN
 
 	-- Creata fake data for security user
 	EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity';
-	DECLARE @intUserId AS INT = 39989
 	DECLARE @intEntityId AS INT = 19945
 
 	INSERT INTO dbo.tblSMUserSecurity (
-		intUserSecurityID
-		,intEntityId 
+		intEntityUserSecurityId
 	)
-	VALUES (@intUserId, @intEntityId);
+	VALUES (@intEntityId);
 
 	EXEC tSQLt.FakeTable 'dbo.tblSOSalesOrder';
 	EXEC tSQLt.FakeTable 'dbo.tblSOSalesOrderDetail', @Identity = 1;

@@ -37,6 +37,7 @@ This tables holds all inventory transactions for storage/custody items (not comp
 		[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
+		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryTransactionStorage] PRIMARY KEY ([intInventoryTransactionStorageId]),
 		CONSTRAINT [FK_tblICInventoryTransactionStorage_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddPurchaseOrderToInventoryReceipt]
 	@PurchaseOrderId AS INT
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
@@ -58,7 +58,6 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,dblActualTempReading
 		,intConcurrencyId
 		,intEntityId
-		,intCreatedUserId
 		,ysnPosted
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
@@ -71,7 +70,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,strBillOfLading		= NULL
 		,intShipViaId			= PO.intShipViaId
 		,intShipFromId			= PO.intShipFromId 
-		,intReceiverId			= @intUserId 
+		,intReceiverId			= @intEntityUserSecurityId 
 		,intCurrencyId			= PO.intCurrencyId
 		,strVessel				= NULL
 		,intFreightTermId		= PO.intFreightTermId
@@ -88,8 +87,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dteReceiveTime			= NULL 
 		,dblActualTempReading	= NULL 
 		,intConcurrencyId		= 1
-		,intEntityId			= (SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
-		,intCreatedUserId		= @intUserId
+		,intEntityId			= @intEntityUserSecurityId
 		,ysnPosted				= 0
 FROM	dbo.tblPOPurchase PO
 WHERE	PO.intPurchaseId = @PurchaseOrderId

@@ -21,7 +21,7 @@ CREATE PROCEDURE [dbo].[uspICPostLIFOStorage]
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255) 
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -61,7 +61,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@UpdatedCostBucketStorageId OUTPUT
@@ -93,7 +93,7 @@ BEGIN
 					,@intTransactionTypeId = @intTransactionTypeId
 					,@intLotId = NULL 
 					,@strTransactionForm = @strTransactionForm
-					,@intUserId = @intUserId
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@SourceCostBucketStorageId = @UpdatedCostBucketStorageId
 					,@InventoryTransactionIdStorageId = @NewInventoryTransactionStorageId OUTPUT			
 			
@@ -114,7 +114,7 @@ BEGIN
 			,@dtmDate
 			,@dblQty
 			,@dblCost
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@strTransactionId
 			,@intTransactionId
 			,@NewInventoryCostBucketStorageId OUTPUT 
@@ -143,7 +143,7 @@ BEGIN
 			,@intTransactionTypeId = @intTransactionTypeId
 			,@intLotId = NULL  
 			,@strTransactionForm = @strTransactionForm
-			,@intUserId = @intUserId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
 			,@SourceCostBucketStorageId = @NewInventoryCostBucketStorageId
 			,@InventoryTransactionIdStorageId = @NewInventoryTransactionStorageId OUTPUT						
 	END 

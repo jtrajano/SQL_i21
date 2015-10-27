@@ -71,14 +71,12 @@ BEGIN
 
 		-- Creata fake data for security user
 		EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity';
-		DECLARE @intUserId AS INT = 39989
 		DECLARE @intEntityId AS INT = 19945
 
 		INSERT INTO tblSMUserSecurity (
-			intUserSecurityID
-			,intEntityId 
+			intEntityUserSecurityId
 		)
-		VALUES (@intUserId, @intEntityId);
+		VALUES (@intEntityId);
 
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchase';
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchaseDetail', @Identity = 1;
@@ -123,7 +121,6 @@ BEGIN
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
-				,intCreatedUserId
 				,intEntityId
 		INTO	expected_tblICInventoryReceipt
 		FROM	dbo.tblICInventoryReceipt
@@ -166,7 +163,6 @@ BEGIN
 									+ ((4-0) * 125.00)
 				,ysnInvoicePaid = 0
 				,intConcurrencyId = 1
-				,intCreatedUserId = @intUserId
 				,intEntityId = @intEntityId
 		
 		---------------------------------------------------------
@@ -232,7 +228,7 @@ BEGIN
 
 		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt
 			@PurchaseOrderId = 1
-			,@intUserId = @intUserId
+			,@intEntityUserSecurityId = @intEntityId
 			,@InventoryReceiptId = @InventoryReceiptIdResult OUTPUT
 			
 		SELECT	strReceiptNumber

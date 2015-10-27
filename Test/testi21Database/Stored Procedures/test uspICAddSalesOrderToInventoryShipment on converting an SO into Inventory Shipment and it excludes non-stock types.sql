@@ -85,7 +85,6 @@ BEGIN
 
 	-- Fake Entity variables
 	BEGIN 
-		DECLARE @intUserId AS INT = 39989
 		DECLARE @intEntityId AS INT = 19945
 	END
 
@@ -130,7 +129,6 @@ BEGIN
 			,strComment
 			,ysnPosted
 			,intEntityId
-			,intCreatedUserId
 			,intConcurrencyId
 		)
 		SELECT 
@@ -160,7 +158,6 @@ BEGIN
 			,strComment					= 'Comments from Sales Order'
 			,ysnPosted					= 0
 			,intEntityId				= @intEntityId
-			,intCreatedUserId			= @intUserId
 			,intConcurrencyId			= 1
 
 	END
@@ -171,7 +168,7 @@ BEGIN
 
 		EXEC dbo.uspICAddSalesOrderToInventoryShipment
 			@SalesOrderId = 1
-			,@intUserId = @intUserId
+			,@intEntitySecurityUserId = @intEntityId
 			,@InventoryShipmentId = @InventoryShipmentIdResult OUTPUT			
 	END 
 
@@ -208,7 +205,6 @@ BEGIN
 				,strComment
 				,ysnPosted
 				,intEntityId
-				,intCreatedUserId
 				,intConcurrencyId
 		)
 		SELECT 
@@ -238,7 +234,6 @@ BEGIN
 				,strComment
 				,ysnPosted
 				,intEntityId
-				,intCreatedUserId
 				,intConcurrencyId
 		FROM	dbo.tblICInventoryShipment
 		WHERE	intInventoryShipmentId = @Expected_Shipment_Id

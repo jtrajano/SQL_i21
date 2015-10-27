@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddInventoryTransfer]
 	@TransferEntries InventoryTransferStagingTable READONLY
-	,@intUserId AS INT	
+	,@intEntityUserSecurityId AS INT	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -69,7 +69,6 @@ END
 
 -- Do a loop using a cursor. 
 BEGIN 
-	DECLARE @intEntityId AS INT;
 
 	DECLARE @intId INT
 	DECLARE loopDataForTransferHeader CURSOR LOCAL FAST_FORWARD 
@@ -87,7 +86,6 @@ BEGIN
 	BEGIN 
 		SET @InventoryTransferNumber = NULL 
 		SET @InventoryTransferId = NULL 
-		SET @intEntityId = NULL 
 
 		-- Check if there is an existing Inventory Transfer 
 		SELECT	@InventoryTransferId = RawData.intInventoryTransferId
@@ -110,12 +108,6 @@ BEGIN
 			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryTransfer, @InventoryTransferNumber OUTPUT 
 			IF @@ERROR <> 0 OR @InventoryTransferNumber IS NULL GOTO _BreakLoop;
 		END 
-
-		-- Get the entity id's 
-		SELECT	TOP 1 
-				@intEntityId = [intEntityUserSecurityId]
-		FROM	dbo.tblSMUserSecurity
-		WHERE	[intEntityUserSecurityId] = @intUserId
 
 		MERGE	
 		INTO	dbo.tblICInventoryTransfer 
@@ -140,7 +132,7 @@ BEGIN
 				dtmTransferDate			= dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmTransferDate, GETDATE()))
 				,strTransferType		= IntegrationData.strTransferType
 				,intSourceType			= IntegrationData.intSourceType
-				,intTransferredById		= @intEntityId
+				,intTransferredById		= @intEntityUserSecurityId
 				,strDescription			= IntegrationData.strDescription
 				,intFromLocationId		= IntegrationData.intFromLocationId
 				,intToLocationId		= IntegrationData.intToLocationId
@@ -149,8 +141,7 @@ BEGIN
 				,intShipViaId			= IntegrationData.intShipViaId
 				,intFreightUOMId		= IntegrationData.intFreightUOMId
 				,ysnPosted				= 0
-				,intCreatedUserId		= @intUserId
-				,intEntityId			= @intEntityId
+				,intEntityId			= @intEntityUserSecurityId
 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -167,7 +158,6 @@ BEGIN
 				,intShipViaId		
 				,intFreightUOMId	
 				,ysnPosted			
-				,intCreatedUserId	
 				,intEntityId
 			)
 			VALUES (
@@ -175,7 +165,7 @@ BEGIN
 				/*dtmTransferDate*/			,dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmTransferDate, GETDATE())) 
 				/*strTransferType*/			,IntegrationData.strTransferType
 				/*intSourceType*/			,IntegrationData.intSourceType
-				/*intTransferredById*/		,@intEntityId
+				/*intTransferredById*/		,@intEntityUserSecurityId
 				/*strDescription*/			,IntegrationData.strDescription
 				/*intFromLocationId*/		,IntegrationData.intFromLocationId
 				/*intToLocationId*/			,IntegrationData.intToLocationId
@@ -184,8 +174,7 @@ BEGIN
 				/*intShipViaId*/			,IntegrationData.intShipViaId
 				/*intFreightUOMId*/			,IntegrationData.intFreightUOMId
 				/*ysnPosted*/				,0
-				/*intCreatedUserId*/		,@intUserId
-				/*intEntityId*/				,@intEntityId
+				/*intEntityId*/				,@intEntityUserSecurityId
 			)			
 		;
 				
@@ -293,8 +282,8 @@ BEGIN
 			
 			EXEC	dbo.uspSMAuditLog 
 					@keyValue = @InventoryTransferId						-- Primary Key Value of the Inventory Transfer. 
-					,@screenName = 'Inventory.view.InventoryTransfer'        -- Screen Namespace
-					,@entityId = @intEntityId                               -- Entity Id.
+					,@screenName = 'Inventory.view.InventoryTransfer'       -- Screen Namespace
+					,@entityId = @intEntityUserSecurityId                   -- Entity Id.
 					,@actionType = 'Processed'                              -- Action Type
 					,@changeDescription = @strDescription					-- Description
 					,@fromValue = @strSourceId                              -- Previous Value

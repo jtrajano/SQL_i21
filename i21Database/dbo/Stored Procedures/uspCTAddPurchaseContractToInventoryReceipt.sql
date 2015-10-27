@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTAddPurchaseContractToInventoryReceipt]
 	@PurchaseContractId AS INT
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
@@ -57,7 +57,6 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,dblActualTempReading
 		,intConcurrencyId
 		,intEntityId
-		,intCreatedUserId
 		,ysnPosted
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
@@ -71,7 +70,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,strBillOfLading		= NULL
 		,intShipViaId			= NULL
 		,intShipFromId			= NULL
-		,intReceiverId			= @intUserId 
+		,intReceiverId			= @intEntityUserSecurityId 
 		,intCurrencyId			= NULL
 		,strVessel				= NULL
 		,intFreightTermId		= NULL
@@ -88,8 +87,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dteReceiveTime			= NULL 
 		,dblActualTempReading	= NULL 
 		,intConcurrencyId		= 1
-		,intEntityId			= (SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
-		,intCreatedUserId		= @intUserId
+		,intEntityId			= @intEntityUserSecurityId
 		,ysnPosted				= 0
 FROM	dbo.tblCTContractHeader Contract
 WHERE	Contract.intContractHeaderId = @PurchaseContractId

@@ -19,7 +19,7 @@
 	,@intTransactionTypeId INT
 	,@intLotId INT
 	,@strTransactionForm NVARCHAR (255)
-	,@intUserId INT
+	,@intEntityUserSecurityId INT
 	,@SourceCostBucketStorageId INT 
 	,@InventoryTransactionIdStorageId INT OUTPUT 
 AS
@@ -81,7 +81,7 @@ SELECT	[intItemId]								= @intItemId
 		,[intStorageLocationId]					= @intStorageLocationId
 		,[ysnIsUnposted]						= 0 
 		,[dtmCreated]							= GETDATE()
-		,[intCreatedUserId]						= @intUserId
+		,[intCreatedEntityId]					= @intEntityUserSecurityId
 		,[intConcurrencyId]						= 1
 		,[intInventoryCostBucketStorageId]	= @SourceCostBucketStorageId
 WHERE	@intItemId IS NOT NULL
@@ -111,7 +111,7 @@ BEGIN
 		,@ActiveLotStatus
 		,@intTransactionTypeId 		
 		,@strTransactionForm
-		,@intUserId 
+		,@intEntityUserSecurityId 
 		,@SourceCostBucketStorageId 
 		,NULL 
 END

@@ -2,8 +2,7 @@
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
-	,@intUserId  INT  = NULL   
-	,@intEntityId INT  = NULL    
+	,@intEntityUserSecurityId AS INT = NULL 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -49,15 +48,7 @@ BEGIN
 	FROM	dbo.tblICBuildAssembly
 	WHERE	strBuildNo = @strTransactionId
 END  
-
--- Read the user preference  
-BEGIN  
-	SELECT	@ysnAllowUserSelfPost = 1  
-	FROM	dbo.tblSMPreferences   
-	WHERE	strPreference = 'AllowUserSelfPost'   
-			AND LOWER(RTRIM(LTRIM(strValue))) = 'true'    
-			AND intUserID = @intUserId  
-END   
+  
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
@@ -94,7 +85,9 @@ BEGIN
 END   
 
 -- Check Company preference: Allow User Self Post  
-IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0   
+IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
+	AND @intEntityUserSecurityId <> @intCreatedEntityId 
+	AND @ysnRecap = 0  
 BEGIN   
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	IF @ysnPost = 1   
@@ -175,7 +168,7 @@ BEGIN
 				@ItemsForPost  
 				,@strBatchId  
 				,NULL
-				,@intUserId
+				,@intEntityUserSecurityId
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
@@ -228,7 +221,7 @@ BEGIN
 				@AssemblyItemForPost  
 				,@strBatchId  
 				,NULL
-				,@intUserId
+				,@intEntityUserSecurityId
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
@@ -266,7 +259,7 @@ BEGIN
 	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
 			,NULL
-			,@intUserId
+			,@intEntityUserSecurityId
 			,NULL
 
 	IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -311,7 +304,7 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId	
+				,@intEntityUserSecurityId	
 				,@ysnRecap 
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -350,6 +343,24 @@ BEGIN
 
 	COMMIT TRAN @TransactionName
 END 
+
+-- Create an Audit Log
+IF @ysnRecap = 0 
+BEGIN 
+	DECLARE @strDescription AS NVARCHAR(100) 
+			,@actionType AS NVARCHAR(50)
+
+	SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+			
+	EXEC	dbo.uspSMAuditLog 
+			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Build Assembly. 
+			,@screenName = 'Inventory.view.BuildAssemblyBlend'		-- Screen Namespace
+			,@entityId = @intEntityUserSecurityId					-- Entity Id.
+			,@actionType = @actionType                              -- Action Type
+			,@changeDescription = @strDescription					-- Description
+			,@fromValue = ''										-- Previous Value
+			,@toValue = ''											-- New Value
+END
     
 GOTO Post_Exit
 

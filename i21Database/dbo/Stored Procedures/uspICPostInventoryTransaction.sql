@@ -22,7 +22,7 @@
 	,@intRelatedTransactionId INT
 	,@strRelatedTransactionId NVARCHAR(40)
 	,@strTransactionForm NVARCHAR (255)
-	,@intUserId INT
+	,@intEntityUserSecurityId INT
 	,@intCostingMethod INT
 	,@InventoryTransactionIdentityId INT OUTPUT 
 AS
@@ -67,7 +67,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[ysnIsUnposted]
 		,[intRelatedInventoryTransactionId]
 		,[dtmCreated] 
-		,[intCreatedUserId] 
+		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
 		,[intCostingMethod]
 )
@@ -96,7 +96,7 @@ SELECT	[intItemId]							= @intItemId
 		,[ysnIsUnposted]					= 0 
 		,[intRelatedInventoryTransactionId] = @intRelatedInventoryTransactionId
 		,[dtmCreated]						= GETDATE()
-		,[intCreatedUserId]					= @intUserId
+		,[intCreatedEntityId]				= @intEntityUserSecurityId
 		,[intConcurrencyId]					= 1
 		,[intCostingMethod]					= @intCostingMethod
 WHERE	@intItemId IS NOT NULL
@@ -124,6 +124,6 @@ BEGIN
 		,@ActiveLotStatus 
 		,@intTransactionTypeId 
 		,@strTransactionForm 
-		,@intUserId 
+		,@intEntityUserSecurityId 
 		,NULL  
 END

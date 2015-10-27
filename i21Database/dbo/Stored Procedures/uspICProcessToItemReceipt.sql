@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICProcessToItemReceipt]
 	@intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
-	,@intUserId AS INT 
+	,@intEntityUserSecurityId AS INT 
 	,@InventoryReceiptId AS INT OUTPUT
 	,@TransactionSourceType AS INT = 0
 	,@TransactionSourceId AS INT = NULL
@@ -113,13 +113,19 @@ BEGIN TRY
 	-- Add the items to the item receipt 
 	IF @strSourceType = @SourceType_PurchaseOrder
 	BEGIN 
-		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt 
+				@intSourceTransactionId
+				, @intEntityUserSecurityId
+				, @InventoryReceiptId OUTPUT; 
 	END
 	ELSE IF @strSourceType = @SourceType_PurchaseContract
 	BEGIN
 		IF (@TransactionSourceType = 0)
 		BEGIN
-			EXEC dbo.uspCTAddPurchaseContractToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+			EXEC dbo.uspCTAddPurchaseContractToInventoryReceipt 
+				@intSourceTransactionId
+				, @intEntityUserSecurityId
+				, @InventoryReceiptId OUTPUT; 
 		END
 		--ELSE IF (@TransactionSourceType = 1)
 		--BEGIN
@@ -127,12 +133,18 @@ BEGIN TRY
 		--END
 		ELSE IF (@TransactionSourceType = 2)
 		BEGIN
-			EXEC dbo.uspLGAddInboundShipmentToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+			EXEC dbo.uspLGAddInboundShipmentToInventoryReceipt 
+				@intSourceTransactionId
+				, @intEntityUserSecurityId
+				, @InventoryReceiptId OUTPUT; 
 		END
 	END
 	ELSE IF @strSourceType = @SourceType_TransferOrder
 	BEGIN 
-		EXEC dbo.uspICAddTransferOrderToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+		EXEC dbo.uspICAddTransferOrderToInventoryReceipt 
+			@intSourceTransactionId
+			, @intEntityUserSecurityId
+			, @InventoryReceiptId OUTPUT; 
 	END
 
 END TRY

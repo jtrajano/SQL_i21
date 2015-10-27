@@ -2,8 +2,7 @@
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
-	,@intUserId  INT  = NULL   
-	,@intEntityId INT  = NULL    
+	,@intEntityUserSecurityId AS INT = NULL 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -59,14 +58,6 @@ BEGIN
 	WHERE	strTransferNo = @strTransactionId
 END  
 
--- Read the user preference  
-BEGIN  
-	SELECT	@ysnAllowUserSelfPost = 1  
-	FROM	dbo.tblSMPreferences   
-	WHERE	strPreference = 'AllowUserSelfPost'   
-			AND LOWER(RTRIM(LTRIM(strValue))) = 'true'    
-			AND intUserID = @intUserId  
-END   
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
@@ -139,7 +130,9 @@ END
 IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) DROP TABLE #tempValidateItemLocation
 
 -- Check Company preference: Allow User Self Post  
-IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0   
+IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
+	AND @intEntityUserSecurityId <> @intCreatedEntityId 
+	AND @ysnRecap = 0   
 BEGIN   
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
 	IF @ysnPost = 1   
@@ -168,7 +161,7 @@ BEGIN
 
 	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryTransfer 
 			@strTransactionId
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@ysnPost
 
 	IF @intCreateUpdateLotError <> 0
@@ -260,7 +253,7 @@ BEGIN
 				@ItemsForRemovalPost  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intUserId
+				,@intEntityUserSecurityId
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
@@ -327,7 +320,7 @@ BEGIN
 				@ItemsForTransferPost  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intUserId
+				,@intEntityUserSecurityId
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
@@ -370,7 +363,7 @@ BEGIN
 		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-			,@intUserId
+			,@intEntityUserSecurityId
 			,@strGLDescription
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -422,7 +415,7 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@ysnRecap 		
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
@@ -488,7 +481,7 @@ BEGIN
 	EXEC	dbo.uspSMAuditLog 
 			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Transfer. 
 			,@screenName = 'Inventory.view.InventoryTransfer'       -- Screen Namespace
-			,@entityId = @intEntityId                               -- Entity Id.
+			,@entityId = @intEntityUserSecurityId					-- Entity Id.
 			,@actionType = @actionType                              -- Action Type
 			,@changeDescription = @strDescription					-- Description
 			,@fromValue = ''										-- Previous Value

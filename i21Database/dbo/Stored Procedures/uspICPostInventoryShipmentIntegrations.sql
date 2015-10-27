@@ -1,8 +1,7 @@
 ﻿CREATE PROCEDURE uspICPostInventoryShipmentIntegrations
 	@ysnPost BIT = 0  
 	,@intTransactionId INT = NULL   
-	,@intUserId  INT  = NULL   
-	,@intEntityId INT  = NULL    
+	,@intEntityUserSecurityId INT  = NULL      
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -95,21 +94,27 @@ END
 -- Update the shipped quantities back to Inbound Shipment 
 IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_INBOUND_SHIPMENT
 BEGIN 
-	EXEC dbo.uspLGShipped @ItemsFromInventoryShipment
+	EXEC dbo.uspLGShipped 
+		@ItemsFromInventoryShipment
+		,@intEntityUserSecurityId
 	GOTO _Exit;
 END
 
 -- Update the shipped quantities back to a Scale Ticket
 IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_SCALE
 BEGIN 
-	EXEC dbo.uspSCShipped @ItemsFromInventoryShipment
+	EXEC dbo.uspSCShipped 
+		@ItemsFromInventoryShipment
+		,@intEntityUserSecurityId
 	GOTO _Exit;
 END
 
 -- Update the shipped quantities back to Transport
 IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_TRANSPORT
 BEGIN 
-	EXEC dbo.uspTRShipped @ItemsFromInventoryShipment
+	EXEC dbo.uspTRShipped 
+		@ItemsFromInventoryShipment
+		,@intEntityUserSecurityId
 	GOTO _Exit;
 END
 

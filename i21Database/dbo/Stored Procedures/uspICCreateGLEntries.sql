@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateGLEntries]
 	@strBatchId AS NVARCHAR(20)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 AS
 
@@ -270,8 +270,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -308,8 +308,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -349,8 +349,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -386,8 +386,8 @@ SELECT
         ,strJournalLineDescription    = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName 
@@ -427,8 +427,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId -- TODO
-		,intEntityId				= @intUserId -- TODO
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -465,8 +465,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -506,8 +506,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -543,8 +543,8 @@ SELECT
         ,strJournalLineDescription  = '' 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
+		,intUserId					= NULL -- @intUserId 
+		,intEntityId				= @intEntityUserSecurityId -- @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName

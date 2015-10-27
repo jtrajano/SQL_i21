@@ -14,12 +14,11 @@ BEGIN
 		UNION ALL SELECT intEntityId = 30
 
 		INSERT INTO tblSMUserSecurity (
-			intUserSecurityID
-			,intEntityId
+			intEntityUserSecurityId
 		)
-		SELECT intUserSecurityID = 1, intEntityId = 10 
-		UNION ALL SELECT intUserSecurityID = 2, intEntityId = 20
-		UNION ALL SELECT intUserSecurityID = 3, intEntityId = 30
+		SELECT intEntityUserSecurityId = 10 
+		UNION ALL SELECT intEntityUserSecurityId = 20
+		UNION ALL SELECT intEntityUserSecurityId = 30
 	END 
 	
 	-- Fake data
@@ -170,7 +169,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE @TransferEntries AS InventoryTransferStagingTable
-				,@intUserId AS INT = 2
+				,@intEntityId AS INT = 20
 	END 
 	
 	-- Act 	
@@ -241,26 +240,25 @@ BEGIN
 
 		EXEC dbo.uspICAddInventoryTransfer
 			@TransferEntries
-			,@intUserId
+			,@intEntityId
 	END 
 
 	-- Assert
 	BEGIN
 
-		DECLARE @strTransferNo AS NVARCHAR(50)
-		DECLARE @intTransferredById AS INT
-				,@intEntityId AS INT
-				
+		DECLARE @actualTransferNo AS NVARCHAR(50)
+		DECLARE @actualTransferredById AS INT
+				,@actualEntityId AS INT
 
-		SELECT	@strTransferNo = tblICInventoryTransfer.strTransferNo
-				,@intTransferredById = intTransferredById
-				,@intEntityId = intEntityId
+		SELECT	@actualTransferNo = tblICInventoryTransfer.strTransferNo
+				,@actualTransferredById = intTransferredById
+				,@actualEntityId = intEntityId
 		FROM	dbo.tblICInventoryTransfer INNER JOIN #tmpAddInventoryTransferResult 
 					ON tblICInventoryTransfer.intInventoryTransferId = #tmpAddInventoryTransferResult.intInventoryTransferId
 
-		EXEC tSQLt.AssertEquals 'INVTRN-1001', @strTransferNo
-		EXEC tSQLt.AssertEquals 20, @intTransferredById
-		EXEC tSQLt.AssertEquals 20, @intEntityId
+		EXEC tSQLt.AssertEquals 'INVTRN-1001', @actualTransferNo
+		EXEC tSQLt.AssertEquals 20, @actualTransferredById
+		EXEC tSQLt.AssertEquals 20, @actualEntityId
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
