@@ -233,7 +233,7 @@ SELECT
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId] 
 	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= CAST(SCT.[intTicketNumber] AS NVARCHAR(250))
+	,[strTicketNumber]					= SCT.[strTicketNumber]
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
@@ -379,7 +379,7 @@ SELECT
 	,[strTerm]							= T.[strTerm]
 	,[intEntityShipViaId]				= S.[intEntityShipViaId]
 	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= CAST(SCT.[intTicketNumber] AS NVARCHAR(250))
+	,[strTicketNumber]					= SCT.[strTicketNumber]
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL
 	,[strTaxGroup]						= NULL
