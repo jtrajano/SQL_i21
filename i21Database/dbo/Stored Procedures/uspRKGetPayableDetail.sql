@@ -6,7 +6,7 @@ AS
 DECLARE @tblTemp TABLE (
 	intInventoryReceiptItemId INT
 	,strLocationName NVARCHAR(50)
-	,intTicketNumber INT
+	,strTicketNumber  NVARCHAR(50)
 	,dtmTicketDateTime DATETIME
 	,strCustomerReference NVARCHAR(100)
 	,strDistributionOption NVARCHAR(50)
@@ -23,7 +23,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -34,7 +34,7 @@ BEGIN
 			)
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, 
@@ -74,7 +74,7 @@ BEGIN
 		
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -111,7 +111,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -121,7 +121,7 @@ BEGIN
 			,dblTotal)
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -159,7 +159,7 @@ BEGIN
 		
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -199,7 +199,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -258,7 +258,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -318,7 +318,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -328,7 +328,7 @@ BEGIN
 			,dblTotal)
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -408,7 +408,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -458,7 +458,7 @@ BEGIN
 		
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -498,7 +498,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -509,7 +509,7 @@ BEGIN
 			)
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -550,7 +550,7 @@ BEGIN
 		
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -589,7 +589,7 @@ BEGIN
 		INSERT INTO @tblTemp (
 			intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -600,7 +600,7 @@ BEGIN
 			)
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -682,7 +682,7 @@ BEGIN
 		BEGIN
 			SELECT intInventoryReceiptItemId
 						,strLocationName
-						,intTicketNumber
+						,strTicketNumber
 						,dtmTicketDateTime
 						,strCustomerReference
 						,strDistributionOption, 
@@ -697,7 +697,7 @@ BEGIN
 		BEGIN
 		SELECT intInventoryReceiptItemId
 				,strLocationName
-				,intTicketNumber
+				,strTicketNumber
 				,dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -711,7 +711,7 @@ ELSE
 BEGIN
 SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
