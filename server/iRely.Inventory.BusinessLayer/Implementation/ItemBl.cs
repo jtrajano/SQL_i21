@@ -388,6 +388,44 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
+        /// Return Inventory Valuation of Item and some of its details
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetInventoryValuationSummary(GetParameter param)
+        {
+            var query = (from p in _db.GetQuery<vyuICGetInventoryValuation>()
+                         group p by new { p.intItemId, p.intItemLocationId, p.intSubLocationId, p.intStorageLocationId } into g
+                         select new vyuICGetInventoryValuationSummary { 
+                             intItemId = g.FirstOrDefault().intItemId,
+                             intItemLocationId = g.FirstOrDefault().intItemLocationId,
+                             intSubLocationId = g.FirstOrDefault().intSubLocationId,
+                             intStorageLocationId = g.FirstOrDefault().intStorageLocationId,
+                             strItemNo = g.FirstOrDefault().strItemNo,
+                             strItemDescription = g.FirstOrDefault().strItemDescription,
+                             strLocationName = g.FirstOrDefault().strLocationName,
+                             strSubLocationName = g.FirstOrDefault().strSubLocationName,
+                             strStorageLocationName = g.FirstOrDefault().strStorageLocationName,
+                             dblValue = g.Sum(p=> p.dblValue)
+                         }).Filter(param, true);
+                              
+
+            var sorts = new List<SearchSort>();
+            sorts.Add(new SearchSort() { property = "intItemId" });
+            sorts.Add(new SearchSort() { property = "intItemLocationId" });
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
         /// Duplicate Item
         /// </summary>
         /// <param name="intItemId">Specify the Item Id of the Item to duplicate</param>

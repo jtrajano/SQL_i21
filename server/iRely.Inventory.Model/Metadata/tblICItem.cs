@@ -560,4 +560,18 @@ namespace iRely.Inventory.Model
         public decimal? dblRunningBalance { get; set; }
         public string strBatchId { get; set; }
     }
+
+    public class vyuICGetInventoryValuationSummary
+    {
+        public int intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public int? intItemLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public decimal? dblValue { get; set; }
+    }
 }
