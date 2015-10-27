@@ -1,8 +1,7 @@
 ﻿CREATE PROCEDURE uspICPostInventoryReceiptIntegrations
 	@ysnPost BIT  = 0  
 	,@intTransactionId INT = NULL   
-	,@intUserId  INT  = NULL   
-	,@intEntityId INT  = NULL    
+	,@intEntityUserSecurityId INT  = NULL    
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -78,32 +77,32 @@ END
 IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER 
 	AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
 BEGIN 
-	EXEC dbo.uspPOReceived @ItemsFromInventoryReceipt, @intUserId
+	EXEC dbo.uspPOReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 	GOTO _Exit;
 END
 
 -- Update the received quantities back to the Purchase Contract
 IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
 BEGIN 
-	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intUserId
+	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 END
 
 -- Update the received quantities back to Inbound Shipment 
 IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
 BEGIN 
-	EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt, @intUserId
+	EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 END
 
 -- Update the received quantities back to a Scale Ticket
 IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_SCALE
 BEGIN 
-	EXEC dbo.uspSCReceived @ItemsFromInventoryReceipt, @intUserId
+	EXEC dbo.uspSCReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 END
 
 -- Update the received quantities back to Transport Order
 IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_TRANSPORT
 BEGIN 
-	EXEC dbo.uspTRReceived @ItemsFromInventoryReceipt, @intUserId
+	EXEC dbo.uspTRReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 END
 
 _Exit: 
