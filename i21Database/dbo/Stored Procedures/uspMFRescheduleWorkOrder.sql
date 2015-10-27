@@ -59,6 +59,7 @@ BEGIN TRY
 	SELECT @intAllottedNoOfMachine = 0
 
 	SELECT @dtmCurrentDateTime = GETDATE()
+
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
 	SELECT @ysnConsiderSumOfChangeoverTime = ysnConsiderSumOfChangeoverTime
@@ -75,7 +76,8 @@ BEGIN TRY
 		,intNoOfMachine INT
 		)
 	DECLARE @tblMFScheduleWorkOrderDetail TABLE (
-		intWorkOrderId INT NOT NULL
+		intScheduleWorkOrderDetailId INT identity(1, 1)
+		,intWorkOrderId INT NOT NULL
 		,dtmPlannedStartDate DATETIME NOT NULL
 		,dtmPlannedEndDate DATETIME NOT NULL
 		,intPlannedShiftId INT NOT NULL
@@ -86,12 +88,14 @@ BEGIN TRY
 		,intNoOfSelectedMachine INT
 		)
 	DECLARE @tblMFScheduleMachineDetail TABLE (
-		intWorkOrderId INT
+		intScheduleMachineDetailId INT identity(1, 1)
+		,intWorkOrderId INT
 		,intCalendarDetailId INT
 		,intCalendarMachineId INT
 		)
 	DECLARE @tblMFScheduleConstraintDetail TABLE (
-		intWorkOrderId INT
+		intScheduleConstraintDetailId INT identity(1, 1)
+		,intWorkOrderId INT
 		,intScheduleRuleId INT
 		,dtmChangeoverStartDate DATETIME
 		,dtmChangeoverEndDate DATETIME
@@ -202,7 +206,10 @@ BEGIN TRY
 		,x.intStatusId
 		,x.intExecutionOrder
 		,x.strComments
-		,CASE WHEN @dtmCurrentDate>x.dtmExpectedDate THEN 'Past Expected Date' END strNote
+		,CASE 
+			WHEN @dtmCurrentDate > x.dtmExpectedDate
+				THEN 'Past Expected Date'
+			END strNote
 		,x.strAdditionalComments
 		,x.intNoOfSelectedMachine
 		,x.dtmEarliestStartDate
@@ -364,15 +371,14 @@ BEGIN TRY
 			,@intNoOfMachine = NULL
 			,@intGapDuetoEarliestStartDate = 0
 
-
 		SELECT @intCalendarDetailId = intCalendarDetailId
 			,@intCalendarId = intCalendarId
 			,@dtmCalendarDate = dtmCalendarDate
 			,@dtmPlannedStartDate = dtmShiftStartTime
 			,@dtmShiftStartTime = dtmShiftStartTime
 			,@dtmShiftEndTime = dtmShiftEndTime
-			,@intDuration = intDuration*intNoOfMachine
-			,@intRemainingDuration=intDuration
+			,@intDuration = intDuration * intNoOfMachine
+			,@intRemainingDuration = intDuration
 			,@intShiftId = intShiftId
 			,@intNoOfMachine = intNoOfMachine
 		FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -425,14 +431,15 @@ BEGIN TRY
 				BREAK
 			END
 
-			IF @intNoOfSelectedMachine>@intNoOfMachine - @intAllottedNoOfMachine and @intNoOfMachine - @intAllottedNoOfMachine>0
+			IF @intNoOfSelectedMachine > @intNoOfMachine - @intAllottedNoOfMachine
+				AND @intNoOfMachine - @intAllottedNoOfMachine > 0
 			BEGIN
 				SELECT @intNoOfSelectedMachine = @intNoOfMachine - @intAllottedNoOfMachine
 			END
 
 			IF @dtmCurrentDateTime > @dtmShiftStartTime
 			BEGIN
-				Select @intDuration=@intDuration-(DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDateTime)*@intNoOfSelectedMachine)
+				SELECT @intDuration = @intDuration - (DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDateTime) * @intNoOfSelectedMachine)
 
 				SELECT @dtmPlannedStartDate = @dtmCurrentDateTime
 
@@ -446,7 +453,7 @@ BEGIN TRY
 			IF @dtmEarliestStartDate IS NOT NULL
 				AND @dtmEarliestStartDate >= @dtmPlannedStartDate
 			BEGIN
-				SELECT @intDuration=@intDuration-(DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDateTime)*@intNoOfSelectedMachine)
+				SELECT @intDuration = @intDuration - (DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDateTime) * @intNoOfSelectedMachine)
 
 				SELECT @intGapDuetoEarliestStartDate = DateDiff(minute, @dtmPlannedStartDate, @dtmEarliestStartDate)
 
@@ -463,7 +470,7 @@ BEGIN TRY
 						WHERE dtmPlannedEndDate BETWEEN @dtmShiftStartTime
 								AND @dtmShiftEndTime
 							AND ysnPicked = 0
-							AND dtmPlannedEndDate<>@dtmShiftEndTime
+							AND dtmPlannedEndDate <> @dtmShiftEndTime
 						)
 				BEGIN
 					SELECT TOP 1 @dtmPlannedStartDate = MIN(dtmPlannedEndDate)
@@ -472,7 +479,7 @@ BEGIN TRY
 					WHERE dtmPlannedEndDate BETWEEN @dtmShiftStartTime
 							AND @dtmShiftEndTime
 						AND ysnPicked = 0
-						AND dtmPlannedEndDate<>@dtmShiftEndTime
+						AND dtmPlannedEndDate <> @dtmShiftEndTime
 
 					UPDATE @tblMFScheduleWorkOrder
 					SET ysnPicked = 1
@@ -480,7 +487,7 @@ BEGIN TRY
 
 					SELECT @intRemainingDuration = DateDiff(minute, @dtmPlannedStartDate, @dtmShiftEndTime)
 
-					IF @intRemainingDuration=0
+					IF @intRemainingDuration = 0
 					BEGIN
 						SELECT @intCalendarDetailId = Min(intCalendarDetailId)
 						FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -503,7 +510,8 @@ BEGIN TRY
 					AND NOT EXISTS (
 						SELECT *
 						FROM @tblMFScheduleMachineDetail SMD
-						JOIN @tblMFScheduleWorkOrderDetail WD ON WD.intCalendarDetailId = SMD.intCalendarDetailId AND SMD.intWorkOrderId = WD.intWorkOrderId
+						JOIN @tblMFScheduleWorkOrderDetail WD ON WD.intCalendarDetailId = SMD.intCalendarDetailId
+							AND SMD.intWorkOrderId = WD.intWorkOrderId
 						WHERE SMD.intCalendarDetailId = @intCalendarDetailId
 							AND SMD.intCalendarMachineId = MD.intCalendarMachineId
 							AND DATEADD(MINUTE, 1, @dtmPlannedStartDate) BETWEEN WD.dtmPlannedStartDate
@@ -621,28 +629,28 @@ BEGIN TRY
 								SELECT @intMaxChangeoverTime = @intChangeoverTime
 							END
 
-							IF @ysnConsiderSumOfChangeoverTime = 1
-							BEGIN
-								SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intChangeoverTime, @dtmPlannedStartDate)
+							--IF @ysnConsiderSumOfChangeoverTime = 1
+							--BEGIN
+							SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intChangeoverTime, @dtmPlannedStartDate)
 
-								SELECT @intShiftBreakTypeDuration = NULL
+							SELECT @intShiftBreakTypeDuration = NULL
 
-								SELECT @intShiftBreakTypeDuration = SUM(intShiftBreakTypeDuration)
-								FROM dbo.tblMFShiftDetail
-								WHERE intShiftId = @intShiftId
-									AND @dtmCalendarDate + dtmShiftBreakTypeStartTime >= @dtmPlannedStartDate
-									AND @dtmCalendarDate + dtmShiftBreakTypeEndTime <= @dtmPlannedEndDate
+							SELECT @intShiftBreakTypeDuration = SUM(intShiftBreakTypeDuration)
+							FROM dbo.tblMFShiftDetail
+							WHERE intShiftId = @intShiftId
+								AND @dtmCalendarDate + dtmShiftBreakTypeStartTime >= @dtmPlannedStartDate
+								AND @dtmCalendarDate + dtmShiftBreakTypeEndTime <= @dtmPlannedEndDate
 
-								SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE, @dtmCalendarDate + dtmShiftBreakTypeStartTime, @dtmPlannedEndDate)
-								FROM dbo.tblMFShiftDetail
-								WHERE intShiftId = @intShiftId
-									AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
-										AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
+							SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE, @dtmCalendarDate + dtmShiftBreakTypeStartTime, @dtmPlannedEndDate)
+							FROM dbo.tblMFShiftDetail
+							WHERE intShiftId = @intShiftId
+								AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
+									AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
 
-								IF @intShiftBreakTypeDuration IS NOT NULL
-									SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
-							END
+							IF @intShiftBreakTypeDuration IS NOT NULL
+								SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
 
+							--END
 							INSERT INTO @tblMFScheduleConstraintDetail (
 								intWorkOrderId
 								,intScheduleRuleId
@@ -737,7 +745,13 @@ BEGIN TRY
 						WHERE intWorkOrderId = @intWorkOrderId
 						)
 				BEGIN
-					SELECT @intChangeoverDuration = SUM(intDuration)
+					SELECT @intChangeoverDuration = (
+							CASE 
+								WHEN @ysnConsiderSumOfChangeoverTime = 0
+									THEN MAX(intDuration)
+								ELSE SUM(intDuration)
+								END
+							)
 						,@dtmChangeoverStartDate = MIN(dtmChangeoverStartDate)
 						,@dtmChangeoverEndDate = MAX(dtmChangeoverEndDate)
 					FROM @tblMFScheduleConstraintDetail
@@ -830,7 +844,8 @@ BEGIN TRY
 					AND NOT EXISTS (
 						SELECT *
 						FROM @tblMFScheduleMachineDetail SMD
-						JOIN @tblMFScheduleWorkOrderDetail WD ON WD.intCalendarDetailId = SMD.intCalendarDetailId AND SMD.intWorkOrderId = WD.intWorkOrderId
+						JOIN @tblMFScheduleWorkOrderDetail WD ON WD.intCalendarDetailId = SMD.intCalendarDetailId
+							AND SMD.intWorkOrderId = WD.intWorkOrderId
 						WHERE SMD.intCalendarDetailId = @intCalendarDetailId
 							AND SMD.intCalendarMachineId = MD.intCalendarMachineId
 							AND DATEADD(MINUTE, 1, @dtmPlannedStartDate) BETWEEN WD.dtmPlannedStartDate
@@ -909,7 +924,8 @@ BEGIN TRY
 					AND NOT EXISTS (
 						SELECT *
 						FROM @tblMFScheduleMachineDetail SMD
-						JOIN @tblMFScheduleWorkOrderDetail WD ON WD.intCalendarDetailId = SMD.intCalendarDetailId AND SMD.intWorkOrderId = WD.intWorkOrderId
+						JOIN @tblMFScheduleWorkOrderDetail WD ON WD.intCalendarDetailId = SMD.intCalendarDetailId
+							AND SMD.intWorkOrderId = WD.intWorkOrderId
 						WHERE SMD.intCalendarDetailId = @intCalendarDetailId
 							AND SMD.intCalendarMachineId = MD.intCalendarMachineId
 							AND DATEADD(MINUTE, 1, @dtmPlannedStartDate) BETWEEN WD.dtmPlannedStartDate
@@ -949,11 +965,11 @@ BEGIN TRY
 			BREAK
 
 		IF (
-				SELECT SUM(SD.intDuration*SD.intNoOfSelectedMachine)+SUM(ISNULL(S.intChangeoverDuration,0))
+				SELECT SUM(SD.intDuration * SD.intNoOfSelectedMachine) + SUM(ISNULL(S.intChangeoverDuration, 0))
 				FROM @tblMFScheduleWorkOrderDetail SD
 				JOIN @tblMFScheduleWorkOrder S ON S.intWorkOrderId = SD.intWorkOrderId
 				WHERE SD.intCalendarDetailId = @intCalendarDetailId
-				) >= @intDuration 
+				) >= @intDuration
 			OR NOT EXISTS (
 				SELECT *
 				FROM @tblMFScheduleWorkOrder S
@@ -968,7 +984,6 @@ BEGIN TRY
 			WHERE intCalendarDetailId > @intCalendarDetailId
 
 			SELECT @intAllottedNoOfMachine = 0
-
 		END
 	END
 
@@ -1008,7 +1023,7 @@ BEGIN TRY
 			,SC.strName
 			,S.intManufacturingCellId
 			,MC.strCellName
-			,@ysnStandard As ysnStandard
+			,@ysnStandard AS ysnStandard
 			,S.intLocationId
 			,S.intConcurrencyId
 			,S.dtmCreated
@@ -1114,7 +1129,7 @@ BEGIN TRY
 	ORDER BY WS.intSequenceNo DESC
 		,SL.intExecutionOrder
 
-	SELECT 0 AS intScheduleWorkOrderDetailId
+	SELECT intScheduleWorkOrderDetailId
 		,0 AS intScheduleWorkOrderId
 		,intWorkOrderId
 		,@intScheduleId AS intScheduleId
@@ -1128,7 +1143,7 @@ BEGIN TRY
 		,@intConcurrencyId AS intConcurrencyId
 	FROM @tblMFScheduleWorkOrderDetail
 
-	SELECT 0 AS intScheduleMachineDetailId
+	SELECT intScheduleMachineDetailId
 		,0 AS intScheduleWorkOrderDetailId
 		,intWorkOrderId
 		,@intScheduleId AS intScheduleId
@@ -1137,7 +1152,7 @@ BEGIN TRY
 		,@intConcurrencyId AS intConcurrencyId
 	FROM @tblMFScheduleMachineDetail
 
-	SELECT 0 AS intScheduleConstraintDetailId
+	SELECT intScheduleConstraintDetailId
 		,0 AS intScheduleWorkOrderId
 		,intWorkOrderId
 		,@intScheduleId AS intScheduleId
@@ -1147,6 +1162,20 @@ BEGIN TRY
 		,intDuration
 		,@intConcurrencyId AS intConcurrencyId
 	FROM @tblMFScheduleConstraintDetail
+
+	IF @ysnConsiderSumOfChangeoverTime = 0
+	BEGIN
+		WITH RemoveUnusedData (RowNumber)
+		AS (
+			SELECT ROW_NUMBER() OVER (
+					PARTITION BY intWorkOrderId ORDER BY intDuration Desc
+					)
+			FROM @tblMFScheduleConstraintDetail
+			)
+		DELETE
+		FROM RemoveUnusedData
+		WHERE RowNumber > 1
+	END
 
 	SELECT MC.intManufacturingCellId
 		,MC.strCellName
@@ -1197,59 +1226,61 @@ BEGIN TRY
 		AND MC.intManufacturingCellId = @intManufacturingCellId
 		AND SL.dtmPlannedStartDate >= @dtmFromDate
 		AND SL.dtmPlannedEndDate <= @dtmToDate
+	
 	UNION
-SELECT W.intManufacturingCellId
-	,MC.strCellName
-	,W.intWorkOrderId
-	,W.strWorkOrderNo
-	,NULL dblQuantity
-	,NULL dblBalanceQuantity
-	,NULL strWorkOrderComment
-	,NULL dtmExpectedDate
-	,NULL dtmEarliestDate
-	,NULL dtmLatestDate
-	,NULL intItemId
-	,NULL strItemNo
-	,NULL strDescription
-	,NULL intItemUOMId
-	,NULL intUnitMeasureId
-	,NULL strUnitMeasure
-	,NULL strAdditive
-	,NULL strAdditiveDesc
-	,NULL intStatusId
-	,NULL strStatusName
-	,SR.strBackColorName
-	,SC.intDuration
-	,SC.dtmChangeoverStartDate
-	,SC.dtmChangeoverEndDate
-	,NULL strScheduleComment
-	,SL.intExecutionOrder
-	,CONVERT(BIT,0) ysnFrozen
-	,NULL intShiftId
-	,NULL strShiftName
-	,NULL OrderLineItemId
-	,CONVERT(BIT,0) AS ysnAlternateLine
-	,0 AS intByWhichDate
-	,NULL AS strCustOrderNo
-	,SR.strName AS strChangeover
-	,SC.intDuration AS intLeadTime
-	,NULL AS strCustomer
-FROM dbo.tblMFWorkOrder W
-JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId 
-JOIN @tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId
-JOIN dbo.tblMFScheduleRule SR on SR.intScheduleRuleId =SC.intScheduleRuleId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId 
-WHERE W.intLocationId = @intLocationId
-	AND W.intManufacturingCellId = (
-		CASE 
-			WHEN @intManufacturingCellId =0
-				THEN W.intManufacturingCellId
-			ELSE @intManufacturingCellId
-			END
-		)
-	AND SC.dtmChangeoverStartDate >= @dtmFromDate
-	AND SC.dtmChangeoverEndDate <= @dtmToDate
-	Order by SL.intExecutionOrder
+	
+	SELECT W.intManufacturingCellId
+		,MC.strCellName
+		,W.intWorkOrderId
+		,W.strWorkOrderNo
+		,NULL dblQuantity
+		,NULL dblBalanceQuantity
+		,NULL strWorkOrderComment
+		,NULL dtmExpectedDate
+		,NULL dtmEarliestDate
+		,NULL dtmLatestDate
+		,NULL intItemId
+		,NULL strItemNo
+		,NULL strDescription
+		,NULL intItemUOMId
+		,NULL intUnitMeasureId
+		,NULL strUnitMeasure
+		,NULL strAdditive
+		,NULL strAdditiveDesc
+		,NULL intStatusId
+		,NULL strStatusName
+		,SR.strBackColorName
+		,SC.intDuration
+		,SC.dtmChangeoverStartDate
+		,SC.dtmChangeoverEndDate
+		,NULL strScheduleComment
+		,SL.intExecutionOrder
+		,CONVERT(BIT, 0) ysnFrozen
+		,NULL intShiftId
+		,NULL strShiftName
+		,NULL OrderLineItemId
+		,CONVERT(BIT, 0) AS ysnAlternateLine
+		,0 AS intByWhichDate
+		,NULL AS strCustOrderNo
+		,SR.strName AS strChangeover
+		,SC.intDuration AS intLeadTime
+		,NULL AS strCustomer
+	FROM dbo.tblMFWorkOrder W
+	JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
+	JOIN @tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId
+	JOIN dbo.tblMFScheduleRule SR ON SR.intScheduleRuleId = SC.intScheduleRuleId
+	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+	WHERE W.intLocationId = @intLocationId
+		AND W.intManufacturingCellId = (
+			CASE 
+				WHEN @intManufacturingCellId = 0
+					THEN W.intManufacturingCellId
+				ELSE @intManufacturingCellId
+				END
+			)
+		AND SC.dtmChangeoverStartDate >= @dtmFromDate
+		AND SC.dtmChangeoverEndDate <= @dtmToDate
+	ORDER BY SL.intExecutionOrder
 
 	EXEC sp_xml_removedocument @idoc
 END TRY

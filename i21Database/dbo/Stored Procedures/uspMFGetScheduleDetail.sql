@@ -1,11 +1,91 @@
 ﻿CREATE PROC uspMFGetScheduleDetail (
-	@intManufacturingCellId int= 0
+	@intManufacturingCellId INT = 0
 	,@dtmPlannedStartDate DATE
 	,@dtmPlannedEndDate DATE
-	,@intLocationId int
-	,@intScheduleId int
+	,@intLocationId INT
+	,@intScheduleId INT
 	)
 AS
+DECLARE @ysnConsiderSumOfChangeoverTime BIT
+
+DECLARE @tblMFScheduleConstraintDetail TABLE (
+	intScheduleConstraintDetailId INT identity(1, 1)
+	,intWorkOrderId INT
+	,intScheduleRuleId INT
+	,dtmChangeoverStartDate DATETIME
+	,dtmChangeoverEndDate DATETIME
+	,intDuration INT
+		,intManufacturingCellId int
+	,strCellName nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strWorkOrderNo nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strBackColorName nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strName nvarchar(50) COLLATE Latin1_General_CI_AS
+	,intExecutionOrder int
+	)
+
+SELECT @ysnConsiderSumOfChangeoverTime = ysnConsiderSumOfChangeoverTime
+FROM dbo.tblMFCompanyPreference
+
+INSERT INTO @tblMFScheduleConstraintDetail (
+	intWorkOrderId
+	,intScheduleRuleId
+	,dtmChangeoverStartDate
+	,dtmChangeoverEndDate
+	,intDuration
+	,intManufacturingCellId
+	,strCellName
+	,strWorkOrderNo
+	,strBackColorName
+	,strName
+	,intExecutionOrder
+	)
+SELECT SC.intWorkOrderId
+	,SC.intScheduleRuleId
+	,SC.dtmChangeoverStartDate
+	,SC.dtmChangeoverEndDate
+	,SC.intDuration
+	,MC.intManufacturingCellId
+	,MC.strCellName
+	,W.strWorkOrderNo
+	,SR.strBackColorName
+	,SR.strName
+	,W.intExecutionOrder
+FROM tblMFScheduleConstraintDetail SC
+JOIN tblMFWorkOrder W ON W.intWorkOrderId = SC.intWorkOrderId
+JOIN dbo.tblMFScheduleRule SR ON SR.intScheduleRuleId = SC.intScheduleRuleId
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+WHERE SC.dtmChangeoverStartDate >= @dtmPlannedStartDate
+	AND SC.dtmChangeoverEndDate <= @dtmPlannedEndDate
+	AND SC.intScheduleId = (
+		CASE 
+			WHEN @intScheduleId = 0
+				THEN SC.intScheduleId
+			ELSE @intScheduleId
+			END
+		)
+	AND W.intLocationId = @intLocationId
+	AND W.intManufacturingCellId = (
+		CASE 
+			WHEN @intManufacturingCellId = 0
+				THEN W.intManufacturingCellId
+			ELSE @intManufacturingCellId
+			END
+		)
+
+IF @ysnConsiderSumOfChangeoverTime = 0
+BEGIN
+	WITH RemoveUnusedData (RowNumber)
+	AS (
+		SELECT ROW_NUMBER() OVER (
+				PARTITION BY intWorkOrderId ORDER BY intDuration DESC
+				)
+		FROM @tblMFScheduleConstraintDetail
+		)
+	DELETE
+	FROM RemoveUnusedData
+	WHERE RowNumber > 1
+END
+
 SELECT MC.intManufacturingCellId
 	,MC.strCellName
 	,W.intWorkOrderId
@@ -36,7 +116,7 @@ SELECT MC.intManufacturingCellId
 	,SH.intShiftId
 	,SH.strShiftName
 	,0 AS OrderLineItemId
-	,CONVERT(BIT,0) AS ysnAlternateLine
+	,CONVERT(BIT, 0) AS ysnAlternateLine
 	,0 AS intByWhichDate
 	,'' AS strCustOrderNo
 	,'' AS strChangeover
@@ -48,24 +128,33 @@ JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 	AND IU.ysnStockUnit = 1
 JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
-JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId AND intScheduleId=(Case When @intScheduleId=0 Then SL.intScheduleId else @intScheduleId end)
+JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
+	AND intScheduleId = (
+		CASE 
+			WHEN @intScheduleId = 0
+				THEN SL.intScheduleId
+			ELSE @intScheduleId
+			END
+		)
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
 JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 WHERE W.intLocationId = @intLocationId
 	AND MC.intManufacturingCellId = (
 		CASE 
-			WHEN @intManufacturingCellId =0
+			WHEN @intManufacturingCellId = 0
 				THEN MC.intManufacturingCellId
 			ELSE @intManufacturingCellId
 			END
 		)
 	AND SL.dtmPlannedStartDate >= @dtmPlannedStartDate
 	AND SL.dtmPlannedEndDate <= @dtmPlannedEndDate
+
 UNION
-SELECT W.intManufacturingCellId
-	,MC.strCellName
-	,W.intWorkOrderId
-	,W.strWorkOrderNo
+
+SELECT SC.intManufacturingCellId
+	,SC.strCellName
+	,SC.intWorkOrderId
+	,SC.strWorkOrderNo
 	,NULL dblQuantity
 	,NULL dblBalanceQuantity
 	,NULL strWorkOrderComment
@@ -82,36 +171,21 @@ SELECT W.intManufacturingCellId
 	,NULL strAdditiveDesc
 	,NULL intStatusId
 	,NULL strStatusName
-	,SR.strBackColorName
+	,SC.strBackColorName
 	,SC.intDuration
 	,SC.dtmChangeoverStartDate
 	,SC.dtmChangeoverEndDate
 	,NULL strScheduleComment
-	,SL.intExecutionOrder
-	,CONVERT(BIT,0) ysnFrozen
+	,SC.intExecutionOrder
+	,CONVERT(BIT, 0) ysnFrozen
 	,NULL intShiftId
 	,NULL strShiftName
 	,NULL OrderLineItemId
-	,CONVERT(BIT,0) AS ysnAlternateLine
+	,CONVERT(BIT, 0) AS ysnAlternateLine
 	,0 AS intByWhichDate
 	,NULL AS strCustOrderNo
-	,SR.strName AS strChangeover
+	,SC.strName AS strChangeover
 	,SC.intDuration AS intLeadTime
 	,NULL AS strCustomer
-FROM dbo.tblMFWorkOrder W
-JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId AND intScheduleId=(Case When @intScheduleId=0 Then SL.intScheduleId else @intScheduleId end)
-JOIN dbo.tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId
-JOIN dbo.tblMFScheduleRule SR on SR.intScheduleRuleId =SC.intScheduleRuleId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId 
-WHERE W.intLocationId = @intLocationId
-	AND W.intManufacturingCellId = (
-		CASE 
-			WHEN @intManufacturingCellId =0
-				THEN W.intManufacturingCellId
-			ELSE @intManufacturingCellId
-			END
-		)
-	AND SC.dtmChangeoverStartDate >= @dtmPlannedStartDate
-	AND SC.dtmChangeoverEndDate <= @dtmPlannedEndDate
-	AND SC.intScheduleId=(Case When @intScheduleId=0 Then SC.intScheduleId else @intScheduleId end)
-	Order by SL.intExecutionOrder
+FROM @tblMFScheduleConstraintDetail SC
+ORDER BY intExecutionOrder
