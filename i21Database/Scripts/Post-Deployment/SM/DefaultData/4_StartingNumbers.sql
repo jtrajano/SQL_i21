@@ -732,6 +732,15 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Parent Lot Number')
 
+	UNION ALL
+    SELECT  [intStartingNumberId]   = 79
+                                    ,[strTransactionType]   = N'ScaleTicket'
+                                    ,[strPrefix]			= N'SCT-'
+                                    ,[intNumber]            = 1
+                                    ,[strModule]			= 'Grain'
+                                    ,[ysnEnable]			= 1
+                                    ,[intConcurrencyId]		= 1
+    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ScaleTicket')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
