@@ -75,7 +75,7 @@ INSERT INTO tblAPAppliedPrepaidAndDebit(
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
-	[intLineApplied]		=	B.intLineNo, 
+	[intLineApplied]		=	CurrentBill.intLineNo,--B.intLineNo, 
 	[intTransactionId]		=	A.intBillId,
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
@@ -123,6 +123,7 @@ INNER JOIN
 		,D.strContractNumber
 		,D.intContractHeaderId
 		,C.intContractDetailId
+		,C.intLineNo
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	WHERE intBillId = @billId
@@ -201,6 +202,55 @@ AND EXISTS
 	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
 	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
 )
+UNION ALL
+--PREPAYMENT MISC
+SELECT
+	[intBillId]				=	@billId, 
+	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
+	[intLineApplied]		=	CurrentBill.intLineNo, 
+	[intTransactionId]		=	A.intBillId,
+	[strTransactionNumber]	=	A.strBillId,
+	[intItemId]				=	B.intItemId,
+	[strItemDescription]	=	C.strDescription,
+	[strItemNo]				=	C.strItemNo,
+	[intContractHeaderId]	=	NULL,	
+	[strContractNumber]		=	NULL,
+	[intPrepayType]			=	B.intPrepayTypeId,
+	[dblTotal]				=	A.dblTotal,
+	[dblBillAmount]			=	CurrentBill.dblTotal,
+	[dblBalance]			=	A.dblAmountDue,
+	[dblAmountApplied]		=	0,
+	[ysnApplied]			=	0,
+	[intConcurrencyId]		=	0
+FROM tblAPBill A
+INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+INNER JOIN 
+(
+	SELECT
+		C.intItemId
+		,C.dblTotal
+		,C.dblCost
+		,C.dblQtyReceived
+		,C.intBillDetailId
+		,C.intLineNo
+	FROM tblAPBillDetail C
+	WHERE intBillId = @billId
+	AND C.intContractDetailId IS NULL
+) CurrentBill ON B.intItemId = CurrentBill.intItemId
+WHERE A.intTransactionType IN (2)
+AND B.intItemId IS NOT NULL
+AND B.intContractDetailId IS NULL
+AND intEntityVendorId = @vendorId
+AND A.dblAmountDue != 0
+AND EXISTS
+(
+	--get prepayment record only if it has payment posted
+	SELECT 1 FROM tblAPPayment B INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
+	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
+	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
+)
+
 ----PREPAYMENT
 --MERGE tblAPAppliedPrepaidAndDebit AS Target
 --USING (
