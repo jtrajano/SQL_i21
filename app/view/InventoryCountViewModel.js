@@ -70,6 +70,43 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
     },
 
     formulas: {
+        checkPrintCountSheet: function (get) {
+            if (get('current.intStatus') !== 1) {
+                return true;
+            }
+            else return false;
+        },
+        checkPrintVariance: function (get) {
+            if (get('current.intStatus') !== 3) {
+                return true;
+            }
+            else return false;
+        },
+        checkLockInventory: function (get) {
+            if (get('current.intStatus') !== 2) {
+                return true;
+            }
+            else return false;
+        },
+        checkPost: function (get) {
+            if (get('current.intStatus') !== 3) {
+                return true;
+            }
+            else return false;
+        },
+        checkRecount: function (get) {
+            if (get('current.intStatus') !== 4) {
+                return true;
+            }
+            else return false;
+        },
+        hasCountGroup: function (get) {
+            if (iRely.Functions.isEmpty(get('current.intCountGroupId'))) {
+                return false;
+            }
+            else return true;
+        },
+
 
     }
 

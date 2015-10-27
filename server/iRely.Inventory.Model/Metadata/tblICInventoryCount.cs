@@ -376,4 +376,48 @@ namespace iRely.Inventory.Model
 
         public tblICInventoryCountDetail tblICInventoryCountDetail { get; set; }
     }
+
+    public class vyuICGetCountSheet
+    {
+        public int intLocationId { get; set; }
+        public int intCommodityId { get; set; }
+        public string strCommodity { get; set; }
+        public string strCountNo { get; set; }
+        public DateTime? dtmCountDate { get; set; }
+        public int? intInventoryCountDetailId { get; set; }
+        public int? intInventoryCountId { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategory { get; set; }
+        public int? intItemLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intLotId { get; set; }
+        public string strLotNumber { get; set; }
+        public string strLotAlias { get; set; }
+        public decimal? dblSystemCount { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public string strCountLine { get; set; }
+        public decimal? dblPallets { get; set; }
+        public decimal? dblQtyPerPallet { get; set; }
+        public decimal? dblPhysicalCount { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public int? dblPhysicalCountStockUnit { get; set; }
+        public decimal? dblVariance { get; set; }
+        public bool? ysnRecount { get; set; }
+        public int? intEntityUserSecurityId { get; set; }
+        public string strUserName { get; set; }
+        public int? intSort { get; set; }
+        public bool? ysnCountByLots { get; set; }
+        public bool? ysnCountByPallets { get; set; }
+        public bool? ysnIncludeOnHand { get; set; }
+        public bool? ysnIncludeZeroOnHand { get; set; }
+    }
 }

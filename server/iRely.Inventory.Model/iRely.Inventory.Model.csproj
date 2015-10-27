@@ -169,6 +169,7 @@
     <Compile Include="Metadata\tblICTag.cs" />
     <Compile Include="Metadata\tblICUnitMeasure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stored Procedures\LockInventory.cs" />
     <Compile Include="Stored Procedures\DuplicateItem.cs" />
     <Compile Include="Stored Procedures\Posting\PostBuildAssembly.cs" />
     <Compile Include="Stored Procedures\Posting\PostInventoryAdjustment.cs" />

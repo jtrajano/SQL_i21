@@ -1,5 +1,4 @@
 ﻿using iRely.Common;
-using iRely.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

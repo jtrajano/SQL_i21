@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa02221ac22dac109cc1ea22736055069849ce3529bd710e1e3ea6ffee9268092))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets624555992f4f1a32d6d80723bfb7cc2da62d1c92279071ecfc91cbfc0415b370))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsa02221ac22dac109cc1ea22736055069849ce3529bd710e1e3ea6ffee9268092 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets624555992f4f1a32d6d80723bfb7cc2da62d1c92279071ecfc91cbfc0415b370 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "a02221ac22dac109cc1ea22736055069849ce3529bd710e1e3ea6ffee9268092"; }
+            get { return "624555992f4f1a32d6d80723bfb7cc2da62d1c92279071ecfc91cbfc0415b370"; }
         }
 
         /// <summary>
@@ -1485,6 +1485,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICGetInventoryCounts")
             {
                 return GetView287();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetCountSheet")
+            {
+                return GetView288();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetCountSheets")
+            {
+                return GetView289();
             }
 
             return null;
@@ -10460,6 +10470,118 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSort AS vyuICGetInventoryCount_intSort, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryCount AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetCountSheet.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView288()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetCountSheet
+        [CodeFirstDatabaseSchema.vyuICGetCountSheet](T1.vyuICGetCountSheet_intInventoryCountDetailId, T1.vyuICGetCountSheet_intLocationId, T1.vyuICGetCountSheet_intCommodityId, T1.vyuICGetCountSheet_strCommodity, T1.vyuICGetCountSheet_strCountNo, T1.vyuICGetCountSheet_dtmCountDate, T1.vyuICGetCountSheet_intInventoryCountId, T1.vyuICGetCountSheet_intItemId, T1.vyuICGetCountSheet_strItemNo, T1.vyuICGetCountSheet_strItemDescription, T1.vyuICGetCountSheet_strLotTracking, T1.vyuICGetCountSheet_intCategoryId, T1.vyuICGetCountSheet_strCategory, T1.vyuICGetCountSheet_intItemLocationId, T1.vyuICGetCountSheet_strLocationName, T1.vyuICGetCountSheet_intSubLocationId, T1.vyuICGetCountSheet_strSubLocationName, T1.vyuICGetCountSheet_intStorageLocationId, T1.vyuICGetCountSheet_strStorageLocationName, T1.vyuICGetCountSheet_intLotId, T1.vyuICGetCountSheet_strLotNumber, T1.vyuICGetCountSheet_strLotAlias, T1.vyuICGetCountSheet_dblSystemCount, T1.vyuICGetCountSheet_dblLastCost, T1.vyuICGetCountSheet_strCountLine, T1.vyuICGetCountSheet_dblPallets, T1.vyuICGetCountSheet_dblQtyPerPallet, T1.vyuICGetCountSheet_dblPhysicalCount, T1.vyuICGetCountSheet_intItemUOMId, T1.vyuICGetCountSheet_strUnitMeasure, T1.vyuICGetCountSheet_dblPhysicalCountStockUnit, T1.vyuICGetCountSheet_dblVariance, T1.vyuICGetCountSheet_ysnRecount, T1.vyuICGetCountSheet_intEntityUserSecurityId, T1.vyuICGetCountSheet_strUserName, T1.vyuICGetCountSheet_intSort, T1.vyuICGetCountSheet_ysnCountByLots, T1.vyuICGetCountSheet_ysnCountByPallets, T1.vyuICGetCountSheet_ysnIncludeOnHand, T1.vyuICGetCountSheet_ysnIncludeZeroOnHand)
+    FROM (
+        SELECT 
+            T.intInventoryCountDetailId AS vyuICGetCountSheet_intInventoryCountDetailId, 
+            T.intLocationId AS vyuICGetCountSheet_intLocationId, 
+            T.intCommodityId AS vyuICGetCountSheet_intCommodityId, 
+            T.strCommodity AS vyuICGetCountSheet_strCommodity, 
+            T.strCountNo AS vyuICGetCountSheet_strCountNo, 
+            T.dtmCountDate AS vyuICGetCountSheet_dtmCountDate, 
+            T.intInventoryCountId AS vyuICGetCountSheet_intInventoryCountId, 
+            T.intItemId AS vyuICGetCountSheet_intItemId, 
+            T.strItemNo AS vyuICGetCountSheet_strItemNo, 
+            T.strItemDescription AS vyuICGetCountSheet_strItemDescription, 
+            T.strLotTracking AS vyuICGetCountSheet_strLotTracking, 
+            T.intCategoryId AS vyuICGetCountSheet_intCategoryId, 
+            T.strCategory AS vyuICGetCountSheet_strCategory, 
+            T.intItemLocationId AS vyuICGetCountSheet_intItemLocationId, 
+            T.strLocationName AS vyuICGetCountSheet_strLocationName, 
+            T.intSubLocationId AS vyuICGetCountSheet_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetCountSheet_strSubLocationName, 
+            T.intStorageLocationId AS vyuICGetCountSheet_intStorageLocationId, 
+            T.strStorageLocationName AS vyuICGetCountSheet_strStorageLocationName, 
+            T.intLotId AS vyuICGetCountSheet_intLotId, 
+            T.strLotNumber AS vyuICGetCountSheet_strLotNumber, 
+            T.strLotAlias AS vyuICGetCountSheet_strLotAlias, 
+            T.dblSystemCount AS vyuICGetCountSheet_dblSystemCount, 
+            T.dblLastCost AS vyuICGetCountSheet_dblLastCost, 
+            T.strCountLine AS vyuICGetCountSheet_strCountLine, 
+            T.dblPallets AS vyuICGetCountSheet_dblPallets, 
+            T.dblQtyPerPallet AS vyuICGetCountSheet_dblQtyPerPallet, 
+            T.dblPhysicalCount AS vyuICGetCountSheet_dblPhysicalCount, 
+            T.intItemUOMId AS vyuICGetCountSheet_intItemUOMId, 
+            T.strUnitMeasure AS vyuICGetCountSheet_strUnitMeasure, 
+            T.dblPhysicalCountStockUnit AS vyuICGetCountSheet_dblPhysicalCountStockUnit, 
+            T.dblVariance AS vyuICGetCountSheet_dblVariance, 
+            T.ysnRecount AS vyuICGetCountSheet_ysnRecount, 
+            T.intEntityUserSecurityId AS vyuICGetCountSheet_intEntityUserSecurityId, 
+            T.strUserName AS vyuICGetCountSheet_strUserName, 
+            T.intSort AS vyuICGetCountSheet_intSort, 
+            T.ysnCountByLots AS vyuICGetCountSheet_ysnCountByLots, 
+            T.ysnCountByPallets AS vyuICGetCountSheet_ysnCountByPallets, 
+            T.ysnIncludeOnHand AS vyuICGetCountSheet_ysnIncludeOnHand, 
+            T.ysnIncludeZeroOnHand AS vyuICGetCountSheet_ysnIncludeZeroOnHand, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetCountSheets AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetCountSheets.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView289()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetCountSheets
+        [iRely.Inventory.Model.vyuICGetCountSheet](T1.vyuICGetCountSheet_intInventoryCountDetailId, T1.vyuICGetCountSheet_intLocationId, T1.vyuICGetCountSheet_intCommodityId, T1.vyuICGetCountSheet_strCommodity, T1.vyuICGetCountSheet_strCountNo, T1.vyuICGetCountSheet_dtmCountDate, T1.vyuICGetCountSheet_intInventoryCountId, T1.vyuICGetCountSheet_intItemId, T1.vyuICGetCountSheet_strItemNo, T1.vyuICGetCountSheet_strItemDescription, T1.vyuICGetCountSheet_strLotTracking, T1.vyuICGetCountSheet_intCategoryId, T1.vyuICGetCountSheet_strCategory, T1.vyuICGetCountSheet_intItemLocationId, T1.vyuICGetCountSheet_strLocationName, T1.vyuICGetCountSheet_intSubLocationId, T1.vyuICGetCountSheet_strSubLocationName, T1.vyuICGetCountSheet_intStorageLocationId, T1.vyuICGetCountSheet_strStorageLocationName, T1.vyuICGetCountSheet_intLotId, T1.vyuICGetCountSheet_strLotNumber, T1.vyuICGetCountSheet_strLotAlias, T1.vyuICGetCountSheet_dblSystemCount, T1.vyuICGetCountSheet_dblLastCost, T1.vyuICGetCountSheet_strCountLine, T1.vyuICGetCountSheet_dblPallets, T1.vyuICGetCountSheet_dblQtyPerPallet, T1.vyuICGetCountSheet_dblPhysicalCount, T1.vyuICGetCountSheet_intItemUOMId, T1.vyuICGetCountSheet_strUnitMeasure, T1.vyuICGetCountSheet_dblPhysicalCountStockUnit, T1.vyuICGetCountSheet_dblVariance, T1.vyuICGetCountSheet_ysnRecount, T1.vyuICGetCountSheet_intEntityUserSecurityId, T1.vyuICGetCountSheet_strUserName, T1.vyuICGetCountSheet_intSort, T1.vyuICGetCountSheet_ysnCountByLots, T1.vyuICGetCountSheet_ysnCountByPallets, T1.vyuICGetCountSheet_ysnIncludeOnHand, T1.vyuICGetCountSheet_ysnIncludeZeroOnHand)
+    FROM (
+        SELECT 
+            T.intInventoryCountDetailId AS vyuICGetCountSheet_intInventoryCountDetailId, 
+            T.intLocationId AS vyuICGetCountSheet_intLocationId, 
+            T.intCommodityId AS vyuICGetCountSheet_intCommodityId, 
+            T.strCommodity AS vyuICGetCountSheet_strCommodity, 
+            T.strCountNo AS vyuICGetCountSheet_strCountNo, 
+            T.dtmCountDate AS vyuICGetCountSheet_dtmCountDate, 
+            T.intInventoryCountId AS vyuICGetCountSheet_intInventoryCountId, 
+            T.intItemId AS vyuICGetCountSheet_intItemId, 
+            T.strItemNo AS vyuICGetCountSheet_strItemNo, 
+            T.strItemDescription AS vyuICGetCountSheet_strItemDescription, 
+            T.strLotTracking AS vyuICGetCountSheet_strLotTracking, 
+            T.intCategoryId AS vyuICGetCountSheet_intCategoryId, 
+            T.strCategory AS vyuICGetCountSheet_strCategory, 
+            T.intItemLocationId AS vyuICGetCountSheet_intItemLocationId, 
+            T.strLocationName AS vyuICGetCountSheet_strLocationName, 
+            T.intSubLocationId AS vyuICGetCountSheet_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetCountSheet_strSubLocationName, 
+            T.intStorageLocationId AS vyuICGetCountSheet_intStorageLocationId, 
+            T.strStorageLocationName AS vyuICGetCountSheet_strStorageLocationName, 
+            T.intLotId AS vyuICGetCountSheet_intLotId, 
+            T.strLotNumber AS vyuICGetCountSheet_strLotNumber, 
+            T.strLotAlias AS vyuICGetCountSheet_strLotAlias, 
+            T.dblSystemCount AS vyuICGetCountSheet_dblSystemCount, 
+            T.dblLastCost AS vyuICGetCountSheet_dblLastCost, 
+            T.strCountLine AS vyuICGetCountSheet_strCountLine, 
+            T.dblPallets AS vyuICGetCountSheet_dblPallets, 
+            T.dblQtyPerPallet AS vyuICGetCountSheet_dblQtyPerPallet, 
+            T.dblPhysicalCount AS vyuICGetCountSheet_dblPhysicalCount, 
+            T.intItemUOMId AS vyuICGetCountSheet_intItemUOMId, 
+            T.strUnitMeasure AS vyuICGetCountSheet_strUnitMeasure, 
+            T.dblPhysicalCountStockUnit AS vyuICGetCountSheet_dblPhysicalCountStockUnit, 
+            T.dblVariance AS vyuICGetCountSheet_dblVariance, 
+            T.ysnRecount AS vyuICGetCountSheet_ysnRecount, 
+            T.intEntityUserSecurityId AS vyuICGetCountSheet_intEntityUserSecurityId, 
+            T.strUserName AS vyuICGetCountSheet_strUserName, 
+            T.intSort AS vyuICGetCountSheet_intSort, 
+            T.ysnCountByLots AS vyuICGetCountSheet_ysnCountByLots, 
+            T.ysnCountByPallets AS vyuICGetCountSheet_ysnCountByPallets, 
+            T.ysnIncludeOnHand AS vyuICGetCountSheet_ysnIncludeOnHand, 
+            T.ysnIncludeZeroOnHand AS vyuICGetCountSheet_ysnIncludeZeroOnHand, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetCountSheet AS T
     ) AS T1");
         }
     }

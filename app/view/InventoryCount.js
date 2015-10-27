@@ -107,6 +107,13 @@ Ext.define('Inventory.view.InventoryCount', {
                         {
                             xtype: 'button',
                             tabIndex: -1,
+                            itemId: 'btnPrintVariance',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Print Variance'
+                        },
+                        {
+                            xtype: 'button',
+                            tabIndex: -1,
                             itemId: 'btnLockInventory',
                             ui: 'i21-button-toolbar-small',
                             text: 'Lock Inventory'
@@ -171,7 +178,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                     items: [
                                         {
                                             xtype: 'container',
-                                            flex: 1.2,
+                                            flex: 1,
                                             layout: {
                                                 type: 'vbox',
                                                 align: 'stretch'
@@ -326,8 +333,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                         },
                                         {
                                             xtype: 'container',
-                                            flex: 1.2,
-                                            margin: '0 0 0 5',
+                                            flex: 1,
+                                            margin: '0 0 0 10',
                                             layout: {
                                                 type: 'vbox',
                                                 align: 'stretch'
@@ -417,8 +424,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                         },
                                         {
                                             xtype: 'container',
-                                            flex: 0.6,
-                                            margin: '0 5 0 5',
+                                            flex: 0.8,
+                                            margin: '0 5 0 10',
                                             layout: {
                                                 type: 'vbox',
                                                 align: 'stretch'
@@ -428,37 +435,37 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkIncludeZeroOnHand',
                                                     fieldLabel: 'Include Zero On Hand',
-                                                    labelWidth: 125
+                                                    labelWidth: 170
                                                 },
                                                 {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkIncludeOnHand',
                                                     fieldLabel: 'Include On Hand',
-                                                    labelWidth: 125
+                                                    labelWidth: 170
                                                 },
                                                 {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkScannedCountEntry',
                                                     fieldLabel: 'Scanned Count Entry',
-                                                    labelWidth: 125
+                                                    labelWidth: 170
                                                 },
                                                 {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkCountByLots',
                                                     fieldLabel: 'Count by Lots',
-                                                    labelWidth: 125
+                                                    labelWidth: 170
                                                 },
                                                 {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkCountByPallets',
                                                     fieldLabel: 'Count by Pallets',
-                                                    labelWidth: 125
+                                                    labelWidth: 170
                                                 }
                                             ]
                                         },
                                         {
                                             xtype: 'container',
-                                            flex: 0.8,
+                                            flex: 1,
                                             margin: '0 5 0 5',
                                             layout: {
                                                 type: 'vbox',

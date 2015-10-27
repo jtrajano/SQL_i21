@@ -11,6 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IInventoryCountBl : IBusinessLayer<tblICInventoryCount>
     {
-
+        Task<SearchResult> GetCountSheets(GetParameter param);
+        SaveResult LockInventory(int InventoryCountId);
     }
 }

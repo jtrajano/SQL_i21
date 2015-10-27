@@ -154,4 +154,56 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
         }
     }
+
+    public class vyuICGetCountSheetMap : EntityTypeConfiguration<vyuICGetCountSheet>
+    {
+        public vyuICGetCountSheetMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryCountDetailId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetCountSheet");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strCommodity).HasColumnName("strCommodity");
+            this.Property(t => t.strCountNo).HasColumnName("strCountNo");
+            this.Property(t => t.dtmCountDate).HasColumnName("dtmCountDate");
+            this.Property(t => t.intInventoryCountDetailId).HasColumnName("intInventoryCountDetailId");
+            this.Property(t => t.intInventoryCountId).HasColumnName("intInventoryCountId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.strCategory).HasColumnName("strCategory");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.intLotId).HasColumnName("intLotId");
+            this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
+            this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
+            this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(18, 6);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
+            this.Property(t => t.strCountLine).HasColumnName("strCountLine");
+            this.Property(t => t.dblPallets).HasColumnName("dblPallets").HasPrecision(18, 6);
+            this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(18, 6);
+            this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(18, 6);
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.dblPhysicalCountStockUnit).HasColumnName("dblPhysicalCountStockUnit");
+            this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(18, 6);
+            this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
+            this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
+            this.Property(t => t.strUserName).HasColumnName("strUserName");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.ysnCountByLots).HasColumnName("ysnCountByLots");
+            this.Property(t => t.ysnCountByPallets).HasColumnName("ysnCountByPallets");
+            this.Property(t => t.ysnIncludeOnHand).HasColumnName("ysnIncludeOnHand");
+            this.Property(t => t.ysnIncludeZeroOnHand).HasColumnName("ysnIncludeZeroOnHand");
+        }
+    }
 }
