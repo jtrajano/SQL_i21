@@ -80,11 +80,11 @@ namespace iRely.Inventory.BusinessLayer
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
                 if (Transfer.isPost)
                 {
-                    db.PostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                    db.PostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                    db.UnPostInventoryTransfer(isRecap, Transfer.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 postResult.HasError = false;
             }
