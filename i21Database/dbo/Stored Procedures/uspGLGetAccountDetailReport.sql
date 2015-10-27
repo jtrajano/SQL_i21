@@ -46,12 +46,10 @@ DECLARE @strAccountIdTo NVARCHAR(50)
 DECLARE @strPrimaryCodeFrom NVARCHAR(50)
 DECLARE @strPrimaryCodeTo NVARCHAR(50)
 DECLARE @strPrimaryCodeCondition NVARCHAR(50) = ''
-
 DECLARE @dtmDateFrom NVARCHAR(50)
 DECLARE @dtmDateTo NVARCHAR(50)
 DECLARE @strAccountIdCondition NVARCHAR(20)=''
 
---set @xmlParam=N'<xmlparam><filters><filter><fieldname>intGLDetailId</fieldname><condition>Equal To</condition><from/><to/><join/><begingroup/><endgroup/><datatype/></filter></filters></xmlparam>'
 IF @xmlParam <> ''
 BEGIN
 	exec sp_xml_preparedocument @idoc output, @xmlParam  
@@ -91,9 +89,6 @@ BEGIN
 	END
 	 
 END
-
-
-
 
 DECLARE @hasInactiveAccountsByDate BIT = 0
 DECLARE @hasInactiveAccountsByAccount BIT = 0
@@ -166,6 +161,7 @@ OUTER APPLY(
 
 )
 
+
 ,
 GLAccountBalance
 (
@@ -188,19 +184,30 @@ AS
 		,A.strDescription as strAccountDescription
 		,(select strAccountType from tblGLAccountGroup where intAccountGroupId = A.intAccountGroupId) as strAccountType
 		,(select strAccountGroup from tblGLAccountGroup where intAccountGroupId = A.intAccountGroupId) as strAccountGroup
-		,dblBeginBalance = dbo.fnGetBeginBalance(A.strAccountId, (SELECT ISNULL(@dtmDateFrom, MIN(dtmDate)) FROM GLAccountDetails),'')
-		,dblBeginBalanceUnit =  dbo.fnGetBeginBalanceUnit(A.strAccountId,(SELECT ISNULL(@dtmDateFrom, MIN(dtmDate)) FROM GLAccountDetails),'')
+		,dblBeginBalance = D.beginBalance
+		,dblBeginBalanceUnit =  D.beginBalanceUnit
 		,B.[Primary Account]
 		,B.[Location] 
 		,C.intGLDetailId
 		FROM tblGLAccount A
+		
+		--CROSS APPLY (dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT ISNULL(@dtmDateFrom,MIN(dtmDate)) FROM GLAccountDetails) as b WHERE b.strAccountId = A.strAccountId)
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
+		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT ISNULL(@dtmDateFrom, MIN(dtmDate)) FROM GLAccountDetails)) D
+				
+		
+		
+		
 ),
+
+--SELECT * FROM GLAccountBalance
+
 RAWREPORT AS (
 
 ----*CountStart*--
-SELECT DISTINCT
+SELECT 
+--DISTINCT
 'Account ID :' + A.strAccountId + ' - ' + ISNULL(RTRIM(A.strAccountDescription),RTRIM(B.strAccountDescription)) + ' ' +  A.strAccountGroup + '-' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
 (CASE WHEN A.strAccountDescription  is  NULL  then B.strAccountDescription else A.strAccountDescription END) as strAccountDescripion
 ,(CASE WHEN A.strAccountType  is  NULL  then B.strAccountType else A.strAccountType END) as strAccountType
@@ -230,10 +237,12 @@ SELECT DISTINCT
 ,B.Location
 ,(CASE WHEN A.strUOMCode is  NULL  then '' else A.strUOMCode END) as strUOMCode
 ,ISNULL(B.dblBeginBalance,0) AS dblBeginBalance
-,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.dblBeginBalanceUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0 
-					ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END	
-FROM GLAccountBalance B
-RIGHT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId and B.intGLDetailId = A.intGLDetailId
+,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.dblBeginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0 
+					ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END	
+FROM
+GLAccountDetails A 
+OUTER APPLY(SELECT * from GLAccountBalance  bal WHERE bal.intAccountId = A.intAccountId and bal.intGLDetailId = A.intGLDetailId) B
+OUTER APPLY(SELECT dblLbsPerUnit from Units u WHERE u.intAccountId = A.intAccountId) U
 WHERE ISNULL(A.ysnIsUnposted ,0) = 0)
 SELECT * INTO #tempTableReport  from RAWREPORT
 
@@ -250,43 +259,42 @@ SELECT @SqlQuery = 'Select * from #tempTableBase '
 
 IF @hasInactiveAccountsByDate =1 
 BEGIN
-	--SELECT @SqlQuery += 'OR dtmDate1 = ''' + @dtmDateFrom + ''''
-	
 	DECLARE @cols1 NVARCHAR(MAX) = ''
-	--DECLARE @beginBalanceUnitFormula NVARCHAR (100)=  'dbo.fnGetBeginBalanceUnit(strAccountId,' + @dtmDateFrom +','''') as dblBeginBalanceUnit'
 	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
 	BEGIN
-		;WITH cte AS
+		;WITH cte (accountId,id)AS
 		(
-	
-		   SELECT *, ROW_NUMBER() OVER (PARTITION BY strAccountId ORDER BY dtmDate DESC) AS rn
-		   FROM #tempTableReport where
-		   strAccountId not in(select strAccountId from #tempTableBase)and
-		   dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
-
-		)
-		SELECT * INTO #tempTableReport1	
-		FROM cte
-		WHERE rn = 1
+			SELECT  strAccountId, MIN(intGLDetailId) FROM #tempTableReport
+			WHERE dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
+			 GROUP BY strAccountId
+		),
+		cte1 
+		AS(
+			SELECT * FROM #tempTableReport	A join cte B
+			ON B.accountId = A.strAccountId 
+			AND B.id = A.intGLDetailId
 		
+		)
+		SELECT * INTO #tempTableReport1 FROM cte1
 	END
 
 	IF @strAccountIdCondition = 'Between' or @strPrimaryCodeCondition = 'Between'
 	BEGIN
-		;WITH cte AS
+		;WITH cte (accountId,id)AS
 		(
-	
-		   SELECT *, ROW_NUMBER() OVER (PARTITION BY strAccountId ORDER BY dtmDate DESC) AS rn
-		   FROM #tempTableReport where  
-		   strAccountId not in(select strAccountId from #tempTableBase) and
-		   dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
-		   AND strAccountId BETWEEN @strAccountIdFrom AND @strAccountIdTo
+			SELECT  strAccountId, MIN(intGLDetailId) FROM #tempTableReport
+			WHERE dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
+			AND strAccountId BETWEEN @strAccountIdFrom AND @strAccountIdTo
+			 GROUP BY strAccountId
+		),
+		cte1 
+		AS(
+			SELECT * FROM #tempTableReport	A join cte B
+			ON B.accountId = A.strAccountId 
+			AND B.id = A.intGLDetailId
+		
 		)
-		
-		SELECT * INTO #tempTableReport2
-		from cte
-		WHERE rn = 1
-		
+		SELECT * INTO #tempTableReport2 FROM cte1
 	END
 	DECLARE @cols NVARCHAR (MAX) = 'AccountHeader, strAccountDescripion,strAccountType,strAccountGroup,dtmDate,strBatchId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDetailDescription,strTransactionId, intTransactionId,strTransactionType,strTransactionForm,strModuleName,strReference,strReferenceDetail,strDocument,dblTotal,intAccountUnitId,strCode,intGLDetailId,ysnIsUnposted,strAccountId,[Primary Account],Location,strUOMCode,dblBeginBalance,dblBeginBalanceUnit'
 	SELECT @SqlQuery = 'SELECT ' + @cols + ' FROM #tempTableBase '

@@ -2377,6 +2377,7 @@
     <Build Include="dbo\Functions\fnICGetRunningQuantity.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
