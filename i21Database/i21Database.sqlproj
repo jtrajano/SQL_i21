@@ -2725,6 +2725,8 @@
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099MISC.sql" />
     <Build Include="dbo\Stored Procedures\uspWHMoveContainer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportProductSpecification.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
