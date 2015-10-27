@@ -2720,6 +2720,7 @@
     <Build Include="dbo\Tables\tblPATCustomerEquity.sql" />
     <Build Include="dbo\Tables\tblPATTransfer.sql" />
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
