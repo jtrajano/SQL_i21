@@ -2378,6 +2378,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
