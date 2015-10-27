@@ -20,4 +20,4 @@ select
 	JOIN tblEntityLocation C
 		ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 	JOIN tblEntityType D
-		ON A.intEntityId = D.intEntityId
+		ON A.intEntityId = D.intEntityId  and D.strType in ('Vendor', 'Customer')
