@@ -112,7 +112,7 @@ AS
 			CD.intContractSeq,
 			UH.dtmTransactionDate,
 			UH.strScreenName,
-			LTRIM(DL.intTicketNumber)	AS	strNumber,
+			LTRIM(DL.strTicketNumber)	AS	strNumber,
 			UH.strFieldName,
 			UH.dblOldValue,
 			UH.dblTransactionQuantity,

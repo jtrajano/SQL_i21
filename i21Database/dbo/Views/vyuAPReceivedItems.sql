@@ -165,7 +165,7 @@ FROM
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
-	,[intScaleTicketNumber]		=	G.intTicketNumber
+	,[intScaleTicketNumber]		=	G.strTicketNumber
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId

@@ -37,7 +37,7 @@ SELECT Load.intLoadId
         ,ysnInProgress = IsNull(Load.ysnInProgress, 0)
         ,strScaleTicketNo = CASE WHEN IsNull(Load.intTicketId, 0) <> 0 
 								 THEN 
-									CAST(ST.intTicketNumber AS VARCHAR(100))
+									CAST(ST.strTicketNumber AS VARCHAR(100))
 								 ELSE 
 									CASE WHEN IsNull(Load.intTransportLoadId, 0) <> 0 
 										THEN 
