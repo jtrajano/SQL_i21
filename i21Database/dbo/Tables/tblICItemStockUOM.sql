@@ -42,7 +42,7 @@ It only tracks the qty of those non-'Stock UOM's.
 		[intSubLocationId] INT NULL,
 		[intStorageLocationId] INT NULL,
 		[dblOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblStorage] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		--[dblStorage] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblInConsigned] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)),

@@ -464,22 +464,22 @@ BEGIN
 				intItemId
 				, intItemLocationId
 				, intItemUOMId
-				, dblStorage		
+				, dblUnitStorage		
 		) 
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_DefaultLocation
 				, intItemUOMId		= @WetGrains_PoundUOM
-				, dblStorage		= 110
+				, dblUnitStorage		= 110
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_DefaultLocation
 				, intItemUOMId		= @StickyGrains_PoundUOM
-				, dblStorage		= 220
+				, dblUnitStorage		= 220
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_DefaultLocation
 				, intItemUOMId		= @PremiumGrains_PoundUOM
-				, dblStorage		= 330
+				, dblUnitStorage		= 330
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_DefaultLocation
@@ -489,14 +489,14 @@ BEGIN
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_DefaultLocation
 				, intItemUOMId		= @HotGrains_PoundUOM
-				, dblStorage		= 550
+				, dblUnitStorage		= 550
 
 		-- Add stock information for items under location 2 ('NEW HAVEN')
 		UNION ALL
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_NewHaven
 				, intItemUOMId		= @WetGrains_PoundUOM
-				, dblStorage		= 660
+				, dblUnitStorage		= 660
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_NewHaven
@@ -506,44 +506,44 @@ BEGIN
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_NewHaven
 				, intItemUOMId		= @PremiumGrains_PoundUOM
-				, dblStorage		= 880
+				, dblUnitStorage		= 880
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_NewHaven
 				, intItemUOMId		= @ColdGrains_PoundUOM
-				, dblStorage		= 990
+				, dblUnitStorage		= 990
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_NewHaven
 				, intItemUOMId		= @HotGrains_PoundUOM
-				, dblStorage		= 1100
+				, dblUnitStorage		= 1100
 
 		-- Add stock information for items under location 3 ('BETTER HAVEN')
 		UNION ALL
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_BetterHaven
 				, intItemUOMId		= @WetGrains_PoundUOM
-				, dblStorage		= 1200
+				, dblUnitStorage		= 1200
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_BetterHaven
 				, intItemUOMId		= @StickyGrains_PoundUOM
-				, dblStorage		= 1300
+				, dblUnitStorage		= 1300
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_BetterHaven
 				, intItemUOMId		= @PremiumGrains_PoundUOM
-				, dblStorage		= 1400
+				, dblUnitStorage		= 1400
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_BetterHaven
 				, intItemUOMId		= @ColdGrains_PoundUOM
-				, dblStorage		= 1500
+				, dblUnitStorage		= 1500
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_BetterHaven
 				, intItemUOMId		= @HotGrains_PoundUOM
-				, dblStorage		= 1600
+				, dblUnitStorage		= 1600
 	END
 
 	-- Fake data for tblICInventoryTransactionStorage
