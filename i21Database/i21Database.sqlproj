@@ -2724,6 +2724,8 @@
     <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099MISC.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailNonInvContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailNonInvContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

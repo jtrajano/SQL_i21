@@ -1,9 +1,16 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreateBillData]
+﻿/*
+	VoucherPODetail - Use this to create bill from miscellaneous item ordered in PO
+	VoucherDetailNonInventory - Use this to create bill and directly adding miscellaneous items.
+	VoucherDetailReceipt - use this to create bill with item from Inventory Receipt.
+	VoucherDetailNonInvContract - Use this to create bill with non inventory item associated to contract
+*/
+CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@userId INT,
 	@vendorId INT,
 	@voucherPODetails AS VoucherPODetail READONLY,
 	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
-	@voucherDetailReceiptPO AS [VoucherDetailReceipt] READONLY,
+	@voucherDetailReceiptPO AS VoucherDetailReceipt READONLY,
+	@voucherDetailNonInvContract AS VoucherDetailNonInvContract READONLY,
 	@shipTo INT= NULL,
 	@billId INT OUTPUT
 AS
@@ -91,7 +98,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SET @billId = SCOPE_IDENTITY()
 
 	--Add details
-	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO
+	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO, @voucherDetailNonInvContract
 	--EXEC uspAPUpdateVoucherTax @billId
 	--EXEC uspAPUpdateVoucherContract @billId
 
