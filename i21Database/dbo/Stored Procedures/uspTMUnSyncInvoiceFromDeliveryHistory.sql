@@ -287,7 +287,7 @@ BEGIN
 							,dblLastDeliveredGal = A.dblSiteLastDeliveredGal
 							,dtmLastDeliveryDate = A.dtmSiteLastDelivery
 							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
-							,ysnDeliveryTicketPrinted = A.ysnSiteDeliveryTicketPrinted
+							,ysnDeliveryTicketPrinted = ISNULL(A.ysnSiteDeliveryTicketPrinted,0)
 							,dblEstimatedPercentLeft = A.dblSiteEstimatedPercentLeft
 							,dblEstimatedGallonsLeft = tblTMSite.dblTotalCapacity * A.dblSiteEstimatedPercentLeft /100
 							,dblPreviousBurnRate = A.dblSitePreviousBurnRate
@@ -395,7 +395,7 @@ BEGIN
 						,dblLastDeliveredGal = A.dblSiteLastDeliveredGal
 						,dtmLastDeliveryDate = A.dtmSiteLastDelivery
 						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
-						,ysnDeliveryTicketPrinted = A.ysnSiteDeliveryTicketPrinted
+						,ysnDeliveryTicketPrinted = ISNULL(A.ysnSiteDeliveryTicketPrinted,0)
 						,dblEstimatedPercentLeft = A.dblSiteEstimatedPercentLeft
 						,dblEstimatedGallonsLeft = tblTMSite.dblTotalCapacity * ISNULl(A.dblSiteEstimatedPercentLeft,0.0) /100
 						,dblPreviousBurnRate = A.dblSitePreviousBurnRate
