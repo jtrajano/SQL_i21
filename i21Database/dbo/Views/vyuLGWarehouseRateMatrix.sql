@@ -10,6 +10,8 @@ SELECT
 		,WMD.intCommodityUnitMeasureId
 		,WMD.ysnPrint
 		,WMD.strComments
+		,WMD.intItemId
+		,Item.strItemNo
 		,WMH.intWarehouseRateMatrixHeaderId
 		,WMH.strServiceContractNo
 		,WMH.dtmContractDate
@@ -31,3 +33,4 @@ JOIN tblLGWarehouseRateMatrixHeader WMH ON WMH.intWarehouseRateMatrixHeaderId = 
 LEFT JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intCommodityUnitMeasureId = WMD.intCommodityUnitMeasureId
 LEFT JOIN tblICUnitMeasure UOM	ON UOM.intUnitMeasureId = CUOM.intUnitMeasureId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = WMH.intCurrencyId
+LEFT JOIN tblICItem Item ON Item.intItemId = WMD.intItemId
