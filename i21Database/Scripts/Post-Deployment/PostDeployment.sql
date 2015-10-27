@@ -29,6 +29,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\13_ShortcutKey.sql
 :r .\SM\DefaultData\14_CompanyPreference.sql
 :r .\SM\DefaultData\15_Module.sql
+:r .\SM\DefaultData\16_PaymentMethod.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
