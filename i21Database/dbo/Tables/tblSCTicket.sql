@@ -2,7 +2,7 @@
 (
 	[intTicketId] INT NOT NULL IDENTITY, 
     [strTicketStatus] NVARCHAR COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intTicketNumber] BIGINT NOT NULL, 
+    [strTicketNumber] NVARCHAR(40) NOT NULL, 
     [intScaleSetupId] INT NOT NULL, 
 	[intTicketPoolId] INT NOT NULL,
     [intTicketLocationId] INT NOT NULL, 
@@ -92,8 +92,9 @@
 	[dblNetWeightDestination] DECIMAL(10, 3) NULL, 
     [ysnUseDestinationWeight] BIT NULL, 
     [ysnUseDestinationGrades] BIT NULL, 
+    [ysnHasGeneratedTicketNumber] BIT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
-    CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
+    CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intProcessingLocationId] FOREIGN KEY ([intProcessingLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSCTicket_tblSCTicketPool_intTicketPoolId] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
@@ -139,7 +140,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
-    @level2name = N'intTicketNumber'
+    @level2name = 'strTicketNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Scale Setup ID',
