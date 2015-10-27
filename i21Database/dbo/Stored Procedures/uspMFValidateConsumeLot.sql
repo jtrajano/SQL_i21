@@ -33,6 +33,9 @@ BEGIN TRY
 		,@strProductItemNo NVARCHAR(50)
 		,@dblTotalQtyToBeConsumed NUMERIC(18, 6)
 		,@dblQtyConsumedSoFar NUMERIC(18, 6)
+		,@strConsumeQty NVARCHAR(50)
+		,@strOnHand NVARCHAR(50)
+
 
 	IF @dblConsumeQty <= 0
 		AND @ysnNegativeQtyAllowed = 0
@@ -129,15 +132,17 @@ BEGIN TRY
 	IF @dblConsumeQty > @dblOnHand
 		AND @ysnNegativeQtyAllowed = 0
 	BEGIN
+		Select @strConsumeQty=@dblConsumeQty
+		Select @strOnHand=@dblOnHand
 		RAISERROR (
 				51089
 				,11
 				,1
-				,@dblConsumeQty
+				,@strConsumeQty
 				,@strUnitMeasure
 				,@strItemNo
 				,@strLotNumber
-				,@dblOnHand
+				,@strOnHand
 				,@strUnitMeasure
 				)
 
