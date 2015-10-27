@@ -1213,6 +1213,7 @@ BEGIN TRY
 		,'' AS strChangeover
 		,0 AS intLeadTime
 		,'' AS strCustomer
+		,Ltrim(W.intWorkOrderId) AS strRowId
 	FROM dbo.tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -1265,6 +1266,7 @@ BEGIN TRY
 		,SR.strName AS strChangeover
 		,SC.intDuration AS intLeadTime
 		,NULL AS strCustomer
+		,Ltrim(W.intWorkOrderId)+Ltrim(SR.intScheduleRuleId)
 	FROM dbo.tblMFWorkOrder W
 	JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	JOIN @tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId

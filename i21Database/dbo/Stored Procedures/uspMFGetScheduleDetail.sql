@@ -21,6 +21,7 @@ DECLARE @tblMFScheduleConstraintDetail TABLE (
 	,strBackColorName nvarchar(50) COLLATE Latin1_General_CI_AS
 	,strName nvarchar(50) COLLATE Latin1_General_CI_AS
 	,intExecutionOrder int
+	,strRowId nvarchar(50) COLLATE Latin1_General_CI_AS
 	)
 
 SELECT @ysnConsiderSumOfChangeoverTime = ysnConsiderSumOfChangeoverTime
@@ -38,6 +39,7 @@ INSERT INTO @tblMFScheduleConstraintDetail (
 	,strBackColorName
 	,strName
 	,intExecutionOrder
+	,strRowId
 	)
 SELECT SC.intWorkOrderId
 	,SC.intScheduleRuleId
@@ -50,6 +52,7 @@ SELECT SC.intWorkOrderId
 	,SR.strBackColorName
 	,SR.strName
 	,W.intExecutionOrder
+	,Ltrim(W.intWorkOrderId)+Ltrim(SR.intScheduleRuleId)
 FROM tblMFScheduleConstraintDetail SC
 JOIN tblMFWorkOrder W ON W.intWorkOrderId = SC.intWorkOrderId
 JOIN dbo.tblMFScheduleRule SR ON SR.intScheduleRuleId = SC.intScheduleRuleId
@@ -122,6 +125,7 @@ SELECT MC.intManufacturingCellId
 	,'' AS strChangeover
 	,0 AS intLeadTime
 	,'' AS strCustomer
+	,Ltrim(W.intWorkOrderId) AS strRowId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -187,5 +191,6 @@ SELECT SC.intManufacturingCellId
 	,SC.strName AS strChangeover
 	,SC.intDuration AS intLeadTime
 	,NULL AS strCustomer
+	,strRowId
 FROM @tblMFScheduleConstraintDetail SC
 ORDER BY intExecutionOrder
