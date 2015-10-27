@@ -90,7 +90,7 @@ SET ANSI_WARNINGS OFF
 					WHEN	@ysnCustomerCopy  =	1
 					THEN	'Office Copy'
 			END		AS	strCopy,
-			TIC.intTicketNumber AS TicketNumber,
+			TIC.strTicketNumber AS TicketNumber,
 			TIC.intTicketId,
 			SS.strStationShortDescription AS Station,
 			TIC.strTruckName AS Truck,
