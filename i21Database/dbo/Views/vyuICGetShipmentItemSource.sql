@@ -18,7 +18,7 @@ SELECT
 	strSourceNumber =
 		(
 			CASE WHEN Shipment.intSourceType = 1 -- Scale
-				THEN (SELECT CAST(ISNULL(intTicketNumber, 'Ticket Number not found!')AS NVARCHAR(50)) FROM tblSCTicket WHERE intTicketId = ShipmentItem.intSourceId)
+				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = ShipmentItem.intSourceId)
 			WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 				THEN (SELECT CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50)) FROM tblLGShipment WHERE intShipmentId = ShipmentItem.intSourceId)
 			ELSE NULL
