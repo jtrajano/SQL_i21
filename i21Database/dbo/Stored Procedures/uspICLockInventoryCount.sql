@@ -12,4 +12,8 @@ AS
 		AND tblPatch.intItemLocationId = tblICItemLocation.intItemLocationId
 		AND ysnLockedInventory <> 1
 
+	UPDATE tblICInventoryCount
+	SET intStatus = 3
+	WHERE intInventoryCountId = @intInventoryCountId
+
 RETURN 0
