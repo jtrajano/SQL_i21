@@ -28,7 +28,7 @@ IF @intSeqId = 13
 			
 			UNION ALL
 			
-			SELECT ri.intInventoryReceiptItemId as intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,st.intTicketNumber) strTicketNumber,st.dtmTicketDateTime,strCustomerReference,
+			SELECT ri.intInventoryReceiptItemId as intInventoryShipmentItemId,cl.strLocationName,strTicketNumber strTicketNumber,st.dtmTicketDateTime,strCustomerReference,
 					strDistributionOption,isnull(ri.dblReceived, 0) AS dblTotal,st.intCommodityId
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
@@ -52,7 +52,7 @@ IF @intSeqId = 13
 			
 			UNION ALL
 			
-			SELECT ri.intInventoryReceiptItemId as intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,st.intTicketNumber) strTicketNumber,st.dtmTicketDateTime,strCustomerReference,
+			SELECT ri.intInventoryReceiptItemId as intInventoryShipmentItemId,cl.strLocationName,strTicketNumber strTicketNumber,st.dtmTicketDateTime,strCustomerReference,
 					strDistributionOption,isnull(ri.dblReceived, 0) AS dblTotal,st.intCommodityId
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'

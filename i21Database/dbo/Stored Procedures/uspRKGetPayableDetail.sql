@@ -45,7 +45,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT ri.intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -84,7 +84,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT ri.intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -131,7 +131,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT ri.intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -169,7 +169,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT ri.intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -210,7 +210,7 @@ BEGIN
 			)
 		SELECT DISTINCT ri.intInventoryReceiptItemId
 			,cl.strLocationName
-			,st.intTicketNumber
+			,st.strTicketNumber
 			,st.dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -235,7 +235,7 @@ BEGIN
 		
 		SELECT DISTINCT ri.intInventoryReceiptItemId
 			,cl.strLocationName
-			,st.intTicketNumber
+			,st.strTicketNumber
 			,st.dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -269,7 +269,7 @@ BEGIN
 			)
 		SELECT DISTINCT ri.intInventoryReceiptItemId
 			,cl.strLocationName
-			,st.intTicketNumber
+			,st.strTicketNumber
 			,st.dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -293,7 +293,7 @@ BEGIN
 		
 		SELECT DISTINCT ri.intInventoryReceiptItemId
 			,cl.strLocationName
-			,st.intTicketNumber
+			,st.strTicketNumber
 			,st.dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption
@@ -338,7 +338,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -369,7 +369,7 @@ BEGIN
 		
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -379,7 +379,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -419,7 +419,7 @@ BEGIN
 			)
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -429,7 +429,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -468,7 +468,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -519,7 +519,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -560,7 +560,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -610,7 +610,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
@@ -639,7 +639,7 @@ BEGIN
 		
 		SELECT intInventoryReceiptItemId
 			,strLocationName
-			,intTicketNumber
+			,strTicketNumber
 			,dtmTicketDateTime
 			,strCustomerReference
 			,strDistributionOption, dblUnitCost
@@ -649,7 +649,7 @@ BEGIN
 		FROM (
 			SELECT DISTINCT isi.intInventoryShipmentItemId AS intInventoryReceiptItemId
 				,cl.strLocationName
-				,st.intTicketNumber
+				,st.strTicketNumber
 				,st.dtmTicketDateTime
 				,strCustomerReference
 				,strDistributionOption
