@@ -10,7 +10,7 @@ BEGIN TRY
 	
 	SELECT 
 	DISTINCT
-	T.intTicketNumber
+	T.strTicketNumber
 	,CASE 
 		 WHEN T.strTicketStatus='O' THEN 'Open'
 		 WHEN T.strTicketStatus='C' THEN 'Closed'

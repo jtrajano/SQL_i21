@@ -67,7 +67,7 @@ BEGIN
 			,intCurrencyId = Ticket.intCurrencyId
 			,dblExchangeRate = 1
 			,intTransactionId = Ticket.intTicketId 
-			,strTransactionId = Ticket.intTicketNumber
+			,strTransactionId = Ticket.strTicketNumber
 			,intTransactionTypeId = @INVENTORY_TRANSFER_TYPE
 			,intLotId = NULL 
 			,intSubLocationId = Ticket.intSubLocationId

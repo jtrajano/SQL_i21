@@ -64,7 +64,7 @@ BEGIN TRY
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
 						,intTransactionDetailId = LI.intContractDetailId
-						,strTransactionId = ScaleTicket.intTicketNumber
+						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
@@ -98,7 +98,7 @@ BEGIN TRY
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
 						,intTransactionDetailId = NULL
-						,strTransactionId = ScaleTicket.intTicketNumber
+						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId

@@ -89,7 +89,7 @@ BEGIN
 				,intEntityCustomerId		= SC.intEntityId
 				,intShipToLocationId		= NULL -- TODO
 				,intFreightTermId			= 1 -- TODO
-				,strBOLNumber				= SC.intTicketNumber -- TODO
+				,strBOLNumber				= SC.strTicketNumber -- TODO
 				,intShipViaId				= NULL
 				,strVessel					= SC.strTruckName -- TODO
 				,strProNumber				= NULL 

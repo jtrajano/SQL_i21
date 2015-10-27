@@ -130,7 +130,7 @@ BEGIN
 				,NULL
 				,1
 				,Ticket.intTicketId 
-				,Ticket.intTicketNumber
+				,Ticket.strTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
 				,NULL
 				,Ticket.intSubLocationId
@@ -208,7 +208,7 @@ BEGIN
 				,NULL
 				,1
 				,Ticket.intTicketId 
-				,Ticket.intTicketNumber
+				,Ticket.strTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
 				,NULL
 				,Ticket.intSubLocationId
@@ -286,7 +286,7 @@ BEGIN
 				,NULL
 				,1
 				,Ticket.intTicketId 
-				,Ticket.intTicketNumber
+				,Ticket.strTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
 				,NULL
 				,Ticket.intSubLocationId
@@ -364,7 +364,7 @@ BEGIN
 				,NULL
 				,1
 				,Ticket.intTicketId 
-				,Ticket.intTicketNumber
+				,Ticket.strTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
 				,NULL
 				,Ticket.intSubLocationId
@@ -446,7 +446,7 @@ BEGIN
 			,NULL
 			,1
 			,Ticket.intTicketId 
-			,Ticket.intTicketNumber
+			,Ticket.strTicketNumber
 			,@INVENTORY_TRANSFER_TYPE
 			,NULL 
 			,Ticket.intSubLocationId
@@ -550,7 +550,7 @@ BEGIN
 			,[ysnPrinted]= 0 
 			,[dblCurrencyRate]= 1
 			,'ITR'
-			,[intStorageTicketNumber] = SC.intTicketNumber
+			,[intStorageTicketNumber] = SC.strTicketNumber
 			, SC.[intItemId]
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId

@@ -27,7 +27,7 @@ DECLARE @intScaleStationId AS INT
 DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
-DECLARE @intTicketNumber AS INT
+DECLARE @strTicketNumber AS NVARCHAR(40)
 DECLARE @dblTicketFees AS DECIMAL(7, 2)
 DECLARE @intFeeItemId AS INT
 
@@ -48,7 +48,7 @@ END
 
 BEGIN
     SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
-	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intTicketNumber = ST.intTicketNumber,
+	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @strTicketNumber = ST.strTicketNumber,
 	@dblTicketFees = ST.dblTicketFees, @intFreightVendorId = ST.intFreightCarrierId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
@@ -430,8 +430,8 @@ BEGIN
      SELECT
             [intInventoryReceiptItemId] = @intLoopReceiptItemId
            ,[intLotId] = NULL
-           ,[strLotNumber]  = 'SC-' + CAST(@intTicketNumber  AS VARCHAR(20)) 
-           ,[strLotAlias] = @intTicketNumber 
+           ,[strLotNumber]  = 'SC-' + CAST(@strTicketNumber  AS VARCHAR(20)) 
+           ,[strLotAlias] = @strTicketNumber 
            ,[intSubLocationId] = RCT.intSubLocationId
            ,[intStorageLocationId] = RCT.intStorageLocationId
            ,[intItemUnitMeasureId] = @intTicketItemUOMId

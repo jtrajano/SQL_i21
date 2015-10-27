@@ -225,7 +225,7 @@ BEGIN TRY
 									,intCurrencyId = ScaleTicket.intCurrencyId
 									,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 									,intTransactionId = ScaleTicket.intTicketId
-									,strTransactionId = ScaleTicket.intTicketNumber
+									,strTransactionId = ScaleTicket.strTicketNumber
 									,intTransactionTypeId = @intDirectType 
 									,intLotId = NULL 
 									,intSubLocationId = ScaleTicket.intSubLocationId
@@ -309,7 +309,7 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
-						,strTransactionId = ScaleTicket.intTicketNumber
+						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
@@ -394,7 +394,7 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
-						,strTransactionId = ScaleTicket.intTicketNumber
+						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
@@ -534,7 +534,7 @@ BEGIN TRY
 			,[ysnPrinted]= 0 
 			,[dblCurrencyRate]= 1
 			,[intCurrencyId] = SC.intCurrencyId
-			,[intStorageTicketNumber] = SC.intTicketNumber
+			,[intStorageTicketNumber] = SC.strTicketNumber
 			,SC.[intItemId]
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
@@ -662,7 +662,7 @@ BEGIN TRY
 							,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 							,intTransactionId = ScaleTicket.intTicketId
 							,intTransactionDetailId = NULL
-							,strTransactionId = ScaleTicket.intTicketNumber
+							,strTransactionId = ScaleTicket.strTicketNumber
 							,intTransactionTypeId = @intDirectType 
 							,intLotId = NULL 
 							,intSubLocationId = ScaleTicket.intSubLocationId

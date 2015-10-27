@@ -184,7 +184,7 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
-						,strTransactionId = ScaleTicket.intTicketNumber
+						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
