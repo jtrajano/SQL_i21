@@ -2723,6 +2723,7 @@
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099MISC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
