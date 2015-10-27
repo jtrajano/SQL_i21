@@ -2717,6 +2717,9 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceiptPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateVoucherDetailReceiptPO.sql" />
     <Build Include="dbo\Views\vyuARShippedItemDetail.sql" />
+    <Build Include="dbo\Tables\tblPATCustomerEquity.sql" />
+    <Build Include="dbo\Tables\tblPATTransfer.sql" />
+    <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
