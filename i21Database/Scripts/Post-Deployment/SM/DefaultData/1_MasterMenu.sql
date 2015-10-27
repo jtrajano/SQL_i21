@@ -3250,6 +3250,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process R
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.RefundCalculationWorksheet' WHERE strMenuName = 'Process Refund' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Stock Details', N'Patronage', @PatronageParentMenuId, N'Stock Details', N'Maintenance', N'Screen', N'Patronage.view.CustomerStock', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.CustomerStock' WHERE strMenuName = 'Stock Details' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
+
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Patronage Category' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Stock Classification' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
 
