@@ -16,15 +16,15 @@ SELECT TOP 100 PERCENT
 	[Transaction].intStorageLocationId,
 	strStorageLocationName = StorageLocation.strName,
 	[Transaction].dtmDate,
-	strTransactionType = TransactionType.strTransactionForm,
+	strTransactionType = TransactionType.strName,
 	[Transaction].strTransactionForm,
 	[Transaction].strTransactionId,
 	dblBeginningQtyBalance = dbo.fnICGetRunningQuantity([Transaction].intInventoryTransactionId) - ([Transaction].dblQty * [Transaction].dblUOMQty),
 	dblQuantity = [Transaction].dblQty * [Transaction].dblUOMQty,
 	dblRunningQtyBalance = dbo.fnICGetRunningQuantity([Transaction].intInventoryTransactionId),
 	dblCost = [Transaction].dblCost,
-	dblBeginningBalance = dbo.fnICGetRunningBalance([Transaction].intInventoryTransactionId) - ([Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost),
-	dblValue = [Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost,
+	dblBeginningBalance = dbo.fnICGetRunningBalance([Transaction].intInventoryTransactionId) - (([Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost) + [Transaction].dblValue),
+	dblValue = ([Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost) + [Transaction].dblValue,
 	dblRunningBalance = dbo.fnICGetRunningBalance([Transaction].intInventoryTransactionId),
 	strBatchId
 FROM tblICInventoryTransaction [Transaction]
