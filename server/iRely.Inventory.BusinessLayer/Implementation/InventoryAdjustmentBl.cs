@@ -102,11 +102,11 @@ namespace iRely.Inventory.BusinessLayer
 
                 if (Adjustment.isPost)
                 {
-                    db.PostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                    db.PostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                    db.UnPostInventoryAdjustment(isRecap, Adjustment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 postResult.HasError = false;
             }

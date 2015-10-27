@@ -203,11 +203,11 @@ namespace iRely.Inventory.BusinessLayer
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
                 if (shipment.isPost)
                 {
-                    db.PostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetUserId(), iRely.Common.Security.GetEntityId());
+                    db.PostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetUserId(), iRely.Common.Security.GetEntityId());
+                    db.UnPostInventoryShipment(isRecap, shipment.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 postResult.HasError = false;
             }

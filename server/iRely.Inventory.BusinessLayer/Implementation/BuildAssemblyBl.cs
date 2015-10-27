@@ -79,11 +79,11 @@ namespace iRely.Inventory.BusinessLayer
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
                 if (Assembly.isPost)
                 {
-                    db.PostBuildAssembly(isRecap, Assembly.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                    db.PostBuildAssembly(isRecap, Assembly.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 else
                 {
-                    db.UnPostBuildAssembly(isRecap, Assembly.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                    db.UnPostBuildAssembly(isRecap, Assembly.strTransactionId, iRely.Common.Security.GetEntityId());
                 }
                 postResult.HasError = false;
             }

@@ -15,27 +15,25 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public void PostInventoryShipment(bool ysnRecap, string transactionId, int userId, int entityId) 
+        public void PostInventoryShipment(bool ysnRecap, string transactionId, int entityId) 
         {
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryShipment @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId",
+                "dbo.uspICPostInventoryShipment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
                 new SqlParameter("@ysnPost", true),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intUserId", userId),
-                new SqlParameter("@intEntityId", entityId)
+                new SqlParameter("@intEntityUserSecurityId", entityId)
             );            
         }
 
-        public void UnPostInventoryShipment(bool ysnRecap, string transactionId, int userId, int entityId)
+        public void UnPostInventoryShipment(bool ysnRecap, string transactionId, int entityId)
         {
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICPostInventoryShipment @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId",
+                "dbo.uspICPostInventoryShipment @ysnPost, @ysnRecap, @strTransactionId, @intEntityUserSecurityId",
                 new SqlParameter("@ysnPost", false),
                 new SqlParameter("@ysnRecap", ysnRecap),
                 new SqlParameter("@strTransactionId", transactionId),
-                new SqlParameter("@intUserId", userId),
-                new SqlParameter("@intEntityId", entityId)
+                new SqlParameter("@intEntityUserSecurityId", entityId)
             );
         }
     }
