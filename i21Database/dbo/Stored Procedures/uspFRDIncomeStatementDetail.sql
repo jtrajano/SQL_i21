@@ -33,8 +33,8 @@ SET @intSort = @intSort + 1;
 
 WITH tmpAccountType AS
 (
-  SELECT 'Expense' AS AccountType, 1 AS cntID, 'Debit' as BalanceSide UNION
-  SELECT 'Revenue', 3, 'Credit'
+  SELECT 'Revenue' AS AccountType, 1 AS cntID, 'Credit' as BalanceSide UNION
+  SELECT 'Expense', 3, 'Debit'
 )
 SELECT * INTO #TempAccountType FROM tmpAccountType
 
