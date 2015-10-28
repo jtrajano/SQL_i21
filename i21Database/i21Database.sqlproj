@@ -2729,6 +2729,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailNonInvContract.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailNonInvContract.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuationSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
