@@ -110,26 +110,21 @@ BEGIN TRY
 	WHERE QTR.intProductValueId = @intLotId
 		AND QTR.intPropertyId = @intPropertyId4
 
-	SELECT DISTINCT L.dtmDateCreated
+	SELECT DISTINCT L.strLotNumber
+		,L.dtmDateCreated
 		,US.strUserName
 		,I.strItemNo
-		,I.strDescription
+		,SUBSTRING(I.strDescription, 1, 26) AS strDescription
 		,I.strShortName
-		,S.intShiftSequence
-		,IC.strName
+		,Isnull(C.strContainerNo,SL.strName) as strName
 		,CASE 
 			WHEN L.intWeightUOMId IS NOT NULL
 				THEN L.dblWeight
 			ELSE dblQty
 			END dblWeight
-		,L.strVendorLotNo
-		,WP.strParentLotNumber
-		,UM.strUnitMeasure
-		,L.strLotNumber
 		,WP.dblTareWeight
 		,WP.dblQuantity + ISNULL(WP.dblTareWeight, 0) AS dblGrossWeight
 		,Ltrim(S.intShiftSequence) + ' ' + '(' + CONVERT(NVARCHAR, L.dtmDateCreated, 108) + ')' AS strShiftName
-		,strContainerNo
 		,@strPropertyName1 AS strPropertyName1
 		,@strPropertyValue1 AS strPropertyValue1
 		,@strPropertyName2 AS strPropertyName2
@@ -143,15 +138,18 @@ BEGIN TRY
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblMFWorkOrderProducedLot AS WP ON L.intLotId = WP.intLotId
 	LEFT JOIN dbo.tblMFShift S ON WP.intShiftId = S.intShiftId
-	LEFT JOIN dbo.tblICStorageLocation AS IC ON WP.intStorageLocationId = IC.intStorageLocationId
+	LEFT JOIN dbo.tblICStorageLocation AS SL ON WP.intStorageLocationId = SL.intStorageLocationId
 	LEFT JOIN dbo.tblWHContainer C ON WP.intContainerId = C.intContainerId
-	JOIN dbo.tblICItemUOM IU ON IsNULL(L.intWeightUOMId, L.intItemUOMId) = IU.intItemUOMId
-	JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
 	WHERE L.intLotId = @intLotId
+
+	EXEC sp_xml_removedocument @xmlDocumentId
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = 'uspMFReportToteLabel - ' + ERROR_MESSAGE()
+
+	IF @xmlDocumentId <> 0
+		EXEC sp_xml_removedocument @xmlDocumentId
 
 	RAISERROR (
 			@ErrMsg

@@ -116,7 +116,7 @@ BEGIN TRY
 		,I.strDescription
 		,I.strShortName
 		,S.intShiftSequence
-		,IC.strName
+		,SL.strName
 		,CASE 
 			WHEN L.intWeightUOMId IS NOT NULL
 				THEN L.dblWeight
@@ -126,10 +126,6 @@ BEGIN TRY
 		,WP.strParentLotNumber
 		,UM.strUnitMeasure
 		,L.strLotNumber
-		,WP.dblTareWeight
-		,WP.dblQuantity + ISNULL(WP.dblTareWeight, 0) AS dblGrossWeight
-		,Ltrim(S.intShiftSequence) + ' ' + '(' + CONVERT(NVARCHAR, L.dtmDateCreated, 108) + ')' AS strShiftName
-		,strContainerNo
 		,@strPropertyName1 AS strPropertyName1
 		,@strPropertyValue1 AS strPropertyValue1
 		,@strPropertyName2 AS strPropertyName2
@@ -143,15 +139,19 @@ BEGIN TRY
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblMFWorkOrderProducedLot AS WP ON L.intLotId = WP.intLotId
 	LEFT JOIN dbo.tblMFShift S ON WP.intShiftId = S.intShiftId
-	LEFT JOIN dbo.tblICStorageLocation AS IC ON WP.intStorageLocationId = IC.intStorageLocationId
-	LEFT JOIN dbo.tblWHContainer C ON WP.intContainerId = C.intContainerId
+	LEFT JOIN dbo.tblICStorageLocation AS SL ON WP.intStorageLocationId = SL.intStorageLocationId
 	JOIN dbo.tblICItemUOM IU ON IsNULL(L.intWeightUOMId, L.intItemUOMId) = IU.intItemUOMId
 	JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
 	WHERE L.intLotId = @intLotId
+
+	EXEC sp_xml_removedocument @xmlDocumentId
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = 'uspMFReportLotLabel - ' + ERROR_MESSAGE()
+
+	IF @xmlDocumentId <> 0
+		EXEC sp_xml_removedocument @xmlDocumentId
 
 	RAISERROR (
 			@ErrMsg
