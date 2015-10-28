@@ -22,6 +22,7 @@
     [strFavorite]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [ysnDisabled]       BIT            DEFAULT ((0)) NOT NULL,
     [ysnAdmin]          BIT            DEFAULT ((0)) NOT NULL,
+	[ysnRequirePurchasingApproval]     BIT            DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]  INT            DEFAULT (1) NOT NULL,
 	[intEntityIdOld]		INT NULL,
 	[intUserSecurityIdOld]	INT NULL,
