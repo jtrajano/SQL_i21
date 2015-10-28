@@ -31,6 +31,7 @@
 :r "..\dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginReallocation.sql"
 :r "..\dbo\Views\vyuGLPTDrillDownDifference.sql"
+:r "..\dbo\Views\vyuGLtblGLIjemstDifference.sql"
 
 
 -- FINANCIAL REPORT DESIGNER

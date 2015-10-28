@@ -300,5 +300,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql" />
     <None Include="dbo\Views\vyuGLPTDrillDownDifference.sql" />
     <None Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
+    <None Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
   </ItemGroup>
 </Project>
