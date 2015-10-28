@@ -806,8 +806,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('intSourceType', 0);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
-        if (app.UserId > 0)
-            record.set('intReceiverId', app.UserId);
+        if (iRely.config.Security.EntityId > 0)
+            record.set('intReceiverId', iRely.config.Security.EntityId);
         record.set('dtmReceiptDate', today);
         record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);

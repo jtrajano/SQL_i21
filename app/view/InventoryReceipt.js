@@ -513,9 +513,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intUserSecurityID',
+                                                                                dataIndex: 'intEntityUserSecurityId',
                                                                                 dataType: 'numeric',
-                                                                                text: 'User Security Id',
                                                                                 hidden: true
                                                                             },
                                                                             {
@@ -535,7 +534,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         fieldLabel: 'Receiver',
                                                                         labelWidth: 85,
                                                                         displayField: 'strUserName',
-                                                                        valueField: 'intUserSecurityID'
+                                                                        valueField: 'intEntityUserSecurityId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
