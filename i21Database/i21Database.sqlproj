@@ -2733,6 +2733,7 @@
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
     <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
     <Build Include="dbo\Tables\tblAPCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessToBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
