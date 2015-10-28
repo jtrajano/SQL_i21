@@ -459,6 +459,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "format": "0,000.000000",
                                                 "itemId": "colConversionToStockUOM",
                                                 "minWidth": 110,
                                                 "text": "Conversion To",
@@ -538,7 +539,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging124",
+                    "name": "statusbarpaging12",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
