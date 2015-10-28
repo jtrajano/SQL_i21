@@ -2747,6 +2747,7 @@
     <Build Include="dbo\Stored Procedures\uspWHCreateInboundPutawayTask.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGTINCaseBarcode.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportDailyProduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
