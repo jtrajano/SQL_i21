@@ -1,5 +1,5 @@
 ﻿GO	
-print N'BEGIN Update Efficiency Report Datasource'
+print N'BEGIN Update Efficiency Report Report Datasource'
 GO
 
 DECLARE @strReportName NVARCHAR(100)
@@ -38,7 +38,7 @@ SELECT
 	,B.strSerialNumber
 	,ISNULL(A.dblYTDSales, 0) as dblYTDSales
 	,ISNULL(dblYTDSalesLastSeason, 0) as dblYTDSalesLastSeason
-	,ISNULL(dblYTDSales2SeasonsAgo,0 ) as dblYTDSalesSeasonsAgo
+	,ISNULL(dblYTDSales2SeasonsAgo,0 ) as dblYTDSales2SeasonsAgo
 	,ISNULL(A.dblYTDGalsThisSeason, 0) as dblYTDGalsThisSeason
 	,ISNULL(A.dblYTDGalsLastSeason, 0) as dblYTDGalsLastSeason
 	,ISNULL(A.dblYTDGals2SeasonsAgo, 0 ) as dblYTDGals2SeasonsAgo
@@ -148,6 +148,9 @@ LEFT JOIN
 	) B
 ON A.intSiteID = B.intSiteID
 where  A.vwcus_active_yn = ''Y'' and A.ysnActive = 1 
+
+
+
 ' 
 WHERE intReportId = @intReportId
 

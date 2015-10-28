@@ -85,6 +85,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r .\TM\Reports\DataSource\OpenCallEntries.sql
 :r .\TM\Reports\DataSource\EfficiencyReport.sql
+:r .\TM\Reports\Layout\EfficiencyReport.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
