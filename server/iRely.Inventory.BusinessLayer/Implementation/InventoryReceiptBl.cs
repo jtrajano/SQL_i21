@@ -30,20 +30,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
-            var query = _db.GetQuery<tblICInventoryReceipt>()
-                .Include(p => p.vyuAPVendor)
-                .Include(p => p.tblSMCompanyLocation)
-                .Select(p => new RecieptVM
-                {
-                    intInventoryReceiptId = p.intInventoryReceiptId,
-                    strReceiptNumber = p.strReceiptNumber,
-                    strReceiptType = p.strReceiptType,
-                    strVendorName = p.vyuAPVendor.strName,
-                    strLocationName = p.tblSMCompanyLocation.strLocationName,
-                    strBillOfLading = p.strBillOfLading,
-                    dtmReceiptDate = p.dtmReceiptDate,
-                    ysnPosted = p.ysnPosted ?? false
-                })
+            var query = _db.GetQuery<vyuICGetInventoryReceipt>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();
 

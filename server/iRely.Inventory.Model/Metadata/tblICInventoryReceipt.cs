@@ -61,8 +61,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_vendorName))
-                    if (vyuAPVendor != null)
-                        return vyuAPVendor.strName;
+                    if (vyuICGetInventoryReceipt != null)
+                        return vyuICGetInventoryReceipt.strVendorName;
                     else
                         return null;
                 else
@@ -73,14 +73,14 @@ namespace iRely.Inventory.Model
                 _vendorName = value;
             }
         }
-        private int _vendorEntity;
+        private int? _vendorEntity;
         [NotMapped]
-        public int intVendorEntityId
+        public int? intVendorEntityId
         {
             get
             {
-                if (vyuAPVendor != null)
-                    return vyuAPVendor.intEntityId;
+                if (vyuICGetInventoryReceipt != null)
+                    return vyuICGetInventoryReceipt.intEntityId;
                 else
                     return -1;
             }
@@ -96,8 +96,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_fobPoint))
-                    if (tblSMFreightTerm != null)
-                        return tblSMFreightTerm.strFobPoint;
+                    if (vyuICGetInventoryReceipt != null)
+                        return vyuICGetInventoryReceipt.strFobPoint;
                     else
                         return null;
                 else
@@ -115,8 +115,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_locationName))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strLocationName;
+                    if (vyuICGetInventoryReceipt != null)
+                        return vyuICGetInventoryReceipt.strLocationName;
                     else
                         return null;
                 else
@@ -132,21 +132,59 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public ICollection<tblICInventoryReceiptCharge> tblICInventoryReceiptCharges { get; set; }
 
-        public vyuAPVendor vyuAPVendor { get; set; }
-        public tblSMFreightTerm tblSMFreightTerm { get; set; }
-        public tblSMCompanyLocation tblSMCompanyLocation { get; set; } 
+        public vyuICGetInventoryReceipt vyuICGetInventoryReceipt { get; set; }
     }
 
-    public class RecieptVM
+    public class vyuICGetInventoryReceipt
     {
         public int intInventoryReceiptId { get; set; }
+        public string strReceiptType { get; set; }
+        public int? intSourceType { get; set; }
+        public string strSourceType { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
+        public int? intTransferorId { get; set; }
+        public string strTransferor { get; set; }
+        public int? intLocationId { get; set; }
+        public string strLocationName { get; set; }
         public string strReceiptNumber { get; set; }
         public DateTime? dtmReceiptDate { get; set; }
-        public string strReceiptType { get; set; }
-        public string strVendorName { get; set; }
-        public string strLocationName { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
+        public int? intBlanketRelease { get; set; }
+        public string strVendorRefNo { get; set; }
         public string strBillOfLading { get; set; }
-        public bool ysnPosted { get; set; }
+        public int? intShipViaId { get; set; }
+        public string strShipVia { get; set; }
+        public int? intShipFromId { get; set; }
+        public string strShipFrom { get; set; }
+        public int? intReceiverId { get; set; }
+        public string strReceiver { get; set; }
+        public string strVessel { get; set; }
+        public int? intFreightTermId { get; set; }
+        public string strFreightTerm { get; set; }
+        public string strFobPoint { get; set; }
+        public int? intShiftNumber { get; set; }
+        public decimal? dblInvoiceAmount { get; set; }
+        public bool? ysnPrepaid { get; set; }
+        public bool? ysnInvoicePaid { get; set; }
+        public int? intCheckNo { get; set; }
+        public DateTime? dtmCheckDate { get; set; }
+        public int? intTrailerTypeId { get; set; }
+        public DateTime? dtmTrailerArrivalDate { get; set; }
+        public DateTime? dtmTrailerArrivalTime { get; set; }
+        public string strSealNo { get; set; }
+        public string strSealStatus { get; set; }
+        public DateTime? dtmReceiveTime { get; set; }
+        public decimal? dblActualTempReading { get; set; }
+        public int? intShipmentId { get; set; }
+        public bool? ysnPosted { get; set; }
+        public int? intEntityId { get; set; }
+        public string strEntityName { get; set; }
+        public string strActualCostId { get; set; }
+
+        public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
     }
 
     public class tblICInventoryReceiptItem : BaseEntity

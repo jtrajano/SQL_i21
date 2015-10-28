@@ -28,7 +28,6 @@ namespace iRely.Inventory.Model
         
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
-        public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
 
         public ICollection<tblICInventoryShipment> ShipFromLocations { get; set; }
 
@@ -77,7 +76,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
-        public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
     }
 
     public class tblARCustomer
@@ -183,8 +181,6 @@ namespace iRely.Inventory.Model
         public string strFreightTerm { get; set; }
         public string strFobPoint { get; set; }
         public bool ysnActive { get; set; }
-
-        public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
     }
 
     public class tblMFQAProperty : BaseEntity
