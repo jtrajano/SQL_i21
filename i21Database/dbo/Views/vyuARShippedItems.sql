@@ -578,12 +578,9 @@ LEFT OUTER JOIN
 	tblEntityLocation SL
 		ON C.intShipToId = SL.intEntityLocationId
 LEFT OUTER JOIN
-	vyuLGDropShipmentDetails LGSD
-		ON LGS.[intShipmentId] = LGSD.[intShipmentId]
-LEFT OUTER JOIN
 	tblARInvoice ARI
 		ON LGS.[intShipmentId] = ARI.[intShipmentId]
 WHERE
 	ARI.[intInvoiceId] IS NULL
-	AND ISNULL(LGSD.[intShipmentId],0) <> 0	
+	AND LGS.[intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails)
 	--AND LGS.[ysnInventorized] = 1
