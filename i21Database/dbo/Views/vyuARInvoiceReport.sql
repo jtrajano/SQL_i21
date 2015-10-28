@@ -57,6 +57,7 @@ SELECT INV.intInvoiceId
 	 , IDT.intTaxCodeId
 	 , strTaxCode = SMT.strTaxCode
 	 , dblTaxDetail = IDT.dblTax
+	 , INV.strTransactionType
 	 , intDetailCount = (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = INV.intInvoiceId)
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 

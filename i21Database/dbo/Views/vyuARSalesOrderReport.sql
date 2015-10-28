@@ -51,6 +51,7 @@ SELECT SO.intSalesOrderId
 	 , SDT.intTaxCodeId
 	 , strTaxCode = SMT.strTaxCode
 	 , dblTaxDetail = SDT.dblTax
+	 , SO.strTransactionType
 	 , intDetailCount = (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
