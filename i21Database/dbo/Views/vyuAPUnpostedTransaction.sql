@@ -22,7 +22,7 @@ WHERE
 	ISNULL(ysnPosted, 0) = 0 AND 
 	APB.intTransactionType != 6 AND							   --Will not show BillTemplate
 	APB.ysnForApproval != 1	AND								   --Will not show For Approval Bills
-    (APB.ysnApproved = 0 AND APB.dtmApprovalDate IS NULL)	   --Will not show Rejected approval bills  
+    (APB.ysnApproved = 0 AND APB.dtmApprovalDate IS NOT NULL)	   --Will not show Rejected approval bills  
 
 UNION 
 

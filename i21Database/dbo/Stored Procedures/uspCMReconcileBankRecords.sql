@@ -73,26 +73,27 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND dbo.fnIsDepositEntry(strLink) = 0
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback		
 
--- Mark all origin transactions as cleared.
-UPDATE	[dbo].[apchkmst_origin]
-SET		apchk_cleared_ind = 'C'
-		,apchk_clear_rev_dt = CONVERT(VARCHAR(10), dtmDate, 112)
-FROM	dbo.tblCMBankTransaction f INNER JOIN [dbo].[apchkmst_origin] origin
-			ON f.strLink = ( CAST(origin.apchk_cbk_no AS NVARCHAR(2)) 
-							+ CAST(origin.apchk_rev_dt AS NVARCHAR(10))
-							+ CAST(origin.apchk_trx_ind AS NVARCHAR(1))
-							+ CAST(origin.apchk_chk_no AS NVARCHAR(8))
-			) COLLATE Latin1_General_CI_AS 
-			AND f.intBankTransactionTypeId IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
-			AND dbo.fnIsDepositEntry(f.strLink) = 0
-WHERE	intBankAccountId = @intBankAccountId
-		AND ysnPosted = 1
-		AND ysnClr = 1
-		AND dtmDateReconciled IS NULL 
-		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
-		AND origin.apchk_cleared_ind IS NULL 
+-- Commented due to this jira CM-915 and created a counter part on integration project
+---- Mark all origin transactions as cleared.
+--UPDATE	[dbo].[apchkmst_origin]
+--SET		apchk_cleared_ind = 'C'
+--		,apchk_clear_rev_dt = CONVERT(VARCHAR(10), dtmDate, 112)
+--FROM	dbo.tblCMBankTransaction f INNER JOIN [dbo].[apchkmst_origin] origin
+--			ON f.strLink = ( CAST(origin.apchk_cbk_no AS NVARCHAR(2)) 
+--							+ CAST(origin.apchk_rev_dt AS NVARCHAR(10))
+--							+ CAST(origin.apchk_trx_ind AS NVARCHAR(1))
+--							+ CAST(origin.apchk_chk_no AS NVARCHAR(8))
+--			) COLLATE Latin1_General_CI_AS 
+--			AND f.intBankTransactionTypeId IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+--			AND dbo.fnIsDepositEntry(f.strLink) = 0
+--WHERE	intBankAccountId = @intBankAccountId
+--		AND ysnPosted = 1
+--		AND ysnClr = 1
+--		AND dtmDateReconciled IS NULL 
+--		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
+--		AND origin.apchk_cleared_ind IS NULL 
 		
-IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
+--IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 
 -- Mark all CM transactions as cleared.
 UPDATE	[dbo].[tblCMBankTransaction]

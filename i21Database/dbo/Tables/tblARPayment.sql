@@ -3,7 +3,7 @@
     [intEntityCustomerId]   INT             NOT NULL,
     [intCurrencyId]			INT             NOT NULL,
     [dtmDatePaid]			DATETIME        NULL,
-    [intAccountId]			INT             NOT NULL,
+    [intAccountId]			INT             NULL,
 	[intBankAccountId]		INT             NULL,
     [intPaymentMethodId]	INT             NOT NULL,
     [intLocationId]			INT             NULL,

@@ -17,10 +17,11 @@
 	END
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
-	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
-		SELECT strAccountId, 
+	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountCategoryId], [intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
+		SELECT strAccountId,
 			   strDescription,
 			   intAccountGroupId,
+			   intAccountCategoryId,
 			   intAccountUnitId,
 			   ysnSystem,
 			   ysnActive,

@@ -10,6 +10,7 @@ AS
 		ISNULL(I.strType, 'Standard')	AS strType,
 		I.strPONumber, 
 		T.strTerm,
+		I.strBOLNumber,
 		I.intTermId, 
 		I.intAccountId,
 		I.dtmDate,

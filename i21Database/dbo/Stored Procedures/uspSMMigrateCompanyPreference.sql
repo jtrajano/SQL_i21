@@ -51,9 +51,9 @@ BEGIN
 		ysnInterfaceToTargetOrders, ysnAllowUseForClosingPrices, ysnAllowUseForEndOfMonth, ysnInterfaceToScales, intSaveHistoryEveryId, strIntervalStartTime,
 		strIntervalEndTime, strIntervalUpdatesMinutes, strQuotesDecimalsShown, intCompanySetupId)
 		SELECT 
-		ISNULL(defaultCurrency, 0) AS intDefaultCurrencyId,
-		ISNULL(defaultReporting, 0) AS intDefaultReportingCurrencyId, 
-		ISNULL(defaultCountry, 0) AS intDefaultCountryId,
+		defaultCurrency AS intDefaultCurrencyId,
+		defaultReporting AS intDefaultReportingCurrencyId, 
+		defaultCountry AS intDefaultCountryId,
 		'Production' as strEnvironmentType,
 		ISNULL(isLegacyIntegration, 0) AS ysnLegacyIntegration,
 		ISNULL(AccountingMethod, '') AS strAccountingMethod,

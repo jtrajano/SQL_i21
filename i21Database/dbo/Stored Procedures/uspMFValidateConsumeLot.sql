@@ -37,6 +37,7 @@ BEGIN TRY
 		,@strConsumeQty nvarchar(50)
 		,@strOnHand nvarchar(50)
 
+
 	IF @dblConsumeQty <= 0
 		AND @ysnNegativeQtyAllowed = 0
 	BEGIN

@@ -110,6 +110,7 @@ INSERT INTO dbo.tblICInventoryLot (
 		intItemId
 		,intItemLocationId
 		,intItemUOMId
+		,dtmDate
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
@@ -125,6 +126,7 @@ INSERT INTO dbo.tblICInventoryLot (
 SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
 		,intItemUOMId = OutTransactions.intItemUOMId
+		,dtmDate = OutTransactions.dtmDate
 		,intLotId = OutTransactions.intLotId
 		,intSubLocationId = OutTransactions.intSubLocationId
 		,intStorageLocationId = OutTransactions.intStorageLocationId

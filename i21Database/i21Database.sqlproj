@@ -2729,6 +2729,10 @@
     <Build Include="dbo\User Defined Types\VoucherDetailNonInvContract.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailNonInvContract.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationSummary.sql" />
+    <Build Include="dbo\Views\vyuTRQuoteView.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
+    <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
+    <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

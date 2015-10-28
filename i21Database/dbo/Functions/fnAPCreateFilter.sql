@@ -23,15 +23,15 @@ BEGIN
 				WHEN 'String'
 					THEN
 						CASE @condition
-						WHEN 'Like' THEN ' LIKE ''' + @from + ''''
-						WHEN 'Not Like' THEN ' NOT LIKE ''' + @from + ''''
+						WHEN 'Like' THEN ' LIKE ''%' + @from + '%'''
+						WHEN 'Not Like' THEN ' NOT LIKE ''%' + @from + '%'''
 						WHEN 'Between' THEN ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
 						WHEN 'Starts With' THEN ' LIKE ''' + @from + '%'''
 						WHEN 'Ends With' THEN ' LIKE ''%' + @from + '%'''
-						WHEN 'Equal To' THEN ' = ' + @from
-						WHEN 'Not Equa lTo' THEN ' != ' + @from
-						WHEN 'Greater Than' THEN ' > ' + @from
-						WHEN 'In' THEN ' (' + @from + ')' END
+						WHEN 'Equal To' THEN ' = ''' + @from + ''''
+						WHEN 'Not Equal To' THEN ' != ''' + @from + ''''
+						WHEN 'Greater Than' THEN ' > ''' + @from + ''''
+						WHEN 'In' THEN ' IN (''' + @from + ''')' END
 				WHEN 'Decimal' 
 						THEN 
 							CASE @condition

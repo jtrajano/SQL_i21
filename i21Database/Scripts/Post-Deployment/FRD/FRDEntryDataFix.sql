@@ -354,3 +354,13 @@ DROP TABLE #BudgetCode
 GO
 	PRINT N'MOVE GL BUDGET TO FRD BUDGET TABLES'
 GO
+
+
+--=====================================================================================================================================
+-- 	ROW: CORRECT ORPHAN REFNO CALC
+---------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE tblFRRowDesignCalculation SET intRefNoCalc = (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)
+									    ,intRowId = (SELECT TOP 1 intRowId FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)
+							WHERE intRowDetailRefNo IN (SELECT intRowDetailId FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo) 
+							   AND intRefNoCalc NOT IN (SELECT intRefNo FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)

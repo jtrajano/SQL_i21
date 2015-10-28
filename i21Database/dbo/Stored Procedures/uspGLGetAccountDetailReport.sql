@@ -90,9 +90,6 @@ BEGIN
 	 
 END
 
-
-
-
 DECLARE @hasInactiveAccountsByDate BIT = 0
 DECLARE @hasInactiveAccountsByAccount BIT = 0
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport')) DROP TABLE #tempTableReport
@@ -188,10 +185,15 @@ AS
 		,B.[Location] 
 		,C.intGLDetailId
 		FROM tblGLAccount A
+		
+		--CROSS APPLY (dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT ISNULL(@dtmDateFrom,MIN(dtmDate)) FROM GLAccountDetails) as b WHERE b.strAccountId = A.strAccountId)
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
 		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT ISNULL(@dtmDateFrom, MIN(dtmDate)) FROM GLAccountDetails)) D
 ),
+
+--SELECT * FROM GLAccountBalance
+
 RAWREPORT AS (
 ----*CountStart*--
 SELECT 

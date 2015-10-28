@@ -12,6 +12,21 @@
 	END
 ELSE
 	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE intDefaultCurrencyId = 0)
+		BEGIN
+			UPDATE tblSMCompanyPreference SET intDefaultCurrencyId = NULL WHERE intCompanyPreferenceId = 1
+		END
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE intDefaultReportingCurrencyId = 0)
+		BEGIN
+			UPDATE tblSMCompanyPreference SET intDefaultReportingCurrencyId = NULL WHERE intCompanyPreferenceId = 1
+		END
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE intDefaultCountryId = 0)
+		BEGIN
+			UPDATE tblSMCompanyPreference SET intDefaultCountryId = NULL WHERE intCompanyPreferenceId = 1
+		END
+
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE strEnvironmentType = '')
 		BEGIN
 			UPDATE tblSMCompanyPreference SET strEnvironmentType = 'Production' WHERE intCompanyPreferenceId = 1

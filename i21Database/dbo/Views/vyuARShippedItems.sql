@@ -86,13 +86,63 @@ LEFT OUTER JOIN
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
 LEFT OUTER JOIN
 	tblSMTaxGroup TG
-		ON SOD.[intTaxGroupId] = TG.intTaxGroupId 				
-WHERE
-	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
-		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-		WHERE tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
-	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
-
+		ON SOD.[intTaxGroupId] = TG.intTaxGroupId 
+CROSS APPLY
+	(
+	SELECT 
+		 ISI.[intInventoryShipmentItemId]
+		,ISH.[strShipmentNumber] 
+		,ISI.[intLineNo]
+		,ISI.[intItemId]
+		,ISI.[dblQuantity]
+		,ISI.[intItemUOMId]
+		,U.[strUnitMeasure]
+		,ISI.[dblUnitPrice]
+		,ISI.[intSourceId]
+		,dbo.fnCalculateQtyBetweenUOM(ISI.[intItemUOMId], SOD.[intItemUOMId], SUM(ISNULL(ISI.[dblQuantity],0))) dblSOShipped
+		,SUM(ISNULL(ISI.dblQuantity,0)) dblShipped
+		,ISH.[intShipFromLocationId]
+		,ISH.[dtmShipDate]
+		,CL.[strLocationName] 
+	FROM
+		tblICInventoryShipmentItem ISI
+	INNER JOIN
+		tblICInventoryShipment ISH
+			ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
+	LEFT JOIN
+		[tblICItemUOM] IU
+			ON ISI.[intItemUOMId] = IU.[intItemUOMId]
+	LEFT JOIN
+		[tblICUnitMeasure] U
+			ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+	LEFT OUTER JOIN
+		[tblSMCompanyLocation] CL
+			ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId] 
+	WHERE
+		ISH.[ysnPosted] = 1
+		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
+		AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentItemId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId])
+	GROUP BY
+		 ISI.[intInventoryShipmentItemId]
+		,ISH.[strShipmentNumber]
+		,ISI.[intLineNo]
+		,ISI.[intItemId]
+		,ISI.[dblQuantity]
+		,ISI.[intItemUOMId]
+		,ISI.[dblUnitPrice]
+		,U.[strUnitMeasure]
+		,ISI.[intSourceId]
+		,ISH.[intShipFromLocationId]
+		,ISH.[dtmShipDate]
+		,CL.[strLocationName]
+	--HAVING
+	--	SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
+	) SHP
+LEFT OUTER JOIN
+	tblSCTicket SCT
+		ON SHP.[intSourceId] = SCT.[intTicketId] 
+	
 UNION ALL
 
 SELECT
