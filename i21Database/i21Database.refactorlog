@@ -4298,4 +4298,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCompanyPreferenceId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3e7e6424-2ca1-44d5-9172-ca1c8616d06a" ChangeDateTime="10/28/2015 08:31:23">
+    <Property Name="ElementName" Value="[dbo].[uspMFReportLotLabel]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="uspMFReportBagOffLabel" />
+  </Operation>
 </Operations>
