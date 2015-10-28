@@ -1181,3 +1181,162 @@ UPDATE dbo.tblMFCompanyPreference
 SET strDefaultStatusForSanitizedLot ='SANITIZED'
 WHERE strDefaultStatusForSanitizedLot IS NULL
 Go
+GO
+
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'Caffeine'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblMFReportProperty
+		WHERE strReportName = 'BagOff Label'
+			AND intPropertyId = @intPropertyId
+			AND intSequenceNo = 1
+		)
+BEGIN
+	INSERT INTO tblMFReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'BagOff Label'
+		,@intPropertyId
+		,1
+END
+GO
+
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'Moisture'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblMFReportProperty
+		WHERE strReportName = 'BagOff Label'
+			AND intPropertyId = @intPropertyId
+			AND intSequenceNo = 2
+		)
+BEGIN
+	INSERT INTO tblMFReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'BagOff Label'
+		,@intPropertyId
+		,2
+END
+
+GO
+
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'Moisture'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblMFReportProperty
+		WHERE strReportName = 'Tote Label'
+			AND intPropertyId = @intPropertyId
+			AND intSequenceNo = 1
+		)
+BEGIN
+	INSERT INTO tblMFReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Tote Label'
+		,@intPropertyId
+		,1
+END
+GO
+
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'Density'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblMFReportProperty
+		WHERE strReportName = 'Tote Label'
+			AND intPropertyId = @intPropertyId
+			AND intSequenceNo = 2
+		)
+BEGIN
+	INSERT INTO tblMFReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Tote Label'
+		,@intPropertyId
+		,2
+END
+Go
+GO
+
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'Color'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblMFReportProperty
+		WHERE strReportName = 'Tote Label'
+			AND intPropertyId = @intPropertyId
+			AND intSequenceNo = 3
+		)
+BEGIN
+	INSERT INTO tblMFReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Tote Label'
+		,@intPropertyId
+		,3
+END
+GO
+
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'Rework Comments'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblMFReportProperty
+		WHERE strReportName = 'Tote Label'
+			AND intPropertyId = @intPropertyId
+			AND intSequenceNo = 4
+		)
+BEGIN
+	INSERT INTO tblMFReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Tote Label'
+		,@intPropertyId
+		,4
+END
+Go
