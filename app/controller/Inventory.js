@@ -188,5 +188,49 @@ Ext.define('Inventory.controller.Inventory', {
         }
         else
             return true;
+    },
+
+    showScreen: function(recordId, screenType) {
+        var screenName = '',
+            action = 'new',
+            columnName = '';
+
+        switch (screenType) {
+            case 'Order':
+                screenName = 'AccountsReceivable.view.SalesOrder';
+                columnName = 'intSalesOrderId';
+                break;
+            case 'ReceiptNo':
+                screenName = 'Inventory.view.InventoryReceipt';
+                columnName = 'strReceiptNumber';
+                break;
+            case 'VendorName':
+                screenName = 'EntityManagement.view.Entity';
+                columnName = 'strName';
+                break;
+            case 'LocationName':
+                screenName = 'i21.view.CompanyLocation';
+                columnName = 'strLocationName';
+                break;
+        }
+
+        var filter = [];
+        if (recordId != 0 && recordId != 'undefined' && recordId) {
+            action = 'view';
+            filter.push({
+                column: columnName,
+                value: recordId,
+                condition: 'eq',
+                conjunction: ''
+            });
+        }
+
+        if (screenName != '') {
+            iRely.Functions.openScreen(screenName, {
+                modalMode: true,
+                action: action,
+                filters: filter
+            });
+        }
     }
 });

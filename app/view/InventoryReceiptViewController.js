@@ -12,11 +12,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             columns: [
                 {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string'},
+                {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
                 {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
                 {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
-                {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string'},
-                {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string'},
+                {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName'},
+                {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName'},
                 {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string'},
                 {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
 
@@ -1307,6 +1307,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             });
         }
+    },
+
+    onViewReceiptNo: function (value, record) {
+        i21.ModuleMgr.Inventory.showScreen(value, 'ReceiptNo');
+    },
+
+    onViewVendorName: function (value, record) {
+        i21.ModuleMgr.Inventory.showScreen(value, 'VendorName');
+    },
+
+    onViewLocationName: function (value, record) {
+        i21.ModuleMgr.Inventory.showScreen(value, 'LocationName');
     },
 
     onViewTaxDetailsClick: function (ReceiptItemId) {
