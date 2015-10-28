@@ -740,7 +740,17 @@ GO
                                     ,[strModule]			= 'Grain'
                                     ,[ysnEnable]			= 1
                                     ,[intConcurrencyId]		= 1
-    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ScaleTicket')
+    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Transfer')
+
+	UNION ALL
+    SELECT  [intStartingNumberId]   = 80
+                                    ,[strTransactionType]   = N'Transfer'
+                                    ,[strPrefix]			= N'TRF-'
+                                    ,[intNumber]            = 1
+                                    ,[strModule]			= 'Patronage'
+                                    ,[ysnEnable]			= 1
+                                    ,[intConcurrencyId]		= 1
+    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Transfer')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
