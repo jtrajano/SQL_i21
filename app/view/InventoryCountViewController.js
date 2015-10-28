@@ -471,6 +471,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             "#btnPrintCountSheets": {
                 click: this.onPrintCountSheetsClick
             },
+            "#btnPrintVariance": {
+                click: this.onPrintCountSheetsClick
+            },
             "#btnLockInventory": {
                 click: this.onLockInventoryClick
             }
