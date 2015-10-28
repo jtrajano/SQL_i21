@@ -2738,7 +2738,7 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\EfficiencyReport.sql" />
     <Build Include="dbo\Views\vyuRKM2MInquirySearch.sql" />
-    <Build Include="dbo\Tables\uspMFReportToteLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportToteLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
