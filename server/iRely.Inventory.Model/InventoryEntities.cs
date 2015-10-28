@@ -292,6 +292,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
 
             modelBuilder.Configurations.Add(new vyuICGetInventoryValuationMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryValuationSummaryMap());
             modelBuilder.Configurations.Add(new vyuICGetAssemblyItemMap());
             modelBuilder.Configurations.Add(new vyuICGetCompactItemMap());
             modelBuilder.Configurations.Add(new vyuICGetItemCommodityMap());

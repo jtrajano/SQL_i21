@@ -394,21 +394,8 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> GetInventoryValuationSummary(GetParameter param)
         {
-            var query = (from p in _db.GetQuery<vyuICGetInventoryValuation>()
-                         group p by new { p.intItemId, p.intItemLocationId, p.intSubLocationId, p.intStorageLocationId } into g
-                         select new vyuICGetInventoryValuationSummary { 
-                             intItemId = g.FirstOrDefault().intItemId,
-                             intItemLocationId = g.FirstOrDefault().intItemLocationId,
-                             intSubLocationId = g.FirstOrDefault().intSubLocationId,
-                             intStorageLocationId = g.FirstOrDefault().intStorageLocationId,
-                             strItemNo = g.FirstOrDefault().strItemNo,
-                             strItemDescription = g.FirstOrDefault().strItemDescription,
-                             strLocationName = g.FirstOrDefault().strLocationName,
-                             strSubLocationName = g.FirstOrDefault().strSubLocationName,
-                             strStorageLocationName = g.FirstOrDefault().strStorageLocationName,
-                             dblValue = g.Sum(p=> p.dblValue)
-                         }).Filter(param, true);
-                              
+            var query = _db.GetQuery<vyuICGetInventoryValuationSummary>()
+                        .Filter(param, true);                              
 
             var sorts = new List<SearchSort>();
             sorts.Add(new SearchSort() { property = "intItemId" });

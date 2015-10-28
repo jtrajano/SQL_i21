@@ -630,4 +630,29 @@ namespace iRely.Inventory.Model
         }
     }
 
+    class vyuICGetInventoryValuationSummaryMap : EntityTypeConfiguration<vyuICGetInventoryValuationSummary>
+    {
+        public vyuICGetInventoryValuationSummaryMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intInventoryValuationKeyId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryValuationSummary");
+            this.Property(t => t.intInventoryValuationKeyId).HasColumnName("intInventoryValuationKeyId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(18, 6);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
+            this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost").HasPrecision(18, 6);
+            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost").HasPrecision(18, 6);
+        }
+    }
+
 }

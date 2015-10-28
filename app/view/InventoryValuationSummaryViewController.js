@@ -11,8 +11,10 @@ Ext.define('Inventory.view.InventoryValuationSummaryViewController', {
                 { dataIndex: 'strItemDescription', text: 'Description', allowSort: false, flex: 1, dataType: 'string' },
                 { dataIndex: 'strLocationName', text: 'Location', allowSort: false, flex: 1, dataType: 'string' },
                 { dataIndex: 'strSubLocationName', text: 'Sub Location', allowSort: false, flex: 1, dataType: 'string' },
-                { dataIndex: 'strStorageLocationName', text: 'Storage Location', allowSort: false, flex: 1, dataType: 'string' },
-                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblValue', text: 'Value', allowSort: false, flex: 1, dataType: 'float' }
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblValue', text: 'Value', allowSort: false, flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', allowSort: false, flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblStandardCost', text: 'Standard Cost', allowSort: false, flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblAverageCost', text: 'Average Cost', allowSort: false, flex: 1, dataType: 'float' }
             ],
             showNew: false,
             showOpenSelected: false,

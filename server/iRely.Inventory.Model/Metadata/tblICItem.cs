@@ -563,6 +563,7 @@ namespace iRely.Inventory.Model
 
     public class vyuICGetInventoryValuationSummary
     {
+        public int intInventoryValuationKeyId { get; set; }
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
@@ -570,8 +571,10 @@ namespace iRely.Inventory.Model
         public string strLocationName { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
-        public int? intStorageLocationId { get; set; }
-        public string strStorageLocationName { get; set; }
+        public decimal? dblQuantity { get; set; }
         public decimal? dblValue { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblStandardCost { get; set; }
+        public decimal? dblAverageCost { get; set; }
     }
 }
