@@ -4305,4 +4305,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="uspMFReportBagOffLabel" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a3cdc727-1caa-46f0-930c-8aea5f97b34b" ChangeDateTime="10/28/2015 17:12:33">
+    <Property Name="ElementName" Value="[dbo].[tblMFCompanyPreference].[strGTIN Case Code]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strGTINCaseCode" />
+  </Operation>
 </Operations>

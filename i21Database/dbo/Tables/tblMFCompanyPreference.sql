@@ -10,5 +10,6 @@
     [strDefaultStatusForSanitizedLot] NVARCHAR(50) NULL, 
     [dblSanitizationOrderOutputQtyTolerancePercentage] NUMERIC(18, 6) NULL, 
     [ysnSanitizationInboundPutaway] BIT NULL, 
+    [strGTINCaseCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )
