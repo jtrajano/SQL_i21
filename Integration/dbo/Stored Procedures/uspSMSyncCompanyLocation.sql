@@ -260,8 +260,8 @@ BEGIN
       ,CL.[strDefaultTicketPrinter] --[agloc_pic_prtr_name]  
       ,CL.[strDefaultInvoicePrinter] --[agloc_ivc_prtr_name]  
       ,NULL       --[agloc_cnt_prtr_name]  
-      ,CL.[strLastInvoiceNumber]  --[agloc_last_ivc_no]  
-      ,CL.[strLastOrderNumber]  --[agloc_last_ord_no]  
+      ,dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])  --[agloc_last_ivc_no]  
+      ,dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])  --[agloc_last_ord_no]  
       ,(CASE CL.[ysnUseOrderNumberforInvoiceNumber]  
            WHEN 1 THEN ''Y''  
            WHEN 0 THEN ''N''  

@@ -25,7 +25,7 @@ BEGIN
 			WHERE intJournalId = @journalId
 			SELECT  @intJournalID = SCOPE_IDENTITY() 
 			INSERT INTO tblGLJournalDetail (intJournalId,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit, dblDebitRate,strDescription,strReference,strComments,strDocument,dtmDate)
-			SELECT @intJournalID,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit,dblDebitRate,strDescription,strReference,strComments,strDocument,@dateNow
+			SELECT @intJournalID,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit,dblDebitRate,strDescription,strReference,strComments,strDocument,@journalDate
 			FROM tblGLJournalDetail
 			WHERE intJournalId = @journalId
 		COMMIT TRANSACTION

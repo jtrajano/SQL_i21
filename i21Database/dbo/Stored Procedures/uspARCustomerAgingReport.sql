@@ -76,7 +76,7 @@ IF ISNULL(@from, '') <> ''
 		SET @joinQuery = 'LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId'
 	END
 
-SELECT	@dtmAsOfDate = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE GETDATE() END AS DATETIME)
+SELECT	@dtmAsOfDate = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 		
