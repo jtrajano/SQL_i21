@@ -2745,6 +2745,7 @@
     <Build Include="dbo\Stored Procedures\uspWHCheckInSKU.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreatePutAwayTask.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateInboundPutawayTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportSampleLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
