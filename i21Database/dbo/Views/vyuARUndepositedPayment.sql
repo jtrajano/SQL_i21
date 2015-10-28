@@ -6,7 +6,8 @@ SELECT
 	,[dtmDate]					= A.[dtmDatePaid]
 	,[strName]					= E.[strName] 
 	,[dblAmount]				= A.[dblAmountPaid]
-	,[strSourceSystem]			= 'AR'						
+	,[strSourceSystem]			= 'AR'
+	,[intBankAccountId]			= A.[intBankAccountId] 					
 
 FROM 
 	tblARPayment A
