@@ -16,7 +16,7 @@ BEGIN   Try
             @strBrokerTradeNo nvarchar(50),
             @strBuySell nvarchar(10),
             @intNoOfContract int,
-            @dblPrice int,
+            @dblPrice numeric(18,6),
             @strStatus nvarchar(50),
             @dtmFilledDate datetime,
             @strReserveForFix nvarchar(50),
@@ -25,7 +25,11 @@ BEGIN   Try
             @ysnOffset bit,
             @intFutOptTransactionHeaderId int,
             @ErrMsg nvarchar(max),
-            @intCurrencyId INT
+            @intCurrencyId INT,
+			@intContractHeaderId INT,
+			@intContractDetailId INT,
+			@strXml  nvarchar(max),
+			@intMatchedLots INT
     
 
 
@@ -56,7 +60,9 @@ SELECT
       @intBookId = intBookId ,
       @intSubBookId =    intSubBookId ,
       @ysnOffset = ysnOffset ,
-      @intCurrencyId = intCurrencyId
+      @intCurrencyId = intCurrencyId,
+	  @intContractHeaderId = intContractHeaderId,
+	  @intContractDetailId = intContractDetailId
 
 FROM OPENXML(@idoc,'root',2)          
 WITH(
@@ -74,7 +80,7 @@ strInternalTradeNo nvarchar(10),
 strBrokerTradeNo nvarchar(50),
 strBuySell nvarchar(10),
 intNoOfContract int,
-dblPrice int,
+dblPrice NUMERIC(18,6),
 strStatus nvarchar(50),
 dtmFilledDate datetime,
 strReserveForFix nvarchar(50),
@@ -82,7 +88,9 @@ intBookId int,
 intSubBookId int,
 ysnOffset bit,
 intCurrencyId INT,
-CurrentDate datetime
+CurrentDate datetime,
+intContractHeaderId INT,
+intContractDetailId INT
 )      
 IF ISNULL(@intFutOptTransactionId,0) > 0
 BEGIN
@@ -96,6 +104,18 @@ BEGIN
       intNoOfContract = @intNoOfContract, 
       dblPrice =  @dblPrice 
       WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+	  SELECT @intMatchedLots = SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+	  IF @intMatchedLots < @intNoOfContract
+	  BEGIN
+		RAISERROR('Cannot change number of hedged lots as it is used in Match Futures Purchase and sales.',16,1)
+	  END
+
+	IF ISNULL(@intContractDetailId,0) > 0
+		UPDATE tblRKAssignFuturesToContractSummary SET intHedgedLots = @intNoOfContract WHERE intContractDetailId = @intContractDetailId AND intFutOptTransactionId = @intFutOptTransactionId
+	ELSE
+		UPDATE tblRKAssignFuturesToContractSummary SET intHedgedLots = @intNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
 END
 ELSE
 BEGIN
@@ -155,6 +175,19 @@ BEGIN
       )          
 
       SET @intFutOptTransactionId = SCOPE_IDENTITY()
+
+		SET @strXml = '<root><Transaction>';
+		SET @strXml = @strXml + '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
+		IF ISNULL(@intContractDetailId,0) > 0
+			SET @strXml = @strXml + '<intContractDetailId>' + LTRIM(@intContractDetailId) + '</intContractDetailId>'
+		SET @strXml = @strXml + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
+		SET @strXml = @strXml + '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
+		SET @strXml = @strXml + '<intHedgedLots>' + LTRIM(@intNoOfContract) + '</intHedgedLots>'
+		SET @strXml = @strXml + '<dblAssignedLots>0</dblAssignedLots>'
+		SET @strXml = @strXml + '<ysnIsHedged>1</ysnIsHedged>'
+		SET @strXml = @strXml + '</Transaction></root>'
+
+		EXEC uspRKAssignFuturesToContractSummarySave @strXml
 END
   
 END TRY    

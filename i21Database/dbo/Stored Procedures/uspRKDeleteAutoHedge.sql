@@ -20,6 +20,7 @@ BEGIN
 END
 ELSE
 BEGIN
+      DELETE FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intFutOptTransactionId 
       DELETE FROM tblRKFutOptTransaction WHERE intFutOptTransactionId=@intFutOptTransactionId 
 END
 
