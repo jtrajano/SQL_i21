@@ -2741,6 +2741,10 @@
     <Build Include="dbo\Stored Procedures\uspMFReportToteLabel.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDeleteBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHAutoCheckInSKU.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCheckInSKU.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreatePutAwayTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreateInboundPutawayTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
