@@ -59,7 +59,10 @@ BEGIN TRY
 
 	EXEC uspAPCreateBillData @intUserId, @intVendorEntityId, @voucherDetailNonInvContract = @voucherDetailNonInvContract, @billId=@intBillId OUTPUT
 
+	UPDATE tblLGWarehouseInstructionHeader SET intBillId = @intBillId WHERE intWarehouseInstructionHeaderId=@intWarehouseInstructionHeaderId
+
 	Select @intBillId
+
 
 END TRY
 BEGIN CATCH

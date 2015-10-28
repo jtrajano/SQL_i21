@@ -39,7 +39,9 @@ AS
 			CD.intContainerTypeId,
 			CD.strVessel,
 			CD.intContractTypeId,
-			Item.strType as strItemType
+			Item.strType as strItemType,
+			convert(nvarchar(100), CD.dtmStartDate, 101) as strStartDate,
+			convert(nvarchar(100), CD.dtmEndDate, 101) as strEndDate
 
 	FROM 	vyuCTContractDetailView 		CD
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId

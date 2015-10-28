@@ -12,6 +12,7 @@
 	[intWarehouseRateMatrixHeaderId] INT NOT NULL,
     [intUserSecurityId] INT NOT NULL,
     [strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, 
+	[intBillId]            INT NULL,
 
     CONSTRAINT [PK_tblLGWarehouseInstructionHeader_intWarehouseInstructionHeaderId] PRIMARY KEY ([intWarehouseInstructionHeaderId]), 
     CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]),
@@ -22,5 +23,6 @@
 	-- THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
 --    CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]),
     CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblLGWarehouseRateMatrixHeader_intWarehouseRateMatrixHeaderId] FOREIGN KEY ([intWarehouseRateMatrixHeaderId]) REFERENCES [tblLGWarehouseRateMatrixHeader]([intWarehouseRateMatrixHeaderId]),
-    CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
+    CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
+	CONSTRAINT [FK_tblLGWarehouseInstructionHeader_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId])
 )

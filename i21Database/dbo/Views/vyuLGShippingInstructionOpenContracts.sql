@@ -25,7 +25,9 @@ AS
 			CD.intShippingLineId as intShippingLineEntityId,
 			CD.intNumberOfContainers,
 			CD.intContainerTypeId,
-			CD.strVessel
+			CD.strVessel,
+			convert(nvarchar(100), CD.dtmStartDate, 101) as strStartDate,
+			convert(nvarchar(100), CD.dtmEndDate, 101) as strEndDate
 
 	FROM vyuCTContractDetailView 		CD
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
