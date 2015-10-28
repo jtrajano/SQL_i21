@@ -2727,6 +2727,8 @@
     <Build Include="dbo\Stored Procedures\uspWHMoveContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportProductSpecification.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailNonInvContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailNonInvContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
