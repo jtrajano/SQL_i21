@@ -87,8 +87,10 @@ UNION SELECT
 	dtmCreated = GETDATE(),
 	intLastModifiedUserId = @intUserId,
 	dtmLastModified = GETDATE()
-FROM vyuARUndepositedPayment v
-WHERE	NOT EXISTS (
+FROM vyuARUndepositedPayment v INNER JOIN tblCMBankAccount b
+			ON b.intBankAccountId = v.intBankAccountId
+WHERE	b.intBankAccountId = @intBankAccountId
+		AND	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
 			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
