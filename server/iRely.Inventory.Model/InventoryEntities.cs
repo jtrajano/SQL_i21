@@ -119,7 +119,6 @@ namespace iRely.Inventory.Model
         public DbSet<tblSMCountry> tblSMCountries { get; set; }
         public DbSet<tblSMCurrency> tblSMCurrencies { get; set; }
         public DbSet<tblSMStartingNumber> tblSMStartingNumbers { get; set; }
-        public DbSet<tblSMFreightTerm> tblSMFreightTerms { get; set; }
         public DbSet<tblSMCompanyLocationSubLocation> tblSMCompanyLocationSubLocations { get; set; }
         public DbSet<tblSMTaxCode> tblSMTaxCodes { get; set; }
 
@@ -288,7 +287,6 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICCompanyPreferenceMap());
             modelBuilder.Configurations.Add(new tblSMStartingNumberMap());
-            modelBuilder.Configurations.Add(new tblSMFreightTermMap());
             modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
 
             modelBuilder.Configurations.Add(new vyuICGetInventoryValuationMap());

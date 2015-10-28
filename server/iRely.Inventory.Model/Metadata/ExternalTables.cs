@@ -175,14 +175,6 @@ namespace iRely.Inventory.Model
         public bool ysnEnable { get; set; }
     }
 
-    public class tblSMFreightTerm : BaseEntity
-    {
-        public int intFreightTermId { get; set; }
-        public string strFreightTerm { get; set; }
-        public string strFobPoint { get; set; }
-        public bool ysnActive { get; set; }
-    }
-
     public class tblMFQAProperty : BaseEntity
     {
         public int intQAPropertyId { get; set; }

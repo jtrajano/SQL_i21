@@ -239,23 +239,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnEnable).HasColumnName("ysnEnable");
         }
     }
-
-    public class tblSMFreightTermMap : EntityTypeConfiguration<tblSMFreightTerm>
-    {
-        public tblSMFreightTermMap()
-        {
-            // Primary Key
-            this.HasKey(t => t.intFreightTermId);
-
-            // Table & Column Mappings
-            this.ToTable("tblSMFreightTerms");
-            this.Property(t => t.intFreightTermId).HasColumnName("intFreightTermId");
-            this.Property(t => t.strFobPoint).HasColumnName("strFobPoint");
-            this.Property(t => t.strFreightTerm).HasColumnName("strFreightTerm");
-            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
-        }
-    }
-
+    
     public class tblMFQAPropertyMap : EntityTypeConfiguration<tblMFQAProperty>
     {
         public tblMFQAPropertyMap()
