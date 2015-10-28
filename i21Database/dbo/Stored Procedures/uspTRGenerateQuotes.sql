@@ -50,8 +50,8 @@ select intEntityCustomerId,NULL from tblARCustomerGroup CG
 		  right join vyuTRQuoteSelection QS on QS.intEntityCustomerId = CD.intEntityId
 		   where CD.ysnQuote = 1
 		         and QS.ysnQuote = 1
-		         and (isNull(@intCustomerId ,0 ) = 0 or isNull(@intCustomerId ,0 ) = QS.intEntityCustomerId) 
-                                                              or  (isNull(@intCustomerGroupId ,0 ) = 0 or isNull(@intCustomerGroupId ,0 ) = CG.intCustomerGroupId) 
+		         and (CG.intCustomerGroupId = @intCustomerGroupId or isNull(@intCustomerGroupId,0) = 0)
+                 and (isNull(@intCustomerId ,0 ) = 0 or @intCustomerId = QS.intEntityCustomerId)
           group by QS.intEntityCustomerId
 
 
