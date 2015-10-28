@@ -111,7 +111,7 @@ BEGIN TRY
 		AND QTR.intPropertyId = @intPropertyId4
 
 	SELECT DISTINCT
-		,L.strLotNumber
+		L.strLotNumber
 		,WP.strParentLotNumber
 		,L.dtmDateCreated
 		,US.strUserName
