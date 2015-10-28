@@ -31,6 +31,7 @@ BEGIN
 		SELECT strAccountId,
 			   strDescription,
 			   intAccountGroupId,
+			   intAccountCategoryId,
 			   intAccountUnitId,
 			   ysnSystem,
 			   ysnActive,
