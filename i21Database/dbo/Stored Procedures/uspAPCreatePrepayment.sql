@@ -78,7 +78,7 @@ BEGIN
 			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId) --USER USER LOCATION
 		END
 
-		SELECT @intGLBankAccountId = B.intCashAccount 
+		SELECT @intGLBankAccountId = A.intCashAccount 
 			FROM tblSMCompanyLocation A
 		WHERE A.intCompanyLocationId = @location
 		
