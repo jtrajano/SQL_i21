@@ -2740,6 +2740,7 @@
     <Build Include="dbo\Views\vyuRKM2MInquirySearch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportToteLabel.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGDeleteBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
