@@ -27,6 +27,7 @@ BEGIN
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @intGLBankAccountId INT;
+	DECLARE @location INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -34,6 +35,7 @@ BEGIN
 	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
 	SELECT TOP 1 @vendorId = C.[intEntityVendorId] 
+			,@location = A.intShipToId
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
@@ -70,15 +72,24 @@ BEGIN
 	--Make sure there is bank account to use
 	IF @intBankAccountId IS NULL
 	BEGIN
-		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
-		WHERE A.[intEntityUserSecurityId] = @userId
+
+		IF @location IS NULL
+		BEGIN
+			SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId) --USER USER LOCATION
+		END
+
+		SELECT @intGLBankAccountId = B.intCashAccount 
+			FROM tblSMCompanyLocation A
+		WHERE A.intCompanyLocationId = @location
+		
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
-		IF @intBankAccountId IS NULL
-		BEGIN
-			RAISERROR('There was not set up for cash account.', 16, 1);
-			RETURN;
-		END
+	END
+
+	IF @intBankAccountId IS NULL
+	BEGIN
+		RAISERROR('Cash account setup is missing.', 16, 1);
+		RETURN;
 	END
 
 	IF @intGLBankAccountId IS NULL

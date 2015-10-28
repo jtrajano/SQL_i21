@@ -19,6 +19,7 @@ DECLARE @APAccount INT;
 DECLARE @shipFrom INT, @shipTo INT;
 DECLARE @receiptLocation INT;
 DECLARE @userLocation INT;
+DECLARE @location INT;
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -41,6 +42,7 @@ BEGIN TRANSACTION
 INSERT INTO #tmpReceiptIds(intInventoryReceiptId) SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@receiptIds)
 
 SET @totalReceipts = (SELECT COUNT(*) FROM #tmpReceiptIds)
+
 SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId);
 
 --Get the company location of the user to get the default ap account else get from preference
@@ -50,11 +52,11 @@ SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompany
 --IF @APAccount IS NULL
 --	SET @APAccount = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountCategoryId = 1)
 
-IF @APAccount IS NULL OR @APAccount <= 0
-BEGIN
-	RAISERROR('Please setup default AP Account', 16, 1);
-	GOTO DONE
-END
+--IF @APAccount IS NULL OR @APAccount <= 0
+--BEGIN
+--	RAISERROR('Please setup default AP Account', 16, 1);
+--	GOTO DONE
+--END
 
 --Make sure all items were not yet billed.
 IF NOT EXISTS(SELECT 1 FROM tblICInventoryReceiptItem A
@@ -76,19 +78,22 @@ BEGIN
 	SELECT TOP(1) @receiptId = intInventoryReceiptId FROM #tmpReceiptIds
 	EXEC uspSMGetStartingNumber 9, @generatedBillRecordId OUT
 
-	--IF DEFAULT LOCATION OF USER WAS DIFFERENT FROM CURRENT IR LOCATION
+	--PRIORITIZE RECEIPT LOCATION
 	SET @receiptLocation = (SELECT intLocationId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId)
-	IF @userLocation != @receiptLocation
-	BEGIN
-		SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @receiptLocation)
-		IF @APAccount IS NULL OR @APAccount <= 0
-		BEGIN
-			RAISERROR('Please setup default AP Account.', 16, 1);
-			GOTO DONE
-		END
-	END
-						
+	SET @location = @receiptLocation; 
 
+	IF @receiptLocation IS NULL
+	BEGIN
+		SET @location = @userLocation --USE USER LOCATION
+	END
+
+	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @location)
+	IF @APAccount IS NULL OR @APAccount <= 0
+	BEGIN
+		RAISERROR('Please setup default AP Account.', 16, 1);
+		GOTO DONE
+	END
+			
 	INSERT INTO tblAPBill(
 		[intEntityVendorId],
 		[strVendorOrderNumber], 

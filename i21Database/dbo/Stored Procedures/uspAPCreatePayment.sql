@@ -37,6 +37,7 @@ BEGIN
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
 	DECLARE @intGLBankAccountId INT;
+	DECLARE @location INT;
 	DECLARE @autoPay BIT = 0; --Automatically compute the payment
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
@@ -61,17 +62,29 @@ BEGIN
 		RETURN;
 	END
 
+	SELECT @location = intShipToId FROM tblAPBill WHERE intBillId = @billId
+
+	IF @location IS NULL
+	BEGIN
+		SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId)
+		IF @location IS NULL
+		BEGIN
+			RAISERROR('Location setup is missing.', 16, 1);
+			RETURN;
+		END
+	END
+
 	--Make sure there is bank account to use
 	IF @intBankAccountId IS NULL
 	BEGIN
-		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A 
-					INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
-					WHERE A.[intEntityUserSecurityId] = @userId
+		SELECT @intGLBankAccountId = A.intCashAccount FROM tblSMCompanyLocation A
+					WHERE A.intCompanyLocationId = @location
+
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
 		IF @intBankAccountId IS NULL
 		BEGIN
-			RAISERROR('The Cash Account setup is missing.', 16, 1);
+			RAISERROR('The Cash Account setup is missing on company location.', 16, 1);
 			RETURN;
 		END
 	END
