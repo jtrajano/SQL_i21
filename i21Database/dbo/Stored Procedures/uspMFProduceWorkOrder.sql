@@ -26,6 +26,8 @@
 	,@strVendorLotNo nvarchar(50)=NULL
 	,@strComment nvarchar(MAX)=NULL
 	,@strParentLotNumber nvarchar(50)=NULL
+	,@intInputLotId int=NULL
+	,@intInputStorageLocationId int=NULL
 	)
 AS
 BEGIN
@@ -112,7 +114,9 @@ BEGIN
 		,dtmLastModified
 		,intLastModifiedUserId
 		,strComment
-		,strParentLotNumber 
+		,strParentLotNumber
+		,intInputLotId 
+		,intInputStorageLocationId  
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -139,6 +143,8 @@ BEGIN
 		,@intUserId
 		,@strComment
 		,@strParentLotNumber
+		,@intInputLotId 
+		,@intInputStorageLocationId  
 
 	UPDATE tblMFWorkOrder
 	SET intBatchID = @intWorkOrderId

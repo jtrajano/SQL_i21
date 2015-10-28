@@ -506,7 +506,9 @@ BEGIN TRY
 			,@dtmProductionDate=@dtmPlannedDate
 			,@strVendorLotNo =@strVendorLotNo
 			,@strComment=@strComment 
-			,@strParentLotNumber=@strParentLotNumber 
+			,@strParentLotNumber=@strParentLotNumber
+			,@intInputLotId =@intInputLotId
+			,@intInputStorageLocationId =@intInputLotStorageLocationId 
 	
 		IF @intLotStatusId IS NOT NULL
 		BEGIN

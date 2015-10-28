@@ -110,7 +110,10 @@ BEGIN TRY
 	WHERE QTR.intProductValueId = @intLotId
 		AND QTR.intPropertyId = @intPropertyId4
 
-	SELECT DISTINCT L.dtmDateCreated
+	SELECT DISTINCT
+		,L.strLotNumber
+		,WP.strParentLotNumber
+		,L.dtmDateCreated
 		,US.strUserName
 		,I.strItemNo
 		,I.strDescription
@@ -122,10 +125,8 @@ BEGIN TRY
 				THEN L.dblWeight
 			ELSE dblQty
 			END dblWeight
-		,L.strVendorLotNo
-		,WP.strParentLotNumber
 		,UM.strUnitMeasure
-		,L.strLotNumber
+		,L.strVendorLotNo
 		,@strPropertyName1 AS strPropertyName1
 		,@strPropertyValue1 AS strPropertyValue1
 		,@strPropertyName2 AS strPropertyName2
@@ -139,7 +140,7 @@ BEGIN TRY
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblMFWorkOrderProducedLot AS WP ON L.intLotId = WP.intLotId
 	LEFT JOIN dbo.tblMFShift S ON WP.intShiftId = S.intShiftId
-	LEFT JOIN dbo.tblICStorageLocation AS SL ON WP.intStorageLocationId = SL.intStorageLocationId
+	LEFT JOIN dbo.tblICStorageLocation AS SL ON WP.intInputStorageLocationId = SL.intStorageLocationId
 	JOIN dbo.tblICItemUOM IU ON IsNULL(L.intWeightUOMId, L.intItemUOMId) = IU.intItemUOMId
 	JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
 	WHERE L.intLotId = @intLotId
