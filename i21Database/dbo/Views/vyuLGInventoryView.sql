@@ -2,7 +2,7 @@
 	AS 
 SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY strStatus)) as intKeyColumn,*  FROM (
 SELECT
-	'Afloat' as strStatus
+	'In-transit' as strStatus
 	,Shipment.strContractNumber
 	,Shipment.intContractSeq
 	,Shipment.intContractDetailId
