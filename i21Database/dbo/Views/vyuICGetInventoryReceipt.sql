@@ -33,6 +33,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.strVessel
 	, Receipt.intFreightTermId
 	, FreightTerm.strFreightTerm
+	, FreightTerm.strFobPoint
 	, Receipt.intShiftNumber
 	, Receipt.dblInvoiceAmount
 	, Receipt.ysnPrepaid
