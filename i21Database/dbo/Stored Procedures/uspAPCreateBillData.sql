@@ -3,10 +3,16 @@
 	VoucherDetailNonInventory - Use this to create bill and directly adding miscellaneous items.
 	VoucherDetailReceipt - use this to create bill with item from Inventory Receipt.
 	VoucherDetailNonInvContract - Use this to create bill with non inventory item associated to contract
+
+	@type - The transaction type to create
+	1 - Bill
+	2 - Prepayment
+	3 - Debit Memo
 */
 CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@userId INT,
 	@vendorId INT,
+	@type INT = 1,
 	@voucherPODetails AS VoucherPODetail READONLY,
 	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
 	@voucherDetailReceiptPO AS VoucherDetailReceipt READONLY,
@@ -24,6 +30,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @startingRecordId INT;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -33,7 +40,47 @@ IF @transCount = 0 BEGIN TRANSACTION
 	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
-	EXEC uspSMGetStartingNumber 9, @billRecordNumber OUTPUT
+	IF @type = 1
+	BEGIN
+		SET @startingRecordId = 9;
+	END
+	ELSE IF @type = 2
+	BEGIN
+		SET @startingRecordId = 18;
+	END
+
+	EXEC uspSMGetStartingNumber @startingRecordId, @billRecordNumber OUTPUT
+
+	SELECT 
+		[intTermsId]			=	A.[intTermsId],
+		[dtmDueDate]			=	A.[dtmDueDate],
+		[intAccountId]			=	A.[intAccountId],
+		[intEntityId]			=	A.[intEntityId],
+		[intEntityVendorId]		=	A.[intEntityVendorId],
+		[intTransactionType]	=	A.[intTransactionType],
+		[strBillId]				=	@billRecordNumber,
+		[strShipToAttention]	=	A.[strShipToAttention],
+		[strShipToAddress]		=	A.[strShipToAddress],
+		[strShipToCity]			=	A.[strShipToCity],
+		[strShipToState]		=	A.[strShipToState],
+		[strShipToZipCode]		=	A.[strShipToZipCode],
+		[strShipToCountry]		=	A.[strShipToCountry],
+		[strShipToPhone]		=	A.[strShipToPhone],
+		[strShipFromAttention]	=	A.[strShipFromAttention],
+		[strShipFromAddress]	=	A.[strShipFromAddress],
+		[strShipFromCity]		=	A.[strShipFromCity],
+		[strShipFromState]		=	A.[strShipFromState],
+		[strShipFromZipCode]	=	A.[strShipFromZipCode],
+		[strShipFromCountry]	=	A.[strShipFromCountry],
+		[strShipFromPhone]		=	A.[strShipFromPhone],
+		[intShipFromId]			=	A.[intShipFromId],
+		[intShipToId]			=	A.[intShipToId],
+		[intShipViaId]			=	A.[intShipViaId],
+		[intContactId]			=	A.[intContactId],
+		[intOrderById]			=	A.[intOrderById],
+		[intCurrencyId]			=	A.[intCurrencyId]
+	INTO #tmpBillData
+	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @shipTo) A
 
 	INSERT INTO tblAPBill
 	(
@@ -65,35 +112,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intOrderById]			,
 		[intCurrencyId]			
 	)
-	SELECT 
-		[intTermsId]			=	A.[intTermsId],
-		[dtmDueDate]			=	A.[dtmDueDate],
-		[intAccountId]			=	A.[intAccountId],
-		[intEntityId]			=	A.[intEntityId],
-		[intEntityVendorId]		=	A.[intEntityVendorId],
-		[intTransactionType]	=	A.[intTransactionType],
-		[strBillId]				=	@billRecordNumber,
-		[strShipToAttention]	=	A.[strShipToAttention],
-		[strShipToAddress]		=	A.[strShipToAddress],
-		[strShipToCity]			=	A.[strShipToCity],
-		[strShipToState]		=	A.[strShipToState],
-		[strShipToZipCode]		=	A.[strShipToZipCode],
-		[strShipToCountry]		=	A.[strShipToCountry],
-		[strShipToPhone]		=	A.[strShipToPhone],
-		[strShipFromAttention]	=	A.[strShipFromAttention],
-		[strShipFromAddress]	=	A.[strShipFromAddress],
-		[strShipFromCity]		=	A.[strShipFromCity],
-		[strShipFromState]		=	A.[strShipFromState],
-		[strShipFromZipCode]	=	A.[strShipFromZipCode],
-		[strShipFromCountry]	=	A.[strShipFromCountry],
-		[strShipFromPhone]		=	A.[strShipFromPhone],
-		[intShipFromId]			=	A.[intShipFromId],
-		[intShipToId]			=	A.[intShipToId],
-		[intShipViaId]			=	A.[intShipViaId],
-		[intContactId]			=	A.[intContactId],
-		[intOrderById]			=	A.[intOrderById],
-		[intCurrencyId]			=	A.[intCurrencyId]
-	FROM dbo.fnAPCreateBillData(@vendorId, @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @shipTo) A
+	SELECT * FROM #tmpBillData
 
 	SET @billId = SCOPE_IDENTITY()
 

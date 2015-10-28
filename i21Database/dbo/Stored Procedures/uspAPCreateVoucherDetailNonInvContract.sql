@@ -22,6 +22,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INSERT INTO tblAPBillDetail(
 		[intBillId]						,
 		[intAccountId]					,
+		[intContractDetailId]			,
+		[intContractHeaderId]			,
 		[intItemId]						,
 		[dblTotal]						,
 		[dblQtyOrdered]					,
@@ -35,6 +37,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SELECT
 		[intBillId]						=	@voucherId							,
 		[intAccountId]					=	A.intAccountId,
+		[intContractDetailId]			=	A.intContractDetailId,
+		[intContractHeaderId]			=	A.intContractHeaderId,
 		[intItemId]						=	A.[intItemId]					,
 		[dblTotal]						=	A.dblCost * A.dblQtyReceived,
 		[dblQtyOrdered]					=	A.dblQtyReceived,

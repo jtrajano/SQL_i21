@@ -2,6 +2,7 @@
 (
 	@vendorId INT,
 	@userId INT,
+	@type INT,
 	@termId INT = NULL,
 	@currencyId INT = NULL,
 	@apAccountId INT = NULL,
@@ -10,10 +11,10 @@
 )
 RETURNS @returntable TABLE
 (
-	[intTermsId]			INT             NOT NULL DEFAULT 0,
+	[intTermsId]			INT             NOT NULL,
     [dtmDate]				DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]			DATETIME        NOT NULL DEFAULT GETDATE(),
-    [intAccountId]			INT             NOT NULL DEFAULT 0,
+    [intAccountId]			INT             NOT NULL,
     [strReference]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[strApprovalNotes]		NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[strComment]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
@@ -174,7 +175,7 @@ BEGIN
 		@apAccount,
 		@userId,
 		@vendorId,
-		1,
+		@type,
 		NULL,
 		@shipToAddress,
 		@shipToCity,
