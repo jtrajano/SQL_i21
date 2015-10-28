@@ -45,40 +45,70 @@ BEGIN TRY
 		,@strDensityValue NVARCHAR(10)
 		,@strColorValue NVARCHAR(10)
 		,@strReworkCommentsValue NVARCHAR(10)
+		,@intPropertyId1 INT
+		,@strPropertyName1 NVARCHAR(50)
+		,@strPropertyValue1 NVARCHAR(50)
+		,@intPropertyId2 INT
+		,@strPropertyName2 NVARCHAR(50)
+		,@strPropertyValue2 NVARCHAR(50)
+		,@intPropertyId3 INT
+		,@strPropertyName3 NVARCHAR(50)
+		,@strPropertyValue3 NVARCHAR(50)
+		,@intPropertyId4 INT
+		,@strPropertyName4 NVARCHAR(50)
+		,@strPropertyValue4 NVARCHAR(50)
 
 	SELECT @intLotId = intLotId
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strLotNumber
 
-	SELECT @strCaffeineValue = ISNULL(QTR.strPropertyValue, '')
-	FROM dbo.tblQMTestResult QTR
-	JOIN dbo.tblQMProperty P ON P.intPropertyId = QTR.intPropertyId
-	WHERE P.strPropertyName = 'Caffeine'
-		AND QTR.intProductValueId = @intLotId
+	SELECT @intPropertyId1 = P.intPropertyId
+		,@strPropertyName1 = P.strPropertyName
+	FROM tblMFReportProperty RP
+	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
+	WHERE strReportName = 'BagOff Label'
+		AND intSequenceNo = 1
 
-	SELECT @strMoistureValue = ISNULL(QTR.strPropertyValue, '')
-	FROM dbo.tblQMTestResult QTR
-	JOIN dbo.tblQMProperty P ON P.intPropertyId = QTR.intPropertyId
-	WHERE P.strPropertyName = 'Moisture'
-		AND QTR.intProductValueId = @intLotId
+	SELECT @intPropertyId2 = P.intPropertyId
+		,@strPropertyName2 = P.strPropertyName
+	FROM tblMFReportProperty RP
+	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
+	WHERE strReportName = 'BagOff Label'
+		AND intSequenceNo = 2
 
-	SELECT @strDensityValue = ISNULL(QTR.strPropertyValue, '')
-	FROM dbo.tblQMTestResult QTR
-	JOIN dbo.tblQMProperty P ON P.intPropertyId = QTR.intPropertyId
-	WHERE P.strPropertyName = 'Density'
-		AND QTR.intProductValueId = @intLotId
+	SELECT @intPropertyId3 = P.intPropertyId
+		,@strPropertyName3 = P.strPropertyName
+	FROM tblMFReportProperty RP
+	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
+	WHERE strReportName = 'BagOff Label'
+		AND intSequenceNo = 3
 
-	SELECT @strColorValue = ISNULL(QTR.strPropertyValue, '')
-	FROM dbo.tblQMTestResult QTR
-	JOIN dbo.tblQMProperty P ON P.intPropertyId = QTR.intPropertyId
-	WHERE P.strPropertyName = 'Color'
-		AND QTR.intProductValueId = @intLotId
+	SELECT @intPropertyId4 = P.intPropertyId
+		,@strPropertyName4 = P.strPropertyName
+	FROM tblMFReportProperty RP
+	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
+	WHERE strReportName = 'BagOff Label'
+		AND intSequenceNo = 4
 
-	SELECT @strReworkCommentsValue = ISNULL(QTR.strPropertyValue, '')
+	SELECT @strPropertyValue1 = QTR.strPropertyValue
 	FROM dbo.tblQMTestResult QTR
-	JOIN dbo.tblQMProperty P ON P.intPropertyId = QTR.intPropertyId
-	WHERE P.strPropertyName = 'Rework Comments'
-		AND QTR.intProductValueId = @intLotId
+	WHERE QTR.intProductValueId = @intLotId
+		AND QTR.intPropertyId = @intPropertyId1
+
+	SELECT @strPropertyValue2 = QTR.strPropertyValue
+	FROM dbo.tblQMTestResult QTR
+	WHERE QTR.intProductValueId = @intLotId
+		AND QTR.intPropertyId = @intPropertyId2
+
+	SELECT @strPropertyValue3 = QTR.strPropertyValue
+	FROM dbo.tblQMTestResult QTR
+	WHERE QTR.intProductValueId = @intLotId
+		AND QTR.intPropertyId = @intPropertyId3
+
+	SELECT @strPropertyValue4 = QTR.strPropertyValue
+	FROM dbo.tblQMTestResult QTR
+	WHERE QTR.intProductValueId = @intLotId
+		AND QTR.intPropertyId = @intPropertyId4
 
 	SELECT DISTINCT L.dtmDateCreated
 		,US.strUserName
@@ -96,15 +126,18 @@ BEGIN TRY
 		,WP.strParentLotNumber
 		,UM.strUnitMeasure
 		,L.strLotNumber
-		,@strCaffeineValue strCaffeineValue
-		,@strMoistureValue strMoistureValue
 		,WP.dblTareWeight
 		,WP.dblQuantity + ISNULL(WP.dblTareWeight, 0) AS dblGrossWeight
 		,Ltrim(S.intShiftSequence) + ' ' + '(' + CONVERT(NVARCHAR, L.dtmDateCreated, 108) + ')' AS strShiftName
 		,strContainerNo
-		,@strDensityValue AS strDensityValue
-		,@strColorValue AS strColorValue
-		,@strReworkCommentsValue AS strReworkCommentsValue
+		,@strPropertyName1 AS strPropertyName1
+		,@strPropertyValue1 AS strPropertyValue1
+		,@strPropertyName2 AS strPropertyName2
+		,@strPropertyValue2 AS strPropertyValue2
+		,@strPropertyName3 AS strPropertyName3
+		,@strPropertyValue3 AS strPropertyValue3
+		,@strPropertyName4 AS strPropertyName4
+		,@strPropertyValue4 AS strPropertyValue4
 	FROM dbo.tblICLot AS L
 	JOIN dbo.tblSMUserSecurity US ON L.intCreatedUserId = US.intEntityUserSecurityId
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
