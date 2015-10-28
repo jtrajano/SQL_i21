@@ -2735,6 +2735,7 @@
     <Build Include="dbo\Tables\tblAPCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToBill.sql" />
     <Build Include="dbo\Tables\tblMFReportProperty.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
