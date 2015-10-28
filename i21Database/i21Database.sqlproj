@@ -172,7 +172,6 @@
     <Build Include="dbo\Tables\tblAPPostResult.sql" />
     <Build Include="dbo\Tables\tblAPPayment.sql" />
     <Build Include="dbo\Tables\tblAPPaymentDetail.sql" />
-    <Build Include="dbo\Tables\tblAPPreference.sql" />
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblAPVendor.sql" />
     <Build Include="dbo\Tables\tblCMBank.sql" />
@@ -2733,6 +2732,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
     <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
+    <Build Include="dbo\Tables\tblAPCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

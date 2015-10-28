@@ -71,9 +71,9 @@ BEGIN
 	AND A.strDescription <> 'Posted Payment'
 	WHERE D.dblPayment <> 0 AND A.intAccountId NOT IN
 	(
-		SELECT intWithholdAccountId FROM tblAPPreference union
-		select intDiscountAccountId FROM tblAPPreference UNION
-		SELECT intInterestAccountId FROM tblAPPreference
+		SELECT intWithholdAccountId FROM [tblAPCompanyPreference] union
+		select intDiscountAccountId FROM [tblAPCompanyPreference] UNION
+		SELECT intInterestAccountId FROM [tblAPCompanyPreference]
 	)
 	AND A.dtmDateEntered <= @DateRestricion
 
@@ -82,7 +82,7 @@ BEGIN
 	ON A.strTransactionId = B.strPaymentRecordNum
 	INNER JOIN [dbo].tblGLAccount GLAccnt ON B.intAccountId = GLAccnt.intAccountId
 	INNER JOIN tblAPVendor C ON B.intEntityVendorId = B.intEntityVendorId AND C.ysnWithholding = 1
-	INNER JOIN tblAPPreference D ON A.intAccountId = D.intWithholdAccountId
+	INNER JOIN [tblAPCompanyPreference] D ON A.intAccountId = D.intWithholdAccountId
 	INNER JOIN tblGLAccount E ON E.intAccountId = A.intAccountId
 	INNER JOIN tblGLJournal F ON F.intJournalId =B.intPaymentId
 	AND A.strDescription <> 'Posted Payment - Withheld'
@@ -94,7 +94,7 @@ BEGIN
 	INNER JOIN [dbo].tblAPPayment B ON A.strTransactionId = B.strPaymentRecordNum
 	INNER JOIN tblAPPaymentDetail C	ON B.intPaymentId = C.intPaymentId
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
-	INNER JOIN tblAPPreference E ON A.intAccountId = E.intDiscountAccountId
+	INNER JOIN [tblAPCompanyPreference] E ON A.intAccountId = E.intDiscountAccountId
 	INNER JOIN tblGLJournal F ON F.intJournalId = B.intPaymentId
 	AND A.strDescription <> 'Posted Payment - Discount'
 	AND A.strCode = 'AP'
@@ -108,7 +108,7 @@ BEGIN
 	INNER JOIN [dbo].tblAPPayment B ON A.strTransactionId = B.strPaymentRecordNum
 	INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
-	INNER JOIN tblAPPreference E ON A.intAccountId = E.intInterestAccountId
+	INNER JOIN [tblAPCompanyPreference] E ON A.intAccountId = E.intInterestAccountId
 	INNER JOIN tblGLAccount F ON F.intAccountId = B.intAccountId
 	INNER JOIN tblGLJournal G ON G.intJournalId = B.intPaymentId
 	AND A.strDescription <> 'Posted Payment - Interest'

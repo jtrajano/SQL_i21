@@ -4284,4 +4284,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCustomerStockId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b67e3f4c-4a4a-4eed-984e-94150a4740be" ChangeDateTime="10/27/2015 08:57:42">
+    <Property Name="ElementName" Value="[dbo].[tblAPPreference]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblAPCompanyPreference]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0362b7d0-0ac4-4c06-bc15-b89febea1004" ChangeDateTime="10/27/2015 09:21:38">
+    <Property Name="ElementName" Value="[dbo].[tblAPCompanyPreference].[intPreferenceId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceId" />
+  </Operation>
 </Operations>
