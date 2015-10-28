@@ -688,9 +688,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             enableComment: true,
             enableAudit: true,
             include: 'tblICInventoryReceiptInspections,' +
-                'vyuAPVendor,' +
-                'tblSMFreightTerm,' +
-                'tblSMCompanyLocation,' +
+                'vyuICGetInventoryReceipt,' +
                 'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem,' +
                 'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
                 'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
