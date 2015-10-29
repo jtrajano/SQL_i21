@@ -2748,6 +2748,12 @@
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGTINCaseBarcode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportDailyProduction.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostEnquiryCost.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostEnquiryHedge.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostEnquiryMain.sql" />
+    <Build Include="dbo\Functions\fnCTGetBrokerageCommission.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQtyToTargetItemUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetLastSettlementPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

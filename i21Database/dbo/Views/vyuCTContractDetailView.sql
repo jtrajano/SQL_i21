@@ -24,16 +24,21 @@ AS
 			CD.dtmFXValidFrom,					CD.dtmFXValidTo,				CD.strFXRemarks,
 			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
 			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
-			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,
+			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
+			CD.strDestinationPointType,			
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
 			FM.strFutMarketName,				MO.strFutureMonth,				U2.strUnitMeasure				AS	strPriceUOM,
 			MZ.strMarketZoneCode,				OH.strContractOptDesc,			U3.strUnitMeasure				AS	strAdjUOM,
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
-			IX.strIndexType,					
-			ISNULL(CD.dblBalance,0) -	ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty,
-
+			IX.strIndexType,													LP.strCity						AS	strLoadingPoint,	
+																				DP.strCity						AS	strDestinationPoint,
+																				DC.strCity						AS	strDestinationCity,
+			ISNULL(CD.dblBalance,0) -	ISNULL(CD.dblScheduleQty,0)												AS	dblAvailableQty,
+			CH.strContractNumber + LTRIM(CD.intContractSeq)														AS	strSequenceNumber,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInQtyUOM,
+			
 			--Required by other modules
 
 			SL.intStorageLocationId,			IM.strLotTracking,				SL.strName						AS	strStorageLocationName,
@@ -83,7 +88,7 @@ AS
 			CH.dblTolerancePct,					CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
 			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
-			CH.ysnMultiplePriceFixation
+			CH.ysnMultiplePriceFixation,		CH.strINCOLocation
 			
 	FROM	tblCTContractDetail				CD
 	
@@ -113,6 +118,9 @@ AS
 													IL.intLocationId			=	CD.intCompanyLocationId		LEFT
 	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
 	JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
+	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
+	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
+	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
 	JOIN(
 			SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
 			FROM	tblICItemUOM			IU	LEFT 
