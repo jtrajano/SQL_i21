@@ -2748,7 +2748,6 @@
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGTINCaseBarcode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportDailyProduction.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPCreatePrepayClearBalance.sql" />
     <Build Include="dbo\Views\vyuCTContractCostEnquiryCost.sql" />
     <Build Include="dbo\Views\vyuCTContractCostEnquiryHedge.sql" />
     <Build Include="dbo\Views\vyuCTContractCostEnquiryMain.sql" />
