@@ -2773,6 +2773,7 @@
     <Build Include="dbo\Functions\fnRKGetCurrencyConvertion.sql" />
     <Build Include="dbo\Tables\tblQMCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHReportContainerLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
