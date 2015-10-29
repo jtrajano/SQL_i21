@@ -2764,6 +2764,7 @@
     <Build Include="dbo\Functions\fnAPCreateWriteOffGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetEquityPatronageDetails.sql" />
     <Build Include="dbo\Views\vyuPATEquityDetails.sql" />
+    <Build Include="dbo\Tables\tblSCLastScaleSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
