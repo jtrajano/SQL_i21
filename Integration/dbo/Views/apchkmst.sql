@@ -2,6 +2,9 @@
 
 
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'apchkmst')
+	DROP TRIGGER trgInsteadOfDeleteCMApchkmst
+	DROP TRIGGER trgInsteadOfInsertCMApchkmst
+	DROP TRIGGER trgInsteadOfUpdateCMApchkmst
 	DROP VIEW apchkmst
 
 GO
