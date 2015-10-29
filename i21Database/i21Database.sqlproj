@@ -2762,6 +2762,8 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateWriteOff.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostWriteOff.sql" />
     <Build Include="dbo\Functions\fnAPCreateWriteOffGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetEquityPatronageDetails.sql" />
+    <Build Include="dbo\Views\vyuPATEquityDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
