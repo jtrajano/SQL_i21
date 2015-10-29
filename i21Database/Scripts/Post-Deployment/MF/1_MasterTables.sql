@@ -1192,13 +1192,13 @@ WHERE strPropertyName = 'Caffeine'
 IF @intPropertyId IS NOT NULL
 	AND NOT EXISTS (
 		SELECT *
-		FROM tblMFReportQualityProperty
+		FROM tblQMReportProperty
 		WHERE strReportName = 'BagOff Label'
 			AND intPropertyId = @intPropertyId
 			AND intSequenceNo = 1
 		)
 BEGIN
-	INSERT INTO tblMFReportQualityProperty (
+	INSERT INTO tblQMReportProperty (
 		strReportName
 		,intPropertyId
 		,intSequenceNo
@@ -1218,13 +1218,13 @@ WHERE strPropertyName = 'Moisture'
 IF @intPropertyId IS NOT NULL
 	AND NOT EXISTS (
 		SELECT *
-		FROM tblMFReportQualityProperty
+		FROM tblQMReportProperty
 		WHERE strReportName = 'BagOff Label'
 			AND intPropertyId = @intPropertyId
 			AND intSequenceNo = 2
 		)
 BEGIN
-	INSERT INTO tblMFReportQualityProperty (
+	INSERT INTO tblQMReportProperty (
 		strReportName
 		,intPropertyId
 		,intSequenceNo
@@ -1245,13 +1245,13 @@ WHERE strPropertyName = 'Moisture'
 IF @intPropertyId IS NOT NULL
 	AND NOT EXISTS (
 		SELECT *
-		FROM tblMFReportQualityProperty
+		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
 			AND intSequenceNo = 1
 		)
 BEGIN
-	INSERT INTO tblMFReportQualityProperty (
+	INSERT INTO tblQMReportProperty (
 		strReportName
 		,intPropertyId
 		,intSequenceNo
@@ -1271,13 +1271,13 @@ WHERE strPropertyName = 'Density'
 IF @intPropertyId IS NOT NULL
 	AND NOT EXISTS (
 		SELECT *
-		FROM tblMFReportQualityProperty
+		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
 			AND intSequenceNo = 2
 		)
 BEGIN
-	INSERT INTO tblMFReportQualityProperty (
+	INSERT INTO tblQMReportProperty (
 		strReportName
 		,intPropertyId
 		,intSequenceNo
@@ -1298,13 +1298,13 @@ WHERE strPropertyName = 'Color'
 IF @intPropertyId IS NOT NULL
 	AND NOT EXISTS (
 		SELECT *
-		FROM tblMFReportQualityProperty
+		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
 			AND intSequenceNo = 3
 		)
 BEGIN
-	INSERT INTO tblMFReportQualityProperty (
+	INSERT INTO tblQMReportProperty (
 		strReportName
 		,intPropertyId
 		,intSequenceNo
@@ -1324,13 +1324,13 @@ WHERE strPropertyName = 'Rework Comments'
 IF @intPropertyId IS NOT NULL
 	AND NOT EXISTS (
 		SELECT *
-		FROM tblMFReportQualityProperty
+		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
 			AND intSequenceNo = 4
 		)
 BEGIN
-	INSERT INTO tblMFReportQualityProperty (
+	INSERT INTO tblQMReportProperty (
 		strReportName
 		,intPropertyId
 		,intSequenceNo

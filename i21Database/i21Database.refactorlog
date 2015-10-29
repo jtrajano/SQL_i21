@@ -4319,4 +4319,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="tblMFReportQualityProperty" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4ed095ef-03e9-4775-8a41-ba09d9aa5903" ChangeDateTime="10/29/2015 12:33:41">
+    <Property Name="ElementName" Value="[dbo].[tblMFReportQualityProperty]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="tblQMReportProperty" />
+  </Operation>
 </Operations>
