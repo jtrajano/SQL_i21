@@ -79,9 +79,16 @@ IF(@CFPriceOut IS NOT NULL)
 	IF(@CFPricingOut = 'Inventory - Standard Pricing')
 
 		BEGIN 
-
-			SET @CFStandardPrice = @CFPriceOut  
-
+			IF (@CFOriginalPrice IS NOT NULL OR @CFOriginalPrice > 0)
+				BEGIN 
+					SET @CFStandardPrice = @CFOriginalPrice  
+					SET @CFPricingOut = 'Import File Price'
+				END 
+			ELSE
+				BEGIN
+					SET @CFStandardPrice = @CFPriceOut
+					SET @CFPricingOut = 'Inventory - Standard Pricing'
+				END
 		END
 
 	ELSE
@@ -97,8 +104,6 @@ IF(@CFPriceOut IS NOT NULL)
    END    
 
 ---***SPECIAL PRICING***---
-
-   
 
 ---***PRICE PROFILE***---
 
@@ -1062,9 +1067,6 @@ BEGIN
 
 	select dblOriginalGrossPrice from tblCFTransaction
 	
-
-	
-	SET @CFPricingOut = 'Price Profile' 
 	SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
 	print 'rate'
 	print @Rate
@@ -1075,9 +1077,10 @@ BEGIN
 		IF(@CFPriceBasis = 'Pump Price Adjustment')
 			BEGIN
 				SET @CFPriceOut = @CFStandardPrice + @Rate
+				SET @CFPricingOut = 'Price Profile' 
 				RETURN 1;    
 			END
-		ELSE
+		ELSE IF(@CFPriceBasis IS NOT NULL)
 			BEGIN 
 				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
 									FROM @cfMatchPriceProfile 
@@ -1103,13 +1106,15 @@ BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
 						RETURN 1;    
 					END
+					
+				SET @CFPricingOut = 'Price Profile' 
 			END
 	END
 	ELSE IF (@CFTransactionType = 'Remote')
 	BEGIN
 		IF(@CFPriceBasis = 'Remote Pricing Index')
 			BEGIN
-
+				
 				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
 									FROM @cfMatchPriceProfile 
 									WHERE intCustomerId = @CFCustomerId 
@@ -1134,6 +1139,10 @@ BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
 						RETURN 1;    
 					END
+
+					
+				SET @CFPricingOut = 'Price Profile' 
+
 			END
 		ELSE IF(@CFPriceBasis = 'Transfer Cost' OR @CFPriceBasis = 'Transfer Price')
 			BEGIN
@@ -1142,6 +1151,8 @@ BEGIN
 						SET @CFPriceOut = @CFTransferCost + @Rate
 						RETURN 1;    
 					END
+					
+				SET @CFPricingOut = 'Price Profile' 
 			END
 	END
 	ELSE IF (@CFTransactionType = 'Extended Remote')
@@ -1153,6 +1164,8 @@ BEGIN
 						SET @CFPriceOut = @CFTransferCost + @Rate
 						RETURN 1;    
 					END
+					
+				SET @CFPricingOut = 'Price Profile' 
 			END
 		ELSE
 			BEGIN
@@ -1180,6 +1193,8 @@ BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
 						RETURN 1;    
 					END
+					
+				SET @CFPricingOut = 'Price Profile' 
 			END
 		
 	END
@@ -1191,7 +1206,7 @@ END
 
 
 ---***ITEM PRICING***---
-SET @CFPricingOut = 'Inventory - Standard Pricing' 
+SET @CFPricingOut = @CFPricingOut 
 SET @CFPriceOut = @CFStandardPrice;
 
 ---***ITEM PRICING***---

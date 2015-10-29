@@ -106,6 +106,9 @@ BEGIN
 		,[strTaxGroup]					NVARCHAR(100)
 	)
 
+	DECLARE @ysnInvalid					BIT	= 0
+	DECLARE @ysnPosted					BIT = 0
+
 	IF(@intSiteId = 0)
 		BEGIN
 			SET @intSiteId =(SELECT TOP 1 intSiteId
@@ -120,7 +123,6 @@ BEGIN
 								WHERE strNetwork = @strNetworkId)
 		END
 
-	
 	---------------------------------------
 	-- SET intCard && intCustomerId value--
 	SELECT TOP 1 
@@ -144,7 +146,7 @@ BEGIN
 
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
 								FROM tblCFSite 
-								WHERE strSiteNumber = @strSiteId)
+								WHERE intSiteId = @intSiteId)
 	SET @intVehicleId =(SELECT TOP 1 intVehicleId
 						FROM tblCFVehicle
 						WHERE strVehicleNumber	= @strVehicleId)
@@ -169,6 +171,8 @@ BEGIN
 		DECLARE @strPrcPriceBasis			NVARCHAR(MAX)	
 		DECLARE @dblCalcQuantity			NUMERIC(18,6)
 		DECLARE @dblCalcOverfillQuantity	NUMERIC(18,6)
+
+		
 		
 
 		SET @intPrcCustomerId =(SELECT TOP 1 A.intCustomerId	
@@ -185,6 +189,45 @@ BEGIN
 								FROM tblICItemLocation
 								WHERE intLocationId = @intARItemLocationId 
 								AND intItemId = @intARItemId)
+
+	
+		--IF(@dtmTransactionDate = 0 OR @dtmTransactionDate IS NULL)
+		--BEGIN
+		--	SET @ysnInvalid = 1
+		--END
+		IF(@intARItemId = 0 OR @intARItemId IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		IF(@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		IF(@intARItemLocationId = 0 OR @intARItemLocationId IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		IF(@intSiteId = 0 OR @intSiteId IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		IF(@intCardId = 0 OR @intCardId IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
+		BEGIN
+			SET @ysnInvalid = 1
+		END
+		
 
 		SELECT @intARItemId	 AS intARItemId,
 		 @intPrcCustomerId		 AS intPrcCustomerId,
@@ -207,9 +250,7 @@ BEGIN
 		 @strPrcPriceBasis			as strPrcPriceBasis		
 
 		set @dblPrcOriginalPrice = @dblOriginalGrossPrice
-		select dblQuantity,dblScheduleQty,dblBalance from tblCTContractDetail where intContractDetailId = 43
 
-	
 		EXEC dbo.uspCFGetItemPrice 
 			@CFItemId					=	@intARItemId,
 			@CFCustomerId				=	@intPrcCustomerId,
@@ -418,7 +459,9 @@ BEGIN
 			,[dblOriginalNetPrice]		
 			,[dblCalculatedPumpPrice]	
 			,[dblOriginalPumpPrice]		
-			,[intSalesPersonId]			
+			,[intSalesPersonId]
+			,[ysnPosted]
+			,[ysnInvalid]			
 		)
 		VALUES
 		(
@@ -452,7 +495,9 @@ BEGIN
 			,@dblOriginalNetPrice	
 			,@dblCalculatedPumpPrice	
 			,@dblOriginalPumpPrice	
-			,@intSalesPersonId		
+			,@intSalesPersonId
+			,@ysnPosted
+			,@ysnInvalid		
 		)			
 	
 		DECLARE @Pk	INT		
@@ -597,6 +642,21 @@ BEGIN
 			,(@dblPrcPriceOut + @dblCPTotalTax) * @dblQuantity
 		)
 		END
+
+		IF (@ysnInvalid = 0)
+		BEGIN
+			DECLARE	@ErrorMessage NVARCHAR(250)
+			EXEC [uspCFProcessTransactionToInvoice] 
+			 @TransactionId = @Pk
+			,@UserId = 1
+			,@ErrorMessage = @ErrorMessage OUTPUT
+
+			IF (@ErrorMessage IS NULL)
+			BEGIN
+				UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId = @Pk
+			END
+		END
+		
 
 		print @dblCalcOverfillQuantity
 		IF(@dblCalcOverfillQuantity > 0)

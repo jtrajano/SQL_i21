@@ -2765,6 +2765,7 @@
     <Build Include="dbo\Stored Procedures\uspPATGetEquityPatronageDetails.sql" />
     <Build Include="dbo\Views\vyuPATEquityDetails.sql" />
     <Build Include="dbo\Tables\tblSCLastScaleSetup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFProcessTransactionToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

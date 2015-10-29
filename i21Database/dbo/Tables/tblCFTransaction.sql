@@ -31,9 +31,13 @@
     [dblCalculatedPumpPrice]  NUMERIC (18, 6) NULL,
     [dblOriginalPumpPrice]    NUMERIC (18, 6) NULL,
     [intSalesPersonId]        INT             NULL,
+    [ysnInvalid]              BIT             NULL,
+    [ysnPosted]               BIT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC)
 );
+
+
 
 
 
