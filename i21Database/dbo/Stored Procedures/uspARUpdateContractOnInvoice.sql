@@ -114,7 +114,8 @@ BEGIN TRY
 		AND D.intContractDetailId = TD.intContractDetailId		
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
-		AND D.intItemId = TD.intItemId		
+		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
+		AND D.[intItemId] = TD.[intItemId]
 		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
 		AND ISNULL(H.intDistributionHeaderId, 0) = 0
 		
@@ -147,6 +148,7 @@ BEGIN TRY
 		AND D.intContractDetailId <> TD.intContractDetailId		
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
+		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND ISNULL(H.intDistributionHeaderId, 0) = 0	
 		
@@ -179,6 +181,7 @@ BEGIN TRY
 		AND D.intContractDetailId <> TD.intContractDetailId		
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
+		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND ISNULL(H.intDistributionHeaderId, 0) = 0
 		
@@ -211,6 +214,7 @@ BEGIN TRY
 		AND TD.intContractDetailId IS NOT NULL
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
+		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND ISNULL(H.intDistributionHeaderId, 0) = 0	
 		
 	UNION ALL	
@@ -235,6 +239,7 @@ BEGIN TRY
 		AND TD.intContractDetailId IS NOT NULL
 		AND TD.[intInventoryShipmentItemId] IS NULL
 		AND TD.[intSalesOrderDetailId] IS NULL
+		AND TD.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
 		AND ISNULL(H.intDistributionHeaderId, 0) = 0
 		
@@ -260,6 +265,7 @@ BEGIN TRY
 		AND Detail.intContractDetailId IS NOT NULL
 		AND Detail.[intInventoryShipmentItemId] IS NULL
 		AND Detail.[intSalesOrderDetailId] IS NULL
+		AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
 		AND ISNULL(Header.intDistributionHeaderId, 0) = 0
 

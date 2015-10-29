@@ -18,6 +18,7 @@ IF @ForDelete = 1
 
 EXEC dbo.[uspARUpdateCommitted] @InvoiceId, @ForDelete, @UserId
 EXEC dbo.[uspARUpdateContractOnInvoice] @InvoiceId, @ForDelete, @UserId
+EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @InvoiceId, @ForDelete, @UserId
 
 DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = 'Invoice'
 
