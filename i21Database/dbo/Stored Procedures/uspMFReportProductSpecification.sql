@@ -50,10 +50,9 @@ BEGIN TRY
 		,PS.strParameterValue
 		,dblCalculatedQuantity + dblShrinkage AS dblInputQuantity
 		,U1.strUnitMeasure AS strInputUnitMeasure
-	FROM dbo.tblMFWorkOrderProductSpecification PS
-	JOIN dbo.tblMFWorkOrder W ON PS.intWorkOrderId = W.intWorkOrderId
-		AND W.strWorkOrderNo = @strWorkOrderNo
-	JOIN dbo.tblICItem I ON W.intItemId = I.intItemId
+	FROM dbo.tblMFWorkOrder W 
+	JOIN dbo.tblICItem I ON W.intItemId = I.intItemId AND W.strWorkOrderNo = @strWorkOrderNo
+	LEFT JOIN dbo.tblMFWorkOrderProductSpecification PS ON W.intWorkOrderId = PS.intWorkOrderId
 	LEFT JOIN dbo.tblICItemUOM IU ON W.intItemUOMId = IU.intItemUOMId
 	LEFT JOIN dbo.tblICUnitMeasure U ON IU.intUnitMeasureId = U.intUnitMeasureId
 	LEFT JOIN dbo.tblMFWorkOrderItem WI ON W.intWorkOrderId = WI.intWorkOrderId
