@@ -24,6 +24,8 @@ AS
 		,intConcurrencyId = A.intConcurrencyId
 		,intDispatchId = A.intDispatchID
 		,intCustomerID = B.intCustomerID
+		,intLocationId = B.intLocationId
+		,strLocation = B.strLocation
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
