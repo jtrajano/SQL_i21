@@ -90,7 +90,7 @@ BEGIN TRY
 													 @dblNewUnitCost = NULL,
 													 @intSourceId = @intSourceId,
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
-													 @intUserId = @intUserId,
+													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 

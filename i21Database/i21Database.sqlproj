@@ -2758,6 +2758,7 @@
     <Build Include="dbo\Views\vyuPATVolumeDetails.sql" />
     <Build Include="dbo\Tables\tblMFReportCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreateOutboundOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
