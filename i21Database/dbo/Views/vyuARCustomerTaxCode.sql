@@ -23,7 +23,7 @@ INNER JOIN
 		AND L.intEntityLocationId = C.intDefaultLocationId
 INNER JOIN
 	tblSMTaxGroup G
-		ON L.intTaxCodeId = G.intTaxGroupId		
+		ON L.intTaxGroupId = G.intTaxGroupId		
 INNER JOIN
 	tblSMTaxGroupCode TG
 		ON G.intTaxGroupId = TG.intTaxGroupId

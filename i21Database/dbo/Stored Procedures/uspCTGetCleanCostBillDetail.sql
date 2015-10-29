@@ -35,14 +35,14 @@ BEGIN TRY
 
 	SELECT	BD.intBillDetailId AS intExpenseId,
 			BD.intItemId,
-			CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblCost
+			CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 					ELSE CAST(NULL AS NUMERIC(18,0)) 
 			END		AS dblValueInCCCurrency,
 			dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) dblQuantity,
 			RI.intUnitMeasureId AS intQuantityUOMId ,
 			@intCleanCostCurrencyId intCCCurrencyId,
 			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
-					ELSE	BD.dblCost 
+					ELSE	BD.dblTotal 
 			END		AS		dblValueInOtherCurrency,
 			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
 					ELSE	BL.intCurrencyId 

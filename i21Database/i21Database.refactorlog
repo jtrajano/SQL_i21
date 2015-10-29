@@ -4312,4 +4312,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strGTINCaseCode" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="bc709d60-2804-4858-b9a8-812e26ffdcde" ChangeDateTime="10/29/2015 07:38:13">
+    <Property Name="ElementName" Value="[dbo].[tblMFReportProperty]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="tblMFReportQualityProperty" />
+  </Operation>
 </Operations>

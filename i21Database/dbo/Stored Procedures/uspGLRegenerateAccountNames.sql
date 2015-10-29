@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspGLRegenerateAccountNames](@strDelimiter  NVARCHAR(1) 
 AS
 BEGIN
 	IF @strDelimiter = '' SET @strDelimiter = ' '
+	UPDATE tblGLAccountSegment SET strDescription = NULL WHERE RTRIM (strDescription) = ''
 	;WITH CTE(intAccountId,strDescription) 
 	AS(
 	SELECT A1.intAccountId,

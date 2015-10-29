@@ -2734,7 +2734,7 @@
     <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
     <Build Include="dbo\Tables\tblAPCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToBill.sql" />
-    <Build Include="dbo\Tables\tblMFReportProperty.sql" />
+    <Build Include="dbo\Tables\tblMFReportQualityProperty.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\EfficiencyReport.sql" />
     <Build Include="dbo\Views\vyuRKM2MInquirySearch.sql" />
@@ -2748,6 +2748,15 @@
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGTINCaseBarcode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportDailyProduction.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostEnquiryCost.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostEnquiryHedge.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostEnquiryMain.sql" />
+    <Build Include="dbo\Functions\fnCTGetBrokerageCommission.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQtyToTargetItemUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetLastSettlementPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetPatronageDetails.sql" />
+    <Build Include="dbo\Views\vyuPATVolumeDetails.sql" />
+    <Build Include="dbo\Tables\tblMFReportCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryCount.sql" />
   </ItemGroup>
   <ItemGroup>

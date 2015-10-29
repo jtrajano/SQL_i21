@@ -64,28 +64,28 @@ BEGIN TRY
 
 	SELECT @intPropertyId1 = P.intPropertyId
 		,@strPropertyName1 = P.strPropertyName
-	FROM tblMFReportProperty RP
+	FROM tblMFReportQualityProperty RP
 	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
 	WHERE strReportName = 'Tote Label'
 		AND intSequenceNo = 1
 
 	SELECT @intPropertyId2 = P.intPropertyId
 		,@strPropertyName2 = P.strPropertyName
-	FROM tblMFReportProperty RP
+	FROM tblMFReportQualityProperty RP
 	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
 	WHERE strReportName = 'Tote Label'
 		AND intSequenceNo = 2
 
 	SELECT @intPropertyId3 = P.intPropertyId
 		,@strPropertyName3 = P.strPropertyName
-	FROM tblMFReportProperty RP
+	FROM tblMFReportQualityProperty RP
 	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
 	WHERE strReportName = 'Tote Label'
 		AND intSequenceNo = 3
 
 	SELECT @intPropertyId4 = P.intPropertyId
 		,@strPropertyName4 = P.strPropertyName
-	FROM tblMFReportProperty RP
+	FROM tblMFReportQualityProperty RP
 	JOIN dbo.tblQMProperty P ON P.intPropertyId = RP.intPropertyId
 	WHERE strReportName = 'Tote Label'
 		AND intSequenceNo = 4

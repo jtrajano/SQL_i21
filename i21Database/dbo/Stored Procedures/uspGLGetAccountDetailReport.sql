@@ -273,8 +273,9 @@ BEGIN
 		;WITH cte (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM #tempTableReport
-			WHERE dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
+			WHERE (dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom))
 			AND strAccountId BETWEEN @strAccountIdFrom AND @strAccountIdTo
+			AND strAccountId NOT IN(SELECT strAccountId FROM #tempTableBase)
 			 GROUP BY strAccountId
 		),
 		cte1 

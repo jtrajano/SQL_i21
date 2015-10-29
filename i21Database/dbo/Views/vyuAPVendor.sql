@@ -30,7 +30,7 @@ SELECT
 	B.ysnWithholding,
 	B.dblCreditLimit,
 	C.intShipViaId,
-	C.intTaxCodeId,
+	--C.intTaxCodeId,
 	C.intTermsId,
 	--C.strContactName,
 	C.strAddress,
