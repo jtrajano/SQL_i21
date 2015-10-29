@@ -12,7 +12,6 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-BEGIN TRANSACTION
 
 	
 DELETE h FROM glhstmst h
@@ -242,18 +241,18 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 SET ROWCOUNT 0
 
 UPDATE #iRelyImptblGLJournalDetail
-SET gooddate = CAST (substring(convert(varchar(10),glhst_trans_dt),1,4)
-				+substring(convert(varchar(10),glhst_trans_dt),5,2)
-				+substring(convert(varchar(10),glhst_trans_dt),7,2) AS DATETIME)
+SET gooddate = CAST (substring(convert(varchar(10),glarc_trans_dt),1,4)
+				+substring(convert(varchar(10),glarc_trans_dt),5,2)
+				+substring(convert(varchar(10),glarc_trans_dt),7,2) AS DATETIME)
 FROM #iRelyImptblGLJournalDetail
-WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 1
+WHERE ISDATE(substring(convert(varchar(10),glarc_trans_dt),1,4) + substring(convert(varchar(10),glarc_trans_dt),5,2) + substring(convert(varchar(10),glarc_trans_dt),7,2) ) = 1
 
 UPDATE #iRelyImptblGLJournalDetail
-SET gooddate = CAST (substring(convert(varchar(10),glhst_trans_dt),1,4)
-				+substring(convert(varchar(10),glhst_trans_dt),5,2)
+SET gooddate = CAST (substring(convert(varchar(10),glarc_trans_dt),1,4)
+				+substring(convert(varchar(10),glarc_trans_dt),5,2)
 				+ ''01'' AS DATETIME)
 FROM #iRelyImptblGLJournalDetail
-WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 0
+WHERE ISDATE(substring(convert(varchar(10),glarc_trans_dt),1,4) + substring(convert(varchar(10),glarc_trans_dt),5,2) + substring(convert(varchar(10),glarc_trans_dt),7,2) ) = 0
 
 IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 --+++++++++++++++++++++++++++++++++
@@ -284,11 +283,9 @@ END
 -- FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
 COMMIT_INSERT:
- COMMIT TRANSACTION
  GOTO IMPORT_EXIT
    
 ROLLBACK_INSERT:
- ROLLBACK TRANSACTION
  SELECT @result =  ''One Time Closed Year Conversion error :'' + ERROR_MESSAGE()
  GOTO IMPORT_EXIT
 

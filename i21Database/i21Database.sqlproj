@@ -2377,6 +2377,15 @@
 	<Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGenerateQuotes.sql" />
     <Build Include="dbo\Views\vyuTRQuoteSelection.sql" />
+    <Build Include="dbo\Views\vyuTRQuoteView.sql" />
+    <Build Include="dbo\Functions\fnTMGetSpecialPricingPriceTable.sql" />
+    <Build Include="dbo\Functions\fnICGetRunningQuantity.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
+    <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\EfficiencyReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

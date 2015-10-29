@@ -3,6 +3,8 @@ CREATE PROCEDURE [dbo].[uspTRGenerateQuotes]
 	 @intCustomerId AS INT,
 	 @dtmQuoteDate AS DATETIME,
 	 @dtmEffectiveDate AS DATETIME,
+	 @ysnConfirm as bit,
+	 @ysnVoid as bit,
 	 @intBegQuoteId int OUTPUT,
 	 @intEndQuoteId int OUTPUT
 AS
@@ -48,9 +50,11 @@ select intEntityCustomerId,NULL from tblARCustomerGroup CG
 		  right join vyuTRQuoteSelection QS on QS.intEntityCustomerId = CD.intEntityId
 		   where CD.ysnQuote = 1
 		         and QS.ysnQuote = 1
-		         and (isNull(@intCustomerId ,0 ) = 0 or isNull(@intCustomerId ,0 ) = QS.intEntityCustomerId) 
-                                                              or  (isNull(@intCustomerGroupId ,0 ) = 0 or isNull(@intCustomerGroupId ,0 ) = CG.intCustomerGroupId) 
+		         and (CG.intCustomerGroupId = @intCustomerGroupId or isNull(@intCustomerGroupId,0) = 0)
+                 and (isNull(@intCustomerId ,0 ) = 0 or @intCustomerId = QS.intEntityCustomerId)
           group by QS.intEntityCustomerId
+
+
 
 
 select @total = count(*) from @DataForQuote;
@@ -58,15 +62,38 @@ set @incval = 1
 WHILE @incval <=@total 
 BEGIN
    
-   EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT 
-
-   update @DataForQuote 
-       set strQuoteNumber = @QuoteNumber
-         where @incval = intId 
+   if @ysnConfirm = 1
+      BEGIN
+         update tblTRQuoteHeader
+	     set strQuoteStatus = 'Confirmed'
+	     where intEntityCustomerId = (select top 1 intEntityCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'UnConfirmed'      
+      END
+   else
+       BEGIN
+            if @ysnVoid = 1
+               BEGIN
+                  update tblTRQuoteHeader
+                 set strQuoteStatus = 'Void'
+                 where intEntityCustomerId = (select top 1 intEntityCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'Confirmed'      
+               END
+            else
+                BEGIN
+                    EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT 
+                     update @DataForQuote 
+                     set strQuoteNumber = @QuoteNumber
+                       where @incval = intId 
+               END
+	   END
    SET @incval = @incval + 1;
 
 END;
 
+if @ysnConfirm = 1 or @ysnVoid = 1
+   BEGIN
+       set @intBegQuoteId = 0;
+       set @intEndQuoteId = 0;
+       RETURN;
+   END
 
 INSERT INTO [dbo].[tblTRQuoteHeader]
            ([strQuoteNumber]
@@ -151,11 +178,14 @@ from @DataForQuote QS
      where QD.ysnQuote = 1
 
 INSERT INTO @DataForDetailQuote
-select QH.intQuoteHeaderId,QD.intQuoteDetailId from @DataForQuote QT 
+select QD.intQuoteDetailId,QH.intQuoteHeaderId from @DataForQuote QT 
              JOIN tblTRQuoteHeader QH on QH.strQuoteNumber = QT.strQuoteNumber          
              JOIN tblTRQuoteDetail QD on QH.intQuoteHeaderId = QD.intQuoteHeaderId
              
-DECLARE @detailId as int;
+DECLARE @detailId as int,
+        @intSpecialPriceId as int,
+        @dblRackPrice DECIMAL(18, 6),
+		@dblDeviationAmount DECIMAL(18, 6);
 select @total = count(*) from @DataForQuote;
 set @incval = 1 
 WHILE @incval <=@total 
@@ -164,21 +194,24 @@ BEGIN
                                        join tblTRQuoteHeader QH on QS.strQuoteNumber = QH.strQuoteNumber
                                     where @incval = intId 
    
-   while  (select top 1 intDetailId from @DataForDetailQuote where intQuoteHeaderId = @QuoteHeader) IS NOT NULL
+   while  (select top 1 intQuoteDetailId from @DataForDetailQuote where intQuoteHeaderId = @QuoteHeader) IS NOT NULL
    BEGIN
-   select top 1 @detailId= intDetailId from @DataForDetailQuote where intQuoteHeaderId = @QuoteHeader
-   
-
-   update tblTRQuoteDetail 
-   SET dblDeviationAmount = (select top 1 SP.dblDeviation from tblARCustomerSpecialPrice SP where SP.intSpecialPriceId = intSpecialPriceId)      
-       where intQuoteDetailId = @detailId
-
-   update tblTRQuoteDetail 
-   SET dblQuotePrice = dblDeviationAmount + dblRackPrice,
-       dblMargin = dblDeviationAmount
-       where intQuoteDetailId = @detailId
-    
-   delete from @DataForDetailQuote where intDetailId = @detailId
+        select top 1 @detailId= intQuoteDetailId from @DataForDetailQuote where intQuoteHeaderId = @QuoteHeader
+        
+        select @intSpecialPriceId = intSpecialPriceId from tblTRQuoteDetail where intQuoteDetailId = @detailId
+        
+        update tblTRQuoteDetail 
+        SET dblDeviationAmount = (select top 1 SP.dblDeviation from tblARCustomerSpecialPrice SP where SP.intSpecialPriceId = @intSpecialPriceId)      
+            where intQuoteDetailId = @detailId
+        
+        select @dblDeviationAmount=dblDeviationAmount,@dblRackPrice=dblRackPrice from tblTRQuoteDetail where intQuoteDetailId = @detailId
+        
+        update tblTRQuoteDetail 
+        SET dblQuotePrice = @dblDeviationAmount + @dblRackPrice,
+            dblMargin = @dblDeviationAmount
+            where intQuoteDetailId = @detailId
+         
+        delete from @DataForDetailQuote where intQuoteDetailId = @detailId
    END     
    SET @incval = @incval + 1;
 

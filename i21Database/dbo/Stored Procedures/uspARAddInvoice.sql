@@ -318,6 +318,55 @@ LEFT OUTER JOIN
 WHERE
 	IE.intInvoiceId IS NOT NULL 
 	AND IE.intInvoiceId <> 0
+	
+DECLARE @InvoicesForUpdate AS TABLE(intInvoiceID INT)
+INSERT INTO @InvoicesForUpdate 
+SELECT DISTINCT
+	[intInvoiceId]
+FROM 
+	@InvoiceEntries
+WHERE intInvoiceId IS NOT NULL AND intInvoiceId <> 0
+
+--Log Update 
+DECLARE @strDescription AS NVARCHAR(100) --= @strSourceScreenName + ' to Invoice'
+		,@strSourceId AS NVARCHAR(250)
+		,@strInvoiceNumber AS NVARCHAR(250)
+		,@intNewInvoiceId AS INT   
+		,@intUpdatedInvoiceId AS INT   
+DECLARE @InvoiceIdForUpdate as int;		
+WHILE EXISTS(SELECT NULL FROM @InvoicesForUpdate)
+BEGIN
+	SELECT TOP 1 @InvoiceIdForUpdate = [intInvoiceID] FROM @InvoicesForUpdate
+
+    -- Create an Audit Log
+    SELECT TOP 1
+		@intUpdatedInvoiceId = I.intInvoiceId 
+		,@strInvoiceNumber = I.strInvoiceNumber 
+		,@strSourceId = RTRIM(LTRIM(IE.strSourceId))
+		,@strDescription = RTRIM(LTRIM(IE.strSourceScreenName)) + + ' to Invoice'
+	FROM
+		@InvoiceEntries IE
+	INNER JOIN
+		tblARInvoice I
+			ON IE.intSourceId = I.intDistributionHeaderId
+	WHERE
+		ISNULL(IE.intInvoiceId,0) <> 0
+		AND I.intInvoiceId = @InvoiceIdForUpdate
+		
+	IF ISNULL(@intUpdatedInvoiceId,0) <> 0	
+    BEGIN                                
+        EXEC dbo.uspSMAuditLog 
+			 @keyValue			= @intUpdatedInvoiceId              -- Primary Key Value of the Invoice. 
+			,@screenName		= 'AccountsReceivable.view.Invoice' -- Screen Namespace
+			,@entityId			= @EntityId                         -- Entity Id.
+			,@actionType		= 'Processed'                       -- Action Type
+			,@changeDescription	= @strDescription					-- Description
+			,@fromValue			= @strSourceId                      -- Previous Value
+			,@toValue			= @strInvoiceNumber                 -- New Value
+    END
+
+	DELETE FROM @InvoicesForUpdate WHERE [intInvoiceID] = @InvoiceIdForUpdate
+END	
 
 
 DELETE FROM tblARInvoiceDetailTax 
@@ -470,7 +519,8 @@ FROM
 	 		ON @intFreightItemId = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
      where isNull(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice !=1
-		
+	
+--Log Insert	
 DECLARE @Invoices AS TABLE(intInvoiceID INT)
 INSERT INTO @Invoices 
 SELECT DISTINCT
@@ -486,11 +536,6 @@ BEGIN
 	SELECT TOP 1 @InvoiceId = [intInvoiceID] FROM @Invoices
 	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
 
-    -- Create an Audit Log
-    DECLARE @strDescription AS NVARCHAR(100) --= @strSourceScreenName + ' to Invoice'
-			,@strSourceId AS NVARCHAR(250)
-			,@strInvoiceNumber AS NVARCHAR(250)
-			,@intNewInvoiceId AS INT
     SELECT TOP 1
 		@intNewInvoiceId = I.intInvoiceId 
 		,@strInvoiceNumber = I.strInvoiceNumber 
