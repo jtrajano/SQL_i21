@@ -38,8 +38,8 @@ BEGIN TRY
 			CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 					ELSE CAST(NULL AS NUMERIC(18,0)) 
 			END		AS dblValueInCCCurrency,
-			dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) dblQuantity,
-			RI.intUnitMeasureId AS intQuantityUOMId ,
+			dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, RI.dblNet) dblQuantity,
+			RI.intWeightUOMId AS intQuantityUOMId ,
 			@intCleanCostCurrencyId intCCCurrencyId,
 			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
 					ELSE	BD.dblTotal 
@@ -65,7 +65,7 @@ BEGIN TRY
 	JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
 	JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId					LEFT
 	JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	BD.intInventoryReceiptItemId	LEFT
-	JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	RI.intUnitMeasureId				LEFT
+	JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	RI.intWeightUOMId				LEFT
 	JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
 	WHERE	BD.intBillId = @intBillId
 	ORDER BY BD.intBillDetailId DESC
