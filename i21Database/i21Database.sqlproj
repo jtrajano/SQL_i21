@@ -2768,6 +2768,7 @@
     <Build Include="dbo\Stored Procedures\uspCFProcessTransactionToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInboundShipmentOnInvoice.sql" />
     <Build Include="dbo\Views\vyuAPBillDetail.sql" />
+    <Build Include="dbo\Functions\fnCMGetBankAccountMICR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

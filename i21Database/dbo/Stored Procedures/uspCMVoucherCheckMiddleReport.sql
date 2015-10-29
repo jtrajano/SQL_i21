@@ -127,6 +127,7 @@ SELECT	CHK.dtmDate
 		,strCompanyAddress = ''
 		,strBank = ''
 		,strBankAddress = ''
+		,strMIRC = [dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo)
 		
 		-- A/P Related fields: 
 		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
