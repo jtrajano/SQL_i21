@@ -490,8 +490,8 @@ BEGIN
 
 		
 
-		INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId, 1)
+		INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, 1)
 
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
