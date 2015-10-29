@@ -57,6 +57,7 @@ BEGIN TRY
 		,PL.strParentLotNumber
 		,ST.strDescription AS strSampleTypeDescription
 		,C.strCategoryCode
+		,ISNULL(W.strERPOrderNo, S.strRefNo) AS strRefNo
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 	JOIN tblICItem I ON S.intItemId = I.intItemId
@@ -65,6 +66,8 @@ BEGIN TRY
 		AND TR.intProductTypeId = 11
 	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = TR.intProductValueId
 	LEFT JOIN tblICLot L ON PL.intParentLotId = L.intParentLotId
+	LEFT JOIN tblMFWorkOrderInputParentLot WPL ON WPL.intParentLotId = PL.intParentLotId
+	LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 	WHERE S.intSampleId = @intSampleId
 END TRY
 

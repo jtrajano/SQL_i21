@@ -370,3 +370,176 @@ BEGIN
 	DROP TABLE tblQMDocumentFile
 END
 GO
+
+-- Report Properties
+GO
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'Density'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblQMReportProperty
+		WHERE strReportName = 'Quality Label'
+			AND intPropertyId = @intPropertyId
+		)
+BEGIN
+	INSERT INTO tblQMReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Quality Label'
+		,@intPropertyId
+		,1
+END
+GO
+
+GO
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'OS Sparkle'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblQMReportProperty
+		WHERE strReportName = 'Quality Label'
+			AND intPropertyId = @intPropertyId
+		)
+BEGIN
+	INSERT INTO tblQMReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Quality Label'
+		,@intPropertyId
+		,2
+END
+GO
+
+GO
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'OS Colour'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblQMReportProperty
+		WHERE strReportName = 'Quality Label'
+			AND intPropertyId = @intPropertyId
+		)
+BEGIN
+	INSERT INTO tblQMReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Quality Label'
+		,@intPropertyId
+		,3
+END
+GO
+
+GO
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'OS Impact'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblQMReportProperty
+		WHERE strReportName = 'Quality Label'
+			AND intPropertyId = @intPropertyId
+		)
+BEGIN
+	INSERT INTO tblQMReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Quality Label'
+		,@intPropertyId
+		,4
+END
+GO
+
+GO
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'OS Body'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblQMReportProperty
+		WHERE strReportName = 'Quality Label'
+			AND intPropertyId = @intPropertyId
+		)
+BEGIN
+	INSERT INTO tblQMReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Quality Label'
+		,@intPropertyId
+		,5
+END
+GO
+
+GO
+DECLARE @intPropertyId INT
+
+SELECT @intPropertyId = intPropertyId
+FROM tblQMProperty
+WHERE strPropertyName = 'OS Astringency'
+
+IF @intPropertyId IS NOT NULL
+	AND NOT EXISTS (
+		SELECT *
+		FROM tblQMReportProperty
+		WHERE strReportName = 'Quality Label'
+			AND intPropertyId = @intPropertyId
+		)
+BEGIN
+	INSERT INTO tblQMReportProperty (
+		strReportName
+		,intPropertyId
+		,intSequenceNo
+		)
+	SELECT 'Quality Label'
+		,@intPropertyId
+		,6
+END
+GO
+
+GO
+IF EXISTS (
+		SELECT *
+		FROM tblQMCompanyPreference
+		)
+BEGIN
+	UPDATE tblQMCompanyPreference
+	SET intNumberofDecimalPlaces = 3
+END
+ELSE
+BEGIN
+	INSERT INTO tblQMCompanyPreference (intNumberofDecimalPlaces)
+	SELECT 3
+END
+GO

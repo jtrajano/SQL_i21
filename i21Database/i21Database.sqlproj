@@ -2771,6 +2771,8 @@
     <Build Include="dbo\Functions\fnCMGetBankAccountMICR.sql" />
     <Build Include="dbo\Functions\fnCTGetFuturesProfitLoss.sql" />
     <Build Include="dbo\Functions\fnRKGetCurrencyConvertion.sql" />
+    <Build Include="dbo\Tables\tblQMCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportSampleResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
