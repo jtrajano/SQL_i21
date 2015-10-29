@@ -7,7 +7,8 @@ SELECT
    QH.strQuoteComments,
    QH.strCustomerComments,
    QH.dtmQuoteDate,
-   AR.strName
+   AR.strName,
+   AR.intEntityCustomerId
     	
 FROM
     tblTRQuoteHeader QH
