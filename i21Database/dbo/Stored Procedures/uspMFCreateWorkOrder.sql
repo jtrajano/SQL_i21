@@ -313,7 +313,7 @@ BEGIN TRY
 	SELECT @strXML += '</root>'
 
 	INSERT INTO @tblWHOrderHeader
-	EXEC dbo.uspWHOutboundOrderCreate @strXML = @strXML
+	EXEC dbo.uspWHCreateOutboundOrder @strXML = @strXML
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM @tblWHOrderHeader
@@ -343,9 +343,10 @@ BEGIN TRY
 		,strLotAlias
 		,intSanitizationOrderDetailsId
 		,intLotId
+		,intConcurrencyId
 		)
 	SELECT @intOrderHeaderId
-		,@intItemId
+		,CL.intItemId
 		,CL.dblIssuedQuantity
 		,CL.intItemIssuedUOMId
 		,CL.intCreatedUserId
@@ -377,6 +378,7 @@ BEGIN TRY
 		,L.strLotAlias
 		,CL.intWorkOrderInputLotId
 		,L.intLotId
+		,1
 	FROM dbo.tblMFWorkOrderInputLot CL
 	JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId
 	JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId

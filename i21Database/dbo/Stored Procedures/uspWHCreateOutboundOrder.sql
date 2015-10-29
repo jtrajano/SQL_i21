@@ -88,7 +88,9 @@ BEGIN TRY
 		   strProNo, 
 		   strSpecialInstruction, 
 		   dblFreightCharge, 
-		   strShipper)
+		   strShipper,
+		   intConcurrencyId,
+		   intUpdateCounter)
 	SELECT intOrderStatusId, 
 		   intOrderTypeId, 
 		   intOrderDirectionId, 
@@ -114,7 +116,9 @@ BEGIN TRY
 		   strProNo, 
 		   strSpecialInstruction, 
 		   dblFreightCharge, 
-		   strShipper
+		   strShipper,
+		   1,
+		   1
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 		   intOrderStatusId INT, 
 		   intOrderTypeId INT, 
