@@ -2775,6 +2775,7 @@
     <Build Include="dbo\Stored Procedures\uspQMReportSampleResult.sql" />
     <Build Include="dbo\Stored Procedures\uspWHReportContainerLabel.sql" />
     <Build Include="dbo\Functions\fnRemoveTrailingZeroes.sql" />
+    <Build Include="dbo\Views\vyuAPContractItemDistinct.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
