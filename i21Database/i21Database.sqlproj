@@ -2767,6 +2767,7 @@
     <Build Include="dbo\Tables\tblSCLastScaleSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspCFProcessTransactionToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInboundShipmentOnInvoice.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
