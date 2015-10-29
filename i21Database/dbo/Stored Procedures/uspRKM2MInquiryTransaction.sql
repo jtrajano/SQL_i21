@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKM2MInquiryTransaction  
+﻿create PROC uspRKM2MInquiryTransaction  
 			@intM2MBasisId int = null,
 			@intFutureSettlementPriceId int = null,
 			@intQuantityUOMId int = null,
@@ -14,10 +14,11 @@ AS
 DECLARE @ysnIncludeBasisDifferentialsInResults bit
 DECLARE @dtmPriceDate DATETIME    
 DECLARE @dtmSettlemntPriceDate DATETIME  
+DECLARE @strLocationName nvarchar(50)
 SELECT @dtmPriceDate=dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId=@intM2MBasisId  
 SELECT @ysnIncludeBasisDifferentialsInResults=ysnIncludeBasisDifferentialsInResults FROM tblRKCompanyPreference
 SELECT @dtmSettlemntPriceDate=dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId=@intFutureSettlementPriceId
-
+select @strLocationName=strLocationName from tblSMCompanyLocation where intCompanyLocationId=@intLocationId
 SELECT * INTO #temp1 FROM (
 SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) AS dblAdjustedContractPrice,
 		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblCashPrice,
@@ -396,7 +397,10 @@ FROM
 			AND temp.intItemId = iv.intItemId),0) as intltemPrice
 FROM vyuICGetInventoryValuation iv 
 JOIN tblICItem i on iv.intItemId=i.intItemId
-JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId)t		
+JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId
+WHERE i.intCommodityId= case when isnull(@intCommodityId,0)=0 then i.intCommodityId else @intCommodityId end
+AND strLocationName= case when isnull(@strLocationName,0)=0 then strLocationName else @strLocationName end
+)t		
 ) f
 
 IF (@strRateType='Exchange')
