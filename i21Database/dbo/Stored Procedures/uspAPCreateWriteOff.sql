@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreatePrepayClearBalance]
-	@billId INT,
+﻿CREATE PROCEDURE [dbo].[uspAPCreateWriteOff]
+	@billIds AS Id READONLY,
 	@userId INT,
 	@paymentCreated INT OUTPUT
 AS
@@ -22,15 +22,18 @@ DECLARE @prepayRecord NVARCHAR(100);
 DECLARE @paymentMethod INT;
 DECLARE @vendorExpense INT;
 DECLARE @balance DECIMAL(18,6);
-DECLARE @billIds NVARCHAR(MAX);
+DECLARE @billIdsPostParam NVARCHAR(MAX);
 DECLARE @postSuccess BIT;
 DECLARE @paymentValid BIT = 0;
 DECLARE @postError NVARCHAR(200);
+DECLARE @bills AS Id;
 DECLARE @batchId NVARCHAR(100);
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
-SELECT 
+SET @bills = @billIds;
+
+SELECT TOP 1
 	@vendorId = A.intEntityVendorId
 	,@location = A.intShipToId
 	,@prepayRecord = A.strBillId
@@ -38,7 +41,8 @@ SELECT
 	,@balance = A.dblAmountDue
 FROM tblAPBill A
 INNER JOIN tblAPVendor B ON  A.intEntityVendorId = B.intEntityVendorId
-WHERE A.intBillId = @billId
+WHERE A.intBillId IN (SELECT intId FROM @bills)
+AND A.intTransactionType IN (2)
 
 IF @balance <= 0
 BEGIN
@@ -70,33 +74,11 @@ BEGIN
 	RAISERROR('Cash account setup is missing on location.', 16, 1);
 END
 
-SET @paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod LIKE '%debit memos and payments%');
+SET @paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod LIKE '%Write Off%');
 IF @paymentMethod IS NULL
 BEGIN
-	RAISERROR('Debit memos and payments payment method is missing.', 16, 1);
+	RAISERROR('Write Off payment method is missing.', 16, 1);
 END
-
---Create Debit Memo
-INSERT INTO @voucherDetailNonInv
-SELECT 
-	[intAccountId]			=	@vendorExpense,		
-	[intItemId]				=	NULL,
-	[strMiscDescription]	=	'Clear prepay balance ' + @prepayRecord,
-	[dblQtyReceived]		=	1,
-	[dblDiscount]			=	0,
-	[dblCost]				=	@balance,
-	[intTaxGroupId]			=	NULL
-	   	
-EXEC uspAPCreateBillData @userId = @userId, @type = 2, @vendorId = @vendorId, @voucherNonInvDetails = @voucherDetailNonInv, @billId = @debitMemoCreated OUTPUT
-
---Post Debit Memo
-SET @billIds = CAST(@debitMemoCreated AS NVARCHAR(MAX));
-EXEC uspAPPostBill DEFAULT, DEFAULT, DEFAULT, 1, 0, 0, @billIds, @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @batchIdUsed = @batchId OUTPUT, @success = @postSuccess OUTPUT;
-SELECT TOP 1 
-	@postError = 'Failed to post debit memo.' + CHAR(13) + CHAR(10) + A.strMessage
-FROM tblAPPostResult A
-WHERE A.strBatchNumber = @batchId
-IF @postSuccess = 0 RAISERROR(@postError, 16, 1);
 
 --Create Payment
 EXEC uspAPCreatePayment @userId, @bankAccount, @paymentMethod, @billId = @billIds, @createdPaymentId = @paymentCreated OUTPUT

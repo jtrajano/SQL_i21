@@ -2,18 +2,28 @@
 Usage:
 1. Creating payment from Bill screen.
 2. Creating payment from Importing of bills.
+
+@userId - User that creates the payment
+@bankAccount - Bank Account to use on creating payment
+@paymentMethod
+	1 - Check
+	2 - eCheck
+	3 - Debit memos and Payments
+	4 - ACH
+	5 - Write Off
+@paymentInfo - Usually use for echeck
 */
 CREATE PROCEDURE [dbo].[uspAPCreatePayment]
 	@userId INT,
 	@bankAccount INT = NULL,
-	@paymentMethod INT = NULL,
+	@paymentMethod INT = 1,
 	@paymentInfo NVARCHAR(10) = NULL,
 	@notes NVARCHAR(500) = NULL,
 	@payment DECIMAL(18, 6) = NULL,
 	@datePaid DATETIME = NULL,
 	@isPost BIT = 0,
 	@post BIT = 0,
-	@billId NVARCHAR(MAX),
+	@billIds AS Id READONLY,
 	@createdPaymentId INT = NULL OUTPUT
 AS
 BEGIN
@@ -38,19 +48,22 @@ BEGIN
 	DECLARE @vendorWithhold BIT = 0;
 	DECLARE @intGLBankAccountId INT;
 	DECLARE @location INT;
+	DECLARE @bills AS Id;
 	DECLARE @autoPay BIT = 0; --Automatically compute the payment
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
 	--TODO Allow Multi Vendor
-	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
+	--SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
+	SET @bills = @billIds;
 
 	SELECT 
 		TOP 1 @vendorId = C.[intEntityVendorId] 
 		,@vendorWithhold = C.ysnWithholding
+		,@location = A.intShipToId
 		FROM tblAPBill A
-		INNER JOIN  #tmpBillsId B
-			ON A.intBillId = B.intID
+		INNER JOIN  @bills B
+			ON A.intBillId = B.intId
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityVendorId] = C.[intEntityVendorId]
 
@@ -61,8 +74,6 @@ BEGIN
 		RAISERROR('User is required.', 16, 1);
 		RETURN;
 	END
-
-	SELECT @location = intShipToId FROM tblAPBill WHERE intBillId = @billId
 
 	IF @location IS NULL
 	BEGIN

@@ -198,7 +198,7 @@ BEGIN
 		INNER JOIN tblICItem D ON C.intItemId = D.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.ysnPosted = 0 AND C.intContractDetailId IS NOT NULL AND B1.intPricingTypeId NOT IN (7)
-		AND ISNULL(B2.dblCashPrice,0) <> ISNULL(C.dblCost,0)
+		AND ISNULL(B2.dblCashPrice,0) <> ISNULL(E.dblUnitCost,0)
 
 	END
 	ELSE
