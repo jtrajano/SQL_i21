@@ -2756,6 +2756,7 @@
     <Build Include="dbo\Functions\fnCTGetLastSettlementPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetPatronageDetails.sql" />
     <Build Include="dbo\Views\vyuPATVolumeDetails.sql" />
+    <Build Include="dbo\Tables\tblMFReportCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
