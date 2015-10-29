@@ -19,7 +19,6 @@
 CREATE PROCEDURE [dbo].[uspICPostCostAdjustment]
 	@ItemsToAdjust AS ItemCostAdjustmentTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
-	--,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost Adjustment'
 	,@intUserId AS INT
 AS
 

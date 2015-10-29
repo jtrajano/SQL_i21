@@ -134,6 +134,7 @@ BEGIN
 				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
 	END 
 	
+	EXEC [testi21Database].[Fake COA used for fake inventory items]
 	EXEC [testi21Database].[Fake transactions for item costing]; 
 	EXEC [testi21Database].[Fake open fiscal year and accounting periods]; 
 	-- IMPORTANT NOTE: Below will add the Inventory Receipt transactions in relation to the fake data in [Fake transactions for item costing]
@@ -149,6 +150,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblAPBillDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransfer', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransferDetail', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;			
 
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICLot', 'UN_tblICLot';	
 
