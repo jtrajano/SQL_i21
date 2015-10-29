@@ -19,6 +19,7 @@ AS
 							ON Z.intDeviceId = Y.intDeviceId
 						WHERE Z.intSiteID = A.intSiteID
 							AND RTRIM(ISNULL(strSerialNumber,''))<> ''
+							AND Y.intDeviceTypeId = (SELECT TOP 1 intDeviceTypeId FROM tblTMDeviceType WHERE strDeviceType = 'Tank')
 						ORDER BY Z.intSiteDeviceID
 						FOR XML PATH ('')) + '#@$',', #@$','')
 	,A.intLocationId
