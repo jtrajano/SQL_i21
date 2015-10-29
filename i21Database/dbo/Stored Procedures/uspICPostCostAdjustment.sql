@@ -477,6 +477,6 @@ END
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-EXEC dbo.uspICCreateGLEntriesForCostAdj 
+EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 	@strBatchId
 	,@intUserId

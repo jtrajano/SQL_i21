@@ -882,6 +882,19 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Cost Adjust.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Transfer.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Receive Stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for a GL description.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for missing GL description.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for missing Auto Negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for missing Cost Adjustment.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for missing Revalue Sold.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for missing Revalue WIP.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for missing Inventory.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for Revalue Sold.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for Revalue WIP.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for Revalue Produced.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for Revalue Build Assembly.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for Revalue Transfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

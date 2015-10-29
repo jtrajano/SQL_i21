@@ -405,6 +405,8 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 
+		-- Get the g/l entries
+
 		EXEC dbo.uspICPostCostAdjustment
 			@ItemsToAdjust
 			,@strBatchId

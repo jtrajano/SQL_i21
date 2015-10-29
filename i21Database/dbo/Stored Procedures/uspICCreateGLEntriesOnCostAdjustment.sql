@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICCreateGLEntriesForCostAdj]
+﻿CREATE PROCEDURE [dbo].[uspICCreateGLEntriesOnCostAdjustment]
 	@strBatchId AS NVARCHAR(20)
 	,@intUserId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
@@ -18,7 +18,9 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 
 		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Cost Adjustment'
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Revalue WIP'
-		
+		,@AccountCategory_Revalue_Produced AS NVARCHAR(30) = 'Revalue Produced'
+		,@AccountCategory_Revalue_Transfer AS NVARCHAR(30) = 'Revalue Inventory Transfer'
+		,@AccountCategory_Revalue_Build_Assembly AS NVARCHAR(30) = 'Revalue Build Assembly'		
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
@@ -58,6 +60,7 @@ SELECT	Query.intItemId
 		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Negative) 
 		,intCostAdjustment = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment) 
 		,intRevalueWIP = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_WIP) 
+
 		,intRevalueProduced = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_WIP) 
 		,intRevalueTransfer = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
 		,intRevalueBuildAssembly = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
@@ -92,6 +95,13 @@ END
 ;
 
 -- Check for missing Write-Off Sold Account Id
+IF EXISTS (
+	SELECT	TOP 1 1 
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+	WHERE	TRANS.strBatchId = @strBatchId
+			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Write_Off_Sold 
+)
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -101,15 +111,12 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
+			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+				ON TRANS.intItemId = Item.intItemId			
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				AND TRANS.intItemId = Item.intItemId
 	WHERE	ItemGLAccount.intWriteOffSoldId IS NULL 
-			AND EXISTS (
-				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				WHERE	TRANS.strBatchId = @strBatchId
-						AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Write_Off_Sold 
-						AND TRANS.intItemId = Item.intItemId
-			)
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
@@ -121,6 +128,13 @@ END
 ;
 
 -- Check for missing Revalue Sold Account id
+IF EXISTS (
+	SELECT	TOP 1 1 
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+	WHERE	TRANS.strBatchId = @strBatchId
+			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold  
+)
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -130,15 +144,12 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
+			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+				ON TRANS.intItemId = Item.intItemId			
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				AND TRANS.intItemId = Item.intItemId
 	WHERE	ItemGLAccount.intRevalueSoldId IS NULL 
-			AND EXISTS (
-				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				WHERE	TRANS.strBatchId = @strBatchId
-						AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold  
-						AND TRANS.intItemId = Item.intItemId
-			)
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
@@ -150,6 +161,13 @@ END
 ;
 
 -- Check for missing Auto Negative Account Id
+IF EXISTS (
+	SELECT	TOP 1 1 
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+	WHERE	TRANS.strBatchId = @strBatchId
+			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Negative 
+)
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -159,15 +177,12 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
+			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+				ON TRANS.intItemId = Item.intItemId			
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				AND TRANS.intItemId = Item.intItemId
 	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
-			AND EXISTS (
-				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				WHERE	TRANS.strBatchId = @strBatchId
-						AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Negative 
-						AND TRANS.intItemId = Item.intItemId
-			)
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
@@ -178,8 +193,81 @@ BEGIN
 END 
 ;
 
--- TODO: Validate Cost Adjustment
--- TODO: Validate Revalue WIP
+-- Check for missing Cost Adjustment Account Id
+IF EXISTS (
+	SELECT	TOP 1 1 
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+	WHERE	TRANS.strBatchId = @strBatchId
+			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+)
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+				ON TRANS.intItemId = Item.intItemId			
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				AND TRANS.intItemId = Item.intItemId
+	WHERE	ItemGLAccount.intCostAdjustment IS NULL 
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Cost Adjustment} account category.
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Cost_Adjustment) 	
+		RETURN -1;
+	END 
+END 
+;
+
+-- Check for missing Revalue WIP account id.
+IF EXISTS (
+	SELECT	TOP 1 1 	
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+	WHERE	TRANS.strBatchId = @strBatchId
+			AND TRANS.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_WIP
+)
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+				ON TRANS.intItemId = Item.intItemId			
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				AND TRANS.intItemId = Item.intItemId
+	WHERE	ItemGLAccount.intRevalueWIP IS NULL 
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Revalue WIP} account category.
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Revalue_WIP) 	
+		RETURN -1;
+	END 
+END 
+;
+
+/*-------------------------------------------------------------------------------------------
+ Note:  No need to validate for the missing: 
+
+	1. Revalue Produced account id.
+	2. Revalue Inventory Transfer account id.
+	3. Revalue Inventory Build Assembly account id.
+
+The system should validate for the missing WIP and/or Inventory account in their place. 
+-------------------------------------------------------------------------------------------*/
 
 -- Log the g/l account used in this batch. 
 INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
@@ -662,7 +750,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'RWIP' 
+		,strCode					= 'RPRD' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -699,7 +787,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'RWIP' 
+		,strCode					= 'RPRD' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -722,7 +810,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intRevalueWIP
+			ON tblGLAccount.intAccountId = GLAccounts.intRevalueProduced
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Revalue_Produced
@@ -781,7 +869,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'RASM' 
+		,strCode					= 'RBLD' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
