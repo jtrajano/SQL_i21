@@ -53,7 +53,8 @@ BEGIN
 			,dblQty
 			--,dblUOMQty
 			,intSubLocationId
-			,intStorageLocationId			
+			,intStorageLocationId
+			,intTransactionTypeId		
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
@@ -63,11 +64,12 @@ BEGIN
 			--,ItemTrans.dblUOMQty		
 			,ItemTrans.intSubLocationId
 			,ItemTrans.intStorageLocationId
+			,ItemTrans.intTransactionTypeId
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
-	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId, ItemTrans.intItemUOMId, ItemTrans.intLotId, ItemTrans.intSubLocationId, ItemTrans.intStorageLocationId
+	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId, ItemTrans.intItemUOMId, ItemTrans.intLotId, ItemTrans.intSubLocationId, ItemTrans.intStorageLocationId, ItemTrans.intTransactionTypeId
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ItemToUnpost

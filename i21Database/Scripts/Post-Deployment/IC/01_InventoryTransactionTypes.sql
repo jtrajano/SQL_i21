@@ -98,6 +98,10 @@ USING	(
         SELECT    id = 22
                 ,name = 'Inbound Shipments'
                 ,form = 'Inbound Shipments'
+		UNION ALL 
+        SELECT    id = 23
+                ,name = 'Inventory Count'
+                ,form = 'Inventory Count'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

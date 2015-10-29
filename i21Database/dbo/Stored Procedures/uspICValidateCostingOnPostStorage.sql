@@ -40,6 +40,7 @@ CREATE TABLE #FoundErrors (
 	,intItemLocationId INT
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
+	,intTransactionTypeId INT
 )
 
 -- Cross-check each items against the function that does the validation. 
@@ -49,6 +50,7 @@ SELECT	Errors.intItemId
 		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
+		,Item.intTransactionTypeId
 FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostStorageErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
 
 -- Check for invalid items in the temp table. 
@@ -106,6 +108,25 @@ IF @strItemNo IS NOT NULL
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
 	RAISERROR(80022, 11, 1, @strItemNo)
+	RETURN -1
+END 
+
+-- Check for the locked Items
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END,
+		@strLocationName = CASE WHEN ISNULL(Location.strLocationName, '') = '' THEN '(Item Location id: ' + CAST(ItemLocation.intItemLocationId AS NVARCHAR(10)) + ')' ELSE Location.strLocationName END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.intItemId
+		INNER JOIN tblICItemLocation ItemLocation ON Errors.intItemLocationId = ItemLocation.intItemLocationId
+		INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
+WHERE	intErrorCode = 80066
+	AND Errors.intTransactionTypeId <> 23
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
+	RAISERROR(80066, 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
 GO

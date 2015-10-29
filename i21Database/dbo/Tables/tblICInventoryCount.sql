@@ -20,6 +20,9 @@
     [ysnRecount] BIT NOT NULL DEFAULT ((0)), 
     [intRecountReferenceId] INT NULL, 
     [intStatus] INT NULL DEFAULT ((1)), 
+	[ysnPosted] BIT NOT NULL DEFAULT ((0)),
+	[dtmPosted] DATETIME NULL,
+	[intEntityId] INT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryCount] PRIMARY KEY ([intInventoryCountId]), 
@@ -29,5 +32,6 @@
     CONSTRAINT [FK_tblICInventoryCount_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId]), 
     CONSTRAINT [FK_tblICInventoryCount_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
     CONSTRAINT [FK_tblICInventoryCount_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
-    CONSTRAINT [FK_tblICInventoryCount_tblICInventoryCount] FOREIGN KEY ([intRecountReferenceId]) REFERENCES [tblICInventoryCount]([intInventoryCountId]) 
+    CONSTRAINT [FK_tblICInventoryCount_tblICInventoryCount] FOREIGN KEY ([intRecountReferenceId]) REFERENCES [tblICInventoryCount]([intInventoryCountId]), 
+    CONSTRAINT [FK_tblICInventoryCount_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) 
 )

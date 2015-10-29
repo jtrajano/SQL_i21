@@ -40,6 +40,7 @@ CREATE TABLE #FoundErrors (
 	,intItemLocationId INT
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
+	,intTransactionTypeId INT
 )
 
 -- Cross-check each items against the function that does the validation. 
@@ -49,6 +50,7 @@ SELECT	Errors.intItemId
 		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
+		,Item.intTransactionTypeId
 FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
 
 -- Check for invalid items in the temp table. 
@@ -162,6 +164,7 @@ FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.in
 		INNER JOIN tblICItemLocation ItemLocation ON Errors.intItemLocationId = ItemLocation.intItemLocationId
 		INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 WHERE	intErrorCode = 80066
+	AND Errors.intTransactionTypeId <> 23
 
 IF @intItemId IS NOT NULL 
 BEGIN 

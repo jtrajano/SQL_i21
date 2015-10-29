@@ -72,5 +72,30 @@ RETURN (
 							AND Location.intAllowNegativeInventory = 3						
 				)
 
+		-- Check for locked inventory. 
+		-- Inventory count ongoing. 
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(
+								80066
+								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
+								,(
+									SELECT	tblSMCompanyLocation.strLocationName 
+									FROM	dbo.tblICItemLocation INNER JOIN dbo.tblSMCompanyLocation 
+												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
+									WHERE	tblICItemLocation.intItemId = @intItemId
+											AND tblICItemLocation.intItemLocationId = @intItemLocationId
+								)
+							)
+				,intErrorCode = 80066
+		WHERE	EXISTS (
+					SELECT	TOP 1 1
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+								ON Item.intItemId = @intItemId
+								AND Location.intItemLocationId = @intItemLocationId
+					WHERE	ysnLockedInventory = 1
+				)
+
 	) AS Query		
 )

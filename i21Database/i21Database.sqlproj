@@ -2748,6 +2748,7 @@
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportGTINCaseBarcode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportDailyProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
