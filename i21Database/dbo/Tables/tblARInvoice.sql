@@ -115,6 +115,7 @@ BEGIN
 
 	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Prepayment' THEN 64 
 									WHEN @strTransactionType = 'Overpayment' THEN 65
+									WHEN @strTransactionType = 'Provisional Invoice' THEN 81
 									ELSE 19 END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT	
