@@ -2770,6 +2770,7 @@
     <Build Include="dbo\Views\vyuAPBillDetail.sql" />
     <Build Include="dbo\Functions\fnCMGetBankAccountMICR.sql" />
     <Build Include="dbo\Functions\fnCTGetFuturesProfitLoss.sql" />
+    <Build Include="dbo\Functions\fnRKGetCurrencyConvertion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
