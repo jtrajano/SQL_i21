@@ -2754,6 +2754,8 @@
     <Build Include="dbo\Functions\fnCTGetBrokerageCommission.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetItemUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetLastSettlementPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetPatronageDetails.sql" />
+    <Build Include="dbo\Views\vyuPATVolumeDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
