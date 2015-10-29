@@ -12,18 +12,20 @@ Usage:
 	4 - ACH
 	5 - Write Off
 @paymentInfo - Usually use for echeck
+@isPost - Set the payment that will create as posted (usually use for importing)
+@post - Will post the payment
 */
 CREATE PROCEDURE [dbo].[uspAPCreatePayment]
 	@userId INT,
 	@bankAccount INT = NULL,
-	@paymentMethod INT = 1,
+	@paymentMethod INT = NULL,
 	@paymentInfo NVARCHAR(10) = NULL,
 	@notes NVARCHAR(500) = NULL,
 	@payment DECIMAL(18, 6) = NULL,
 	@datePaid DATETIME = NULL,
 	@isPost BIT = 0,
 	@post BIT = 0,
-	@billIds AS Id READONLY,
+	@billId AS NVARCHAR(MAX),
 	@createdPaymentId INT = NULL OUTPUT
 AS
 BEGIN
@@ -54,16 +56,15 @@ BEGIN
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
 	--TODO Allow Multi Vendor
-	--SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
-	SET @bills = @billIds;
+	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
 	SELECT 
 		TOP 1 @vendorId = C.[intEntityVendorId] 
 		,@vendorWithhold = C.ysnWithholding
 		,@location = A.intShipToId
 		FROM tblAPBill A
-		INNER JOIN  @bills B
-			ON A.intBillId = B.intId
+		INNER JOIN  #tmpBillsId B
+			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityVendorId] = C.[intEntityVendorId]
 
@@ -105,7 +106,7 @@ BEGIN
 		SET @intGLBankAccountId = (SELECT TOP 1 intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId);
 	END
 		
-	--Make sure there is payment method to user
+	--Make sure there is payment method
 	IF @paymentMethodId IS NULL
 	BEGIN
 		SELECT TOP 1 @paymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'

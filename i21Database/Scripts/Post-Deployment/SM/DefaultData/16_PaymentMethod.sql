@@ -10,10 +10,4 @@
 		INSERT INTO tblSMPaymentMethod([strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
 		VALUES('Write Off', NULL, 0, NULL, 1, 0)
 	END
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod LIKE 'Refund')
-	BEGIN
-		INSERT INTO tblSMPaymentMethod([strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-		VALUES('Refund', NULL, 0, NULL, 1, 0)
-	END
 GO

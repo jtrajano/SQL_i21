@@ -2761,6 +2761,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryCount.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateOutboundOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateWriteOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostWriteOff.sql" />
+    <Build Include="dbo\Functions\fnAPCreateWriteOffGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

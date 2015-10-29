@@ -185,20 +185,22 @@ BEGIN
 			AND A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT
-			'The cost of item ' + D.strItemNo + ' did not match with the contract price.'
-			,'Bill'
-			,A.strBillId
-			,A.intBillId
-		FROM  tblAPBill A
-		INNER JOIN tblAPBillDetail C ON A.intBillId = C.intBillId
-		INNER JOIN (tblCTContractHeader B1 INNER JOIN tblCTContractDetail B2 ON B1.intContractHeaderId = B2.intContractHeaderId)
-			ON C.intContractDetailId = B2.intContractDetailId
-		INNER JOIN tblICItem D ON C.intItemId = D.intItemId
-		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND A.ysnPosted = 0 AND C.intContractDetailId IS NOT NULL AND B1.intPricingTypeId NOT IN (7)
-		AND ISNULL(B2.dblCashPrice,0) <> ISNULL(E.dblUnitCost,0)
+		--COMPARE THE CASH PRICE
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--SELECT
+		--	'The cost of item ' + D.strItemNo + ' did not match with the contract price.'
+		--	,'Bill'
+		--	,A.strBillId
+		--	,A.intBillId
+		--FROM  tblAPBill A
+		--INNER JOIN tblAPBillDetail C ON A.intBillId = C.intBillId
+		--INNER JOIN tblICInventoryReceiptItem E ON C.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+		--INNER JOIN (tblCTContractHeader B1 INNER JOIN tblCTContractDetail B2 ON B1.intContractHeaderId = B2.intContractHeaderId)
+		--	ON C.intContractDetailId = B2.intContractDetailId
+		--INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+		--WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		--AND A.ysnPosted = 0 AND C.intContractDetailId IS NOT NULL AND B1.intPricingTypeId NOT IN (7)
+		--AND ISNULL(B2.dblCashPrice,0) <> ISNULL(E.dblUnitCost,0)
 
 	END
 	ELSE

@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateWriteOff]
-	@billIds AS Id READONLY,
+	@voucherId INT,
 	@userId INT,
 	@paymentCreated INT OUTPUT
 AS
@@ -31,49 +31,6 @@ DECLARE @batchId NVARCHAR(100);
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
-SET @bills = @billIds;
-
-SELECT TOP 1
-	@vendorId = A.intEntityVendorId
-	,@location = A.intShipToId
-	,@prepayRecord = A.strBillId
-	,@vendorExpense = B.intGLAccountExpenseId
-	,@balance = A.dblAmountDue
-FROM tblAPBill A
-INNER JOIN tblAPVendor B ON  A.intEntityVendorId = B.intEntityVendorId
-WHERE A.intBillId IN (SELECT intId FROM @bills)
-AND A.intTransactionType IN (2)
-
-IF @balance <= 0
-BEGIN
-	RAISERROR('Cannot clear balance. Prepaid was fully applied.', 16, 1);
-END
-
-IF @vendorExpense IS NULL OR @vendorExpense <= 0
-BEGIN
-	RAISERROR('Please setup default vendor expense account.', 16, 1);
-END
-
-IF @location IS NULL
-BEGIN
-	SET @location = (SELECT intCompanyLocationId FROM tblSMUserSecurity A WHERE A.intEntityUserSecurityId = @userId)
-	IF @location IS NULL
-	BEGIN
-		RAISERROR('Default location setup for user is missing.', 16, 1);
-	END
-END
-
-SELECT 
-	@bankAccount = B.intBankAccountId
-FROM tblSMCompanyLocation A 
-INNER JOIN tblCMBankAccount B ON A.intCashAccount = B.intGLAccountId
-WHERE B.intGLAccountId IS NOT NULL AND A.intCashAccount IS NOT NULL
-
-IF @bankAccount IS NULL
-BEGIN
-	RAISERROR('Cash account setup is missing on location.', 16, 1);
-END
-
 SET @paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod LIKE '%Write Off%');
 IF @paymentMethod IS NULL
 BEGIN
@@ -81,7 +38,8 @@ BEGIN
 END
 
 --Create Payment
-EXEC uspAPCreatePayment @userId, @bankAccount, @paymentMethod, @billId = @billIds, @createdPaymentId = @paymentCreated OUTPUT
+SET @billIdsPostParam = CAST(@voucherId AS NVARCHAR(MAX))
+EXEC uspAPCreatePayment @userId, DEFAULT, @paymentMethod, @billId = @billIdsPostParam, @createdPaymentId = @paymentCreated OUTPUT
 
 IF @transCount = 0 COMMIT TRANSACTION
 

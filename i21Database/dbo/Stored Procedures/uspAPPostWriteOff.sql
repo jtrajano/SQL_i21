@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPPostPrepayment]
+﻿CREATE PROCEDURE [dbo].[uspAPPostWriteOff]
 	@batchId			AS NVARCHAR(20)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
@@ -31,7 +31,7 @@ SET @batchIdUsed = @batchId
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.[fnAPCreatePrepaymentGLEntries](@prepaymentId, @userId, @batchId)
+	SELECT * FROM dbo.[fnAPCreateWriteOffGLEntries](@prepaymentId, @userId, @batchId)
 END
 ELSE
 BEGIN
