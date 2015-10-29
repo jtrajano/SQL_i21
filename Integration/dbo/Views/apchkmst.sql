@@ -1,14 +1,20 @@
 ﻿GO
 
 
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'apchkmst')
-	DROP TRIGGER trgInsteadOfDeleteCMApchkmst
-	DROP TRIGGER trgInsteadOfInsertCMApchkmst
-	DROP TRIGGER trgInsteadOfUpdateCMApchkmst
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'apchkmst') 
 	DROP VIEW apchkmst
-
 GO
 
+IF EXISTS(select top 1 1 from sys.triggers where name = 'trgInsteadOfDeleteCMApchkmst')
+	DROP TRIGGER trgInsteadOfDeleteCMApchkms
+GO
+IF EXISTS(select top 1 1 from sys.triggers where name = 'trgInsteadOfInsertCMApchkmst')
+	DROP TRIGGER trgInsteadOfInsertCMApchkmst
+GO
+IF EXISTS(select top 1 1 from sys.triggers where name = 'trgInsteadOfUpdateCMApchkmst')
+	DROP TRIGGER trgInsteadOfUpdateCMApchkmst
+GO
+ 
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
