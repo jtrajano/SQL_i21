@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFReleaseBlendSheet]
 @strXml nVarchar(Max),
 @strWorkOrderNoOut nvarchar(50)='' OUT,
-@dblBalancedQtyToProduceOut numeric(18,6) = 0 OUTPUT 
+@dblBalancedQtyToProduceOut numeric(18,6) = 0 OUTPUT,
+@intWorkOrderIdOut int=0 OUTPUT 
 AS
 Begin Try
 
@@ -370,6 +371,7 @@ if @dblBalancedQtyToProduceOut <=0
 	Set @dblBalancedQtyToProduceOut=0
 
 Set @strWorkOrderNoOut=@strNextWONo;
+Set @intWorkOrderIdOut=@intWorkOrderId
 
 Commit Tran
 
