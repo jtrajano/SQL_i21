@@ -299,26 +299,29 @@ BEGIN
 
 
 	BEGIN TRY
-		IF ISNULL(@SourceTransaction,'') = 'Transport Load'
+		IF ISNULL(@SourceTransaction, '') <> 'Import'
 			BEGIN
-				SET @SourceColumn = 'intDistributionHeaderId'
-				SET @SourceTable = 'tblTRDistributionHeader'
-			END
-		IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
-			BEGIN
-				SET @SourceColumn = 'intShipmentId'
-				SET @SourceTable = 'tblLGShipment'
-			END
-		IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
-			BEGIN
-				SET @SourceColumn = 'intTransactionId'
-				SET @SourceTable = 'tblCFTransaction'
-			END
+				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
+					BEGIN
+						SET @SourceColumn = 'intDistributionHeaderId'
+						SET @SourceTable = 'tblTRDistributionHeader'
+					END
+				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
+					BEGIN
+						SET @SourceColumn = 'intShipmentId'
+						SET @SourceTable = 'tblLGShipment'
+					END
+				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
+					BEGIN
+						SET @SourceColumn = 'intTransactionId'
+						SET @SourceTable = 'tblCFTransaction'
+					END
 
-		IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction')
-			BEGIN
-				EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
-			END
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction')
+					BEGIN
+						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
+					END
+			END		
 	END TRY
 	BEGIN CATCH
 		IF ISNULL(@RaiseError,0) = 0

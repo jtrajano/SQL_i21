@@ -10,20 +10,18 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@DateNow DATETIME
-		,@DefaultCompanyLocation INT
+DECLARE @ZeroDecimal		NUMERIC(18, 6)
+	  , @DateNow			DATETIME
+	  , @DefaultCurrencyId	INT
+	  , @CreatedIvoices		NVARCHAR(MAX)
+	  , @BOLNumber			NVARCHAR(50)
+
+DECLARE @InvoicesForImport AS TABLE(intImportLogDetailId INT UNIQUE)
+DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
 SET @ZeroDecimal = 0.000000
 SET @DateNow = CAST(GETDATE() AS DATE)
---For Delta
-SET @DefaultCompanyLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1 AND strLocationType = 'Warehouse' AND strLocationName = 'APX Direct')
-
-IF ISNULL(@DefaultCompanyLocation,0) = 0
-	SET @DefaultCompanyLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)
-
-
-DECLARE @InvoicesForImport AS TABLE(intImportLogDetailId INT UNIQUE)
+SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 
 INSERT INTO 
 	@InvoicesForImport
@@ -32,8 +30,7 @@ SELECT
 FROM
 	[tblARImportLogDetail]
 WHERE
-	[intImportLogId] = @ImportLogId 
-	--AND LEN(LTRIM(RTRIM(ISNULL([strEventResult], '')))) <= 0
+	[intImportLogId] = @ImportLogId
 	AND ISNULL([ysnSuccess],0) = 1
 	AND ISNULL(ysnImported,0) = 0
 ORDER BY
@@ -64,107 +61,47 @@ BEGIN
 		,@Type							NVARCHAR(200)	= 'Standard'
 		,@Comment						NVARCHAR(500)	= ''
 		,@InvoiceOriginId				NVARCHAR(16)	= ''
-		,@PONumber						NVARCHAR(50)	= ''
-		,@DistributionHeaderId			INT				= NULL
-		,@PaymentMethodId				INT				= 0
+		,@PONumber						NVARCHAR(50)	= ''		
 		,@FreightTermId					INT				= NULL
-		,@DeliverPickUp					NVARCHAR(100)	= NULL
+		,@ShipViaId						INT				= NULL		
 		,@DiscountAmount				NUMERIC(18,6)   = @ZeroDecimal
-		,@ItemId						INT				= NULL
-		,@ItemUOMId						INT				= NULL
+		,@DiscountPercentage			NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemQtyShipped				NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemPrice						NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemDescription				NVARCHAR(500)	= NULL
-		,@ItemSiteId					INT				= NULL			
-		,@ItemBillingBy					NVARCHAR(200)	= NULL
-		,@ItemPercentFull				NUMERIC(18,6)	= @ZeroDecimal
-		,@ItemNewMeterReading			NUMERIC(18,6)	= @ZeroDecimal
-		,@ItemPreviousMeterReading		NUMERIC(18,6)	= @ZeroDecimal
-		,@ItemConversionFactor			NUMERIC(18,8)	= 0.00000000
-		,@ItemDiscount					NUMERIC(18,6)	= @ZeroDecimal
-		,@ItemPerformerId				INT				= NULL
-		,@ItemLeaseBilling				BIT				= 0
-		,@TaxMasterId					INT				= NULL
-		,@ItemContractHeaderId			INT				= NULL
-		,@ItemContractDetailId			INT				= NULL
-		,@ItemMaintenanceType			NVARCHAR(50)	= NULL
-		,@ItemFrequency					NVARCHAR(50)	= NULL
-		,@ItemMaintenanceDate			DATETIME		= NULL
-		,@ItemMaintenanceAmount			NUMERIC(18,6)	= @ZeroDecimal
-		,@ItemLicenseAmount				NUMERIC(18,6)	= @ZeroDecimal	
-		,@ItemTicketId					INT				= NULL		
-		,@ItemSCInvoiceId				INT				= NULL
-		,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
-		,@ItemServiceChargeAccountId	INT				= NULL
-		,@ItemTaxGroupId				INT				= NULL
-		,@ItemTaxSchedule				NVARCHAR(100)	= NULL
-		,@SalesTaxAmount				NUMERIC(18,6)	= @ZeroDecimal
-		,@Balance						NUMERIC(18,6)	= @ZeroDecimal
-		
-		
+		,@TaxGroupId					INT				= NULL
+		,@AmountDue						NUMERIC(18,6)	= @ZeroDecimal
+		,@TaxAmount						NUMERIC(18,6)	= @ZeroDecimal
 			
 	SELECT 
 		 @EntityCustomerId				= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
 		,@InvoiceDate					= D.[dtmInvoiceDate] 					
-		,@CompanyLocationId				= @DefaultCompanyLocation --(SELECT [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strDivision])
+		,@CompanyLocationId				= (SELECT TOP 1 [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strLocationName])
 		,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
-		,@TermId						= (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTermCode] = D.[strTermsCode])
-		,@EntitySalespersonId			= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strSalespersonCode])
-		,@DueDate						= NULL		
-		,@ShipDate						= NULL
-		,@PostDate						= D.[dtmPostingDate] 
-		,@TransactionType				= (CASE WHEN D.[strTransactionType] = 'IN' AND D.[dblBalance] > 0 THEN 'Invoice'
-												WHEN D.[strTransactionType] = 'IN' AND D.[dblBalance] < 0 THEN 'Credit Memo'
-												WHEN D.[strTransactionType] = 'PP' THEN 'Prepayment'												
-											ELSE 'Overpayment'
-										END)
-		,@Type							= (CASE WHEN D.[strTransactionType] = 'IN' AND D.[dblBalance] < 0 THEN 'Credit Memo'
-											ELSE 'Standard'
-										END)
+		,@TermId						= (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTerm] = D.[strTerms])
+		,@EntitySalespersonId			= (SELECT TOP 1 [intEntitySalespersonId] FROM tblARSalesperson WHERE [strSalespersonId] = D.[strSalespersonNumber])
+		,@DueDate						= D.dtmDueDate		
+		,@ShipDate						= D.dtmShipDate
+		,@PostDate						= D.[dtmPostDate] 
+		,@TransactionType				= D.[strTransactionType]
+		,@Type							= (CASE WHEN D.[strTransactionType] = 'Credit Memo' THEN 'Credit Memo' ELSE 'Standard' END)
 		,@Comment						= D.[strInvoiceNumber]
 		,@InvoiceOriginId				= D.[strInvoiceNumber]
 		,@PONumber						= D.[strPONumber] 
-		,@DistributionHeaderId			= NULL
-		,@PaymentMethodId				= 0
-		,@FreightTermId					= NULL
-		,@DeliverPickUp					= NULL
-		,@DiscountAmount				= @ZeroDecimal
-		,@ItemId						= NULL
-		,@ItemUOMId						= NULL
+		,@BOLNumber						= D.[strBOLNumber]		
+		,@FreightTermId					= (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = D.strFreightTerm)
+		,@ShipViaId						= (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia WHERE strShipVia = D.strShipVia)		
+		,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
+		,@DiscountPercentage			= (CASE WHEN ISNULL(D.[dblDiscount], @ZeroDecimal) > 0 
+												THEN (1 - ((ABS(D.[dblInvoiceTotal]) - ISNULL(D.[dblDiscount], @ZeroDecimal)) / ABS(D.[dblInvoiceTotal]))) * 100
+												ELSE @ZeroDecimal
+										   END)
 		,@ItemQtyShipped				= 1.000000
-		,@ItemPrice						= (CASE WHEN D.[strTransactionType] = 'PP' THEN ISNULL(D.[dblTaxableAmount], @ZeroDecimal) ELSE ABS((CASE WHEN D.[dblSalesTaxAmount] <> 0 THEN D.[dblTaxableAmount] ELSE D.[dblNonTaxableAmount] END)) END)
+		,@ItemPrice						= ISNULL(D.[dblInvoiceSubtotal], @ZeroDecimal)
 		,@ItemDescription				= D.[strComment] 
-		,@ItemSiteId					= NULL			
-		,@ItemBillingBy					= NULL
-		,@ItemPercentFull				= @ZeroDecimal
-		,@ItemNewMeterReading			= @ZeroDecimal
-		,@ItemPreviousMeterReading		= @ZeroDecimal
-		,@ItemConversionFactor			= 0.00000000
-		,@ItemDiscount					= @ZeroDecimal
-		,@ItemPerformerId				= NULL
-		,@ItemLeaseBilling				= 0
-		,@TaxMasterId					= NULL
-		,@ItemContractHeaderId			= NULL
-		,@ItemContractDetailId			= NULL
-		,@ItemMaintenanceType			= NULL
-		,@ItemFrequency					= NULL
-		,@ItemMaintenanceDate			= NULL
-		,@ItemMaintenanceAmount			= @ZeroDecimal
-		,@ItemLicenseAmount				= @ZeroDecimal	
-		,@ItemTicketId					= NULL		
-		,@ItemSCInvoiceId				= NULL
-		,@ItemSCInvoiceNumber			= NULL
-		,@ItemServiceChargeAccountId	= NULL
-		,@ItemTaxGroupId				= (CASE WHEN D.[dblSalesTaxAmount] <> 0 AND D.[strTransactionType] = 'IN'
-											THEN (SELECT TOP 1 [intTaxGroupId] FROM tblSMTaxGroup WHERE UPPER(LTRIM(RTRIM(ISNULL(strTaxGroup,'')))) = UPPER(LTRIM(RTRIM(ISNULL(D.[strTaxSchedule],''))))) 
-											ELSE NULL 
-										END)
-		,@ItemTaxSchedule				= ISNULL(D.[strTaxSchedule],'')
-		,@SalesTaxAmount				= (CASE WHEN D.[dblSalesTaxAmount] <> 0 AND D.[strTransactionType] = 'IN'
-											THEN ISNULL(D.[dblSalesTaxAmount], @ZeroDecimal)
-											ELSE @ZeroDecimal
-										END)
-		,@Balance						= ISNULL(D.[dblBalance], @ZeroDecimal)
+		,@TaxGroupId					= (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.[strTaxGroup])
+		,@AmountDue						= ISNULL(D.[dblAmountDue], @ZeroDecimal)
+		,@TaxAmount						= ISNULL(D.[dblTax], @ZeroDecimal)
 	FROM
 		[tblARImportLogDetail] D
 	INNER JOIN
@@ -175,74 +112,174 @@ BEGIN
 		
 	SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) + ' was already imported! (' + strInvoiceNumber + ')' FROM [tblARInvoice] WHERE RTRIM(LTRIM(ISNULL([strInvoiceOriginId],''))) = RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strInvoiceOriginId],'')))) > 0
 
-	IF @ItemTaxSchedule <> '' AND @ItemTaxGroupId IS NULL AND @TransactionType IN ('Invoice', 'Credit Memo')
-		SET @ErrorMessage = 'Tax Schedule does not exists!'
-
 	IF ISNULL(@EntityCustomerId, 0) = 0
-		SET @ErrorMessage = 'Customer Number does not exists!'
+		SET @ErrorMessage = 'The Customer Number provided does not exists.'
 
-	IF ISNULL(@EntitySalespersonId, 0) = 0
-		BEGIN
-			SELECT TOP 1 @EntitySalespersonId = intEntityId FROM tblEntity E 
-				INNER JOIN tblARSalesperson SP ON E.intEntityId = SP.intEntitySalespersonId
-				WHERE E.strName = 'Don Dockstader'
-		END
-
-	IF ISNULL(@TermId, 0) = 0 AND LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1 AND @TransactionType IN ('Invoice', 'Credit Memo')
-		SET @ErrorMessage = 'Term is required! The Term Code provided does not exists.'
+	IF ISNULL(@CompanyLocationId, 0) = 0
+		SET @ErrorMessage = 'The Location Name provided does not exists.'
+	
+	IF ISNULL(@TermId, 0) = 0
+		SET @ErrorMessage = 'The Term Code provided does not exists.'
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
-		BEGIN TRY		
-			EXEC [dbo].[uspARCreateCustomerInvoice]
-				 @EntityCustomerId				= @EntityCustomerId
-				,@InvoiceDate					= @InvoiceDate
-				,@CompanyLocationId				= @CompanyLocationId
-				,@EntityId						= @EntityId
-				,@NewInvoiceId					= @NewInvoiceId OUTPUT
-				,@ErrorMessage					= @ErrorMessage OUTPUT
-				,@TermId						= @TermId
-				,@EntitySalespersonId			= @EntitySalespersonId
-				,@DueDate						= @DueDate
-				,@ShipDate						= @ShipDate
-				,@PostDate						= @PostDate
-				,@TransactionType				= @TransactionType
-				,@Type							= @Type
-				,@Comment						= @Comment
-				,@InvoiceOriginId				= @InvoiceOriginId
-				,@PONumber						= @PONumber
-				,@DistributionHeaderId			= @DistributionHeaderId
-				,@PaymentMethodId				= @PaymentMethodId
-				,@FreightTermId					= @FreightTermId
-				,@DeliverPickUp					= @DeliverPickUp
-				,@DiscountAmount				= @DiscountAmount
-				,@ItemId						= @ItemId
-				,@ItemUOMId						= @ItemUOMId
-				,@ItemQtyShipped				= @ItemQtyShipped
-				,@ItemPrice						= @ItemPrice
-				,@ItemDescription				= @ItemDescription
-				,@ItemSiteId					= @ItemSiteId
-				,@ItemBillingBy					= @ItemBillingBy
-				,@ItemPercentFull				= @ItemPercentFull
-				,@ItemNewMeterReading			= @ItemNewMeterReading
-				,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
-				,@ItemConversionFactor			= @ItemConversionFactor
-				,@ItemDiscount					= @ItemDiscount
-				,@ItemPerformerId				= @ItemPerformerId
-				,@ItemLeaseBilling				= @ItemLeaseBilling
-				,@TaxMasterId					= @TaxMasterId
-				,@ItemContractHeaderId			= @ItemContractHeaderId
-				,@ItemContractDetailId			= @ItemContractDetailId
-				,@ItemMaintenanceType			= @ItemMaintenanceType
-				,@ItemFrequency					= @ItemFrequency
-				,@ItemMaintenanceDate			= @ItemMaintenanceDate
-				,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
-				,@ItemLicenseAmount				= @ItemLicenseAmount
-				,@ItemTicketId					= @ItemTicketId
-				,@ItemSCInvoiceId				= @ItemSCInvoiceId
-				,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
-				,@ItemServiceChargeAccountId	= @ItemServiceChargeAccountId
-				,@ItemTaxGroupId				= @ItemTaxGroupId			
+		BEGIN TRY
+			INSERT INTO @EntriesForInvoice(
+				 [strSourceTransaction]
+				,[intSourceId]
+				,[strSourceId]
+				,[intInvoiceId]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intCurrencyId]
+				,[intTermId]
+				,[dtmDate]
+				,[dtmDueDate]
+				,[dtmShipDate]
+				,[intEntitySalespersonId]
+				,[intFreightTermId]
+				,[intShipViaId]
+				,[intPaymentMethodId]
+				,[strInvoiceOriginId]
+				,[strPONumber]
+				,[strBOLNumber]
+				,[strDeliverPickup]
+				,[strComments]
+				,[intShipToLocationId]
+				,[intBillToLocationId]
+				,[ysnTemplate]
+				,[ysnForgiven]
+				,[ysnCalculated]
+				,[ysnSplitted]
+				,[intPaymentId]
+				,[intSplitId]
+				,[intDistributionHeaderId]
+				,[strActualCostId]
+				,[intShipmentId]
+				,[intTransactionId]
+				,[intEntityId]
+				,[ysnResetDetails]
+				,[ysnPost]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[ysnInventory]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyOrdered]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[ysnRefreshPrice]
+				,[strMaintenanceType]
+				,[strFrequency]
+				,[dtmMaintenanceDate]
+				,[dblMaintenanceAmount]
+				,[dblLicenseAmount]
+				,[intTaxGroupId]
+				,[ysnRecomputeTax]
+				,[intSCInvoiceId]
+				,[strSCInvoiceNumber]
+				,[intInventoryShipmentItemId]
+				,[strShipmentNumber]
+				,[intSalesOrderDetailId]
+				,[strSalesOrderNumber]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intShipmentPurchaseSalesContractId]
+				,[intTicketId]
+				,[intTicketHoursWorkedId]
+				,[intSiteId]
+				,[strBillingBy]
+				,[dblPercentFull]
+				,[dblNewMeterReading]
+				,[dblPreviousMeterReading]
+				,[dblConversionFactor]
+				,[intPerformerId]
+				,[ysnLeaseBilling]
+				,[ysnVirtualMeterReading]
+			)
+			SELECT 
+			     [strSourceTransaction]		= 'Import'
+				,[intSourceId]				= @ImportLogDetailId
+				,[strSourceId]				= CAST(@ImportLogDetailId AS NVARCHAR(250))
+				,[intInvoiceId]				= NULL
+				,[intEntityCustomerId]		= @EntityCustomerId
+				,[intCompanyLocationId]		= @CompanyLocationId
+				,[intCurrencyId]			= @DefaultCurrencyId
+				,[intTermId]				= @TermId
+				,[dtmDate]					= @InvoiceDate
+				,[dtmDueDate]				= @DueDate
+				,[dtmShipDate]				= @ShipDate
+				,[intEntitySalespersonId]	= @EntitySalespersonId
+				,[intFreightTermId]			= @FreightTermId
+				,[intShipViaId]				= @ShipViaId
+				,[intPaymentMethodId]		= NULL
+				,[strInvoiceOriginId]		= @InvoiceOriginId
+				,[strPONumber]				= @PONumber
+				,[strBOLNumber]				= @BOLNumber
+				,[strDeliverPickup]			= NULL
+				,[strComments]				= @Comment
+				,[intShipToLocationId]		= NULL
+				,[intBillToLocationId]		= NULL
+				,[ysnTemplate]				= 0
+				,[ysnForgiven]				= 0
+				,[ysnCalculated]			= 0
+				,[ysnSplitted]				= 0
+				,[intPaymentId]				= NULL
+				,[intSplitId]				= NULL
+				,[intDistributionHeaderId]	= NULL
+				,[strActualCostId]			= NULL
+				,[intShipmentId]			= NULL
+				,[intTransactionId]			= NULL
+				,[intEntityId]				= @EntityId
+				,[ysnResetDetails]			= 1
+				,[ysnPost]					= CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END
+				,[intInvoiceDetailId]		= NULL
+				,[intItemId]				= NULL
+				,[ysnInventory]				= 0
+				,[strItemDescription]		= @ItemDescription
+				,[intItemUOMId]				= NULL
+				,[dblQtyOrdered]			= @ItemQtyShipped
+				,[dblQtyShipped]			= @ItemQtyShipped
+				,[dblDiscount]				= @DiscountPercentage
+				,[dblPrice]					= @ItemPrice
+				,[ysnRefreshPrice]			= 0
+				,[strMaintenanceType]		= NULL
+				,[strFrequency]				= NULL
+				,[dtmMaintenanceDate]		= NULL
+				,[dblMaintenanceAmount]		= NULL
+				,[dblLicenseAmount]			= NULL
+				,[intTaxGroupId]			= @TaxGroupId
+				,[ysnRecomputeTax]			= CASE WHEN ISNULL(@TaxGroupId, 0) > 0 THEN 1 ELSE 0 END
+				,[intSCInvoiceId]			= NULL
+				,[strSCInvoiceNumber]		= NULL
+				,[intInventoryShipmentItemId] = NULL
+				,[strShipmentNumber]		= NULL
+				,[intSalesOrderDetailId]	= NULL
+				,[strSalesOrderNumber]		= NULL
+				,[intContractHeaderId]		= NULL
+				,[intContractDetailId]		= NULL
+				,[intShipmentPurchaseSalesContractId]	= NULL
+				,[intTicketId]				= NULL
+				,[intTicketHoursWorkedId]	= NULL
+				,[intSiteId]				= NULL
+				,[strBillingBy]				= NULL
+				,[dblPercentFull]			= NULL
+				,[dblNewMeterReading]		= NULL
+				,[dblPreviousMeterReading]	= NULL
+				,[dblConversionFactor]		= NULL
+				,[intPerformerId]			= NULL
+				,[ysnLeaseBilling]			= NULL
+				,[ysnVirtualMeterReading]	= NULL
 				
+			EXEC [dbo].[uspARProcessInvoices]
+				 @InvoiceEntries	= @EntriesForInvoice
+				,@UserId			= @EntityId
+				,@GroupingOption	= 11
+				,@RaiseError		= 1
+				,@ErrorMessage		= @ErrorMessage OUTPUT
+				,@CreatedIvoices	= @CreatedIvoices OUTPUT
+			
+			SET @NewInvoiceId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))				
 		END TRY
 		BEGIN CATCH
 			SET @ErrorMessage = ERROR_MESSAGE();
