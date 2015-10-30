@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARInvoiceDetail] (
     [intInvoiceDetailId]					INT             IDENTITY (1, 1)					NOT NULL,
     [intInvoiceId]							INT												NOT NULL,
+	[strDocumentNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
     [intItemId]								INT												NULL,
     [strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[intItemUOMId]							INT												NULL,

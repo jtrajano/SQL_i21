@@ -96,26 +96,27 @@ ON dbo.tblARInvoice
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25))
+DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100))
 DECLARE @count INT = 0
 DECLARE @intInvoiceId INT
 DECLARE @InvoiceNumber NVARCHAR(50)
 DECLARE @strTransactionType NVARCHAR(25)
+DECLARE @strType NVARCHAR(100)
 DECLARE @intMaxCount INT = 0
 DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId, strTransactionType FROM INSERTED ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType FROM INSERTED ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SET @intStartingNumberId = 19
 	
-	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType FROM @inserted
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType FROM @inserted
 
 	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Prepayment' THEN 64 
 									WHEN @strTransactionType = 'Overpayment' THEN 65
-									WHEN @strTransactionType = 'Provisional Invoice' THEN 81
+									WHEN @strType = 'Provisional Invoice' THEN 81
 									ELSE 19 END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT	

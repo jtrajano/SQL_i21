@@ -3,7 +3,7 @@ AS
 
 SELECT DISTINCT 
 	 [strTransactionType]				= ARSI.[strTransactionType]
-	,[strTransactionNumber]				= ARSI.[strTransactionNumber]
+	,[strDocumentNumber]				= ARSI.[strTransactionNumber]
 	,[strDocumentId]					= ARSI.[strShippedItemId]
 	,[intEntityCustomerId]				= ARSI.[intEntityCustomerId] 
 	,[strCustomerName]					= ARSI.[strCustomerName]	
