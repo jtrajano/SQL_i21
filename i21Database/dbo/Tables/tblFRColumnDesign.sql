@@ -9,6 +9,8 @@
     [strColumnType]            NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
     [strColumnCode]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strFilterType]            NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
+	[strStartOffset]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+	[strEndOffset]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dtmStartDate]             DATETIME        NULL,
     [dtmEndDate]               DATETIME        NULL,
     [strJustification]         NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
