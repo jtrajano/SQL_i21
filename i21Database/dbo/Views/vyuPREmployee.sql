@@ -1,17 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuPREmployee]
 AS
 SELECT
-Ent.intEntityId,
-intEmployeeId = Emp.intEntityEmployeeId,
+Emp.intEntityEmployeeId,
 Emp.strEmployeeId,
 Emp.strLastName,
 Emp.strFirstName,
 Emp.strNameSuffix,
 Emp.strMiddleName,
-Emp.intUserSecurityId,
+Sec.intEntityUserSecurityId,
 Emp.intRank,
-Con.strPhone,
-Con.strTitle,
+Ent.strPhone,
+Ent.strTitle,
 Loc.strAddress,
 Loc.strCity,
 Loc.strState,
@@ -21,5 +20,5 @@ Emp.ysnActive,
 Emp.strPayPeriod
 FROM dbo.tblPREmployee AS Emp
 INNER JOIN dbo.tblEntity AS Ent ON Ent.intEntityId = Emp.[intEntityEmployeeId]
-LEFT JOIN dbo.tblEntity AS Con ON Con.[intEntityId] = Emp.[intEntityEmployeeId]
-LEFT JOIN dbo.tblEntityLocation AS Loc ON Loc.intEntityId = Emp.[intEntityEmployeeId]
+LEFT JOIN dbo.tblEntityLocation AS Loc ON Loc.intEntityId = Emp.[intEntityEmployeeId] AND Loc.ysnDefaultLocation = 1
+LEFT JOIN dbo.tblSMUserSecurity AS Sec ON Sec.intEntityUserSecurityId = Ent.intEntityId
