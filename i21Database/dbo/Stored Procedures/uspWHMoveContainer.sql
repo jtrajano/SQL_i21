@@ -395,7 +395,7 @@ BEGIN TRY
 					WHERE intOrderHeaderId = @intOrderHeaderId
 					)
 				UPDATE tblWHOrderHeader
-				SET intOrderStatusId = 256
+				SET intOrderStatusId = 9
 				WHERE intOrderHeaderId = @intOrderHeaderId --PUT-AWAY                                                    
 		END
 	END
