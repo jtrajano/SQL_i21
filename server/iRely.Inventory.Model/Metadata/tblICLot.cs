@@ -53,8 +53,7 @@ namespace iRely.Inventory.Model
         public string strNotes { get; set; }
         public int? intEntityVendorId { get; set; }
         public string strVendorLotNo { get; set; }
-        public int? intVendorLocationId { get; set; }
-        public string strVendorLocation { get; set; }
+        public string strGarden { get; set; }
         public string strContractNo { get; set; }
         public DateTime? dtmManufacturedDate { get; set; }
         public bool? ysnReleasedToWarehouse { get; set; }

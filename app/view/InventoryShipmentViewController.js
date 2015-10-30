@@ -4,19 +4,41 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     config: {
         searchConfig: {
-            title:  'Search Inventory Shipment',
+            title: 'Search Inventory Shipment',
             type: 'Inventory.InventoryShipment',
             api: {
                 read: '../Inventory/api/InventoryShipment/Search'
             },
             columns: [
-                {dataIndex: 'intInventoryShipmentId',text: "Shipment Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1,  dataType: 'string'},
-                {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strOrderType',text: 'Order Type', flex: 1,  dataType: 'int'},
-                {dataIndex: 'strCustomerId',text: 'Customer', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strCustomerName',text: 'Customer Name', flex: 1,  dataType: 'string'},
-                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
+                {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewShipmentNo'},
+                {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                {dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'int'},
+                {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
+                {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo'},
+                {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName'},
+                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'},
+
+                {dataIndex: 'strReferenceNumber', text: 'Reference Number', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'dtmRequestedArrivalDate', text: 'Requested Arrival Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'strShipFromLocation', text: 'ShipFrom', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strShipToLocation', text: 'Ship To', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strFreightTerm', text: 'Freight Term', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strFobPoint', text: 'FOB Point', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strBOLNumber', text: 'BOL Number', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strShipVia', text: 'Ship Via', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strVessel', text: 'Vessel', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strProNumber', text: 'PRO Number', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strDriverId', text: 'Driver Id', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strSealNumber', text: 'Seal Number', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strDeliveryInstruction', text: 'Delivery Instruction', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'dtmAppointmentTime', text: 'Appointment Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'dtmDepartureTime', text: 'Departure Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'dtmArrivalTime', text: 'Arrival Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'dtmDeliveredDate', text: 'Delivered Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'dtmFreeTime', text: 'Free Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
+                {dataIndex: 'strReceivedBy', text: 'Received By', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strComment', text: 'Comment', flex: 1, dataType: 'string', hidden: true }
             ]
         },
         binding: {
@@ -426,9 +448,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             store: store,
             enableComment: true,
             enableAudit: true,
-            include: 'ShipFromLocation, ' +
-                'tblARCustomer, ' +
-                'ShipToLocation, ' +
+            include: 'vyuICGetInventoryShipment, ' +
                 'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
                 'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
                 'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot',
@@ -880,6 +900,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 }
             });
         }
+    },
+
+    onViewShipmentNo: function (value, record) {
+        i21.ModuleMgr.Inventory.showScreen(value, 'ShipmentNo');
+    },
+
+    onViewCustomerNo: function (value, record) {
+        var strName = record.get('strCustomerName');
+        i21.ModuleMgr.Inventory.showScreen(strName, 'CustomerName');
+    },
+
+    onViewCustomerName: function (value, record) {
+        i21.ModuleMgr.Inventory.showScreen(value, 'CustomerName');
     },
 
     onViewItemClick: function(button, e, eOpts) {

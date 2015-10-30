@@ -24,19 +24,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
-            var query = _db.GetQuery<tblICInventoryShipment>()
-                .Include(p => p.tblARCustomer)
-                .Select(p => new ShipmentVM
-                {
-                    intInventoryShipmentId = p.intInventoryShipmentId,
-                    strShipmentNumber = p.strShipmentNumber,
-                    intOrderType = p.intOrderType,
-                    strOrderType = (p.intOrderType == 1 ? "Sales Contract" : (p.intOrderType == 2 ? "Sales Order" : (p.intOrderType == 3 ? "Transfer Order" : (p.intOrderType == 4 ? "Direct" : "")))),
-                    dtmShipDate = p.dtmShipDate,
-                    strCustomerId = p.tblARCustomer.strCustomerNumber,
-                    strCustomerName = p.tblARCustomer.strCustomerName,
-                    ysnPosted = p.ysnPosted
-                })
+            var query = _db.GetQuery<vyuICGetInventoryShipment>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
 

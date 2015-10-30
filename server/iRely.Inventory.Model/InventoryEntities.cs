@@ -114,7 +114,6 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetStorageLocation> vyuICGetStorageLocations { get; set; }
         public DbSet<vyuICGetPostedLot> vyuICGetPostedLots { get; set; }
 
-        public DbSet<tblEntityLocation> tblEntityLocations { get; set; }
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
         public DbSet<tblSMCountry> tblSMCountries { get; set; }
         public DbSet<tblSMCurrency> tblSMCurrencies { get; set; }
@@ -268,7 +267,6 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblSMCurrencyMap());
             modelBuilder.Configurations.Add(new tblSMCompanyLocationSubLocationMap());
             modelBuilder.Configurations.Add(new tblSMTaxCodeMap());
-            modelBuilder.Configurations.Add(new tblEntityLocationMap());
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());
@@ -295,6 +293,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetCompactItemMap());
             modelBuilder.Configurations.Add(new vyuICGetItemCommodityMap());
             modelBuilder.Configurations.Add(new vyuICGetOtherChargesMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());

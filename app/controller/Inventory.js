@@ -204,7 +204,12 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'Inventory.view.InventoryReceipt';
                 columnName = 'strReceiptNumber';
                 break;
+            case 'ShipmentNo':
+                screenName = 'Inventory.view.InventoryShipment';
+                columnName = 'strShipmentNumber';
+                break;
             case 'VendorName':
+            case 'CustomerName':
                 screenName = 'EntityManagement.view.Entity';
                 columnName = 'strName';
                 break;
