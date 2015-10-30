@@ -2786,6 +2786,7 @@
     <Build Include="dbo\Functions\fnAPGet1099PrintStatus.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocument.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocumentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentSalesReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
