@@ -1,7 +1,8 @@
 CREATE VIEW vyuLGDropShipmentDetails
 AS
 SELECT
-	PS.intShipmentPurchaseSalesContractId
+	Shipment.intTrackingNumber
+	,PS.intShipmentPurchaseSalesContractId
 	,PS.intShipmentContractQtyId 
 	,PS.intShipmentId
 	,Alloc.intCompanyLocationId
@@ -36,4 +37,5 @@ SELECT
 
 FROM tblLGShipmentPurchaseSalesContract PS
 LEFT JOIN tblLGShipmentContractQty ShipContract On ShipContract.intShipmentContractQtyId = PS.intShipmentContractQtyId
+LEFT JOIN tblLGShipment Shipment ON Shipment.intShipmentId = PS.intShipmentId
 LEFT JOIN vyuLGAllocatedContracts Alloc ON Alloc.intAllocationDetailId = PS.intAllocationDetailId

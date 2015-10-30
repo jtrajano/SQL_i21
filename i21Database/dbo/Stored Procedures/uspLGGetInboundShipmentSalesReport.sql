@@ -42,5 +42,5 @@ BEGIN
 
 SELECT SH.*
 FROM vyuLGDropShipmentDetails SH 
-WHERE SH.intShipmentId = @xmlParam	
+WHERE SH.intTrackingNumber = @xmlParam	
 END
