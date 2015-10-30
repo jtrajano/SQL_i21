@@ -1,10 +1,9 @@
-﻿--WARNING! ERRORS ENCOUNTERED DURING SQL PARSING!
-CREATE PROCEDURE uspMFReportDailyProduction @xmlParam NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE uspMFReportDailyProduction @xmlParam NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
-		,@dtmStartDate DATE
-		,@dtmEndDate DATE
+		,@dtmStartDate DATETIME
+		,@dtmEndDate DATETIME
 		,@intLocationId INT
 		,@xmlDocumentId INT
 

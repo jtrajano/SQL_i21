@@ -70,25 +70,27 @@ IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAI
 GO
 PRINT 'END Drop FK_tblRKElectronicPricing_tblRKFutureMarket'
 GO
-PRINT 'BEGIN CREATE COLUMN strTicketNumber'
-IF NOT EXISTS(SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'tblSCTicket' AND COLUMN_NAME = 'strTicketNumber')
-	BEGIN
-		EXEC('
-			ALTER TABLE tblSCTicket ADD strTicketNumber NVARCHAR(40) NULL
-		');
-		EXEC('
-			UPDATE tblSCTicket SET strTicketNumber = intTicketNumber
-			ALTER TABLE tblSCTicket ALTER COLUMN strTicketNumber NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL
-		');
-	END
-GO
 
-PRINT 'BEGIN Drop UK_tblSCTicket_intTicketPoolId_intTicketNumber'
-IF EXISTS(SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAINT_NAME = 'UK_tblSCTicket_intTicketPoolId_intTicketNumber')
+IF EXISTS(select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tblSCTicket')
 	BEGIN
-		EXEC('
-			ALTER TABLE tblSCTicket DROP CONSTRAINT UK_tblSCTicket_intTicketPoolId_intTicketNumber
-			ALTER TABLE tblSCTicket DROP COLUMN intTicketNumber
-		');
-	END	
+		PRINT 'BEGIN CREATE COLUMN strTicketNumber'
+		IF NOT EXISTS(SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'tblSCTicket' AND COLUMN_NAME = 'strTicketNumber')
+		BEGIN
+			EXEC('
+				ALTER TABLE tblSCTicket ADD strTicketNumber NVARCHAR(40) NULL
+			');
+			EXEC('
+				UPDATE tblSCTicket SET strTicketNumber = intTicketNumber
+				ALTER TABLE tblSCTicket ALTER COLUMN strTicketNumber NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL
+			');
+		END
+		PRINT 'BEGIN Drop UK_tblSCTicket_intTicketPoolId_intTicketNumber'
+		IF EXISTS(SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAINT_NAME = 'UK_tblSCTicket_intTicketPoolId_intTicketNumber')
+		BEGIN
+			EXEC('
+				ALTER TABLE tblSCTicket DROP CONSTRAINT UK_tblSCTicket_intTicketPoolId_intTicketNumber
+				ALTER TABLE tblSCTicket DROP COLUMN intTicketNumber
+			');
+		END	
+	END
 GO
