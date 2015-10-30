@@ -8,6 +8,7 @@
 	[strCondition] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intSequence] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-	CONSTRAINT [PK_tblSMImportFileRecordMarker] PRIMARY KEY ([intImportFileRecordMarkerId]),
+	[strFormat] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
+    CONSTRAINT [PK_tblSMImportFileRecordMarker] PRIMARY KEY ([intImportFileRecordMarkerId]),
 	CONSTRAINT [FK_tblSMImportFileRecordMarker_tblSMImportHeader_intImportFileHeaderId] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]) ON DELETE CASCADE
 )
