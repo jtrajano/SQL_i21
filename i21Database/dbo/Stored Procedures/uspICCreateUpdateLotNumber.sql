@@ -32,6 +32,7 @@ DECLARE @LotType_Manual AS INT = 1
 
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intParentLotId AS INT = NULL
+DECLARE @intErrorFoundOnMFCreateUpdateParentLotNumber AS INT
 
 -- Lot Number batch number in the starting numbers table. 
 DECLARE @STARTING_NUMBER_BATCH AS INT = 24 
@@ -563,7 +564,9 @@ BEGIN
 		-- Insert the parent lot 
 		SET @intParentLotId = NULL
 
-		EXEC dbo.uspMFCreateUpdateParentLotNumber 
+		SET @intErrorFoundOnMFCreateUpdateParentLotNumber = 0 
+
+		EXEC @intErrorFoundOnMFCreateUpdateParentLotNumber = dbo.uspMFCreateUpdateParentLotNumber 
 			@strParentLotNumber
 			,@strParentLotAlias
 			,@intItemId
@@ -572,6 +575,9 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intLotId
 			,@intParentLotId OUTPUT 
+
+		IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
+			RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;
 
 		-- Insert into a temp table 
 		BEGIN 

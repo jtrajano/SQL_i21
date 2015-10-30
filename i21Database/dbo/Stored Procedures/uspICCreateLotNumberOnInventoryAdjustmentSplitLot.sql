@@ -93,8 +93,6 @@ BEGIN
 			,strVendorLotNo
 			,strGarden
 			,intDetailId		
-			,intVendorLocationId
-			,intDetailId
 			,strParentLotNumber
 			,strParentLotAlias		
 	)

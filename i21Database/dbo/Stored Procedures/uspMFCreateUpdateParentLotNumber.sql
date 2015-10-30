@@ -5,13 +5,11 @@
 	,@dtmExpiryDate DATETIME
 	,@intLotStatusId INT
 	,@intEntityUserSecurityId INT
-	-- ,@dtmDate DATETIME
 	,@intLotId INT
 	,@intParentLotId INT OUTPUT 
 AS
-BEGIN TRY
+
 	DECLARE @ErrMsg NVARCHAR(Max)
-		-- ,@intParentLotId INT
 
 	IF @strParentLotNumber Is NULL
 	BEGIN
@@ -30,12 +28,16 @@ BEGIN TRY
 			SELECT 1
 			FROM tblICLot
 			WHERE intLotId = @intLotId
-			)
+	)
+	BEGIN 
 		RAISERROR (
-				'Lot does not exist for parent lot creation.'
-				,16
-				,1
-				)
+		'Lot does not exist for parent lot creation.'
+		,16
+		,1
+		)
+
+		RETURN -1;
+	END 
 
 	IF ISNULL(@intParentLotId, 0) = 0
 	BEGIN
@@ -70,26 +72,18 @@ BEGIN TRY
 				SELECT intItemId
 				FROM tblICParentLot
 				WHERE intParentLotId = @intParentLotId
-				) <> @intItemId
+		) <> @intItemId
+		BEGIN 
 			RAISERROR (
-					'Lot and Parent Lot cannot have different item.'
-					,16
-					,1
-					)
+				'Lot and Parent Lot cannot have different item.'
+				,16
+				,1
+			)
+			RETURN -1;
+		END 
+			
 
 		UPDATE tblICLot
 		SET intParentLotId = @intParentLotId
 		WHERE intLotId = @intLotId
 	END
-END TRY
-
-BEGIN CATCH
-	SET @ErrMsg = ERROR_MESSAGE()
-
-	RAISERROR (
-			@ErrMsg
-			,16
-			,1
-			,'WITH NOWAIT'
-			)
-END CATCH
