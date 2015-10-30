@@ -458,17 +458,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotWeightUOM: 'strWeightUOM',
                 colLotPhyVsStated: 'dblPhyVsStated',
                 colLotParentLotId: {
-                    dataIndex: 'strParentLotId',
-                    editor: {
-                        store: '{parentLots}',
-                        defaultFilters: [
-                            {
-                                column: 'intItemId',
-                                value: '{grdInventoryReceipt.selection.intItemId}',
-                                conjunction: 'and'
-                            }
-                        ]
-                    }
+                    dataIndex: 'strParentLotNumber'
+                    //editor: {
+                    //    store: '{parentLots}',
+                    //    defaultFilters: [
+                    //        {
+                    //            column: 'intItemId',
+                    //            value: '{grdInventoryReceipt.selection.intItemId}',
+                    //            conjunction: 'and'
+                    //        }
+                    //    ]
+                    //}
                 },
                 colLotContainerNo: 'strContainerNo',
                 colLotVendorLocation: {

@@ -57,7 +57,12 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'dblNetWeight', type: 'float' },
-        { name: 'strWeightUOM', type: 'string' }
+        { name: 'strWeightUOM', type: 'string' },
+
+        { name: 'intParentLotId', type: 'int', allowNull: true },
+        { name: 'strParentLotNumber', type: 'string' },
+        { name: 'strParentLotAlias', type: 'string' }
+
     ],
 
     validate: function(options){

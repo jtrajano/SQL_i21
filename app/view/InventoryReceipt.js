@@ -1747,10 +1747,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotParentLotId',
                                                                                 width: 100,
-                                                                                text: 'Parent Lot ID',
+                                                                                dataIndex: 'string',
+                                                                                text: 'Parent Lot Number',
                                                                                 editor: {
                                                                                     xtype: 'textfield',
                                                                                     columns: [
@@ -1782,9 +1782,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotVendorLocation',
                                                                                 width: 120,
+                                                                                dataIndex: 'string',
                                                                                 text: 'Garden',
                                                                                 editor: {
                                                                                     xtype: 'textfield'
