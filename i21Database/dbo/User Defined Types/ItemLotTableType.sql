@@ -134,13 +134,13 @@ This is a user-defined table type used in creating records to the lot master tab
 	Optional 
 
 
-*	[intVendorLocationId] INT NULL
-	The id of the vendor location. 
+*	[strGarden] INT NULL
+	The Garden. 
 	Optional 
 
 
-*	[strVendorLocation] COLLATE Latin1_General_CI_AS NULL
-	The string value of the vendor locatoin. 
+*	[strGarden] COLLATE Latin1_General_CI_AS NULL
+	The string value of the Garden. 
 	Optional 
 
 
@@ -189,7 +189,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,[intEntityVendorId]		INT NULL
 	,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[intVendorLocationId]		INT NULL
+	,[strGarden]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[ysnReleasedToWarehouse]	BIT DEFAULT((0))
 	,[ysnProduced]				BIT DEFAULT((0))

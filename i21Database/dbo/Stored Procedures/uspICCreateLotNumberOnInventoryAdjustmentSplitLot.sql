@@ -89,7 +89,7 @@ BEGIN
 			,strNotes
 			,intEntityVendorId
 			,strVendorLotNo
-			,intVendorLocationId
+			,strGarden
 			,intDetailId		
 	)
 	SELECT	intLotId				= NULL 
@@ -129,7 +129,7 @@ BEGIN
 			,strNotes				= SourceLot.strNotes
 			,intEntityVendorId		= SourceLot.intEntityVendorId
 			,strVendorLotNo			= SourceLot.strVendorLotNo
-			,intVendorLocationId	= SourceLot.intVendorLocationId
+			,strGarden				= SourceLot.strGarden
 			,intDetailId			= Detail.intInventoryAdjustmentDetailId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId

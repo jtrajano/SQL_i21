@@ -151,7 +151,7 @@ BEGIN
 			,strNotes
 			,intEntityVendorId
 			,strVendorLotNo
-			,intVendorLocationId
+			,strGarden
 			,intDetailId
 			,intOwnershipType
 			,dblGrossWeight	
@@ -185,7 +185,7 @@ BEGIN
 			,strNotes				= ItemLot.strRemarks
 			,intEntityVendorId		= ISNULL(ItemLot.intEntityVendorId, Receipt.intEntityVendorId)  
 			,strVendorLotNo			= ItemLot.strVendorLotId
-			,intVendorLocationId	= ItemLot.intVendorLocationId
+			,strGarden				= ItemLot.strGarden
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
 			,intOwnershipType		= ReceiptItem.intOwnershipType
 			,dblGrossWeight			= ItemLot.dblGrossWeight

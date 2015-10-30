@@ -446,7 +446,7 @@ BEGIN TRY
 						,strNotes
 						,intEntityVendorId
 						,strVendorLotNo
-						,intVendorLocationId
+						,strGarden
 						,intDetailId
 						,ysnProduced
 						)
@@ -472,7 +472,7 @@ BEGIN TRY
 						,strNotes = NULL
 						,intEntityVendorId = NULL
 						,strVendorLotNo = NULL
-						,intVendorLocationId = NULL
+						,strGarden = NULL
 						,intDetailId = @intWorkOrderId
 						,ysnProduced = 1
 

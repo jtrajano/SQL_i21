@@ -2780,6 +2780,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099B.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVendorApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVendorContact.sql" />
+    <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

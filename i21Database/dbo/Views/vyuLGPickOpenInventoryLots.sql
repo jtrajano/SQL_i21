@@ -51,8 +51,7 @@ SELECT Lot.intLotId
 	, Lot.strNotes
 	, Lot.intEntityVendorId
 	, Lot.strVendorLotNo
-	, Lot.intVendorLocationId
-	, Lot.strVendorLocation
+	, Lot.strGarden
 	, Lot.strContractNo
 	, Lot.dtmManufacturedDate
 	, Lot.ysnReleasedToWarehouse
