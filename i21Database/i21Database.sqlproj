@@ -2783,6 +2783,7 @@
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateStorageCharge.sql" />
+    <Build Include="dbo\Functions\fnAPGet1099PrintStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
