@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd77c665a2f298aaa27a06530855ca050279e2e240322679fa3d9d59954b41382))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets66867787f3043b18fb25b171bef4c87e10725fbbfe0dc7b8aa61b96456067c20))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsd77c665a2f298aaa27a06530855ca050279e2e240322679fa3d9d59954b41382 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets66867787f3043b18fb25b171bef4c87e10725fbbfe0dc7b8aa61b96456067c20 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "d77c665a2f298aaa27a06530855ca050279e2e240322679fa3d9d59954b41382"; }
+            get { return "66867787f3043b18fb25b171bef4c87e10725fbbfe0dc7b8aa61b96456067c20"; }
         }
 
         /// <summary>
@@ -10305,7 +10305,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCount
-        [CodeFirstDatabaseSchema.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountId AS tblICInventoryCount_intInventoryCountId, 
@@ -10328,6 +10328,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnRecount AS tblICInventoryCount_ysnRecount, 
             T.intRecountReferenceId AS tblICInventoryCount_intRecountReferenceId, 
             T.intStatus AS tblICInventoryCount_intStatus, 
+            T.ysnPosted AS tblICInventoryCount_ysnPosted, 
+            T.dtmPosted AS tblICInventoryCount_dtmPosted, 
+            T.intEntityId AS tblICInventoryCount_intEntityId, 
             T.intSort AS tblICInventoryCount_intSort, 
             T.intConcurrencyId AS tblICInventoryCount_intConcurrencyId, 
             True AS _from0
@@ -10424,7 +10427,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryCounts
-        [iRely.Inventory.Model.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryCount](T1.tblICInventoryCount_intInventoryCountId, T1.tblICInventoryCount_intLocationId, T1.tblICInventoryCount_intCategoryId, T1.tblICInventoryCount_intCommodityId, T1.tblICInventoryCount_intCountGroupId, T1.tblICInventoryCount_dtmCountDate, T1.tblICInventoryCount_strCountNo, T1.tblICInventoryCount_intSubLocationId, T1.tblICInventoryCount_intStorageLocationId, T1.tblICInventoryCount_strDescription, T1.tblICInventoryCount_ysnIncludeZeroOnHand, T1.tblICInventoryCount_ysnIncludeOnHand, T1.tblICInventoryCount_ysnScannedCountEntry, T1.tblICInventoryCount_ysnCountByLots, T1.tblICInventoryCount_ysnCountByPallets, T1.tblICInventoryCount_ysnRecountMismatch, T1.tblICInventoryCount_ysnExternal, T1.tblICInventoryCount_ysnRecount, T1.tblICInventoryCount_intRecountReferenceId, T1.tblICInventoryCount_intStatus, T1.tblICInventoryCount_ysnPosted, T1.tblICInventoryCount_dtmPosted, T1.tblICInventoryCount_intEntityId, T1.tblICInventoryCount_intSort, T1.tblICInventoryCount_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryCountId AS tblICInventoryCount_intInventoryCountId, 
@@ -10447,6 +10450,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnRecount AS tblICInventoryCount_ysnRecount, 
             T.intRecountReferenceId AS tblICInventoryCount_intRecountReferenceId, 
             T.intStatus AS tblICInventoryCount_intStatus, 
+            T.ysnPosted AS tblICInventoryCount_ysnPosted, 
+            T.dtmPosted AS tblICInventoryCount_dtmPosted, 
+            T.intEntityId AS tblICInventoryCount_intEntityId, 
             T.intSort AS tblICInventoryCount_intSort, 
             T.intConcurrencyId AS tblICInventoryCount_intConcurrencyId, 
             True AS _from0

@@ -15,11 +15,13 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public void LockInventory(int InventoryCountId)
+        public void LockInventory(int InventoryCountId, bool ysnLock = true)
         {
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICLockInventoryCount @intInventoryCountId",
-                new SqlParameter("@intInventoryCountId", InventoryCountId)
+                "dbo.uspICLockInventoryCount @intInventoryCountId, @ysnLock",
+                new SqlParameter("@intInventoryCountId", InventoryCountId),
+                new SqlParameter("@ysnLock", ysnLock)
+                
             );
         }
     }

@@ -30,13 +30,32 @@ namespace iRely.Inventory.WebApi
 
         [HttpPost]
         [ActionName("LockInventory")]
-        public HttpResponseMessage LockInventory(int inventoryCountId)
+        public HttpResponseMessage LockInventory(int inventoryCountId, bool ysnLock)
         {
-            var result = _bl.LockInventory(inventoryCountId);
+            var result = _bl.LockInventory(inventoryCountId, ysnLock);
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
                 data = inventoryCountId,
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+        [HttpPost]
+        [ActionName("PostTransaction")]
+        public HttpResponseMessage PostTransaction(BusinessLayer.Common.Posting_RequestModel count)
+        {
+            var result = _bl.PostInventoryCount(count, count.isRecap);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                data = count,
                 success = !result.HasError,
                 message = new
                 {

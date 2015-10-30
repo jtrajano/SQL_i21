@@ -36,6 +36,9 @@ namespace iRely.Inventory.Model
         public bool? ysnRecount { get; set; }
         public int? intRecountReferenceId { get; set; }
         public int? intStatus { get; set; }
+        public bool? ysnPosted { get; set; }
+        public DateTime? dtmPosted { get; set; }
+        public int? intEntityId { get; set; }
         public int? intSort { get; set; }
 
         public ICollection<tblICInventoryCountDetail> tblICInventoryCountDetails { get; set; }

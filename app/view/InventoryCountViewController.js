@@ -34,9 +34,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 hidden: '{checkPrintVariance}'
             },
             btnLockInventory: {
-                hidden: '{checkLockInventory}'
+                hidden: '{checkLockInventory}',
+                text: '{getLockInventoryText}'
             },
             btnPost: {
+                text: '{getPostText}',
                 hidden: '{checkPost}'
             },
             btnRecap: {
@@ -415,7 +417,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 search.multi = false;
                 search.show();
             };
-            current.set('intStatus', 2);
+            if (button.itemId === 'btnPrintCountSheets') {
+                current.set('intStatus', 2);
+            }
             showAddScreen();
         }
     },
@@ -425,12 +429,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var vm = win.getViewModel();
         var current = vm.data.current;
         var context = win.context;
+        var isLock = true;
+        if (button.text === 'Unlock Inventory') {
+            isLock = false;
+        }
 
         var doLock = function() {
             if (current) {
                 Ext.Ajax.request({
                     timeout: 120000,
-                    url: '../Inventory/api/InventoryCount/LockInventory?inventoryCountId=' + current.get('intInventoryCountId'),
+                    url: '../Inventory/api/InventoryCount/LockInventory?inventoryCountId=' + current.get('intInventoryCountId') + '&ysnLock=' + isLock,
                     method: 'post',
                     success: function(response){
                         var jsonData = Ext.decode(response.responseText);
@@ -457,6 +465,110 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         });
     },
 
+    onPostClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function() {
+            var strCountNo = win.viewModel.data.current.get('strCountNo');
+            var posted = win.viewModel.data.current.get('ysnPosted');
+
+            var options = {
+                postURL             : '../Inventory/api/InventoryCount/PostTransaction',
+                strTransactionId    : strCountNo,
+                isPost              : !posted,
+                isRecap             : false,
+                callback            : me.onAfterPost,
+                scope               : me
+            };
+
+            CashManagement.common.BusinessRules.callPostRequest(options);
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doPost();
+            }
+        });
+    },
+
+    onRecapClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doRecap = function(recapButton, currentRecord, currency){
+
+            // Call the buildRecapData to generate the recap data
+            CashManagement.common.BusinessRules.buildRecapData({
+                postURL: '../Inventory/api/InventoryCount/PostTransaction',
+                strTransactionId: currentRecord.get('strCountNo'),
+                ysnPosted: currentRecord.get('ysnPosted'),
+                scope: me,
+                success: function() {
+                    // If data is generated, show the recap screen.
+                    CashManagement.common.BusinessRules.showRecap({
+                        strTransactionId: currentRecord.get('strCountNo'),
+                        ysnPosted: currentRecord.get('ysnPosted'),
+                        dtmDate: currentRecord.get('dtmCountDate'),
+                        strCurrencyId: currency,
+                        dblExchangeRate: 1,
+                        scope: me,
+                        postCallback: function () {
+                            me.onPostClick(recapButton);
+                        },
+                        unpostCallback: function () {
+                            me.onPostClick(recapButton);
+                        }
+                    });
+                },
+                failure: function(message){
+                    // Show why recap failed.
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        message
+                    );
+                }
+            });
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doRecap(button, win.viewModel.data.current, null);
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doRecap(button, win.viewModel.data.current, null);
+            }
+        });
+    },
+
+    onAfterPost: function(success, message) {
+        if (success === true) {
+            var me = this;
+            var win = me.view;
+            var paging = win.down('ipagingstatusbar');
+
+            paging.doRefresh();
+        }
+        else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboUOM": {
@@ -476,6 +588,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#btnLockInventory": {
                 click: this.onLockInventoryClick
+            },
+            "#btnPost": {
+                click: this.onPostClick
+            },
+            "#btnRecap": {
+                click: this.onPostClick
             }
         });
     }

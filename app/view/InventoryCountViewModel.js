@@ -83,16 +83,16 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             else return false;
         },
         checkLockInventory: function (get) {
-            if (get('current.intStatus') !== 2) {
-                return true;
+            if (get('current.intStatus') === 2 || get('current.intStatus') === 3) {
+                return false;
             }
-            else return false;
+            else return true;
         },
         checkPost: function (get) {
-            if (get('current.intStatus') !== 3) {
-                return true;
+            if (get('current.intStatus') === 3 || get('current.intStatus') === 4) {
+                return false;
             }
-            else return false;
+            else return true;
         },
         checkRecount: function (get) {
             if (get('current.intStatus') !== 4) {
@@ -106,7 +106,18 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
             }
             else return true;
         },
-
+        getLockInventoryText: function (get) {
+            if (get('current.intStatus') === 3) {
+                return 'Unlock Inventory';
+            }
+            else return 'Lock Inventory';
+        },
+        getPostText: function (get) {
+            if (get('current.ysnPosted')) {
+                return 'Unpost';
+            }
+            else return 'Post';
+        }
 
     }
 

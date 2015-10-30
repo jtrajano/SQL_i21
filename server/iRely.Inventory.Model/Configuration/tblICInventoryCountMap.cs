@@ -32,6 +32,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intRecountReferenceId).HasColumnName("intRecountReferenceId");
             this.Property(t => t.intStatus).HasColumnName("intStatus");
+            this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
+            this.Property(t => t.dtmPosted).HasColumnName("dtmPosted");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasMany(p => p.tblICInventoryCountDetails)

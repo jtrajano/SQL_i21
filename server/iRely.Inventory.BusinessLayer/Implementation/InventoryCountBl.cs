@@ -55,13 +55,47 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public SaveResult LockInventory(int InventoryCountId)
+        public SaveResult LockInventory(int InventoryCountId, bool ysnLock = true)
         {
             var postResult = new SaveResult();
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
-                db.LockInventory(InventoryCountId);
+                db.LockInventory(InventoryCountId, ysnLock);
+                postResult.HasError = false;
+            }
+            catch (Exception ex)
+            {
+                postResult.BaseException = ex;
+                postResult.HasError = true;
+                postResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return postResult;
+        }
+
+        public SaveResult PostInventoryCount(Common.Posting_RequestModel count, bool isRecap)
+        {
+            // Save the record first 
+            var result = _db.Save(false);
+
+            if (result.HasError)
+            {
+                return result;
+            }
+
+            // Post the receipt transaction 
+            var postResult = new SaveResult();
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                if (count.isPost)
+                {
+                    db.PostInventoryCount(isRecap, count.strTransactionId, iRely.Common.Security.GetEntityId());
+                }
+                else
+                {
+                    db.UnPostInventoryCount(isRecap, count.strTransactionId, iRely.Common.Security.GetEntityId());
+                }
                 postResult.HasError = false;
             }
             catch (Exception ex)

@@ -32,7 +32,10 @@ Ext.define('Inventory.model.InventoryCount', {
         { name: 'ysnRecount', type: 'boolean' },
         { name: 'intRecountReferenceId', type: 'int', allowNull: true },
         { name: 'intStatus', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int', allowNull: true }
+        { name: 'ysnPosted', type: 'boolean' },
+        { name: 'dtmPosted', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
+        { name: 'intEntityId', type: 'int', allowNull: true },
+        { name: 'intSort', type: 'int', allowNull: true },
     ],
 
     validators: [
