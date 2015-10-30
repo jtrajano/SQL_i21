@@ -67,9 +67,9 @@ DECLARE
 	,@strReceiptNumber			AS NVARCHAR(50)
 	,@strMarkings				AS NVARCHAR(MAX)
 	,@strNotes					AS NVARCHAR(MAX)
-	,@intEntityVendorId				AS INT 
+	,@intEntityVendorId			AS INT 
 	,@strVendorLotNo			AS NVARCHAR(50)
-	,@intVendorLocationId		AS INT
+	,@strGarden					AS INT
 	,@strContractNo				AS NVARCHAR(50)
 	,@ysnReleasedToWarehouse	AS BIT
 	,@ysnProduced				AS BIT 
@@ -154,7 +154,7 @@ SELECT  intId
 		,strNotes
 		,intEntityVendorId
 		,strVendorLotNo
-		,intVendorLocationId
+		,strGarden
 		,strContractNo
 		,ysnReleasedToWarehouse
 		,ysnProduced
@@ -190,7 +190,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strNotes
 		,@intEntityVendorId
 		,@strVendorLotNo
-		,@intVendorLocationId
+		,@strGarden
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
@@ -363,7 +363,7 @@ BEGIN
 				,strNotes				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strNotes ELSE LotMaster.strNotes END 
 				,intEntityVendorId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
 				,strVendorLotNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
-				,intVendorLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
+				,strGarden				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strGarden ELSE LotMaster.strGarden END
 				,strContractNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContractNo ELSE LotMaster.strContractNo END 
 				,dtmManufacturedDate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
 								
@@ -510,7 +510,7 @@ BEGIN
 				,strNotes
 				,intEntityVendorId
 				,strVendorLotNo
-				,intVendorLocationId
+				,strGarden
 				,strContractNo
 				,dtmManufacturedDate
 				,ysnReleasedToWarehouse
@@ -548,7 +548,7 @@ BEGIN
 				,@strNotes
 				,@intEntityVendorId
 				,@strVendorLotNo
-				,@intVendorLocationId
+				,@strGarden
 				,@strContractNo
 				,@dtmManufacturedDate
 				,@ysnReleasedToWarehouse
@@ -681,7 +681,7 @@ BEGIN
 		,@strNotes
 		,@intEntityVendorId
 		,@strVendorLotNo
-		,@intVendorLocationId
+		,@strGarden
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced

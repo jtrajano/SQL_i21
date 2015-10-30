@@ -172,7 +172,7 @@ BEGIN
 		,strNotes
 		,intEntityVendorId
 		,strVendorLotNo
-		,intVendorLocationId
+		,strGarden
 		,intDetailId
 		,ysnProduced
 		)
@@ -198,7 +198,7 @@ BEGIN
 		,strNotes = NULL
 		,intEntityVendorId = NULL
 		,strVendorLotNo = @strVendorLotNo
-		,intVendorLocationId = NULL
+		,strGarden = NULL
 		,intDetailId = @intWorkOrderId
 		,ysnProduced = 1
 

@@ -150,7 +150,7 @@ BEGIN
 			,strNotes
 			,intEntityVendorId
 			,strVendorLotNo
-			,intVendorLocationId
+			,strGarden
 			,intDetailId
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
@@ -175,7 +175,7 @@ BEGIN
 			,strNotes				= SourceLot.strNotes
 			,intEntityVendorId		= SourceLot.intEntityVendorId
 			,strVendorLotNo			= SourceLot.strVendorLotNo
-			,intVendorLocationId	= SourceLot.intVendorLocationId
+			,strGarden				= SourceLot.strGarden
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
 	FROM	dbo.tblICInventoryTransfer Transfer INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId

@@ -21,7 +21,7 @@ Begin
 	l.strLotNumber,i.intItemId,i.strItemNo,i.strDescription,um.strUnitMeasure AS strUOM,
 	um1.strUnitMeasure AS strIssuedUOM,wi.intRecipeItemId,l.dblLastCost AS dblUnitCost,
 	ISNULL(l.strLotAlias,'') AS strLotAlias,
-	l.strVendorLocation AS strGarden,l.intLocationId,
+	l.strGarden AS strGarden,l.intLocationId,
 	cl.strLocationName AS strLocationName,
 	sbl.strSubLocationName,
 	sl.strName AS strStorageLocationName,

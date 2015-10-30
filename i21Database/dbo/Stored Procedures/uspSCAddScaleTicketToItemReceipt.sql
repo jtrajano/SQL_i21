@@ -415,7 +415,7 @@ BEGIN
            ,[dblStatedTarePerUnit]
            ,[strContainerNo]
            ,[intEntityVendorId]
-           ,[intVendorLocationId]
+           ,[strGarden]
            ,[strMarkings]
            ,[intOriginId]
            ,[intSeasonCropYear]
@@ -444,7 +444,7 @@ BEGIN
            ,[dblStatedTarePerUnit] = NULL
            ,[strContainerNo] = NULL
            ,[intEntityVendorId] = NULL
-           ,[intVendorLocationId] = NULL
+           ,[strGarden] = NULL
            ,[strMarkings] = NULL 
            ,[intOriginId] = NULL
            ,[intSeasonCropYear] = NULL

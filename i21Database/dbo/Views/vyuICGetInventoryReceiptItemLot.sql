@@ -24,8 +24,7 @@ SELECT ReceiptItemLot.intInventoryReceiptItemLotId
 	, ReceiptItemLot.strContainerNo
 	, ReceiptItemLot.intEntityVendorId
 	, Vendor.strVendorId
-	, ReceiptItemLot.intVendorLocationId
-	, strVendorLocation = VendorLocation.strLocationName
+	, ReceiptItemLot.strGarden
 	, ReceiptItemLot.strMarkings
 	, ReceiptItemLot.intOriginId
 	, strOrigin = Origin.strCountry
@@ -45,6 +44,5 @@ LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLoca
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItemLot.intItemUnitMeasureId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = ReceiptItemLot.intEntityVendorId
-LEFT JOIN tblEntityLocation VendorLocation ON VendorLocation.intEntityLocationId = ReceiptItemLot.intVendorLocationId
 LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = ReceiptItemLot.intOriginId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItemLot.intGradeId
