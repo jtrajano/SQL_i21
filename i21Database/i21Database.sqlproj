@@ -2778,6 +2778,8 @@
     <Build Include="dbo\Views\vyuAPContractItemDistinct.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099INT.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099B.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetVendorApprover.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetVendorContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
