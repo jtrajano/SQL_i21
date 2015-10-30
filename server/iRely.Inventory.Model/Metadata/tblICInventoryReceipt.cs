@@ -935,6 +935,9 @@ namespace iRely.Inventory.Model
         public DateTime? dtmCertified { get; set; }
         public DateTime? dtmExpiryDate { get; set; }
         public int? intSort { get; set; }
+        public int? intParentLotId { get; set; }
+        public string strParentLotNumber { get; set; }
+        public string strParentLotAlias { get; set; }
 
         [NotMapped]
         public decimal dblNetWeight
@@ -1136,6 +1139,9 @@ namespace iRely.Inventory.Model
         public DateTime? dtmCertified { get; set; }
         public DateTime? dtmExpiryDate { get; set; }
         public int? intSort { get; set; }
+        public int? intParentLotId { get; set; }
+        public string strParentLotNumber { get; set; }
+        public string strParentLotAlias { get; set; }
 
         public tblICInventoryReceiptItemLot tblICInventoryReceiptItemLot { get; set; }
     }

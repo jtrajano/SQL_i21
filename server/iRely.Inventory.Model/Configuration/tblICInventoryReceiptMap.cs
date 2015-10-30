@@ -303,7 +303,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmCertified).HasColumnName("dtmCertified");
             this.Property(t => t.dtmExpiryDate).HasColumnName("dtmExpiryDate");
             this.Property(t => t.intSort).HasColumnName("intSort");
-
+            this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
+            this.Property(t => t.strParentLotNumber).HasColumnName("strParentLotNumber");
+            this.Property(t => t.strParentLotAlias).HasColumnName("strParentLotAlias");
+            
             this.HasOptional(p => p.vyuICGetInventoryReceiptItemLot)
                 .WithRequired(p => p.tblICInventoryReceiptItemLot);
         }
@@ -354,6 +357,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmCertified).HasColumnName("dtmCertified");
             this.Property(t => t.dtmExpiryDate).HasColumnName("dtmExpiryDate");
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
+            this.Property(t => t.strParentLotNumber).HasColumnName("strParentLotNumber");
+            this.Property(t => t.strParentLotAlias).HasColumnName("strParentLotAlias");
+
         }
     }
 

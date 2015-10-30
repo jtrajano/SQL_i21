@@ -1747,12 +1747,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotParentLotId',
                                                                                 width: 100,
-                                                                                dataIndex: 'string',
                                                                                 text: 'Parent Lot ID',
                                                                                 editor: {
-                                                                                    xtype: 'gridcombobox',
+                                                                                    xtype: 'textfield',
                                                                                     columns: [
                                                                                         {
                                                                                             dataIndex: 'intLotId',
@@ -1767,9 +1767,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             flex: 1
                                                                                         }
                                                                                     ],
-                                                                                    itemId: 'cboLotParent',
-                                                                                    displayField: 'strLotNumber',
-                                                                                    valueField: 'strLotNumber'
+                                                                                    itemId: 'cboLotParent'
                                                                                 }
                                                                             },
                                                                             {
