@@ -85,9 +85,7 @@ BEGIN TRY
 			,I.strDescription
 			,LT.dblQty
 			,UM.strUnitMeasure
-			,CSL.strSubLocationName
 			,SL.strName AS strStorageLocationName
-			,US.strUserName
 			,@strCompanyName AS strCompanyName
 			,@dtmStartDate1 AS dtmStartDate
 			,@dtmEndDate1 AS dtmEndDate
@@ -98,10 +96,8 @@ BEGIN TRY
 		JOIN dbo.tblICInventoryTransactionType LTT ON LT.intTransactionTypeId = LTT.intTransactionTypeId
 		JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 		JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
-		JOIN dbo.tblSMCompanyLocationSubLocation CSL ON L.intSubLocationId = CSL.intCompanyLocationSubLocationId
 		JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 		JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
-		JOIN dbo.tblSMUserSecurity US ON LT.intCreatedUserId = US.intEntityUserSecurityId
 		WHERE LT.intTransactionTypeId = 9
 			AND dtmDate >= @dtmStartDate
 			AND dtmDate <= @dtmEndDate
@@ -117,9 +113,7 @@ BEGIN TRY
 			,I.strDescription
 			,LT.dblQty
 			,UM.strUnitMeasure
-			,CSL.strSubLocationName
 			,SL.strName
-			,US.strUserName
 			,@strCompanyName as strCompanyName
 			,@dtmStartDate1 AS dtmStartDate
 			,@dtmEndDate1 AS dtmEndDate
@@ -130,10 +124,8 @@ BEGIN TRY
 		JOIN dbo.tblICInventoryTransactionType LTT ON LT.intTransactionTypeId = LTT.intTransactionTypeId
 		JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 		JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
-		JOIN dbo.tblSMCompanyLocationSubLocation CSL ON L.intSubLocationId = CSL.intCompanyLocationSubLocationId
 		JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 		JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
-		JOIN dbo.tblSMUserSecurity US ON LT.intCreatedUserId = US.intEntityUserSecurityId
 		WHERE LT.intTransactionTypeId = 9
 			AND dtmDate >= @dtmStartDate
 			AND dtmDate <= @dtmEndDate
@@ -149,9 +141,7 @@ BEGIN TRY
 			,I.strDescription
 			,- AD.dblQuantity
 			,UM.strUnitMeasure
-			,CSL.strSubLocationName
 			,SL.strName
-			,'' strUserName
 			,@strCompanyName as strCompanyName
 			,@dtmStartDate1 AS dtmStartDate
 			,@dtmEndDate1 AS dtmEndDate
@@ -163,10 +153,8 @@ BEGIN TRY
 		JOIN dbo.tblICInventoryTransactionType LTT ON A.intAdjustmentType = LTT.intTransactionTypeId
 		JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 		JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
-		JOIN dbo.tblSMCompanyLocationSubLocation CSL ON L.intSubLocationId = CSL.intCompanyLocationSubLocationId
 		JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 		JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
-		--JOIN dbo.tblSMUserSecurity US ON LT.intCreatedUserId=US.intEntityUserSecurityId 
 		WHERE A.intAdjustmentType = 15
 			AND A.dtmAdjustmentDate >= @dtmStartDate
 			AND A.dtmAdjustmentDate <= @dtmEndDate
@@ -181,9 +169,7 @@ BEGIN TRY
 			,I.strDescription
 			,AD.dblQuantity
 			,UM.strUnitMeasure
-			,CSL.strSubLocationName
 			,SL.strName
-			,'' strUserName
 			,@strCompanyName as strCompanyName
 			,@dtmStartDate1 AS dtmStartDate
 			,@dtmEndDate1 AS dtmEndDate
@@ -195,10 +181,8 @@ BEGIN TRY
 		JOIN dbo.tblICInventoryTransactionType LTT ON A.intAdjustmentType = LTT.intTransactionTypeId
 		JOIN dbo.tblICItem I ON AD.intNewItemId = I.intItemId
 		JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
-		JOIN dbo.tblSMCompanyLocationSubLocation CSL ON L.intSubLocationId = CSL.intCompanyLocationSubLocationId
 		JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 		JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
-		--JOIN dbo.tblSMUserSecurity US ON LT.intCreatedUserId=US.intEntityUserSecurityId 
 		WHERE A.intAdjustmentType = 15
 			AND A.dtmAdjustmentDate >= @dtmStartDate
 			AND A.dtmAdjustmentDate <= @dtmEndDate
