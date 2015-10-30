@@ -19,6 +19,8 @@ CREATE TABLE #GeneratedLotItems (
 	intLotId INT
 	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,intDetailId INT 
+	,intParentLotId INT
+	,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
 ------------------------------------------------------------------------------
@@ -91,6 +93,10 @@ BEGIN
 			,strVendorLotNo
 			,strGarden
 			,intDetailId		
+			,intVendorLocationId
+			,intDetailId
+			,strParentLotNumber
+			,strParentLotAlias		
 	)
 	SELECT	intLotId				= NULL 
 			,strLotNumber			= Detail.strNewLotNumber
@@ -131,6 +137,9 @@ BEGIN
 			,strVendorLotNo			= SourceLot.strVendorLotNo
 			,strGarden				= SourceLot.strGarden
 			,intDetailId			= Detail.intInventoryAdjustmentDetailId
+			,strParentLotNumber		= ParentLotSourceLot.strLotNumber
+			,strParentLotAlias		= ParentLotSourceLot.strLotAlias
+
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -140,8 +149,9 @@ BEGIN
 				ON SourceLot.intLotId = Detail.intLotId
 			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
+			LEFT JOIN dbo.tblICLot ParentLotSourceLot
+				ON ParentLotSourceLot.intLotId = SourceLot.intParentLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
@@ -160,7 +170,7 @@ END
 BEGIN 
 	UPDATE	dbo.tblICInventoryAdjustmentDetail
 	SET		intNewLotId = LotNumbers.intLotId
-			,strNewLotNumber = LotNumbers.strLotNumber		
+			,strNewLotNumber = LotNumbers.strLotNumber
 	FROM	dbo.tblICInventoryAdjustmentDetail Detail INNER JOIN #GeneratedLotItems LotNumbers
 				ON Detail.intInventoryAdjustmentDetailId = LotNumbers.intDetailId
 END 

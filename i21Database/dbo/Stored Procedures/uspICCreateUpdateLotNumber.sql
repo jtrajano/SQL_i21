@@ -31,6 +31,7 @@ DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
 DECLARE @strItemNo AS NVARCHAR(50)
+DECLARE @intParentLotId AS INT = NULL
 
 -- Lot Number batch number in the starting numbers table. 
 DECLARE @STARTING_NUMBER_BATCH AS INT = 24 
@@ -42,6 +43,8 @@ BEGIN
 		intLotId INT
 		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 		,intDetailId INT 
+		,intParentLotId INT
+		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	);
 END
 
@@ -76,6 +79,8 @@ DECLARE
 	,@intDetailId				AS INT 
 	,@intOwnershipType			AS INT
 	,@dblGrossWeight			AS NUMERIC(18,6)
+	,@strParentLotNumber		AS NVARCHAR(50) 
+	,@strParentLotAlias			AS NVARCHAR(50) 
 
 
 DECLARE @OwnerShipType_Own AS INT = 1
@@ -161,6 +166,8 @@ SELECT  intId
 		,intDetailId
 		,intOwnershipType
 		,dblGrossWeight
+		,strParentLotNumber
+		,strParentLotAlias
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -197,6 +204,8 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intDetailId
 		,@intOwnershipType
 		,@dblGrossWeight
+		,@strParentLotNumber
+		,@strParentLotAlias
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -257,23 +266,6 @@ BEGIN
 		RAISERROR(80015, 11, 1, @strItemNo, @strLotNumber)  
 		RETURN -4; 
 	END 
-
-	-- Check if Item and Weight UOM are the same value. 
-	--IF @intItemUOMId = @intWeightUOMId
-	--BEGIN 
-	--	SELECT	@strItemNo = strItemNo
-	--	FROM	dbo.tblICItem Item
-	--	WHERE	Item.intItemId = @intItemId
-
-	--	IF @intLotTypeId = @LotType_Serial
-	--	BEGIN 
-	--		SET @strLotNumber = '(To be generated)'
-	--	END 
-
-	--	-- Cannot have the same item and weight UOM. Please remove the weight UOM for {Item} with lot number {Lot Number}.
-	--	RAISERROR(80042, 11, 1, @strItemNo, @strLotNumber)  
-	--	RETURN -5; 
-	--END 
 
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
@@ -568,16 +560,33 @@ BEGIN
 			SELECT @intInsertedLotId = @intLotId;
 		END 
 
+		-- Insert the parent lot 
+		SET @intParentLotId = NULL
+
+		EXEC dbo.uspMFCreateUpdateParentLotNumber 
+			@strParentLotNumber
+			,@strParentLotAlias
+			,@intItemId
+			,@dtmExpiryDate
+			,@intLotStatusId
+			,@intEntityUserSecurityId
+			,@intLotId
+			,@intParentLotId OUTPUT 
+
 		-- Insert into a temp table 
 		BEGIN 
 			INSERT INTO #GeneratedLotItems (
 				intLotId
 				,strLotNumber
 				,intDetailId
+				,intParentLotId
+				,strParentLotNumber
 			)
 			SELECT	@intLotId
 					,@strLotNumber
 					,@intDetailId
+					,@intParentLotId
+					,@strParentLotNumber
 			WHERE ISNULL(@intLotId, 0) <> 0 
 		END 
 	END 
@@ -687,7 +696,10 @@ BEGIN
 		,@ysnProduced
 		,@intDetailId
 		,@intOwnershipType
-		,@dblGrossWeight;
+		,@dblGrossWeight
+		,@strParentLotNumber
+		,@strParentLotAlias
+	;
 END
 
 CLOSE loopLotItems;

@@ -20,6 +20,9 @@ CREATE TABLE #GeneratedLotItems (
 	intLotId INT
 	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,intDetailId INT 
+	,intParentLotId INT
+	,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+
 )
 
 ------------------------------------------------------------------------------
@@ -155,6 +158,8 @@ BEGIN
 			,intDetailId
 			,intOwnershipType
 			,dblGrossWeight	
+			,strParentLotNumber
+			,strParentLotAlias
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -189,6 +194,9 @@ BEGIN
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
 			,intOwnershipType		= ReceiptItem.intOwnershipType
 			,dblGrossWeight			= ItemLot.dblGrossWeight
+			,strParentLotNumber		= ItemLot.strParentLotNumber
+			,strParentLotAlias		= ItemLot.strParentLotAlias
+
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -221,6 +229,8 @@ BEGIN
 	UPDATE	dbo.tblICInventoryReceiptItemLot
 	SET		intLotId = LotNumbers.intLotId
 			,strLotNumber = LotNumbers.strLotNumber		
+			,intParentLotId = LotNumbers.intParentLotId
+			,strParentLotNumber = LotNumbers.strParentLotNumber
 	FROM	dbo.tblICInventoryReceiptItemLot ItemLot INNER JOIN #GeneratedLotItems LotNumbers
 				ON ItemLot.intInventoryReceiptItemLotId = LotNumbers.intDetailId
 END 

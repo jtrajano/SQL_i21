@@ -235,7 +235,9 @@ BEGIN TRY
 					intLotId INT
 					,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 					,intDetailId INT
-					)
+					,intParentLotId INT
+					,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				)
 
 				-- Create and validate the lot numbers
 				BEGIN

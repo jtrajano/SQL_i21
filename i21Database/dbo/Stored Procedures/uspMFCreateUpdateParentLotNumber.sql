@@ -1,15 +1,17 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber] @strParentLotNumber NVARCHAR(50) = NULL
+﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber] 
+	@strParentLotNumber NVARCHAR(50) = NULL
 	,@strParentLotAlias NVARCHAR(50)
 	,@intItemId INT
 	,@dtmExpiryDate DATETIME
 	,@intLotStatusId INT
-	,@intUserId INT
-	,@dtmDate DATETIME
+	,@intEntityUserSecurityId INT
+	-- ,@dtmDate DATETIME
 	,@intLotId INT
+	,@intParentLotId INT OUTPUT 
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(Max)
-		,@intParentLotId INT
+		-- ,@intParentLotId INT
 
 	IF @strParentLotNumber Is NULL
 	BEGIN
@@ -21,8 +23,8 @@ BEGIN TRY
 	FROM tblICParentLot
 	WHERE strParentLotNumber = @strParentLotNumber
 
-	IF @dtmDate IS NULL
-		SET @dtmDate = GETDATE()
+	--IF @dtmDate IS NULL
+	--	SET @dtmDate = GETDATE()
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -43,7 +45,7 @@ BEGIN TRY
 			,intItemId
 			,dtmExpiryDate
 			,intLotStatusId
-			,intCreatedUserId
+			,intCreatedEntityId
 			,dtmDateCreated
 			)
 		VALUES (
@@ -52,8 +54,8 @@ BEGIN TRY
 			,@intItemId
 			,@dtmExpiryDate
 			,@intLotStatusId
-			,@intUserId
-			,@dtmDate
+			,@intEntityUserSecurityId
+			,GETDATE()
 			)
 
 		SELECT @intParentLotId = SCOPE_IDENTITY()

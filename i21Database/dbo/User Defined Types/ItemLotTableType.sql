@@ -195,5 +195,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[ysnProduced]				BIT DEFAULT((0))
 	,[intDetailId]				INT NOT NULL
 	,[intOwnershipType]			INT NULL DEFAULT ((1))
-	,[dblGrossWeight]			NUMERIC(18,6) NULL 
+	,[dblGrossWeight]			NUMERIC(18,6) NULL 	
+	,[strParentLotNumber]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strParentLotAlias]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )

@@ -20,6 +20,8 @@ CREATE TABLE #GeneratedLotItems (
 	intLotId INT
 	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,intDetailId INT 
+	,intParentLotId INT
+	,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
 ------------------------------------------------------------------------------
@@ -152,6 +154,8 @@ BEGIN
 			,strVendorLotNo
 			,strGarden
 			,intDetailId
+			,strParentLotNumber
+			,strParentLotAlias	
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -177,6 +181,9 @@ BEGIN
 			,strVendorLotNo			= SourceLot.strVendorLotNo
 			,strGarden				= SourceLot.strGarden
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
+			,strParentLotNumber		= ParentLotSourceLot.strLotNumber
+			,strParentLotAlias		= ParentLotSourceLot.strLotAlias
+
 	FROM	dbo.tblICInventoryTransfer Transfer INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item
@@ -186,6 +193,9 @@ BEGIN
 				AND Transfer.intToLocationId = ItemLocation.intLocationId	
 			INNER JOIN tblICLot SourceLot 
 				ON SourceLot.intLotId = TransferItem.intLotId
+			LEFT JOIN dbo.tblICLot ParentLotSourceLot
+				ON ParentLotSourceLot.intLotId = SourceLot.intParentLotId
+
 	WHERE	Transfer.strTransferNo = @strTransactionId
 
 END 

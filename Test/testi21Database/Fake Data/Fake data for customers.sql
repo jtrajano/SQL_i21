@@ -55,7 +55,7 @@ BEGIN
 		,strPricingLevel
 		,strNotes
 		,intShipViaId
-		,intTaxCodeId
+		--,intTaxCodeId
 		,intTermsId
 		,intWarehouseId
 		,ysnDefaultLocation
@@ -73,7 +73,7 @@ BEGIN
 		,strPricingLevel		= ''
 		,strNotes				= ''
 		,intShipViaId			= NULL 
-		,intTaxCodeId			= NULL 
+		-- ,intTaxCodeId			= NULL 
 		,intTermsId				= 1
 		,intWarehouseId			= NULL 
 		,ysnDefaultLocation		= 1
