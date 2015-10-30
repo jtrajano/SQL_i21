@@ -4,6 +4,9 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@dtmStartDate DATETIME
 		,@dtmEndDate DATETIME
+		,@dtmStartDate1 DATETIME
+		,@dtmEndDate1 DATETIME
+		
 		,@intLocationId INT
 		,@xmlDocumentId INT
 
@@ -45,12 +48,18 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'dtmEndDate'
 
+	SELECT @dtmStartDate1=@dtmStartDate,@dtmEndDate1=@dtmEndDate
+
+
 	SELECT @intLocationId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intLocationId'
 
 	DECLARE @dtmShiftStartTime DATETIME
 		,@dtmShiftEndTime DATETIME
+		,@strCompanyName nvarchar(50)
+
+	SELECT @strCompanyName=strCompanyName FROM dbo.tblSMCompanySetup
 
 	SELECT TOP 1 @dtmShiftStartTime = dtmShiftStartTime + intStartOffset
 	FROM dbo.tblMFShift
@@ -79,6 +88,11 @@ BEGIN TRY
 			,CSL.strSubLocationName
 			,SL.strName AS strStorageLocationName
 			,US.strUserName
+			,@strCompanyName AS strCompanyName
+			,@dtmStartDate1 AS dtmStartDate
+			,@dtmEndDate1 AS dtmEndDate
+			,'' as strShiftName
+			,L.dtmExpiryDate 
 		FROM dbo.tblICLot L
 		JOIN dbo.tblICInventoryLotTransaction LT ON L.intLotId = LT.intLotId
 		JOIN dbo.tblICInventoryTransactionType LTT ON LT.intTransactionTypeId = LTT.intTransactionTypeId
@@ -106,6 +120,11 @@ BEGIN TRY
 			,CSL.strSubLocationName
 			,SL.strName
 			,US.strUserName
+			,@strCompanyName as strCompanyName
+			,@dtmStartDate1 AS dtmStartDate
+			,@dtmEndDate1 AS dtmEndDate
+			,'' as strShiftName
+			,L.dtmExpiryDate 
 		FROM dbo.tblICLot L
 		JOIN dbo.tblICInventoryLotTransaction LT ON L.intLotId = LT.intLotId
 		JOIN dbo.tblICInventoryTransactionType LTT ON LT.intTransactionTypeId = LTT.intTransactionTypeId
@@ -133,6 +152,11 @@ BEGIN TRY
 			,CSL.strSubLocationName
 			,SL.strName
 			,'' strUserName
+			,@strCompanyName as strCompanyName
+			,@dtmStartDate1 AS dtmStartDate
+			,@dtmEndDate1 AS dtmEndDate
+			,'' as strShiftName
+			,L.dtmExpiryDate 
 		FROM tblICInventoryAdjustment A
 		JOIN tblICInventoryAdjustmentDetail AD ON A.intInventoryAdjustmentId = AD.intInventoryAdjustmentId
 		JOIN tblICLot L ON AD.intLotId = L.intLotId
@@ -160,6 +184,11 @@ BEGIN TRY
 			,CSL.strSubLocationName
 			,SL.strName
 			,'' strUserName
+			,@strCompanyName as strCompanyName
+			,@dtmStartDate1 AS dtmStartDate
+			,@dtmEndDate1 AS dtmEndDate
+			,'' as strShiftName
+			,L.dtmExpiryDate 
 		FROM tblICInventoryAdjustment A
 		JOIN tblICInventoryAdjustmentDetail AD ON A.intInventoryAdjustmentId = AD.intInventoryAdjustmentId
 		JOIN tblICLot L ON AD.intLotId = L.intLotId
