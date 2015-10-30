@@ -37,6 +37,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	)
 	, ReceiptItem.intGradeId
 	, strGrade = Grade.strDescription
+	, Item.intLifeTime
+	, Item.strLifeTimeType
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
