@@ -8,7 +8,7 @@ SELECT R.intRecipeId
 	 , RI.intUOMId AS intItemUnitMeasureId
 	 , UOM.strUnitMeasure
 	 , RI.dblQuantity
-	 , dblPrice = 0.000000
+	 , dblPrice = ISNULL(dbo.fnARGetItemPrice(RI.intItemId, R.intCustomerId, R.intLocationId, RI.intUOMId, NULL, RI.dblQuantity, NULL, NULL, NULL, NULL, RI.dblQuantity, 0, NULL, NULL, NULL, NULL, NULL), 0)
 	 , strItemType = (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = RI.intItemId)
 	 , strType = 'Finished Good'
 FROM tblICItem I 
