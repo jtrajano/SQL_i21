@@ -258,7 +258,7 @@ BEGIN
 		;WITH cte (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM #tempTableReport
-			WHERE (dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom))
+			WHERE (dtmDate < @dtmDateFrom or dtmDate > CASE WHEN @dtmDateFrom = '' THEN @dtmDateTo ELSE @dtmDateFrom END)	
 			AND strAccountId NOT IN(SELECT strAccountId FROM #tempTableBase)
 			GROUP BY strAccountId
 		),
@@ -276,8 +276,8 @@ BEGIN
 		;WITH cte (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM #tempTableReport
-			WHERE (dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom))
-			AND strAccountId BETWEEN @strAccountIdFrom AND @strAccountIdTo
+			WHERE (dtmDate < @dtmDateFrom or dtmDate > CASE WHEN @dtmDateFrom = '' THEN @dtmDateTo ELSE @dtmDateFrom END)	
+			AND strAccountId BETWEEN @strAccountIdFrom AND  CASE WHEN @strAccountIdTo = '' THEN @strAccountIdFrom ELSE @strAccountIdTo END
 			AND strAccountId NOT IN(SELECT strAccountId FROM #tempTableBase)
 			GROUP BY strAccountId
 		),
