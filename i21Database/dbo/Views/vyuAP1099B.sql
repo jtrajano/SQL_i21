@@ -16,6 +16,7 @@ SELECT
 	, A.strVendorCompanyName
 	, A.strVendorId
 	, A.strZip
+	, A.strZipState
 	, A.strFederalTaxId
 	, A.intYear
 	, CASE WHEN SUM(A.dbl1099B) >= C.dbl1099B THEN SUM(A.dbl1099B) ELSE 0 END AS dbl1099B
@@ -31,4 +32,5 @@ GROUP BY intYear, intEntityVendorId
 , A.strVendorCompanyName
 , A.strVendorId
 , A.strZip
+, A.strZipState
 , A.strFederalTaxId

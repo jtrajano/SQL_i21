@@ -2775,6 +2775,11 @@
     <Build Include="dbo\Stored Procedures\uspQMReportSampleResult.sql" />
     <Build Include="dbo\Stored Procedures\uspWHReportContainerLabel.sql" />
     <Build Include="dbo\Functions\fnRemoveTrailingZeroes.sql" />
+    <Build Include="dbo\Views\vyuAPContractItemDistinct.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099INT.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099B.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetVendorApprover.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetVendorContact.sql" />
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
   </ItemGroup>
   <ItemGroup>
