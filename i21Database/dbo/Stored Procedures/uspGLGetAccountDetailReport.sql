@@ -90,18 +90,11 @@ BEGIN
 	 
 END
 
-DECLARE @hasInactiveAccountsByDate BIT = 0
-DECLARE @hasInactiveAccountsByAccount BIT = 0
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport')) DROP TABLE #tempTableReport
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableBase')) DROP TABLE #tempTableBase
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport1')) DROP TABLE #tempTableReport1
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport2')) DROP TABLE #tempTableReport2
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport3')) DROP TABLE #tempTableReport3
-IF @dtmDateFrom IS NOT NULL AND (
-	(@strAccountIdFrom IS NULL OR @strAccountIdCondition = 'Between') or
-	(@strPrimaryCodeFrom IS NULL OR @strPrimaryCodeCondition = 'Between')
-	)
-	SELECT @hasInactiveAccountsByDate = 1
 
 
 EXEC [dbo].[uspGLSummaryRecalculate]
@@ -257,7 +250,7 @@ IF @Where <> 'Where ' select @SqlQuery +=  @Where
 Exec(@SqlQuery)
 SELECT @SqlQuery = 'Select * from #tempTableBase ' 
 
-IF @hasInactiveAccountsByDate =1 
+IF @dtmDateFrom IS NOT NULL
 BEGIN
 	DECLARE @cols1 NVARCHAR(MAX) = ''
 	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
@@ -265,7 +258,8 @@ BEGIN
 		;WITH cte (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM #tempTableReport
-			WHERE dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
+			WHERE (dtmDate < @dtmDateFrom or dtmDate > CASE WHEN @dtmDateFrom = '' THEN @dtmDateTo ELSE @dtmDateFrom END)
+			AND strAccountId NOT IN(SELECT strAccountId FROM #tempTableBase)
 			 GROUP BY strAccountId
 		),
 		cte1 
@@ -273,18 +267,18 @@ BEGIN
 			SELECT * FROM #tempTableReport	A join cte B
 			ON B.accountId = A.strAccountId 
 			AND B.id = A.intGLDetailId
-		
 		)
 		SELECT * INTO #tempTableReport1 FROM cte1
 	END
 
-	IF @strAccountIdCondition = 'Between' or @strPrimaryCodeCondition = 'Between'
+	IF @strAccountIdFrom IS NOT NULL  AND @strPrimaryCodeFrom IS NULL
 	BEGIN
 		;WITH cte (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM #tempTableReport
-			WHERE dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
-			AND strAccountId BETWEEN @strAccountIdFrom AND @strAccountIdTo
+			WHERE (dtmDate < @dtmDateFrom or dtmDate > CASE WHEN @dtmDateFrom = '' THEN @dtmDateTo ELSE @dtmDateFrom END)
+			AND strAccountId BETWEEN @strAccountIdFrom AND  CASE WHEN @strAccountIdTo = '' THEN @strAccountIdFrom ELSE @strAccountIdTo END
+			AND strAccountId NOT IN(SELECT strAccountId FROM #tempTableBase)
 			 GROUP BY strAccountId
 		),
 		cte1 
