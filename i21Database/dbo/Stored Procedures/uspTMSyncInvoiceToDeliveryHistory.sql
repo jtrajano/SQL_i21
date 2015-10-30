@@ -815,6 +815,7 @@ BEGIN
 		PRINT 'DONE'
 	END
 
+-------------------------------------- Meter Reading--------------------------------------------------
 	---Get Invoice detail for Virtual meter reading
 	IF OBJECT_ID('tempdb..#tmpVirtualMeterInvoiceDetail') IS NOT NULL DROP TABLE #tmpVirtualMeterInvoiceDetail
 	SELECT *
@@ -902,7 +903,7 @@ BEGIN
 			,intDegreeDayOnLastDeliveryDate = NULL
 			,dblBurnRateAfterDelivery = A.dblBurnRate
 			,dblCalculatedBurnRate = A.dblBurnRate
-			,ysnAdjustBurnRate = 0
+			,ysnAdjustBurnRate = A.ysnAdjustBurnRate
 			,intElapsedDegreeDaysBetweenDeliveries = 0
 			,intElapsedDaysBetweenDeliveries = 0
 			,strSeason = H.strCurrentSeason
@@ -919,7 +920,7 @@ BEGIN
 			,intSiteID = A.intSiteID
 			,strSalesPersonID = I.strSalespersonId
 			,dblExtendedAmount = ISNULL(B.dblTotal,0.0)
-			,ysnForReview = 1
+			,ysnForReview = 0
 			,dtmMarkForReviewDate = NULL
 			,dblWillCallCalculatedQuantity  = NULL
 			,dblWillCallDesiredQuantity = NULL
