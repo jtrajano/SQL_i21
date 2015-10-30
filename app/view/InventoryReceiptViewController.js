@@ -472,18 +472,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colLotContainerNo: 'strContainerNo',
                 colLotVendorLocation: {
-                    dataIndex: 'strVendorLocation',
-                    editor: {
-                        origValueField: 'intEntityLocationId',
-                        origUpdateField: 'intVendorLocationId',
-                        store: '{vendorLocation}',
-                        defaultFilters: [
-                            {
-                                column: 'intEntityId',
-                                value: '{current.intVendorEntityId}'
-                            }
-                        ]
-                    }
+                    dataIndex: 'strGarden'
                 },
                 colLotGrade: {
                     dataIndex: 'strGrade',
@@ -842,6 +831,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onLotCreateRecord: function(config, action) {
         var win = config.grid.up('window');
+        var current = win.viewModel.data.current;
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var record = Ext.create('Inventory.model.ReceiptItemLot');
         record.set('strUnitMeasure', currentReceiptItem.get('strUnitMeasure'));
@@ -854,6 +844,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dblTareWeight', 0.00);
         record.set('dblNetWeight', 0.00);
         record.set('dblQuantity', config.dummy.get('dblQuantity'));
+
+        //Expiry Date Calculation
+        var receiptDate = current.get('dtmReceiptDate');
+        var lifetime = currentReceiptItem.get('intLifeTime');
+        var lifetimeType  = currentReceiptItem.get('strLifeTimeType');
+
+
 
         var qty = config.dummy.get('dblQuantity');
         var lotCF = currentReceiptItem.get('dblItemUOMConvFactor');

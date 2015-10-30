@@ -639,6 +639,41 @@ namespace iRely.Inventory.Model
                 _grossMargin = value;
             }
         }
+        private string _lifetimeType;
+        [NotMapped]
+        public string strLifeTimeType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_lifetimeType))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strLifeTimeType;
+                    else
+                        return null;
+                else
+                    return _lifetimeType;
+            }
+            set
+            {
+                _lifetimeType = value;
+            }
+        }
+        private int _lifetime;
+        [NotMapped]
+        public int intLifeTime
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.intLifeTime ?? 0;
+                else
+                    return _lifetime;
+            }
+            set
+            {
+                _lifetime = value;
+            }
+        }
         
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
@@ -684,6 +719,8 @@ namespace iRely.Inventory.Model
         public decimal? dblGrossMargin { get; set; }
         public int? intGradeId { get; set; }
         public string strGrade { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
@@ -886,7 +923,7 @@ namespace iRely.Inventory.Model
         public decimal? dblStatedTarePerUnit { get; set; }
         public string strContainerNo { get; set; }
         public int? intEntityVendorId { get; set; }
-        public int? intVendorLocationId { get; set; }
+        public string strGarden { get; set; }
         public string strMarkings { get; set; }
         public int? intOriginId { get; set; }
         public int? intGradeId { get; set; }
@@ -1018,25 +1055,6 @@ namespace iRely.Inventory.Model
                 _vendorId = value;
             }
         }
-        private string _vendorLoc;
-        [NotMapped]
-        public string strVendorLocation
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_vendorLoc))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strVendorLocation;
-                    else
-                        return null;
-                else
-                    return _vendorLoc;
-            }
-            set
-            {
-                _vendorLoc = value;
-            }
-        }
         private string _origin;
         [NotMapped]
         public string strOrigin
@@ -1105,8 +1123,6 @@ namespace iRely.Inventory.Model
         public string strContainerNo { get; set; }
         public int? intEntityVendorId { get; set; }
         public string strVendorId { get; set; }
-        public int? intVendorLocationId { get; set; }
-        public string strVendorLocation { get; set; }
         public string strMarkings { get; set; }
         public int? intOriginId { get; set; }
         public string strOrigin { get; set; }

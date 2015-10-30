@@ -1784,35 +1784,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotVendorLocation',
                                                                                 width: 120,
-                                                                                dataIndex: 'string',
-                                                                                text: 'Vendor Location',
+                                                                                text: 'Garden',
                                                                                 editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intEntityLocationId',
-                                                                                            dataType: 'numeric',
-                                                                                            text: 'Location Id',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strLocationName',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Location Name',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strAddress',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Address',
-                                                                                            flex: 1
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboVendorLocation',
-                                                                                    displayField: 'strLocationName',
-                                                                                    valueField: 'strLocationName'
+                                                                                    xtype: 'textfield'
                                                                                 }
                                                                             },
                                                                             {

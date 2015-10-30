@@ -201,6 +201,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
+            this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
         }
     }
 
@@ -289,7 +291,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblStatedTarePerUnit).HasColumnName("dblStatedTarePerUnit").HasPrecision(18, 6);
             this.Property(t => t.strContainerNo).HasColumnName("strContainerNo");
             this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
-            this.Property(t => t.intVendorLocationId).HasColumnName("intVendorLocationId");
+            this.Property(t => t.strGarden).HasColumnName("strGarden");
             this.Property(t => t.strMarkings).HasColumnName("strMarkings");
             this.Property(t => t.intOriginId).HasColumnName("intOriginId");
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
@@ -339,8 +341,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strContainerNo).HasColumnName("strContainerNo");
             this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
-            this.Property(t => t.intVendorLocationId).HasColumnName("intVendorLocationId");
-            this.Property(t => t.strVendorLocation).HasColumnName("strVendorLocation");
             this.Property(t => t.strMarkings).HasColumnName("strMarkings");
             this.Property(t => t.intOriginId).HasColumnName("intOriginId");
             this.Property(t => t.strOrigin).HasColumnName("strOrigin");

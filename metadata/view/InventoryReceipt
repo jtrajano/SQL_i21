@@ -3694,59 +3694,21 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "itemId": "colLotVendorLocation",
-                                                                        "text": "Vendor Location",
+                                                                        "text": "Garden",
                                                                         "width": 120
                                                                     },
                                                                     "name": "MyColumn37",
                                                                     "designerId": "60e52a8f-cceb-4a5d-b56e-973e9920ca05",
                                                                     "cn": [
                                                                         {
-                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "type": "Ext.form.field.Text",
                                                                             "reference": {
                                                                                 "name": "editor",
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "columns": [
-                                                                                    "[",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'intEntityLocationId',",
-                                                                                    "\t\tdataType: 'numeric',",
-                                                                                    "\t\ttext: 'Location Id',",
-                                                                                    "\t\thidden: true",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strLocationName',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Location Name',",
-                                                                                    "\t\tflex: 1",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strAddress',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Address',",
-                                                                                    "\t\tflex: 1",
-                                                                                    "\t}",
-                                                                                    "]"
-                                                                                ],
-                                                                                "designer|createAlias": "gridcombobox",
-                                                                                "displayField": "strLocationName",
-                                                                                "itemId": "cboVendorLocation",
-                                                                                "valueField": "strLocationName"
-                                                                            },
-                                                                            "name": "MyComboBox90",
-                                                                            "configAlternates": {
-                                                                                "columns": "array"
-                                                                            },
-                                                                            "designerId": "70f1a4d5-c523-4a49-be28-60a0b002c1b6",
-                                                                            "customConfigs": [
-                                                                                {
-                                                                                    "group": "(Custom Properties)",
-                                                                                    "name": "columns",
-                                                                                    "type": "string"
-                                                                                }
-                                                                            ]
+                                                                            "name": "MyTextField6",
+                                                                            "designerId": "4e7017ad-76b3-4e24-9abc-04ddd168b71b"
                                                                         }
                                                                     ]
                                                                 },
