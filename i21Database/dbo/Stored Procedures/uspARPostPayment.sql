@@ -1652,7 +1652,15 @@ IF @recap = 0
 					
 					DELETE FROM @ARPrepayment WHERE intPaymentId = @PaymentIdToDeletePre
 					
-				END										
+				END
+				
+			UPDATE 
+				tblARPayment
+			SET 
+				intAccountId = NULL			
+			WHERE
+				intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)		
+									
 
 			END
 		ELSE
