@@ -3,6 +3,12 @@
 	  ,@strProcessType Nvarchar(30)
 	  ,@StorageChargeDate DATETIME = NULL	
 	  ,@UserKey INT
+	  ,@dblStorageDuePerUnit DECIMAL(24, 10) OUTPUT
+	  ,@dblStorageDueAmount DECIMAL(24, 10) OUTPUT
+	  ,@dblStorageDueTotalPerUnit DECIMAL(24, 10) OUTPUT
+	  ,@dblStorageDueTotalAmount DECIMAL(24, 10) OUTPUT
+	  ,@dblStorageBilledPerUnit DECIMAL(24, 10) OUTPUT
+	  ,@dblStorageBilledAmount DECIMAL(24, 10) OUTPUT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -12,6 +18,7 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @UserName NVARCHAR(100)	
+	DECLARE @dblOldStoragePaid DECIMAL(24, 10)
 	DECLARE @dblOpenBalance DECIMAL(24, 10)
 	DECLARE @intStorageScheduleId INT
 	DECLARE @strStorageRate NVARCHAR(50)
@@ -26,9 +33,8 @@ BEGIN TRY
 	DECLARE @dtmEndingDate DATETIME
 	DECLARE @intNumberOfDays INT
 	DECLARE @dblStorageRate DECIMAL(24, 10)
-	
-	DECLARE @dblStorageDuePerUnit DECIMAL(24, 10) = 0
-	DECLARE @dblStorageDueAmount DECIMAL(24, 10) = 0
+
+	DECLARE @dblNewStoragePaid DECIMAL(24, 10)
 	DECLARE @TotalDaysApplicableForStorageCharge INT
 	DECLARE @StorageChargeCalculationRequired BIT=1
 	
@@ -43,7 +49,8 @@ BEGIN TRY
 	)
 	
 	SELECT 
-		 @dblOpenBalance=CS.dblOpenBalance
+		  @dblOldStoragePaid=CS.dblStoragePaid
+		 ,@dblOpenBalance=CS.dblOpenBalance
 		,@intStorageScheduleId = CS.intStorageScheduleId
 		,@strStorageRate = SR.strStorageRate
 		,@dtmHEffectiveDate = SR.dtmEffectiveDate
@@ -71,15 +78,15 @@ BEGIN TRY
 		,[dblStorageRate]
 		FROM  tblGRStorageSchedulePeriod Where intStorageScheduleRule=@intStorageScheduleId Order by intSort
 	
-		--Suppose StorageCharge Date is later on Termination Date of Schedule then Charge Should be applicable upto Termination Date.
+		--Suppose Termination Date is not Blank and Storage Charge Date is later on Termination Date then Charge Upto Termination Date.
 		IF @StorageChargeDate > @dtmTerminationDate AND @dtmTerminationDate IS NOT NULL
 			SET @StorageChargeDate=@dtmTerminationDate
 					
-		--Suppose Delivery Date is Prior to Effective Date of Schedule then Charge Should be applicable from Effective Date of Schedule.	
+		--Suppose Effective Date is not blank and Delivery Date is Prior to Effective Date then Charge From Effective Date.	
 		IF @dtmDeliveryDate < @dtmHEffectiveDate AND @dtmHEffectiveDate IS NOT NULL	
 			SET @dtmDeliveryDate=@dtmHEffectiveDate
 			
-		--Suppose Storage Due is once Accured then Storage Charge should be accrued from the Most recent Accured date.
+		--Suppose Storage Due is atleast once Accured then Storage Charge should be accrued from the Most recent Accured date.
 		IF @dtmLastStorageAccrueDate IS NOT NULL
 			SET @dtmDeliveryDate=@dtmLastStorageAccrueDate+1
 			
@@ -121,7 +128,7 @@ BEGIN TRY
 				BEGIN
 					SET @dblStorageDuePerUnit =@dblStorageRate *(DATEDIFF(DAY, @dtmDeliveryDate,@StorageChargeDate)+1)
 					SET @dblStorageDueAmount=@dblStorageDuePerUnit*@dblOpenBalance
-					SET @TotalDaysApplicableForStorageCharge=@TotalDaysApplicableForStorageCharge-(DATEDIFF(DAY, @dtmDeliveryDate,@StorageChargeDate)+1)			
+					SET @TotalDaysApplicableForStorageCharge=@TotalDaysApplicableForStorageCharge - (DATEDIFF(DAY, @dtmDeliveryDate,@StorageChargeDate)+1)			
 				END
 					
 				SELECT @intSchedulePeriodId = MIN(intSchedulePeriodId)
@@ -139,14 +146,11 @@ BEGIN TRY
 			Update tblGRCustomerStorage SET dtmLastStorageAccrueDate=@StorageChargeDate 
 			Where intCustomerStorageId=@intCustomerStorageId
 			
-			Update tblGRCustomerStorage SET dblStorageDue=dblStorageDue+ @dblStorageDuePerUnit
-			Where intCustomerStorageId=@intCustomerStorageId
-			
-			IF @strProcessType='Bill'
+			IF @strProcessType='accrue' OR @strProcessType='Bill'
 			BEGIN
-				Update tblGRCustomerStorage SET dblStoragePaid=dblStorageDue-dblStoragePaid 
+				Update tblGRCustomerStorage SET dblStorageDue=dblStorageDue+ @dblStorageDuePerUnit
 				Where intCustomerStorageId=@intCustomerStorageId
-			END
+			END		
 			
 			INSERT INTO [dbo].[tblGRStorageHistory] 
 							(
@@ -186,9 +190,64 @@ BEGIN TRY
 							,NULL
 							,NULL
 						  )	
-	    END				  			
-	
-	
+	END	
+
+	IF @strProcessType='Bill'
+	BEGIN
+
+		Update tblGRCustomerStorage SET dblStoragePaid=dblStorageDue Where intCustomerStorageId=@intCustomerStorageId
+
+		SELECT @dblNewStoragePaid=dblStoragePaid FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+
+		INSERT INTO [dbo].[tblGRStorageHistory] 
+					(
+						[intConcurrencyId]
+					,[intCustomerStorageId]
+					,[intTicketId]
+					,[intInventoryReceiptId]
+					,[intInvoiceId]
+					,[intContractDetailId]
+					,[dblUnits]
+					,[dtmHistoryDate]
+					,[dblPaidAmount]
+					,[strPaidDescription]
+					,[dblCurrencyRate]
+					,[strType]
+					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]	
+					)
+				VALUES 
+					(
+						1
+					,@intCustomerStorageId
+					,NULL
+					,NULL
+					,NULL
+					,NULL
+					,NULL
+					,@StorageChargeDate
+					,(@dblNewStoragePaid-@dblOldStoragePaid)
+					,NULL
+					,NULL
+					,'Storage Paid'
+					,@UserName
+					,NULL
+					,NULL
+					,NULL
+					)				
+	END
+	  
+	    			  			
+		SELECT @dblStorageDueTotalPerUnit=dblStorageDue-dblStoragePaid
+				,@dblStorageBilledPerUnit=dblStoragePaid-@dblOldStoragePaid 
+				FROM tblGRCustomerStorage
+				Where intCustomerStorageId=@intCustomerStorageId
+				
+		SELECT @dblStorageDueTotalAmount=@dblStorageDueTotalPerUnit * @dblOpenBalance
+		SELECT @dblStorageBilledAmount=@dblStorageBilledPerUnit * @dblOpenBalance
+
 END TRY
 
 BEGIN CATCH

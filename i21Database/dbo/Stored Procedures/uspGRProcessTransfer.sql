@@ -44,6 +44,12 @@ BEGIN TRY
 	DECLARE @intItemId INT
 	DECLARE @intItemLocationId INT
 	DECLARE @intActionLocationId INT
+	DECLARE @dblStorageDuePerUnit DECIMAL(24, 10)
+	DECLARE @dblStorageDueAmount DECIMAL(24, 10)
+	DECLARE @dblStorageDueTotalPerUnit DECIMAL(24, 10)
+	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)	
+	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
+	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -205,7 +211,17 @@ BEGIN TRY
 		
 		
 		--Storage Charge Update
-		EXEC uspGRCalculateStorageCharge @intCustomerStorageId,@strProcessType,NULL,@UserKey
+		EXEC uspGRCalculateStorageCharge
+		 @intCustomerStorageId
+		 ,@strProcessType,NULL
+		 ,@UserKey
+		 ,@dblStorageDuePerUnit OUTPUT
+		,@dblStorageDueAmount OUTPUT
+		,@dblStorageDueTotalPerUnit OUTPUT
+		,@dblStorageDueTotalAmount OUTPUT
+		,@dblStorageBilledPerUnit OUTPUT
+		,@dblStorageBilledAmount OUTPUT
+
 		
 		WHILE @ActionKey > 0
 		BEGIN
@@ -292,7 +308,8 @@ BEGIN TRY
 					,[dblOpenBalance]
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]					
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -326,10 +343,10 @@ BEGIN TRY
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-				
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END				
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -456,7 +473,8 @@ BEGIN TRY
 					,[dblOpenBalance]
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -490,7 +508,8 @@ BEGIN TRY
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
@@ -618,7 +637,8 @@ BEGIN TRY
 					,[dblOpenBalance]
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -652,7 +672,8 @@ BEGIN TRY
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]	
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]			
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
@@ -781,7 +802,8 @@ BEGIN TRY
 					,[dblOpenBalance]
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -816,6 +838,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]		
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
@@ -944,7 +967,8 @@ BEGIN TRY
 					,[dblOpenBalance]
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -979,6 +1003,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]		
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
@@ -1106,7 +1131,8 @@ BEGIN TRY
 					,[dblOpenBalance]
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -1141,9 +1167,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]		
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -1272,7 +1298,8 @@ BEGIN TRY
 					,[dblOpenBalance]
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
-					,[strDPARecieptNumber]					
+					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -1307,6 +1334,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
+					,[dtmLastStorageAccrueDate]		
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
 					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
