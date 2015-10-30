@@ -6,12 +6,12 @@
 	,@intLotStatusId INT
 	,@intEntityUserSecurityId INT
 	,@intLotId INT
-	,@intParentLotId INT OUTPUT 
+	,@intParentLotId INT = NULL OUTPUT  
 AS
 
 	DECLARE @ErrMsg NVARCHAR(Max)
 
-	IF @strParentLotNumber Is NULL
+	IF @strParentLotNumber Is NULL OR @strParentLotNumber=''
 	BEGIN
 		EXEC dbo.uspSMGetStartingNumber 78
 			,@strParentLotNumber OUTPUT

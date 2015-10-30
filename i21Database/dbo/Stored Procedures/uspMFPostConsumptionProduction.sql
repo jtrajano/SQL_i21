@@ -218,8 +218,7 @@ BEGIN
 											@intItemId=@intItemId,
 											@dtmExpiryDate=@dtmExpiryDate,
 											@intLotStatusId=1,
-											@intUserId=@intUserId,
-											@dtmDate=@dtmDate,
+											@intEntityUserSecurityId =@intUserId,
 											@intLotId=@intLotId
 
 	DELETE
