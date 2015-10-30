@@ -35,6 +35,7 @@ AS
 			IX.strIndexType,													LP.strCity						AS	strLoadingPoint,	
 																				DP.strCity						AS	strDestinationPoint,
 																				DC.strCity						AS	strDestinationCity,
+																				PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
 			ISNULL(CD.dblBalance,0) -	ISNULL(CD.dblScheduleQty,0)												AS	dblAvailableQty,
 			CH.strContractNumber + LTRIM(CD.intContractSeq)														AS	strSequenceNumber,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInQtyUOM,
