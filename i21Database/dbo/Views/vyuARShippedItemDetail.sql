@@ -33,7 +33,7 @@ SELECT
 	,[intSalesAccountId]					= ARIA.[intSalesAccountId]
 	,[intInventoryAccountId]				= ARIA.[intInventoryAccountId]
 	,[intStorageLocationId]					= NULL
-	,[strStorageLocationName]				= ''	
+	,[strStorageLocationName]				= NULL	
 	,[intTaxGroupId]						= NULL
 	,[strTaxGroup]							= NULL
 FROM
