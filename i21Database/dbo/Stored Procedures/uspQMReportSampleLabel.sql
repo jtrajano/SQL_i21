@@ -59,9 +59,14 @@ BEGIN TRY
 		,ST.strDescription AS strSampleTypeDescription
 		,C.strCategoryCode
 		,@intSampleId AS intSampleId
-		,W.strERPOrderNo AS BPCSshopOrder#
-		,ISNULL(PD.intLineNo, 1) AS BPCSLineNumber
+		,ISNULL(W.strERPOrderNo,'') AS BPCSshopOrder#
+		,CASE 
+		WHEN S.strRefNo <> ''
+			THEN ISNULL(PD.intLineNo, 1)
+		ELSE PD.intLineNo
+		END AS BPCSLineNumber
 		,ISNULL(P.strReference, S.strRefNo) AS BPCSPoNumber
+		,ST.strDescription + ', #: ' + S.strSampleNumber AS strSampleTypeDescandNumber
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 	JOIN tblICItem I ON S.intItemId = I.intItemId
