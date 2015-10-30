@@ -49,11 +49,11 @@ BEGIN TRY
 	FROM tblMFCompanyPreference
 
 	SELECT I.intItemId
-		,I.strItemNo
-		,I.strDescription
+		,'Product : '+I.strItemNo
+		,'Desc : '+I.strDescription
 		,IsNULL(PS.strParameterValue, I.strItemNo) AS strValue
-		,GETDATE() AS dtmDate
-		,@strUserName AS strUserName
+		,'Date : '+Ltrim(GETDATE()) AS dtmDate
+		,'Printed By : '+@strUserName AS strUserName
 	FROM tblMFWorkOrder W
 	JOIN tblICItem I ON W.intItemId = I.intItemId
 	LEFT JOIN dbo.tblMFWorkOrderProductSpecification PS ON W.intWorkOrderId = PS.intWorkOrderId
