@@ -9,6 +9,7 @@ BEGIN TRY
 			@intCleanCostUOMId			INT,
 			@intCleanCostCurrencyId		INT,
 			@intSourceId				INT,
+			@intContractHeaderId		INT,
 			@ErrMsg						NVARCHAR(MAX)
 			
 	SELECT	@intSourceId = intShipmentContractQtyId
@@ -24,6 +25,10 @@ BEGIN TRY
 			@intCleanCostCurrencyId = intCleanCostCurrencyId 
 	FROM	tblCTCompanyPreference
 	
+	SELECT	@intContractHeaderId	= intContractHeaderId 
+	FROM	tblCTContractDetail
+	WHERE	intContractDetailId		=	@intContractDetailId
+
 	IF @intCleanCostUOMId IS NULL OR @intCleanCostCurrencyId IS NULL
 	BEGIN 
 		RAISERROR('Clean cost configuration is missing under Company Configuration.',16,1)
@@ -33,42 +38,142 @@ BEGIN TRY
 	FROM	tblAPBillDetail
 	WHERE	intInventoryReceiptItemId = @intInventoryReceiptItemId
 
-	SELECT	BD.intBillDetailId AS intExpenseId,
-			BD.intItemId,
-			CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
-					ELSE CAST(NULL AS NUMERIC(18,0)) 
-			END		AS dblValueInCCCurrency,
-			dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, RI.dblNet) dblQuantity,
-			RI.intWeightUOMId AS intQuantityUOMId ,
-			@intCleanCostCurrencyId intCCCurrencyId,
-			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
-					ELSE	BD.dblTotal 
-			END		AS		dblValueInOtherCurrency,
-			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
-					ELSE	BL.intCurrencyId 
-			END		AS		intOtherCurrencyId,
-			CAST(NULL AS NUMERIC(18,0))  AS dblFX,
-			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
-					ELSE	CAST(1 AS BIT)
-			END		AS		ysnValueEnable,
-			CAST(0 AS BIT)	AS ysnQuantityEnable,
-			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
-					ELSE	CAST(0 AS BIT)
-			END		AS		ysnOtherCurrencyEnable,
-			IM.strItemNo,
-			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN ''
-					ELSE	CU.strCurrency 
-			END		AS		strOtherCurrency
+	SELECT	intItemId,
+			SUM(dblValueInCCCurrency)dblValueInCCCurrency,
+			SUM(dblQuantity)dblQuantity,
+			MAX(intQuantityUOMId)intQuantityUOMId,
+			MAX(intCCCurrencyId)intCCCurrencyId,
+			SUM(dblValueInOtherCurrency)dblValueInOtherCurrency,
+			MAX(intOtherCurrencyId)intOtherCurrencyId,
+			ysnValueEnable,
+			ysnOtherCurrencyEnable,
+			strItemNo,
+			strOtherCurrency
+	FROM	(
+				SELECT	BD.intItemId,
+						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
+								ELSE CAST(NULL AS NUMERIC(18,0)) 
+						END		AS dblValueInCCCurrency,
+						CASE	WHEN BD.intInventoryReceiptChargeId IS NULL 
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, RI.dblNet) 
+								ELSE NULL 
+						END
+						dblQuantity,
+						RI.intWeightUOMId AS intQuantityUOMId ,
+						@intCleanCostCurrencyId intCCCurrencyId,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
+								ELSE	BD.dblTotal 
+						END		AS		dblValueInOtherCurrency,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
+								ELSE	BL.intCurrencyId 
+						END		AS		intOtherCurrencyId,
+						CAST(NULL AS NUMERIC(18,0))  AS dblFX,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
+								ELSE	CAST(1 AS BIT)
+						END		AS		ysnValueEnable,
+						CAST(0 AS BIT)	AS ysnQuantityEnable,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
+								ELSE	CAST(0 AS BIT)
+						END		AS		ysnOtherCurrencyEnable,
+						IM.strItemNo,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN ''
+								ELSE	CU.strCurrency 
+						END		AS		strOtherCurrency
 
 
-	FROM	tblAPBillDetail				BD
-	JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
-	JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId					LEFT
-	JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	BD.intInventoryReceiptItemId	LEFT
-	JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	RI.intWeightUOMId				LEFT
-	JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
-	WHERE	BD.intBillId = @intBillId
-	ORDER BY BD.intBillDetailId DESC
+				FROM	tblAPBillDetail				BD
+				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
+				JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId					
+				JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	BD.intInventoryReceiptItemId	LEFT
+				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intChargeId					=	BD.intInventoryReceiptChargeId	LEFT
+				JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	RI.intWeightUOMId				LEFT
+				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
+				WHERE	RI.intInventoryReceiptId = @intInventoryReceiptId AND BL.intTransactionType = 1
+				
+				UNION ALL 
+				
+				SELECT	BD.intItemId,
+						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
+								ELSE CAST(NULL AS NUMERIC(18,0)) 
+						END		AS dblValueInCCCurrency,
+						CASE	WHEN BD.intInventoryReceiptChargeId IS NULL 
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, RI.dblNet) 
+								ELSE NULL 
+						END
+						dblQuantity,
+						RI.intWeightUOMId AS intQuantityUOMId ,
+						@intCleanCostCurrencyId intCCCurrencyId,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
+								ELSE	BD.dblTotal 
+						END		AS		dblValueInOtherCurrency,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
+								ELSE	BL.intCurrencyId 
+						END		AS		intOtherCurrencyId,
+						CAST(NULL AS NUMERIC(18,0))  AS dblFX,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
+								ELSE	CAST(1 AS BIT)
+						END		AS		ysnValueEnable,
+						CAST(0 AS BIT)	AS ysnQuantityEnable,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
+								ELSE	CAST(0 AS BIT)
+						END		AS		ysnOtherCurrencyEnable,
+						IM.strItemNo,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN ''
+								ELSE	CU.strCurrency 
+						END		AS		strOtherCurrency
+
+
+				FROM	tblAPBillDetail				BD
+				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
+				JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId					
+				JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	BD.intInventoryReceiptItemId	LEFT
+				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intChargeId					=	BD.intInventoryReceiptChargeId	LEFT
+				JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	RI.intWeightUOMId				LEFT
+				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
+				WHERE	RI.intInventoryReceiptId =@intInventoryReceiptId AND BL.intTransactionType = 1
+				
+				UNION ALL
+				
+				SELECT	BD.intItemId,
+						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
+								ELSE CAST(NULL AS NUMERIC(18,0)) 
+						END		AS dblValueInCCCurrency,
+						NUll AS dblQuantity,
+						NUll AS intQuantityUOMId ,
+						@intCleanCostCurrencyId intCCCurrencyId,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
+								ELSE	BD.dblTotal 
+						END		AS		dblValueInOtherCurrency,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
+								ELSE	BL.intCurrencyId 
+						END		AS		intOtherCurrencyId,
+						CAST(NULL AS NUMERIC(18,0))  AS dblFX,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
+								ELSE	CAST(1 AS BIT)
+						END		AS		ysnValueEnable,
+						CAST(0 AS BIT)	AS ysnQuantityEnable,
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
+								ELSE	CAST(0 AS BIT)
+						END		AS		ysnOtherCurrencyEnable,
+						'Pre-Payment',
+						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN ''
+								ELSE	CU.strCurrency 
+						END		AS		strOtherCurrency
+
+
+				FROM	tblAPBillDetail				BD
+				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
+				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
+				--JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	BD.intContractHeaderId
+				WHERE	BD.intContractHeaderId	=	@intContractHeaderId AND BL.intTransactionType = 2
+		)t
+		GROUP BY	intItemId,
+					intCCCurrencyId,
+					ysnValueEnable,
+					ysnOtherCurrencyEnable,
+					strItemNo,
+					strOtherCurrency
+		ORDER BY	dblQuantity DESC
 
 END TRY
 BEGIN CATCH
