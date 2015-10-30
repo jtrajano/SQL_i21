@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspQMReportSampleLabel @xmlParam NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE uspQMReportSampleLabel
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -57,7 +58,10 @@ BEGIN TRY
 		,PL.strParentLotNumber
 		,ST.strDescription AS strSampleTypeDescription
 		,C.strCategoryCode
-		,ISNULL(W.strERPOrderNo, S.strRefNo) AS strRefNo
+		,@intSampleId AS intSampleId
+		,W.strERPOrderNo AS BPCSshopOrder#
+		,ISNULL(PD.intLineNo, 1) AS BPCSLineNumber
+		,ISNULL(P.strReference, S.strRefNo) AS BPCSPoNumber
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 	JOIN tblICItem I ON S.intItemId = I.intItemId
@@ -68,6 +72,12 @@ BEGIN TRY
 	LEFT JOIN tblICLot L ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblMFWorkOrderInputParentLot WPL ON WPL.intParentLotId = PL.intParentLotId
 	LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	LEFT JOIN tblPOPurchaseDetail PD ON PD.intPurchaseDetailId = RI.intLineNo
+		AND PD.intPurchaseId = RI.intOrderId
+	LEFT JOIN tblPOPurchase P ON P.intPurchaseId = PD.intPurchaseId
 	WHERE S.intSampleId = @intSampleId
 END TRY
 
