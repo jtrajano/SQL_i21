@@ -118,6 +118,7 @@ BEGIN TRY
 		,I.strItemNo
 		,I.strDescription
 		,I.strShortName
+		,S.strShiftName 
 		,S.intShiftSequence
 		,SL.strName
 		,CASE 
