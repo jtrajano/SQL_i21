@@ -2781,6 +2781,7 @@
     <Build Include="dbo\Stored Procedures\uspAPGetVendorApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVendorContact.sql" />
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
