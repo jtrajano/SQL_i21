@@ -139,22 +139,17 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		--DEFAULTS THE POST DATE TO glije_date
 			UPDATE tblGLIjemst SET glije_postdate = glije_dte WHERE glije_uid=@uid
 
-			--UPDATES THE POSTDATE TO MAX GROUP BY SOURCE ID AND SOURCE SYSTEM
-			UPDATE a SET glije_postdate = b.postdate FROM tblGLIjemst a JOIN
-			(SELECT MAX(glije_postdate) as postdate,glije_src_no,glije_src_sys FROM tblGLIjemst WHERE glije_uid = @uid GROUP BY glije_src_no, glije_src_sys ) b
-			ON a.glije_src_no = b.glije_src_no AND a.glije_src_sys = b.glije_src_sys
-			where glije_uid = @uid
-
-
     		DECLARE @id INT, @dte DATETIME, @glije_period INT,@intFiscalYearId INT,@glije_acct_no DECIMAL(16,8)
     		DECLARE @year NVARCHAR(4) ,@period NVARCHAR(4),@intFiscalPeriodId INT,@dateStart DATETIME, @dateEnd DATETIME ,@ysnStatus BIT
 
     		--DETERMINES THE glije_postdate VALUE . IF glije_date is not within the period then glije_postdate value is enddate
-    		DECLARE cursor_tbl CURSOR FOR SELECT glije_postdate,glije_period FROM tblGLIjemst WHERE glije_uid = @uid GROUP BY glije_period,glije_postdate
+    		DECLARE cursor_tbl CURSOR FOR SELECT glije_dte,glije_period FROM tblGLIjemst WHERE glije_uid = @uid GROUP BY glije_period,glije_dte
     		OPEN cursor_tbl
     		FETCH NEXT FROM cursor_tbl INTO @dte,@glije_period
     		WHILE @@FETCH_STATUS = 0
     		BEGIN
+
+
 			SELECT @year = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),1,4), @period = SUBSTRING(CONVERT(NVARCHAR(10), @glije_period),5,2)
     			SELECT TOP 1 @intFiscalYearId= intFiscalYearId,@ysnStatus = ysnStatus FROM tblGLFiscalYear WHERE strFiscalYear = @year
     		
