@@ -10,6 +10,11 @@
 [intUnitMeasureId] INT NOT NULL,
 [dblReceivedQty] NUMERIC(18, 6) NULL,
 
+[dblUnitCost] NUMERIC(18, 6) NULL,
+[intCostUOMId] [int] NULL,
+[intCurrencyId] [int] NULL,
+[dblTotalCost] NUMERIC(18, 6) NULL,
+
 CONSTRAINT [PK_tblLGShipmentBLContainerContract_intShipmentBLContainerContractId] PRIMARY KEY ([intShipmentBLContainerContractId]), 
 CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]) ON DELETE CASCADE,
 
@@ -17,5 +22,7 @@ CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblLGShipmentBL_intShipmentBLId]
 CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblLGShipmentBLContainer_intShipmentBLContainerId] FOREIGN KEY ([intShipmentBLContainerId]) REFERENCES [tblLGShipmentBLContainer]([intShipmentBLContainerId]),
 CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblLGShipmentContractQty_intShipmentContractQtyId] FOREIGN KEY ([intShipmentContractQtyId]) REFERENCES [tblLGShipmentContractQty]([intShipmentContractQtyId]),
 
-CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblICItemUOM_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )

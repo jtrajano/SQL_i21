@@ -2787,6 +2787,8 @@
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocument.sql" />
     <Build Include="dbo\Views\vyuARProvisionalInvoiceDocumentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentSalesReport.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentBLContainerContractCost.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentBLContainerCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
