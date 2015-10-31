@@ -47,7 +47,7 @@ AS
 								ELSE HE.dblNetImpact / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intPriceUnitMeasureId,CD.intUnitMeasureId,CD.dblDetailQuantity)
 						END		dblNetImpactPer
 				FROM	vyuCTContractDetailView		CD
-				JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId		
+				JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId		LEFT
 				JOIN	tblSMCountry				RY	ON	RY.intCountryID					=	IM.intOriginId		LEFT
 				JOIN	tblICCommodityProductLine	PL	ON	PL.intCommodityProductLineId	=	IM.intProductLineId	LEFT
 				JOIN	tblICCommodityAttribute		CP	ON	CP.intCommodityAttributeId		=	IM.intProductTypeId	LEFT
