@@ -6,7 +6,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'apchk
 GO
 
 IF EXISTS(select top 1 1 from sys.triggers where name = 'trgInsteadOfDeleteCMApchkmst')
-	DROP TRIGGER trgInsteadOfDeleteCMApchkms
+	DROP TRIGGER trgInsteadOfDeleteCMApchkmst
 GO
 IF EXISTS(select top 1 1 from sys.triggers where name = 'trgInsteadOfInsertCMApchkmst')
 	DROP TRIGGER trgInsteadOfInsertCMApchkmst
