@@ -2789,6 +2789,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentSalesReport.sql" />
     <Build Include="dbo\Tables\tblLGShipmentBLContainerContractCost.sql" />
     <Build Include="dbo\Tables\tblLGShipmentBLContainerCost.sql" />
+    <Build Include="dbo\Views\vyuCTItemContractView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
