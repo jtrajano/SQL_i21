@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblLGShipmentBLContainerContractCost]
 	[intShipmentBLContainerContractId] [int] NOT NULL,
 	[intItemId] [int] NOT NULL,
 	[intVendorEntityId] [int] NULL,
-	[intCostMethod] [int] NOT NULL,
+	[strCostMethod] NVARCHAR(75) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dblRate] [numeric](10, 6) NOT NULL,
 	[intCostUOMId] [int] NULL,
 	[intCurrencyId] [int] NOT NULL,
