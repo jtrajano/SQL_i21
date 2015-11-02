@@ -27,13 +27,11 @@ BEGIN
 		--Reinsert Deduction Taxes
 		INSERT INTO tblPREmployeeDeductionTax
 			(intEmployeeDeductionId
-			,intEmployeeTaxId
 			,intTypeTaxId
 			,intSort
 			,intConcurrencyId)
 		SELECT
 			(SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
-			,(SELECT TOP 1 intEmployeeTaxId FROM tblPREmployeeTax WHERE intTypeTaxId = tblPRTypeDeductionTax.intTypeTaxId)
 			,intTypeTaxId
 			,intSort
 			,intConcurrencyId

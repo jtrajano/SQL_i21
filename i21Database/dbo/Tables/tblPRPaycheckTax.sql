@@ -1,7 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPRPaycheckTax](
 	[intPaycheckTaxId] [int] IdENTITY(1,1) NOT NULL,
 	[intPaycheckId] INT NOT NULL,
-	[intEmployeeTaxId] INT NOT NULL,
 	[intTypeTaxId] INT NOT NULL,
 	[strCalculationType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strFilingStatus] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
@@ -65,14 +64,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intPaycheckId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Employee Tax Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRPaycheckTax',
-    @level2type = N'COLUMN',
-    @level2name = N'intEmployeeTaxId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Tax Type Id',

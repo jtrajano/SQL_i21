@@ -99,7 +99,6 @@ SELECT @intPaycheckId = @@IDENTITY
 /* Create Paycheck Taxes */
 INSERT INTO [dbo].[tblPRPaycheckTax]
 	([intPaycheckId]
-	,[intEmployeeTaxId]
 	,[intTypeTaxId]
 	,[strCalculationType]
 	,[strFilingStatus]
@@ -124,7 +123,6 @@ INSERT INTO [dbo].[tblPRPaycheckTax]
 	,[intConcurrencyId])
 SELECT
 	@intPaycheckId
-	,[intEmployeeTaxId]
 	,[intTypeTaxId]
 	,[strCalculationType]
 	,[strFilingStatus]
@@ -331,12 +329,10 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				INSERT INTO tblPRPaycheckEarningTax
 					(intPaycheckEarningId
 					,intTypeTaxId
-					,intEmployeeTaxId
 					,intConcurrencyId)
 				SELECT 
 					@intPaycheckEarningId
 					,intTypeTaxId
-					,intEmployeeTaxId
 					,1
 				FROM tblPREmployeeEarningTax
 				WHERE intEmployeeEarningId = @intEmployeeEarningId
@@ -411,12 +407,10 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 				INSERT INTO tblPRPaycheckDeductionTax
 					(intPaycheckDeductionId
 					,intTypeTaxId
-					,intEmployeeTaxId
 					,intConcurrencyId)
 				SELECT 
 					@intPaycheckDeductionId
 					,intTypeTaxId
-					,intEmployeeTaxId
 					,1
 				FROM tblPREmployeeDeductionTax
 				WHERE intEmployeeDeductionId = @intEmployeeDeductionId
