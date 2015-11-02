@@ -39,7 +39,8 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
 		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 
 		CONSTRAINT [FK_tblICCommodity_tblGRDiscount] FOREIGN KEY ([intScheduleDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
-		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]) 
+		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]), 
+		CONSTRAINT [AK_tblICCommodity_strCommodityCode] UNIQUE ([strCommodityCode]) 
 	)
 
 	GO

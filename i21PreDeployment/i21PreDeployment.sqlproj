@@ -136,6 +136,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\14_EntityUserSecuritySchemaUpdateForTM04.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\14_EntityUserSecuritySchemaUpdateForTM05.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\14_EntityUserSecuritySchemaUpdateForTM06.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\1530_to_1540.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
