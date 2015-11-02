@@ -5498,6 +5498,11 @@ Ext.define('Inventory.view.Item', {
                                                                     flex: 1
                                                                 },
                                                                 {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    hidden: true
+                                                                },
+                                                                {
                                                                     xtype: 'checkcolumn',
                                                                     dataIndex: 'ysnStockUnit',
                                                                     dataType: 'boolean',
@@ -5514,31 +5519,7 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colBundleUnit',
                                                         align: 'right',
-                                                        text: 'Unit',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colBundlePrice',
-                                                        width: 70,
-                                                        align: 'right',
-                                                        text: 'Price',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colBundleSubtotal',
-                                                        width: 70,
-                                                        align: 'right',
-                                                        text: 'Subtotal'
+                                                        text: 'Unit'
                                                     }
                                                 ],
                                                 viewConfig: {

@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets5af5e8a508dabe83b30605090bb357ee6cf3a19bee64b20ca10c5540319dec80))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetscb2ea42e2bead425d5e8b61934723338cacbd6221052bd3f1f7a35c9a9321d49))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets5af5e8a508dabe83b30605090bb357ee6cf3a19bee64b20ca10c5540319dec80 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetscb2ea42e2bead425d5e8b61934723338cacbd6221052bd3f1f7a35c9a9321d49 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "5af5e8a508dabe83b30605090bb357ee6cf3a19bee64b20ca10c5540319dec80"; }
+            get { return "cb2ea42e2bead425d5e8b61934723338cacbd6221052bd3f1f7a35c9a9321d49"; }
         }
 
         /// <summary>
@@ -1713,7 +1713,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemBundle
-        [CodeFirstDatabaseSchema.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_dblUnit, T1.tblICItemBundle_dblPrice, T1.tblICItemBundle_intSort, T1.tblICItemBundle_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_intSort, T1.tblICItemBundle_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemBundleId AS tblICItemBundle_intItemBundleId, 
@@ -1722,8 +1722,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.strDescription AS tblICItemBundle_strDescription, 
             T.dblQuantity AS tblICItemBundle_dblQuantity, 
             T.intItemUnitMeasureId AS tblICItemBundle_intItemUnitMeasureId, 
-            T.dblUnit AS tblICItemBundle_dblUnit, 
-            T.dblPrice AS tblICItemBundle_dblPrice, 
             T.intSort AS tblICItemBundle_intSort, 
             T.intConcurrencyId AS tblICItemBundle_intConcurrencyId, 
             True AS _from0
@@ -4960,7 +4958,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemBundles
-        [iRely.Inventory.Model.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_dblUnit, T1.tblICItemBundle_dblPrice, T1.tblICItemBundle_intSort, T1.tblICItemBundle_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_intSort, T1.tblICItemBundle_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemBundleId AS tblICItemBundle_intItemBundleId, 
@@ -4969,8 +4967,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.strDescription AS tblICItemBundle_strDescription, 
             T.dblQuantity AS tblICItemBundle_dblQuantity, 
             T.intItemUnitMeasureId AS tblICItemBundle_intItemUnitMeasureId, 
-            T.dblUnit AS tblICItemBundle_dblUnit, 
-            T.dblPrice AS tblICItemBundle_dblPrice, 
             T.intSort AS tblICItemBundle_intSort, 
             T.intConcurrencyId AS tblICItemBundle_intConcurrencyId, 
             True AS _from0

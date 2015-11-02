@@ -1236,6 +1236,14 @@ Ext.define('Inventory.view.ItemViewModel', {
             else {
                 return true;
             }
+        },
+        readOnlyOnBundleItems: function(get) {
+            if (get('current.strType') === 'Bundle') {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
 

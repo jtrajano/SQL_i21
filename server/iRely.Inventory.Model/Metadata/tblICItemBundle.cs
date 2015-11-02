@@ -17,8 +17,6 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public decimal? dblQuantity { get; set; }
         public int? intItemUnitMeasureId { get; set; }
-        public decimal? dblUnit { get; set; }
-        public decimal? dblPrice { get; set; }
         public int? intSort { get; set; }
 
         private string _item;
@@ -57,6 +55,22 @@ namespace iRely.Inventory.Model
             set
             {
                 _uom = value;
+            }
+        }
+        private decimal _unitQty;
+        [NotMapped]
+        public decimal dblUnit
+        {
+            get
+            {
+                if (tblICItemUOM != null)
+                    return tblICItemUOM.dblUnitQty ?? 0;
+                else
+                    return 0;
+            }
+            set
+            {
+                _unitQty = value;
             }
         }
 

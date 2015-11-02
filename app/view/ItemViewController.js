@@ -151,7 +151,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
-                colAllowPurchase: 'ysnAllowPurchase',
+                colAllowPurchase: {
+                    disabled: '{readOnlyOnBundleItems}',
+                    dataIndex: 'ysnAllowPurchase'
+                },
                 colConvertToStock: 'dblConvertToStock',
                 colConvertFromStock: 'dblConvertFromStock',
                 colDetailLength: 'dblLength',
@@ -908,8 +911,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colBundleUnit: 'dblUnit',
-                colBundlePrice: 'dblPrice'
+                colBundleUnit: 'dblUnit'
             },
 
             //---------------//
@@ -1517,12 +1519,18 @@ Ext.define('Inventory.view.ItemViewController', {
         var grid = combo.up('grid');
         var win = grid.up('window');
         var plugin = grid.getPlugin('cepDetailUOM');
+        var currentItem = win.viewModel.data.current;
         var current = plugin.getActiveRecord();
         var uomConversion = win.viewModel.storeInfo.uomConversion;
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
-            current.set('ysnAllowPurchase', true);
+            if (currentItem.get('strType') === 'Bundle') {
+                current.set('ysnAllowPurchase', false);
+            }
+            else {
+                current.set('ysnAllowPurchase', true);
+            }
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
 
@@ -2464,6 +2472,24 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
+    // <editor-fold desc="Bundle Tab Methods and Event Handlers">
+
+    onBundleUOMSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepBundle');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colBundleUOM'){
+            current.set('dblUnit', records[0].get('dblUnitQty'));
+        }
+
+    },
+
+    // </editor-fold>
+
     // <editor-fold desc="Assembly Tab Methods and Event Handlers">
 
     onAssemblySelect: function(combo, records, eOpts) {
@@ -2842,6 +2868,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboSpecialPricingDiscountBy": {
                 select: this.onSpecialPricingSelect
+            },
+            "#cboBundleUOM": {
+                select: this.onBundleUOMSelect
             },
             "#cboAssemblyItem": {
                 select: this.onAssemblySelect
