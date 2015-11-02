@@ -27,7 +27,7 @@ BEGIN TRY
 	and QD.intShipToLocationId = @intShipToId
 	and QD.intSupplyPointId = @intSupplyPointId
 	and QH.dtmQuoteEffectiveDate <= @dtmTransactionDate
-	and QH.strQuoteStatus = 'Confirmed'
+	and QH.strQuoteStatus = 'Sent'
   order by QH.dtmQuoteEffectiveDate DESC
 
 if @dblQuotePrice is null
