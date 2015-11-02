@@ -1675,11 +1675,15 @@ WHERE strMenuName = 'Inventory Count Name'
 	AND strModuleName = 'Inventory' 
 	AND intParentMenuID = @InventoryParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Stock Report', N'Inventory', @InventoryParentMenuId, N'Simple Stock Report', N'Report', N'Report', N'Stock Report', N'small-menu-report', 1, 1, 0, 1, 24, 0)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Stock Report', intSort = 24 WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
+DELETE FROM tblSMMasterMenu
+WHERE strMenuName = 'Stock Report' 
+	AND strModuleName = 'Inventory' 
+	AND intParentMenuID = @InventoryParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Stock Report', N'Inventory', @InventoryParentMenuId, N'Simple Stock Report', N'Report', N'Report', N'Stock Report', N'small-menu-report', 1, 1, 0, 1, 24, 0)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'Stock Report', intSort = 24 WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
