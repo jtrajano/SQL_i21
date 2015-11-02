@@ -183,7 +183,7 @@ BEGIN TRY
 		,intWeightUOMId
 		,dblQty
 		,intItemUOMId
-		,NULL
+		,ISNULL((SELECT MAX(intSequenceNo) FROM dbo.tblMFWorkOrderInputLot WHERE intWorkOrderId =@intWorkOrderId),0)+1
 		,@dtmCurrentDate
 		,@intUserId
 		,@dtmCurrentDate
@@ -221,7 +221,7 @@ BEGIN TRY
 		,intWeightUOMId
 		,dblQty
 		,intItemUOMId
-		,NULL
+		,ISNULL((SELECT MAX(intSequenceNo) FROM dbo.tblMFWorkOrderConsumedLot WHERE intWorkOrderId =@intWorkOrderId),0)+1
 		,@dtmCurrentDate
 		,@intUserId
 		,@dtmCurrentDate
@@ -358,6 +358,7 @@ BEGIN TRY
 		,intSanitizationOrderDetailsId
 		,intLotId
 		,intConcurrencyId
+		,ysnIsWeightCertified
 		)
 	SELECT @intOrderHeaderId
 		,CL.intItemId
@@ -392,6 +393,7 @@ BEGIN TRY
 		,L.strLotAlias
 		,CL.intWorkOrderInputLotId
 		,L.intLotId
+		,1
 		,1
 	FROM dbo.tblMFWorkOrderInputLot CL
 	JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId
