@@ -23,7 +23,7 @@ SELECT TC.intTaxCodeId
 	 , dblNonTaxable    = (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId)
 	 , dblTaxable       = (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId)
 	 , dblTotalSales    = I.dblInvoiceTotal
-	 , dblTaxCollected  = CASE WHEN I.ysnPaid = 1 THEN ISNULL(I.dblTax, 0) ELSE 0 END
+	 , dblTaxCollected  = ISNULL(I.dblTax, 0)
 FROM tblSMTaxCode TC
 	LEFT OUTER JOIN tblSMTaxClass CL ON TC.intTaxClassId = CL.intTaxClassId
 	LEFT OUTER JOIN tblGLAccount SA ON TC.intSalesTaxAccountId = SA.intAccountId 
