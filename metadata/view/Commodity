@@ -966,134 +966,6 @@
                                                             "designerId": "e4237761-ef54-41df-b8a3-8c9db51ad953"
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intPatronageCategoryId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Patronage Category ID',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strCategoryCode',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Category Code',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strPurchaseSale',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Purchase/Sale',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitAmount',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit/Amount',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strCategoryCode",
-                                                        "fieldLabel": "Patronage Category",
-                                                        "itemId": "cboPatronageCategory",
-                                                        "labelWidth": 140,
-                                                        "layout|flex": null,
-                                                        "valueField": "intPatronageCategoryId",
-                                                        "width": 280
-                                                    },
-                                                    "name": "MyComboBox54",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "0ba2c2bf-184e-410f-acc7-7195db8c1f1c",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intPatronageCategoryId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Patronage Category ID',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strCategoryCode',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Category Code',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strPurchaseSale',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Purchase/Sale',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitAmount',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit/Amount',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strCategoryCode",
-                                                        "fieldLabel": "Direct",
-                                                        "itemId": "cboPatronageCategoryDirect",
-                                                        "labelWidth": 140,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "valueField": "intPatronageCategoryId"
-                                                    },
-                                                    "name": "MyComboBox55",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "a1709371-d660-447c-878b-8e258f635411",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
                                                 }
                                             ]
                                         }
@@ -1175,7 +1047,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter110",
+                                                            "name": "filter128",
                                                             "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2751,7 +2623,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter111",
+                                                    "name": "filter129",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3111,7 +2983,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter130",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3387,7 +3259,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter131",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3656,7 +3528,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter114",
+                                                    "name": "filter132",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3882,7 +3754,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging12",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

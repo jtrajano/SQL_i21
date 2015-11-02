@@ -49,9 +49,7 @@ namespace iRely.Inventory.Model
         public bool? ysnAllowLoadContracts { get; set; }
         public decimal? dblMaxUnder { get; set; }
         public decimal? dblMaxOver { get; set; }
-        public int? intPatronageCategoryId { get; set; }
-        public int? intPatronageCategoryDirectId { get; set; }
-
+        
         public ICollection<tblICItem> tblICItems { get; set; }
         public ICollection<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }

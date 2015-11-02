@@ -26,8 +26,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'RiskManagement.store.FutureMarketBuffered',
         'Grain.store.BufferedStorageSchedule',
         'Grain.store.BufferedDiscountId',
-        'Grain.store.BufferedDistributions',
-        'Patronage.store.BufferedPatronageCategory'
+        'Grain.store.BufferedDistributions'
     ],
 
     stores: {
@@ -99,12 +98,6 @@ Ext.define('Inventory.view.CommodityViewModel', {
         },
         accountCategory: {
             type: 'glbufaccountcategorygroup'
-        },
-        patronageCategory: {
-            type: 'patbufferedpatronagecategory'
-        },
-        directPatronageCategory: {
-            type: 'patbufferedpatronagecategory'
         },
         unitMeasure: {
             type: 'icbuffereduom'

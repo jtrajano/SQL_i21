@@ -77,17 +77,6 @@ Ext.define('Inventory.view.CommodityViewController', {
                 value: '{current.intScaleAutoDistId}',
                 store: '{autoScaleDist}'
             },
-//            chkAllowLoadContracts: '{current.ysnAllowLoadContracts}',
-//            txtMaximumUnder: '{current.dblMaxUnder}',
-//            txtMaximumOver: '{current.dblMaxOver}',
-            cboPatronageCategory: {
-                value: '{current.intPatronageCategoryId}',
-                store: '{patronageCategory}'
-            },
-            cboPatronageCategoryDirect: {
-                value: '{current.intPatronageCategoryDirectId}',
-                store: '{directPatronageCategory}'
-            },
 
             grdUom: {
                 colUOMCode: {
