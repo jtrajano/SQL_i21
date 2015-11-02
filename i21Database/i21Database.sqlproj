@@ -2790,6 +2790,7 @@
     <Build Include="dbo\Tables\tblLGShipmentBLContainerContractCost.sql" />
     <Build Include="dbo\Tables\tblLGShipmentBLContainerCost.sql" />
     <Build Include="dbo\Views\vyuCTItemContractView.sql" />
+    <Build Include="dbo\Functions\fnGetCompanyLogo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
