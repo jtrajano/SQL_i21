@@ -2795,6 +2795,7 @@
     <Build Include="dbo\Tables\tblPATDividendsCustomer.sql" />
     <Build Include="dbo\Tables\tblPATDividendsStock.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportItemPlan.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryAdjustment_CreatePostLotItemChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
