@@ -3,7 +3,7 @@ AS
 SELECT TOP 100 PERCENT  
   s.intCustomerStorageId
  ,E.strName  
-,intStorageTicketNumber
+,strStorageTicketNumber
 ,loc.strLocationName
 ,st.strStorageTypeDescription  
 ,s.dtmDeliveryDate  

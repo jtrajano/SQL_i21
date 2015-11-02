@@ -181,7 +181,7 @@ BEGIN TRY
 		FROM @ItemsToMove
 		WHERE intItemsToMoveKey = @ItemsToMoveKey
 		
-		SELECT @CurrentItemOpenBalance=dblOpenBalance,@TicketNo=intStorageTicketNumber,@intItemId=intItemId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+		SELECT @CurrentItemOpenBalance=dblOpenBalance,@TicketNo=strStorageTicketNumber,@intItemId=intItemId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
 
 		SELECT @ItemStorageTypeDescription = strStorageTypeDescription
 		FROM tblGRStorageType
@@ -204,7 +204,7 @@ BEGIN TRY
 		
 		IF @CurrentItemOpenBalance <> @ItemBalance
 		BEGIN		 
-		 SELECT @TicketNo=intStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+		 SELECT @TicketNo=strStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
 		 SET @ErrMsg='The Open balance of ticket '+@TicketNo+' has been modified by another user.  Transfer Process cannot proceed.'
 		 RAISERROR(@ErrMsg,16,1)		 
 		END
@@ -326,7 +326,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -361,7 +361,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,intItemId
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -491,7 +491,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -526,7 +526,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -655,7 +655,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -690,7 +690,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -820,7 +820,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -855,7 +855,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -985,7 +985,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -1020,7 +1020,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -1149,7 +1149,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -1184,7 +1184,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -1316,7 +1316,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -1351,7 +1351,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId

@@ -505,7 +505,7 @@ BEGIN TRY
 	           ,[ysnPrinted]
 	           ,[dblCurrencyRate]
 			   ,[intCurrencyId]
-			   ,[intStorageTicketNumber]
+			   ,[strStorageTicketNumber]
 			   ,[intItemId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId

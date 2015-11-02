@@ -145,7 +145,7 @@ BEGIN TRY
 			,[dblDiscountsPaid]
 			,[strCustomerReference]
 			,[intCurrencyId]
-			,[intStorageTicketNumber]
+			,[strStorageTicketNumber]
 			,intItemId
 			
 		)

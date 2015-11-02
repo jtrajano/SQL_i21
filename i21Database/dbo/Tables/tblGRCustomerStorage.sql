@@ -33,7 +33,7 @@
     [strCustomerReference] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [strStorageType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [intCurrencyId] INT NULL,
-	[intStorageTicketNumber] INT NULL,
+	[strStorageTicketNumber] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] INT NULL,  
     CONSTRAINT [PK_tblGRCustomerStorage_intCustomerStorageId] PRIMARY KEY ([intCustomerStorageId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),

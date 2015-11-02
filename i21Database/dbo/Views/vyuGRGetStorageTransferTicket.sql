@@ -2,7 +2,7 @@ CREATE VIEW [dbo].[vyuGRGetStorageTransferTicket]
 AS  
 SELECT TOP 100 PERCENT   
    a.intCustomerStorageId  
-   ,a.intStorageTicketNumber  
+   ,a.strStorageTicketNumber  
   ,a.intEntityId  
  ,E.strName  
  ,a.intStorageTypeId  
