@@ -19,7 +19,7 @@ AS
 						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CM.intUnitMeasureId,PU.intUnitMeasureId,
 						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblDetailQuantity)*CC.dblRate)
 					WHEN	CC.strCostMethod = 'Amount'		THEN
-						CC.dblRate
+						CC.dblRate/dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)
 					WHEN	CC.strCostMethod = 'Percentage' THEN 
 						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)*CD.dblCashPrice*CC.dblRate/100
 			END dblAmountPer,
