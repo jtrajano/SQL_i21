@@ -1033,6 +1033,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataIndex: 'strStorageLocationName',
                                                                                             dataType: 'string',
                                                                                             hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'ysnReceiveUOMAllowPurchase',
+                                                                                            dataType: 'boolean',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboItem',

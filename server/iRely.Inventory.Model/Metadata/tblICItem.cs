@@ -374,6 +374,8 @@ namespace iRely.Inventory.Model
         public decimal? dblReceiveStandardCost { get; set; }
         public decimal? dblReceiveAverageCost { get; set; }
         public decimal? dblReceiveEndMonthCost { get; set; }
+        public bool? ysnReceiveUOMAllowPurchase { get; set; }
+        public bool? ysnReceiveUOMAllowSale { get; set; }
         public string strIssueUOM { get; set; }
         public string strIssueUPC { get; set; }
         public decimal? dblIssueSalePrice { get; set; }
@@ -382,6 +384,8 @@ namespace iRely.Inventory.Model
         public decimal? dblIssueStandardCost { get; set; }
         public decimal? dblIssueAverageCost { get; set; }
         public decimal? dblIssueEndMonthCost { get; set; }
+        public bool? ysnIssueUOMAllowPurchase { get; set; }
+        public bool? ysnIssueUOMAllowSale { get; set; }
         public decimal? dblMinOrder { get; set; }
         public decimal? dblReorderPoint { get; set; }
         public int? intAllowNegativeInventory { get; set; }

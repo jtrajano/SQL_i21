@@ -1923,6 +1923,11 @@
                                                                                     "dataIndex: 'strStorageLocationName',",
                                                                                     "dataType: 'string',",
                                                                                     "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'ysnReceiveUOMAllowPurchase',",
+                                                                                    "dataType: 'boolean',",
+                                                                                    "hidden: true",
                                                                                     "}",
                                                                                     "]"
                                                                                 ],
