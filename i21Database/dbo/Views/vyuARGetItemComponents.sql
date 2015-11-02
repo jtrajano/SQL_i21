@@ -27,7 +27,7 @@ SELECT intRecipeId = NULL
 	 , IB.intItemUnitMeasureId
 	 , UOM.strUnitMeasure
 	 , IB.dblQuantity
-	 , IB.dblPrice
+	 , dblPrice = 0 -- Removed Price field from Bundle Components
 	 , strItemType = 'Inventory'
 	 , strType = 'Bundle'
 FROM tblICItemBundle IB

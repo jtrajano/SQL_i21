@@ -13,8 +13,7 @@ SELECT ItemBundle.intItemBundleId
 , ItemBundle.intItemUnitMeasureId
 , dblConversionFactor = ItemUOM.dblUnitQty
 , UOM.strUnitMeasure
-, ItemBundle.dblUnit
-, ItemBundle.dblPrice
+, ItemUOM.dblUnitQty
 , ItemBundle.intSort
 FROM tblICItemBundle ItemBundle
 	LEFT JOIN tblICItem Item ON Item.intItemId = ItemBundle.intItemId

@@ -551,16 +551,12 @@ BEGIN
 		strDescription,
 		dblQuantity,
 		intItemUnitMeasureId,
-		dblUnit,
-		dblPrice,
 		intSort )
 	SELECT @NewItemId,
 		intBundleItemId,
 		strDescription,
 		dblQuantity,
 		dbo.fnICGetItemUOMIdFromDuplicateItem(intItemUnitMeasureId, @NewItemId),
-		dblUnit,
-		dblPrice,
 		intSort 
 	FROM tblICItemBundle
 	WHERE intItemId = @ItemId

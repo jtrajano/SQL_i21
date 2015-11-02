@@ -18,8 +18,6 @@ Type the overview for the table here.
 		[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intItemUnitMeasureId] INT NULL, 
-		[dblUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemBundle] PRIMARY KEY ([intItemBundleId]),
@@ -83,23 +81,9 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = 'intItemUnitMeasureId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Unit',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemBundle',
-		@level2type = N'COLUMN',
-		@level2name = N'dblUnit'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Price',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemBundle',
-		@level2type = N'COLUMN',
-		@level2name = N'dblPrice'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sort Field',
