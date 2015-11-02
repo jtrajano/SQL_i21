@@ -249,6 +249,7 @@ BEGIN TRY
 		,@strBOLNo NVARCHAR(50)
 		,@intEntityId INT
 		,@intOrderHeaderId INT
+		,@strItemNo nvarchar(50)
 
 	SELECT @intOwnerId = IO.intOwnerId
 	FROM dbo.tblICItemOwner IO
@@ -283,6 +284,19 @@ BEGIN TRY
 		,@strBOLNo OUTPUT
 
 	DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
+
+	IF @intOwnerId IS NULL
+	BEGIN
+		SELECT @strItemNo = I.strItemNo 
+		FROM dbo.tblICItem I
+		WHERE intItemId IN (
+			SELECT intItemId
+			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intItemId INT) x
+			)
+
+		RAISERROR(90005,14,1,@strItemNo)
+	END
+
 
 	SELECT @strXML = '<root>'
 
