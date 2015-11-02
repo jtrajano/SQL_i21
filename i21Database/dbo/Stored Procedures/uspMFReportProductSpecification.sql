@@ -52,9 +52,9 @@ BEGIN TRY
 		,U1.strUnitMeasure AS strInputUnitMeasure
 	FROM dbo.tblMFWorkOrder W 
 	JOIN dbo.tblICItem I ON W.intItemId = I.intItemId AND W.strWorkOrderNo = @strWorkOrderNo
+	JOIN dbo.tblICItemUOM IU ON W.intItemUOMId = IU.intItemUOMId
+	JOIN dbo.tblICUnitMeasure U ON IU.intUnitMeasureId = U.intUnitMeasureId
 	LEFT JOIN dbo.tblMFWorkOrderProductSpecification PS ON W.intWorkOrderId = PS.intWorkOrderId
-	LEFT JOIN dbo.tblICItemUOM IU ON W.intItemUOMId = IU.intItemUOMId
-	LEFT JOIN dbo.tblICUnitMeasure U ON IU.intUnitMeasureId = U.intUnitMeasureId
 	LEFT JOIN dbo.tblMFWorkOrderItem WI ON W.intWorkOrderId = WI.intWorkOrderId
 	LEFT JOIN dbo.tblICItem I1 ON WI.intItemId = I1.intItemId
 	LEFT JOIN dbo.tblICItemUOM IU1 ON WI.intItemUOMId = IU1.intItemUOMId
