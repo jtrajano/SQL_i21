@@ -2791,6 +2791,9 @@
     <Build Include="dbo\Tables\tblLGShipmentBLContainerCost.sql" />
     <Build Include="dbo\Views\vyuCTItemContractView.sql" />
     <Build Include="dbo\Functions\fnGetCompanyLogo.sql" />
+    <Build Include="dbo\Tables\tblPATDividends.sql" />
+    <Build Include="dbo\Tables\tblPATDividendsCustomer.sql" />
+    <Build Include="dbo\Tables\tblPATDividendsStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
