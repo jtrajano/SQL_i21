@@ -54,6 +54,7 @@
 	[strActualCostId]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[intShipmentId]				INT												NULL,        	
 	[intTransactionId]			INT												NULL,        	
+	[intOriginalInvoiceId]		INT												NULL,        	
 	[intEntityId]				INT												NOT NULL	DEFAULT ((0)), 
 	[intConcurrencyId]			INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),

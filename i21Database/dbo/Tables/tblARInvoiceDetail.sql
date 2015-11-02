@@ -34,6 +34,7 @@
 	[intShipmentPurchaseSalesContractId]	INT												NULL,
 	[intTicketId]							INT												NULL, 
 	[intTicketHoursWorkedId]				INT												NULL,
+	[intOriginalInvoiceDetailId]			INT												NULL,
 	[intSiteId]								INT												NULL,
 	[strBillingBy]							NVARCHAR(100)   COLLATE Latin1_General_CI_AS	NULL,
 	[dblPercentFull]						NUMERIC(18, 6)									NULL,

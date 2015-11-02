@@ -3,7 +3,8 @@
 	,@ItemId						INT
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
-	,@RaiseError					BIT				= 0			
+	,@RaiseError					BIT				= 0	
+	,@ItemDocumentNumber			NVARCHAR(100)	= NULL		
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
@@ -30,6 +31,7 @@
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL			
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL		
+	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
@@ -137,6 +139,7 @@ BEGIN TRY
 	INSERT INTO [tblARInvoiceDetail]
 		([intInvoiceId]
 		,[intItemId]
+		,[strDocumentNumber]
 		,[strItemDescription]
 		,[intItemUOMId]
 		,[dblQtyOrdered]
@@ -168,6 +171,7 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId]
 		,[intTicketId]
 		,[intTicketHoursWorkedId]
+		,[intOriginalInvoiceDetailId]
 		,[intSiteId]
 		,[strBillingBy]
 		,[dblPercentFull]
@@ -181,6 +185,7 @@ BEGIN TRY
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= IC.[intItemId] 
+		,[strDocumentNumber]				= @ItemDocumentNumber
 		,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
 		,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
 		,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
@@ -212,6 +217,7 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
 		,[intTicketId]						= @ItemTicketId
 		,[intTicketHoursWorkedId]			= @ItemTicketHoursWorkedId 
+		,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId 
 		,[intSiteId]						= @ItemSiteId
 		,[strBillingBy]						= @ItemBillingBy
 		,[dblPercentFull]					= @ItemPercentFull
