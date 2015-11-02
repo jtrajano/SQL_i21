@@ -191,10 +191,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     formulas: {
         getShipButtonText: function(get) {
             if (get('current.ysnPosted')) {
-                return 'UnShip';
+                return 'Unpost';
             }
             else {
-                return 'Ship';
+                return 'Post';
             }
         },
         getShipButtonIcon: function(get) {

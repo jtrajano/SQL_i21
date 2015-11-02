@@ -165,10 +165,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.intShiftNumber}',
                 readOnly: '{current.ysnPosted}'
             },
-            txtNotes: {
-                value: '{current.strNotes}',
-                readOnly: '{current.ysnPosted}'
-            },
             btnInsertInventoryReceipt: {
                 hidden: '{current.ysnPosted}'
             },

@@ -120,7 +120,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         tabIndex: -1,
                                         itemId: 'btnReceive',
                                         ui: 'i21-button-toolbar-small',
-                                        text: 'Receive'
+                                        text: 'Post'
                                     },
                                     {
                                         xtype: 'button',
@@ -1931,76 +1931,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        hidden: true,
-                                        itemId: 'pgeIncomingInspection',
-                                        layout: 'fit',
-                                        title: 'Incoming Inspection',
-                                        items: [
-                                            {
-                                                xtype: 'gridpanel',
-                                                itemId: 'grdIncomingInspection',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnSelectAll',
-                                                                iconCls: 'small-select-all',
-                                                                text: 'Select All'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnClearAll',
-                                                                iconCls: 'small-select-none',
-                                                                text: 'Clear All'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colInspect',
-                                                        width: 65,
-                                                        text: 'Inspect'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colQualityPropertyName',
-                                                        width: 82,
-                                                        dataIndex: 'string',
-                                                        text: 'Quality Property Name',
-                                                        flex: 1
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvIncomingInspection'
-                                                },
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepInspection',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
                                         itemId: 'pgeFreightInvoice',
                                         bodyPadding: 5,
                                         title: 'Charges & Invoice',
@@ -2381,6 +2311,75 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeIncomingInspection',
+                                        layout: 'fit',
+                                        title: 'Incoming Inspection',
+                                        items: [
+                                            {
+                                                xtype: 'gridpanel',
+                                                itemId: 'grdIncomingInspection',
+                                                margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnSelectAll',
+                                                                iconCls: 'small-select-all',
+                                                                text: 'Select All'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnClearAll',
+                                                                iconCls: 'small-select-none',
+                                                                text: 'Clear All'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colInspect',
+                                                        width: 65,
+                                                        text: 'Inspect'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colQualityPropertyName',
+                                                        width: 82,
+                                                        dataIndex: 'string',
+                                                        text: 'Quality Property Name',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvIncomingInspection'
+                                                },
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepInspection',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
                                         itemId: 'pgeEDI',
                                         bodyPadding: 10,
                                         title: 'EDI',
@@ -2657,12 +2656,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        itemId: 'pgeNotes',
+                                        itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Notes',
+                                        title: 'Comments',
                                         tabConfig: {
                                             xtype: 'tab',
-                                            itemId: 'cfgNotes'
+                                            itemId: 'cfgComments'
                                         },
                                         items: [
                                             {

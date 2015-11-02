@@ -370,10 +370,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         getReceiveButtonText: function (get) {
             if (get('current.ysnPosted')) {
-                return 'UnReceive';
+                return 'Unpost';
             }
             else {
-                return 'Receive';
+                return 'Post';
             }
         },
         checkHideOrderNo: function (get) {
