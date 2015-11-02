@@ -20,6 +20,9 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , I.intEntityCustomerId
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
 	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, 'Statement Footer')
+	 , blbCompanyLogo = [dbo].fnGetCompanyLogo()
+	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+	 , strCompanyAddress = (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
 		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	

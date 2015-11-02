@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceReport]
 AS
 SELECT INV.intInvoiceId
+	 , blbCompanyLogo = [dbo].fnGetCompanyLogo()
 	 , strCompanyName = CASE WHEN L.strUseLocationAddress = 'Letterhead'
 								THEN ''
 							 ELSE
