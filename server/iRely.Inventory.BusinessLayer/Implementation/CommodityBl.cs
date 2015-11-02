@@ -34,6 +34,31 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public override async Task<BusinessResult<tblICCommodity>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            var msg = result.Exception.Message;
+
+            if (result.HasError)
+            {
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICCommodity_strCommodityCode'"))
+                {
+                    msg = "Commodity Code must be unique.";
+                }
+            }
+
+            return new BusinessResult<tblICCommodity>()
+            {
+                success = !result.HasError,
+                message = new MessageResult()
+                {
+                    statusText = msg,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            };
+        }
+
         /// <summary>
         /// Get Compact version of Commodity Details
         /// </summary>
