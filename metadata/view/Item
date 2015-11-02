@@ -2387,57 +2387,6 @@
                                                     "designerId": "d89f876c-1c8f-48fc-a24f-b4ce4805c5e0",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "{",
-                                                                    "dataIndex: 'intPatronageCategoryId',",
-                                                                    "dataType: 'numeric',",
-                                                                    "text: 'Patronage Category ID',",
-                                                                    "hidden: true",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strCategoryCode',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Category Code',",
-                                                                    "flex: 1",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strDescription',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Description',",
-                                                                    "flex: 1",
-                                                                    "}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strCategoryCode",
-                                                                "fieldLabel": "Patronage",
-                                                                "itemId": "cboPatronage",
-                                                                "labelWidth": 116,
-                                                                "layout|flex": null,
-                                                                "valueField": "intPatronageCategoryId"
-                                                            },
-                                                            "name": "MyComboBox8",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "672c6f55-2007-4948-baa8-26d02b7bdedf",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
                                                             "type": "Ext.form.field.Checkbox",
                                                             "reference": {
                                                                 "name": "items",
@@ -2589,6 +2538,23 @@
                                                             },
                                                             "name": "MyCheckbox32",
                                                             "designerId": "e2e85845-40af-4f98-a5c0-86a444f2a9f1"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "List Bundle Items Separately",
+                                                                "itemId": "chkListBundleSeparately",
+                                                                "labelWidth": 116,
+                                                                "layout|flex": null
+                                                            },
+                                                            "name": "MyCheckbox29",
+                                                            "designerId": "e60a903c-f316-4e90-8663-328b4a32141e"
                                                         },
                                                         {
                                                             "type": "Ext.panel.Panel",
@@ -8335,6 +8301,129 @@
                                                                     },
                                                                     "name": "MyNumberField12",
                                                                     "designerId": "b256e5c4-0313-42e2-9da1-160a1c127369"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "container|align": "stretch",
+                                                                "container|padding": 5,
+                                                                "itemId": "pnlPatronage",
+                                                                "layout": "vbox",
+                                                                "layout|flex": null,
+                                                                "margin": "5 0 0 0",
+                                                                "title": "Patronage"
+                                                            },
+                                                            "name": "MyPanel34",
+                                                            "designerId": "91869f75-6e52-4d97-86a5-1117ec0847ed",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "{",
+                                                                            "dataIndex: 'intPatronageCategoryId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "text: 'Patronage Category ID',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strCategoryCode',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Category Code',",
+                                                                            "flex: 1",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strDescription',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Description',",
+                                                                            "flex: 1",
+                                                                            "}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strCategoryCode",
+                                                                        "fieldLabel": "Patronage Category",
+                                                                        "itemId": "cboPatronage",
+                                                                        "labelWidth": 116,
+                                                                        "layout|flex": null,
+                                                                        "valueField": "intPatronageCategoryId"
+                                                                    },
+                                                                    "name": "MyComboBox8",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "672c6f55-2007-4948-baa8-26d02b7bdedf",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "{",
+                                                                            "dataIndex: 'intPatronageCategoryId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "text: 'Patronage Category ID',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strCategoryCode',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Category Code',",
+                                                                            "flex: 1",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strDescription',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Description',",
+                                                                            "flex: 1",
+                                                                            "}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strCategoryCode",
+                                                                        "fieldLabel": "Direct Sale",
+                                                                        "itemId": "cboPatronageDirect",
+                                                                        "labelWidth": 116,
+                                                                        "layout|flex": null,
+                                                                        "valueField": "intPatronageCategoryId"
+                                                                    },
+                                                                    "name": "MyComboBox18",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "d25ec096-e4a7-4f3f-80ac-24ec76c77621",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         }

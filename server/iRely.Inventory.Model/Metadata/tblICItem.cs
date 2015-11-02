@@ -50,6 +50,7 @@ namespace iRely.Inventory.Model
         public string strMask2 { get; set; }
         public string strMask3 { get; set; }
         public int? intPatronageCategoryId { get; set; }
+        public int? intPatronageCategoryDirectId { get; set; }
         public int? intSalesTaxGroupId { get; set; }
         public int? intPurchaseTaxGroupId { get; set; }
         public bool? ysnStockedItem { get; set; }
@@ -86,6 +87,7 @@ namespace iRely.Inventory.Model
         public decimal? dblOverReceiveTolerance { get; set; }
         public string strMaintenanceCalculationMethod { get; set; }
         public decimal? dblMaintenanceRate { get; set; }
+        public bool? ysnListBundleSeparately { get; set; }
         public int? intModuleId { get; set; }
         public string strNACSCategory { get; set; }
         public string strWICCode { get; set; }

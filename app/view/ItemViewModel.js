@@ -223,6 +223,9 @@ Ext.define('Inventory.view.ItemViewModel', {
         patronage: {
             type: 'patbufferedpatronagecategory'
         },
+        directSale: {
+            type: 'patbufferedpatronagecategory'
+        },
         taxClass: {
             type: 'icbufferedfueltaxclass'
         },

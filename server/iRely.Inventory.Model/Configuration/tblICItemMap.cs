@@ -50,6 +50,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMask2).HasColumnName("strMask2");
             this.Property(t => t.strMask3).HasColumnName("strMask3");
             this.Property(t => t.intPatronageCategoryId).HasColumnName("intPatronageCategoryId");
+            this.Property(t => t.intPatronageCategoryDirectId).HasColumnName("intPatronageCategoryDirectId");
             this.Property(t => t.intSalesTaxGroupId).HasColumnName("intSalesTaxGroupId");
             this.Property(t => t.intPurchaseTaxGroupId).HasColumnName("intPurchaseTaxGroupId");
             this.Property(t => t.ysnStockedItem).HasColumnName("ysnStockedItem");
@@ -86,6 +87,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOverReceiveTolerance).HasColumnName("dblOverReceiveTolerance").HasPrecision(18, 6);
             this.Property(t => t.strMaintenanceCalculationMethod).HasColumnName("strMaintenanceCalculationMethod");
             this.Property(t => t.dblMaintenanceRate).HasColumnName("dblMaintenanceRate").HasPrecision(18, 6);
+            this.Property(t => t.ysnListBundleSeparately).HasColumnName("ysnListBundleSeparately");
             this.Property(t => t.intModuleId).HasColumnName("intModuleId");
             this.Property(t => t.strNACSCategory).HasColumnName("strNACSCategory");
             this.Property(t => t.strWICCode).HasColumnName("strWICCode");

@@ -1143,34 +1143,6 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intPatronageCategoryId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Patronage Category ID',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strCategoryCode',
-                                                                                dataType: 'string',
-                                                                                text: 'Category Code',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboPatronage',
-                                                                        fieldLabel: 'Patronage',
-                                                                        labelWidth: 116,
-                                                                        displayField: 'strCategoryCode',
-                                                                        valueField: 'intPatronageCategoryId'
-                                                                    },
-                                                                    {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkStockedItem',
                                                                         fieldLabel: 'Stocked Item',
@@ -1224,6 +1196,12 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkFuelItem',
                                                                         fieldLabel: 'Fuel Item',
+                                                                        labelWidth: 116
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkListBundleSeparately',
+                                                                        fieldLabel: 'List Bundle Items Separately',
                                                                         labelWidth: 116
                                                                     },
                                                                     {
@@ -3853,6 +3831,75 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 110,
                                                                                 fieldStyle: 'text-align:right',
                                                                                 hideTrigger: true
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'panel',
+                                                                        itemId: 'pnlPatronage',
+                                                                        margin: '5 0 0 0',
+                                                                        title: 'Patronage',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch',
+                                                                            padding: 5
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intPatronageCategoryId',
+                                                                                        dataType: 'numeric',
+                                                                                        text: 'Patronage Category ID',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCategoryCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Category Code',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strDescription',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Description',
+                                                                                        flex: 1
+                                                                                    }
+                                                                                ],
+                                                                                itemId: 'cboPatronage',
+                                                                                fieldLabel: 'Patronage Category',
+                                                                                labelWidth: 116,
+                                                                                displayField: 'strCategoryCode',
+                                                                                valueField: 'intPatronageCategoryId'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intPatronageCategoryId',
+                                                                                        dataType: 'numeric',
+                                                                                        text: 'Patronage Category ID',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strCategoryCode',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Category Code',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strDescription',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Description',
+                                                                                        flex: 1
+                                                                                    }
+                                                                                ],
+                                                                                itemId: 'cboPatronageDirect',
+                                                                                fieldLabel: 'Direct Sale',
+                                                                                labelWidth: 116,
+                                                                                displayField: 'strCategoryCode',
+                                                                                valueField: 'intPatronageCategoryId'
                                                                             }
                                                                         ]
                                                                     }

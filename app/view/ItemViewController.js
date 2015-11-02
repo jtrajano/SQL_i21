@@ -242,10 +242,6 @@ Ext.define('Inventory.view.ItemViewController', {
             //---------//
             //Sales Tab//
             //---------//
-            cboPatronage: {
-                value: '{current.intPatronageCategoryId}',
-                store: '{patronage}'
-            },
             cboFuelTaxClass: {
                 value: '{current.intFuelTaxClassId}',
                 store: '{taxClass}'
@@ -284,6 +280,10 @@ Ext.define('Inventory.view.ItemViewController', {
             cboFuelCategory: {
                 value: '{current.intRINFuelTypeId}',
                 store: '{fuelCategory}'
+            },
+            chkListBundleSeparately: {
+                disabled: '{!readOnlyOnBundleItems}',
+                value: '{current.ysnListBundleSeparately}'
             },
             txtPercentDenaturant: '{current.dblDenaturantPercent}',
             chkTonnageTax: '{current.ysnTonnageTax}',
@@ -567,6 +567,15 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colMFTProductCodeDescription: 'strProductDescription',
                 colMFTProductCodeGroup: 'strProductCodeGroup'
+            },
+
+            cboPatronage: {
+                value: '{current.intPatronageCategoryId}',
+                store: '{patronage}'
+            },
+            cboPatronageDirect: {
+                value: '{current.intPatronageCategoryDirectId}',
+                store: '{directSale}'
             },
 
             //-----------------//
