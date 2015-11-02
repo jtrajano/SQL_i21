@@ -83,12 +83,12 @@ BEGIN
 		SELECT @intOpenStatusId = 3
 	END
 
-	IF @strShowFROZENWorkOrder = 'Yes'
+	IF @strShowFrozenWorkOrder = 'Yes'
 	BEGIN
 		SELECT @intFrozenStatusId = 4
 	END
 
-	IF @strShowPAUSEDWorkOrder = 'Yes'
+	IF @strShowPausedWorkOrder = 'Yes'
 	BEGIN
 		SELECT @intPausedStatusId = 11
 	END
@@ -98,7 +98,7 @@ BEGIN
 		SELECT @intReleaseStatusId = 9
 	END
 
-	IF @strShowSTARTEDWorkOrder = 'Yes'
+	IF @strShowStartedWorkOrder = 'Yes'
 	BEGIN
 		SELECT @intStartedStatusId = 10
 	END
