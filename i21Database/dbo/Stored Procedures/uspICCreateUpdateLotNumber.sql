@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateUpdateLotNumber]
 	@ItemsForLot ItemLotTableType READONLY 
 	,@intEntityUserSecurityId AS INT 
-	,@intLotStatusId AS INT = 1 -- (1: is Active, 2: is On Hold, 3: Quarantine) 
+	,@intLotStatusId AS INT = NULL -- (1: is Active, 2: is On Hold, 3: Quarantine) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -73,7 +73,7 @@ DECLARE
 	,@strNotes					AS NVARCHAR(MAX)
 	,@intEntityVendorId			AS INT 
 	,@strVendorLotNo			AS NVARCHAR(50)
-	,@strGarden					AS INT
+	,@strGarden					AS NVARCHAR(100)
 	,@strContractNo				AS NVARCHAR(50)
 	,@ysnReleasedToWarehouse	AS BIT
 	,@ysnProduced				AS BIT 
@@ -82,30 +82,9 @@ DECLARE
 	,@dblGrossWeight			AS NUMERIC(18,6)
 	,@strParentLotNumber		AS NVARCHAR(50) 
 	,@strParentLotAlias			AS NVARCHAR(50) 
-
+	,@intLotStatusId_ItemLotTable AS INT 
 
 DECLARE @OwnerShipType_Own AS INT = 1
-
----- Check for UNIQUE errors. 
---BEGIN
---	SELECT	TOP 1 
---			@strReceiptNumber = LotMaster.strReceiptNumber
---			,@strLotNumber = LotMaster.strLotNumber
---	FROM	tblICLot LotMaster INNER JOIN @ItemsForLot LotFromTransaction
---				ON LotMaster.intItemId = LotFromTransaction.intItemId
---				AND LotMaster.strLotNumber = LotFromTransaction.strLotNumber
---			INNER JOIN dbo.tblICItemLocation ItemLocation
---				ON ItemLocation.intItemLocationId = LotFromTransaction.intItemLocationId
---				AND LotMaster.intLocationId = ItemLocation.intLocationId
---	WHERE	ISNULL(LotMaster.dblQty, 0) > 0
-
---	IF ISNULL(@strReceiptNumber, '') <> ''
---	BEGIN 
---		-- 'The lot number {Lot Number} is already used in {Transaction Id}.'
---		RAISERROR(80018, 11, 1, @strLotNumber, @strReceiptNumber);
---		RETURN -9
---	END 
---END			
 
 -- Check for redundant lot numbers 
 BEGIN 
@@ -169,6 +148,7 @@ SELECT  intId
 		,dblGrossWeight
 		,strParentLotNumber
 		,strParentLotAlias
+		,intLotStatusId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -207,6 +187,8 @@ FETCH NEXT FROM loopLotItems INTO
 		,@dblGrossWeight
 		,@strParentLotNumber
 		,@strParentLotAlias
+		,@intLotStatusId_ItemLotTable
+;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -267,6 +249,9 @@ BEGIN
 		RAISERROR(80015, 11, 1, @strItemNo, @strLotNumber)  
 		RETURN -4; 
 	END 
+
+	-- Setup the Lot Status
+	SET @intLotStatusId_ItemLotTable = ISNULL(ISNULL(@intLotStatusId, @intLotStatusId_ItemLotTable), @Active) 
 
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
@@ -409,7 +394,7 @@ BEGIN
 												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
-											) THEN @intLotStatusId ELSE LotMaster.intLotStatusId
+											) THEN @intLotStatusId_ItemLotTable ELSE LotMaster.intLotStatusId
 											END 
 				,ysnReleasedToWarehouse =	CASE WHEN (
 												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
@@ -524,7 +509,7 @@ BEGIN
 				,0 -- (keep at zero. We only need to create the lot record)
 				,@dtmExpiryDate
 				,@strLotAlias
-				,@intLotStatusId
+				,@intLotStatusId_ItemLotTable
 				,0 -- (keep at zero. We only need to create the lot record)
 				,@intWeightUOMId
 				,CASE WHEN ISNULL(@intWeightUOMId, 0) <> 0 THEN 
@@ -571,7 +556,7 @@ BEGIN
 			,@strParentLotAlias
 			,@intItemId
 			,@dtmExpiryDate
-			,@intLotStatusId
+			,@intLotStatusId_ItemLotTable
 			,@intEntityUserSecurityId
 			,@intLotId
 			,@intParentLotId OUTPUT 
@@ -705,6 +690,7 @@ BEGIN
 		,@dblGrossWeight
 		,@strParentLotNumber
 		,@strParentLotAlias
+		,@intLotStatusId_ItemLotTable
 	;
 END
 

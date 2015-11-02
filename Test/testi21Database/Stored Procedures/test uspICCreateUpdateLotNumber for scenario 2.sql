@@ -53,6 +53,14 @@ BEGIN
 				,[strModule]			= N'Posting'
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
+		UNION ALL
+		SELECT	[intStartingNumberId]	= 78
+				,[strTransactionType]	= N'Parent Lot Number'
+				,[strPrefix]			= N'PLOT-'
+				,[intNumber]			= 1
+				,[strModule]			= N'Manufacturing'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1	
 
 		DECLARE @Items AS ItemLotTableType
 		DECLARE @intEntityUserSecurityId AS INT 
@@ -82,8 +90,7 @@ BEGIN
 				,@strNotes					AS NVARCHAR(MAX)
 				,@intEntityVendorId			AS INT 
 				,@strVendorLotNo			AS NVARCHAR(50)
-				,@intVendorLocationId		AS INT
-				,@strVendorLocation			AS NVARCHAR(100)
+				,@strGarden					AS NVARCHAR(100)
 				,@strContractNo				AS NVARCHAR(50)
 				,@ysnReleasedToWarehouse	AS BIT
 				,@ysnProduced				AS BIT 
@@ -119,7 +126,7 @@ BEGIN
 			,[intEntityVendorId]				INT 
 			,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[intVendorLocationId]		INT 
-			,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS 
+			,[strGarden]				NVARCHAR(100) COLLATE Latin1_General_CI_AS 
 			,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[dtmManufacturedDate]		DATETIME 
 			,[ysnReleasedToWarehouse]	BIT 
@@ -157,7 +164,7 @@ BEGIN
 				,@strNotes					= 'Add notes for a lot number'
 				,@intEntityVendorId			= 1
 				,@strVendorLotNo			= 'Vendor lot number is 1abc-049843'
-				,@intVendorLocationId		= 1
+				,@strGarden					= 'Garden'
 				,@strContractNo				= 'Contract No.'
 				,@ysnReleasedToWarehouse	= 0
 				,@ysnProduced				= 0
@@ -189,7 +196,7 @@ BEGIN
 			,strNotes
 			,intEntityVendorId
 			,strVendorLotNo
-			,intVendorLocationId
+			,strGarden
 			,intDetailId
 			,dblGrossWeight
 	)
@@ -215,7 +222,7 @@ BEGIN
 			,strNotes				= @strNotes
 			,intEntityVendorId		= @intEntityVendorId
 			,strVendorLotNo			= @strVendorLotNo
-			,intVendorLocationId	= @intVendorLocationId
+			,strGarden				= @strGarden
 			,intDetailId			= @intDetailId
 			,dblGrossWeight			= @dblGrossWeight
 
@@ -245,7 +252,7 @@ BEGIN
 				,strNotes
 				,intEntityVendorId
 				,strVendorLotNo
-				,intVendorLocationId
+				,strGarden
 				,dblGrossWeight
 				,intCreatedEntityId
 		)
@@ -273,7 +280,7 @@ BEGIN
 				,strNotes				= @strNotes
 				,intEntityVendorId		= @intEntityVendorId
 				,strVendorLotNo			= @strVendorLotNo
-				,intVendorLocationId	= @intVendorLocationId
+				,strGarden				= @strGarden
 				,dblGrossWeight			= @dblGrossWeight
 				,intCreatedEntityId		= @intEntityUserSecurityId
 	END 
@@ -313,7 +320,7 @@ BEGIN
 				,strNotes
 				,intEntityVendorId
 				,strVendorLotNo
-				,intVendorLocationId
+				,strGarden
 				,dblGrossWeight
 				,intCreatedEntityId
 		)
@@ -341,7 +348,7 @@ BEGIN
 				,strNotes				
 				,intEntityVendorId			
 				,strVendorLotNo			
-				,intVendorLocationId
+				,strGarden
 				,dblGrossWeight
 				,intCreatedEntityId
 		FROM dbo.tblICLot 

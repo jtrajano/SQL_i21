@@ -995,10 +995,10 @@ BEGIN
 	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
 			AND ItemLocation.intLocationId = @Default_Location
 				
-	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
-	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
-	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
-	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
+	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail', 'Failed to meet the expected GL Detail.';
+	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction', 'Failed to meet the expected Inventory Transaction records.';
+	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock', 'Failed to meet the expected Item Stock records.';
+	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO', 'Failed to meet the expected FIFO records.';
 END 
 
 -- Clean-up: remove the tables used in the unit test

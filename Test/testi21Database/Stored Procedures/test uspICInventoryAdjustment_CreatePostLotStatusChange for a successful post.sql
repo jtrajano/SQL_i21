@@ -158,7 +158,7 @@ BEGIN
 			,@intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation 
 			,@intStorageLocationId			= @StorageSilo_RM_DL 
 			,@strLotNumber					= @MG_LOT_100001 
-			,@intNewLotStatusId				= @LOT_STATUS_Quarantine 
+			,@intNewLotStatusId				= @LOT_STATUS_Active
 			,@intSourceId					= 1 
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
 			,@intEntityUserSecurityId		= 1
@@ -218,8 +218,8 @@ BEGIN
 				,intStorageLocationId			= @StorageSilo_RM_DL
 				,intItemId						= @ManualLotGrains
 				,intLotId						= @ManualLotGrains_Lot_100001
-				,intLotStatusId					= @LOT_STATUS_Active
-				,intNewLotStatusId				= @LOT_STATUS_Quarantine
+				,intLotStatusId					= @LOT_STATUS_Quarantine
+				,intNewLotStatusId				= @LOT_STATUS_Active
 				,intConcurrencyId				= 1
 
 		-- Setup the expected data (Lot)
@@ -231,7 +231,7 @@ BEGIN
 		SELECT 
 			intLotId			= @ManualLotGrains_Lot_100001
 			,strLotNumber		= @MG_LOT_100001
-			,intLotStatusId		= @LOT_STATUS_Quarantine
+			,intLotStatusId		= @LOT_STATUS_Active
 
 
 		-- Get the actual data (Detail)

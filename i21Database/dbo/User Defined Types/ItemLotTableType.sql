@@ -166,36 +166,77 @@ This is a user-defined table type used in creating records to the lot master tab
 
 CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 (
+	--[intId]						INT IDENTITY PRIMARY KEY CLUSTERED
+	--,[intLotId]					INT NULL 
+	--,[strLotNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--,[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--,[intItemId]				INT NOT NULL
+	--,[intItemLocationId]		INT NOT NULL
+	--,[intSubLocationId]			INT NULL
+	--,[intStorageLocationId]		INT NULL	
+	--,[dblQty]					NUMERIC(18,6) DEFAULT ((0)) NOT NULL	
+	--,[intItemUOMId]				INT NOT NULL
+	--,[dblWeight]				NUMERIC(18,6) NULL DEFAULT ((0))
+	--,[intWeightUOMId]			INT NULL	
+	--,[dtmExpiryDate]			DATETIME NULL
+	--,[dtmManufacturedDate]		DATETIME NULL
+	--,[intOriginId]				INT NULL
+	--,[intGradeId]				INT NULL
+	--,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	--,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	--,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	--,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	--,[intEntityVendorId]		INT NULL
+	--,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--,[strGarden]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	--,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--,[ysnReleasedToWarehouse]	BIT DEFAULT((0))
+	--,[ysnProduced]				BIT DEFAULT((0))
+	--,[intDetailId]				INT NOT NULL
+	--,[intOwnershipType]			INT NULL DEFAULT ((1))
+	--,[dblGrossWeight]			NUMERIC(18,6) NULL 	
+	--,[strParentLotNumber]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--,[strParentLotAlias]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--,[intLotStatusId]			INT NOT NULL DEFAULT ((1))
+	
 	[intId]						INT IDENTITY PRIMARY KEY CLUSTERED
-	,[intLotId]					INT NULL 
-	,[strLotNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intLotId]					INT NULL 		
 	,[intItemId]				INT NOT NULL
+-- 	,[intLocationId]			INT NOT NULL
 	,[intItemLocationId]		INT NOT NULL
+	,[intItemUOMId]				INT NOT NULL			
+	,[strLotNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 	,[intSubLocationId]			INT NULL
-	,[intStorageLocationId]		INT NULL	
-	,[dblQty]					NUMERIC(18,6) DEFAULT ((0)) NOT NULL	
-	,[intItemUOMId]				INT NOT NULL
-	,[dblWeight]				NUMERIC(18,6) NULL DEFAULT ((0))
-	,[intWeightUOMId]			INT NULL	
+	,[intStorageLocationId]		INT NULL
+	,[dblQty]					NUMERIC(18,6) DEFAULT ((0)) NOT NULL
 	,[dtmExpiryDate]			DATETIME NULL
-	,[dtmManufacturedDate]		DATETIME NULL
-	,[intOriginId]				INT NULL
-	,[intGradeId]				INT NULL
-	,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	,[intEntityVendorId]		INT NULL
-	,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[strGarden]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[ysnReleasedToWarehouse]	BIT DEFAULT((0))
-	,[ysnProduced]				BIT DEFAULT((0))
-	,[intDetailId]				INT NOT NULL
-	,[intOwnershipType]			INT NULL DEFAULT ((1))
-	,[dblGrossWeight]			NUMERIC(18,6) NULL 	
+	,[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intLotStatusId]			INT NOT NULL DEFAULT ((1))
+	,[intParentLotId]			INT NULL
 	,[strParentLotNumber]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strParentLotAlias]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intSplitFromLotId]		INT NULL
+	,[dblGrossWeight]			NUMERIC(18,6) NULL
+	,[dblWeight]				NUMERIC(18,6) NULL DEFAULT ((0))
+	,[intWeightUOMId]			INT NULL
+	,[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0))
+	,[intOriginId]				INT NULL
+	,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+	,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 		
+	,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+	,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+	,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+	,[intEntityVendorId]		INT NULL
+	,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+	,[strGarden]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+	,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+	,[dtmManufacturedDate]		DATETIME NULL
+	,[ysnReleasedToWarehouse]	BIT DEFAULT((0))
+	,[ysnProduced]				BIT DEFAULT((0))
+	,[ysnStorage]				BIT DEFAULT((0))
+	,[intOwnershipType]			INT NULL DEFAULT ((1))
+	,[intGradeId]				INT NULL
+	,[intDetailId]				INT NOT NULL
+
 )

@@ -147,7 +147,7 @@ BEGIN
 			,@intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation 
 			,@intStorageLocationId			= @StorageSilo_RM_DL 
 			,@strLotNumber					= @MG_LOT_100001 
-			,@intNewLotStatusId				= @LOT_STATUS_Active -- Invalid status. Item is already active. 
+			,@intNewLotStatusId				= @LOT_STATUS_Quarantine -- Invalid status. Item is already quarantined. 
 			,@intSourceId					= 1 
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
 			,@intEntityUserSecurityId		= 1

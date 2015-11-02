@@ -11,9 +11,10 @@ AS
 
 	DECLARE @ErrMsg NVARCHAR(Max)
 
-	IF @strParentLotNumber Is NULL OR @strParentLotNumber=''
+	IF @strParentLotNumber IS NULL OR @strParentLotNumber = ''
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 78
+		EXEC dbo.uspSMGetStartingNumber 
+			78
 			,@strParentLotNumber OUTPUT
 	END
 
