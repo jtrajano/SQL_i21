@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnAPGet1099PrintStatus]
 (
-	@vendorFrom NVARCHAR(100),
-	@vendorTo NVARCHAR(100),
+	@vendorFrom NVARCHAR(100) = NULL,
+	@vendorTo NVARCHAR(100)  = NULL,
 	@year INT,
 	@form1099 INT
 )

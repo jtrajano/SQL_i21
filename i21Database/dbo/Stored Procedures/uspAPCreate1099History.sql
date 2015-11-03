@@ -2,6 +2,7 @@
 	@vendorFrom NVARCHAR(100) = NULL,
 	@vendorTo NVARCHAR(100) = NULL,
 	@year INT,
+	@reprint BIT = 0,
 	@form1099 INT
 AS
 
@@ -42,10 +43,21 @@ BEGIN
 			[dtmDatePrinted]	=	GETDATE(), 
 			[dtmDateFiled]		=	NULL
 		FROM vyuAP1099MISC A
+		OUTER APPLY 
+		(
+			SELECT TOP 1 * FROM tblAP1099History B
+			WHERE A.intYear = B.intYear AND B.int1099Form = 1
+			AND B.intEntityVendorId = A.intEntityVendorId
+			ORDER BY B.dtmDatePrinted DESC
+		) History
 		WHERE 
 		1 = (CASE WHEN ISNULL(@vendorFrom,'') = '' THEN 1
 					WHEN ISNULL(@vendorFrom,'') <> '' AND A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
 				AND A.intYear = @year
+				AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
+					WHEN History.ysnPrinted IS NULL THEN 1
+					WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
+					ELSE 0 END)
 
 	END
 	ELSE IF @form1099 = 2

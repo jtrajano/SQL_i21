@@ -14,3 +14,7 @@
     [dtmDatePrinted] DATETIME NULL, 
     [dtmDateFiled] DATETIME NULL
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblAP1099History_intEntityVendorId] ON [dbo].[tblAP1099History] ([intEntityVendorId], [intYear], [ysnPrinted])

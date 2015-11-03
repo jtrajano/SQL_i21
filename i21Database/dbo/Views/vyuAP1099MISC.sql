@@ -26,7 +26,7 @@ WITH MISC1099 (
 	,dblRoyalties
 	,dblSubstitutePayments
 	,dblDirectSales
-	,ysnDirectSales
+	,strDirectSales
 	,intEntityVendorId
 )
 AS
@@ -64,7 +64,7 @@ AS
 		, CASE WHEN SUM(A.dblRoyalties) >= C.dbl1099MISCRoyalties THEN SUM(dblRoyalties) ELSE 0 END AS dblRoyalties
 		, CASE WHEN SUM(A.dblSubstitutePayments) >= C.dbl1099MISCSubstitute THEN SUM(dblSubstitutePayments) ELSE 0 END AS dblSubstitutePayments
 		, CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN SUM(A.dblDirectSales) ELSE 0 END AS dblDirectSales
-		, CAST(CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN 1 ELSE 0 END AS BIT) AS ysnDirectSales
+		, (CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN 'X' ELSE NULL END) AS ysnDirectSales
 		, A.intEntityVendorId
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
@@ -125,7 +125,7 @@ GROUP BY intEntityVendorId
 	,dblRents
 	,dblRoyalties
 	,dblSubstitutePayments
-	,ysnDirectSales
+	,strDirectSales
 HAVING SUM(dblBoatsProceeds
 		+ dblCropInsurance
 		+ dblDirectSales
