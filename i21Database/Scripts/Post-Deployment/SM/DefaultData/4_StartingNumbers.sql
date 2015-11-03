@@ -699,7 +699,7 @@ GO
 			,[strModule]			= 'Warehouse'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjustment1099')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'WarehouseBOLNo')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 76
@@ -734,22 +734,22 @@ GO
 
 	UNION ALL
     SELECT  [intStartingNumberId]   = 79
-                                    ,[strTransactionType]   = N'ScaleTicket'
-                                    ,[strPrefix]			= N'SCT-'
-                                    ,[intNumber]            = 1
-                                    ,[strModule]			= 'Grain'
-                                    ,[ysnEnable]			= 1
-                                    ,[intConcurrencyId]		= 1
-    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Transfer')
+            ,[strTransactionType]   = N'ScaleTicket'
+            ,[strPrefix]			= N'SCT-'
+            ,[intNumber]            = 1
+            ,[strModule]			= 'Grain'
+            ,[ysnEnable]			= 1
+            ,[intConcurrencyId]		= 1
+    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ScaleTicket')
 
 	UNION ALL
     SELECT  [intStartingNumberId]   = 80
-                                    ,[strTransactionType]   = N'Transfer'
-                                    ,[strPrefix]			= N'TRF-'
-                                    ,[intNumber]            = 1
-                                    ,[strModule]			= 'Patronage'
-                                    ,[ysnEnable]			= 1
-                                    ,[intConcurrencyId]		= 1
+            ,[strTransactionType]   = N'Transfer'
+            ,[strPrefix]			= N'TRF-'
+            ,[intNumber]            = 1
+            ,[strModule]			= 'Patronage'
+            ,[ysnEnable]			= 1
+            ,[intConcurrencyId]		= 1
     WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Transfer')
 
 	UNION ALL
@@ -761,6 +761,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Provisional Invoice')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 82
+			,[strTransactionType]	= N'Dividend Number'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Dividend Number')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
