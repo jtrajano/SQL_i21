@@ -84,7 +84,7 @@ WHERE	b.intBankAccountId = @intBankAccountId
 						) COLLATE Latin1_General_CI_AS
 		)
 
-UNION SELECT 
+UNION SELECT DISTINCT
 	@intBankAccountId,
 	strSourceTransactionId,
 	intSourceTransactionId,
