@@ -2798,6 +2798,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessProvisionalInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportItemPlanSummary.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockSummary.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockSummaryByLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
