@@ -2801,6 +2801,8 @@
     <Build Include="dbo\Views\vyuICGetItemStockSummaryByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspWHReceiveOrder.sql" />
     <Build Include="dbo\Functions\fnCTGetCurrencyExchangeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomerPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKHedgeCustomerPositionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
