@@ -505,6 +505,74 @@ Ext.define('Inventory.view.CategoryViewController', {
         }
     },
 
+    onAddRequiredClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.getController()
+        var current = win.getViewModel().data.current;
+        var accountCategoryList = win.getViewModel().storeInfo.accountCategoryList;
+
+        switch (current.get('strInventoryType')) {
+            case "Assembly/Blend":
+            case "Inventory":
+                me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory', accountCategoryList);
+                me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
+                break;
+
+            case "Raw Material":
+                me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory', accountCategoryList);
+                me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
+                break;
+
+            case "Finished Good":
+                me.addAccountCategory(current, 'Inventory', accountCategoryList);
+                me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                break;
+
+            case "Other Charge":
+                me.addAccountCategory(current, 'Other Charge Income', accountCategoryList);
+                me.addAccountCategory(current, 'Other Charge Expense', accountCategoryList);
+                break;
+
+            case "Non-Inventory":
+            case "Service":
+            case "Software":
+                me.addAccountCategory(current, 'General', accountCategoryList);
+                break;
+        }
+
+    },
+
+    addAccountCategory: function(current, category, categoryList) {
+        if (categoryList) {
+            var exists = Ext.Array.findBy(current.tblICCategoryAccounts().data.items, function (row) {
+                if (category === row.get('strAccountCategory')) {
+                    return true;
+                }
+            });
+            if (!exists) {
+                var category = categoryList.findRecord('strAccountCategory', category);
+                if(category) {
+                    var newCategoryAccount = Ext.create('Inventory.model.CategoryAccount', {
+                        intCategoryId: current.get('intCategoryId'),
+                        intAccountCategoryId: category.get('intAccountCategoryId'),
+                        strAccountCategory: category.get('strAccountCategory')
+                    });
+                    current.tblICCategoryAccounts().add(newCategoryAccount);
+                }
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboDetailUnitMeasure": {
@@ -521,6 +589,9 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             "#btnEditLocation": {
                 click: this.onbtnEditLocationClick
+            },
+            "#btnAddRequired": {
+                click: this.onAddRequiredClick
             },
             "#colStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange

@@ -1301,6 +1301,24 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
+                                                        "iconCls": "small-insert",
+                                                        "itemId": "btnAddRequired",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Add Required"
+                                                    },
+                                                    "name": "MyButton80",
+                                                    "designerId": "3af355f5-b104-4eda-b528-c664d21c4a2c"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
                                                         "iconCls": "small-remove",
                                                         "itemId": "btnDeleteGlAccounts",
                                                         "layout|flex": null,

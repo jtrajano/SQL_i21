@@ -628,6 +628,13 @@ Ext.define('Inventory.view.Category', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnAddRequired',
+                                                                iconCls: 'small-insert',
+                                                                text: 'Add Required'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
                                                                 itemId: 'btnDeleteGlAccounts',
                                                                 iconCls: 'small-remove',
                                                                 text: 'Remove'

@@ -2041,6 +2041,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 break;
 
             case "Raw Material":
