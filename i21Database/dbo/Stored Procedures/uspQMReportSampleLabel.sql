@@ -52,10 +52,10 @@ BEGIN TRY
 		,CONVERT(NVARCHAR, S.dtmSampleReceivedDate, 107) AS dtmSampleReceivedDate
 		,CASE 
 			WHEN C.strCategoryCode = 'C'
-				THEN L.strLotNumber
+				THEN ISNULL(L.strLotNumber,'')
 			ELSE ''
 			END AS strLotNumber
-		,PL.strParentLotNumber
+		,ISNULL(PL.strParentLotNumber,'') AS strParentLotNumber
 		,ST.strDescription AS strSampleTypeDescription
 		,C.strCategoryCode
 		,@intSampleId AS intSampleId
