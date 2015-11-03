@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetItemStockSummary]
+﻿CREATE VIEW [dbo].[vyuICGetItemStockSummaryByLot]
 	AS 
 
 SELECT
@@ -6,7 +6,8 @@ SELECT
 			, ItemStock.intItemLocationId
 			, ItemStock.intSubLocationId
 			, ItemStock.intStorageLocationId
-			, ItemStock.intItemUOMId) AS INT)
+			, ItemStock.intItemUOMId
+			, ItemStock.intLotId) AS INT)
 	, ItemStock.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
@@ -25,6 +26,9 @@ SELECT
 	, strStorageLocationName = StorageLocation.strName
 	, ItemStock.intItemUOMId
 	, UOM.strUnitMeasure
+	, ItemStock.intLotId
+	, Lot.strLotNumber
+	, Lot.strLotAlias
 	, ItemStock.dblStockIn
 	, ItemStock.dblStockOut
 	, ItemStock.dblOnHand
@@ -37,6 +41,7 @@ FROM (
 			, intSubLocationId
 			, intStorageLocationId
 			, intItemUOMId
+			, intLotId
 			, dblStockIn = SUM(dblStockIn)
 			, dblStockOut = SUM(dblStockOut)
 			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
@@ -46,6 +51,7 @@ FROM (
 			, intSubLocationId = NULL
 			, intStorageLocationId = NULL
 			, intItemUOMId
+			, intLotId = NULL
 			, dblStockIn = SUM(dblStockIn)
 			, dblStockOut = SUM(dblStockOut)
 			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
@@ -58,6 +64,7 @@ FROM (
 			, intSubLocationId = NULL
 			, intStorageLocationId = NULL
 			, intItemUOMId
+			, intLotId = NULL
 			, SUM(dblStockIn)
 			, SUM(dblStockOut)
 			, SUM(dblStockIn) - SUM(dblStockOut)
@@ -70,18 +77,19 @@ FROM (
 			, intSubLocationId
 			, intStorageLocationId
 			, intItemUOMId
+			, intLotId
 			, SUM(dblStockIn)
 			, SUM(dblStockOut)
 			, SUM(dblStockIn) - SUM(dblStockOut)
 		FROM tblICInventoryLot
-		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId
+		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId
 
 		UNION ALL
 		SELECT intItemId
 			, intItemLocationId
 			, intSubLocationId = NULL
 			, intStorageLocationId = NULL
-			, intItemUOMId
+			, intItemUOMId, intLotId = NULL
 			, SUM(dblStockIn)
 			, SUM(dblStockOut)
 			, SUM(dblStockIn) - SUM(dblStockOut)
@@ -94,6 +102,7 @@ FROM (
 			, intSubLocationId = NULL
 			, intStorageLocationId = NULL
 			, intItemUOMId
+			, intLotId = NULL
 			, SUM(dblStockIn)
 			, SUM(dblStockOut)
 			, SUM(dblStockIn) - SUM(dblStockOut)
@@ -106,6 +115,7 @@ FROM (
 			, intSubLocationId = NULL
 			, intStorageLocationId = NULL
 			, intItemUOMId
+			, intLotId = NULL
 			, SUM(dblStockIn)
 			, SUM(dblStockOut)
 			, SUM(dblStockIn) - SUM(dblStockOut)
@@ -118,17 +128,19 @@ FROM (
 			, intSubLocationId
 			, intStorageLocationId
 			, intItemUOMId
+			, intLotId
 			, SUM(dblStockIn)
 			, SUM(dblStockOut)
 			, SUM(dblStockIn) - SUM(dblStockOut)
 		FROM tblICInventoryLotStorage
-		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId
+		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId
 		) tblCostingBuckets
 	GROUP BY intItemId
 			, intItemLocationId
 			, intSubLocationId
 			, intStorageLocationId
 			, intItemUOMId
+			, intLotId
 	) ItemStock
 	LEFT JOIN tblICItem Item ON Item.intItemId = ItemStock.intItemId
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -140,3 +152,4 @@ FROM (
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ItemStock.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemStock.intStorageLocationId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = ItemStock.intLotId
