@@ -85,7 +85,7 @@ DECLARE @intId AS INT
 		,@intTransactionTypeId AS INT 
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS NUMERIC(38,20)
-		,@intLotId AS INT 
+		--,@intLotId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionTypeName AS NVARCHAR(200) 
@@ -184,7 +184,7 @@ SELECT  intId
 		,intSourceTransactionId
 		,strSourceTransactionId
 		,intTransactionTypeId
-		,intLotId 
+		-- ,intLotId 
 		,intCurrencyId
 		,dblExchangeRate
 FROM	@Internal_ItemsToAdjust
@@ -208,7 +208,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intSourceTransactionId
 	,@strSourceTransactionId
 	,@intTransactionTypeId
-	,@intLotId
+	--,@intLotId
 	,@intCurrencyId
 	,@dblExchangeRate
 ;
@@ -254,6 +254,84 @@ BEGIN
 		IF @returnValue < 0 RETURN -1;
 	END
 
+	-- FIFO
+	IF (@CostingMethod = @FIFO)
+	BEGIN 
+		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnFIFOCosting
+			@dtmDate
+			,@intItemId
+			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@intItemUOMId
+			,@dblQty			
+			,@dblNewCost 
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@intSourceTransactionId
+			,@strSourceTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intCurrencyId
+			,@dblExchangeRate			
+			,@intUserId
+
+		IF @returnValue < 0 RETURN -1;
+	END
+
+	-- LIFO
+	IF (@CostingMethod = @LIFO)
+	BEGIN 
+		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnLIFOCosting
+			@dtmDate
+			,@intItemId
+			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@intItemUOMId
+			,@dblQty			
+			,@dblNewCost 
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@intSourceTransactionId
+			,@strSourceTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intCurrencyId
+			,@dblExchangeRate			
+			,@intUserId
+
+		IF @returnValue < 0 RETURN -1;
+	END
+
+	-- Lot Costing
+	IF (@CostingMethod = @LOTCOST)
+	BEGIN 
+		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnLotCosting
+			@dtmDate
+			,@intItemId
+			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@intItemUOMId
+			,@dblQty			
+			,@dblNewCost 
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@intSourceTransactionId
+			,@strSourceTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intCurrencyId
+			,@dblExchangeRate			
+			,@intUserId
+
+		IF @returnValue < 0 RETURN -1;
+	END
+
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItemsToAdjust INTO 
 		@intId
@@ -271,7 +349,7 @@ BEGIN
 		,@intSourceTransactionId
 		,@strSourceTransactionId
 		,@intTransactionTypeId
-		,@intLotId
+		--,@intLotId
 		,@intCurrencyId
 		,@dblExchangeRate
 	;
@@ -305,7 +383,7 @@ BEGIN
 			,intTransactionDetailId
 			,strTransactionId
 			,intTransactionTypeId
-			,intLotId 
+			-- ,intLotId 
 	FROM	@Internal_ItemsToAdjust
 
 	OPEN loopItemsToAdjustForAutoNegative;
@@ -324,7 +402,7 @@ BEGIN
 		,@intTransactionDetailId
 		,@strTransactionId
 		,@intTransactionTypeId
-		,@intLotId
+		-- ,@intLotId
 	;
 
 	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
@@ -401,7 +479,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intTransactionTypeId
-			,@intLotId
+			--,@intLotId
 		;
 	END 
 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnAverageCosting. Receive Stocks. Cost Adjust. Unpost Receive Stocks]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnFIFOCosting. Receive Stocks. Cost Adjust. Unpost Receive Stocks]
 AS
 BEGIN
 	-- Create the fake data
@@ -160,7 +160,7 @@ BEGIN
 		DECLARE @dblAverageCost_Expected AS NUMERIC(38,20)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(38,20)
 		
-		-- Declare the variables used in uspICPostCostAdjustmentOnAverageCosting
+		-- Declare the variables used in uspICPostCostAdjustmentOnFIFOCosting
 		DECLARE @dtmDate AS DATETIME						= 'January 10, 2014'
 				,@intItemId AS INT							= @WetGrains
 				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
@@ -259,6 +259,15 @@ BEGIN
 		)
 	END 
 
+	-- Arrange the costing method
+	BEGIN 
+		UPDATE dbo.tblICItemLocation
+		SET intCostingMethod = @FIFO
+
+		UPDATE dbo.tblICInventoryTransaction
+		SET intCostingMethod = @FIFO
+	END 
+
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.ExpectException @ExpectedMessage = 'Unable to unpost because WET GRAINS has a cost adjustment from BILL-10001.'
@@ -268,7 +277,7 @@ BEGIN
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
 		-- Do the cost adjustment 
-		EXEC dbo.uspICPostCostAdjustmentOnAverageCosting
+		EXEC dbo.uspICPostCostAdjustmentOnFIFOCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -401,7 +410,7 @@ BEGIN
 				,[strBatchId]				= 'BATCH-100000'
 				,[intTransactionTypeId]		= @PurchaseType
 				,[intLotId]					= NULL 
-				,[intCostingMethod]			= @AVERAGECOST
+				,[intCostingMethod]			= @FIFO
 		UNION ALL 
 		SELECT	
 				--Cost Adjustment 
@@ -421,7 +430,7 @@ BEGIN
 				,[strBatchId]				= 'BATCH-10291'
 				,[intTransactionTypeId]		= @CostAdjustmentType
 				,[intLotId]					= NULL 
-				,[intCostingMethod]			= @AVERAGECOST
+				,[intCostingMethod]			= @FIFO
 		UNION ALL 
 		SELECT	--Unpost
 				[intItemId]					= @WetGrains
@@ -440,7 +449,7 @@ BEGIN
 				,[strBatchId]				= 'BATCH-10292'
 				,[intTransactionTypeId]		= @PurchaseType
 				,[intLotId]					= NULL 
-				,[intCostingMethod]			= @AVERAGECOST
+				,[intCostingMethod]			= @FIFO
 		UNION ALL 
 		SELECT	
 				--Unpost Cost Adjustment along with the receive stock unpost 
@@ -460,7 +469,7 @@ BEGIN
 				,[strBatchId]				= 'BATCH-10292'
 				,[intTransactionTypeId]		= @PurchaseType
 				,[intLotId]					= NULL 
-				,[intCostingMethod]			= @AVERAGECOST
+				,[intCostingMethod]			= @FIFO
 
 		UNION ALL 
 		SELECT	--Repost
@@ -480,7 +489,7 @@ BEGIN
 				,[strBatchId]				= 'BATCH-10293'
 				,[intTransactionTypeId]		= @PurchaseType
 				,[intLotId]					= NULL 
-				,[intCostingMethod]			= @AVERAGECOST
+				,[intCostingMethod]			= @FIFO
 
 		INSERT INTO expectedInventoryFIFOCostAdjustmentLog (
 				[intInventoryFIFOId]

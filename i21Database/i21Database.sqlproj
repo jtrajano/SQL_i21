@@ -2355,8 +2355,6 @@
     <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICRecalcAveCostOnCostAdjustment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnFIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFOCostAdjustmentLog.sql" />
     <Build Include="dbo\Views\vyuGRGetVendors.sql" />
     <Build Include="dbo\Views\vyuGRGetSettleItem.sql" />
@@ -2387,6 +2385,10 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\EfficiencyReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnFIFOCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLIFOCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLotCosting.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotCostAdjustmentLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2450,6 +2452,7 @@
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
+    <None Include="i21Database_1.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
