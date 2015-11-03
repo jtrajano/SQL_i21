@@ -49,7 +49,7 @@ AS
 			IX.strIndex,						VR.strVendorId,					CD.strReference,
 			IM.intPurchaseTaxGroupId,			SP.intSupplyPointId,			SP.intEntityVendorId			AS	intTerminalId,
 			SP.intRackPriceSupplyPointId,		IM.intOriginId,
-			RV.dblReservedQuantity,				
+			RV.dblReservedQuantity,				IM.intLifeTime,					IM.strLifeTimeType,
 			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0) AS dblUnReservedQuantity,
 			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS dblAllocatedQty,
 			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS dblUnAllocatedQty,
