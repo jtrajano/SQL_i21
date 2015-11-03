@@ -3,7 +3,6 @@
     [strTitle]			NVARCHAR(255)	 COLLATE Latin1_General_CI_AS NULL, 
     [strMessage]        NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [strRoute]			NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
-	[strDomain]			NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [dtmLastUpdated]    DATETIME         NULL,
 	[ysnClosable]		BIT				 NULL,
 	[ysnSent]			BIT				 NULL,
