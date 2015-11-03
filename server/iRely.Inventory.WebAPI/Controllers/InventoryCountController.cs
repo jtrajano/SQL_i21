@@ -66,5 +66,18 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        [HttpGet]
+        [ActionName("GetItemStockSummary")]
+        public async Task<HttpResponseMessage> GetItemStockSummary(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockSummary(param));
+        }
+
+        [HttpGet]
+        [ActionName("GetItemStockSummaryByLot")]
+        public async Task<HttpResponseMessage> GetItemStockSummaryByLot(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockSummaryByLot(param));
+        }
     }
 }

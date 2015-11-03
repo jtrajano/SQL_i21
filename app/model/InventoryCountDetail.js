@@ -54,8 +54,25 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'strLotNumber', type: 'string' },
         { name: 'strLotAlias', type: 'string' },
         { name: 'strUnitMeasure', type: 'string' },
-        { name: 'dblPhysicalCountStockUnit', type: 'int' },
-        { name: 'dblVariance', type: 'float' },
+        { name: 'dblConversionFactor', type: 'float' },
+        { name: 'dblPhysicalCountStockUnit', type: 'float',
+            persist: false,
+            convert: function(value, record){
+                var dblPhysicalCount = iRely.Functions.isEmpty(record.get('dblPhysicalCount')) ? 0 : record.get('dblPhysicalCount');
+                var dblConversionFactor = iRely.Functions.isEmpty(record.get('dblConversionFactor')) ? 0 : record.get('dblConversionFactor');
+                var dblPhysicalCountStockUnit = dblPhysicalCount * dblConversionFactor;
+                return dblPhysicalCountStockUnit;
+            },
+            depends: ['dblPhysicalCount', 'dblConversionFactor']},
+        { name: 'dblVariance', type: 'float' ,
+            persist: false,
+            convert: function(value, record){
+                var dblPhysicalCount = iRely.Functions.isEmpty(record.get('dblPhysicalCount')) ? 0 : record.get('dblPhysicalCount');
+                var dblSystemCount = iRely.Functions.isEmpty(record.get('dblSystemCount')) ? 0 : record.get('dblSystemCount');
+                var dblVariance = dblPhysicalCount - dblSystemCount;
+                return dblVariance;
+            },
+            depends: ['dblPhysicalCount', 'dblSystemCount']},
         { name: 'strUserName', type: 'string' }
     ],
 

@@ -609,14 +609,16 @@ Ext.define('Inventory.view.InventoryCount', {
                                             xtype: 'numbercolumn',
                                             itemId: 'colSystemCount',
                                             dataIndex: 'string',
-                                            text: 'System Count'
+                                            text: 'System Count',
+                                            format: '0,000.00####'
                                         },
                                         {
                                             xtype: 'numbercolumn',
                                             itemId: 'colLastCost',
                                             width: 71,
                                             dataIndex: 'string',
-                                            text: 'Last Cost'
+                                            text: 'Last Cost',
+                                            format: '0,000.00####'
                                         },
                                         {
                                             xtype: 'gridcolumn',
@@ -630,6 +632,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                             width: 85,
                                             dataIndex: 'string',
                                             text: 'No of Pallets',
+                                            format: '0,000.00####',
                                             editor: {
                                                 xtype: 'numberfield'
                                             }
@@ -639,6 +642,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                             itemId: 'colQtyPerPallet',
                                             dataIndex: 'string',
                                             text: 'Qty Per Pallet',
+                                            format: '0,000.00####',
                                             editor: {
                                                 xtype: 'numberfield'
                                             }
@@ -648,6 +652,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                             itemId: 'colPhysicalCount',
                                             dataIndex: 'string',
                                             text: 'Physical Count',
+                                            format: '0,000.00####',
                                             editor: {
                                                 xtype: 'numberfield'
                                             }
@@ -700,13 +705,15 @@ Ext.define('Inventory.view.InventoryCount', {
                                             itemId: 'colPhysicalCountStockUnit',
                                             width: 150,
                                             dataIndex: 'string',
-                                            text: 'Physical Count in Stock Unit'
+                                            text: 'Physical Count in Stock Unit',
+                                            format: '0,000.00####'
                                         },
                                         {
                                             xtype: 'numbercolumn',
                                             itemId: 'colVariance',
                                             dataIndex: 'string',
-                                            text: 'Variance'
+                                            text: 'Variance',
+                                            format: '0,000.00####'
                                         },
                                         {
                                             xtype: 'checkcolumn',

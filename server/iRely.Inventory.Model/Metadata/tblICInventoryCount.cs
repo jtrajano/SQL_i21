@@ -305,6 +305,22 @@ namespace iRely.Inventory.Model
                 _variance = value;
             }
         }
+        private decimal _convFactor;
+        [NotMapped]
+        public decimal dblConversionFactor
+        {
+            get
+            {
+                if (vyuICGetInventoryCountDetail != null)
+                    return vyuICGetInventoryCountDetail.dblConversionFactor ?? 0;
+                else
+                    return _convFactor;
+            }
+            set
+            {
+                _convFactor = value;
+            }
+        }
 
 
         public tblICInventoryCount tblICInventoryCount { get; set; }
@@ -370,7 +386,8 @@ namespace iRely.Inventory.Model
         public decimal? dblPhysicalCount { get; set; }
         public int? intItemUOMId { get; set; }
         public string strUnitMeasure { get; set; }
-        public int? dblPhysicalCountStockUnit { get; set; }
+        public decimal? dblConversionFactor { get; set; }
+        public decimal? dblPhysicalCountStockUnit { get; set; }
         public decimal? dblVariance { get; set; }
         public bool? ysnRecount { get; set; }
         public int? intEntityUserSecurityId { get; set; }
@@ -422,5 +439,66 @@ namespace iRely.Inventory.Model
         public bool? ysnCountByPallets { get; set; }
         public bool? ysnIncludeOnHand { get; set; }
         public bool? ysnIncludeZeroOnHand { get; set; }
+    }
+
+    public class vyuICGetItemStockSummary
+    {
+        public int intKey { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategoryCode { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodityCode { get; set; }
+        public int? intItemLocationId { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intCountGroupId { get; set; }
+        public string strLocationName { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public decimal? dblStockIn { get; set; }
+        public decimal? dblStockOut { get; set; }
+        public decimal? dblOnHand { get; set; }
+        public decimal? dblConversionFactor { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblTotalCost { get; set; }
+    }
+
+    public class vyuICGetItemStockSummaryByLot
+    {
+        public int intKey { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategoryCode { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodityCode { get; set; }
+        public int? intItemLocationId { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intCountGroupId { get; set; }
+        public string strLocationName { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public int? intLotId { get; set; }
+        public string strLotNumber { get; set; }
+        public string strLotAlias { get; set; }
+        public decimal? dblStockIn { get; set; }
+        public decimal? dblStockOut { get; set; }
+        public decimal? dblOnHand { get; set; }
+        public decimal? dblConversionFactor { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblTotalCost { get; set; }
     }
 }

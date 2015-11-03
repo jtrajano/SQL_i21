@@ -106,5 +106,41 @@ namespace iRely.Inventory.BusinessLayer
             }
             return postResult;
         }
+
+        /// <summary>
+        /// Get Item Stock Summary
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemStockSummary(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockSummary>()
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intKey").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
+        /// Get Item Stock Summary By Lots
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemStockSummaryByLot(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockSummaryByLot>()
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intKey").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

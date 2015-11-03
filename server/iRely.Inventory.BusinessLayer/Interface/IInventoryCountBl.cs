@@ -14,5 +14,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> GetCountSheets(GetParameter param);
         SaveResult LockInventory(int InventoryCountId, bool ysnLock = true);
         SaveResult PostInventoryCount(Common.Posting_RequestModel count, bool isRecap);
+        Task<SearchResult> GetItemStockSummary(GetParameter param);
+        Task<SearchResult> GetItemStockSummaryByLot(GetParameter param);
     }
 }

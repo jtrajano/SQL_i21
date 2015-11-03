@@ -47,6 +47,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             btnRecount: {
                 hidden: '{checkRecount}'
             },
+            btnFetch: {
+                disabled: '{checkPrintCountSheet}'
+            },
 
             cboLocation: {
                 value: '{current.intLocationId}',
@@ -237,7 +240,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-//            current.set('ysnIncludeZeroOnHand', records[0].get('ysnIncludeZeroOnHand'));
             current.set('ysnIncludeOnHand', records[0].get('ysnIncludeOnHand'));
             current.set('ysnScannedCountEntry', records[0].get('ysnScannedCountEntry'));
             current.set('ysnCountByLots', records[0].get('ysnCountByLots'));
@@ -252,93 +254,103 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var vm = win.getViewModel();
         var current = vm.data.current;
         var itemList = vm.storeInfo.itemList;
+        var data = win.context.data;
 
-        win.setLoading('Fetching Items...');
-        if (itemList) {
-            var filter = [];
-            if (!iRely.Functions.isEmpty(current.get('intLocationId'))) {
-                filter.push({
-                    column: 'intLocationId',
-                    value: current.get('intLocationId'),
-                    conjunction: 'and'
-                });
-            };
-            if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
-                filter.push({
-                    column: 'intCategoryId',
-                    value: current.get('intCategoryId'),
-                    conjunction: 'and'
-                });
-            };
-            if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
-                filter.push({
-                    column: 'intCommodityId',
-                    value: current.get('intCommodityId'),
-                    conjunction: 'and'
-                });
-            };
-            if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
-                filter.push({
-                    column: 'intCountGroupId',
-                    value: current.get('intCountGroupId'),
-                    conjunction: 'and'
-                });
-            };
-            if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
-                filter.push({
-                    column: 'intSubLocationId',
-                    value: current.get('intSubLocationId'),
-                    conjunction: 'and'
-                });
-            };
-            if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
-                filter.push({
-                    column: 'intStorageLocationId',
-                    value: current.get('intStorageLocationId'),
-                    conjunction: 'and'
-                });
-            };
+        if (!data) return;
+        data.saveRecord({ callbackFn: function(batch, eOpts, success){
+            win.setLoading('Fetching Items...');
+            if (itemList) {
+                var filter = [];
+                if (!iRely.Functions.isEmpty(current.get('intLocationId'))) {
+                    filter.push({
+                        column: 'intLocationId',
+                        value: current.get('intLocationId'),
+                        conjunction: 'and'
+                    });
+                };
+                if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
+                    filter.push({
+                        column: 'intCategoryId',
+                        value: current.get('intCategoryId'),
+                        conjunction: 'and'
+                    });
+                };
+                if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
+                    filter.push({
+                        column: 'intCommodityId',
+                        value: current.get('intCommodityId'),
+                        conjunction: 'and'
+                    });
+                };
+                if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
+                    filter.push({
+                        column: 'intCountGroupId',
+                        value: current.get('intCountGroupId'),
+                        conjunction: 'and'
+                    });
+                };
+                if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
+                    filter.push({
+                        column: 'intSubLocationId',
+                        value: current.get('intSubLocationId'),
+                        conjunction: 'and'
+                    });
+                };
+                if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
+                    filter.push({
+                        column: 'intStorageLocationId',
+                        value: current.get('intStorageLocationId'),
+                        conjunction: 'and'
+                    });
+                };
 
-            itemList.load({
-                filters: filter,
-                callback: function(records, eOpts, success) {
-                    if (success) {
-                        if (records) {
-                            current.tblICInventoryCountDetails().removeAll();
-                            Ext.Array.each(records, function(record) {
-                                var newItem = Ext.create('Inventory.model.InventoryCountDetail', {
-                                    intItemId: record.get('intItemId'),
-                                    intItemLocationId: record.get('intItemLocationId'),
-                                    intSubLocationId: record.get('intSubLocationId'),
-                                    intStorageLocationId: record.get('intStorageLocationId'),
-                                    intLotId: record.get('intLotId'),
-                                    dblSystemCount: record.get('dblOnHand'),
-//                                    dblLastCost: record.get(''),
-                                    strCountLine: record.get(''),
-                                    intItemUOMId: record.get('intItemUOMId'),
-                                    ysnRecount: false,
-                                    intEntityUserSecurityId: iRely.config.Security.EntityId,
-
-                                    strItemNo: record.get('strItemNo'),
-                                    strItemDescription: record.get('strItemDescription'),
-                                    strLotTracking: record.get('strLotTracking'),
-                                    strCategory: record.get('strCategory'),
-                                    strLocationName: record.get('strLocationName'),
-                                    strSubLocationName: record.get('strSubLocationName'),
-                                    strStorageLocationName: record.get('strStorageLocationName'),
-                                    strLotNumber: record.get('strLotNumber'),
-                                    strLotAlias: record.get('strLotAlias'),
-                                    strUnitMeasure: record.get('strUnitMeasure'),
-                                    strUserName: iRely.config.Security.UserName
-                                });
-                                current.tblICInventoryCountDetails().add(newItem);
-                            });
-                        }
-                    }
-                    win.setLoading(false);
+                if (current.get('ysnCountByLots')) {
+                    itemList = vm.storeInfo.itemListByLot;
                 }
-            });
-        }
+
+                itemList.load({
+                    filters: filter,
+                    callback: function(records, eOpts, success) {
+                        if (success) {
+                            if (records) {
+                                current.tblICInventoryCountDetails().removeAll();
+                                var count = 1;
+                                Ext.Array.each(records, function(record) {
+                                    var newItem = Ext.create('Inventory.model.InventoryCountDetail', {
+                                        intItemId: record.get('intItemId'),
+                                        intItemLocationId: record.get('intItemLocationId'),
+                                        intSubLocationId: record.get('intSubLocationId'),
+                                        intStorageLocationId: record.get('intStorageLocationId'),
+                                        intLotId: record.get('intLotId'),
+                                        dblSystemCount: record.get('dblOnHand'),
+                                        dblLastCost: record.get('dblLastCost'),
+                                        strCountLine: current.get('strCountNo') + '-' + count,
+                                        intItemUOMId: record.get('intItemUOMId'),
+                                        ysnRecount: false,
+                                        intEntityUserSecurityId: iRely.config.Security.EntityId,
+
+                                        strItemNo: record.get('strItemNo'),
+                                        strItemDescription: record.get('strItemDescription'),
+                                        strLotTracking: record.get('strLotTracking'),
+                                        strCategory: record.get('strCategoryCode'),
+                                        strLocationName: record.get('strLocationName'),
+                                        strSubLocationName: record.get('strSubLocationName'),
+                                        strStorageLocationName: record.get('strStorageLocationName'),
+                                        strLotNumber: record.get('strLotNumber'),
+                                        strLotAlias: record.get('strLotAlias'),
+                                        strUnitMeasure: record.get('strUnitMeasure'),
+                                        strUserName: iRely.config.Security.UserName
+                                    });
+                                    current.tblICInventoryCountDetails().add(newItem);
+                                    count++;
+                                });
+                            }
+                        }
+                        win.setLoading(false);
+                    }
+                });
+            }
+        } });
     },
 
     onPrintCountSheetsClick: function(button) {
