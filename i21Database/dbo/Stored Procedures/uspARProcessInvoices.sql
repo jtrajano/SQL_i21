@@ -69,6 +69,7 @@ BEGIN TRY
 
 	DECLARE  @QueryString AS VARCHAR(MAX)
 			,@Columns AS VARCHAR(MAX)
+			,@intId AS VARCHAR(100)
 			
 	SET @Columns =	(CASE 
 						WHEN @GroupingOption = 0 THEN '[intId]'
@@ -85,10 +86,12 @@ BEGIN TRY
 						WHEN @GroupingOption =11 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]'
 					END)
 					
-	SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], ' + @Columns + ', [ysnForInsert]) SELECT DISTINCT MIN([intId]), ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) = 0 GROUP BY ' + @Columns
+	SET @intId = (CASE WHEN @GroupingOption = 0 THEN '' ELSE '[intId],' END)
+					
+	SET @QueryString = 'INSERT INTO #EntriesForProcessing( ' + @intId + @Columns + ', [ysnForInsert]) SELECT ' + @intId + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) = 0 GROUP BY ' + @intId + @Columns
 	EXECUTE(@QueryString);
 
-	SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT [intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intId], [intInvoiceId], [intInvoiceDetailId],' + @Columns
+	SET @QueryString = 'INSERT INTO #EntriesForProcessing(' + @intId + ' [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT ' + @intId + ' [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY ' + @intId + ' [intInvoiceId], [intInvoiceDetailId],' + @Columns
 	EXECUTE(@QueryString);
 
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
@@ -101,7 +104,6 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
-
 
 DECLARE  @Id									INT
 		,@SourceTransaction						NVARCHAR(250)	
@@ -344,6 +346,12 @@ BEGIN
 	END CATCH
 		
 	DECLARE @NewInvoiceId INT
+			,@Type NVARCHAR(200)
+	SET @Type = 'Standard'
+	--IF ISNULL(@SourceTransaction,'') = 'Provisional Invoice'
+	--	BEGIN
+	--		SET @Type = 'Provisional Invoice'
+	--	END
 	
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -357,7 +365,7 @@ BEGIN
 			,@ShipDate						= @ShipDate
 			,@PostDate						= NULL
 			,@TransactionType				= 'Invoice'
-			,@Type							= 'Standard'
+			,@Type							= @Type
 			,@NewInvoiceId					= @NewInvoiceId			OUTPUT 
 			,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
 			,@RaiseError					= @RaiseError
@@ -482,6 +490,7 @@ BEGIN
 		
 	IF (ISNULL(@NewInvoiceId, 0) <> 0 AND @GroupingOption > 0)
 	BEGIN
+
 		WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @NewInvoiceId)
 		BEGIN
 			DECLARE @ForDetailId INT
@@ -632,7 +641,17 @@ BEGIN
 		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
+		
 END
+
+	UPDATE
+		tblARInvoice
+	SET
+		[ysnProcessed] = 1
+	WHERE
+		[intInvoiceId] IN (SELECT [intSourceId] FROM @InvoiceEntries WHERE [intId] IN (SELECT [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND [ysnProcessed] = 1))
+		AND [strType] = 'Provisional Invoice'
+
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

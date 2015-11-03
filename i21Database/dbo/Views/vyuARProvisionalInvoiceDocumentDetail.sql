@@ -4,8 +4,10 @@ AS
 SELECT
 	 [strDocumentId]						= ARSI.[strShippedItemId]
 	,[strDocumentDetailId]					= 'icis:' + CAST(ARSI.[intInventoryShipmentItemId] AS NVARCHAR(250))
+	,[intShipmentId]						= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId]
+	,[intInventoryShipmentId]				= ARSI.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId]
 	,[intContractHeaderId]					= NULL
 	,[strContractNumber]					= NULL 
@@ -48,8 +50,10 @@ UNION ALL
 SELECT
 	 [strDocumentId]						= ARSI.[strShippedItemId]
 	,[strDocumentDetailId]					= ARSI.[strShippedItemDetailId]
+	,[intShipmentId]						= ARSI.[intShipmentId]
 	,[intShipmentPurchaseSalesContractId]	= ARSI.[intShipmentPurchaseSalesContractId] 
 	,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId]
+	,[intInventoryShipmentId]				= ARSI.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId]
 	,[intContractHeaderId]					= ARSI.[intContractHeaderId]
 	,[strContractNumber]					= ARSI.[strContractNumber] 

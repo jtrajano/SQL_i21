@@ -4,8 +4,10 @@ AS
 SELECT
 	 [strShippedItemId]						= 'lgis:' + CAST(LGSPS.[intShipmentId] AS NVARCHAR(250))
 	,[strShippedItemDetailId]				= 'lgis:' + CAST(LGSPS.[intShipmentPurchaseSalesContractId] AS NVARCHAR(250))
+	,[intShipmentId]						= LGSPS.[intShipmentId]
 	,[intShipmentPurchaseSalesContractId]	= LGSPS.[intShipmentPurchaseSalesContractId] 
 	,[intSalesOrderDetailId]				= NULL
+	,[intInventoryShipmentId]				= NULL	
 	,[intInventoryShipmentItemId]			= NULL	
 	,[intContractHeaderId]					= CTCD.[intContractHeaderId]
 	,[strContractNumber]					= CTCD.[strContractNumber] 
