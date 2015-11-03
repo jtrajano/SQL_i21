@@ -12,7 +12,8 @@ Ext.define('Inventory.view.CategoryViewController', {
             columns: [
                 {dataIndex: 'intCategoryId', text: "Category Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strCategoryCode', text: 'Category Code', flex: 1, dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'}
+                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
+                {dataIndex: 'strInventoryType', text: 'Inventory Type', flex: 1, dataType: 'string'}
             ]
         },
         binding: {
@@ -60,6 +61,10 @@ Ext.define('Inventory.view.CategoryViewController', {
                 value: '{current.intFreightItemId}',
                 store: '{freightItem}',
                 readOnly: '{checkAutoCalculateFreight}'
+            },
+            cboInventoryType: {
+                value: '{current.strInventoryType}',
+                store: '{inventoryTypes}'
             },
 
             grdUnitOfMeasure: {

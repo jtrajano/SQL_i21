@@ -15,6 +15,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
             this.Property(t => t.strCategoryCode).HasColumnName("strCategoryCode");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strInventoryType).HasColumnName("strInventoryType");
             this.Property(t => t.intLineOfBusinessId).HasColumnName("intLineOfBusinessId");
             this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
             this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");

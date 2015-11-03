@@ -16,6 +16,43 @@ Ext.define('Inventory.view.CategoryViewModel', {
     ],
 
     stores: {
+        inventoryTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    strType: 'Bundle'
+                },
+                {
+                    strType: 'Inventory'
+                },
+                {
+                    strType: 'Kit'
+                },
+                {
+                    strType: 'Finished Good'
+                },
+                {
+                    strType: 'Non-Inventory'
+                },
+                {
+                    strType: 'Other Charge'
+                },
+                {
+                    strType: 'Raw Material'
+                },
+                {
+                    strType: 'Service'
+                },
+                {
+                    strType: 'Software'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strType'
+                }
+            ]
+        },
         linesOfBusiness: {
             type: 'icbufferedlineofbusiness'
         },

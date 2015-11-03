@@ -357,6 +357,15 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strItemNo',
                                                                 valueField: 'intItemId'
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboInventoryType',
+                                                                modelValidation: true,
+                                                                fieldLabel: 'Inventory Type',
+                                                                labelWidth: 130,
+                                                                displayField: 'strType',
+                                                                valueField: 'strType'
                                                             }
                                                         ]
                                                     }

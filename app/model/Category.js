@@ -18,6 +18,7 @@ Ext.define('Inventory.model.Category', {
         { name: 'intCategoryId', type: 'int' },
         { name: 'strCategoryCode', type: 'string' },
         { name: 'strDescription', type: 'string' },
+        { name: 'strInventoryType', type: 'string' },
         { name: 'intLineOfBusinessId', type: 'int', allowNull: true },
         { name: 'intCostingMethod', type: 'int', allowNull: true },
         { name: 'strInventoryTracking', type: 'string' },
@@ -54,6 +55,7 @@ Ext.define('Inventory.model.Category', {
 
     validators: [
         {type: 'presence', field: 'strCategoryCode'},
+        {type: 'presence', field: 'strInventoryType'},
         {type: 'presence', field: 'intCostingMethod'}
     ],
 
