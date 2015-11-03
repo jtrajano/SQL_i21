@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustment. Receive Stocks. Cost Adjust. Unpost Cost Adjust]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCostAdjustment. Receive Stocks. Cost Adjust. Unpost Cost Adjust]
 AS
 BEGIN
 	-- Create the fake data

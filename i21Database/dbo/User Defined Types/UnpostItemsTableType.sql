@@ -13,4 +13,6 @@ CREATE TYPE [dbo].[UnpostItemsTableType] AS TABLE
 	,[intStorageLocationId] INT NULL 
     ,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0 
 	,[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0 	
+	,[intTransactionTypeId] INT NULL
+	,[intInventoryTransactionId] INT NOT NULL 
 )

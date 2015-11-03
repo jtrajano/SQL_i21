@@ -33,18 +33,21 @@ BEGIN
 				,intItemUOMId 
 				,dblQty
 				,dblUOMQty
+				,intInventoryTransactionId 
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblQty = -10000
 				,dblUOMQty = 1
+				,intInventoryTransactionId = 1
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @NewHaven
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblQty = -10000
 				,dblUOMQty = 1
+				,intInventoryTransactionId = 2
 
 		-- Use the simple item mock data
 		EXEC testi21Database.[Fake inventory items]; 
