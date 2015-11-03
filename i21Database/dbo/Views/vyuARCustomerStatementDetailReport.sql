@@ -8,6 +8,10 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , dblTotalAmount = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblAmountPaid = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
 	 , dblAmountDue = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END	 
+	 , dblPastDue = CASE WHEN DATEDIFF(DAY, I.[dtmDueDate], GETDATE()) > ISNULL(T.intBalanceDue, 0) 
+						THEN CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+						ELSE 0
+					END
 	 , IC.strDescription
 	 , IC.strItemNo
 	 , ID.dblQtyOrdered
@@ -27,5 +31,6 @@ FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
 		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
+	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID
 WHERE I.ysnPosted = 1
   AND I.ysnPaid = 0
