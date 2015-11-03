@@ -282,25 +282,25 @@ BEGIN
 	-- Fake data for item pricing table
 	BEGIN 
 		-- Add pricing information for items under location 1 ('Default')
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@WetGrains,		@WetGrains_DefaultLocation,		22)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@StickyGrains,	@StickyGrains_DefaultLocation,	33)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@PremiumGrains, @PremiumGrains_DefaultLocation, 44)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@ColdGrains,	@ColdGrains_DefaultLocation,	55)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@HotGrains,		@HotGrains_DefaultLocation,		66)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@WetGrains,		@WetGrains_DefaultLocation,		22, 22)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@StickyGrains,		@StickyGrains_DefaultLocation,	33, 33)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@PremiumGrains,	@PremiumGrains_DefaultLocation, 44, 44)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@ColdGrains,		@ColdGrains_DefaultLocation,	55, 55)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@HotGrains,		@HotGrains_DefaultLocation,		66, 66)
 
 		-- Add pricing information for items under location 2 ('NEW HAVEN')
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@WetGrains,		@WetGrains_NewHaven,		0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@StickyGrains,	@StickyGrains_NewHaven,		0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@PremiumGrains, @PremiumGrains_NewHaven,	0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@ColdGrains,	@ColdGrains_NewHaven,		0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@HotGrains,		@HotGrains_NewHaven,		0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@WetGrains,		@WetGrains_NewHaven,		0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@StickyGrains,		@StickyGrains_NewHaven,		0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@PremiumGrains,	@PremiumGrains_NewHaven,	0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@ColdGrains,		@ColdGrains_NewHaven,		0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@HotGrains,		@HotGrains_NewHaven,		0, 0)
 
 		-- Add pricing information for items under location 3 ('BETTER HAVEN')
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@WetGrains,		@WetGrains_BetterHaven,		0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@StickyGrains,	@StickyGrains_BetterHaven,	0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@PremiumGrains, @PremiumGrains_BetterHaven,	0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@ColdGrains,	@ColdGrains_BetterHaven,	0)
-		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@HotGrains,		@HotGrains_BetterHaven,		0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@WetGrains,		@WetGrains_BetterHaven,		0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@StickyGrains,		@StickyGrains_BetterHaven,	0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@PremiumGrains,	@PremiumGrains_BetterHaven,	0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@ColdGrains,		@ColdGrains_BetterHaven,	0, 0)
+		INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost, dblLastCost) VALUES (@HotGrains,		@HotGrains_BetterHaven,		0, 0)
 	END
 
 	-- Fake data for tblICInventoryTransaction

@@ -201,9 +201,11 @@ BEGIN
 		DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 				,@COST_ADJ_TYPE_New_Cost AS INT = 2
 
-		-- Declare the variables to check the average cost. 
-		DECLARE @dblAverageCost_Expected AS NUMERIC(38,20)
-		DECLARE @dblAverageCost_Actual AS NUMERIC(38,20)
+		-- Declare the variables to check the average cost and last cost. 
+		DECLARE @expected_AverageCost AS NUMERIC(38, 20) 
+				,@actual_AverageCost AS NUMERIC(38, 20)
+				,@expected_LastCost AS NUMERIC(38, 20)
+				,@actual_LastCost AS NUMERIC(38, 20)
 
 		CREATE TABLE expectedInventoryTransaction (
 			[intInventoryTransactionId] INT NOT NULL
@@ -482,8 +484,16 @@ BEGIN
 				,[dblQty] 
 				,[dblCost]
 		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
+
+		-- Get the actual Average Cost and Last Cost. 
+		SELECT	@actual_AverageCost = dblAverageCost
+				,@actual_LastCost = dblLastCost
+		FROM	tblICItemPricing
+		WHERE	intItemId = @WetGrains
+				AND intItemLocationId = @WetGrains_DefaultLocation
 	END
 		
+	-- Define the expected data. 
 	BEGIN 
 		-- Setup the expectedInventoryTransaction data. 
 		INSERT INTO expectedInventoryTransaction (
@@ -642,6 +652,10 @@ BEGIN
 				,[strTransactionForm]			= 'Bill'
 				,[strModuleName]				= 'Inventory'
 				,[intConcurrencyId]				= 1
+
+		-- Compute the expected average cost. 
+		SET @expected_AverageCost = ((60 * 22) + (40 * 37.261)) / 100 
+		SET @expected_LastCost = 22.00
 	END 
 
 	-- Assert
@@ -663,7 +677,13 @@ BEGIN
 		-- Assert the G/L entries 
 		EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail', 'Failed to get the expected GL Detail records.'
 
+		-- Assert the average cost
+		EXEC tSQLt.AssertEquals @expected_AverageCost, @actual_AverageCost, 'Failed to compute the expected average cost.'
+
+		-- Assert the last cost. 
+		EXEC tSQLt.AssertEquals @expected_LastCost, @actual_LastCost, 'Failed to retain the same last cost. It should not chnage.'
 	END 
+
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actualInventoryTransaction') IS NOT NULL 

@@ -201,9 +201,11 @@ BEGIN
 		DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 				,@COST_ADJ_TYPE_New_Cost AS INT = 2
 
-		-- Declare the variables to check the average cost. 
-		DECLARE @dblAverageCost_Expected AS NUMERIC(38,20)
-		DECLARE @dblAverageCost_Actual AS NUMERIC(38,20)
+		-- Declare the variables to check the average cost and last cost. 
+		DECLARE @expected_AverageCost AS NUMERIC(38, 20) 
+				,@actual_AverageCost AS NUMERIC(38, 20)
+				,@expected_LastCost AS NUMERIC(38, 20)
+				,@actual_LastCost AS NUMERIC(38, 20)
 
 		CREATE TABLE expectedInventoryTransaction (
 			[intInventoryTransactionId] INT NOT NULL
@@ -588,9 +590,10 @@ BEGIN
 				,[dblCost]
 		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
 
-		-- Get the actual average cost
-		SELECT	@dblAverageCost_Actual = dblAverageCost
-		FROM	dbo.tblICItemPricing
+		-- Get the actual average cost. 
+		SELECT	@actual_AverageCost = dblAverageCost
+				,@actual_LastCost = dblLastCost
+		FROM	tblICItemPricing
 		WHERE	intItemId = @WetGrains
 				AND intItemLocationId = @WetGrains_DefaultLocation
 	END
@@ -695,9 +698,6 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_New_Cost
 				,[dblQty] = 40.00
 				,[dblCost] = 37.261
-
-		-- Setup the expected average cost
-		SET @dblAverageCost_Expected = 22.00
 
 		-- Setup the expected GL Detail 
 		INSERT INTO expectedGLDetail (
@@ -833,6 +833,10 @@ BEGIN
 				,[strTransactionForm]			= 'Bill'
 				,[strModuleName]				= 'Inventory'
 				,[intConcurrencyId]				= 1
+
+		-- Compute the expected Average Cost and Last Cost. 
+		SET @expected_AverageCost = 22.00
+		SET @expected_LastCost = 22.00
 	END 
 
 	-- Assert
@@ -852,6 +856,12 @@ BEGIN
 		
 		-- Assert the G/L entries 
 		EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail', 'Failed to get the expected GL Detail records.'
+
+		-- Assert the average cost
+		EXEC tSQLt.AssertEquals @expected_AverageCost, @actual_AverageCost, 'Failed to compute the expected average cost.'
+
+		-- Assert the last cost. 
+		EXEC tSQLt.AssertEquals @expected_LastCost, @actual_LastCost, 'Failed to retain the same last cost. It should not change.'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
