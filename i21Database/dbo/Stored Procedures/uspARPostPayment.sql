@@ -1543,37 +1543,37 @@ IF @recap = 0
 			FROM @ARReceivablePostData A
 			WHERE EXISTS(SELECT * FROM @ZeroPayment B WHERE A.intPaymentId = B.intPaymentId)						
 					
-			---- Creating the temp table:
-			--DECLARE @isSuccessful BIT
-			--CREATE TABLE #tmpCMBankTransaction (strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,UNIQUE (strTransactionId))
+			-- Creating the temp table:
+			DECLARE @isSuccessful BIT
+			CREATE TABLE #tmpCMBankTransaction (strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,UNIQUE (strTransactionId))
 
-			--INSERT INTO #tmpCMBankTransaction
-			--SELECT strRecordNumber FROM tblARPayment A
-			--INNER JOIN @ARReceivablePostData B ON A.intPaymentId = B.intPaymentId
+			INSERT INTO #tmpCMBankTransaction
+			SELECT strRecordNumber FROM tblARPayment A
+			INNER JOIN @ARReceivablePostData B ON A.intPaymentId = B.intPaymentId
 
-			---- Calling the stored procedure
-			--DECLARE @ReverseDate AS DATETIME
-			--SET @ReverseDate = GETDATE()
-			--EXEC uspCMBankTransactionReversal @userId, @ReverseDate, @isSuccessful OUTPUT
+			-- Calling the stored procedure
+			DECLARE @ReverseDate AS DATETIME
+			SET @ReverseDate = GETDATE()
+			EXEC uspCMBankTransactionReversal @userId, @ReverseDate, @isSuccessful OUTPUT
 			
-			----update payment record based on record from tblCMBankTransaction
-			--UPDATE tblARPayment
-			--	SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
-			--FROM tblARPayment A 
-			--	INNER JOIN tblCMBankTransaction B
-			--		ON A.strRecordNumber = B.strTransactionId
-			--WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
+			--update payment record based on record from tblCMBankTransaction
+			UPDATE tblARPayment
+				SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
+			FROM tblARPayment A 
+				INNER JOIN tblCMBankTransaction B
+					ON A.strRecordNumber = B.strTransactionId
+			WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
 			
-			----DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
-			--DELETE FROM tblCMBankTransaction
-			--WHERE strTransactionId IN (
-			--SELECT strRecordNumber 
-			--FROM tblARPayment
-			--	INNER JOIN tblSMPaymentMethod ON tblARPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
-			-- WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData) 
-			--AND tblSMPaymentMethod.strPaymentMethod != 'Check' 
-			--OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
-			--)
+			--DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
+			DELETE FROM tblCMBankTransaction
+			WHERE strTransactionId IN (
+			SELECT strRecordNumber 
+			FROM tblARPayment
+				INNER JOIN tblSMPaymentMethod ON tblARPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
+			 WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData) 
+			AND tblSMPaymentMethod.strPaymentMethod != 'Check' 
+			OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
+			)
 			
 			DELETE FROM tblCMUndepositedFund
 			WHERE
@@ -1652,7 +1652,15 @@ IF @recap = 0
 					
 					DELETE FROM @ARPrepayment WHERE intPaymentId = @PaymentIdToDeletePre
 					
-				END										
+				END
+				
+			UPDATE 
+				tblARPayment
+			SET 
+				intAccountId = NULL			
+			WHERE
+				intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)		
+									
 
 			END
 		ELSE
