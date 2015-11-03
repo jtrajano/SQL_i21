@@ -10,7 +10,8 @@ SELECT
 		e.strCity,  
 		e.strState,  
 		e.strZipCode,
-		c.ysnActive
+		c.ysnActive,
+		a.strTitle
 	FROM 		
 			tblEntity a
 		join tblEntityType b

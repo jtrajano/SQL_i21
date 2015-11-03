@@ -543,3 +543,9 @@ BEGIN
 	SELECT 3
 END
 GO
+
+GO
+UPDATE tblQMCompanyPreference
+SET ysnEnableParentLot = 0
+WHERE ysnEnableParentLot IS NULL
+GO
