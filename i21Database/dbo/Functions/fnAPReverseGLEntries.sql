@@ -33,6 +33,12 @@ RETURNS @returntable TABLE
 	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+	[dblDebitForeign]           NUMERIC (18, 6)	NULL,
+    [dblDebitReport]            NUMERIC (18, 6) NULL,
+    [dblCreditForeign]          NUMERIC (18, 6) NULL,
+    [dblCreditReport]           NUMERIC (18, 6) NULL,
+    [dblReportingRate]          NUMERIC (18, 6) NULL,
+    [dblForeignRate]            NUMERIC (18, 6) NULL,
 	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 )
 AS
@@ -69,6 +75,12 @@ BEGIN
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
+		,[dblDebitForeign]           
+		,[dblDebitReport]            
+		,[dblCreditForeign]          
+		,[dblCreditReport]           
+		,[dblReportingRate]          
+		,[dblForeignRate]            
 		,[intEntityId]
 	)
 	SELECT	
@@ -96,6 +108,12 @@ BEGIN
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
+		,[dblDebitForeign]           
+		,[dblDebitReport]            
+		,[dblCreditForeign]          
+		,[dblCreditReport]           
+		,[dblReportingRate]          
+		,[dblForeignRate]  
 		,[intEntityId] = @intUserId
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intTransactionId FROM @tmpTransacions)
