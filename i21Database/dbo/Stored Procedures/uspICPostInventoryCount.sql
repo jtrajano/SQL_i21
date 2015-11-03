@@ -19,7 +19,7 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Count Transaction' + CAST(
 
 -- Constants  
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Count'
+DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjusment'
 
 -- Get the Inventory Count batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -179,6 +179,7 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 	WHERE	Header.intInventoryCountId = @intTransactionId
+			AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
 	
 	-----------------------------------
 	--  Call the costing routine 
