@@ -26,7 +26,7 @@
     [strLink]                  NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [ysnClr]                   BIT              DEFAULT 0 NOT NULL,
 	[ysnEmailSent]			   BIT				NULL,
-	[strEmailStatus]		   NVARCHAR (250)	NULL,
+	[strEmailStatus]		   NVARCHAR (250)	COLLATE Latin1_General_CI_AS NULL,
     [dtmDateReconciled]        DATETIME         NULL,
 	[intBankStatementImportId] INT              NULL,
 	[intBankFileAuditId]	   INT				NULL, 
