@@ -5,7 +5,7 @@
     [strRoute]			NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [dtmLastUpdated]    DATETIME         NULL,
 	[ysnClosable]		BIT				 NULL,
-	[ysnSent]			BIT				 NULL,
+	[ysnSent]			BIT				 DEFAULT ((0)) NULL,
 	[intCounter]		INT				 NULL, 
     [intFromEntityId]	INT				 NULL, 
 	[intToEntityId]     INT              NULL,
