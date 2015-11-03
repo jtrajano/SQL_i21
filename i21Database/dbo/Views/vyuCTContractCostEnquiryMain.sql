@@ -35,17 +35,17 @@ AS
 						CD.strItemUOM,
 						RI.dblOpenReceive,
 						CD.strItemUOM strReceivedUOM,
-						CD.dblCashPrice,
+						CD.dblCashPrice * dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) dblCashPrice,
 						CD.strPriceUOM,
 						CC.dblAmount,
 						CC.dblAmountPer,
 						CC.dblActual,
 						CC.dblActualPer,
-						HE.dblNetImpact,
+						HE.dblNetImpact * dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) dblNetImpact,
 						CASE	WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intPriceUnitMeasureId,CD.intUnitMeasureId,CD.dblDetailQuantity),0) = 0 
 								THEN NULL
-								ELSE HE.dblNetImpact / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intPriceUnitMeasureId,CD.intUnitMeasureId,CD.dblDetailQuantity)
-						END		dblNetImpactPer
+								ELSE HE.dblNetImpact / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity)
+						END	 * dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	dblNetImpactPer
 				FROM	vyuCTContractDetailView		CD
 				JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId		LEFT
 				JOIN	tblSMCountry				RY	ON	RY.intCountryID					=	IM.intOriginId		LEFT

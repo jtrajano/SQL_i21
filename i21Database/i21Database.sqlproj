@@ -2800,6 +2800,7 @@
     <Build Include="dbo\Views\vyuICGetItemStockSummary.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockSummaryByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspWHReceiveOrder.sql" />
+    <Build Include="dbo\Functions\fnCTGetCurrencyExchangeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
