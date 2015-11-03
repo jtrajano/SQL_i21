@@ -191,7 +191,7 @@ BEGIN TRY
 						WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 						END
 
-						EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
+						EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
 					END
 				IF(@dblRemainingUnits > 0)
 				BEGIN
@@ -736,7 +736,7 @@ BEGIN TRY
 		FROM	dbo.tblICInventoryShipment ship	        
 		WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 		END
-		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
+		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
 	END
 
 	END

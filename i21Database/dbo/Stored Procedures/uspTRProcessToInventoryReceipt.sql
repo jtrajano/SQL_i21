@@ -352,7 +352,7 @@ _PostOrUnPost:
 		WHERE	[intEntityUserSecurityId] = @intUserId
 		if @ysnRecap = 0
 		BEGIN
-		  EXEC dbo.uspICPostInventoryReceipt @ysnPostOrUnPost, 0, @strTransactionId, @intUserId, @intEntityId;			
+		  EXEC dbo.uspICPostInventoryReceipt @ysnPostOrUnPost, 0, @strTransactionId, @intEntityId;			
 		END
 		
 
