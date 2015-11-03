@@ -48,8 +48,8 @@ BEGIN TRY
 		,I.strDescription
 		,PS.strParameterName
 		,PS.strParameterValue
-		,dblCalculatedQuantity + dblShrinkage AS dblInputQuantity
-		,U1.strUnitMeasure AS strInputUnitMeasure
+		,Case When PS.strParameterName='BOM Item' Then dblCalculatedQuantity + dblShrinkage Else NULL End AS dblInputQuantity
+		,Case When PS.strParameterName='BOM Item' Then U1.strUnitMeasure Else NULL End AS strInputUnitMeasure
 	FROM dbo.tblMFWorkOrder W 
 	JOIN dbo.tblICItem I ON W.intItemId = I.intItemId AND W.strWorkOrderNo = @strWorkOrderNo
 	JOIN dbo.tblICItemUOM IU ON W.intItemUOMId = IU.intItemUOMId
