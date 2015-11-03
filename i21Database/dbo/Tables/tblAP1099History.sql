@@ -6,10 +6,10 @@
 	[int1099Form] INT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 
     [ysnFiled] BIT NOT NULL DEFAULT 0, 
-    [strComment] NVARCHAR(500) NULL, 
+    [strComment] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
     [dblAmount] DECIMAL(18, 6) NULL, 
-    [strVendorName] NVARCHAR(200) NULL, 
-	[strVendorId] NVARCHAR(100) NULL, 
+    [strVendorName] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
+	[strVendorId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmDatePrinted] DATETIME NULL, 
     [dtmDateFiled] DATETIME NULL

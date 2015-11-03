@@ -15,8 +15,8 @@
     [dbl1099MISCCrop] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dbl1099MISCExcessGolden] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dbl1099MISCGrossProceeds] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[strContactName] NVARCHAR(100) NULL,
-	[strContactPhone] NVARCHAR(100) NULL,
-	[strContactEmail] NVARCHAR(100) NULL,
+	[strContactName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strContactPhone] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strContactEmail] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0
 )
