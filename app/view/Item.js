@@ -395,6 +395,11 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1
                                                                     },
                                                                     {
+                                                                        dataIndex: 'strInventoryType',
+                                                                        dataType: 'string',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
                                                                         dataIndex: 'tblICCategoryAccounts',
                                                                         hidden: true
                                                                     },

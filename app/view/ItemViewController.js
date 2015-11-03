@@ -58,7 +58,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboCategory: {
                 value: '{current.intCategoryId}',
-                store: '{itemCategory}'
+                store: '{itemCategory}',
+                defaultFilters: [{
+                    column: 'strInventoryType',
+                    value: '{current.strType}',
+                    conjunction: 'and'
+                }]
             },
             cboCommodity: {
                 readOnly: '{readOnlyCommodity}',
