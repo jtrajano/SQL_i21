@@ -7,6 +7,7 @@
     [ysnAllowUserSelfPost] BIT NULL DEFAULT 1, 
     [ysnShowReminderList] BIT NULL DEFAULT 0, 
 	--[strTheme] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''), 
+	[dtmNotificationEmailTime] DATETIME NULL, 
 	[strMenuBackground] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''), 
 	[imgMenuBackground] VARBINARY (MAX) NULL, 
 	[dblImageSizePercent] DECIMAL (18, 6) NULL DEFAULT 0,
