@@ -54,6 +54,7 @@ SELECT SO.intSalesOrderId
 	 , dblTaxDetail = SDT.dblTax
 	 , SO.strTransactionType
 	 , intDetailCount = (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
+	 , ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + SO.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId 
