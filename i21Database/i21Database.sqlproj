@@ -687,7 +687,6 @@
     <Build Include="dbo\Tables\tblICTag.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
-    <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
@@ -2798,6 +2797,7 @@
     <Build Include="dbo\Stored Procedures\uspMFInventoryAdjustment_CreatePostLotItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessProvisionalInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportItemPlanSummary.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
