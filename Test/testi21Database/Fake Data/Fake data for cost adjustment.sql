@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [testi21Database].[Fake data for cost adjustment]
+	@intCostingMethod AS INT = NULL 
 AS
 BEGIN
 	-- Variables from [Fake inventory items]
@@ -134,8 +135,24 @@ BEGIN
 				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
 	END 
 	
-	EXEC [testi21Database].[Fake COA used for fake inventory items]
-	EXEC [testi21Database].[Fake transactions for item costing]; 
+	DECLARE @AVERAGECOST AS INT = 1
+		,@FIFO AS INT = 2
+		,@LIFO AS INT = 3
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5	
+
+	EXEC [testi21Database].[Fake COA used for fake inventory items];
+
+	IF @intCostingMethod = @LIFO
+	BEGIN 
+		EXEC [testi21Database].[Fake transactions for LIFO costing]; 
+	END 
+	ELSE 
+	BEGIN 
+		EXEC [testi21Database].[Fake transactions for item costing]; 
+	END 
+	
+	
 	EXEC [testi21Database].[Fake open fiscal year and accounting periods]; 
 	-- IMPORTANT NOTE: Below will add the Inventory Receipt transactions in relation to the fake data in [Fake transactions for item costing]
 		

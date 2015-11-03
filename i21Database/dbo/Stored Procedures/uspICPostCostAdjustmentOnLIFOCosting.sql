@@ -239,7 +239,7 @@ BEGIN
 		,@strRelatedTransactionId				= @CostBucketStrTransactionId
 		,@strTransactionForm					= @strTransactionForm
 		,@intUserId								= @intUserId
-		,@intCostingMethod						= @AVERAGECOST
+		,@intCostingMethod						= @LIFO
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 
 	-- Log original cost to tblICInventoryLIFOCostAdjustmentLog
@@ -427,7 +427,7 @@ BEGIN
 					,@strRelatedTransactionId				= @InvTranStringTransactionId 
 					,@strTransactionForm					= @strTransactionForm
 					,@intUserId								= @intUserId
-					,@intCostingMethod						= @AVERAGECOST
+					,@intCostingMethod						= @LIFO
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			END 	
 
@@ -472,7 +472,7 @@ BEGIN
 					,@strRelatedTransactionId				= @InvTranStringTransactionId 
 					,@strTransactionForm					= @strTransactionForm
 					,@intUserId								= @intUserId
-					,@intCostingMethod						= @AVERAGECOST
+					,@intCostingMethod						= @LIFO
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 					
 				----------------------------------------------------------------------------------------------------

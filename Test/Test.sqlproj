@@ -907,6 +907,17 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnFIFOCosting. Receive Stocks. Cost Adjust. Unpost Cost Adjust.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnFIFOCosting. Receive Stocks. Cost Adjust. Unpost Receive Stocks.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnFIFOCosting. Receive Stocks. Repost Receive Stocks. Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Cost Adjust.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for LIFO costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Receive Stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Transfer.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Transfer Stocks, Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting. Receive Stocks. Cost Adjust. Unpost Cost Adjust. Unpost Receive Stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting. Receive Stocks. Cost Adjust. Unpost Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting. Receive Stocks. Cost Adjust. Unpost Receive Stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLIFOCosting. Receive Stocks. Repost Receive Stocks. Cost Adjust.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

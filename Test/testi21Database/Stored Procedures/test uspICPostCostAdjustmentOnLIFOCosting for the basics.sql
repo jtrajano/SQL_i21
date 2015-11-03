@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnFIFOCosting for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLIFOCosting for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -8,7 +8,7 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOCostAdjustmentLog', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOCostAdjustmentLog', @Identity = 1;
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @WRITE_OFF_SOLD AS INT = -1
@@ -50,7 +50,7 @@ BEGIN
 		DECLARE @dblAverageCost_Expected AS NUMERIC(18,6)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(18,6)
 		
-		-- Declare the variables used in uspICPostCostAdjustmentOnFIFOCosting
+		-- Declare the variables used in uspICPostCostAdjustmentOnLIFOCosting
 		DECLARE @dtmDate AS DATETIME
 				,@intItemId AS INT
 				,@intItemLocationId AS INT
@@ -134,8 +134,8 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1	
 		)
 
-		CREATE TABLE ExpectedInventoryFIFOCostAdjustmentLog (
-			[intInventoryFIFOId] INT NOT NULL 
+		CREATE TABLE ExpectedInventoryLIFOCostAdjustmentLog (
+			[intInventoryLIFOId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -154,7 +154,7 @@ BEGIN
 				,@ACTUALCOST AS INT = 5	
 
 		UPDATE dbo.tblICItemLocation
-		SET intCostingMethod = @FIFO
+		SET intCostingMethod = @LIFO
 	END 
 
 	-- Assert
@@ -165,7 +165,7 @@ BEGIN
 	-- Act 
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
-		EXEC dbo.uspICPostCostAdjustmentOnFIFOCosting
+		EXEC dbo.uspICPostCostAdjustmentOnLIFOCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -237,8 +237,8 @@ BEGIN
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
-		-- Assert the expected data for tblICInventoryFIFOCostAdjustmentLog is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOCostAdjustmentLog', 'tblICInventoryFIFOCostAdjustmentLog'
+		-- Assert the expected data for tblICInventoryLIFOCostAdjustmentLog is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryLIFOCostAdjustmentLog', 'tblICInventoryLIFOCostAdjustmentLog'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -248,6 +248,6 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryFIFOCostAdjustmentLog
+	IF OBJECT_ID('ExpectedInventoryLIFOCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.ExpectedInventoryLIFOCostAdjustmentLog
 END
