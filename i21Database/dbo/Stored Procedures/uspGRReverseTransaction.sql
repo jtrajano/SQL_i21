@@ -15,6 +15,7 @@ BEGIN TRY
 	DECLARE @intTransactionTypeId INT
 	DECLARE @dblUnits DECIMAL(24, 10)
 	DECLARE @dblAmount DECIMAL(24, 10)
+	DECLARE @dblOpenBalance DECIMAL(24, 10)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -30,30 +31,27 @@ BEGIN TRY
 		,@dblAmount = ISNULL(dblPaidAmount, 0)
 	FROM tblGRStorageHistory
 	WHERE intStorageHistoryId = @intStorageHistoryId
+	
+	IF @intTransactionTypeId =2
+	BEGIN
 
-	IF @intTransactionTypeId = 5
-	BEGIN
-	
-		UPDATE tblGRCustomerStorage
-		SET dblOriginalBalance = dblOriginalBalance - @dblUnits
-		WHERE intCustomerStorageId = @intCustomerStorageId
+		IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId AND (dblOpenBalance - @dblUnits)<0)
+		BEGIN
+			 SET @ErrMsg='This transaction cannot reversed because open balance will be negative.'
+			 RAISERROR(@ErrMsg,16,1)		 
+		END
 		
-		DELETE
-		FROM tblGRStorageHistory
-		WHERE intStorageHistoryId = @intStorageHistoryId
+		SELECT @dblOpenBalance=dblOpenBalance FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
 		
-		
-	END	
-	ELSE IF @intTransactionTypeId = 6
-	BEGIN
-	
 		UPDATE tblGRCustomerStorage
 		SET dblOpenBalance = dblOpenBalance - @dblUnits
 		WHERE intCustomerStorageId = @intCustomerStorageId
+		
+		EXEC [uspGRUpdateOnStoreInventory] @intCustomerStorageId,@dblOpenBalance
 
 		INSERT INTO [dbo].[tblGRStorageHistory] 
 		(
-			[intConcurrencyId]
+			 [intConcurrencyId]
 			,[intCustomerStorageId]
 			,[intTicketId]
 			,[intInventoryReceiptId]
@@ -85,73 +83,13 @@ BEGIN TRY
 			,NULL
 			,'Reverse Adjustment'
 			,@StrUserName
-			,15
+			,2
 			,NULL
 			,NULL
 		)
 
-		DELETE
-		FROM tblGRStorageHistory
-		WHERE intStorageHistoryId = @intStorageHistoryId
-		
 	END
-	
-	ELSE IF @intTransactionTypeId = 7
-	BEGIN
-		UPDATE tblGRCustomerStorage
-		SET dblInsuranceRate = dblInsuranceRate - @dblAmount
-		WHERE intCustomerStorageId = @intCustomerStorageId
-
-		DELETE
-		FROM tblGRStorageHistory
-		WHERE intStorageHistoryId = @intStorageHistoryId
-	END	
-	
-	ELSE IF @intTransactionTypeId = 8
-	BEGIN
-		UPDATE tblGRCustomerStorage
-		SET dblStorageDue = dblStorageDue - @dblAmount
-		WHERE intCustomerStorageId = @intCustomerStorageId
-
-		DELETE
-		FROM tblGRStorageHistory
-		WHERE intStorageHistoryId = @intStorageHistoryId
-
-	END
-		
-	ELSE IF @intTransactionTypeId = 9
-	BEGIN
-		UPDATE tblGRCustomerStorage
-		SET dblStoragePaid = dblStoragePaid - @dblAmount
-		WHERE intCustomerStorageId = @intCustomerStorageId
-
-		DELETE
-		FROM tblGRStorageHistory
-		WHERE intStorageHistoryId = @intStorageHistoryId
-
-	END	
-	ELSE IF @intTransactionTypeId = 10
-	BEGIN
-		UPDATE tblGRCustomerStorage
-		SET dblFeesDue = dblFeesDue - @dblAmount
-		WHERE intCustomerStorageId = @intCustomerStorageId
-
-		DELETE
-		FROM tblGRStorageHistory
-		WHERE intStorageHistoryId = @intStorageHistoryId
-
-	END	
-	ELSE IF @intTransactionTypeId = 11
-	BEGIN
-		UPDATE tblGRCustomerStorage
-		SET dblFeesPaid = dblFeesPaid - @dblAmount
-		WHERE intCustomerStorageId = @intCustomerStorageId
-		
-		DELETE
-		FROM tblGRStorageHistory
-		WHERE intStorageHistoryId = @intStorageHistoryId
-
-    END		
+			
 END TRY
 
 BEGIN CATCH

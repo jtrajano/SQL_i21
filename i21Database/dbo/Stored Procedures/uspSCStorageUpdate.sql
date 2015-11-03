@@ -523,7 +523,7 @@ BEGIN TRY
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
 			,[dtmLastStorageAccrueDate]= NULL 
-			,[dblStorageDue]= NULL 
+			,[dblStorageDue]= 0 
 			,[dblStoragePaid]= 0
 			,[dblInsuranceRate]= 0 
 			,[strOriginState]= NULL 
