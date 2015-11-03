@@ -28,6 +28,8 @@ SELECT
        strItemDescription = Item.strDescription,
        Item.strLotTracking,
        Item.strType,
+	   Item.intLifeTime,
+	   Item.strLifeTimeType,
        UOM.strUnitMeasure
        , dblItemUOMCF = ItemUOM.dblUnitQty
        ,intStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = CT.intItemUOMId),0)
