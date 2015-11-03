@@ -32,3 +32,20 @@
 		intTransactionId = intTransactionId
 		--,* 
 	from vyuAPVendorHistory
+	union
+	select 
+		intEntityId = intEntityCustomerId,
+		strBillId = '' COLLATE Latin1_General_CI_AS,
+		strTransactionNumber = strQuoteNumber COLLATE Latin1_General_CI_AS,
+		strTransactionType = 'Transport Quote' COLLATE Latin1_General_CI_AS,
+		dblTransactionTotal = 0,
+		dblAmountPaid = 0,
+		dblAmountDue = 0,
+		ysnPaid = Cast(0 as bit),
+		strEntityNo = '' COLLATE Latin1_General_CI_AS,
+		dtmDate = dtmQuoteDate,
+		strPaymentInfo = '',
+		intPaymentId = 0,
+		intTransactionId = 0
+		--,* 
+	from vyuTRQuoteView
