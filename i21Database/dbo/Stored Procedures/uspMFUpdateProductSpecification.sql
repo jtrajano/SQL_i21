@@ -29,7 +29,7 @@ BEGIN TRY
 		FROM (
 			SELECT strParameterName
 				,ROW_NUMBER() OVER (
-					PARTITION BY strParameterName ORDER BY strParameterName
+					PARTITION BY strParameterName+strParameterValue ORDER BY strParameterName+strParameterValue
 					) as intRowNumber
 			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
 					intWorkOrderProductSpecificationId INT
