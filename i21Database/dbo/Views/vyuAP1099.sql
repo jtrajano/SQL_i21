@@ -3,14 +3,14 @@ AS
 SELECT
       C.strVendorId
 	, C.intEntityVendorId
-    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN C2.str1099Name IS NOT NULL THEN C2.str1099Name ELSE C2.strName END), '&', 'and'))      
-    , strAddress = REPLACE(REPLACE(D.strAddress, CHAR(10), ' ') , CHAR(13), ' ')         
-	, ISNULL(strCity, '') strCity
-	, ISNULL(strState, '') strState
-	, ISNULL(strZipCode, '') strZip
-    , strZipState = (CASE WHEN LEN(D.strCity) <> 0 THEN D.strCity ELSE '' END +               
-       CASE WHEN LEN(D.strState) <> 0 THEN ', ' + D.strState ELSE '' END +               
-       CASE WHEN LEN(D.strZipCode) <> 0 THEN ', ' + D.strZipCode ELSE '' END)              
+    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN C2.str1099Name IS NOT NULL THEN dbo.fnTrim(C2.str1099Name) ELSE dbo.fnTrim(C2.strName) END), '&', 'and'))      
+    , strAddress = REPLACE(REPLACE(dbo.fnTrim(D.strAddress), CHAR(10), ' ') , CHAR(13), ' ')         
+	, ISNULL(dbo.fnTrim(strCity), '') strCity
+	, ISNULL(dbo.fnTrim(strState), '') strState
+	, ISNULL(dbo.fnTrim(strZipCode), '') strZip
+    , strZipState = (CASE WHEN LEN(D.strCity) <> 0 THEN dbo.fnTrim(D.strCity) ELSE '' END +               
+       CASE WHEN LEN(D.strState) <> 0 THEN ', ' + dbo.fnTrim(D.strState) ELSE '' END +               
+       CASE WHEN LEN(D.strZipCode) <> 0 THEN ', ' + dbo.fnTrim(D.strZipCode) ELSE '' END)              
     , C2.strFederalTaxId
 	, dblCropInsurance = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 1 --'Crop Insurance Proceeds'     
 		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dblTotal)
