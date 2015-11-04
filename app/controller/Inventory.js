@@ -196,6 +196,14 @@ Ext.define('Inventory.controller.Inventory', {
             columnName = '';
 
         switch (screenType) {
+            case 'ItemId':
+                screenName = 'Inventory.view.Item';
+                columnName = 'intItemId';
+                break;
+            case 'CategoryId':
+                screenName = 'Inventory.view.Category';
+                columnName = 'intCategoryId';
+                break;
             case 'Order':
                 screenName = 'AccountsReceivable.view.SalesOrder';
                 columnName = 'intSalesOrderId';

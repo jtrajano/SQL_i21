@@ -131,11 +131,27 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
 
             grdPhysicalCount: {
-                colItem: 'strItemNo',
-                colDescription: 'strItemDescription',
-                colCategory: 'strCategory',
-                colSubLocation: 'strSubLocationName',
-                colStorageLocation: 'strStorageLocationName',
+                colItem: {
+                    dataIndex: 'strItemNo',
+                    drillDownText: 'View Item',
+                    drillDownClick: 'onViewItemNo'
+                },
+                colDescription: {
+                    dataIndex: 'strItemDescription',
+                    drillDownText: 'View Item',
+                    drillDownClick: 'onViewItemDescription'
+                },
+                colCategory: {
+                    dataIndex: 'strCategory',
+                    drillDownText: 'View Category',
+                    drillDownClick: 'onViewCategory'
+                },
+                colSubLocation: {
+                    dataIndex: 'strSubLocationName'
+                },
+                colStorageLocation: {
+                    dataIndex: 'strStorageLocationName'
+                },
                 colLotNo: {
                     dataIndex: 'strLotNumber',
                     hidden: '{!current.ysnCountByLots}'
@@ -579,6 +595,21 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         else {
             iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
         }
+    },
+
+    onViewItemNo: function (value, record) {
+        var itemId = record.get('intItemId');
+        i21.ModuleMgr.Inventory.showScreen(itemId, 'ItemId');
+    },
+
+    onViewItemDescription: function (value, record) {
+        var itemId = record.get('intItemId');
+        i21.ModuleMgr.Inventory.showScreen(itemId, 'ItemId');
+    },
+
+    onViewCategory: function (value, record) {
+        var categoryId = record.get('intCategoryId');
+        i21.ModuleMgr.Inventory.showScreen(categoryId, 'CategoryId');
     },
 
     init: function(application) {

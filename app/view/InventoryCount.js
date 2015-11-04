@@ -525,7 +525,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                     ]
                                 },
                                 {
-                                    xtype: 'gridpanel',
+                                    xtype: 'frmadvancesearchgrid',
                                     flex: 1,
                                     margins: '',
                                     itemId: 'grdPhysicalCount',

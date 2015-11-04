@@ -1096,6 +1096,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdPhysicalCount",
                                         "layout|flex": 1,
                                         "layout|margins": "",

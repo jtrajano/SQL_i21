@@ -140,6 +140,22 @@ namespace iRely.Inventory.Model
                 _category = value;
             }
         }
+        private int? _categoryId;
+        [NotMapped]
+        public int? intCategoryId
+        {
+            get
+            {
+                if (vyuICGetInventoryCountDetail != null)
+                    return vyuICGetInventoryCountDetail.intCategoryId;
+                else
+                    return null;
+            }
+            set
+            {
+                _categoryId = value;
+            }
+        }
         private string _location;
         [NotMapped]
         public string strLocationName
