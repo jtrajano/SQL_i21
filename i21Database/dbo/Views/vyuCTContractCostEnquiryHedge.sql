@@ -8,12 +8,12 @@ AS
 			dtmTransactionDate,	
 			strFutMarketName,	
 			strFutureMonth,
-			dblLots,	
-			dblPrice,	
+			dblLots * intProffitLoss dblLots,	
+			dblPrice dblPrice,	
 			dblLatestPrice,	
-			dblContractSize * dblLots * (dblLatestPrice - dblPrice) AS dblGrossImpact,
+			dblContractSize * dblLots * (dblLatestPrice - dblPrice) * intProffitLoss AS dblGrossImpact,
 			dblLots * dblCommission dblCommission,
-			(dblContractSize * dblLots * (dblLatestPrice - dblPrice ))- (dblLots * dblCommission) AS dblNetImpact
+			((dblContractSize * dblLots * (dblLatestPrice - dblPrice ))- (dblLots * dblCommission))  * intProffitLoss AS dblNetImpact
 	FROM
 	(
 			SELECT	SY.intAssignFuturesToContractSummaryId,
@@ -26,7 +26,8 @@ AS
 					FT.dblPrice,
 					dbo.fnCTGetLastSettlementPrice(FT.intFutureMarketId,FT.intFutureMonthId)							AS dblLatestPrice,
 					dbo.fnCTGetBrokerageCommission(FT.intBrokerageAccountId,FT.intFutureMarketId,FT.dtmTransactionDate) AS dblCommission,
-					MA.dblContractSize
+					MA.dblContractSize,
+					CASE WHEN FT.strBuySell = 'Sell' THEN -1 ELSE 1 END intProffitLoss
 			FROM	tblRKAssignFuturesToContractSummary SY
 			JOIN	tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId
 			JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FT.intFutureMarketId

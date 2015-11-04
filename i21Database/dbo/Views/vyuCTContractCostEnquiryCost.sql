@@ -23,8 +23,8 @@ AS
 						(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)*CD.dblCashPrice*CC.dblRate/100)/
 						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity)
 			END  * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblAmountPer,
-			(SELECT SUM(dblTotal) FROM tblAPBillDetail BD WHERE BD.intContractHeaderId = CC.intContractHeaderId AND BD.intItemId = CC.intItemId) * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblActual,
-			(SELECT SUM(dblTotal) FROM tblAPBillDetail BD WHERE BD.intContractHeaderId = CC.intContractHeaderId AND BD.intItemId = CC.intItemId)/ 
+			BD.dblTotal * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblActual,
+			BD.dblTotal/ 
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity) * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1)dblActualPer
 	FROM	vyuCTContractCostView		CC 
 	JOIN	vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId	
@@ -32,4 +32,13 @@ AS
 	JOIN	tblICItemUOM				CU	ON	CU.intItemUOMId			=	CC.intItemUOMId			LEFT	
 	JOIN	tblICItemUOM				CM	ON	CM.intUnitMeasureId		=	CC.intUnitMeasureId
 											AND	CM.intItemId			=	CD.intItemId			LEFT
-	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId			=	CD.intItemUOMId	
+	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId			=	CD.intItemUOMId			LEFT
+	JOIN	(
+				SELECT	BD.intItemId,
+						BD.dblTotal,	
+						RC.intContractId AS intContractHeaderId
+
+				FROM	tblAPBillDetail				BD
+				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intInventoryReceiptChargeId	=	BD.intInventoryReceiptChargeId	
+				WHERE	BD.intInventoryReceiptChargeId IS NOT NULL 
+			)BD	ON	BD.intContractHeaderId	=	CC.intContractHeaderId AND CC.intItemId = BD.intItemId
