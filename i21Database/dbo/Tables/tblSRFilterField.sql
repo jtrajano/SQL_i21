@@ -5,6 +5,7 @@
 	[strReportModule] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
 	[strReportName] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
 	[strFieldName] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
+	[strFriendlyName] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
 	[strDataType] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
 	[strCondition] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
 	[strFromValue] [nvarchar] (max) COLLATE Latin1_General_CI_AS NULL,
