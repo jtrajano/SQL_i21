@@ -8,7 +8,7 @@
     [dblProcessedDays] NUMERIC(18, 6) NULL, 
     [dblDividendNo] NUMERIC(18, 6) NULL, 
     [dblMinimumDividend] NUMERIC(18, 6) NULL, 
-    [dblProrateDividend] NUMERIC(18, 6) NULL, 
+    [ysnProrateDividend] BIT NULL, 
     [dtmCutoffDate] DATETIME NULL, 
     [dblFederalTaxWithholding] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
