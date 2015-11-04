@@ -513,7 +513,7 @@ SET @batchIdUsed = @batchId
 				--Contract Item Price not Equal to Contract Sequence Cash Price
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(CT.dblCashPrice,@ZeroDecimal) AS MONEY),2) + ').',
+					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * CT.dblCashPrice,@ZeroDecimal) AS MONEY),2) + ').',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -535,7 +535,7 @@ SET @batchIdUsed = @batchId
 						AND D.intContractDetailId = CT.intContractDetailId 		 				
 				WHERE
 					D.dblPrice <> @ZeroDecimal				
-					AND CT.dblCashPrice <> D.dblPrice 
+					AND ([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * CT.dblCashPrice) <> D.dblPrice 
 					
 					
 				BEGIN TRY

@@ -26,10 +26,10 @@ SELECT
 	,[dblShipmentQtyShippedTotal]			= LGSPS.[dblSAllocatedQty]
 	,[dblQtyRemaining]						= LGSPS.[dblSAllocatedQty]
 	,[dblDiscount]							= 0.00
-	,[dblPrice]								= CTCD.[dblCashPrice]
-	,[dblShipmentUnitPrice]					= CTCD.[dblCashPrice]
+	,[dblPrice]								= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],1) * CTCD.[dblCashPrice]
+	,[dblShipmentUnitPrice]					= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],1) * CTCD.[dblCashPrice]
 	,[dblTotalTax]							= 0.00
-	,[dblTotal]								= LGSPS.[dblSAllocatedQty] * CTCD.[dblCashPrice]
+	,[dblTotal]								= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],LGSPS.[dblSAllocatedQty]) * CTCD.[dblCashPrice]
 	,[intAccountId]							= ARIA.[intAccountId]
 	,[intCOGSAccountId]						= ARIA.[intCOGSAccountId]
 	,[intSalesAccountId]					= ARIA.[intSalesAccountId]

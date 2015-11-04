@@ -81,7 +81,7 @@ SELECT
 	,@ShipToLocationId		= [intShipToLocationId]
 	,@BillToLocationId		= [intBillToLocationId]
 	,@ShipmentId			= [intShipmentId]
-	,@OriginalInvoiceId		= @InvoiceId
+	,@OriginalInvoiceId		= [intInvoiceId]
 FROM
 	tblARInvoice
 WHERE 
@@ -200,7 +200,7 @@ BEGIN TRY
 		,[strActualCostId]					= NULL
 		,[intShipmentId]					= NULL
 		,[intTransactionId]					= NULL
-		,[intOriginalInvoiceId]				= @InvoiceId
+		,[intOriginalInvoiceId]				= @OriginalInvoiceId
 		,[intEntityId]						= @UserEntityId
 		,[ysnResetDetails]					= 1
 		,[ysnPost]							= NULL
@@ -296,7 +296,7 @@ SELECT
 		,[strActualCostId]					= NULL
 		,[intShipmentId]					= NULL
 		,[intTransactionId]					= NULL
-		,[intOriginalInvoiceId]				= @InvoiceId
+		,[intOriginalInvoiceId]				= @OriginalInvoiceId
 		,[intEntityId]						= @UserEntityId
 		,[ysnResetDetails]					= 1
 		,[ysnPost]							= NULL

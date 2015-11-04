@@ -212,6 +212,7 @@ BEGIN TRY
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
+		,[intOriginalInvoiceId] 
 		,[intEntityId]
 		,[intConcurrencyId])
 	SELECT
@@ -268,6 +269,7 @@ BEGIN TRY
 		,[strActualCostId]				= @ActualCostId 
 		,[intShipmentId]				= @ShipmentId 
 		,[intTransactionId]				= @TransactionId 
+		,[intOriginalInvoiceId]			= @OriginalInvoiceId
 		,[intEntityId]					= @EntityId 
 		,[intConcurrencyId]				= 0
 	FROM	
