@@ -82,8 +82,7 @@ namespace iRely.Inventory.BusinessLayer
                         var idParameter = new SqlParameter("intTransactionId", shipment.Entity.intInventoryShipmentId);
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
                     }
-
-                    
+                                        
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
                         
@@ -92,18 +91,12 @@ namespace iRely.Inventory.BusinessLayer
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", intTransactionId);
 
                         // Update the sales order status using the latest shipment data
-                        var intShipmentId = new SqlParameter("intShipmentId", shipment.intInventoryShipmentId);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", intShipmentId);
+                        if (shipment.intOrderType == 2)
+                        {
+                            var intShipmentId = new SqlParameter("intShipmentId", shipment.intInventoryShipmentId);
+                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", intShipmentId);
+                        }
                     }
-
-                    
-                    foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
-                    {
-                        
-                        
-
-                    }
-
 
                     transaction.Commit();
 

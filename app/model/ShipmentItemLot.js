@@ -31,6 +31,7 @@ Ext.define('Inventory.model.ShipmentItemLot', {
         { name: 'intLotId', type: 'int', allowNull: true },
         { name: 'dblQuantityShipped', type: 'float' },
         { name: 'dblLotQty', type: 'float' },
+        { name: 'dblAvailableQty', type: 'float' },
         { name: 'intItemUOMId', type: 'int', allowNull: true },
         { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblGrossWeight', type: 'float' },
@@ -50,13 +51,12 @@ Ext.define('Inventory.model.ShipmentItemLot', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strLotId'},
-        {type: 'presence', field: 'dblQuantityShipped'}
+        {type: 'presence', field: 'strLotId'}
     ],
 
     validate: function(options){
         var errors = this.callParent(arguments);
-        if (this.get('dblQuantityShipped') > this.get('dblLotQty')) {
+        if (this.get('dblQuantityShipped') > this.get('dblAvailableQty')) {
             errors.add({
                 field: 'dblQuantityShipped',
                 message: 'Ship Qty cannot be more than the Available Qty.'

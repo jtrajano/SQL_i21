@@ -178,7 +178,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 hidden: '{!readOnlyOnPickLots}'
             },
             btnRemoveItem: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{readOnlyOnPickLots}'
             },
             btnQuality: {
                 hidden: '{current.ysnPosted}'
@@ -310,6 +310,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colNotes: 'strNotes'
             },
 
+            btnRemoveLot: {
+                hidden: '{readOnlyOnPickLots}'
+            },
             grdLotTracking: {
                 readOnly: '{readOnlyOnPickLots}',
                 colLotID: {
@@ -343,7 +346,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }]
                     }
                 },
-                colAvailableQty: 'dblAvailableQty',
+                colAvailableQty: {
+                    hidden: '{readOnlyOnPickLots}',
+                    dataIndex: 'dblAvailableQty'
+                },
                 colShipQty: 'dblQuantityShipped',
                 colLotUOM: {
                     dataIndex: 'strUnitMeasure'
@@ -1566,7 +1572,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         intCommodityId: lot.get('intCommodityId'),
                                                         intItemUOMId: lot.get('intSaleUnitMeasureId'),
                                                         strUnitMeasure: lot.get('strSaleUnitMeasure'),
-                                                        dblQuantity: lot.get('dblSalePickedQty'),
+                                                        dblQuantity: 0,
                                                         strOrderUOM: lot.get('strSaleUnitMeasure'),
                                                         dblQtyOrdered: lot.get('dblSalesOrderedQty'),
                                                         dblUnitPrice: lot.get('dblCashPrice'),
@@ -1578,13 +1584,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         strStorageLocationName: lot.get('strStorageLocation')
                                                     });
 
+                                                    var totalQty = 0;
                                                     Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lotDetails) {
                                                         if (lotDetails.get('intSContractHeaderId') === lot.get('intSContractHeaderId') &&
                                                             lotDetails.get('intPickLotHeaderId') === lot.get('intPickLotHeaderId')) {
+                                                            totalQty += lotDetails.get('dblLotPickedQty');
                                                             var newItemLot = Ext.create('Inventory.model.ShipmentItemLot', {
                                                                 intLotId: lotDetails.get('intLotId'),
                                                                 strLotId: lotDetails.get('strLotNumber'),
-                                                                dblAvailableQty: lotDetails.get('dblAvailableQty'),
+                                                                dblLotQty: lotDetails.get('dblLotPickedQty'),
+                                                                dblAvailableQty: lotDetails.get('dblLotPickedQty'),
                                                                 dblQuantityShipped: lotDetails.get('dblLotPickedQty'),
                                                                 strUnitMeasure: lotDetails.get('strLotUnitMeasure'),
                                                                 strWeightUOM: lotDetails.get('strWeightUnitMeasure'),
@@ -1596,6 +1605,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                             newItem.tblICInventoryShipmentItemLots().add(newItemLot);
                                                         }
                                                     });
+
+                                                    newItem.set('dblQuantity', totalQty);
 
                                                     current.tblICInventoryShipmentItems().add(newItem);
                                                 }
