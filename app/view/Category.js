@@ -24,8 +24,8 @@ Ext.define('Inventory.view.Category', {
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
-        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.grid.column.Check',
@@ -37,6 +37,7 @@ Ext.define('Inventory.view.Category', {
         'Ext.toolbar.Paging'
     ],
 
+    height: 414,
     hidden: false,
     width: 860,
     layout: 'fit',
@@ -206,6 +207,125 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strDescription',
                                                                 valueField: 'strDescription'
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1,
+                                                        margin: '0 1 0 5',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber',
+                                                                fieldLabel: 'GL Division Number',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkSalesAnalysisByTon',
+                                                                fieldLabel: 'Sales Analysis by Ton',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                hidden: true,
+                                                                itemId: 'cboMaterialFee',
+                                                                fieldLabel: 'Material Fee',
+                                                                labelWidth: 130,
+                                                                displayField: 'strDescription',
+                                                                forceSelection: true,
+                                                                valueField: 'strDescription'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intItemId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Item Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strItemNo',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Number',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strType',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                hidden: true,
+                                                                itemId: 'cboMaterialItem',
+                                                                fieldLabel: 'Material Item',
+                                                                labelWidth: 130,
+                                                                displayField: 'strItemNo',
+                                                                valueField: 'intItemId'
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                hidden: true,
+                                                                itemId: 'chkAutoCalculateFreight',
+                                                                fieldLabel: 'Auto Calculate Freight',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intItemId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Item Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strItemNo',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Number',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strType',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                hidden: true,
+                                                                itemId: 'cboFreightItem',
+                                                                fieldLabel: 'Freight Item',
+                                                                labelWidth: 130,
+                                                                displayField: 'strItemNo',
+                                                                valueField: 'intItemId'
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboInventoryType',
+                                                                modelValidation: true,
+                                                                fieldLabel: 'Inventory Type',
+                                                                labelWidth: 130,
+                                                                displayField: 'strType',
+                                                                valueField: 'strType'
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
@@ -251,121 +371,6 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strUnitMeasure',
                                                                 valueField: 'intCategoryUOMId'
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 1 0 5',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber',
-                                                                fieldLabel: 'GL Division Number',
-                                                                labelWidth: 130
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkSalesAnalysisByTon',
-                                                                fieldLabel: 'Sales Analysis by Ton',
-                                                                labelWidth: 130
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboMaterialFee',
-                                                                fieldLabel: 'Material Fee',
-                                                                labelWidth: 130,
-                                                                displayField: 'strDescription',
-                                                                forceSelection: true,
-                                                                valueField: 'strDescription'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intItemId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Item Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strItemNo',
-                                                                        dataType: 'string',
-                                                                        text: 'Item Number',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strType',
-                                                                        dataType: 'string',
-                                                                        text: 'Item Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboMaterialItem',
-                                                                fieldLabel: 'Material Item',
-                                                                labelWidth: 130,
-                                                                displayField: 'strItemNo',
-                                                                valueField: 'intItemId'
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkAutoCalculateFreight',
-                                                                fieldLabel: 'Auto Calculate Freight',
-                                                                labelWidth: 130
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intItemId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Item Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strItemNo',
-                                                                        dataType: 'string',
-                                                                        text: 'Item Number',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strType',
-                                                                        dataType: 'string',
-                                                                        text: 'Item Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboFreightItem',
-                                                                fieldLabel: 'Freight Item',
-                                                                labelWidth: 130,
-                                                                displayField: 'strItemNo',
-                                                                valueField: 'intItemId'
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboInventoryType',
-                                                                modelValidation: true,
-                                                                fieldLabel: 'Inventory Type',
-                                                                labelWidth: 130,
-                                                                displayField: 'strType',
-                                                                valueField: 'strType'
                                                             }
                                                         ]
                                                     }
