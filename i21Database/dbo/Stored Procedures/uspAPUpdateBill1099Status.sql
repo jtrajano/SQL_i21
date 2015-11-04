@@ -5,6 +5,12 @@
 	@form1099 INT
 AS
 
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
 UPDATE A
 	SET A.ysn1099Printed = Status1099.ysnPrinted
 FROM tblAPBillDetail A
@@ -12,18 +18,22 @@ INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
 CROSS APPLY (
 	SELECT
-		*
+		TOP 1 *
 	FROM tblAP1099History C
 	WHERE C.intEntityVendorId = B.intEntityVendorId
-	AND YEAR(B.dtmDate) = @year
+	AND YEAR(B.dtmDate) = 2015
+	AND A.int1099Form = C.int1099Form
+	ORDER BY C.dtmDatePrinted DESC
 ) Status1099
 WHERE 
---B.intEntityVendorId BETWEEN (CASE WHEN @vendorTo < @vendorFrom THEN @vendorTo ELSE @vendorFrom END) 
---					AND (CASE WHEN @vendorTo < @vendorFrom THEN @vendorFrom ELSE @vendorTo END)
 1 = (CASE WHEN ISNULL(@vendorFrom,'') = '' THEN 1
 				WHEN ISNULL(@vendorFrom,'') <> '' AND C.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
-			AND YEAR(B.dtmDate) = @year
-			AND A.int1099Form = @form1099
-			AND B.ysnPosted = 1 AND B.dblPayment > 0
+AND YEAR(B.dtmDate) = @year
+AND A.int1099Form = @form1099
+AND 1 = (CASE WHEN B.intTransactionType = 9 THEN 1 
+			WHEN B.intTransactionType != 9 AND B.ysnPosted = 1 THEN 1
+			ELSE 0 END)
+AND 1 = (CASE WHEN B.intTransactionType = 9 THEN 1
+			WHEN B.intTransactionType != 9 AND B.dblPayment > 0 THEN 1 ELSE 0 END)
 
 

@@ -10,5 +10,6 @@
 	[ysnActive] bit DEFAULT 1,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSMXMLTagAttribute_intTagAttributeId] PRIMARY KEY ([intTagAttributeId]),
-	CONSTRAINT [FK_tblSMXMLTagAttribute_tblSMImportFileColumnDetail_intImportFileColumnDetailId] FOREIGN KEY ([intImportFileColumnDetailId]) REFERENCES [tblSMImportFileColumnDetail]([intImportFileColumnDetailId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblSMXMLTagAttribute_tblSMImportFileColumnDetail_intImportFileColumnDetailId] FOREIGN KEY ([intImportFileColumnDetailId]) REFERENCES [tblSMImportFileColumnDetail]([intImportFileColumnDetailId]) ON DELETE CASCADE,
+	CONSTRAINT [AK_tblSMXMLTagAttribute_intImportFileColumnDetailId_intSequence] UNIQUE ([intImportFileColumnDetailId], [intSequence])
 )
