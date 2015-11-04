@@ -237,5 +237,31 @@ Ext.define('Inventory.controller.Inventory', {
                 filters: filter
             });
         }
+    },
+
+    computeDateAdd: function(currentDate, qty, type) {
+        if (!currentDate) return;
+        if (!qty) return;
+        if (!type) return;
+        var newDate = currentDate;
+
+        switch (type) {
+            case 'Minutes':
+                newDate = Ext.Date.add(currentDate, Ext.Date.MINUTE, qty);
+                break;
+            case 'Hours':
+                newDate = Ext.Date.add(currentDate, Ext.Date.HOUR, qty);
+                break;
+            case 'Days':
+                newDate = Ext.Date.add(currentDate, Ext.Date.DAY, qty);
+                break;
+            case 'Months':
+                newDate = Ext.Date.add(currentDate, Ext.Date.MONTH, qty);
+                break;
+            case 'Years':
+                newDate = Ext.Date.add(currentDate, Ext.Date.YEAR, qty);
+                break;
+        }
+        return newDate;
     }
 });

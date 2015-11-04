@@ -850,8 +850,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var receiptDate = current.get('dtmReceiptDate');
         var lifetime = currentReceiptItem.get('intLifeTime');
         var lifetimeType  = currentReceiptItem.get('strLifeTimeType');
-
-
+        var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
+        record.set('dtmExpiryDate', expiryDate);
 
         var qty = config.dummy.get('dblQuantity');
         var lotCF = currentReceiptItem.get('dblItemUOMConvFactor');
@@ -990,6 +990,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intCommodityId', records[0].get('intCommodityId'));
             current.set('intOwnershipType', 1);
             current.set('strOwnershipType', 'Own');
+            current.set('intLifeTime', records[0].get('intLifeTime'));
+            current.set('strLifeTimeType', records[0].get('strLifeTimeType'));
 
             current.set('intSubLocationId', records[0].get('intSubLocationId'));
             current.set('strSubLocationName', records[0].get('strSubLocationName'));
@@ -1882,6 +1884,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
                 current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
                 current.set('strUnitType', po.get('strStockUOMType'));
+                current.set('intLifeTime', po.get('intLifeTime'));
+                current.set('strLifeTimeType', po.get('strLifeTimeType'));
                 break;
 
             case 'Purchase Contract':
@@ -1967,6 +1971,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('strUnitType', po.get('strStockUOMType'));
+                        current.set('intLifeTime', po.get('intLifeTime'));
+                        current.set('strLifeTimeType', po.get('strLifeTimeType'));
                     }
                 }
                 break;
@@ -2017,6 +2023,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strUnitType', po.get('strStockUOMType'));
                 current.set('strContainer', po.get('strContainerNumber'));
                 current.set('intContainerId', po.get('intShipmentBLContainerId'));
+                current.set('intLifeTime', po.get('intLifeTime'));
+                current.set('strLifeTimeType', po.get('strLifeTimeType'));
 
                 if (iRely.Functions.isEmpty(current.get('intOrderId'))) {
                     current.set('intLineNo', po.get('intContractDetailId'));
