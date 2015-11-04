@@ -424,6 +424,8 @@ namespace iRely.Inventory.Model
         public string strPurchaseTax { get; set; }
         public int? intGradeId { get; set; }
         public string strGrade { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }
@@ -513,6 +515,8 @@ namespace iRely.Inventory.Model
         public decimal? dblAvailableQty { get; set; }
         public decimal? dblUnitQty { get; set; }
         public bool? ysnStockUnit { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
     }
 
     public class vyuICGetItemStockUOMForAdjustment

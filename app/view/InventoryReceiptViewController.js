@@ -2191,6 +2191,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataIndex: 'dblStockUOMCF',
                         dataType: 'float',
                         hidden: true
+                    },
+                    {
+                        dataIndex: 'intLifeTime',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strLifeTimeType',
+                        dataType: 'string',
+                        hidden: true
                     }
                 ],
                 itemId: 'cboOrderNumber',

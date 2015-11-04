@@ -1928,6 +1928,16 @@
                                                                                     "dataIndex: 'ysnReceiveUOMAllowPurchase',",
                                                                                     "dataType: 'boolean',",
                                                                                     "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intLifeTime',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strLifeTimeType',",
+                                                                                    "dataType: 'string',",
+                                                                                    "hidden: true",
                                                                                     "}",
                                                                                     "]"
                                                                                 ],
@@ -4190,7 +4200,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter13",
+                                                            "name": "filter12",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5069,7 +5079,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter13",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

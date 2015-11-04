@@ -1038,6 +1038,16 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataIndex: 'ysnReceiveUOMAllowPurchase',
                                                                                             dataType: 'boolean',
                                                                                             hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intLifeTime',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strLifeTimeType',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboItem',

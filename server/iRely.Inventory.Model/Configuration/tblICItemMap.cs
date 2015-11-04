@@ -443,6 +443,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strPurchaseTax).HasColumnName("strPurchaseTax");
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
+            this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)
@@ -556,6 +558,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(18, 6);
             this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(18, 6);
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+            this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
+            this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
         }
     }
 
