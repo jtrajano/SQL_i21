@@ -48,7 +48,6 @@ A.intJournalId
 ,B.dblDebitReport
 ,B.dblCreditForeign
 ,B.dblCreditReport
-,B.strOriginTable
 ,C.strAccountId
 from tblGLJournal A
 inner join tblGLJournalDetail B

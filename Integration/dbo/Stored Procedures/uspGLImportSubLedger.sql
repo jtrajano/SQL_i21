@@ -293,9 +293,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				--SELECT @totalCredit += @credit, @totalDebit +=@debit
 
     				INSERT INTO tblGLJournalDetail (intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
-    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument,strOriginTable, strSourceKey)
+    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument, strSourceKey)
     				SELECT @intAccountId1,@strDescription1,@dtmDate,@intJournalId,@debit,@credit,@debitUnit,@creditUnit,
-    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc,''tblGLIjemst'', A4GLIdentity
+    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc, A4GLIdentity
     				 FROM tblGLIjemst WHERE glije_id=@id
 
     				FETCH NEXT FROM cursor_gldetail INTO @id,@glije_acct_no,@glije_date,@glije_amt,@glije_units,@glije_dr_cr_ind,@glije_correcting,
