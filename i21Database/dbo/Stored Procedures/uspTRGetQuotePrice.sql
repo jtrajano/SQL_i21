@@ -20,16 +20,29 @@ DECLARE @ErrorState INT;
 
 BEGIN TRY
   
-  select top 1 @dblQuotePrice = QD.dblQuotePrice from dbo.tblTRQuoteHeader QH
-	 join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
-  where QH.intEntityCustomerId =@intEntityCustomerId
-    and QD.intItemId = @intItemId
-	and QD.intShipToLocationId = @intShipToId
-	and QD.intSupplyPointId = @intSupplyPointId
-	and QH.dtmQuoteEffectiveDate <= @dtmTransactionDate
-	and QH.strQuoteStatus = 'Sent'
-  order by QH.dtmQuoteEffectiveDate DESC
-
+  if @intSupplyPointId != 0
+  BEGIN 
+       select top 1 @dblQuotePrice = QD.dblQuotePrice from dbo.tblTRQuoteHeader QH
+	      join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
+       where QH.intEntityCustomerId =@intEntityCustomerId
+         and QD.intItemId = @intItemId
+	     and QD.intShipToLocationId = @intShipToId
+	     and QD.intSupplyPointId = @intSupplyPointId
+	     and QH.dtmQuoteEffectiveDate <= @dtmTransactionDate
+	     and QH.strQuoteStatus = 'Sent'
+       order by QH.dtmQuoteEffectiveDate DESC
+  END
+  else
+  BEGIN
+     select top 1 @dblQuotePrice = QD.dblQuotePrice from dbo.tblTRQuoteHeader QH
+	      join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
+       where QH.intEntityCustomerId =@intEntityCustomerId
+         and QD.intItemId = @intItemId
+	     and QD.intShipToLocationId = @intShipToId
+	     and QH.dtmQuoteEffectiveDate <= @dtmTransactionDate
+	     and QH.strQuoteStatus = 'Sent'
+       order by QH.dtmQuoteEffectiveDate DESC
+  END
 if @dblQuotePrice is null
     BEGIN
 	   set @dblQuotePrice = 0;
