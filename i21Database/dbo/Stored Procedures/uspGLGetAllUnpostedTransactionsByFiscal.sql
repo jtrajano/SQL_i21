@@ -1,4 +1,5 @@
-﻿-- =============================================
+﻿/****** Object:  StoredProcedure [dbo].[uspGLGetAllUnpostedTransactionsByFiscal]    Script Date: 11/4/2015 3:41:46 PM ******/
+-- =============================================
 -- Author:		Trajano, Jeff
 -- Create date: 8-11-2015
 -- Description:	Gets all unposted transaction (GL,CM,AP,IC,AR) 
@@ -30,42 +31,6 @@ BEGIN
 	DECLARE @dtmDateTo DATETIME
 	SELECT TOP 1 @dtmDateFrom= dtmDateFrom,@dtmDateTo= dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId
 
-	--INSERTS TO temporarytable
-	;WITH Transactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
-	AS
-	(
-		SELECT intJournalId,  strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId,strDescription,  strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType,
-		strUserName = (select strName from tblEntity where intEntityId = j.intEntityId ),
-		intEntityId,
-		dtmDate
-		 dtmDate 
-			FROM tblGLJournal j
-			 WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
-		--UNION
-		--SELECT strTransactionId, strTransactionType,dtmDate from [vyuICGetUnpostedTransactions] --IC
-		--UNION
-		--SELECT strTransactionId, strTransactionType,dtmDate from [vyuAPUnpostedTransaction] --AP
-		UNION
-		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate from [vyuCMUnpostedTransaction] --CM
-		--UNION
-		--SELECT strTransactionId, strTransactionType,dtmDate from [vyuARUnpostedTransactions] --AR
-	)
-	INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
-	SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate from Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
-	
-	IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
-	BEGIN
-		DELETE FROM tblGLForBatchPosting 
-		SELECT @guid = NEWID()
-		
-		INSERT INTO 
-		tblGLForBatchPosting (intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName, intEntityId, dtmDate,[guid])
-		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,@guid FROM @tblTransactions
-	END
-
-		
-	
-	
 	SELECT TOP 1 @blnLegacyIntegration = ISNULL(ysnLegacyIntegration,0) FROM tblSMCompanyPreference 
 	
 	IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glijemst]') AND type IN (N'U'))
@@ -77,7 +42,8 @@ BEGIN
 		SELECT glije_src_no as strTransactionId, 
 		'Origin - ' + glije_src_sys as strTransactionType,	
 		CAST(SUBSTRING(CAST(glije_date AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
-		FROM glijemst
+		FROM glijemst group by glije_src_no,glije_src_sys,glije_date
+
 	)
 	INSERT INTO @tblOriginTransactions
 	SELECT strTransactionId,strTransactionType,dtmDate FROM GLORIGIN
@@ -103,11 +69,51 @@ BEGIN
 	DECLARE @intCount INT
 	DECLARE @intAACount INT
 	
-	SELECT @intCount = COUNT(1) FROM @tblTransactions
-	SELECT @intAACount = COUNT(1) FROM @tblTransactions WHERE strTransactionType = 'Audit Adjustment'
-	
-	SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
-	SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
-	SELECT @guid as batchGUID
+		IF EXISTS (SELECT TOP 1 1 FROM @tblOriginTransactions)
+		BEGIN
+			SELECT  TransactionType ='Origin' 
+			SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
+			RETURN
+		END
 
+		;WITH Transactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
+		AS
+		(
+			SELECT intJournalId,  strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId,strDescription,  strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType,
+			strUserName = (select strName from tblEntity where intEntityId = j.intEntityId ),
+			intEntityId,
+			dtmDate
+			  
+				FROM tblGLJournal j
+				 WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
+			UNION ALL
+				SELECT intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName,intEntityId, dtmDate from [vyuICGetUnpostedTransactions] --IC
+			UNION ALL
+				SELECT intTransactionId, strTransactionId,strDescription,strTransactionType,strUserName,intEntityId,  dtmDate from [vyuAPUnpostedTransaction] --AP
+			UNION ALL
+				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate from [vyuCMUnpostedTransaction] --CM
+			UNION ALL
+				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName, intEntityId, dtmDate from [vyuARUnpostedTransactions] --AR
+		)
+		INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
+		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate from Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+		
+		IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
+		BEGIN
+			SELECT  TransactionType ='NonOrigin' 
+			DELETE FROM tblGLForBatchPosting 
+			SELECT @guid = NEWID()
+		
+			INSERT INTO tblGLForBatchPosting (intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName, intEntityId, dtmDate,[guid])
+				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,@guid FROM @tblTransactions
+			SELECT @intAACount = COUNT(1) FROM @tblTransactions WHERE strTransactionType = 'Audit Adjustment'
+			SELECT @intCount = COUNT(1) FROM @tblTransactions
+
+			SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
+			SELECT  @guid as batchGUID
+		END
+		ELSE
+		BEGIN
+			SELECT  TransactionType ='Empty' 
+		END
 END
