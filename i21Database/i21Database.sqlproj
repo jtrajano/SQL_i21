@@ -2809,6 +2809,7 @@
     <Build Include="dbo\Tables\tblEntityTariffType.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetDividends.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateProvisionalOnStandardInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateScaleDeviceInterface.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
