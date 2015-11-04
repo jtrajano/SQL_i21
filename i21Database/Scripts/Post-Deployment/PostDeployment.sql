@@ -187,6 +187,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePOAddressInfo.sql
 :r .\AP\UpdateApprovalRecords.sql
 :r .\AP\UpdateBillStatus.sql
+:r .\AP\RemoveBillTemplate.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 

@@ -59,6 +59,7 @@
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
 	[ysnDeleted] BIT NULL DEFAULT 0 ,
 	[ysnReadyForPayment] BIT NULL DEFAULT 0 ,
+	[ysnRecurring] BIT NULL DEFAULT 0 ,
 	[dtmDateDeleted] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
