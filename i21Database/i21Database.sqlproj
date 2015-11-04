@@ -2806,6 +2806,7 @@
     <Build Include="dbo\Functions\fnICCheckAllowPurchase.sql" />
     <Build Include="dbo\Functions\fnICCheckAllowSale.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetBudgetLetter.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetDividends.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
