@@ -2814,6 +2814,8 @@
     <Build Include="dbo\Stored Procedures\uspMFConsumeSKU.sql" />
     <Build Include="dbo\Views\vyuMFGetProductionOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCustomerPositionInquiryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetParentLotQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetParentLotQualityCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
