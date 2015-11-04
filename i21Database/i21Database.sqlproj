@@ -2805,6 +2805,7 @@
     <Build Include="dbo\Stored Procedures\uspRKHedgeCustomerPositionDetail.sql" />
     <Build Include="dbo\Functions\fnICCheckAllowPurchase.sql" />
     <Build Include="dbo\Functions\fnICCheckAllowSale.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetBudgetLetter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
