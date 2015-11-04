@@ -32,7 +32,9 @@ SELECT
 	dblReservedQty = ISNULL(Reserve.dblTotalQty, 0),
 	dblAvailableQty = (CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN (ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserve.dblTotalQty, 0)) ELSE ISNULL(Lot.dblQty, 0) END),
 	dblUnitQty = ItemUOM.dblUnitQty,
-	ysnStockUnit = ItemUOM.ysnStockUnit
+	ysnStockUnit = ItemUOM.ysnStockUnit,
+	Item.intLifeTime,
+	Item.strLifeTimeType
 FROM tblICItemStockUOM StockUOM
 LEFT JOIN tblICItem Item ON Item.intItemId = StockUOM.intItemId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

@@ -2803,6 +2803,8 @@
     <Build Include="dbo\Functions\fnCTGetCurrencyExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCustomerPositionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKHedgeCustomerPositionDetail.sql" />
+    <Build Include="dbo\Functions\fnICCheckAllowPurchase.sql" />
+    <Build Include="dbo\Functions\fnICCheckAllowSale.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
