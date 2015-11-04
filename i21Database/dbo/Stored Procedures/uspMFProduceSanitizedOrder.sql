@@ -26,6 +26,7 @@ BEGIN TRY
 		,@intBatchId INT
 		,@intSubLocationId INT
 		,@intInputLotId INT
+		,@intInputStorageLocationId INT
 		,@dblInputWeightPerQty NUMERIC(18, 6)
 		,@strDefaultStatusForSanitizedLot NVARCHAR(50)
 		,@intLotStatusId INT
@@ -95,13 +96,14 @@ BEGIN TRY
 
 	SELECT @dblInputWeight = dblWeight
 		,@dblInputWeightPerQty = dblWeightPerQty
+		,@intInputStorageLocationId=intStorageLocationId 
 	FROM tblICLot
 	WHERE intLotId = @intInputLotId
 
 	IF @dblWeight > @dblInputWeight
 	BEGIN
-		EXEC uspMFLotAdjustQty @intOutputLotId = @intOutputLotId
-			,@dblNewLotQty = dblWeight
+		EXEC uspMFLotAdjustQty @intLotId = @intInputLotId
+			,@dblNewLotQty = @dblWeight
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Production'
 			,@strNotes = 'Production - Adjust'
@@ -117,9 +119,19 @@ BEGIN TRY
 		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	IF @intOutputLotId IS NULL
+	IF @intOutputLotId IS NULL or @intOutputLotId=0
 	BEGIN
-		EXEC dbo.uspMFLotSplit @intOutputLotId = intInputLotId
+		IF (
+				@strOutputLotNumber = ''
+				OR @strOutputLotNumber IS NULL
+				)
+			
+		BEGIN
+			EXEC dbo.uspSMGetStartingNumber 24
+				,@strOutputLotNumber OUTPUT
+		END
+
+		EXEC dbo.uspMFLotSplit @intLotId = @intInputLotId
 			,@strNewLotNumber = @strOutputLotNumber
 			,@intSplitSubLocationId = @intSubLocationId
 			,@intSplitStorageLocationId = @intStorageLocationId
@@ -156,7 +168,7 @@ BEGIN TRY
 					)
 		END
 
-		EXEC dbo.uspMFLotMerge @intOutputLotId = @intInputLotId
+		EXEC dbo.uspMFLotMerge @intLotId = @intInputLotId
 			,@intNewLotId = @intOutputLotId
 			,@dblMergeQty = @dblQty
 			,@intUserId = @intUserId
@@ -185,6 +197,8 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmLastModified
 		,intLastModifiedUserId
+		,intInputLotId
+		,intInputStorageLocationId
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -204,7 +218,9 @@ BEGIN TRY
 		,@intUserId
 		,@dtmCreated
 		,@intUserId
-
+		,@intInputLotId
+		,@intInputStorageLocationId
+	
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
 
 	DECLARE @intOrderHeaderId INT
@@ -224,6 +240,7 @@ BEGIN TRY
 		,@intWeightUnitMeasureId INT
 		,@intUOMId INT
 		,@dblWeightperUnit NUMERIC(18, 6)
+		,@strSKUNo nvarchar(50)
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM dbo.tblMFWorkOrder
@@ -249,6 +266,7 @@ BEGIN TRY
 			,intItemId INT
 			,intLotId INT
 			,intSKUId INT
+			,strSKUNo nvarchar(50)
 			,intContainerId INT
 			,intUOMId INT
 			,dblQuantity NUMERIC(16, 8)
@@ -264,6 +282,7 @@ BEGIN TRY
 			intItemId
 			,intLotId
 			,intSKUId
+			,strSKUNo
 			,intContainerId
 			,intUOMId
 			,dblQuantity
@@ -277,28 +296,29 @@ BEGIN TRY
 		SELECT S.intItemId
 			,S.intLotId
 			,S.intSKUId
-			,S.intUOMId
+			,S.strSKUNo 
 			,C.intContainerId
-			,S.dblQuantity
+			,S.intUOMId
+			,S.dblQty
 			,L.intItemUOMId
 			,I.intUnitMeasureId
 			,S.dblWeightPerUnit
-			,S.dblQuantity * S.dblWeightPerUnit
+			,S.dblQty * S.dblWeightPerUnit
 			,L.intWeightUOMId
 			,W.intUnitMeasureId
 		FROM dbo.tblWHSKU S
 		JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
 		JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
-		JOIN dbo.tblItemUOM I ON I.intItemUOMId = L.intItemUOMId
-		LEFT JOIN dbo.tblItemUOM W ON W.intItemUOMId = L.intWeightUOMId
+		JOIN dbo.tblICItemUOM I ON I.intItemUOMId = L.intItemUOMId
+		LEFT JOIN dbo.tblICItemUOM W ON W.intItemUOMId = L.intWeightUOMId
 		WHERE C.intStorageLocationId = @intStagingLocationId
-			AND S.Qty > 0
+			AND S.dblQty > 0
 			AND S.intLotId = @intInputLotId
 		ORDER BY S.intSKUId
 
 		SELECT @dblRequiredWeight = @dblWeight
 
-		SELECT intRecordId = MIN(intRecordId)
+		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblWHSKU
 
 		WHILE @intRecordId IS NOT NULL
@@ -306,13 +326,21 @@ BEGIN TRY
 		BEGIN
 			SELECT @intSKUId = NULL
 				,@dblWeight = NULL
+				,@intUOMId=NULL
+				,@intItemUnitMeasureId=NULL
+				,@intWeightUnitMeasureId=NULL
+				,@dblWeightperUnit=NULL
+				,@intContainerId=NULL
+				,@strSKUNo=NULL
 
 			SELECT @intSKUId = intSKUId
+				,@strSKUNo=strSKUNo
 				,@intUOMId = intUOMId
 				,@dblWeight = dblWeight
 				,@intItemUnitMeasureId = intItemUnitMeasureId
 				,@intWeightUnitMeasureId = intWeightUnitMeasureId
 				,@dblWeightperUnit = dblWeightperUnit
+				,@intContainerId=intContainerId
 			FROM @tblWHSKU
 			WHERE intRecordId = @intRecordId
 
@@ -366,7 +394,7 @@ BEGIN TRY
 				WHERE intContainerId = @intContainerId
 
 				DELETE
-				FROM dbo.tblWHTASK
+				FROM dbo.tblWHTask
 				WHERE intFromContainerId = @intContainerId
 
 				SELECT @intDestinationContainerId = NULL
@@ -384,8 +412,8 @@ BEGIN TRY
 				EXEC [dbo].uspWHSplitSKUForOrder @strUserName = @strUserName
 					,@intAddressId = @intLocationId
 					,@strSourceContainerNo = @strSourceContainerNo
-					,@dblSplitQty = dblSplitQty
-					,@strSKUNo = ''
+					,@dblSplitQty = @dblSplitQty
+					,@strSKUNo = @strSKUNo
 					,@intOrderHeaderId = 0
 					,@ysnGeneratePickTask = @ysnGeneratePickTask OUT
 					,@strDestContainerNo = @strDestinationContainerNo OUT
@@ -444,11 +472,15 @@ BEGIN TRY
 				SELECT @dblRequiredWeight = 0
 			END
 
-			SELECT intRecordId = MIN(intRecordId)
+			SELECT @intRecordId = MIN(intRecordId)
 			FROM @tblWHSKU
 			WHERE intRecordId > @intRecordId
 		END
 	END
+
+	SELECT @intOwnerId = IO.intOwnerId
+	FROM dbo.tblICItemOwner IO
+	WHERE intItemId = @intItemId
 
 	IF @ysnSanitizationInboundPutaway = 1
 	BEGIN
@@ -458,10 +490,6 @@ BEGIN TRY
 				WHERE intInboundOrderHeaderId IS NULL
 				)
 		BEGIN
-			SELECT @intOwnerId = IO.intOwnerId
-			FROM dbo.tblICItemOwner IO
-			WHERE intItemId = @intItemId
-
 			SELECT @intEntityId = E.intEntityId
 			FROM dbo.tblEntity E
 			JOIN dbo.tblEntityType ET ON E.intEntityId = ET.intEntityId
@@ -510,7 +538,7 @@ BEGIN TRY
 			SELECT @strXML += '</root>'
 
 			INSERT INTO @tblWHOrderHeader
-			EXEC dbo.uspWHOutboundOrderCreate @strXML = @strXML
+			EXEC dbo.uspWHCreateOutboundOrder @strXML = @strXML
 
 			SELECT @intOrderHeaderId = intOrderHeaderId
 			FROM @tblWHOrderHeader
@@ -554,6 +582,7 @@ BEGIN TRY
 				,intWeightPerUnitUOMId
 				,dtmProductionDate
 				,strLotAlias
+				,intConcurrencyId
 				)
 			SELECT @intOrderHeaderId
 				,@intItemId
@@ -581,6 +610,7 @@ BEGIN TRY
 				,IU.intUnitMeasureId
 				,@dtmCreated
 				,@strLotAlias
+				,1
 			FROM dbo.tblMFWorkOrderProducedLot PL
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = PL.intItemUOMId
 			WHERE PL.intWorkOrderProducedLotId = @intWorkOrderProducedLotId
@@ -660,7 +690,7 @@ BEGIN TRY
 			,intBatchId
 			,intShiftId
 			,dtmCreated
-			,intCreatedUserId
+			,intCreatedUserId			
 			)
 		SELECT @intWorkOrderId
 			,intItemId
@@ -686,6 +716,8 @@ BEGIN TRY
 				,strManifestItemNote
 				,intLastUpdateId
 				,dtmLastUpdateOn
+				,intConcurrencyId
+				,intOrderHeaderId
 				)
 			SELECT (
 					SELECT intOrderLineItemId
@@ -698,11 +730,29 @@ BEGIN TRY
 				,NULL
 				,@intUserId
 				,@dtmCreated
+				,1
+				,@intOrderHeaderId
 		END
 
 		SELECT @intNoOfPallet = @intNoOfPallet - 1
 	END
+
+		IF @intTransactionCount = 0
+		COMMIT TRANSACTION
+
 END TRY
 
 BEGIN CATCH
+	SET @ErrMsg = ERROR_MESSAGE()
+
+	IF XACT_STATE() != 0
+		AND @intTransactionCount = 0
+		ROLLBACK TRANSACTION
+
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH

@@ -8,6 +8,7 @@ BEGIN TRY
 		,@dtmEndDate1 DATETIME
 		,@intLocationId INT
 		,@xmlDocumentId INT
+		,@strLocationName nvarchar(50)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -50,9 +51,11 @@ BEGIN TRY
 	SELECT @dtmStartDate1 = @dtmStartDate
 		,@dtmEndDate1 = @dtmEndDate
 
-	SELECT @intLocationId = [from]
+	SELECT @strLocationName = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'intLocationId'
+	WHERE [fieldname] = 'strLocationName'
+
+	SELECT @intLocationId=intCompanyLocationId FROM dbo.tblSMCompanyLocation WHERE strLocationName=@strLocationName
 
 	DECLARE @dtmShiftStartTime DATETIME
 		,@dtmShiftEndTime DATETIME

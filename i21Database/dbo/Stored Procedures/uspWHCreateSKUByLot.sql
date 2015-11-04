@@ -264,7 +264,7 @@ BEGIN TRY
 		BEGIN
 			--Create the container                                      
 			INSERT INTO tblWHContainer (strContainerNo,intConcurrencyId, intContainerTypeId, intStorageLocationId,intCreatedUserId,dtmCreated, intLastModifiedUserId, dtmLastModified)
-			VALUES (@strNewContainerNo, @intContainerTypeId,0, @intDefaultStagingLocationId, @intUserId, GETDATE(), @intUserId, GETDATE())
+			VALUES (@strNewContainerNo, 0,@intContainerTypeId, @intDefaultStagingLocationId, @intUserId, GETDATE(), @intUserId, GETDATE())
 
 			SET @intContainerId = SCOPE_IDENTITY()
 		END

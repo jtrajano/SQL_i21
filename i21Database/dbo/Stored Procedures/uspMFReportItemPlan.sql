@@ -237,8 +237,7 @@ BEGIN
 			AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 			AND II.intCategoryId = @intCategoryId
-		JOIN dbo.tblMFWorkOrderItem WI ON WI.intWorkOrderId = W.intWorkOrderId
-		JOIN @tblICItem I ON I.intItemId = WI.intItemId
+		JOIN @tblICItem I ON I.intItemId = II.intItemId
 		--JOIN dbo.tblEntity E ON E.intEntityId = I.intOwnerId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 		WHERE S.intLocationId = @intCompanyLocationId
@@ -920,7 +919,7 @@ BEGIN
 			--,a.strItemType
 			,a.intRowNumber
 			,a.strWorkorderNo
-			,a.dtmPlannedDate
+			,a.dtmPlannedDateTime 
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner

@@ -1132,6 +1132,7 @@ IF EXISTS (
 BEGIN
 	UPDATE tblMFCompanyPreference
 	SET intDefaultGanttChartViewDuration = 7
+	Where intDefaultGanttChartViewDuration=NULL
 END
 ELSE
 BEGIN
@@ -1340,3 +1341,12 @@ BEGIN
 		,4
 END
 Go
+GO
+UPDATE tblMFCompanyPreference
+SET ysnSanitizationInboundPutaway = 0
+WHERE ysnSanitizationInboundPutaway IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET dblSanitizationOrderOutputQtyTolerancePercentage = 2
+WHERE dblSanitizationOrderOutputQtyTolerancePercentage IS NULL
+GO
