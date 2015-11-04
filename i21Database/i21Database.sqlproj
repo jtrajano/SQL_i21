@@ -2389,6 +2389,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLIFOCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLotCosting.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotCostAdjustmentLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

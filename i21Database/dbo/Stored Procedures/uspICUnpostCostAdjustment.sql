@@ -46,6 +46,7 @@ BEGIN
 		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intRelatedTransactionId INT NULL 
 		,intTransactionTypeId INT NOT NULL 
+		,intCostingMethod INT 
 	)
 END 
 
@@ -59,6 +60,7 @@ INSERT INTO #tmpInvCostAdjustmentToReverse (
 	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,intTransactionTypeId
+	,intCostingMethod
 )
 SELECT	Changes.intInventoryTransactionId
 		,Changes.intTransactionId
@@ -66,6 +68,7 @@ SELECT	Changes.intInventoryTransactionId
 		,Changes.intRelatedTransactionId
 		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
+		,Changes.intCostingMethod 
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -108,6 +111,7 @@ FROM	(
 						, Inserted.intRelatedTransactionId
 						, Inserted.strRelatedTransactionId
 						, Inserted.intTransactionTypeId
+						, Inserted.intCostingMethod
 		) AS Changes (
 			Action
 			, intInventoryTransactionId
@@ -116,6 +120,7 @@ FROM	(
 			, intRelatedTransactionId
 			, strRelatedTransactionId
 			, intTransactionTypeId
+			, intCostingMethod
 		)
 WHERE	Changes.Action = 'UPDATE'
 ;
@@ -127,92 +132,11 @@ BEGIN
 	-- Update the cost buckets. Reverse the cost. 
 	-------------------------------------------------
 	BEGIN 
-		DECLARE @CostBucketIntTransactionId AS INT
-				,@CostBucketStrTransactionId AS NVARCHAR(50)
-				,@CostAdjQty AS NUMERIC(18,6)
-				,@CostAdjNewCost AS NUMERIC(38,20)
-				,@CostBucketId AS INT 
+		-- Unpost the cost buckets for FIFO or Average Costing 
+		EXEC dbo.uspICUnpostCostAdjustmentOnFIFO
 
-				,@CostBucketCost AS NUMERIC(38,20)
-				,@OriginalCost AS NUMERIC(38,20)
-				,@NewTransactionValue AS NUMERIC(38,20)
-				,@OriginalTransactionValue AS NUMERIC(38,20)
-				,@dblNewCalculatedCost AS NUMERIC(38,20)
-				,@CostBucketStockInQty AS NUMERIC(18,6)
-				
-
-		DECLARE loopCostBucket CURSOR LOCAL FAST_FORWARD
-		FOR 
-		SELECT  intTransactionId
-				,strTransactionId
-				,CostAdjLog.dblQty
-				,CostAdjLog.dblCost
-				,CostAdjLog.intInventoryFIFOId
-		FROM	#tmpInvCostAdjustmentToReverse InvReverse INNER JOIN dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjLog
-					ON InvReverse.intInventoryTransactionId = CostAdjLog.intInventoryTransactionId
-		WHERE	CostAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost
-
-		OPEN loopCostBucket;
-
-		-- Initial fetch attempt
-		FETCH NEXT FROM loopCostBucket INTO 
-				@CostBucketIntTransactionId
-				,@CostBucketStrTransactionId 
-				,@CostAdjQty 
-				,@CostAdjNewCost 
-				,@CostBucketId 
-		;
-
-		-----------------------
-		-- Start of the loop
-		-----------------------
-		WHILE @@FETCH_STATUS = 0
-		BEGIN 
-			-- Get the original cost
-			SELECT TOP 1 
-					@OriginalCost = dblCost
-			FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
-			WHERE	intInventoryFIFOId = @CostBucketId
-					AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-
-			-- Get the cost at cost bucket. 
-			SELECT	@CostBucketCost = dblCost
-					,@CostBucketStockInQty = dblStockIn
-			FROM	dbo.tblICInventoryFIFO
-			WHERE	intInventoryFIFOId = @CostBucketId
-
-			-- Compute the new transaction value. 
-			SELECT	@NewTransactionValue = @CostAdjQty * @CostAdjNewCost
-
-			-- Compute the original transaction value. 
-			SELECT	@OriginalTransactionValue = @CostAdjQty * @OriginalCost
-
-			-- Compute the new cost. 
-			SELECT @dblNewCalculatedCost =	@CostBucketCost 
-											- ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
-
-			-- Calculate the new cost
-			UPDATE	CostBucket
-			SET		dblCost = @dblNewCalculatedCost
-			FROM	tblICInventoryFIFO CostBucket
-			WHERE	CostBucket.intInventoryFIFOId = @CostBucketId
-
-			-- Attempt to fetch the next row from cursor. 
-			FETCH NEXT FROM loopCostBucket INTO 
-				@CostBucketIntTransactionId
-				,@CostBucketStrTransactionId 
-				,@CostAdjQty 
-				,@CostAdjNewCost 
-				,@CostBucketId
-			;
-		END 
-
-		CLOSE loopCostBucket;
-		DEALLOCATE loopCostBucket;
-
-		-----------------------
-		-- End of the loop
-		-----------------------
+		-- Unpost the cost buckets for LIFO
+		EXEC dbo.uspICUnpostCostAdjustmentOnLIFO
 	END 
 	
 	-------------------------------------------------
