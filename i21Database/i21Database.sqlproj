@@ -2806,6 +2806,7 @@
     <Build Include="dbo\Functions\fnICCheckAllowPurchase.sql" />
     <Build Include="dbo\Functions\fnICCheckAllowSale.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetBudgetLetter.sql" />
+    <Build Include="dbo\Tables\tblEntityTariffType.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetDividends.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -2872,6 +2873,7 @@
     <None Include="Scripts\Post-Deployment\AP\CreateVoucherPayable.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099.sql" />
     <None Include="Scripts\Post-Deployment\EM\014_UpdateCustomerPricingLevel.sql" />
+    <None Include="Scripts\Post-Deployment\EM\015_UpdateEntityTariffType.sql" />
     <None Include="Scripts\Post-Deployment\AP\RemoveBillTemplate.sql" />
   </ItemGroup>
   <ItemGroup>

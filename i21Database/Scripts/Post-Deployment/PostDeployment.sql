@@ -248,6 +248,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\012_DeleteOldTables.sql
 :r .\EM\013_SetDefaultLocationToActive.sql
 :r .\EM\014_UpdateCustomerPricingLevel.sql
+:r .\EM\015_UpdateEntityTariffType.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
