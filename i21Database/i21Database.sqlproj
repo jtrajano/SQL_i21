@@ -2813,6 +2813,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCreatePickOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFConsumeSKU.sql" />
     <Build Include="dbo\Views\vyuMFGetProductionOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomerPositionInquiryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

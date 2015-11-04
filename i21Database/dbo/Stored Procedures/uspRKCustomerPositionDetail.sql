@@ -114,7 +114,7 @@ UNION
 			
 UNION
 	
-	SELECT 6 AS intSeqId
+	SELECT 7 AS intSeqId
 		,'Total Receipted Sales' AS [strType]
 		,isnull(dblTotal1, 0) + (isnull(CollateralSale, 0)) dblTotal
 	FROM (
@@ -158,7 +158,7 @@ UNION
 			) AS CollateralPurchases
 	
 UNION
-		SELECT 7 AS intSeqId
+		SELECT 8 AS intSeqId
 		,'Purchase Priced' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
@@ -171,7 +171,7 @@ UNION
 		
 UNION
 	
-		SELECT 8 AS intSeqId
+		SELECT 9 AS intSeqId
 		,'Sales Priced' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
@@ -185,7 +185,7 @@ UNION
 			
 UNION
 	
-		SELECT 9 AS intSeqId
+		SELECT 10 AS intSeqId
 		,'Purchase Basis' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
@@ -198,7 +198,7 @@ UNION
 	
 UNION
 	
-	SELECT 10 AS intSeqId
+	SELECT 11 AS intSeqId
 		,'Sales Basis' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
@@ -211,7 +211,7 @@ UNION
 		
 	
 UNION
-		SELECT 11 AS intSeqId
+		SELECT 12 AS intSeqId
 		,'Purchase HTA' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
@@ -224,7 +224,7 @@ UNION
 		
 UNION
 		
-		SELECT 12 AS intSeqId
+		SELECT 13 AS intSeqId
 		,'Sales HTA' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
@@ -236,7 +236,7 @@ UNION
 		AND CD.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 		
 UNION		
-	SELECT 13 AS intSeqId
+	SELECT 14 AS intSeqId
 		,'Purchase Basis Deliveries' AS [strType]
 		,isnull(SUM(dblTotal), 0) AS dblTotal
 	FROM (			
@@ -251,7 +251,7 @@ UNION
 		
 UNION
 		
-		SELECT 14 AS intSeqId
+		SELECT 15 AS intSeqId
 		,'Purchase In-Transit' AS [strType]
 		,ISNULL(ReserveQty, 0) AS dblTotal
 	FROM (SELECT sum(dblStockQty) ReserveQty FROM  vyuLGInventoryView  WHERE  strStatus='In-transit' and intVendorEntityId=@intVendorCustomerId) t
@@ -259,26 +259,12 @@ UNION
 ) t1
 END
 
---DECLARE @intUnitMeasureId int
---DECLARE @intFromCommodityUnitMeasureId int
---DECLARE @intToCommodityUnitMeasureId int
---SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-
---SELECT @intFromCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId,@intToCommodityUnitMeasureId=cuc1.intCommodityUnitMeasureId 
---FROM tblICCommodity t
---JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
---JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
---WHERE t.intCommodityId= @intCommodityId
-
 IF @strPurchaseSales = 'Sales'
 BEGIN
-SELECT intSeqId,strType, dblTotal
-		--dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
-FROM #temp where strType not like '%Purchase%'
+SELECT intSeqId,strType, dblTotal FROM #temp where strType not like '%Purchase%'
 END
 ELSE
 BEGIN
-SELECT intSeqId,strType, dblTotal
-		--dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+SELECT intSeqId,strType, dblTotal		
 FROM #temp where strType not like '%Sales%'
 END

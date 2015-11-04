@@ -26,9 +26,8 @@ SELECT * INTO #temp FROM (
 		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Direct') 
 		AND r.intSourceType=1 and isnull(dblUnitCost,0) <> 0 
 		INNER JOIN tblICItem i on ri.intItemId=i.intItemId
-		WHERE i.intCommodityId = @intCommodityId AND r.intEntityId=@intVendorCustomerId
+		WHERE i.intCommodityId = @intCommodityId AND r.intEntityVendorId =@intVendorCustomerId
 			AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
-		 --AND r.intLocationId = @intLocationId
 		) t	
 
 UNION
@@ -71,7 +70,7 @@ SELECT 3 AS intSeqId
 		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Direct') 
 		AND r.intSourceType=1 and isnull(dblUnitCost,0) <> 0 
 		INNER JOIN tblICItem i on ri.intItemId=i.intItemId 
-		WHERE i.intCommodityId = @intCommodityId and r.intEntityId=@intVendorCustomerId  
+		WHERE i.intCommodityId = @intCommodityId and r.intEntityVendorId=@intVendorCustomerId  
 		AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end) t
 		
 UNION
@@ -103,8 +102,7 @@ SELECT 5 AS intSeqId
 			SELECT DISTINCT ri.*
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId
-				AND strDistributionOption IN ('CNT')
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
 			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intPricingTypeId = 1
 			WHERE intSourceType = 1 and  ch.intEntityId=@intVendorCustomerId
@@ -121,7 +119,7 @@ SELECT 5 AS intSeqId
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId
 				AND strDistributionOption IN ('SPT')
-			WHERE intSourceType = 1 and r.intEntityId=@intVendorCustomerId
+			WHERE intSourceType = 1 and r.intEntityVendorId=@intVendorCustomerId
 				AND strReceiptType IN ('Direct') AND st.intCommodityId = @intCommodityId 
 				AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
 			) t
@@ -163,7 +161,7 @@ SELECT 6 AS intSeqId
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId
 				AND strDistributionOption IN ('SPT')
-			WHERE intSourceType = 1 and r.intEntityId=@intVendorCustomerId	AND strReceiptType IN ('Direct')
+			WHERE intSourceType = 1 and r.intEntityVendorId=@intVendorCustomerId	AND strReceiptType IN ('Direct')
 			 AND st.intCommodityId = @intCommodityId 
 			 AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
 			) t
@@ -173,42 +171,11 @@ SELECT 6 AS intSeqId
 
 END
 
---DECLARE @intUnitMeasureId int
---DECLARE @intFromCommodityUnitMeasureId int
---DECLARE @intToCommodityUnitMeasureId int
---SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-
---SELECT @intFromCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId,@intToCommodityUnitMeasureId=cuc1.intCommodityUnitMeasureId 
---FROM tblICCommodity t
---JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
---JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
---WHERE t.intCommodityId= @intCommodityId
-
---IF ISNULL(@intLocationId, 0) <> 0
---BEGIN
---SELECT intSeqId,strType, 
---		CASE WHEN strType = 'Net Payable' THEN dblTotal
---			 WHEN strType = 'Net Receivable' THEN dblTotal
---			 else dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) end dblTotal
---FROM #temp 
-
---END
---ELSE
---BEGIN
---	SELECT intSeqId,strType,
---		dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
---FROM #temp1
---END
-
 IF @strPurchaseSales = 'Sales'
 BEGIN
-SELECT intSeqId,strType, dblTotal
-		--dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
-FROM #temp where strType not like '%Purchase%' order by intSeqId
+	SELECT intSeqId,strType, dblTotal FROM #temp where strType not like '%Purchase%' order by intSeqId
 END
 ELSE
 BEGIN
-SELECT intSeqId,strType, dblTotal
-		--dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
-FROM #temp where strType not like '%Sales%' order by intSeqId
+	SELECT intSeqId,strType, dblTotal FROM #temp where strType not like '%Sales%' order by intSeqId
 END
