@@ -73,6 +73,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strRemark] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 
 	[strGarden] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
+	[strGrade] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strReference] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
