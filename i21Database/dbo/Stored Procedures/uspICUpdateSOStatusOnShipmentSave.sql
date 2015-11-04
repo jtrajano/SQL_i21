@@ -3,12 +3,12 @@
 	,@ysnOpenStatus	BIT = 0
 AS
 
-DECLARE @SOId INT
-
 BEGIN
 
-	IF EXISTS(SELECT * FROM tblICInventoryShipment WHERE intOrderType = 2)
+	IF EXISTS(SELECT * FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = 2)
 	BEGIN
+		DECLARE @SOId INT
+
 		SELECT DISTINCT intOrderId INTO #tmpSOList FROM tblICInventoryShipmentItem
 		WHERE intInventoryShipmentId = @intShipmentId
 			AND ISNULL(intOrderId, '') <> ''
@@ -26,6 +26,26 @@ BEGIN
 		END
 		
 		DROP TABLE #tmpSOList
+	END
+
+	IF EXISTS(SELECT * FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = 1 AND intSourceType = 3)
+	BEGIN
+		DECLARE @PickLotId INT
+
+		SELECT DISTINCT intSourceId INTO #tmpPickLotList FROM tblICInventoryShipmentItem
+		WHERE intInventoryShipmentId = @intShipmentId
+			AND ISNULL(intSourceId, '') <> ''
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPickLotList)
+		BEGIN
+			SELECT TOP 1 @PickLotId = intSourceId FROM #tmpPickLotList
+
+			EXEC uspLGReserveStockForPickLots @PickLotId
+			
+			DELETE FROM #tmpPickLotList WHERE intSourceId = @PickLotId
+		END
+		
+		DROP TABLE #tmpPickLotList
 	END
 
 	RETURN

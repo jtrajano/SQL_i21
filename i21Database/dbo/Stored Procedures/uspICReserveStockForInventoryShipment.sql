@@ -13,6 +13,19 @@ DECLARE @intInventoryTransactionType AS INT
 DECLARE @strInvalidItemNo AS NVARCHAR(50) 
 DECLARE @intInvalidItemId AS INT 
 
+-- Check if Source Type is Pick Lot
+IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intTransactionId AND intOrderType = 1 AND intSourceType = 3)
+BEGIN
+	DECLARE @intInventoryTransactionType_PickLot AS INT = 21
+
+	DELETE FROM tblICStockReservation
+	WHERE intInventoryTransactionType = @intInventoryTransactionType_PickLot
+		AND intTransactionId IN (
+			SELECT intSourceId FROM tblICInventoryShipmentItem
+			WHERE intInventoryShipmentId = @intTransactionId
+		)
+END
+
 -- Get the transaction type id
 BEGIN 
 	SELECT TOP 1 
