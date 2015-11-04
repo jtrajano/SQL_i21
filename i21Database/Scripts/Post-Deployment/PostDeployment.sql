@@ -246,6 +246,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\011_FixEntityLocationNullTerms.sql
 :r .\EM\012_DeleteOldTables.sql
 :r .\EM\013_SetDefaultLocationToActive.sql
+:r .\EM\014_UpdateCustomerPricingLevel.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

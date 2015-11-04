@@ -2805,6 +2805,8 @@
     <Build Include="dbo\Stored Procedures\uspRKHedgeCustomerPositionDetail.sql" />
     <Build Include="dbo\Functions\fnICCheckAllowPurchase.sql" />
     <Build Include="dbo\Functions\fnICCheckAllowSale.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetBudgetLetter.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetDividends.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2869,6 +2871,7 @@
     <None Include="Scripts\Post-Deployment\EM\013_SetDefaultLocationToActive.sql" />
     <None Include="Scripts\Post-Deployment\AP\CreateVoucherPayable.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099.sql" />
+    <None Include="Scripts\Post-Deployment\EM\014_UpdateCustomerPricingLevel.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

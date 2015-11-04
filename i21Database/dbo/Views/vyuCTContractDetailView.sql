@@ -25,7 +25,7 @@ AS
 			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
 			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
 			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
-			CD.strDestinationPointType,			
+			CD.strDestinationPointType,			CD.intItemContractId,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,

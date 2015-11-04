@@ -19,6 +19,7 @@ AS
 		I.dtmShipDate,
 		I.ysnPosted, 
 		I.ysnPaid, 
+		I.ysnProcessed, 
 		I.ysnForgiven,
 		I.ysnCalculated,
 		I.dblInvoiceTotal, 
