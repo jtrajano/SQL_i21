@@ -184,7 +184,7 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'format')
 	BEGIN	
 		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'format',	'tblSTstgPricebookSendFile',	'POSCodeFormat',	'', 1	,1
+		SELECT @intImportFileColumnDetailId,	1,	'format',	'tblSTstgPricebookSendFile',	'POSCodeFormatFormat',	'', 1	,1
 	END
 	
 	SET @intImportFileColumnDetailId = 0
