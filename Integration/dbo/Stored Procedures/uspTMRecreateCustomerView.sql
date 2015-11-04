@@ -146,6 +146,8 @@ BEGIN
 		IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 		BEGIN
 			EXEC ('
+				CREATE VIEW [dbo].[vwcusmst]  
+				AS  
 				SELECT  
 				vwcus_key    = ISNULL(A.ptcus_cus_no,'''')    
 				,vwcus_last_name =			(CASE WHEN (ISNULL(A.ptcus_co_per_ind_cp,'''') = ''P'') 
