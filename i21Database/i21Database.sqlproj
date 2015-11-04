@@ -2818,6 +2818,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetParentLotQualityCount.sql" />
     <Build Include="dbo\Tables\tblWHContainerInboundOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStagedContainer.sql" />
+    <Build Include="dbo\Tables\tblWHPickPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
