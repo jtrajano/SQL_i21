@@ -79,6 +79,7 @@
 	[intNoOfPeriods]				  INT			  NULL,
 	[dtmBudgetBeginDate]			  DATETIME			NULL,
 	[strFLOId]						  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
+	[intCompanyLocationPricingLevelId]INT			  NULL,
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
@@ -91,7 +92,8 @@
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_ContractGroup] FOREIGN KEY([intContractGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_BuybackGroup] FOREIGN KEY([intBuybackGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_PriceGroup] FOREIGN KEY([intPriceGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
-	CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblARCustomer_tblSMCompanyLocationPricingLevel] FOREIGN KEY ([intCompanyLocationPricingLevelId]) REFERENCES [dbo].[tblSMCompanyLocationPricingLevel] ([intCompanyLocationPricingLevelId])
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 
