@@ -1,46 +1,4 @@
 ﻿------------------------------------------------------------------------------------------------------------------------------------
--- Fix the cost in the Inventory Adjustment 
-------------------------------------------------------------------------------------------------------------------------------------
-
-UPDATE	Lot
-SET		dblLastCost = 0 
-FROM	dbo.tblICLot Lot 
-
-UPDATE	Lot
-SET		dblLastCost = dbo.fnCalculateUnitCost(ReceiptItem.dblUnitCost , ItemUOM.dblUnitQty)
-FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICInventoryReceiptItemLot ReceiptLot
-			ON Lot.intLotId = ReceiptLot.intLotId
-		INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-			ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-		LEFT JOIN dbo.tblICItemUOM ItemUOM
-			ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-
-UPDATE	AdjDetail
-SET		dblCost =	CASE	WHEN ISNULL(Lot.dblLastCost, 0) <> 0 THEN Lot.dblLastCost 
-							ELSE AdjDetail.dblCost 
-					END 
-					* ItemUOM.dblUnitQty 
-FROM	dbo.tblICInventoryAdjustmentDetail AdjDetail LEFT JOIN dbo.tblICLot Lot
-			ON AdjDetail.intLotId = Lot.intLotId
-		LEFT JOIN dbo.tblICItemUOM ItemUOM
-			ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
-
-UPDATE	InvTrans
-SET		dblCost =	CASE	WHEN InvTrans.dblQty > 0 THEN 
-								InvTrans.dblCost * InvTrans.dblUOMQty 
-							ELSE 
-								InvTrans.dblCost 
-					END
-FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICLot Lot
-			ON InvTrans.intLotId = Lot.intLotId
-		LEFT JOIN dbo.tblICItemUOM ItemUOM
-			ON ItemUOM.intItemUOMId = InvTrans.intItemUOMId
-WHERE	InvTrans.ysnIsUnposted = 0 
-		AND InvTrans.strTransactionId LIKE 'ADJ%'
-
-GO 
-
-------------------------------------------------------------------------------------------------------------------------------------
 -- Open the fiscal year periods
 ------------------------------------------------------------------------------------------------------------------------------------
 SELECT	* 
@@ -284,12 +242,17 @@ BEGIN
 										(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId) * dblUOMQty  
 									 WHEN dblQty > 0 AND strTransactionId LIKE 'ADJ%' THEN 
 										(	
-											SELECT TOP 1 CASE WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN ItemPricing.dblLastCost ELSE Lot.dblLastCost END 
+											SELECT	TOP 1 
+													CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN ItemPricing.dblLastCost 
+															ELSE Lot.dblLastCost 
+													END 
 											FROM	tblICItem Item LEFT JOIN dbo.tblICItemPricing ItemPricing
 														ON Item.intItemId = ItemPricing.intItemId
+														AND ItemPricing.intItemLocationId = #tmpICInventoryTransaction.intItemLocationId
 													LEFT JOIN dbo.tblICLot Lot
 														ON Lot.intItemId = Item.intItemId 
 														AND Lot.intLotId = #tmpICInventoryTransaction.intLotId
+														AND Lot.intItemLocationId = #tmpICInventoryTransaction.intItemLocationId
 											WHERE	Item.intItemId = #tmpICInventoryTransaction.intItemId
 										) * dblUOMQty  
 									 ELSE 
