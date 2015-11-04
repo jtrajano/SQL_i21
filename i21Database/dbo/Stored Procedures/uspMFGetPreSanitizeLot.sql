@@ -32,7 +32,7 @@ BEGIN
 		,CSL.strSubLocationName
 		,SL.intStorageLocationId
 		,SL.strName
-		,'' AS strGarden
+		,L.strGarden 
 		,L.dblWeightPerQty
 		,L.dblQty
 		,IsNull((
