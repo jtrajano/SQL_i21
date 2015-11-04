@@ -61,13 +61,13 @@ BEGIN TRY
 			WHERE m.intSKUId = s.intSKUId
 			)
 
-	INSERT INTO tblWHTask (intConcurrencyId, strTaskNo, intTaskTypeId, intTaskStateId, intAssigneeId, intAddressId, intOrderHeaderId, intTaskPriorityId, dtmReleaseDate, intFromStorageLocationId, intToStorageLocationId, intFromContainerId, intItemId, intSKUId, dblQty, intCreatedUserId, dtmCreated, intLastModifiedUserId, dtmLastModified)
+	INSERT INTO tblWHTask (intConcurrencyId, strTaskNo, intTaskTypeId, intTaskStateId, intAssigneeId, intAddressId, intOrderHeaderId, intTaskPriorityId, dtmReleaseDate, intFromStorageLocationId, intToStorageLocationId, intFromContainerId, intItemId, intSKUId, dblQty, dblPickQty, intCreatedUserId, dtmCreated, intLastModifiedUserId, dtmLastModified)
 	VALUES (0,
 		@strTaskNo, 2, CASE 
 			WHEN @intAssigneeId > 0
 				THEN 2
 			ELSE 1
-			END, @intAssigneeId, @intAddressId, @intOrderHeaderId, 2, ISNULL(@dtmReleaseDate, GETDATE()), @intFromStorageLocationId, @intToStorageLocationId, @intFromContainerId, @intItemId, @intSKUId, @dblQty, @intUserSecurityId, GETDATE(), @intUserSecurityId, GETDATE()
+			END, @intAssigneeId, @intAddressId, @intOrderHeaderId, 2, ISNULL(@dtmReleaseDate, GETDATE()), @intFromStorageLocationId, @intToStorageLocationId, @intFromContainerId, @intItemId, @intSKUId, @dblQty, @dblQty, @intUserSecurityId, GETDATE(), @intUserSecurityId, GETDATE()
 		)
 
 	SET @intTaskId = SCOPE_IDENTITY()

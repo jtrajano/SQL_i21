@@ -54,6 +54,16 @@ BEGIN
 
 	SET @intTaskId = SCOPE_IDENTITY()
 
+	UPDATE t 
+			SET dblPickQty = 
+			CASE WHEN strTaskType = 'Put Back'
+			THEN s.dblQty - t.dblQty
+			ELSE t.dblQty END
+	FROM tblWHTask t
+	JOIN tblWHSKU s ON s.intSKUId = t.intSKUId
+	JOIN tblWHTaskType tt ON tt.intTaskTypeId = t.intTaskTypeId
+	WHERE intTaskId = @intTaskId
+
 	SELECT @intDirectionId = intOrderDirectionId
 	FROM tblWHOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
