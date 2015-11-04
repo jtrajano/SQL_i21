@@ -2810,6 +2810,9 @@
     <Build Include="dbo\Stored Procedures\uspPATGetDividends.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateProvisionalOnStandardInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateScaleDeviceInterface.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFConsumeSKU.sql" />
+    <Build Include="dbo\Views\vyuMFGetProductionOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
