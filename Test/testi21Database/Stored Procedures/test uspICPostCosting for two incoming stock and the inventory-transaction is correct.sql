@@ -7,11 +7,12 @@ BEGIN
 		EXEC testi21Database.[Fake transactions for item costing]
 
 		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
-		DECLARE @PurchaseType AS INT = 1
-		DECLARE @SalesType AS INT = 2
+		DECLARE @AUTO_NEGATIVE AS INT = 1
+				,@WRITE_OFF_SOLD AS INT = 2
+				,@REVALUE_SOLD AS INT = 3
+
+		DECLARE @PurchaseType AS INT = 4
+		DECLARE @SalesType AS INT = 5
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -189,6 +190,25 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedUserId = 1
 				,intConcurrencyId = 1
+		UNION ALL 
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
+				,dtmDate = 'November 14, 2014'
+				,dblQty = 0
+				,dblCost = 0
+				,dblValue = (18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
+				,dblSalesPrice = 0 
+				,intCurrencyId = @USD
+				,dblExchangeRate = 1
+				,intTransactionId = 1
+				,strTransactionId = 'PURCHASE-000001'
+				,strBatchId = 'BATCH-000001'
+				,intTransactionTypeId = @AUTO_NEGATIVE
+				,intLotId = NULL
+				,intCreatedUserId = 1
+				,intConcurrencyId = 1
+
 	END 
 	
 	-- Act
