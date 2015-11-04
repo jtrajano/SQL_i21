@@ -2816,6 +2816,8 @@
     <Build Include="dbo\Stored Procedures\uspRKCustomerPositionInquiryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetParentLotQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetParentLotQualityCount.sql" />
+    <Build Include="dbo\Tables\tblWHContainerInboundOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStagedContainer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
