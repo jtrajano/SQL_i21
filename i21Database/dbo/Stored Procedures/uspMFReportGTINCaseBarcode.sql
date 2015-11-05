@@ -49,8 +49,8 @@ BEGIN TRY
 	FROM tblMFCompanyPreference
 
 	SELECT I.intItemId
-		,'Product : '+I.strItemNo
-		,'Desc : '+I.strDescription
+		,'Product : '+I.strItemNo AS strItemNo
+		,'Desc : '+I.strDescription AS strDescription
 		,IsNULL(PS.strParameterValue, I.strItemNo) AS strValue
 		,'Date : '+Ltrim(GETDATE()) AS dtmDate
 		,'Printed By : '+@strUserName AS strUserName
