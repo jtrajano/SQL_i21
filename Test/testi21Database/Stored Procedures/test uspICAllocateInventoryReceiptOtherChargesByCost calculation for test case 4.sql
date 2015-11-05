@@ -180,14 +180,14 @@ BEGIN
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 33
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 856.7325
+				,[dblAmount]					= 856.73 -- 856.7325
 				,[ysnAccrue]					= 0 -- @COST_BILLED_BY_None
 				,[ysnInventoryCost]				= @INVENTORY_COST_No
 		UNION ALL 
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 34
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 1999.0425
+				,[dblAmount]					= 1999.05 -- 1999.0425
 				,[ysnAccrue]					= 0 -- @COST_BILLED_BY_None
 				,[ysnInventoryCost]				= @INVENTORY_COST_No
 	END
