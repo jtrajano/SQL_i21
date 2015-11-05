@@ -109,7 +109,7 @@ BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
 		,PL.intLotStatusId
-		,PL.strParentLotNumber
+		,PL.strParentLotNumber AS strLotNumber
 		,PL.intItemId
 		,I.strDescription
 		,@dblRepresentingQty AS dblRepresentingQty

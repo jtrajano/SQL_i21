@@ -15,6 +15,11 @@ SELECT
 	,Alloc.strPContractNumber
 	,Alloc.intPContractSeq
 	,PS.dblPAllocatedQty
+	,dblGrossWt = (ShipContract.dblGrossWt / ShipContract.dblQuantity) * PS.dblPAllocatedQty
+	,dblTareWt = (ShipContract.dblTareWt / ShipContract.dblQuantity) * PS.dblPAllocatedQty
+	,dblNetWt = (ShipContract.dblNetWt / ShipContract.dblQuantity) * PS.dblPAllocatedQty
+	,Shipment.intWeightUnitMeasureId
+	,UOM.strUnitMeasure as strWeightUOM
 	,ShipContract.intItemId as intPItemId
 	,Alloc.strPItemUOM
 	,Alloc.strPItemNo
@@ -38,4 +43,5 @@ SELECT
 FROM tblLGShipmentPurchaseSalesContract PS
 LEFT JOIN tblLGShipmentContractQty ShipContract On ShipContract.intShipmentContractQtyId = PS.intShipmentContractQtyId
 LEFT JOIN tblLGShipment Shipment ON Shipment.intShipmentId = PS.intShipmentId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = Shipment.intWeightUnitMeasureId
 LEFT JOIN vyuLGAllocatedContracts Alloc ON Alloc.intAllocationDetailId = PS.intAllocationDetailId

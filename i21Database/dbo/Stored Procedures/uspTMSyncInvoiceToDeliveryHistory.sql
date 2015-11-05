@@ -4,7 +4,6 @@
 	,@ResultLog NVARCHAR(MAX) OUTPUT
 AS
 BEGIN
-
 	
 
 	DECLARE @intSiteId INT
@@ -37,6 +36,7 @@ BEGIN
 	DECLARE @intDeliveryHistoryInvoiceDetailId INT
 	DECLARE @intNewDeliveryHistoryId INT
 	DECLARE @intTopInvoiceDetailId INT
+	DECLARE @strBillingBy NVARCHAR(15)
 	
 
 
@@ -94,6 +94,8 @@ BEGIN
 			,@dblTotalTax = dblTotalTax
 			,@dblItemTotal = dblTotal
 		FROM #tmpInvoiceDetail
+
+		SELECT @strBillingBy = strBillingBy FROM tblTMSite WHERE intSiteID = @intSiteId
 		
 		print 'Check ysnProcessed'
 		---Check ysnProcessed
@@ -289,10 +291,20 @@ BEGIN
 					WHERE tblTMDeliveryHistory.intDeliveryHistoryID = @intNewDeliveryHistoryId
 					
 					---Update Site Info
+					IF(@strBillingBy <> 'Virtual Meter')
+					BEGIN
+						UPDATE tblTMSite
+						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.)
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
+								,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+							FROM #tmpSiteInvoiceLineItems
+						)A
+						WHERE intSiteID = @intSiteId
+					END
 					UPDATE tblTMSite
-					SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
-						,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.)
-						,dtmLastReadingUpdate = @dtmInvoiceDate
+					SET dtmLastReadingUpdate = @dtmInvoiceDate
 						,dblLastDeliveredGal = dblQuantityTotal
 					FROM(
 						SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
@@ -424,17 +436,19 @@ BEGIN
 						WHERE tblTMDeliveryHistory.intDeliveryHistoryID = @intNewDeliveryHistoryId
 						
 						-----Update Site
-						UPDATE tblTMSite
-						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
-							,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
-						FROM(
-							SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
-								,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
-							FROM #tmpSiteInvoiceLineItems
-						)A
-						WHERE intSiteID = @intSiteId
-						
-						
+						IF(@strBillingBy <> 'Virtual Meter')
+						BEGIN
+							UPDATE tblTMSite
+							SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+								,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
+								,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+							FROM(
+								SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
+									,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+								FROM #tmpSiteInvoiceLineItems
+							)A
+							WHERE intSiteID = @intSiteId
+						END
 					END
 					ELSE
 					BEGIN
@@ -578,15 +592,20 @@ BEGIN
 							ON A.intItemId = C.intItemId
 							
 						-----Update Site
-						UPDATE tblTMSite
-						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
-							,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
-						FROM(
-							SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
-								,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
-							FROM #tmpSiteInvoiceLineItems
-						)A
-						WHERE intSiteID = @intSiteId
+
+						IF(@strBillingBy <> 'Virtual Meter')
+						BEGIN
+							UPDATE tblTMSite
+							SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+								,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
+								,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+							FROM(
+								SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
+									,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+								FROM #tmpSiteInvoiceLineItems
+							)A
+							WHERE intSiteID = @intSiteId
+						END
 				
 					END
 				END
@@ -768,12 +787,20 @@ BEGIN
 					--UPDATE tblTMSite
 					--SET dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
 					--WHERE intSiteID = @intSiteId
+
+					IF(@strBillingBy <> 'Virtual Meter')
+					BEGIN
+						UPDATE tblTMSite
+						SET	dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
+							,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
+						WHERE intSiteID = @intSiteId
+					END
+
 					
 					UPDATE tblTMSite
 					SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
 						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-						,dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
-						,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
+						
 						,dblLastDeliveredGal = @dblQuantityShipped
 						,dtmLastDeliveryDate = @dtmInvoiceDate
 						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
@@ -959,6 +986,15 @@ BEGIN
 			ON A.intClockID = H.intClockID
 		LEFT JOIN tblARSalesperson I
 			ON I.intEntitySalespersonId = C.intEntitySalespersonId
+
+		----Update Site Info
+		UPDATE tblTMSite
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + ISNULL(@dblQuantityShipped,0.0)
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0)
+			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+		WHERE intSiteID = @intSiteId
+
+
 		
 		DELETE FROM #tmpVirtualMeterInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 	END

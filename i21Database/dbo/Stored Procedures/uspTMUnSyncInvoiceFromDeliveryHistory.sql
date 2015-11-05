@@ -20,6 +20,7 @@ BEGIN
 	DECLARE @dtmSiteLastDelivery DATETIME
 	DECLARE @intJulianCalendarFillId INT
 	DECLARE @intDeliveryHistoryIdOfPreviousDelivery INT
+	DECLARE @strBillingBy NVARCHAR(15)
 	
 	
 	PRINT 'Get invoice header detail'
@@ -30,8 +31,41 @@ BEGIN
 	FROM tblARInvoice
 	WHERE intInvoiceId = @InvoiceId 
 
-	---Delete from delivery history Virtual Meter Entry
+	---unsync and Delete from delivery history Virtual Meter Entry
+	IF(@strTransactionType <> 'Credit Memo')
+	BEGIN
+		UPDATE tblTMSite
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - ISNULL(dblQuantityDelivered,0.0)
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(dblExtendedAmount,0.0)
+			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+		FROM  (
+			SELECT dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0.0))
+				,dblExtendedAmount = SUM(ISNULL(dblExtendedAmount,0.0))
+				,intSiteID
+			FROM tblTMDeliveryHistory WHERE intInvoiceId = @InvoiceId AND ysnMeterReading = 1
+			GROUP BY intSiteID
+		) A
+		WHERE A.intSiteID = tblTMSite.intSiteID
+	END
+	ELSE
+	BEGIN
+		UPDATE tblTMSite
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + ISNULL(dblQuantityDelivered,0.0)
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(dblExtendedAmount,0.0)
+			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+		FROM  (
+			SELECT dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0.0))
+				,dblExtendedAmount = SUM(ISNULL(dblExtendedAmount,0.0))
+				,intSiteID
+			FROM tblTMDeliveryHistory WHERE intInvoiceId = @InvoiceId AND ysnMeterReading = 1
+			GROUP BY intSiteID
+		) A
+		WHERE A.intSiteID = tblTMSite.intSiteID
+	END
+
 	DELETE FROM tblTMDeliveryHistory WHERE intInvoiceId = @InvoiceId AND ysnMeterReading = 1
+
+	-----------------------------------------------------------------------------
 
 	
 	IF OBJECT_ID('tempdb..#tmpInvoiceDetail') IS NOT NULL DROP TABLE #tmpInvoiceDetail
@@ -76,6 +110,7 @@ BEGIN
 			,@intClockId = B.intClockID
 			,@dtmPreviousLastDelivery = A.dtmSiteLastDelivery
 			,@dtmSiteLastDelivery = B.dtmLastDeliveryDate
+			,@strBillingBy = B.strBillingBy
 		FROM #tmpDeliveryHistory A
 		INNER JOIN tblTMSite B
 			ON A.intSiteID = B.intSiteID
@@ -138,17 +173,20 @@ BEGIN
 			WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 			
 			---Update Site Info
-			UPDATE tblTMSite
-			SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
-				,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
-				,intConcurrencyId = intConcurrencyId + 1
-			FROM(
-				SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
-					,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
-				FROM #tmpDeliveryHistoryDetail 
-				WHERE intDeliveryHistoryID = @intDeliveryHistoryId
-			)A
-			WHERE intSiteID = @intSiteId
+			IF(@strBillingBy <> 'Virtual Meter')
+			BEGIN
+				UPDATE tblTMSite
+				SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
+					,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
+					,intConcurrencyId = intConcurrencyId + 1
+				FROM(
+					SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+						,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+					FROM #tmpDeliveryHistoryDetail 
+					WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+				)A
+				WHERE intSiteID = @intSiteId
+			END
 			
 			--CHECK if invoice date is the last delivery of the site
 			IF(DATEADD(DAY, DATEDIFF(DAY, 0, @dtmSiteLastDelivery), 0) = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmInvoiceDate), 0))
@@ -243,18 +281,21 @@ BEGIN
 				WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 
 				---Update Site Info
-				UPDATE tblTMSite
-				SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
-					,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
-					,dtmLastReadingUpdate = @dtmInvoiceDate
-					,intConcurrencyId = intConcurrencyId + 1
-				FROM(
-					SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
-						,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
-					FROM #tmpDeliveryHistoryDetail 
-					WHERE intDeliveryHistoryID = @intDeliveryHistoryId
-				)A
-				WHERE intSiteID = @intSiteId
+				IF(@strBillingBy <> 'Virtual Meter')
+				BEGIN
+					UPDATE tblTMSite
+					SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
+						,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.0)
+						,dtmLastReadingUpdate = @dtmInvoiceDate
+						,intConcurrencyId = intConcurrencyId + 1
+					FROM(
+						SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+							,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+						FROM #tmpDeliveryHistoryDetail 
+						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+					)A
+					WHERE intSiteID = @intSiteId
+				END
 
 			END
 			ELSE
@@ -305,17 +346,20 @@ BEGIN
 						WHERE tblTMSite.intSiteID = @intSiteId
 
 						---Update Site Info
-						UPDATE tblTMSite
-						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
-							,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
-							,intConcurrencyId = intConcurrencyId + 1
-						FROM(
-							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
-								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
-							FROM #tmpDeliveryHistoryDetail 
-							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
-						)A
-						WHERE intSiteID = @intSiteId
+						IF(@strBillingBy <> 'Virtual Meter')
+						BEGIN
+							UPDATE tblTMSite
+							SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
+								,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
+								,intConcurrencyId = intConcurrencyId + 1
+							FROM(
+								SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+									,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+								FROM #tmpDeliveryHistoryDetail 
+								WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+							)A
+							WHERE intSiteID = @intSiteId
+						END
 			
 			
 						----Update Next Julian Calendar Date of the site
@@ -368,17 +412,20 @@ BEGIN
 						WHERE tblTMSite.intSiteID = @intSiteId
 
 						---Update Site YTD Info 
-						UPDATE tblTMSite
-						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
-							,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
-							,intConcurrencyId = intConcurrencyId + 1
-						FROM(
-							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
-								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
-							FROM #tmpDeliveryHistoryDetail 
-							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
-						)A
-						WHERE intSiteID = @intSiteId
+						IF(@strBillingBy <> 'Virtual Meter')
+						BEGIN
+							UPDATE tblTMSite
+							SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
+								,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
+								,intConcurrencyId = intConcurrencyId + 1
+							FROM(
+								SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+									,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+								FROM #tmpDeliveryHistoryDetail 
+								WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+							)A
+							WHERE intSiteID = @intSiteId
+						END
 
 						--DELETE Delivery History Header
 						DELETE FROM tblTMDeliveryHistory
@@ -415,17 +462,20 @@ BEGIN
 					WHERE tblTMSite.intSiteID = @intSiteId
 			
 					---Update Site Info
-					UPDATE tblTMSite
-					SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
-						,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
-						,intConcurrencyId = intConcurrencyId + 1
-					FROM(
-						SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
-							,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
-						FROM #tmpDeliveryHistoryDetail 
-						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
-					)A
-					WHERE intSiteID = @intSiteId
+					IF(@strBillingBy <> 'Virtual Meter')
+					BEGIN
+						UPDATE tblTMSite
+						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
+							,intConcurrencyId = intConcurrencyId + 1
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+							FROM #tmpDeliveryHistoryDetail 
+							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+						)A
+						WHERE intSiteID = @intSiteId
+					END
 			
 					----Update Next Julian Calendar Date of the site
 					UPDATE tblTMSite

@@ -15,7 +15,7 @@ SELECT	CD.intContractDetailId,
 		IC.strContractItemName,
 		WU.strUnitMeasure strNetWeightUOM
 		
-FROM	tblCTContractDetail CD	
+FROM	tblCTContractDetail CD	LEFT
 JOIN	tblICItemContract	IC	ON	IC.intItemContractId	=	CD.intItemContractId	LEFT
 JOIN	tblICItemUOM		WM	ON	WM.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
 JOIN	tblICUnitMeasure	WU	ON	WU.intUnitMeasureId		=	WM.intUnitMeasureId		LEFT		

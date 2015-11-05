@@ -44,8 +44,9 @@ BEGIN TRY
 		,@intWorkOrderProducedLotId INT
 		,@intOrderLineItemId INT
 
-	--SELECT @strDefaultStatusForSanitizedLot = strDefaultStatusForSanitizedLot
-	--FROM dbo.tblMFCompanyPreference
+	SELECT @strDefaultStatusForSanitizedLot = strDefaultStatusForSanitizedLot
+	FROM dbo.tblMFCompanyPreference
+
 	EXEC dbo.uspSMGetStartingNumber 33
 		,@intBatchId OUTPUT
 
@@ -150,8 +151,14 @@ BEGIN TRY
 				SELECT intLotStatusId
 				FROM tblICLotStatus
 				WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot
-				) <> @intLotStatusId
+				) <> @intLotStatusId AND EXISTS(SELECT intLotStatusId
+												FROM tblICLotStatus
+												WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot)
 		BEGIN
+			SELECT @intLotStatusId=intLotStatusId
+			FROM tblICLotStatus
+			WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot
+
 			UPDATE tblICLot
 			SET intLotStatusId = @intLotStatusId
 			WHERE intLotId = @intOutputLotId
@@ -199,6 +206,8 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,intInputLotId
 		,intInputStorageLocationId
+		,intUnitPerLayer
+		,intLayerPerPallet
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -220,7 +229,9 @@ BEGIN TRY
 		,@intUserId
 		,@intInputLotId
 		,@intInputStorageLocationId
-	
+		,@intUnitPerLayer
+		,@intLayerPerPallet
+
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
 
 	DECLARE @intOrderHeaderId INT

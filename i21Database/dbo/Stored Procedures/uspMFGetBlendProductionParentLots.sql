@@ -68,8 +68,8 @@ Begin
 	ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
 	ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
 	From tblMFWorkOrderRecipeSubstituteItem wri Join tblICItem i on wri.intSubstituteItemId=i.intItemId 
-	Left Join @tblItemQty iq on wri.intItemId=iq.intItemId
-	Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
+	Left Join @tblItemQty iq on wri.intSubstituteItemId=iq.intItemId
+	Left Join @tblItemConfirmQty cq on wri.intSubstituteItemId=cq.intItemId
 	Where wri.intWorkOrderId=@intWorkOrderId And wri.intRecipeItemTypeId=1
 End
 Else
