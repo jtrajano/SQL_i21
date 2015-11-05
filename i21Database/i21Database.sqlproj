@@ -2840,6 +2840,7 @@
     <Build Include="dbo\Stored Procedures\uspWHCancelOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspWHShipOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspWHDeleteSKUForWarehouse.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherApprover.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
