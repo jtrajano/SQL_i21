@@ -1034,6 +1034,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strWeightUOM', null);
             }
 
+            var receiptDate = win.viewModel.data.current.get('dtmReceiptDate');
+            var lifetime = current.get('intLifeTime');
+            var lifetimeType  = current.get('strLifeTimeType');
+            var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
+
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':
                 case 'Yes - Manual':
@@ -1052,7 +1057,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dblStatedGrossPerUnit: '',
                         dblStatedTarePerUnit: '',
                         intStorageLocationId: current.get('intStorageLocationId'),
-                        strStorageLocation: current.get('strStorageLocationName')
+                        strStorageLocation: current.get('strStorageLocationName'),
+                        dtmExpiryDate: expiryDate
                     });
                     current.tblICInventoryReceiptItemLots().add(newLot);
                     break;
