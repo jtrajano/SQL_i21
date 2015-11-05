@@ -2820,6 +2820,7 @@
     <Build Include="dbo\Functions\fnARGetCustomerBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetEquityRefundDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
