@@ -2837,6 +2837,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotShipDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityWorkOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotSplitDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCancelOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
