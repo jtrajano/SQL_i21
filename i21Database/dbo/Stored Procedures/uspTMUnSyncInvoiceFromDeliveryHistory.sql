@@ -34,8 +34,8 @@ BEGIN
 	IF(@strTransactionType <> 'Credit Memo')
 	BEGIN
 		UPDATE tblTMSite
-		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - ISNULL(dblQuantityDelivered)
-			,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(dblExtendedAmount)
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - ISNULL(dblQuantityDelivered,0.0)
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(dblExtendedAmount,0.0)
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		FROM  (
 			SELECT dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0.0))
@@ -49,8 +49,8 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE tblTMSite
-		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + ISNULL(dblQuantityDelivered)
-			,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(dblExtendedAmount)
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + ISNULL(dblQuantityDelivered,0.0)
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(dblExtendedAmount,0.0)
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		FROM  (
 			SELECT dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0.0))
@@ -278,7 +278,7 @@ BEGIN
 				---Update Site Info
 				UPDATE tblTMSite
 				SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
-					,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
+					,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.0)
 					,dtmLastReadingUpdate = @dtmInvoiceDate
 					,intConcurrencyId = intConcurrencyId + 1
 				FROM(
