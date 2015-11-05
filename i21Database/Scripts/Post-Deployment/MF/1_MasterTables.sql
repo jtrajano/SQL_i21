@@ -1350,3 +1350,7 @@ UPDATE tblMFCompanyPreference
 SET dblSanitizationOrderOutputQtyTolerancePercentage = 2
 WHERE dblSanitizationOrderOutputQtyTolerancePercentage IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET strBlendProductionStagingLocation = 'BLENDPRESTG'
+Where strBlendProductionStagingLocation IS NULL
+GO
