@@ -12,11 +12,11 @@ BEGIN
 		,WS.intStatusId
 		,WS.strName
 		,WL.dblQuantity
-		,U1.intUnitMeasureId AS intWeightUnitMeasureId
-		,U1.strUnitMeasure AS strWeightUnitMeasure
+		,U.intUnitMeasureId AS intWeightUnitMeasureId
+		,U.strUnitMeasure AS strWeightUnitMeasure
 		,WL.dblIssuedQuantity
-		,U.intUnitMeasureId
-		,U.strUnitMeasure
+		,U1.intUnitMeasureId
+		,U1.strUnitMeasure
 		,W.intOrderHeaderId
 		,W.strBOLNo AS strPickNo
 		,ISNULL(OS.strOrderStatus, WS.strName) AS strPickStatus
