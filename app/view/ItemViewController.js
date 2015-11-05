@@ -1506,6 +1506,16 @@ Ext.define('Inventory.view.ItemViewController', {
             if (records[0].get('strType') == 'Assembly/Blend') {
                 current.set('strLotTracking', 'No');
             }
+
+            else if (records[0].get('strType') == 'Bundle') {
+                if (current.tblICItemUOMs()) {
+                    Ext.Array.each(current.tblICItemUOMs().data.items, function (uom) {
+                        if (!uom.dummy) {
+                            uom.set('ysnAllowPurchase', false);
+                        }
+                    });
+                }
+            }
         }
     },
 
