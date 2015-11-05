@@ -93,7 +93,7 @@ BEGIN TRY
 	IF @intLocalTran = 1
 		BEGIN TRANSACTION
 
-	SELECT @intUOMId = um.intUnitMeasureId, @intUnitPerLayer = intUnitPerLayer, @intLayersPerPallet = intLayerPerPallet
+	SELECT @intUOMId = CASE WHEN @intUOMId IS NULL THEN um.intUnitMeasureId ELSE @intUOMId END, @intUnitPerLayer = intUnitPerLayer, @intLayersPerPallet = intLayerPerPallet
 	FROM tblICItem i
 	JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId AND iu.ysnStockUnit =1
