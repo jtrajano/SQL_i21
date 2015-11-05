@@ -21,7 +21,8 @@ SELECT
 		Trucker,
 		Insurer,
 		ShipVia,
-		VendorOrCustomer =  Vendor + Customer
+		VendorOrCustomer =  Vendor + Customer,
+		b.strFederalTaxId
 	FROM 		
 			(SELECT	intEntityId,
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
