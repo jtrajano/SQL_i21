@@ -1,19 +1,20 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber] @strParentLotNumber NVARCHAR(50) = NULL
+﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber] 
+	@strParentLotNumber NVARCHAR(50) = NULL
 	,@strParentLotAlias NVARCHAR(50)
 	,@intItemId INT
 	,@dtmExpiryDate DATETIME
 	,@intLotStatusId INT
-	,@intUserId INT
-	,@dtmDate DATETIME
+	,@intEntityUserSecurityId INT
 	,@intLotId INT
+	,@intParentLotId INT = NULL OUTPUT  
 AS
-BEGIN TRY
-	DECLARE @ErrMsg NVARCHAR(Max)
-		,@intParentLotId INT
 
-	IF @strParentLotNumber Is NULL
+	DECLARE @ErrMsg NVARCHAR(Max)
+
+	IF @strParentLotNumber IS NULL OR @strParentLotNumber = ''
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 78
+		EXEC dbo.uspSMGetStartingNumber 
+			78
 			,@strParentLotNumber OUTPUT
 	END
 
@@ -21,19 +22,23 @@ BEGIN TRY
 	FROM tblICParentLot
 	WHERE strParentLotNumber = @strParentLotNumber
 
-	IF @dtmDate IS NULL
-		SET @dtmDate = GETDATE()
+	--IF @dtmDate IS NULL
+	--	SET @dtmDate = GETDATE()
 
 	IF NOT EXISTS (
 			SELECT 1
 			FROM tblICLot
 			WHERE intLotId = @intLotId
-			)
+	)
+	BEGIN 
 		RAISERROR (
-				'Lot does not exist for parent lot creation.'
-				,16
-				,1
-				)
+		'Lot does not exist for parent lot creation.'
+		,16
+		,1
+		)
+
+		RETURN -1;
+	END 
 
 	IF ISNULL(@intParentLotId, 0) = 0
 	BEGIN
@@ -43,7 +48,7 @@ BEGIN TRY
 			,intItemId
 			,dtmExpiryDate
 			,intLotStatusId
-			,intCreatedUserId
+			,intCreatedEntityId
 			,dtmDateCreated
 			)
 		VALUES (
@@ -52,8 +57,8 @@ BEGIN TRY
 			,@intItemId
 			,@dtmExpiryDate
 			,@intLotStatusId
-			,@intUserId
-			,@dtmDate
+			,@intEntityUserSecurityId
+			,GETDATE()
 			)
 
 		SELECT @intParentLotId = SCOPE_IDENTITY()
@@ -68,26 +73,18 @@ BEGIN TRY
 				SELECT intItemId
 				FROM tblICParentLot
 				WHERE intParentLotId = @intParentLotId
-				) <> @intItemId
+		) <> @intItemId
+		BEGIN 
 			RAISERROR (
-					'Lot and Parent Lot cannot have different item.'
-					,16
-					,1
-					)
+				'Lot and Parent Lot cannot have different item.'
+				,16
+				,1
+			)
+			RETURN -1;
+		END 
+			
 
 		UPDATE tblICLot
 		SET intParentLotId = @intParentLotId
 		WHERE intLotId = @intLotId
 	END
-END TRY
-
-BEGIN CATCH
-	SET @ErrMsg = ERROR_MESSAGE()
-
-	RAISERROR (
-			@ErrMsg
-			,16
-			,1
-			,'WITH NOWAIT'
-			)
-END CATCH

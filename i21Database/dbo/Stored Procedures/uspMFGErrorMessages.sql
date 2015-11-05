@@ -32,3 +32,7 @@ EXEC sp_addmessage 90003,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90004) EXEC sp_dropmessage 90004, 'us_english'	
 SET @strmessage = 'The quantity you are trying to produce ( %s %s ) is less than the quantity allowed ( %s %s ) for the lot %s.'
 EXEC sp_addmessage 90004,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90005) EXEC sp_dropmessage 90005, 'us_english'	
+SET @strmessage = 'Owner is not configured for the item %s.'
+EXEC sp_addmessage 90005,11,@strmessage,'us_english','False'

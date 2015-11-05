@@ -327,22 +327,49 @@ BEGIN
 
 	END
 
-	--UPDATE PO Status
-	IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblICItem B 
-				ON A.intItemId = B.intItemId 
-				WHERE B.strType IN ('Service','Software','Non-Inventory','Other Charge')
-				AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-				AND A.[intPurchaseDetailId] > 0)
-	BEGIN
-		DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
-		WHILE @countReceivedMisc != @totalRecords
+	BEGIN TRY
+
+		--PATRONAGE
+		DECLARE @patVoucherId INT, @patVoucherVendorId INT;
+		DECLARE @patVoucherIds AS Id;
+		INSERT INTO @patVoucherIds
+		SELECT intBillId FROM #tmpPostBillData
+		
+		WHILE EXISTS(SELECT 1 FROM @patVoucherIds)
 		BEGIN
-			SET @countReceivedMisc = @countReceivedMisc + 1;
-			SELECT TOP(1) @billIdReceived = intBillId FROM #tmpPostBillData
-			EXEC [uspPOReceivedMiscItem] @billIdReceived
-			DELETE FROM #tmpPostBillData WHERE intBillId = @billIdReceived
+			SELECT TOP 1 
+				@patVoucherId = B.intBillId,
+				@patVoucherVendorId = B.intEntityVendorId
+			FROM @patVoucherIds A INNER JOIN tblAPBill B ON A.intId = B.intBillId
+
+			EXEC uspPATBillToCustomerVolume @patVoucherVendorId, @patVoucherId, @post
+
+			DELETE FROM @patVoucherIds WHERE intId = @patVoucherId;
 		END
-	END
+
+		--UPDATE PO Status
+		IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblICItem B 
+					ON A.intItemId = B.intItemId 
+					WHERE B.strType IN ('Service','Software','Non-Inventory','Other Charge')
+					AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+					AND A.[intPurchaseDetailId] > 0)
+		BEGIN
+			DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
+			WHILE @countReceivedMisc != @totalRecords
+			BEGIN
+				SET @countReceivedMisc = @countReceivedMisc + 1;
+				SELECT TOP(1) @billIdReceived = intBillId FROM #tmpPostBillData
+				EXEC [uspPOReceivedMiscItem] @billIdReceived
+				DELETE FROM #tmpPostBillData WHERE intBillId = @billIdReceived
+			END
+		END
+
+	END TRY
+	BEGIN CATCH
+		DECLARE @integrationError NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR(@integrationError, 16, 1);
+		GOTO Post_Rollback
+	END CATCH
 
 END
 ELSE

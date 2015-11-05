@@ -30,6 +30,8 @@ SELECT
  ,D.strItemNo
  ,D.strLotTracking
  ,D.intCommodityId
+ ,D.intLifeTime
+ ,D.strLifeTimeType
  ,H.strUnitMeasure AS strUOM
  ,ISNULL(E.dblUnitQty,0) AS dblItemUOMCF
  ,intStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)

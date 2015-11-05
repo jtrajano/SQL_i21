@@ -67,6 +67,7 @@ BEGIN
 		strMask2,
 		strMask3,
 		intPatronageCategoryId,
+		intPatronageCategoryDirectId,
 		intSalesTaxGroupId,
 		intPurchaseTaxGroupId,
 		ysnStockedItem,
@@ -103,6 +104,7 @@ BEGIN
 		dblOverReceiveTolerance,
 		strMaintenanceCalculationMethod,
 		dblMaintenanceRate,
+		ysnListBundleSeparately,
 		strNACSCategory,
 		strWICCode,
 		intAGCategory,
@@ -173,6 +175,7 @@ BEGIN
 		strMask2,
 		strMask3,
 		intPatronageCategoryId,
+		intPatronageCategoryDirectId,
 		intSalesTaxGroupId,
 		intPurchaseTaxGroupId,
 		ysnStockedItem,
@@ -209,6 +212,7 @@ BEGIN
 		dblOverReceiveTolerance,
 		strMaintenanceCalculationMethod,
 		dblMaintenanceRate,
+		ysnListBundleSeparately,
 		strNACSCategory,
 		strWICCode,
 		intAGCategory,
@@ -551,16 +555,12 @@ BEGIN
 		strDescription,
 		dblQuantity,
 		intItemUnitMeasureId,
-		dblUnit,
-		dblPrice,
 		intSort )
 	SELECT @NewItemId,
 		intBundleItemId,
 		strDescription,
 		dblQuantity,
 		dbo.fnICGetItemUOMIdFromDuplicateItem(intItemUnitMeasureId, @NewItemId),
-		dblUnit,
-		dblPrice,
 		intSort 
 	FROM tblICItemBundle
 	WHERE intItemId = @ItemId

@@ -19,6 +19,8 @@ CREATE TABLE #GeneratedLotItems (
 	intLotId INT
 	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,intDetailId INT 
+	,intParentLotId INT
+	,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
 ------------------------------------------------------------------------------
@@ -67,70 +69,166 @@ END
 
 -- Get the list of item that needs lot numbers
 BEGIN 
+	--INSERT INTO @ItemsThatNeedLotId (
+	--		intLotId
+	--		,strLotNumber
+	--		,strLotAlias
+	--		,intItemId
+	--		,intItemLocationId
+	--		,intSubLocationId
+	--		,intStorageLocationId
+	--		,dblQty
+	--		,intItemUOMId
+	--		,dblWeight
+	--		,intWeightUOMId
+	--		,dtmExpiryDate
+	--		,dtmManufacturedDate
+	--		,intOriginId
+	--		,strBOLNo
+	--		,strVessel
+	--		,strReceiptNumber
+	--		,strMarkings
+	--		,strNotes
+	--		,intEntityVendorId
+	--		,strVendorLotNo
+	--		,strGarden
+	--		,intDetailId		
+	--		,strParentLotNumber
+	--		,strParentLotAlias
+	--		,intLotStatusId	
+	--)
+	--SELECT	intLotId				= NULL 
+	--		,strLotNumber			= Detail.strNewLotNumber
+	--		,strLotAlias			= SourceLot.strLotAlias
+	--		,intItemId				= Detail.intItemId
+	--		,intItemLocationId		= ItemLocation.intItemLocationId
+	--		,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
+	--		,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
+	--		,dblQty					= CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN 
+	--											Detail.dblNewSplitLotQuantity
+	--										ELSE  
+	--											-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+	--									END 
+	--		,intItemUOMId			= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
+	--		,dblWeight				= CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+	--											Detail.dblNewWeight
+	--										WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
+	--											-- Convert the weight into the new Weight UOM.
+	--											dbo.fnCalculateQtyBetweenUOM(
+	--												Detail.intWeightUOMId
+	--												, Detail.intNewWeightUOMId
+	--												, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+	--											)
+	--										ELSE 
+	--											ISNULL(Detail.dblWeightPerQty, 0) 
+	--											* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+	--									END
+	--		,intWeightUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
+	--		,dtmExpiryDate			= SourceLot.dtmExpiryDate
+	--		,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
+	--		,intOriginId			= SourceLot.intOriginId
+	--		,strBOLNo				= SourceLot.strBOLNo
+	--		,strVessel				= SourceLot.strVessel
+	--		,strReceiptNumber		= Header.strAdjustmentNo
+	--		,strMarkings			= SourceLot.strMarkings
+	--		,strNotes				= SourceLot.strNotes
+	--		,intEntityVendorId		= SourceLot.intEntityVendorId
+	--		,strVendorLotNo			= SourceLot.strVendorLotNo
+	--		,strGarden				= SourceLot.strGarden
+	--		,intDetailId			= Detail.intInventoryAdjustmentDetailId
+	--		,strParentLotNumber		= ParentLotSourceLot.strLotNumber
+	--		,strParentLotAlias		= ParentLotSourceLot.strLotAlias
+	--		,intLotStatusId			= SourceLot.intLotStatusId
+
 	INSERT INTO @ItemsThatNeedLotId (
-			intLotId
-			,strLotNumber
-			,strLotAlias
-			,intItemId
-			,intItemLocationId
-			,intSubLocationId
-			,intStorageLocationId
-			,dblQty
-			,intItemUOMId
-			,dblWeight
-			,intWeightUOMId
-			,dtmExpiryDate
-			,dtmManufacturedDate
-			,intOriginId
-			,strBOLNo
-			,strVessel
-			,strReceiptNumber
-			,strMarkings
-			,strNotes
-			,intEntityVendorId
-			,strVendorLotNo
-			,strGarden
-			,intDetailId		
+			[intLotId]
+			,[intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[strLotNumber]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQty]
+			,[dtmExpiryDate]
+			,[strLotAlias]
+			,[intLotStatusId]
+			,[intParentLotId]
+			,[strParentLotNumber]
+			,[strParentLotAlias]
+			,[intSplitFromLotId]
+			,[dblGrossWeight]
+			,[dblWeight]
+			,[intWeightUOMId]
+			,[intOriginId]
+			,[strBOLNo]
+			,[strVessel]
+			,[strReceiptNumber]
+			,[strMarkings]
+			,[strNotes]
+			,[intEntityVendorId]
+			,[strVendorLotNo]
+			,[strGarden]
+			,[strContractNo]
+			,[dtmManufacturedDate]
+			,[ysnReleasedToWarehouse]
+			,[ysnProduced]
+			,[ysnStorage]
+			,[intOwnershipType]
+			,[intGradeId]
+			,[intDetailId]
 	)
-	SELECT	intLotId				= NULL 
-			,strLotNumber			= Detail.strNewLotNumber
-			,strLotAlias			= SourceLot.strLotAlias
-			,intItemId				= Detail.intItemId
-			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
-			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
-			,dblQty					= CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN 
+	SELECT	[intLotId]					= NULL 
+			,[intItemId]				= Detail.intItemId
+			,[intItemLocationId]		= ItemLocation.intItemLocationId
+			,[intItemUOMId]				= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
+			,[strLotNumber]				= Detail.strNewLotNumber
+			,[intSubLocationId]			= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
+			,[intStorageLocationId]		= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
+			,[dblQty]					= CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN 
 												Detail.dblNewSplitLotQuantity
 											ELSE  
 												-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
 										END 
-			,intItemUOMId			= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
-			,dblWeight				= CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
-												Detail.dblNewWeight
-											WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
-												-- Convert the weight into the new Weight UOM.
-												dbo.fnCalculateQtyBetweenUOM(
-													Detail.intWeightUOMId
-													, Detail.intNewWeightUOMId
-													, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
-												)
-											ELSE 
-												ISNULL(Detail.dblWeightPerQty, 0) 
-												* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
-										END
-			,intWeightUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
-			,dtmExpiryDate			= SourceLot.dtmExpiryDate
-			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
-			,intOriginId			= SourceLot.intOriginId
-			,strBOLNo				= SourceLot.strBOLNo
-			,strVessel				= SourceLot.strVessel
-			,strReceiptNumber		= Header.strAdjustmentNo
-			,strMarkings			= SourceLot.strMarkings
-			,strNotes				= SourceLot.strNotes
-			,intEntityVendorId		= SourceLot.intEntityVendorId
-			,strVendorLotNo			= SourceLot.strVendorLotNo
-			,strGarden				= SourceLot.strGarden
-			,intDetailId			= Detail.intInventoryAdjustmentDetailId
+			,[dtmExpiryDate]			= SourceLot.dtmExpiryDate
+			,[strLotAlias]				= SourceLot.strLotAlias
+			,[intLotStatusId]			= SourceLot.intLotStatusId
+			,[intParentLotId]			= SourceLot.intParentLotId
+			,[strParentLotNumber]		= ParentLotSourceLot.strLotNumber
+			,[strParentLotAlias]		= ParentLotSourceLot.strLotAlias
+			,[intSplitFromLotId]		= SourceLot.intLotId
+			,[dblGrossWeight]			= SourceLot.dblGrossWeight
+			,[dblWeight]				= CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+													Detail.dblNewWeight
+												WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
+													-- Convert the weight into the new Weight UOM.
+													dbo.fnCalculateQtyBetweenUOM(
+														Detail.intWeightUOMId
+														, Detail.intNewWeightUOMId
+														, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+													)
+												ELSE 
+													ISNULL(Detail.dblWeightPerQty, 0) 
+													* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+											END
+			,[intWeightUOMId]			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
+			,[intOriginId]				= SourceLot.intOriginId
+			,[strBOLNo]					= SourceLot.strBOLNo
+			,[strVessel]				= SourceLot.strVessel
+			,[strReceiptNumber]			= Header.strAdjustmentNo
+			,[strMarkings]				= SourceLot.strMarkings
+			,[strNotes]					= SourceLot.strNotes
+			,[intEntityVendorId]		= SourceLot.intEntityVendorId
+			,[strVendorLotNo]			= SourceLot.strVendorLotNo
+			,[strGarden]				= SourceLot.strGarden
+			,[strContractNo]			= SourceLot.strContractNo
+			,[dtmManufacturedDate]		= SourceLot.dtmManufacturedDate
+			,[ysnReleasedToWarehouse]	= SourceLot.ysnReleasedToWarehouse
+			,[ysnProduced]				= SourceLot.ysnProduced
+			,[ysnStorage]				= SourceLot.ysnStorage
+			,[intOwnershipType]			= SourceLot.intOwnershipType
+			,[intGradeId]				= SourceLot.intGradeId
+			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
+
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -140,8 +238,9 @@ BEGIN
 				ON SourceLot.intLotId = Detail.intLotId
 			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
+			LEFT JOIN dbo.tblICLot ParentLotSourceLot
+				ON ParentLotSourceLot.intLotId = SourceLot.intParentLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
@@ -160,7 +259,7 @@ END
 BEGIN 
 	UPDATE	dbo.tblICInventoryAdjustmentDetail
 	SET		intNewLotId = LotNumbers.intLotId
-			,strNewLotNumber = LotNumbers.strLotNumber		
+			,strNewLotNumber = LotNumbers.strLotNumber
 	FROM	dbo.tblICInventoryAdjustmentDetail Detail INNER JOIN #GeneratedLotItems LotNumbers
 				ON Detail.intInventoryAdjustmentDetailId = LotNumbers.intDetailId
 END 

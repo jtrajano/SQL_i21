@@ -30,7 +30,6 @@ AS
 	INNER JOIN tblAPVendor APV
 		ON APB.intEntityVendorId = APV.intEntityVendorId
 	WHERE 
-			APB.ysnPosted = 1 
-		AND	APB.ysnForApproval != 1									   --Will not show For Approval Bills
-		AND (APB.ysnApproved = 0 AND APB.dtmApprovalDate IS NULL)      --Will not show Rejected approval bills
-		AND APB.intTransactionType != 6                                --Will not show BillTemplate
+			APB.ysnForApproval != 1														   --Will not show For Approval Bills
+		AND APB.ysnPosted = 1 OR (APB.dtmApprovalDate IS NOT NULL AND APB.ysnApproved = 1) --Will not show Rejected approval bills but show old Posted Transactions.
+		AND APB.intTransactionType != 6													   --Will not show BillTemplate

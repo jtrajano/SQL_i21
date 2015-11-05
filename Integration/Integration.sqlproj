@@ -302,5 +302,6 @@
     <None Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
     <None Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateSiteCustomerView.sql" />
+    <None Include="dbo\Views\vyuGLglhstmstDifference.sql" />
   </ItemGroup>
 </Project>

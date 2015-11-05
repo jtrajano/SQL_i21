@@ -17,6 +17,8 @@ BEGIN TRY
 	DECLARE @ItemBalance DECIMAL(24,10)
 	DECLARE @TicketNo Nvarchar(20)
 	DECLARE @TransferTicketNumber Nvarchar(20)
+	DECLARE @intBillBeforeTransfer INT
+	DECLARE @strProcessType Nvarchar(30)
 
 	DECLARE @ActionCustomer INT
 		,@Percent DECIMAL(24,10)
@@ -42,6 +44,12 @@ BEGIN TRY
 	DECLARE @intItemId INT
 	DECLARE @intItemLocationId INT
 	DECLARE @intActionLocationId INT
+	DECLARE @dblStorageDuePerUnit DECIMAL(24, 10)
+	DECLARE @dblStorageDueAmount DECIMAL(24, 10)
+	DECLARE @dblStorageDueTotalPerUnit DECIMAL(24, 10)
+	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)	
+	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
+	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -72,6 +80,7 @@ BEGIN TRY
 		,@ItemCompanyLocationId = intItemLocation
 		,@ActionCompanyLocationId = intActionLocation	
 		,@TransferTicketNumber=strTransferTicketNumber
+		,@intBillBeforeTransfer=intBillBeforeTransfer
 	FROM OPENXML(@idoc, 'root', 2) WITH 
 	(
 			 intCreatedUserId INT			
@@ -79,7 +88,12 @@ BEGIN TRY
 			,intItemLocation INT
 			,intActionLocation INT
 			,strTransferTicketNumber NVARCHAR(20)
+			,intBillBeforeTransfer INT
 	)	
+	IF @intBillBeforeTransfer=0
+		SET @strProcessType='accrue'
+	ELSE
+		SET @strProcessType='Bill'
 												
 	SELECT @ItemCustomerName = strName	FROM tblEntity	WHERE intEntityId = @ItemEntityid
 
@@ -167,7 +181,7 @@ BEGIN TRY
 		FROM @ItemsToMove
 		WHERE intItemsToMoveKey = @ItemsToMoveKey
 		
-		SELECT @CurrentItemOpenBalance=dblOpenBalance,@TicketNo=intStorageTicketNumber,@intItemId=intItemId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+		SELECT @CurrentItemOpenBalance=dblOpenBalance,@TicketNo=strStorageTicketNumber,@intItemId=intItemId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
 
 		SELECT @ItemStorageTypeDescription = strStorageTypeDescription
 		FROM tblGRStorageType
@@ -190,12 +204,24 @@ BEGIN TRY
 		
 		IF @CurrentItemOpenBalance <> @ItemBalance
 		BEGIN		 
-		 SELECT @TicketNo=intStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+		 SELECT @TicketNo=strStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
 		 SET @ErrMsg='The Open balance of ticket '+@TicketNo+' has been modified by another user.  Transfer Process cannot proceed.'
 		 RAISERROR(@ErrMsg,16,1)		 
 		END
 		
 		
+		--Storage Charge Update
+		EXEC uspGRCalculateStorageCharge
+		 @intCustomerStorageId
+		 ,@strProcessType,NULL
+		 ,@UserKey
+		 ,@dblStorageDuePerUnit OUTPUT
+		,@dblStorageDueAmount OUTPUT
+		,@dblStorageDueTotalPerUnit OUTPUT
+		,@dblStorageDueTotalAmount OUTPUT
+		,@dblStorageBilledPerUnit OUTPUT
+		,@dblStorageBilledAmount OUTPUT
+
 		
 		WHILE @ActionKey > 0
 		BEGIN
@@ -283,7 +309,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
+					,[dtmLastStorageAccrueDate]					
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -300,7 +326,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -318,9 +344,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
-					,0--[dblStorageDue]
-					,0--[dblStoragePaid]
+					,[dtmLastStorageAccrueDate]							
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END				
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -335,7 +361,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,intItemId
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -448,7 +474,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -465,7 +491,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -483,9 +509,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
-					,0--[dblStorageDue]
-					,0--[dblStoragePaid]
+					,[dtmLastStorageAccrueDate]							
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -500,7 +526,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -612,7 +638,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -629,7 +655,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -647,9 +673,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
-					,0--[dblStorageDue]
-					,0--[dblStoragePaid]
+					,[dtmLastStorageAccrueDate]			
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -664,7 +690,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -777,7 +803,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -794,7 +820,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -812,9 +838,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
-					,0--[dblStorageDue]
-					,0--[dblStoragePaid]
+					,[dtmLastStorageAccrueDate]		
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -829,7 +855,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -942,7 +968,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -959,7 +985,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -977,9 +1003,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
-					,0--[dblStorageDue]
-					,0--[dblStoragePaid]
+					,[dtmLastStorageAccrueDate]		
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -994,7 +1020,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -1106,7 +1132,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -1123,7 +1149,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -1141,9 +1167,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
-					,0--[dblStorageDue]
-					,0--[dblStoragePaid]
+					,[dtmLastStorageAccrueDate]		
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -1158,7 +1184,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
@@ -1273,7 +1299,7 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
+					,[dtmLastStorageAccrueDate]							
 					,[dblStorageDue]
 					,[dblStoragePaid]
 					,[dblInsuranceRate]
@@ -1290,7 +1316,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 					)
 				SELECT 1
@@ -1308,9 +1334,9 @@ BEGIN TRY
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
-					,[dtmLastStorageAccrueDate]
-					,0--[dblStorageDue]
-					,0--[dblStoragePaid]
+					,[dtmLastStorageAccrueDate]		
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
+					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
 					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
@@ -1325,7 +1351,7 @@ BEGIN TRY
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
-					,[intStorageTicketNumber]
+					,[strStorageTicketNumber]
 					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId

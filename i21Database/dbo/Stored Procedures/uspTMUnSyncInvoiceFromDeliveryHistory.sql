@@ -233,7 +233,8 @@ BEGIN
 			---CHECK if the delivery is the last delivery
 			IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistory 
 						WHERE intSiteID = @intSiteId
-						AND dtmInvoiceDate > @dtmInvoiceDate)
+						AND dtmInvoiceDate > @dtmInvoiceDate
+						AND ysnMeterReading <> 1)
 			BEGIN
 				Print 'Delivery History is not the last delivery'
 
@@ -264,7 +265,8 @@ BEGIN
 				IF EXISTS(SELECT TOP 1 1 
 					FROM tblTMDeliveryHistory
 					WHERE intSiteID = @intSiteId
-						AND dtmInvoiceDate < @dtmInvoiceDate)
+						AND dtmInvoiceDate < @dtmInvoiceDate
+						AND ysnMeterReading <> 1)
 				BEGIN
 					PRINT 'Has previous delivery history before invoice date'
 					SELECT TOP 1
@@ -273,6 +275,7 @@ BEGIN
 					FROM tblTMDeliveryHistory
 					WHERE intSiteID = @intSiteId
 						AND dtmInvoiceDate < @dtmInvoiceDate
+						AND ysnMeterReading <> 1
 					ORDER BY dtmInvoiceDate DESC
 
 					
@@ -359,6 +362,7 @@ BEGIN
 															FROM tblTMDeliveryHistory
 															WHERE intSiteID = @intSiteId
 																AND dtmInvoiceDate < @dtmInvoiceDate
+																AND ysnMeterReading <> 1
 															ORDER BY dtmInvoiceDate DESC)
 						)A
 						WHERE tblTMSite.intSiteID = @intSiteId

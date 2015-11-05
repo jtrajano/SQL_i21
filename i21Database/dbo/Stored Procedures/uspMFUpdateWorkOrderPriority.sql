@@ -248,6 +248,7 @@ BEGIN TRY
 		,W.dblProducedQuantity
 		,W.strComment AS strWorkOrderComments
 		,W.dtmOrderDate
+		,W.dtmLastProducedDate
 		,(
 			SELECT TOP 1 strItemNo
 			FROM dbo.tblMFRecipeItem RI

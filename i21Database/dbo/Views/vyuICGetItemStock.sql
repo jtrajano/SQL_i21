@@ -43,6 +43,8 @@ SELECT
 	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
 	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
 	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	ysnReceiveUOMAllowPurchase = ISNULL(ReceiveUOM.ysnAllowPurchase, dbo.fnICCheckAllowPurchase(Item.intItemId)),
+	ysnReceiveUOMAllowSale = ISNULL(ReceiveUOM.ysnAllowSale, dbo.fnICCheckAllowSale(Item.intItemId)),
 	strIssueUOM = iUOM.strUnitMeasure,
 	strIssueUPC = ISNULL(IssueUOM.strUpcCode, ''),
 	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
@@ -51,6 +53,8 @@ SELECT
 	dblIssueStandardCost = ISNULL(ItemPricing.dblStandardCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
 	dblIssueAverageCost = ISNULL(ItemPricing.dblAverageCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
 	dblIssueEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	ysnIssueUOMAllowPurchase = ISNULL(IssueUOM.ysnAllowPurchase, dbo.fnICCheckAllowPurchase(Item.intItemId)),
+	ysnIssueUOMAllowSale = ISNULL(IssueUOM.ysnAllowSale, dbo.fnICCheckAllowSale(Item.intItemId)),
 	dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0),
 	dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0),
 	ItemLocation.intAllowNegativeInventory,
@@ -109,7 +113,9 @@ SELECT
 	Item.intPurchaseTaxGroupId,
 	strPurchaseTax = PurchaseTax.strTaxGroupMaster,
 	Item.intGradeId,
-	strGrade = Grade.strDescription
+	strGrade = Grade.strDescription,
+	Item.intLifeTime,
+	Item.strLifeTimeType
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId

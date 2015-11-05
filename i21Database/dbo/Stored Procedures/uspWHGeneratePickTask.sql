@@ -148,7 +148,7 @@ BEGIN TRY
 				   s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) AS dblRemainingSKUQty, 
 				   s.dtmProductionDate,1
 			FROM tblWHSKU s
-			LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId
+			LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId AND t.intTaskTypeId NOT IN (5,6,8,9,10,11)
 			WHERE s.intItemId = @intItemId
 				AND dtmProductionDate BETWEEN (
 							SELECT MIN(dtmProductionDate)
@@ -177,7 +177,7 @@ BEGIN TRY
 					s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) AS dblRemainingSKUQty, 
 					s.dtmProductionDate,2
 			FROM tblWHSKU s
-			LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId
+			LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId AND t.intTaskTypeId NOT IN (5,6,8,9,10,11)
 			WHERE s.intItemId = @intItemId
 					AND s.intSKUStatusId = 1
 					AND NOT EXISTS (SELECT * FROM @tblSKU WHERE intSKUId = s.intSKUId)

@@ -16,6 +16,7 @@ DECLARE @intRecurringId INT,@intStartingNumberId INT, @strPrefix NVARCHAR(10), @
 BEGIN TRY
 BEGIN TRANSACTION
 		PRINT 'Begin Importing Recurring Transaction'
+		UPDATE tblGLJournal SET ysnRecurringTemplate = 1 WHERE strJournalType = 'Imported Recurring'
 
 		INSERT INTO @TEMP (RecurringID,ImportedHeader,ImportedDetail)
 			SELECT intJournalRecurringId,0,0 from tblGLJournalRecurring
@@ -31,7 +32,9 @@ BEGIN TRANSACTION
 					   ,intCurrencyId
 					   ,strTransactionType
 					   ,strJournalType
-					   ,strJournalId)
+					   ,strJournalId
+					   ,ysnRecurringTemplate
+					   )
 			SELECT 
 			  CASE WHEN RTRIM(strReference) = '' OR ISNULL(strReference,'') = '' THEN [strRecurringPeriod] ELSE strReference END
 			  ,[dblExchangeRate]
@@ -40,6 +43,7 @@ BEGIN TRANSACTION
 			  ,'Recurring'
 			  ,'Imported Recurring'
 			  , @strPrefix + CONVERT(NVARCHAR(10),@intNumber)
+			  ,1
 		  FROM [dbo].[tblGLJournalRecurring]
 		  WHERE intJournalRecurringId = @intRecurringId
 		  SELECT @intJournalId = @@IDENTITY

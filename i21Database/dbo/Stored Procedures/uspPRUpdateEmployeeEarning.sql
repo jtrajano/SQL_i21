@@ -25,13 +25,11 @@ BEGIN
 		--Reinsert Earning Taxes
 		INSERT INTO tblPREmployeeEarningTax
 					(intEmployeeEarningId,
-					intEmployeeTaxId,
 					intTypeTaxId,
 					intSort,
 					intConcurrencyId)
 			 SELECT
 					(SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intTypeEarningId = @intTypeEarningId),
-					(SELECT TOP 1 intEmployeeTaxId FROM tblPREmployeeTax WHERE intTypeTaxId = tblPRTypeEarningTax.intTypeTaxId),
 					intTypeTaxId,
 					intSort,
 					intConcurrencyId

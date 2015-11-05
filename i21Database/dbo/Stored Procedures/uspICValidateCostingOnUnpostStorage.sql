@@ -33,6 +33,7 @@ CREATE TABLE #FoundErrors (
 	,intItemLocationId INT
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
+	,intTransactionTypeId INT 
 )
 
 -- Cross-check each items against the function that does the validation. 
@@ -42,6 +43,7 @@ SELECT	Errors.intItemId
 		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
+		,Item.intTransactionTypeId
 FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostStorageErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
 WHERE	ISNULL(@ysnRecap, 0) = 0
 

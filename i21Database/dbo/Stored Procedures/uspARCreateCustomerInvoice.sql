@@ -34,9 +34,11 @@
 	,@ActualCostId					NVARCHAR(50)	= ''			
 	,@ShipmentId					INT				= NULL
 	,@TransactionId					INT				= NULL
+	,@OriginalInvoiceId				INT				= NULL
 		
 	,@ItemId						INT				= NULL
 	,@ItemIsInventory				BIT				= 0
+	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
@@ -62,6 +64,7 @@
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL			
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL		
+	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
@@ -209,6 +212,7 @@ BEGIN TRY
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
+		,[intOriginalInvoiceId] 
 		,[intEntityId]
 		,[intConcurrencyId])
 	SELECT
@@ -265,6 +269,7 @@ BEGIN TRY
 		,[strActualCostId]				= @ActualCostId 
 		,[intShipmentId]				= @ShipmentId 
 		,[intTransactionId]				= @TransactionId 
+		,[intOriginalInvoiceId]			= @OriginalInvoiceId
 		,[intEntityId]					= @EntityId 
 		,[intConcurrencyId]				= 0
 	FROM	
@@ -357,6 +362,7 @@ BEGIN TRY
 		,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
 		,@ErrorMessage					= @AddDetailError	OUTPUT
 		,@RaiseError					= @RaiseError
+		,@ItemDocumentNumber			= @ItemDocumentNumber
 		,@ItemDescription				= @ItemDescription
 		,@ItemUOMId						= @ItemUOMId
 		,@ItemQtyOrdered				= @ItemQtyShipped
@@ -383,6 +389,7 @@ BEGIN TRY
 		,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 		,@ItemTicketId					= @ItemTicketId
 		,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+		,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 		,@ItemSiteId					= @ItemSiteId
 		,@ItemBillingBy					= @ItemBillingBy
 		,@ItemPercentFull				= @ItemPercentFull

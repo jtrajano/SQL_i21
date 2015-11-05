@@ -23,6 +23,7 @@ BEGIN
            ,[intShipmentPurchaseSalesContractId]
            ,[intTicketId]
            ,[intTicketHoursWorkedId]
+		   ,[intOriginalInvoiceDetailId]
            ,[intSiteId]
 	)
 	SELECT
@@ -42,6 +43,7 @@ BEGIN
         ,[intShipmentPurchaseSalesContractId]	= [intShipmentPurchaseSalesContractId]
         ,[intTicketId]							= [intTicketId]
         ,[intTicketHoursWorkedId]				= [intTicketHoursWorkedId]
+		,[intOriginalInvoiceDetailId]			= [intOriginalInvoiceDetailId]
         ,[intSiteId]							= [intSiteId]
 
 	FROM

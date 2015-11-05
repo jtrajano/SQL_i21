@@ -521,7 +521,7 @@ BEGIN
 			   ,[ysnPrinted]
 			   ,[dblCurrencyRate]
 			   ,[strStorageType]
-			   ,[intStorageTicketNumber]
+			   ,[strStorageTicketNumber]
 			   ,[intItemId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= SC.intEntityId
@@ -550,7 +550,7 @@ BEGIN
 			,[ysnPrinted]= 0 
 			,[dblCurrencyRate]= 1
 			,'ITR'
-			,[intStorageTicketNumber] = SC.strTicketNumber
+			,[strStorageTicketNumber] = SC.strTicketNumber
 			, SC.[intItemId]
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId

@@ -82,7 +82,10 @@ BEGIN TRY
 
 
 	SELECT	CH.intContractHeaderId,
+
 			TP.strContractType + ' Contract:- ' + CH.strContractNumber AS strCaption,
+			@strCompanyName + ' - '+TP.strContractType+' Contract' AS strTeaCaption,
+
 			CH.dtmContractDate,
 			'The contract has been closed on the conditions of the '+ AN.strComment + '('+AN.strName+')'+' latest edition.' strAssociation,
 			CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END AS strBuyerRefNo,
@@ -92,14 +95,19 @@ BEGIN TRY
 			CB.strContractBasis,
 			SQ.strLocationName,
 			CY.strCropYear,
+
 			SQ.srtLoadingPoint,
 			SQ.strLoadingPointName,
 			SQ.strShipper,
 			SQ.srtDestinationPoint,
 			SQ.strDestinationPointName,
+			SQ.strLoadingPointName + ' to ' + SQ.strDestinationPointName AS strLoadingAndDestinationPointName,
+
 			W1.strWeightGradeDesc AS	strWeight,
 			TM.strTerm,
 			W2.strWeightGradeDesc AS	strGrade,
+			'Quality as per approved sample ' + ' - ' + W2.strWeightGradeDesc + ' and subject to consignment conforming to ' + @strCompanyName + '''s standard quality criteria.' AS strQaulityAndInspection,
+
 			@strContractDocuments strContractDocuments,
 			'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle.' + CHAR(13)+CHAR(10) +
 			'Place of jurisdiction is ' + AB.strState +', '+RY.strCountry AS strArbitration,
@@ -115,7 +123,13 @@ BEGIN TRY
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
 			AS	strOtherPartyAddress,
 			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
-			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller
+			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
+			CH.dblQuantity,
+			SQ.strCurrency,
+			'To be covered by ' + IB.strInsuranceBy AS strInsuranceBy,
+			CH.strContractComments,
+			AN.strComment	AS strArbitrationComment
+			
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
@@ -129,7 +143,8 @@ BEGIN TRY
 	JOIN	tblCTAssociation	AN	ON	AN.intAssociationId		=	CH.intAssociationId		LEFT
 	JOIN	tblSMTerm			TM	ON	TM.intTermID			=	CH.intTermId			LEFT
 	JOIN	tblSMCity			AB	ON	AB.intCityId			=	CH.intArbitrationId		LEFT
-	JOIn	tblSMCountry		RY	ON	RY.intCountryID			=	AB.intCountryId			LEFT
+	JOIN	tblSMCountry		RY	ON	RY.intCountryID			=	AB.intCountryId			LEFT
+	JOIN	tblCTInsuranceBy	IB	ON	IB.intInsuranceById		=	CH.intInsuranceById		LEFT	
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
 							CD.intContractHeaderId,
@@ -138,12 +153,15 @@ BEGIN TRY
 							LP.strCity								AS	strLoadingPointName,
 							'Destination ' + CD.strLoadingPointType AS	srtDestinationPoint,
 							DP.strCity								AS	strDestinationPointName,
-							TT.strName								AS	strShipper
+							TT.strName								AS	strShipper,
+							CY.strCurrency
+
 				FROM		tblCTContractDetail		CD
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId	LEFT
 				JOIN		tblSMCity				LP	ON	LP.intCityId				=	CD.intLoadingPortId		LEFT
 				JOIN		tblSMCity				DP	ON	DP.intCityId				=	CD.intLoadingPortId		LEFT
-				JOIN		tblEntity				TT	ON	TT.intEntityId				=	CD.intShipperId
+				JOIN		tblEntity				TT	ON	TT.intEntityId				=	CD.intShipperId			LEFT
+				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId
 			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1			
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	

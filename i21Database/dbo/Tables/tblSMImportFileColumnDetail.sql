@@ -17,5 +17,6 @@
 	CONSTRAINT [PK_tblSMImportFileColumnDetail] PRIMARY KEY ([intImportFileColumnDetailId]),
 	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileHeader_intImportFileHeaderId] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileRecordMarker_intImportFileRecordMarkerId] FOREIGN KEY ([intImportFileRecordMarkerId]) REFERENCES [dbo].[tblSMImportFileRecordMarker] ([intImportFileRecordMarkerId]),  
+	CONSTRAINT [AK_tblSMImportFileColumnDetail_intImportFileHeaderId_intLevel] UNIQUE ([intImportFileHeaderId], [intLevel])
 	--CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileTable_intImportFileTableId] FOREIGN KEY ([intImportFileTableId]) REFERENCES [dbo].[tblSMImportFileTable] ([intImportFileTableId]), 
 )

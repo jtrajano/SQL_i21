@@ -160,7 +160,7 @@ IF @intLocalTran= 1 BEGIN TRANSACTION
 	--If the destination tblWHContainer does not exists then create it.
 	IF ISNULL(@intDestContainerId,0) = 0
 	BEGIN
-		IF LEN(@strDestContainerNo) = 0
+		IF LEN(@strDestContainerNo) = 0 or @strDestContainerNo IS NULL
 		BEGIN
 			WHILE (1 = 1)
 			BEGIN

@@ -35,15 +35,12 @@ Type the overview for the table here.
 		[ysnAllowLoadContracts] BIT NULL, 
 		[dblMaxUnder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMaxOver] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[intPatronageCategoryId] INT NULL, 
-		[intPatronageCategoryDirectId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
-		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]),
-		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategoryDirect] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]), 
 		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 
 		CONSTRAINT [FK_tblICCommodity_tblGRDiscount] FOREIGN KEY ([intScheduleDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
-		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]) 
+		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]), 
+		CONSTRAINT [AK_tblICCommodity_strCommodityCode] UNIQUE ([strCommodityCode]) 
 	)
 
 	GO
@@ -209,23 +206,9 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'dblMaxOver'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Patronage Category Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'intPatronageCategoryId'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Patronage Category Direct Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'intPatronageCategoryDirectId'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Concurrency Field',

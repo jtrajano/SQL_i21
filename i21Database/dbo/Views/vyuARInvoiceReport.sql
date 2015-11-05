@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceReport]
 AS
 SELECT INV.intInvoiceId
+	 , blbCompanyLogo = [dbo].fnGetCompanyLogo()
 	 , strCompanyName = CASE WHEN L.strUseLocationAddress = 'Letterhead'
 								THEN ''
 							 ELSE
@@ -59,6 +60,7 @@ SELECT INV.intInvoiceId
 	 , dblTaxDetail = IDT.dblTax
 	 , INV.strTransactionType
 	 , intDetailCount = (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = INV.intInvoiceId)
+	 , ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = INV.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + INV.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 
 	LEFT JOIN tblICItem I ON ID.intItemId = I.intItemId 

@@ -58,14 +58,14 @@ IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intI
         EXEC dbo.uspICProcessToInventoryShipment
 		 @intSourceTransactionId = @SalesOrderId
 		,@strSourceType = 'Sales Order'
-		,@intUserId = @icUserId
+		,@intEntityUserSecurityId = @icUserId
 		,@InventoryShipmentId = @ShipmentId OUTPUT
 
 		IF (@HasSoftwareItems = 1)
 			BEGIN
 				DECLARE @strTransactionId NVARCHAR(40) = NULL
 				SELECT @strTransactionId = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
-				EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @icUserId, @UserId
+				EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @icUserId
 			END
 
 		SET @InventoryShipmentId = @ShipmentId;

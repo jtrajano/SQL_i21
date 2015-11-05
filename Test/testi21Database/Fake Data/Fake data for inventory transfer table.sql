@@ -156,6 +156,14 @@ BEGIN
 			,[strModule]			= N'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 78
+			,[strTransactionType]	= N'Parent Lot Number'
+			,[strPrefix]			= N'PLOT-'
+			,[intNumber]			= 1
+			,[strModule]			= N'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1	
 
 	-- Create mock data for Lot Numbers
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1

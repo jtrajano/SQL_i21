@@ -7,7 +7,9 @@ SELECT
    QH.strQuoteComments,
    QH.strCustomerComments,
    QH.dtmQuoteDate,
-   AR.strName
+   AR.strName,
+   AR.intEntityCustomerId,
+   0 "dblQuoteTotal" 
     	
 FROM
     tblTRQuoteHeader QH

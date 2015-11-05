@@ -19,7 +19,7 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Count Transaction' + CAST(
 
 -- Constants  
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Count'
+DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjusment'
 
 -- Get the Inventory Count batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -179,15 +179,19 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 	WHERE	Header.intInventoryCountId = @intTransactionId
+			AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
 	
+
+
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
-	-----------------------------------------
-	-- Generate the Costing
-	-----------------------------------------
+	
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust)
 	BEGIN 
+		-----------------------------------------
+		-- Generate the Costing
+		-----------------------------------------
 		EXEC	@intReturnValue = dbo.uspICPostCosting  
 				@ItemsForAdjust  
 				,@strBatchId  
@@ -196,43 +200,43 @@ BEGIN
 				,@strCountDescription
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+		-----------------------------------------
+		-- Generate a new set of g/l entries
+		-----------------------------------------
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+		)
+		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
+			@strBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intEntityUserSecurityId
+			,@strCountDescription
 	END				
-				
-	-----------------------------------------
-	-- Generate a new set of g/l entries
-	-----------------------------------------
-	INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-	)
-	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
-		@strBatchId
-		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@intEntityUserSecurityId
-		,@strCountDescription
 
 	IF @intReturnValue < 0 GOTO With_Rollback_Exit
 END   
@@ -308,8 +312,11 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0 
 BEGIN 
-	-- If there are items for adjust, expect it to have g/l entries. 	
-	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+	-- If there are items for adjust, expect it to have g/l entries. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+	END
 
 	UPDATE	dbo.tblICInventoryCount
 	SET		ysnPosted = @ysnPost

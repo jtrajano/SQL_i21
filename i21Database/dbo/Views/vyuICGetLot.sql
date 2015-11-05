@@ -78,6 +78,7 @@ LEFT JOIN (
 			, intLotId
 			, dblTotalQty = SUM(dblQty)
 		FROM tblICStockReservation
+		WHERE ysnPosted = 0
 		GROUP BY intItemId
 			, intItemLocationId
 			, intItemUOMId

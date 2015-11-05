@@ -19,5 +19,6 @@
     [ysnPrintAll] BIT NULL DEFAULT ((1)), 
     [ysnRefreshTab] BIT NULL DEFAULT ((0)), 
     [ysnSaveGridLayout] BIT NULL DEFAULT ((1)), 
-    [intConcurrencyId] INT NULL DEFAULT ((1))
+    [intConcurrencyId] INT NULL DEFAULT ((1)), 
+    [ysnSaveDashboardLayout] BIT NULL DEFAULT ((1))
 )

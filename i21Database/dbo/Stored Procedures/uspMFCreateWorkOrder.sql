@@ -183,7 +183,7 @@ BEGIN TRY
 		,intWeightUOMId
 		,dblQty
 		,intItemUOMId
-		,NULL
+		,ISNULL((SELECT MAX(intSequenceNo) FROM dbo.tblMFWorkOrderInputLot WHERE intWorkOrderId =@intWorkOrderId),0)+1
 		,@dtmCurrentDate
 		,@intUserId
 		,@dtmCurrentDate
@@ -221,7 +221,7 @@ BEGIN TRY
 		,intWeightUOMId
 		,dblQty
 		,intItemUOMId
-		,NULL
+		,ISNULL((SELECT MAX(intSequenceNo) FROM dbo.tblMFWorkOrderConsumedLot WHERE intWorkOrderId =@intWorkOrderId),0)+1
 		,@dtmCurrentDate
 		,@intUserId
 		,@dtmCurrentDate
@@ -249,6 +249,7 @@ BEGIN TRY
 		,@strBOLNo NVARCHAR(50)
 		,@intEntityId INT
 		,@intOrderHeaderId INT
+		,@strItemNo nvarchar(50)
 
 	SELECT @intOwnerId = IO.intOwnerId
 	FROM dbo.tblICItemOwner IO
@@ -283,6 +284,19 @@ BEGIN TRY
 		,@strBOLNo OUTPUT
 
 	DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
+
+	IF @intOwnerId IS NULL
+	BEGIN
+		SELECT @strItemNo = I.strItemNo 
+		FROM dbo.tblICItem I
+		WHERE intItemId IN (
+			SELECT intItemId
+			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intItemId INT) x
+			)
+
+		RAISERROR(90005,14,1,@strItemNo)
+	END
+
 
 	SELECT @strXML = '<root>'
 
@@ -344,6 +358,7 @@ BEGIN TRY
 		,intSanitizationOrderDetailsId
 		,intLotId
 		,intConcurrencyId
+		,ysnIsWeightCertified
 		)
 	SELECT @intOrderHeaderId
 		,CL.intItemId
@@ -378,6 +393,7 @@ BEGIN TRY
 		,L.strLotAlias
 		,CL.intWorkOrderInputLotId
 		,L.intLotId
+		,1
 		,1
 	FROM dbo.tblMFWorkOrderInputLot CL
 	JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId

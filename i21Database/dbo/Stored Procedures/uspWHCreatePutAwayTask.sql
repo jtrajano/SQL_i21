@@ -220,15 +220,19 @@ BEGIN TRY
 		END
 		ELSE IF IsNULL(@intToStorageLocationId, 0) = 0
 		BEGIN
-			SELECT TOP 1 @intToStorageLocationId = u.intStorageLocationId
-			FROM @tblTaskTable u
-			INNER JOIN tblWHSKU s ON s.intSKUId = @intSKUId
-			--INNER JOIN MaterialPutAway p ON p.intItemId = s.intItemId AND p.intAddressId = @intAddressId 
-			JOIN tblICItem m ON m.intItemId = s.intItemId
-			JOIN tblICCategory mt ON mt.intCategoryId = m.intCategoryId
-			JOIN UnitMaterialTypeRestrictionMapping UMR ON umr.intItemCategoryId = mt.intItemCategoryId
-				AND UMR.intStorageLocationId = u.intStorageLocationId
-			ORDER BY u.strStorageLocationName
+			--SELECT TOP 1 @intToStorageLocationId = u.intStorageLocationId
+			--FROM @tblTaskTable u
+			--INNER JOIN tblWHSKU s ON s.intSKUId = @intSKUId
+			----INNER JOIN MaterialPutAway p ON p.intItemId = s.intItemId AND p.intAddressId = @intAddressId 
+			--JOIN tblICItem m ON m.intItemId = s.intItemId
+			--JOIN tblICCategory mt ON mt.intCategoryId = m.intCategoryId
+			--JOIN UnitMaterialTypeRestrictionMapping UMR ON umr.intItemCategoryId = mt.intItemCategoryId
+			--	AND UMR.intStorageLocationId = u.intStorageLocationId
+			--ORDER BY u.strStorageLocationName
+						
+			SELECT TOP 1 @intToStorageLocationId = sl.intStorageLocationId
+			FROM tblICStorageLocation sl 
+			JOIN tblICStorageUnitType ut ON ut.intStorageUnitTypeId = sl.intStorageUnitTypeId WHERE strInternalCode Like 'WH_FG_Storage%'
 
 			IF IsNULL(@intToStorageLocationId, 0) = 0
 			BEGIN
@@ -243,61 +247,6 @@ BEGIN TRY
 			END
 		END
 	END
-	--ELSE
-	--BEGIN
-	--	--get a directed put-away location   
-	--	SELECT TOP 1 @intToStorageLocationId = a.intStorageLocationId
-	--	FROM (
-	--		SELECT intStorageLocationId
-	--		FROM @tblTaskTable u
-	--		INNER JOIN tblWHSKU s ON s.intSKUId = @intSKUId
-	--		INNER JOIN MaterialPutAway p ON p.intItemId = s.intItemId
-	--			AND p.intAddressId = @intAddressId
-	--		WHERE strStorageLocationName LIKE p.PutAway1
-	--		) a
-	--	LEFT JOIN tblWHContainer c ON c.unitKey <> a.intStorageLocationId
-	--	LEFT JOIN tblWHTask t ON t.toUnitKey <> a.unitKey
-
-	--	--get a directed put-away location (2nd option)    
-	--	IF (@intToStorageLocationId IS NULL)
-	--		OR (@intToStorageLocationId = 0)
-	--		SELECT TOP 1 @intToStorageLocationId = a.intStorageLocationId
-	--		FROM (
-	--			SELECT intStorageLocationId
-	--			FROM @tblTaskTable u
-	--			INNER JOIN tblWHSKU s ON s.intSKUId = @intSKUId
-	--			INNER JOIN MaterialPutAway p ON p.intItemId = s.intItemId
-	--				AND p.intAddressId = @intAddressId
-	--			WHERE u.strStorageLocationName LIKE p.PutAway2
-	--			) a
-	--		LEFT JOIN tblWHContainer c ON c.unitKey <> a.intStorageLocationId
-	--		LEFT JOIN tblWHTask t ON t.toUnitKey <> a.unitKey
-
-	--	--get a directed put-away location (3nd option)  
-	--	IF (@intToStorageLocationId IS NULL)
-	--		OR (@intToStorageLocationId = 0)
-	--		SELECT TOP 1 @intToStorageLocationId = a.intStorageLocationId
-	--		FROM (
-	--			SELECT intStorageLocationId
-	--			FROM @tblTaskTable u
-	--			INNER JOIN tblWHSKU s ON s.intSKUId = @intSKUId
-	--			INNER JOIN MaterialPutAway p ON p.intItemId = s.intItemId
-	--				AND p.intAddressId = @intAddressId
-	--			WHERE u.strStorageLocationName LIKE p.PutAway3
-	--			) a
-	--		LEFT JOIN tblWHContainer c ON c.unitKey <> a.intStorageLocationId
-	--		LEFT JOIN tblWHTask t ON t.toUnitKey <> a.unitKey
-
-	--	--if there was no directed put away location then find any empty location
-	--	IF (@intToStorageLocationId IS NULL)
-	--		OR (@intToStorageLocationId = 0)
-	--	BEGIN
-	--		SELECT TOP 1 @intToStorageLocationId = a.intStorageLocationId
-	--		FROM @tblTaskTable a
-	--		LEFT JOIN tblWHContainer c ON c.unitKey <> a.intStorageLocationId
-	--		LEFT JOIN tblWHTask t ON t.toUnitKey <> a.unitKey
-	--	END
-	--END
 
 	label1:
 

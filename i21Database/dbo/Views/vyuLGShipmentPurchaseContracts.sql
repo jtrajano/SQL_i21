@@ -6,9 +6,9 @@ SELECT
        S.intTrackingNumber,
 	   S.ysnDirectShipment,
        SCQ.intContractDetailId,
-       CH.intContractHeaderId,
+       CT.intContractHeaderId,
        CT.intContractSeq,
-       CH.strContractNumber,
+       CT.strContractNumber,
 	   Item.intCommodityId,
        SCQ.intItemId,
        CT.intItemUOMId,
@@ -19,15 +19,17 @@ SELECT
        SCQ.dblGrossWt,
        SCQ.dblTareWt,
        SCQ.dblNetWt,
-       dblCost = CT.dblCashPrice, 
+       dblCost = CT.dblCashPriceInQtyUOM, 
        intWeightUOMId = S.intWeightUnitMeasureId,
        WTUOM.strUnitMeasure as strWeightUOM,
        intEntityVendorId = S.intVendorEntityId,
-       EN.strName as strVendor,
+       CT.strEntityName as strVendor,
        Item.strItemNo,
        strItemDescription = Item.strDescription,
        Item.strLotTracking,
        Item.strType,
+	   Item.intLifeTime,
+	   Item.strLifeTimeType,
        UOM.strUnitMeasure
        , dblItemUOMCF = ItemUOM.dblUnitQty
        ,intStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = CT.intItemUOMId),0)
@@ -38,10 +40,8 @@ SELECT
 
 FROM tblLGShipmentContractQty SCQ
 JOIN tblLGShipment S ON S.intShipmentId = SCQ.intShipmentId
-JOIN tblCTContractDetail CT ON CT.intContractDetailId = SCQ.intContractDetailId
+JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = SCQ.intContractDetailId
 JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
-JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
-JOIN tblEntity EN ON EN.intEntityId = S.intVendorEntityId
 JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = SCQ.intUnitMeasureId
 JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = S.intWeightUnitMeasureId
 LEFT JOIN tblICItem Item ON Item.intItemId = SCQ.intItemId

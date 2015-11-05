@@ -99,4 +99,12 @@ GO
            [strNamespace]       =        N'AccountsPayable.view.VendorExpenseApproval', 
 		   [strParameter]		=		 N'intEntityId', 
            [intSort]            =        6
+	UNION ALL
+	SELECT [strReminder]        =        N'Update',
+			[strType]        	=        N'Invoice',
+			[strMessage]		=        N'{0} Customer''s Budget need to update for final budget.',
+			[strQuery]  		=        N'SELECT intEntityCustomerId, DATEADD(MONTH, 1, MAX(dtmBudgetDate)) AS dtmBudgetEndDate FROM tblARCustomerBudget GROUP BY intEntityCustomerId HAVING GETDATE() > DATEADD(MONTH, 1, MAX(dtmBudgetDate))',
+			[strNamespace]      =        N'AccountsReceivable.view.Invoice', 
+			[strParameter]		=		 NULL,
+			[intSort]           =        7
 GO

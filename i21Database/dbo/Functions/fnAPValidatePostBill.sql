@@ -22,6 +22,18 @@ BEGIN
 	IF @post = 1
 	BEGIN
 
+
+		--You cannot post recurring transaction.
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'You cannot post recurring transaction',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND A.ysnRecurring = 1
+
 		--Missing vendor order number
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 

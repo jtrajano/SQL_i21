@@ -99,8 +99,7 @@ BEGIN
 			,strNotes
 			,intEntityVendorId
 			,strVendorLotNo
-			,intVendorLocationId
-			,strVendorLocation
+			,strGarden
 			,strContractNo
 			,dtmManufacturedDate
 			,ysnReleasedToWarehouse
@@ -131,8 +130,7 @@ BEGIN
 			,strNotes					= 'Notes'
 			,intEntityVendorId			= NULL
 			,strVendorLotNo				= 'Vendor Lot No'
-			,intVendorLocationId		= NULL
-			,strVendorLocation			= 'Vendor Location'
+			,strGarden					= 'Garden'
 			,strContractNo				= 'Contract No'
 			,dtmManufacturedDate		= GETDATE()
 			,ysnReleasedToWarehouse		= 0

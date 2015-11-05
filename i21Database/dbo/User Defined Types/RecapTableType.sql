@@ -23,6 +23,12 @@
 	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
+	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
+	[dblDebitForeign]			NUMERIC (18, 9) NULL,
+	[dblDebitReport]			NUMERIC (18, 9) NULL,
+	[dblCreditForeign]			NUMERIC (18, 9) NULL,
+	[dblCreditReport]			NUMERIC (18, 9) NULL,
+	[dblReportingRate]			NUMERIC (18, 9) NULL,
+	[dblForeignRate]			NUMERIC (18, 9) NULL
 )
 

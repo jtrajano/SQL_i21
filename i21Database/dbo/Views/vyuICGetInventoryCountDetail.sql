@@ -26,6 +26,7 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	InvCountDetail.dblPhysicalCount,
 	InvCountDetail.intItemUOMId,
 	UOM.strUnitMeasure,
+	dblConversionFactor = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, 1),
 	dblPhysicalCountStockUnit = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, InvCountDetail.dblPhysicalCount),
 	dblVariance = (CASE WHEN InvCount.ysnCountByLots = 1 THEN ISNULL(InvCountDetail.dblSystemCount, 0) - ISNULL(InvCountDetail.dblPhysicalCount, 0)
 					ELSE ISNULL(InvCountDetail.dblSystemCount, 0) - dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, InvCountDetail.dblPhysicalCount)

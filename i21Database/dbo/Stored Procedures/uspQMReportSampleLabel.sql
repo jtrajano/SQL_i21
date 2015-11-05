@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspQMReportSampleLabel @xmlParam NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE uspQMReportSampleLabel
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -51,13 +52,21 @@ BEGIN TRY
 		,CONVERT(NVARCHAR, S.dtmSampleReceivedDate, 107) AS dtmSampleReceivedDate
 		,CASE 
 			WHEN C.strCategoryCode = 'C'
-				THEN L.strLotNumber
+				THEN ISNULL(L.strLotNumber,'')
 			ELSE ''
 			END AS strLotNumber
-		,PL.strParentLotNumber
+		,ISNULL(PL.strParentLotNumber,'') AS strParentLotNumber
 		,ST.strDescription AS strSampleTypeDescription
 		,C.strCategoryCode
-		,ISNULL(W.strERPOrderNo, S.strRefNo) AS strRefNo
+		,@intSampleId AS intSampleId
+		,ISNULL(W.strERPOrderNo,'') AS BPCSshopOrder#
+		,CASE 
+		WHEN S.strRefNo <> ''
+			THEN ISNULL(PD.intLineNo, 1)
+		ELSE PD.intLineNo
+		END AS BPCSLineNumber
+		,ISNULL(P.strReference, S.strRefNo) AS BPCSPoNumber
+		,ST.strDescription + ', #: ' + S.strSampleNumber AS strSampleTypeDescandNumber
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 	JOIN tblICItem I ON S.intItemId = I.intItemId
@@ -68,6 +77,12 @@ BEGIN TRY
 	LEFT JOIN tblICLot L ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblMFWorkOrderInputParentLot WPL ON WPL.intParentLotId = PL.intParentLotId
 	LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	LEFT JOIN tblPOPurchaseDetail PD ON PD.intPurchaseDetailId = RI.intLineNo
+		AND PD.intPurchaseId = RI.intOrderId
+	LEFT JOIN tblPOPurchase P ON P.intPurchaseId = PD.intPurchaseId
 	WHERE S.intSampleId = @intSampleId
 END TRY
 

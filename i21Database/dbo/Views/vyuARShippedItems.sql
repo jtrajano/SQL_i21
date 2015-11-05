@@ -285,8 +285,8 @@ SELECT
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= SCT.[strTicketNumber]
 	,[intTicketId]						= SCT.[intTicketId]
-	,[intTaxGroupId]					= SOD.[intTaxGroupId]
-	,[strTaxGroup]						= TG.[strTaxGroup]
+	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
+	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -431,62 +431,65 @@ SELECT
 	,[strShipVia]						= S.[strShipVia]
 	,[strTicketNumber]					= SCT.[strTicketNumber]
 	,[intTicketId]						= SCT.[intTicketId]
-	,[intTaxGroupId]					= NULL
-	,[strTaxGroup]						= NULL
-	FROM
-		tblICInventoryShipmentItem ISI
-	INNER JOIN
-		tblICItem I
-			ON ISI.[intItemId] = I.[intItemId]
-	INNER JOIN
-		tblICInventoryShipment ISH
-			ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-	INNER JOIN
-		tblEntity E
-			ON ISH.[intEntityCustomerId] = E.[intEntityId]
-	LEFT OUTER JOIN
-					(	SELECT TOP 1
-							[intEntityLocationId]
-							,[intEntityId] 
-							,[strCountry]
-							,[strState]
-							,[strCity]
-							,[intTermsId]
-							,[intShipViaId]
-						FROM 
-						tblEntityLocation
-						WHERE
-							ysnDefaultLocation = 1
-					) EL
-						ON ISH.[intEntityCustomerId] = EL.[intEntityId]			
-	LEFT OUTER JOIN
-		tblSMCompanyLocation CL
-			ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId]
-	LEFT OUTER JOIN
-		tblSMTerm T
-			ON EL.[intTermsId] = T.[intTermID]
-	LEFT OUTER JOIN
-		tblSMShipVia S
-			ON EL.[intShipViaId] = S.[intEntityShipViaId]			
-	LEFT JOIN
-		[tblICItemUOM] IU
-			ON ISI.[intItemUOMId] = IU.[intItemUOMId]
-	LEFT JOIN
-		[tblICUnitMeasure] U
-			ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
-	LEFT OUTER JOIN
-		tblICStorageLocation SL
-			ON ISI.[intStorageLocationId] = SL.[intStorageLocationId]												
-	LEFT OUTER JOIN
-		tblSCTicket SCT
-			ON ISI.[intSourceId] = SCT.[intTicketId]
-	LEFT OUTER JOIN
-		vyuARGetItemAccount A
-			ON ISI.[intItemId] = A.[intItemId]
-			AND ISH.[intShipFromLocationId] = A.[intLocationId] 
-	LEFT OUTER JOIN
-		 tblARInvoiceDetail IND
-			ON ISI.[intInventoryShipmentItemId] = IND.[intInventoryShipmentItemId]									 
+	,[intTaxGroupId]					= NULL --ISI.[intTaxCodeId] 
+	,[strTaxGroup]						= NULL --TG.[strTaxGroup] 
+FROM
+	tblICInventoryShipmentItem ISI
+INNER JOIN
+	tblICItem I
+		ON ISI.[intItemId] = I.[intItemId]
+INNER JOIN
+	tblICInventoryShipment ISH
+		ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
+INNER JOIN
+	tblEntity E
+		ON ISH.[intEntityCustomerId] = E.[intEntityId]
+LEFT OUTER JOIN
+				(	SELECT TOP 1
+						[intEntityLocationId]
+						,[intEntityId] 
+						,[strCountry]
+						,[strState]
+						,[strCity]
+						,[intTermsId]
+						,[intShipViaId]
+					FROM 
+					tblEntityLocation
+					WHERE
+						ysnDefaultLocation = 1
+				) EL
+					ON ISH.[intEntityCustomerId] = EL.[intEntityId]			
+LEFT OUTER JOIN
+	tblSMCompanyLocation CL
+		ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId]
+LEFT OUTER JOIN
+	tblSMTerm T
+		ON EL.[intTermsId] = T.[intTermID]
+LEFT OUTER JOIN
+	tblSMShipVia S
+		ON EL.[intShipViaId] = S.[intEntityShipViaId]			
+LEFT JOIN
+	[tblICItemUOM] IU
+		ON ISI.[intItemUOMId] = IU.[intItemUOMId]
+LEFT JOIN
+	[tblICUnitMeasure] U
+		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT OUTER JOIN
+	tblICStorageLocation SL
+		ON ISI.[intStorageLocationId] = SL.[intStorageLocationId]												
+LEFT OUTER JOIN
+	tblSCTicket SCT
+		ON ISI.[intSourceId] = SCT.[intTicketId]
+LEFT OUTER JOIN
+	vyuARGetItemAccount A
+		ON ISI.[intItemId] = A.[intItemId]
+		AND ISH.[intShipFromLocationId] = A.[intLocationId] 
+LEFT OUTER JOIN
+	 tblARInvoiceDetail IND
+		ON ISI.[intInventoryShipmentItemId] = IND.[intInventoryShipmentItemId]	
+LEFT OUTER JOIN
+	tblSMTaxGroup TG
+		ON ISI.[intTaxCodeId] = TG.intTaxGroupId 											 
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISH.[intOrderType] <> 2
@@ -536,7 +539,7 @@ SELECT
 	,[intSalesAccountId]				= NULL
 	,[intInventoryAccountId]			= NULL
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= ''
+	,[strStorageLocationName]			= NULL
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL
@@ -583,4 +586,4 @@ LEFT OUTER JOIN
 WHERE
 	ARI.[intInvoiceId] IS NULL
 	AND LGS.[intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails)
-	--AND LGS.[ysnInventorized] = 1
+	AND LGS.[ysnInventorized] = 1

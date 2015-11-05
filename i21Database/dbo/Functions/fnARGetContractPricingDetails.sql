@@ -34,7 +34,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())	
 			
 	SELECT TOP 1
-		 @Price				= dblCashPrice
+		 @Price				= [dbo].[fnCalculateQtyBetweenUOM]([intItemUOMId],[intPriceItemUOMId],1) * dblCashPrice
 		,@ContractHeaderId	= intContractHeaderId
 		,@ContractDetailId	= intContractDetailId
 		,@ContractNumber	= strContractNumber
@@ -75,7 +75,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 	SET @UnlimitedQuantity  = NULL
 			
 	SELECT TOP 1
-		 @Price				= dblCashPrice
+		 @Price				= [dbo].[fnCalculateQtyBetweenUOM]([intItemUOMId],[intPriceItemUOMId],1) * dblCashPrice
 		,@ContractHeaderId	= intContractHeaderId
 		,@ContractDetailId	= intContractDetailId
 		,@ContractNumber	= strContractNumber

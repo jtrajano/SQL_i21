@@ -93,7 +93,7 @@ BEGIN TRY
 	IF @intLocalTran = 1
 		BEGIN TRANSACTION
 
-	SELECT @intUOMId = um.intUnitMeasureId, @intUnitPerLayer = intUnitPerLayer, @intLayersPerPallet = intLayerPerPallet
+	SELECT @intUOMId = CASE WHEN @intUOMId IS NULL THEN um.intUnitMeasureId ELSE @intUOMId END, @intUnitPerLayer = intUnitPerLayer, @intLayersPerPallet = intLayerPerPallet
 	FROM tblICItem i
 	JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId AND iu.ysnStockUnit =1
@@ -264,7 +264,7 @@ BEGIN TRY
 		BEGIN
 			--Create the container                                      
 			INSERT INTO tblWHContainer (strContainerNo,intConcurrencyId, intContainerTypeId, intStorageLocationId,intCreatedUserId,dtmCreated, intLastModifiedUserId, dtmLastModified)
-			VALUES (@strNewContainerNo, @intContainerTypeId,0, @intDefaultStagingLocationId, @intUserId, GETDATE(), @intUserId, GETDATE())
+			VALUES (@strNewContainerNo, 0,@intContainerTypeId, @intDefaultStagingLocationId, @intUserId, GETDATE(), @intUserId, GETDATE())
 
 			SET @intContainerId = SCOPE_IDENTITY()
 		END

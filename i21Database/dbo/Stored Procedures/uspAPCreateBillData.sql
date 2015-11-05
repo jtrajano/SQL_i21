@@ -8,6 +8,8 @@
 	1 - Bill
 	2 - Prepayment
 	3 - Debit Memo
+	9 - 1099 Adjustment
+	10 - Patronage
 */
 CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@userId INT,

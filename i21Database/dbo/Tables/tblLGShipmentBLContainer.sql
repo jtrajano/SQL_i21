@@ -36,6 +36,11 @@
 [ysnUSDAHold] [bit] NULL,
 [strUSDAComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
 
+[dblUnitCost] NUMERIC(18, 6) NULL,
+[intCostUOMId] [int] NULL,
+[intCurrencyId] [int] NULL,
+[dblTotalCost] NUMERIC(18, 6) NULL,
+
 CONSTRAINT [PK_tblLGShipmentBLContainer] PRIMARY KEY ([intShipmentBLContainerId]), 
 CONSTRAINT [UK_tblLGShipmentBLContainer_intShipmentBLId_strContainerNumber_intUnitMeasureId_strLotNumber] UNIQUE ([intShipmentBLId], [strContainerNumber], [intUnitMeasureId], [strLotNumber]),
 CONSTRAINT [FK_tblLGShipmentBLContainer_tblLGShipmentBL_intShipmentBLId] FOREIGN KEY ([intShipmentBLId]) REFERENCES [tblLGShipmentBL]([intShipmentBLId]) ON DELETE CASCADE,
@@ -43,5 +48,7 @@ CONSTRAINT [FK_tblLGShipmentBLContainer_tblLGShipmentBL_intShipmentBLId] FOREIGN
 CONSTRAINT [FK_tblLGShipmentBLContainer_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 CONSTRAINT [FK_tblLGShipmentBLContainer_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 
-CONSTRAINT [FK_tblLGShipmentBLContainer_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId])
+CONSTRAINT [FK_tblLGShipmentBLContainer_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),
+CONSTRAINT [FK_tblLGShipmentBLContainer_tblICItemUOM_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+CONSTRAINT [FK_tblLGShipmentBLContainer_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )

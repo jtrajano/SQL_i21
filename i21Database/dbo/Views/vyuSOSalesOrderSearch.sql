@@ -36,7 +36,8 @@ ESP.strName AS strSalespersonName,
 SO.strLostQuoteCompetitor,
 SO.strLostQuoteReason,
 SO.strLostQuoteComment,
-SO.ysnRecurring
+SO.ysnRecurring,
+CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + SO.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END AS ysnHasEmailSetup
 FROM         
 dbo.tblSOSalesOrder AS SO LEFT OUTER JOIN
 dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] LEFT OUTER JOIN

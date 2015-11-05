@@ -225,7 +225,7 @@ BEGIN
 			,dblLastCost			= 2.50
 			,dtmExpiryDate			= '01/10/2018'
 			,strLotAlias			= 'Fine grade raw material'
-			,intLotStatusId			= @LOT_STATUS_Active
+			,intLotStatusId			= @LOT_STATUS_Quarantine
 			,dblWeight				= 27557.750000
 			,intWeightUOMId			= @ManualGrains_PoundUOM
 			,dblWeightPerQty		= 55.1155

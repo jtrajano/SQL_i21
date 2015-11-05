@@ -1167,7 +1167,7 @@ BEGIN
 					
 				SET @CFPricingOut = 'Price Profile' 
 			END
-		ELSE
+		ELSE IF(@CFPriceBasis IS NOT NULL)
 			BEGIN
 				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
 										FROM @cfMatchPriceProfile 
@@ -1212,4 +1212,3 @@ SET @CFPriceOut = @CFStandardPrice;
 ---***ITEM PRICING***---
 
 RETURN 1
-

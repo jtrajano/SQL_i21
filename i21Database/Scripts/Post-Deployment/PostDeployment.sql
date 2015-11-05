@@ -187,6 +187,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePOAddressInfo.sql
 :r .\AP\UpdateApprovalRecords.sql
 :r .\AP\UpdateBillStatus.sql
+:r .\AP\RemoveBillTemplate.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
@@ -246,6 +247,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\011_FixEntityLocationNullTerms.sql
 :r .\EM\012_DeleteOldTables.sql
 :r .\EM\013_SetDefaultLocationToActive.sql
+:r .\EM\014_UpdateCustomerPricingLevel.sql
+:r .\EM\015_UpdateEntityTariffType.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

@@ -14,8 +14,8 @@ SELECT TR.intTestResultId
 	,TR.strIsMandatory
 	,CH.strContractNumber
 	,SC.strContainerNumber
-	,L.intLotId
-	,L.strLotNumber
+	,ISNULL(L.intLotId,PL.intParentLotId) AS intLotId
+	,ISNULL(L.strLotNumber,PL.strParentLotNumber) AS strLotNumber
 	,S.strSampleNumber
 	,E.strName
 	,SS.strStatus
@@ -31,6 +31,8 @@ JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblEntity AS E ON E.intEntityId = S.intEntityId
 LEFT JOIN dbo.tblICLot AS L ON L.intLotId = S.intProductValueId
 	AND S.intProductTypeId = 6
+LEFT JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = S.intProductValueId
+	AND S.intProductTypeId = 11
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intProductValueId
 	AND S.intProductTypeId = 8
 LEFT JOIN dbo.tblCTContractHeader AS CH ON CH.intContractHeaderId = CD.intContractHeaderId

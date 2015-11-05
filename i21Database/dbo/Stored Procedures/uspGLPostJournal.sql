@@ -140,9 +140,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
-			--,[dblDebitForeign]			
-			--,[dblCreditForeign]
-			--,[dblForeignRate]
+			,[dblDebitForeign]			
+			,[dblCreditForeign]
+			,[dblDebitReport]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
@@ -175,13 +178,20 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 											WHEN [dblCredit] < 0 THEN 0
 											ELSE [dblCredit] END	
-			--,[dblDebitForeign]		= CASE	WHEN [dblCreditForeign] < 0 THEN ABS([dblCreditForeign])
-		--									WHEN [dblDebitForeign] < 0 THEN 0
-			--								ELSE [dblDebitForeign] END 
-			--,[dblCreditForeign]		= CASE	WHEN [dblDebitForeign] < 0 THEN ABS([dblDebitForeign])
-			--								WHEN [dblCreditForeign] < 0 THEN 0
-			--								ELSE [dblCreditForeign] END
-			--,[dblForeignRate]		= B.dblExchangeRate
+			,[dblDebitForeign]		= CASE	WHEN [dblCreditForeign] < 0 THEN ABS([dblCreditForeign])
+											WHEN [dblDebitForeign] < 0 THEN 0
+											ELSE [dblDebitForeign] END 
+			,[dblCreditForeign]		= CASE	WHEN [dblDebitForeign] < 0 THEN ABS([dblDebitForeign])
+											WHEN [dblCreditForeign] < 0 THEN 0
+											ELSE [dblCreditForeign] END
+			,[dblDebitReport]		= CASE	WHEN [dblCreditReport] < 0 THEN ABS([dblCreditReport])
+											WHEN [dblDebitReport] < 0 THEN 0
+											ELSE [dblDebitReport] END 
+			,[dblCreditReport]		= CASE	WHEN [dblDebitReport] < 0 THEN ABS([dblDebitReport])
+											WHEN [dblCreditReport] < 0 THEN 0
+											ELSE [dblCreditReport] END
+			,[dblReportingRate]		= B.dblExchangeRate
+			,[dblForeignRate]		= B.dblExchangeRate
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
@@ -469,6 +479,8 @@ BEGIN
 				,[dblCreditUnit]
 				,[dblDebitForeign]			
 				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblDebitReport]
 				,[strDescription]
 				,[intConcurrencyId]
 				,[dblUnitsInLBS]
@@ -493,7 +505,9 @@ BEGIN
 				,[dblCreditUnit]
 				,[dblDebitUnit]
 				,[dblCreditForeign]
-				,[dblDebitForeign]			
+				,[dblDebitForeign]	
+				,[dblDebitReport]
+				,[dblCreditReport]
 				,[strDescription]
 				,[intConcurrencyId]
 				,[dblUnitsInLBS]

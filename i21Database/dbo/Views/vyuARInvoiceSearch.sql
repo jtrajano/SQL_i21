@@ -19,6 +19,7 @@ AS
 		I.dtmShipDate,
 		I.ysnPosted, 
 		I.ysnPaid, 
+		I.ysnProcessed, 
 		I.ysnForgiven,
 		I.ysnCalculated,
 		I.dblInvoiceTotal, 
@@ -52,7 +53,8 @@ AS
 		ELS.strZipCode					AS strShipToZipCode,
 		ELS.strCountry					AS strShipToCountry,
 		I.intEntityId					AS intEntredById,
-		EB.strName						AS strEnteredBy
+		EB.strName						AS strEnteredBy,
+		CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END AS ysnHasEmailSetup
 	FROM         
 		dbo.tblARInvoice AS I 
 	INNER JOIN

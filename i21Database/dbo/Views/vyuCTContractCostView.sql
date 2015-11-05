@@ -8,8 +8,10 @@ AS
 			CC.intItemId,
 			CC.intVendorId,
 			CC.strCostMethod,
+			CC.intCurrencyId,
 			CC.dblRate,
 			CC.intItemUOMId,
+			CC.dblFX,
 			CC.ysnAccrue,
 			CC.ysnMTM,
 			CC.ysnPrice ,
@@ -18,12 +20,14 @@ AS
 			EY.strEntityName AS strVendorName,
 			CD.intContractHeaderId,
 			IU.intUnitMeasureId,
-			CD.intContractSeq
+			CD.intContractSeq,
+			CY.strCurrency
 
 	FROM	tblCTContractCost	CC
 	JOIN	tblCTContractDetail CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	JOIN	tblICItem			IM	ON	IM.intItemId			=	CC.intItemId			LEFT
 	JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CC.intItemUOMId			LEFT	
 	JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	IU.intUnitMeasureId		LEFT	
+	JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CC.intCurrencyId		LEFT
 	JOIN	vyuCTEntity			EY	ON	EY.intEntityId			=	CC.intVendorId			AND 
 										EY.strEntityType		=	'Vendor'

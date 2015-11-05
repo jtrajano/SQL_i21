@@ -169,6 +169,7 @@ BEGIN
 			,dblWeight NUMERIC(18,6) NULL 
 			,intWeightUOMId INT NULL 
 			,dblWeightPerQty NUMERIC(18,6) NULL 
+			,strGarden NVARCHAR(100)  COLLATE Latin1_General_CI_AS NOT NULL
 		)
 		
 		CREATE TABLE expected (
@@ -188,6 +189,7 @@ BEGIN
 			,dblWeight NUMERIC(18,6) NULL 
 			,intWeightUOMId INT NULL 
 			,dblWeightPerQty NUMERIC(18,6) NULL 
+			,strGarden NVARCHAR(100)  COLLATE Latin1_General_CI_AS NOT NULL
 		)
 
 		INSERT INTO expected (
@@ -207,6 +209,7 @@ BEGIN
 			,dblWeight
 			,intWeightUOMId
 			,dblWeightPerQty		
+			,strGarden
 		)
 		SELECT 
 			intLotId				= (SELECT COUNT(1) + 1 FROM dbo.tblICLot)
@@ -221,10 +224,11 @@ BEGIN
 			,dblLastCost			= 2.50
 			,dtmExpiryDate			= '01/10/2018'
 			,strLotAlias			= 'Fine grade raw material'
-			,intLotStatusId			= @LOT_STATUS_Active
+			,intLotStatusId			= @LOT_STATUS_Quarantine
 			,dblWeight				= 27557.750000
 			,intWeightUOMId			= @ManualGrains_PoundUOM
 			,dblWeightPerQty		= 55.1155
+			,strGarden				= 'Garden of Grains'
 	END 
 
 	-- Act
@@ -257,6 +261,7 @@ BEGIN
 				,dblWeight
 				,intWeightUOMId
 				,dblWeightPerQty	
+				,strGarden
 		) 
 		SELECT	intLotId
 				,intItemId
@@ -274,6 +279,7 @@ BEGIN
 				,dblWeight
 				,intWeightUOMId
 				,dblWeightPerQty	
+				,strGarden
 		FROM	dbo.tblICLot 
 		WHERE	intLotId = (SELECT MAX(intLotId) FROM dbo.tblICLot) 
 

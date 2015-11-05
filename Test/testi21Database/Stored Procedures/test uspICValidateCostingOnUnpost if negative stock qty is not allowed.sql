@@ -33,24 +33,28 @@ BEGIN
 				,intItemUOMId
 				,dblQty
 				,dblUOMQty
+				,intInventoryTransactionId
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 11 --@BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblQty = -10
 				,dblUOMQty = 1
+				,intInventoryTransactionId = 1
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 1 --@Default_Location
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblQty = -10000
 				,dblUOMQty = 1
+				,intInventoryTransactionId = 2
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 6 --@NewHaven
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblQty = -10000
 				,dblUOMQty = 1
+				,intInventoryTransactionId = 3
 
 
 		-- Use the simple item mock data

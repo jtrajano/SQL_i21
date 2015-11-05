@@ -63,6 +63,9 @@ SELECT
 		CT.strContractNumber,
 		CT.intContractSeq,
 		strPContractNumber = CAST(CT.strContractNumber as VARCHAR(100)) + '/' + CAST(CT.intContractSeq AS VARCHAR(100)),
+		CT.dblCashPrice,
+		CT.dblCashPriceInQtyUOM,
+		CT.strPriceUOM,
 		CT.intItemId,
 		CT.intItemUOMId,
 		CT.strItemNo,
@@ -115,7 +118,7 @@ SELECT
 		SC.dblQuantity as dblContainerContractQty,
 		dblContainerContractGrossWt = (Container.dblGrossWt / Container.dblQuantity) * SC.dblQuantity,
 		dblContainerContractTareWt = (Container.dblTareWt / Container.dblQuantity) * SC.dblQuantity,
-		dbContainerContractlNetWt = (Container.dblNetWt / Container.dblQuantity) * SC.dblQuantity,	
+		dblContainerContractlNetWt = (Container.dblNetWt / Container.dblQuantity) * SC.dblQuantity,	
 		SC.dblReceivedQty as dblContainerContractReceivedQty
 
 FROM tblLGShipmentBLContainerContract SC

@@ -129,6 +129,14 @@ BEGIN
 									AND ISNULL(aglcl_tax_auth_id1,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_auth_id1,'''') COLLATE Latin1_General_CI_AS
 									AND ISNULL(aglcl_tax_auth_id2,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_auth_id2,'''') COLLATE Latin1_General_CI_AS) AS INT)
 				,ysnOriginIntegration = CAST(1 AS BIT)
+				,strFullCustomerName = (CASE WHEN A.agcus_co_per_ind_cp = ''C''   
+										 THEN    RTRIM(A.agcus_last_name) + RTRIM(A.agcus_first_name)
+										 ELSE    
+													CASE WHEN A.agcus_first_name IS NULL OR RTRIM(A.agcus_first_name) = ''''  
+														THEN     RTRIM(A.agcus_last_name) 
+													ELSE     RTRIM(A.agcus_last_name) + '', '' + RTRIM(A.agcus_first_name)   
+													END   
+										 END)COLLATE Latin1_General_CI_AS
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
@@ -244,6 +252,14 @@ BEGIN
 									AND ISNULL(ptlcl_local1_id,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_local1,'''') COLLATE Latin1_General_CI_AS
 									AND ISNULL(ptlcl_local2_id,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_local2,'''') COLLATE Latin1_General_CI_AS) AS INT)
 				,ysnOriginIntegration = CAST(1 AS BIT)
+				,strFullCustomerName = (CASE WHEN A.ptcus_co_per_ind_cp = ''C''   
+										 THEN    RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_first_name) + RTRIM(A.ptcus_mid_init) + RTRIM(A.ptcus_name_suffx)   
+										 ELSE    
+													CASE WHEN A.ptcus_first_name IS NULL OR RTRIM(A.ptcus_first_name) = ''''  
+														THEN     RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_name_suffx)    
+													ELSE     RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_name_suffx) + '', '' + RTRIM(A.ptcus_first_name) + RTRIM(A.ptcus_mid_init)    
+													END   
+										 END)COLLATE Latin1_General_CI_AS
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
@@ -327,6 +343,7 @@ BEGIN
 				,strFullLocation =  ISNULL(Loc.strLocationName ,'''')
 				,intTaxId = CAST(NULL AS INT)
 				,ysnOriginIntegration = CAST(0 AS BIT)
+				,strFullCustomerName = Ent.strName
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId

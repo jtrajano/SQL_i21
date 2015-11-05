@@ -157,6 +157,14 @@ BEGIN
 			,[strModule]			= N'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 78
+			,[strTransactionType]	= N'Parent Lot Number'
+			,[strPrefix]			= N'PLOT-'
+			,[intNumber]			= 1
+			,[strModule]			= N'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1	
 
 	INSERT INTO dbo.tblSMUserSecurity (
 		intEntityUserSecurityId
@@ -193,6 +201,7 @@ BEGIN
 		,dblWeight
 		,intWeightUOMId
 		,dblWeightPerQty
+		,strGarden
 	)
 	SELECT 
 		intLotId				= @ManualLotGrains_Lot_100001
@@ -207,10 +216,11 @@ BEGIN
 		,dblLastCost			= 2.50
 		,dtmExpiryDate			= '01/10/2018'
 		,strLotAlias			= 'Fine grade raw material'
-		,intLotStatusId			= @LOT_STATUS_Active
+		,intLotStatusId			= @LOT_STATUS_Quarantine
 		,dblWeight				= 55115.50
 		,intWeightUOMId			= @ManualGrains_PoundUOM
 		,dblWeightPerQty		= 55.115500
+		,strGarden				= 'Garden of Grains'
 	UNION ALL 
 	SELECT 
 		intLotId				= @ManualLotGrains_Lot_100002
@@ -229,6 +239,7 @@ BEGIN
 		,dblWeight				= NULL 
 		,intWeightUOMId			= NULL 
 		,dblWeightPerQty		= NULL 
+		,strGarden				= ''
 	UNION ALL 
 	SELECT 
 		intLotId				= @ManualLotGrains_Lot_100003
@@ -247,6 +258,7 @@ BEGIN
 		,dblWeight				= 33069.36
 		,intWeightUOMId			= @ManualGrains_PoundUOM
 		,dblWeightPerQty		= 55.115500
+		,strGarden				= ''
 	SET IDENTITY_INSERT tblICLot OFF
 		
 	-- TODO: 

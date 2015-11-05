@@ -129,7 +129,9 @@ BEGIN
 		intLotId INT
 		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 		,intDetailId INT
-		)
+		,intParentLotId INT
+		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	)
 
 	SELECT @strLifeTimeType = strLifeTimeType
 		,@intLifeTime = intLifeTime
@@ -216,8 +218,7 @@ BEGIN
 											@intItemId=@intItemId,
 											@dtmExpiryDate=@dtmExpiryDate,
 											@intLotStatusId=1,
-											@intUserId=@intUserId,
-											@dtmDate=@dtmDate,
+											@intEntityUserSecurityId =@intUserId,
 											@intLotId=@intLotId
 
 	DELETE

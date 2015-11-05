@@ -687,7 +687,6 @@
     <Build Include="dbo\Tables\tblICTag.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
-    <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
@@ -2504,7 +2503,7 @@
     <Build Include="dbo\Tables\tblARImportFile.sql" />
     <Build Include="dbo\Tables\tblARImportLog.sql" />
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARImportInvoiceCSV.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportTransactionsCSV.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodes.sql" />
     <Build Include="dbo\Functions\fnGetTaxMasterIdForCustomer.sql" />
@@ -2580,7 +2579,6 @@
     <Build Include="dbo\Views\vyuGRStorageSearchView.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MBasis.sql" />
     <Build Include="dbo\Views\vyuMFGetMultipleChangeOverFactor.sql" />
-    <Build Include="dbo\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFTransferBlendSheet.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquiry.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquiryTransaction.sql" />
@@ -2590,7 +2588,6 @@
     <Build Include="dbo\Stored Procedures\uspWHLoadTask.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateSplitAndPickTask.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreatePickTask.sql" />
-    <Build Include="dbo\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdateParentLotNumber.sql" />
     <Build Include="dbo\Tables\tblLGShipmentCertificates.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateOnStoreInventory.sql" />
@@ -2781,6 +2778,52 @@
     <Build Include="dbo\Stored Procedures\uspAPGetVendorApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVendorContact.sql" />
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCalculateStorageCharge.sql" />
+    <Build Include="dbo\Functions\fnAPGet1099PrintStatus.sql" />
+    <Build Include="dbo\Views\vyuARProvisionalInvoiceDocument.sql" />
+    <Build Include="dbo\Views\vyuARProvisionalInvoiceDocumentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentSalesReport.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentBLContainerContractCost.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentBLContainerCost.sql" />
+    <Build Include="dbo\Views\vyuCTItemContractView.sql" />
+    <Build Include="dbo\Functions\fnGetCompanyLogo.sql" />
+    <Build Include="dbo\Tables\tblPATDividends.sql" />
+    <Build Include="dbo\Tables\tblPATDividendsCustomer.sql" />
+    <Build Include="dbo\Tables\tblPATDividendsStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportItemPlan.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFInventoryAdjustment_CreatePostLotItemChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessProvisionalInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportItemPlanSummary.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockSummary.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockSummaryByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHReceiveOrder.sql" />
+    <Build Include="dbo\Functions\fnCTGetCurrencyExchangeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomerPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKHedgeCustomerPositionDetail.sql" />
+    <Build Include="dbo\Functions\fnICCheckAllowPurchase.sql" />
+    <Build Include="dbo\Functions\fnICCheckAllowSale.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetBudgetLetter.sql" />
+    <Build Include="dbo\Tables\tblEntityTariffType.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetDividends.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateProvisionalOnStandardInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateScaleDeviceInterface.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFConsumeSKU.sql" />
+    <Build Include="dbo\Views\vyuMFGetProductionOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomerPositionInquiryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetParentLotQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetParentLotQualityCount.sql" />
+    <Build Include="dbo\Tables\tblWHContainerInboundOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStagedContainer.sql" />
+    <Build Include="dbo\Tables\tblWHPickPreference.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerBudget.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
+    <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetEquityRefundDetails.sql" />
+    <Build Include="dbo\Views\vyuETCustomer.sql" />
+    <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
+    <Build Include="dbo\Views\vyuARShipmentItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2845,6 +2888,10 @@
     <None Include="Scripts\Post-Deployment\EM\013_SetDefaultLocationToActive.sql" />
     <None Include="Scripts\Post-Deployment\AP\CreateVoucherPayable.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099.sql" />
+    <None Include="Scripts\Post-Deployment\EM\014_UpdateCustomerPricingLevel.sql" />
+    <None Include="Scripts\Post-Deployment\EM\015_UpdateEntityTariffType.sql" />
+    <None Include="Scripts\Post-Deployment\AP\RemoveBillTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DataFixes\ResetEaningHoursToProcess.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

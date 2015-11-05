@@ -4,6 +4,7 @@ AS
 
 SELECT 
 	A.strBillId,
+	A.intTransactionType,
 	G2.strName,
 	A.strVendorOrderNumber,
 	A.intBillId,
@@ -11,9 +12,9 @@ SELECT
 	A.intEntityVendorId,
 	C.strItemNo,
 	B.dblCost,
-	B.dblQtyOrdered,
-	B.dblQtyReceived,
-	B.dblTotal,
+	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN B.dblQtyOrdered * -1 ELSE B.dblQtyOrdered END AS dblQtyOrdered,
+	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END AS dblQtyReceived,
+	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN B.dblTotal * -1 ELSE B.dblTotal END AS dblTotal,
 	B.dblTax,
 	B.strMiscDescription,
 	C.strDescription AS strItemDescription,

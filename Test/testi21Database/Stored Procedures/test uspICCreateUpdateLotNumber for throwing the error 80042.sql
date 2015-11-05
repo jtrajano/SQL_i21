@@ -56,6 +56,14 @@ AS
 --				,[strModule]			= N'Posting'
 --				,[ysnEnable]			= 1
 --				,[intConcurrencyId]		= 1
+	--UNION ALL
+	--SELECT	[intStartingNumberId]	= 78
+	--		,[strTransactionType]	= N'Parent Lot Number'
+	--		,[strPrefix]			= N'PLOT-'
+	--		,[intNumber]			= 1
+	--		,[strModule]			= N'Manufacturing'
+	--		,[ysnEnable]			= 1
+	--		,[intConcurrencyId]		= 1	
 
 --		DECLARE @Items AS ItemLotTableType
 --		DECLARE @intUserId AS INT 

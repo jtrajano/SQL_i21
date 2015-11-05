@@ -11,9 +11,14 @@ SELECT	CD.intContractDetailId,
 		PD.dblQuantityPriceFixed,
 		PD.dblPFQuantityUOMId,
 		PF.intTotalLots,
-		PF.intLotsFixed
+		PF.intLotsFixed,
+		IC.strContractItemName,
+		WU.strUnitMeasure strNetWeightUOM
 		
-FROM	tblCTContractDetail CD	LEFT
+FROM	tblCTContractDetail CD	
+JOIN	tblICItemContract	IC	ON	IC.intItemContractId	=	CD.intItemContractId	LEFT
+JOIN	tblICItemUOM		WM	ON	WM.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
+JOIN	tblICUnitMeasure	WU	ON	WU.intUnitMeasureId		=	WM.intUnitMeasureId		LEFT		
 JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId	=	PF.intContractDetailId	LEFT
 JOIN	(
 			SELECT	 intPriceFixationId,

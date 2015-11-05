@@ -118,6 +118,7 @@ BEGIN TRY
 		,I.strItemNo
 		,I.strDescription
 		,I.strShortName
+		,S.strShiftName 
 		,S.intShiftSequence
 		,SL.strName
 		,CASE 
@@ -136,7 +137,7 @@ BEGIN TRY
 		,@strPropertyName4 AS strPropertyName4
 		,@strPropertyValue4 AS strPropertyValue4
 	FROM dbo.tblICLot AS L
-	JOIN dbo.tblSMUserSecurity US ON L.intCreatedUserId = US.intEntityUserSecurityId
+	JOIN dbo.tblSMUserSecurity US ON L.intCreatedEntityId = US.intEntityUserSecurityId
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblMFWorkOrderProducedLot AS WP ON L.intLotId = WP.intLotId
 	LEFT JOIN dbo.tblMFShift S ON WP.intShiftId = S.intShiftId

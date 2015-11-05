@@ -147,7 +147,7 @@ BEGIN
 				,[intEntityVendorId]		INT
 				,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,[intVendorLocationId]		INT
-				,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,[strGarden]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 				,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,[dtmManufacturedDate]		DATETIME
 				,[ysnReleasedToWarehouse]	BIT
@@ -238,8 +238,7 @@ BEGIN
 				,[strNotes]					
 				,[intEntityVendorId]		
 				,[strVendorLotNo]			
-				,[intVendorLocationId]		
-				,[strVendorLocation]		
+				,[strGarden]		
 				,[strContractNo]			
 				,[dtmManufacturedDate]		
 				,[ysnReleasedToWarehouse]	
@@ -278,8 +277,7 @@ BEGIN
 				,[strNotes]					
 				,[intEntityVendorId]		
 				,[strVendorLotNo]			
-				,[intVendorLocationId]		
-				,[strVendorLocation]		
+				,[strGarden]		
 				,[strContractNo]			
 				,[dtmManufacturedDate]		
 				,[ysnReleasedToWarehouse]	
@@ -335,8 +333,7 @@ BEGIN
 				,[strNotes]					
 				,[intEntityVendorId]		
 				,[strVendorLotNo]			
-				,[intVendorLocationId]		
-				,[strVendorLocation]		
+				,[strGarden]		
 				,[strContractNo]			
 				,[dtmManufacturedDate]		
 				,[ysnReleasedToWarehouse]	
@@ -376,8 +373,7 @@ BEGIN
 				,[strNotes]					
 				,[intEntityVendorId]		
 				,[strVendorLotNo]			
-				,[intVendorLocationId]		
-				,[strVendorLocation]		
+				,[strGarden]		
 				,[strContractNo]			
 				,[dtmManufacturedDate]		
 				,[ysnReleasedToWarehouse]	
@@ -387,7 +383,7 @@ BEGIN
 				,[intGradeId]				
 				,[dtmDateCreated]			
 				,[intCreatedEntityId]		
-				,[intConcurrencyId]	
+				,[intConcurrencyId]		
 		FROM	dbo.tblICLot
 	END 
 

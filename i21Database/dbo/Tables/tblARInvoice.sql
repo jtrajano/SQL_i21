@@ -44,6 +44,7 @@
     [strBillToCountry]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,	
     [ysnPosted]					BIT             								NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)),
     [ysnPaid]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPaid] DEFAULT ((0)),
+	[ysnProcessed]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnProcessed] DEFAULT ((0)),
 	[ysnTemplate]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnTemplate] DEFAULT ((0)),
 	[ysnForgiven]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnForgiven] DEFAULT ((0)),
 	[ysnCalculated]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCalculated] DEFAULT ((0)),
@@ -54,6 +55,7 @@
 	[strActualCostId]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[intShipmentId]				INT												NULL,        	
 	[intTransactionId]			INT												NULL,        	
+	[intOriginalInvoiceId]		INT												NULL,        	
 	[intEntityId]				INT												NOT NULL	DEFAULT ((0)), 
 	[intConcurrencyId]			INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
@@ -96,26 +98,27 @@ ON dbo.tblARInvoice
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25))
+DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100))
 DECLARE @count INT = 0
 DECLARE @intInvoiceId INT
 DECLARE @InvoiceNumber NVARCHAR(50)
 DECLARE @strTransactionType NVARCHAR(25)
+DECLARE @strType NVARCHAR(100)
 DECLARE @intMaxCount INT = 0
 DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId, strTransactionType FROM INSERTED ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType FROM INSERTED ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SET @intStartingNumberId = 19
 	
-	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType FROM @inserted
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType FROM @inserted
 
 	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Prepayment' THEN 64 
 									WHEN @strTransactionType = 'Overpayment' THEN 65
-									WHEN @strTransactionType = 'Provisional Invoice' THEN 81
+									WHEN @strType = 'Provisional Invoice' THEN 81
 									ELSE 19 END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT	

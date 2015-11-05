@@ -3,6 +3,7 @@ AS
 SELECT S.intSampleId
 	,S.strSampleNumber
 	,ST.strSampleTypeName
+	,S.intContractHeaderId
 	,CH.strContractNumber
 	,IC.strContractItemName
 	,I.strItemNo

@@ -191,7 +191,7 @@ BEGIN TRY
 						WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 						END
 
-						EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
+						EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
 					END
 				IF(@dblRemainingUnits > 0)
 				BEGIN
@@ -505,7 +505,7 @@ BEGIN TRY
 	           ,[ysnPrinted]
 	           ,[dblCurrencyRate]
 			   ,[intCurrencyId]
-			   ,[intStorageTicketNumber]
+			   ,[strStorageTicketNumber]
 			   ,[intItemId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
@@ -523,7 +523,7 @@ BEGIN TRY
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
 			,[dtmLastStorageAccrueDate]= NULL 
-			,[dblStorageDue]= NULL 
+			,[dblStorageDue]= 0 
 			,[dblStoragePaid]= 0
 			,[dblInsuranceRate]= 0 
 			,[strOriginState]= NULL 
@@ -736,7 +736,7 @@ BEGIN TRY
 		FROM	dbo.tblICInventoryShipment ship	        
 		WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 		END
-		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
+		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
 	END
 
 	END

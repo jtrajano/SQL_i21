@@ -37,7 +37,10 @@ SELECT ReceiptItemLot.intInventoryReceiptItemLotId
 	, ReceiptItemLot.strCondition
 	, ReceiptItemLot.dtmCertified
 	, ReceiptItemLot.dtmExpiryDate
-	, ReceiptItemLot.intSort
+	, ReceiptItemLot.intSort		
+	, ReceiptItemLot.intParentLotId
+	, ReceiptItemLot.strParentLotNumber
+	, ReceiptItemLot.strParentLotAlias
 FROM tblICInventoryReceiptItemLot ReceiptItemLot
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ReceiptItemLot.intSubLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ReceiptItemLot.intStorageLocationId

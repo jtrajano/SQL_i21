@@ -5,7 +5,7 @@ SELECT
 	 ,a.intCompanyLocationId	
 	,c.strLocationName [Loc]
 	,a.dtmDeliveryDate [Delivery Date]
-	,a.intStorageTicketNumber [Ticket]
+	,a.strStorageTicketNumber [Ticket]
 	,a.intEntityId
 	,E.strName [Customer]
 	,a.strDPARecieptNumber [Receipt]

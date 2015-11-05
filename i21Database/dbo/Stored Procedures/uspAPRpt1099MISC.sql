@@ -49,6 +49,14 @@ SET ANSI_WARNINGS OFF
 --			<join>And</join>
 --			<datatype>Boolean</datatype>
 --		</filter>
+--		<filter>
+--			<fieldname>reprint</fieldname>
+--			<condition>Equal To</condition>
+--			<from>0</from>
+--			<to />
+--			<join>And</join>
+--			<datatype>Boolean</datatype>
+--		</filter>
 --	</filters>
 --	<options />
 --</xmlparam>'
@@ -57,6 +65,7 @@ DECLARE @vendorFromParam NVARCHAR(100) = NULL;
 DECLARE @vendorToParam NVARCHAR(100) = NULL;
 DECLARE @yearParam INT = YEAR(GETDATE());
 DECLARE @correctedParam BIT = 0;
+DECLARE @reprint BIT = 0;
 DECLARE @query NVARCHAR(MAX);
 DECLARE @xmlDocumentId AS INT;
 
@@ -64,7 +73,7 @@ DECLARE @xmlDocumentId AS INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT *, @correctedParam AS ysnCorrected FROM vyuAP1099MISC WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT *, NULL AS strCorrected FROM vyuAP1099MISC WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 -- Create a table variable to hold the XML data. 		
@@ -109,7 +118,11 @@ BEGIN
 	FROM @temp_xml_table WHERE [fieldname] = 'year'
 
 	SELECT 
-		@correctedParam = [from]
+		@reprint = [from]
+	FROM @temp_xml_table WHERE [fieldname] = 'reprint'
+
+	SELECT 
+		@correctedParam = CAST([from] AS BIT)
 	FROM @temp_xml_table WHERE [fieldname] = 'corrected'
 END
 
@@ -119,13 +132,24 @@ END
 --SET @correctedParam = @corrected;
 
 SELECT 
-* ,
-@correctedParam AS ysnCorrected
-FROM vyuAP1099MISC
+A.* ,
+(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
+FROM vyuAP1099MISC A
+OUTER APPLY 
+(
+	SELECT TOP 1 * FROM tblAP1099History B
+	WHERE A.intYear = B.intYear AND B.int1099Form = 1
+	AND B.intEntityVendorId = A.intEntityVendorId
+	ORDER BY B.dtmDatePrinted DESC
+) History
 WHERE 1 = (CASE WHEN @vendorFromParam IS NOT NULL THEN
-				(CASE WHEN strVendorId BETWEEN @vendorFromParam AND @vendorToParam THEN 1 ELSE 0 END)
+				(CASE WHEN A.strVendorId BETWEEN @vendorFromParam AND @vendorToParam THEN 1 ELSE 0 END)
 			ELSE 1 END)
-AND intYear = @yearParam
+AND A.intYear = @yearParam
+AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
+			WHEN History.ysnPrinted IS NULL THEN 1
+			WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
+			ELSE 0 END)
 
 
 

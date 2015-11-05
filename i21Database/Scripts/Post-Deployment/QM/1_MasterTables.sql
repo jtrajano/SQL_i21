@@ -543,3 +543,15 @@ BEGIN
 	SELECT 3
 END
 GO
+
+GO
+UPDATE tblQMCompanyPreference
+SET ysnEnableParentLot = 0
+WHERE ysnEnableParentLot IS NULL
+GO
+
+GO
+UPDATE tblQMCompanyPreference
+SET ysnIsSamplePrintEnable = 0
+WHERE ysnIsSamplePrintEnable IS NULL
+GO

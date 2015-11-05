@@ -20,9 +20,11 @@ BEGIN TRY
 		,@strProducedQuantity NVARCHAR(50)
 		,@dblOutputQtyTolerancePercentage NUMERIC(18, 6)
 		,@dblCalculatedInputLotToleranceQty NUMERIC(18, 6)
+		,@strCalculatedInputLotToleranceQty nvarchar(50)
 		,@intUnitMeasureId INT
 		,@strUnitMeasure NVARCHAR(50)
 		,@intTransactionCount INT
+		
 	DECLARE @tblMFWorkOrderConsumedLot TABLE (
 		intRecordId INT identity(1, 1)
 		,intLotId INT
@@ -91,7 +93,7 @@ BEGIN TRY
 
 		SELECT @dblProducedQuantity = SUM(dblQuantity)
 		FROM dbo.tblMFWorkOrderProducedLot
-		WHERE intBatchId = @intBatchId
+		WHERE intWorkOrderId=@intWorkOrderId AND intInputLotId = @intLotId
 
 		IF @dblProducedQuantity IS NULL
 			SELECT @dblProducedQuantity = 0
@@ -113,6 +115,7 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 
 			SELECT @strProducedQuantity = @dblProducedQuantity
+			SELECT @strCalculatedInputLotToleranceQty = @dblCalculatedInputLotToleranceQty
 
 			RAISERROR (
 					90004
@@ -120,7 +123,7 @@ BEGIN TRY
 					,1
 					,@strProducedQuantity
 					,@strUnitMeasure
-					,@dblCalculatedInputLotToleranceQty
+					,@strCalculatedInputLotToleranceQty
 					,@strUnitMeasure
 					,@strLotNumber
 					)

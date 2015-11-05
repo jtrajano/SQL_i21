@@ -14,6 +14,8 @@ SELECT
 	,strContractNumber
 	,intCommodityId
 	,intItemId
+	,intLifeTime
+	,strLifeTimeType
 	,intItemUOMId
 	,intSubLocationId
 	,intLocationId
@@ -66,6 +68,8 @@ SELECT
 	,strContractNumber
 	,intCommodityId
 	,intItemId
+	,intLifeTime
+	,strLifeTimeType
 	,intItemUOMId
 	,intSubLocationId
 	,intLocationId

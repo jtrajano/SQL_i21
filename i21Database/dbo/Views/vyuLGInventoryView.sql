@@ -10,6 +10,7 @@ SELECT
 	,Shipment.strItemUOM as strStockUOM
 	,Shipment.dblContainerContractGrossWt - Shipment.dblContainerContractTareWt as dblNetWeight
 	,Shipment.strWeightUOM
+	,Shipment.intVendorEntityId
 	,Shipment.strVendor
 	,Shipment.strItemNo
 	,Shipment.strItemDescription
@@ -35,6 +36,7 @@ SELECT
 	,Spot.strItemUOM as strStockUOM
 	,Spot.dblNetWeight
 	,Spot.strWeightUOM
+	,Spot.intEntityVendorId
 	,Spot.strVendor
 	,Spot.strItemNo
 	,Spot.strItemDescription

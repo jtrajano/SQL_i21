@@ -62,4 +62,11 @@ GO
 		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
 		VALUES('System Manager', 'Delete Taxable By Other Taxes - Tax Class', 'Delete Taxable By Other Taxes - Tax Class', GETDATE())
 	END
+
+GO
+
+	/* MAKE NULL ALL ZERO VALUES TO NULL FOR intDefaultBlendProductionLocationId  AND intDefaultInboundDockDoorUnitId  IN tblSMCompanyLocation */
+	UPDATE tblSMCompanyLocation SET intDefaultBlendProductionLocationId = NULL WHERE intDefaultBlendProductionLocationId = 0
+	UPDATE tblSMCompanyLocation SET intDefaultInboundDockDoorUnitId = NULL WHERE intDefaultInboundDockDoorUnitId = 0
+
 GO
