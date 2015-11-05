@@ -92,12 +92,17 @@ BEGIN TRY
 			
 		SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityUserSecurityId] = @UserKey
 		
-		--Suppose Storage Charge is accrued for a Particular date and User is again trying to Accure Storage Charge past to the Paricular Date then error.
+		--Suppose Storage Charge is accrued for a Particular date and User is again trying to Accure Storage Charge past to the Paricular Date then return zero.
 		
 		IF EXISTS(SELECT 1 FROM tblGRCustomerStorage Where intCustomerStorageId = @intCustomerStorageId AND dtmLastStorageAccrueDate IS NOT NULL AND (dtmLastStorageAccrueDate >@StorageChargeDate)) OR (@StorageChargeDate < @dtmDeliveryDate)
 		BEGIN
 			SET @dblStorageDuePerUnit =0
 			SET @dblStorageDueAmount=0
+			SET @StorageChargeCalculationRequired=0
+		END
+
+		IF @strProcessType='Unpaid'
+		BEGIN
 			SET @StorageChargeCalculationRequired=0
 		END
 		
@@ -143,13 +148,16 @@ BEGIN TRY
 		---Updating Last Storage AccrueDate, Storage Due Field and Creating History.
 		IF @StorageChargeCalculationRequired=1
 		BEGIN 	
-			Update tblGRCustomerStorage SET dtmLastStorageAccrueDate=@StorageChargeDate 
-			Where intCustomerStorageId=@intCustomerStorageId
 			
 			IF @strProcessType='accrue' OR @strProcessType='Bill'
 			BEGIN
+
+				Update tblGRCustomerStorage SET dtmLastStorageAccrueDate=@StorageChargeDate 
+				Where intCustomerStorageId=@intCustomerStorageId
+			
 				Update tblGRCustomerStorage SET dblStorageDue=dblStorageDue+ @dblStorageDuePerUnit
 				Where intCustomerStorageId=@intCustomerStorageId
+
 			END		
 			
 			INSERT INTO [dbo].[tblGRStorageHistory] 
@@ -192,58 +200,66 @@ BEGIN TRY
 						  )	
 	END	
 
-	IF @strProcessType='Bill'
-	BEGIN
+		IF @strProcessType='Bill'
+		BEGIN
 
-		Update tblGRCustomerStorage SET dblStoragePaid=dblStorageDue Where intCustomerStorageId=@intCustomerStorageId
+			Update tblGRCustomerStorage SET dblStoragePaid=dblStorageDue Where intCustomerStorageId=@intCustomerStorageId
 
-		SELECT @dblNewStoragePaid=dblStoragePaid FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+			SELECT @dblNewStoragePaid=dblStoragePaid FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
-					(
-						[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intTicketId]
-					,[intInventoryReceiptId]
-					,[intInvoiceId]
-					,[intContractDetailId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strPaidDescription]
-					,[dblCurrencyRate]
-					,[strType]
-					,[strUserName]
-					,[intTransactionTypeId]
-					,[intEntityId]
-					,[intCompanyLocationId]	
-					)
-				VALUES 
-					(
-						1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,@StorageChargeDate
-					,(@dblNewStoragePaid-@dblOldStoragePaid)
-					,NULL
-					,NULL
-					,'Storage Paid'
-					,@UserName
-					,NULL
-					,NULL
-					,NULL
-					)				
-	END
+			INSERT INTO [dbo].[tblGRStorageHistory] 
+						(
+							[intConcurrencyId]
+						,[intCustomerStorageId]
+						,[intTicketId]
+						,[intInventoryReceiptId]
+						,[intInvoiceId]
+						,[intContractDetailId]
+						,[dblUnits]
+						,[dtmHistoryDate]
+						,[dblPaidAmount]
+						,[strPaidDescription]
+						,[dblCurrencyRate]
+						,[strType]
+						,[strUserName]
+						,[intTransactionTypeId]
+						,[intEntityId]
+						,[intCompanyLocationId]	
+						)
+					VALUES 
+						(
+							1
+						,@intCustomerStorageId
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,@StorageChargeDate
+						,(@dblNewStoragePaid-@dblOldStoragePaid)
+						,NULL
+						,NULL
+						,'Storage Paid'
+						,@UserName
+						,NULL
+						,NULL
+						,NULL
+						)				
+		END
 	  
 	    			  			
 		SELECT @dblStorageDueTotalPerUnit=dblStorageDue-dblStoragePaid
 				,@dblStorageBilledPerUnit=dblStoragePaid-@dblOldStoragePaid 
 				FROM tblGRCustomerStorage
 				Where intCustomerStorageId=@intCustomerStorageId
+				
+		IF @strProcessType='Unpaid'
+		BEGIN
+			SET @dblStorageDuePerUnit=@dblStorageDueTotalPerUnit				
+			SET @dblStorageDueAmount= @dblStorageDuePerUnit*@dblOpenBalance
+		END
+		
+		
 				
 		SELECT @dblStorageDueTotalAmount=@dblStorageDueTotalPerUnit * @dblOpenBalance
 		SELECT @dblStorageBilledAmount=@dblStorageBilledPerUnit * @dblOpenBalance
