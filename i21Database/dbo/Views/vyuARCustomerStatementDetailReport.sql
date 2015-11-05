@@ -12,6 +12,7 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 						THEN CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
 						ELSE 0
 					END
+	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
 	 , IC.strDescription
 	 , IC.strItemNo
 	 , ID.dblQtyOrdered
