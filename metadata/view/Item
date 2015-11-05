@@ -8578,7 +8578,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 1,
                                                 "itemId": "colPricingLocation",
                                                 "text": "Location",
                                                 "width": 120
@@ -8652,7 +8652,8 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 0.8,
+                                                "format": "0,000.000000",
                                                 "itemId": "colPricingLastCost",
                                                 "text": "Last Cost",
                                                 "width": 80
@@ -8685,7 +8686,8 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 0.8,
+                                                "format": "0,000.000000",
                                                 "itemId": "colPricingStandardCost",
                                                 "text": "Standard Cost",
                                                 "width": 120
@@ -8718,7 +8720,8 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 0.8,
+                                                "format": "0,000.000000",
                                                 "itemId": "colPricingAverageCost",
                                                 "text": "Average Cost",
                                                 "width": 90
@@ -8752,6 +8755,7 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "hidden": true,
                                                 "itemId": "colPricingEOMCost",
                                                 "text": "EOM Cost",
                                                 "width": 85
@@ -8783,7 +8787,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 1,
                                                 "itemId": "colPricingMethod",
                                                 "text": "Pricing Method",
                                                 "width": 120
@@ -8818,7 +8822,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 0.8,
                                                 "itemId": "colPricingAmount",
                                                 "text": "Amount/Percent",
                                                 "width": 110
@@ -8851,7 +8855,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 0.8,
                                                 "itemId": "colPricingRetailPrice",
                                                 "text": "Retail Price",
                                                 "width": 80
@@ -8884,7 +8888,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 0.8,
                                                 "itemId": "colPricingMSRP",
                                                 "text": "MSRP",
                                                 "width": 80

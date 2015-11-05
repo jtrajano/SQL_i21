@@ -3979,6 +3979,7 @@ Ext.define('Inventory.view.Item', {
                                                         width: 120,
                                                         dataIndex: 'string',
                                                         text: 'Location',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -4019,6 +4020,8 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Last Cost',
+                                                        flex: 0.8,
+                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
@@ -4030,6 +4033,8 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Standard Cost',
+                                                        flex: 0.8,
+                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
@@ -4041,12 +4046,15 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Average Cost',
+                                                        flex: 0.8,
+                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        hidden: true,
                                                         itemId: 'colPricingEOMCost',
                                                         width: 85,
                                                         align: 'right',
@@ -4062,6 +4070,7 @@ Ext.define('Inventory.view.Item', {
                                                         width: 120,
                                                         dataIndex: 'string',
                                                         text: 'Pricing Method',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'combobox',
                                                             itemId: 'cboPricingMethod',
@@ -4076,6 +4085,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Amount/Percent',
+                                                        flex: 0.8,
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
@@ -4087,6 +4097,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Retail Price',
+                                                        flex: 0.8,
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
@@ -4098,6 +4109,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'MSRP',
+                                                        flex: 0.8,
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
