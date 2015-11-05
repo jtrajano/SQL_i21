@@ -181,14 +181,17 @@ BEGIN
 	WHERE	Header.intInventoryCountId = @intTransactionId
 			AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
 	
+
+
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
-	-----------------------------------------
-	-- Generate the Costing
-	-----------------------------------------
+	
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust)
 	BEGIN 
+		-----------------------------------------
+		-- Generate the Costing
+		-----------------------------------------
 		EXEC	@intReturnValue = dbo.uspICPostCosting  
 				@ItemsForAdjust  
 				,@strBatchId  
@@ -197,43 +200,43 @@ BEGIN
 				,@strCountDescription
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+		-----------------------------------------
+		-- Generate a new set of g/l entries
+		-----------------------------------------
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+		)
+		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
+			@strBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intEntityUserSecurityId
+			,@strCountDescription
 	END				
-				
-	-----------------------------------------
-	-- Generate a new set of g/l entries
-	-----------------------------------------
-	INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-	)
-	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
-		@strBatchId
-		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@intEntityUserSecurityId
-		,@strCountDescription
 
 	IF @intReturnValue < 0 GOTO With_Rollback_Exit
 END   
