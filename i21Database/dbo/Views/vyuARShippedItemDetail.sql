@@ -13,7 +13,7 @@ SELECT
 	,[strContractNumber]					= CTCD.[strContractNumber] 
 	,[intContractDetailId]					= CTCD.[intContractDetailId] 
 	,[intContractSeq]						= CTCD.[intContractSeq] 
-	,[intItemId]							= CTCD.[intItemId]
+	,[intItemId]							= LGSPS.[intPItemId]
 	,[strItemNo]							= ICI.[strItemNo]
 	,[strItemDescription]					= ICI.[strDescription]
 	,[intItemUOMId]							= CTCD.[intItemUOMId]
@@ -45,7 +45,7 @@ INNER JOIN
 		ON LGSPS.intSContractDetailId = CTCD.intContractDetailId
 INNER JOIN
 	tblICItem ICI
-		ON CTCD.[intItemId] = ICI.[intItemId]
+		ON LGSPS.[intPItemId] = ICI.[intItemId]
 LEFT JOIN
 	tblICItemUOM ICIU
 		ON CTCD.[intItemUOMId] = ICIU.[intItemUOMId]
@@ -54,7 +54,7 @@ LEFT JOIN
 		ON ICUM.[intUnitMeasureId] = ICIU.[intUnitMeasureId]			
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
-		ON CTCD.[intItemId] = ARIA.[intItemId]
+		ON LGSPS.[intPItemId] = ARIA.[intItemId]
 		AND CTCD.[intCompanyLocationId] = ARIA.[intLocationId]
 LEFT OUTER JOIN
 	tblSMTerm SMT

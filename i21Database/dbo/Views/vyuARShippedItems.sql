@@ -586,4 +586,4 @@ LEFT OUTER JOIN
 WHERE
 	ARI.[intInvoiceId] IS NULL
 	AND LGS.[intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails)
-	--AND LGS.[ysnInventorized] = 1
+	AND LGS.[ysnInventorized] = 1
