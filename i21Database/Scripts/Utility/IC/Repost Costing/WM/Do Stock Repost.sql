@@ -14,11 +14,13 @@ GO
 DELETE FROM tblICInventoryLotOut
 DELETE FROM tblICInventoryFIFOOut
 DELETE FROM tblICInventoryLIFOOut
+DELETE FROM tblICInventoryActualCostOut
 
 -- Clearing the cost bucket tables. 
 DELETE FROM tblICInventoryLot
 DELETE FROM tblICInventoryFIFO
 DELETE FROM tblICInventoryLIFO
+DELETE FROM tblICInventoryActualCost
 
 -- Clear the G/L entries 
 DELETE	GLDetail
@@ -85,7 +87,8 @@ BEGIN
 				,@strTransactionForm = strTransactionForm
 				,@strTransactionId = strTransactionId
 		FROM	#tmpICInventoryTransaction
-		ORDER BY intInventoryTransactionId ASC 
+		ORDER BY dtmDate ASC 
+		-- ORDER BY intInventoryTransactionId ASC 
 
 		PRINT 'PROCESSING ' + @strBatchId
 
@@ -130,7 +133,8 @@ BEGIN
 					,intTransactionTypeId  
 					,intLotId 
 					,intSubLocationId
-					,intStorageLocationId		
+					,intStorageLocationId
+					,strActualCostId
 			)
 			SELECT 	intItemId  
 					,intItemLocationId 
@@ -149,6 +153,7 @@ BEGIN
 					,intLotId 
 					,intSubLocationId
 					,intStorageLocationId
+					,strActualCostId = NULL 
 			FROM	#tmpICInventoryTransaction
 			WHERE	strBatchId = @strBatchId
 					AND strTransactionForm = 'Consume'
@@ -180,6 +185,7 @@ BEGIN
 					,intLotId 
 					,intSubLocationId
 					,intStorageLocationId		
+					,strActualCostId
 			)
 			SELECT 	intItemId  
 					,intItemLocationId 
@@ -200,6 +206,7 @@ BEGIN
 					,intLotId 
 					,intSubLocationId
 					,intStorageLocationId
+					,strActualCostId = NULL 
 			FROM	#tmpICInventoryTransaction
 			WHERE	strBatchId = @strBatchId
 					AND strTransactionForm = 'Produce'
@@ -230,45 +237,49 @@ BEGIN
 					,intTransactionTypeId  
 					,intLotId 
 					,intSubLocationId
-					,intStorageLocationId		
+					,intStorageLocationId	
+					,strActualCostId 	
 			)
-			SELECT 	intItemId  
-					,intItemLocationId 
-					,intItemUOMId  
-					,dtmDate  
-					,dblQty  
-					,dblUOMQty  
+			SELECT 	RebuilInvTrans.intItemId  
+					,RebuilInvTrans.intItemLocationId 
+					,RebuilInvTrans.intItemUOMId  
+					,RebuilInvTrans.dtmDate  
+					,RebuilInvTrans.dblQty  
+					,RebuilInvTrans.dblUOMQty  
 					,dblCost  = CASE WHEN dblQty < 0 THEN 
-										(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId) * dblUOMQty  
-									 WHEN dblQty > 0 AND strTransactionId LIKE 'ADJ%' THEN 
-										(	
-											SELECT	TOP 1 
-													CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN ItemPricing.dblLastCost 
-															ELSE Lot.dblLastCost 
-													END 
-											FROM	tblICItem Item LEFT JOIN dbo.tblICItemPricing ItemPricing
-														ON Item.intItemId = ItemPricing.intItemId
-														AND ItemPricing.intItemLocationId = #tmpICInventoryTransaction.intItemLocationId
-													LEFT JOIN dbo.tblICLot Lot
-														ON Lot.intItemId = Item.intItemId 
-														AND Lot.intLotId = #tmpICInventoryTransaction.intLotId
-														AND Lot.intItemLocationId = #tmpICInventoryTransaction.intItemLocationId
-											WHERE	Item.intItemId = #tmpICInventoryTransaction.intItemId
-										) * dblUOMQty  
+										(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId) * dblUOMQty  
+									 --WHEN dblQty > 0 AND strTransactionId LIKE 'ADJ%' THEN 
+										--(	
+										--	SELECT	TOP 1 
+										--			CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN ItemPricing.dblLastCost 
+										--					ELSE Lot.dblLastCost 
+										--			END 
+										--	FROM	tblICItem Item LEFT JOIN dbo.tblICItemPricing ItemPricing
+										--				ON Item.intItemId = ItemPricing.intItemId
+										--				AND ItemPricing.intItemLocationId = RebuilInvTrans.intItemLocationId
+										--			LEFT JOIN dbo.tblICLot Lot
+										--				ON Lot.intItemId = Item.intItemId 
+										--				AND Lot.intLotId = RebuilInvTrans.intLotId
+										--				AND Lot.intItemLocationId = RebuilInvTrans.intItemLocationId
+										--	WHERE	Item.intItemId = RebuilInvTrans.intItemId
+										--) * RebuilInvTrans.dblUOMQty  
 									 ELSE 
-										dblCost
+										RebuilInvTrans.dblCost
 								END 
-					,dblSalesPrice  
-					,intCurrencyId  
-					,dblExchangeRate  
-					,intTransactionId  
-					,intTransactionDetailId  
-					,strTransactionId  
-					,intTransactionTypeId  
-					,intLotId 
-					,intSubLocationId
-					,intStorageLocationId
-			FROM	#tmpICInventoryTransaction
+					,RebuilInvTrans.dblSalesPrice  
+					,RebuilInvTrans.intCurrencyId  
+					,RebuilInvTrans.dblExchangeRate  
+					,RebuilInvTrans.intTransactionId  
+					,RebuilInvTrans.intTransactionDetailId  
+					,RebuilInvTrans.strTransactionId  
+					,RebuilInvTrans.intTransactionTypeId  
+					,RebuilInvTrans.intLotId 
+					,RebuilInvTrans.intSubLocationId
+					,RebuilInvTrans.intStorageLocationId
+					,strActualCostId = Receipt.strActualCostId
+			FROM	#tmpICInventoryTransaction RebuilInvTrans LEFT JOIN dbo.tblICInventoryReceipt Receipt
+						ON Receipt.intInventoryReceiptId = RebuilInvTrans.intTransactionId
+						AND Receipt.strReceiptNumber = RebuilInvTrans.strTransactionId
 			WHERE	strBatchId = @strBatchId
 
 			EXEC dbo.uspICRepostCosting
