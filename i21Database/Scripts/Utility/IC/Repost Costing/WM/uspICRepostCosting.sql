@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspICRepostCosting]
+﻿IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspICRepostCosting' AND type = 'P')
+	DROP PROCEDURE [dbo].[uspICRepostCosting]
+	
+GO 
+
+CREATE PROCEDURE [dbo].[uspICRepostCosting]
 	@strBatchId AS NVARCHAR(20)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intUserId AS INT
@@ -31,11 +36,11 @@ DECLARE @intId AS INT
 		,@intLotId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
+		,@strActualCostId AS NVARCHAR(50)
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
-
-
+		
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
@@ -82,6 +87,7 @@ SELECT  intId
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,strActualCostId
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -105,7 +111,8 @@ FETCH NEXT FROM loopItems INTO
 	,@intTransactionTypeId
 	,@intLotId
 	,@intSubLocationId
-	,@intStorageLocationId;
+	,@intStorageLocationId
+	,@strActualCostId;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -128,8 +135,9 @@ BEGIN
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
+
 	-- Average Cost
-	IF (@CostingMethod = @AVERAGECOST)
+	IF (@CostingMethod = @AVERAGECOST AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostAverageCosting
 			@intItemId
@@ -150,11 +158,11 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId
+			,@intUserId;
 	END
 
 	-- FIFO 
-	IF (@CostingMethod = @FIFO)
+	IF (@CostingMethod = @FIFO AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostFIFO
 			@intItemId
@@ -179,7 +187,7 @@ BEGIN
 	END
 
 	-- LIFO 
-	IF (@CostingMethod = @LIFO)
+	IF (@CostingMethod = @LIFO AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostLIFO
 			@intItemId
@@ -204,7 +212,7 @@ BEGIN
 	END
 
 	-- LOT 
-	IF (@CostingMethod = @LOTCOST)
+	IF (@CostingMethod = @LOTCOST AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostLot
 			@intItemId
@@ -226,6 +234,32 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
+			,@intUserId;
+	END
+
+	-- ACTUAL COST 
+	IF (@strActualCostId IS NOT NULL)
+	BEGIN 
+		EXEC dbo.uspICPostActualCost
+			@strActualCostId 
+			,@intItemId 
+			,@intItemLocationId 
+			,@intItemUOMId 
+			,@intSubLocationId 
+			,@intStorageLocationId 
+			,@dtmDate 
+			,@dblQty 
+			,@dblUOMQty 
+			,@dblCost 
+			,@dblSalesPrice 
+			,@intCurrencyId 
+			,@dblExchangeRate 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@strTransactionForm 
 			,@intUserId;
 	END
 
@@ -441,6 +475,7 @@ BEGIN
 		,@intLotId
 		,@intSubLocationId
 		,@intStorageLocationId
+		,@strActualCostId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
