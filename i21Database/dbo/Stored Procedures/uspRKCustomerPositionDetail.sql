@@ -254,7 +254,10 @@ UNION
 		SELECT 15 AS intSeqId
 		,'Purchase In-Transit' AS [strType]
 		,ISNULL(ReserveQty, 0) AS dblTotal
-	FROM (SELECT sum(dblStockQty) ReserveQty FROM  vyuLGInventoryView  WHERE  strStatus='In-transit' and intVendorEntityId=@intVendorCustomerId) t
+	FROM (SELECT sum(dblStockQty) ReserveQty FROM  vyuLGInventoryView v
+			JOIN vyuCTContractDetailView cd on cd.intContractDetailId=v.intContractDetailId
+			WHERE  strStatus='In-transit' AND cd.intCommodityId = @intCommodityId AND intVendorEntityId=@intVendorCustomerId
+			AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end	) t
 		
 ) t1
 END
@@ -268,3 +271,4 @@ BEGIN
 SELECT intSeqId,strType, dblTotal		
 FROM #temp where strType not like '%Sales%'
 END
+
