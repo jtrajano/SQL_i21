@@ -2824,6 +2824,9 @@
     <Build Include="dbo\Views\vyuETCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
     <Build Include="dbo\Views\vyuARShipmentItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportCleanCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportCleanCostBillExpense.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportCleanCostOtherExpense.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
