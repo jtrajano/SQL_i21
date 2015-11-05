@@ -1158,6 +1158,10 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId 
 UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId WHERE strMenuName = 'Check Register' AND strModuleName = 'Accounts Payable' AND strType = 'Report' AND intParentMenuID = @AccountsPayableParentMenuId
 UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId WHERE strMenuName = 'AP Transactions by GL Account' AND strModuleName = 'Accounts Payable' AND strType = 'Report' AND intParentMenuID = @AccountsPayableParentMenuId
 
+/* Start of Delete */
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Paid Bills History' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+/* End of Delete */
+
 /* RENAME COMMAND - ACCOUNTS PAYABLE */
 
 
