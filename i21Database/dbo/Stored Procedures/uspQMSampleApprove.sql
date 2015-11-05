@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @intSubLocationId INT
 	DECLARE @intStorageLocationId INT
 	DECLARE @intCurrentLotStatusId INT
+	DECLARE @intLotId INT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -70,17 +71,9 @@ BEGIN TRY
 
 		IF @intCurrentLotStatusId <> @intLotStatusId
 		BEGIN
-			EXEC uspICInventoryAdjustment_CreatePostLotStatusChange @intItemId = @intItemId
-				,@dtmDate = @dtmLastModified
-				,@intLocationId = @intLocationId
-				,@intSubLocationId = @intSubLocationId
-				,@intStorageLocationId = @intStorageLocationId
-				,@strLotNumber = @strLotNumber
+			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
 				,@intNewLotStatusId = @intLotStatusId
-				,@intSourceId = 1
-				,@intSourceTransactionTypeId = 8
 				,@intUserId = @intLastModifiedUserId
-				,@intInventoryAdjustmentId = NULL
 		END
 	END
 
@@ -122,7 +115,8 @@ BEGIN TRY
 
 		WHILE (@intSeqNo > 0)
 		BEGIN
-			SELECT @strLotNumber = strLotNumber
+			SELECT @intLotId = intLotId
+				,@strLotNumber = strLotNumber
 				,@intItemId = intItemId
 				,@intLocationId = intLocationId
 				,@intSubLocationId = intSubLocationId
@@ -133,17 +127,9 @@ BEGIN TRY
 
 			IF @intCurrentLotStatusId <> @intLotStatusId
 			BEGIN
-				EXEC uspICInventoryAdjustment_CreatePostLotStatusChange @intItemId = @intItemId
-					,@dtmDate = @dtmLastModified
-					,@intLocationId = @intLocationId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = @strLotNumber
+				EXEC uspMFSetLotStatus @intLotId = @intLotId
 					,@intNewLotStatusId = @intLotStatusId
-					,@intSourceId = 1
-					,@intSourceTransactionTypeId = 8
 					,@intUserId = @intLastModifiedUserId
-					,@intInventoryAdjustmentId = NULL
 			END
 
 			SELECT @intSeqNo = MIN(intSeqNo)
