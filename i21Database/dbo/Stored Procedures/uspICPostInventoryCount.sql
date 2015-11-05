@@ -312,8 +312,11 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0 
 BEGIN 
-	-- If there are items for adjust, expect it to have g/l entries. 	
-	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+	-- If there are items for adjust, expect it to have g/l entries. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+	END
 
 	UPDATE	dbo.tblICInventoryCount
 	SET		ysnPosted = @ysnPost
