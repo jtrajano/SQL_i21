@@ -22,6 +22,7 @@ BEGIN
 				FROM tblICStockReservation LR
 				WHERE LR.intLotId = L.intLotId
 				), 0) AS dblAvailableQty
+		,L.intWeightUOMId
 		,U1.intUnitMeasureId AS intWeightUnitMeasureId
 		,U1.strUnitMeasure AS strWeightUnitMeasure
 		,LS.intLotStatusId

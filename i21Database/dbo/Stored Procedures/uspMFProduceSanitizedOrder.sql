@@ -199,6 +199,8 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,intInputLotId
 		,intInputStorageLocationId
+		,intUnitPerLayer
+		,intLayerPerPallet
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -220,7 +222,9 @@ BEGIN TRY
 		,@intUserId
 		,@intInputLotId
 		,@intInputStorageLocationId
-	
+		,@intUnitPerLayer
+		,@intLayerPerPallet
+
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
 
 	DECLARE @intOrderHeaderId INT
