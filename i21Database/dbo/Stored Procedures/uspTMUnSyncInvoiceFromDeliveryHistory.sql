@@ -30,8 +30,41 @@ BEGIN
 	FROM tblARInvoice
 	WHERE intInvoiceId = @InvoiceId 
 
-	---Delete from delivery history Virtual Meter Entry
+	---unsync and Delete from delivery history Virtual Meter Entry
+	IF(@strTransactionType <> 'Credit Memo')
+	BEGIN
+		UPDATE tblTMSite
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - ISNULL(dblQuantityDelivered)
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(dblExtendedAmount)
+			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+		FROM  (
+			SELECT dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0.0))
+				,dblExtendedAmount = SUM(ISNULL(dblExtendedAmount,0.0))
+				,intSiteID
+			FROM tblTMDeliveryHistory WHERE intInvoiceId = @InvoiceId AND ysnMeterReading = 1
+			GROUP BY intSiteID
+		) A
+		WHERE A.intSiteID = tblTMSite.intSiteID
+	END
+	ELSE
+	BEGIN
+		UPDATE tblTMSite
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + ISNULL(dblQuantityDelivered)
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(dblExtendedAmount)
+			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+		FROM  (
+			SELECT dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0.0))
+				,dblExtendedAmount = SUM(ISNULL(dblExtendedAmount,0.0))
+				,intSiteID
+			FROM tblTMDeliveryHistory WHERE intInvoiceId = @InvoiceId AND ysnMeterReading = 1
+			GROUP BY intSiteID
+		) A
+		WHERE A.intSiteID = tblTMSite.intSiteID
+	END
+
 	DELETE FROM tblTMDeliveryHistory WHERE intInvoiceId = @InvoiceId AND ysnMeterReading = 1
+
+	-----------------------------------------------------------------------------
 
 	
 	IF OBJECT_ID('tempdb..#tmpInvoiceDetail') IS NOT NULL DROP TABLE #tmpInvoiceDetail
