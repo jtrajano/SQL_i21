@@ -2829,6 +2829,14 @@
     <Build Include="dbo\Stored Procedures\uspCTReportCleanCostOtherExpense.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePutAwayOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCustomerPositionHedgeInquiryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityDiagram.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotReceiptDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityWorkOrderOutputDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityWorkOrderInputDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotShipDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityWorkOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotSplitDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
