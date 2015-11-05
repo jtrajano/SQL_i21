@@ -1,12 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuTRRackPriceView]
 	AS 
 SELECT 
-   RH.dtmEffectiveDateTime,  
-   RH.intRackPriceHeaderId,
-   (select top 1 EM.strName from vyuEMEntity EM where EM.intEntityId = SP.intEntityVendorId) as strFuelSupplier,
-   (select strLocationName from tblEntityLocation EL where EL.intEntityLocationId = SP.intEntityLocationId) as strSupplyPoint 
-	
-FROM
-    dbo.tblTRRackPriceHeader RH	
-	JOIN dbo.tblTRSupplyPoint SP on SP.intSupplyPointId = RH.intSupplyPointId
+     vyuTRRackPrice.intRackPriceHeaderId 
+     ,tblEntity.strName 
+    , tblEntityLocation.strLocationName 
+    , tblICItem.strItemNo 
+    , tblICItem.strDescription 
+    ,vyuTRRackPrice.dtmEffectiveDateTime
+    , vyuTRRackPrice.dblVendorRack
+	,vyuTRRackPrice.dblJobberRack
+from vyuTRRackPrice
+    inner join tblICItem on vyuTRRackPrice.intItemId=tblICItem.intItemId
+    inner join tblTRSupplyPoint on vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId
+    inner join tblEntity on tblTRSupplyPoint.intEntityVendorId=tblEntity.intEntityId
+    inner join tblEntityLocation on tblTRSupplyPoint.intEntityLocationId=tblEntityLocation.intEntityLocationId
 	

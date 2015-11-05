@@ -5,8 +5,8 @@ SELECT
    RH.intSupplyPointId,
    RD.intItemId,
    RD.dblJobberRack,
-   RD.dblVendorRack
-	
+   RD.dblVendorRack,
+   RH.intRackPriceHeaderId
 FROM
     dbo.tblTRRackPriceHeader RH
 	JOIN dbo.tblTRRackPriceDetail RD on RH.intRackPriceHeaderId = RD.intRackPriceHeaderId
