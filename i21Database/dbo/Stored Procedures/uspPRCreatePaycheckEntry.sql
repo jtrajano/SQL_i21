@@ -172,7 +172,7 @@ E.intEmployeeEarningId
 ,intEmployeeDepartmentId = ISNULL(T.intEmployeeDepartmentId, 0)
 ,E.intEmployeeEarningOriginalId
 ,E.intTypeEarningId
-,E.dblDefaultHours
+,dblDefaultHours = E.dblHoursToProcess
 ,E.strW2Code
 ,E.intEmployeeTimeOffId
 ,E.intEmployeeEarningLinkId
@@ -202,6 +202,7 @@ intEmployeeEarningId = CASE WHEN (intEmployeeEarningLinkId IS NULL)
 ,intEmployeeEarningLinkId
 ,intEmployeeTimeOffId
 ,dblDefaultHours
+,dblHoursToProcess
 ,intAccountId
 ,intSort
 FROM tblPREmployeeEarning E
@@ -419,14 +420,21 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 		DELETE FROM #tmpDeductions WHERE intEmployeeDeductionId = @intEmployeeDeductionId
 	END
 
-	/* Associate Timecards to created Paycheck */
 	IF (@ysnUseStandardHours = 0)
-		UPDATE tblPRTimecard 
-		SET intPaycheckId = @intPaycheckId
-		WHERE ysnApproved = 1 AND intPaycheckId IS NULL
-		AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
-		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
-		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+		BEGIN
+			/* Associate Timecards to created Paycheck */
+			UPDATE tblPRTimecard 
+			SET intPaycheckId = @intPaycheckId
+			WHERE ysnApproved = 1 AND intPaycheckId IS NULL
+			AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
+			AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
+			AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+		END
+	ELSE
+		BEGIN
+			/* Reset Hours to Process to Default */
+			UPDATE tblPREmployeeEarning SET dblHoursToProcess = dblDefaultHours WHERE intEntityEmployeeId = @intEmployee 
+		END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpDepartments')) DROP TABLE #tmpDepartments
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpEarnings')) DROP TABLE #tmpEarnings
