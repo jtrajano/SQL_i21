@@ -69,7 +69,7 @@ BEGIN
 		
 		
 	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] ,@strAccountIdCondition =[condition] from  @filterTable WHERE [fieldname] = 'strAccountId' 
-	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = 'Primary Code' 
+	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = 'Primary Account' 
 	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate' 
 
 	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
@@ -180,11 +180,9 @@ AS
 		,B.[Location] 
 		,C.intGLDetailId
 		FROM tblGLAccount A
-		
-		--CROSS APPLY (dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT ISNULL(''' + @dtmDateFrom + ''',MIN(dtmDate)) FROM GLAccountDetails) as b WHERE b.strAccountId = A.strAccountId)
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT    ISNULL(''' + @dtmDateFrom + ''', MIN(dtmDate)) FROM GLAccountDetails)) D
+		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT CASE WHEN ''' + ISNULL(@dtmDateFrom,'') + ''' = '''' THEN MIN(dtmDate) ELSE ''' +  ISNULL(@dtmDateFrom,'') + ''' END FROM GLAccountDetails)) D
 ),'
 
 SET @sqlCte +='RAWREPORT AS (
@@ -248,7 +246,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + @dtmDateFrom + '''= '''' THEN ''' + @dtmDateTo + ''' ELSE ''' + @dtmDateFrom + ''' END)	
+			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + ISNULL(@dtmDateTo,'') + '''= '''' THEN ''' + @dtmDateFrom + ''' ELSE ''' + @dtmDateTo + ''' END)	
 			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -267,8 +265,8 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + @dtmDateFrom + '''= '''' THEN ''' + @dtmDateTo + ''' ELSE ''' + @dtmDateFrom + ''' END)	
-			AND strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + @strAccountIdTo + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
+			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + ISNULL(@dtmDateTo,'') + '''= '''' THEN ''' + @dtmDateFrom + ''' ELSE ''' + @dtmDateTo + ''' END)	
+			AND strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
 			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -281,7 +279,31 @@ BEGIN
 		)
 		SELECT ' + @cols1 + ' FROM cte1 union all select ' + @cols + ' from cteBase '
 	END
+	IF @strAccountIdFrom IS NULL  AND @strPrimaryCodeFrom IS NOT NULL
+	BEGIN
+	SET @sqlCte +=
+		',cteInactive (accountId,id)AS
+		(
+			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
+			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + ISNULL(@dtmDateTo,'') + '''= '''' THEN ''' + @dtmDateFrom + ''' ELSE ''' + @dtmDateTo + ''' END)	
+			AND [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
+			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
+			GROUP BY strAccountId
+		),
+		cte1 
+		AS(
+			SELECT * FROM RAWREPORT	A join cteInactive B
+			ON B.accountId = A.strAccountId 
+			AND B.id = A.intGLDetailId
+		
+		)
+		SELECT ' + @cols1 + ' FROM cte1 union all select ' + @cols + ' from cteBase '
+	END
 	
+END
+ELSE
+BEGIN
+	SET @sqlCte += 'SELECT * FROM cteBase'
 END
 EXEC (@sqlCte)
 END
