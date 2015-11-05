@@ -58,7 +58,7 @@ IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intI
         EXEC dbo.uspICProcessToInventoryShipment
 		 @intSourceTransactionId = @SalesOrderId
 		,@strSourceType = 'Sales Order'
-		,@intUserId = @icUserId
+		,@intEntityUserSecurityId = @icUserId
 		,@InventoryShipmentId = @ShipmentId OUTPUT
 
 		IF (@HasSoftwareItems = 1)
