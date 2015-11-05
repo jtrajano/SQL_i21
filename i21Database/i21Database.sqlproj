@@ -2838,6 +2838,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityWorkOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotSplitDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCancelOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHShipOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHDeleteSKUForWarehouse.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
