@@ -1067,8 +1067,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.itemId === 'cboItemUOM') {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
-            current.set('dblUnitCost', records[0].get('dblLastCost'));
-            current.set('dblUnitRetail', records[0].get('dblLastCost'));
             current.set('strUnitType', records[0].get('strUnitType'));
 
             var origCF = current.get('dblOrderUOMConvFactor');
@@ -1090,6 +1088,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
+
+            var dblCost = records[0].get('dblLastCost');
+            if (win.viewModel.data.current.get('strReceiptType') === 'Purchase Contract') {
+                if (current.get('strOrderUOM') !== records[0].get('strUnitMeasure')) {
+                    var orderUOMCF = current.get('dblOrderUOMConvFactor');
+                    var receiptUOMCF = records[0].get('dblUnitQty');
+                    if (orderUOMCF !== receiptUOMCF) {
+                        var currentCost = current.get('dblUnitCost');
+                        var perUnitCost = currentCost / orderUOMCF;
+                        dblCost = perUnitCost * receiptUOMCF;
+                    }
+                }
+            }
+
+            current.set('dblUnitCost', dblCost);
+            current.set('dblUnitRetail', dblCost);
         }
         else if (combo.itemId === 'cboWeightUOM')
         {
