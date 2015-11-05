@@ -23,27 +23,31 @@ BEGIN
 	SELECT L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
-		,S.intSKUId
 		,C.intContainerId
 		,C.strContainerNo
+		,SL.intStorageLocationId
 		,SL.strName
 		,S.intSKUId
 		,S.strSKUNo
+		,I.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 		,S.dtmProductionDate
 		,S.strLotCode
 		,S.dtmExpiryDate
+		,SS.intSKUStatusId
 		,SS.strSKUStatus
+		,E.intEntityId 
 		,E.strName strOwnerName
-		,SL.intStorageLocationId
-		,OH.strBOLNo AS strReturnNo
 		,OH.intOrderHeaderId
+		,OH.strBOLNo AS strReturnNo
+		,OS.intOrderStatusId
 		,OS.strOrderStatus
-		,MIN(W.dtmExpectedDate) [dtmRequiredDate]
-		,MIN(WC.dblIssuedQuantity) AS [dblRequiredQty]
+		,MIN(W.dtmExpectedDate) AS dtmRequiredDate
+		,MIN(WC.dblIssuedQuantity) AS dblRequiredQty
 	FROM dbo.tblWHSKU S
 	JOIN dbo.tblWHSKUStatus SS ON SS.intSKUStatusId = S.intSKUStatusId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intUOMId
@@ -65,24 +69,28 @@ BEGIN
 	GROUP BY L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
-		,S.intSKUId
 		,C.intContainerId
 		,C.strContainerNo
+		,SL.intStorageLocationId
 		,SL.strName
 		,S.intSKUId
 		,S.strSKUNo
+		,I.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 		,S.dtmProductionDate
 		,S.strLotCode
 		,S.dtmExpiryDate
+		,SS.intSKUStatusId
 		,SS.strSKUStatus
+		,E.intEntityId 
 		,E.strName
-		,SL.intStorageLocationId
-		,OH.strBOLNo
 		,OH.intOrderHeaderId
+		,OH.strBOLNo
+		,OS.intOrderStatusId
 		,OS.strOrderStatus
 	
 	UNION
@@ -90,25 +98,29 @@ BEGIN
 	SELECT L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
-		,S.intSKUId
 		,C.intContainerId
 		,C.strContainerNo
+		,SL.intStorageLocationId
 		,SL.strName
 		,S.intSKUId
 		,S.strSKUNo
+		,I.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 		,S.dtmProductionDate
 		,S.strLotCode
 		,S.dtmExpiryDate
+		,SS.intSKUStatusId
 		,SS.strSKUStatus
+		,E.intEntityId 
 		,E.strName strOwnerName
-		,SL.intStorageLocationId
-		,OH.strBOLNo AS strReturnNo
 		,OH.intOrderHeaderId
-		,OS.strOrderStatus AS strReturnStatus
+		,OH.strBOLNo AS strReturnNo
+		,OS.intOrderStatusId
+		,OS.strOrderStatus
 		,MIN(W.dtmExpectedDate) [dtmRequiredDate]
 		,MIN(WC.dblIssuedQuantity) AS [dblRequiredQty]
 	FROM dbo.tblWHSKU S
@@ -128,23 +140,27 @@ BEGIN
 	GROUP BY L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
-		,S.intSKUId
 		,C.intContainerId
 		,C.strContainerNo
+		,SL.intStorageLocationId
 		,SL.strName
 		,S.intSKUId
 		,S.strSKUNo
+		,I.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 		,S.dtmProductionDate
 		,S.strLotCode
 		,S.dtmExpiryDate
+		,SS.intSKUStatusId
 		,SS.strSKUStatus
+		,E.intEntityId 
 		,E.strName
-		,SL.intStorageLocationId
-		,OH.strBOLNo
 		,OH.intOrderHeaderId
-		,strOrderStatus
+		,OH.strBOLNo
+		,OS.intOrderStatusId
+		,OS.strOrderStatus
 END
