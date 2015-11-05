@@ -2828,6 +2828,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportCleanCostBillExpense.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCleanCostOtherExpense.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePutAwayOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomerPositionHedgeInquiryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
