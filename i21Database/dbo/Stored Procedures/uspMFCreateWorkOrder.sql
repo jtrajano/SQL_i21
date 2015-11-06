@@ -269,7 +269,7 @@ BEGIN TRY
 	SELECT @intEntityId = E.intEntityId
 	FROM dbo.tblEntity E
 	JOIN dbo.tblEntityType ET ON E.intEntityId = ET.intEntityId
-	WHERE ET.strType = 'Warehouse'
+	WHERE ET.strType = 'Customer'
 		AND E.strName = 'Production'
 
 	SELECT @intOrderTermsId = intOrderTermsId
@@ -363,7 +363,7 @@ BEGIN TRY
 	SELECT @intOrderHeaderId
 		,CL.intItemId
 		,CL.dblIssuedQuantity
-		,CL.intItemIssuedUOMId
+		,IU1.intUnitMeasureId
 		,CL.intCreatedUserId
 		,CL.dtmCreated
 		--,(
@@ -386,7 +386,7 @@ BEGIN TRY
 				), I.intLayerPerPallet)
 		,intSequenceNo
 		,CL.dblIssuedQuantity
-		,CL.intItemIssuedUOMId
+		,IU1.intUnitMeasureId
 		,CL.dblQuantity / CL.dblIssuedQuantity
 		,IU.intUnitMeasureId
 		,@dtmCurrentDate
@@ -399,6 +399,7 @@ BEGIN TRY
 	JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId
 	JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
+	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
 	WHERE CL.intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 	COMMIT TRANSACTION

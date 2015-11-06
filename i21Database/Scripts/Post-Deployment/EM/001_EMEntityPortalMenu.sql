@@ -159,3 +159,68 @@ BEGIN
 		and strType = ''Screen'' 
 		and strCommand = ''HelpDesk.view.TicketList'' ')
 END
+--Last Count for automated is 28
+
+IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 30  AND strPortalMenuName <> 'Customer')
+BEGIN
+	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 30 ')
+END
+IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 30) 
+	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Customer' and intEntityPortalMenuId = 30)
+begin
+	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	EXEC('
+	
+	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
+	select 30, ''Customer'', 0, ''Folder'', null, ''Customer''
+	')
+	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+end
+
+IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 31  AND strPortalMenuName <> 'Invoice')
+BEGIN
+	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 31 ')
+END
+IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 31) 
+	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Invoice' and intEntityPortalMenuId = 31)
+begin
+	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	EXEC('
+	
+	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
+	select 31, ''Invoice'', 30, ''Screen'', ''AccountsReceivable.view.Invoice'', ''Customer''
+	')
+	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+end
+
+IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 32  AND strPortalMenuName <> 'Receive Payment Details')
+BEGIN
+	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 32 ')
+END
+IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 32) 
+	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Receive Payment Details' and  intEntityPortalMenuId = 32)
+begin
+	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	EXEC('
+	
+	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
+	select 32, ''Receive Payment Details'', 30, ''Screen'', ''AccountsReceivable.view.ReceivePaymentsDetail'', ''Customer''
+	')
+	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+end
+
+IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 33   AND strPortalMenuName <> 'Customer')
+BEGIN
+	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 33 ')
+END
+IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 33) 
+	AND not exists(select 1 from tblEntityPortalMenu where  strPortalMenuName = 'Customer' and intEntityPortalMenuId = 33)
+begin
+	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	EXEC('
+	
+	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
+	select 33, ''Customer'', 30, ''Screen'', ''EntityManagement.view.Entity'', ''Customer''
+	')
+	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+end

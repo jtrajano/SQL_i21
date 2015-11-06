@@ -151,7 +151,7 @@ BEGIN TRY
 	SELECT @intOrderHeaderId
 		,CL.intItemId
 		,SUM(CL.dblIssuedQuantity)
-		,CL.intItemIssuedUOMId
+		,IU1.intUnitMeasureId
 		,CL.intCreatedUserId
 		,CL.dtmCreated
 		--,(
@@ -174,7 +174,7 @@ BEGIN TRY
 				), I.intLayerPerPallet)
 		,intSequenceNo
 		,SUM(CL.dblIssuedQuantity)
-		,CL.intItemIssuedUOMId
+		,IU1.intUnitMeasureId
 		,L.dblWeightPerQty
 		,IU.intUnitMeasureId
 		,@dtmCurrentDate
@@ -187,12 +187,13 @@ BEGIN TRY
 	JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId
 	JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
+	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
 	WHERE CL.intWorkOrderId IN (
 			SELECT x.intWorkOrderId
 			FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (intWorkOrderId INT) x
 			)
 	GROUP BY CL.intItemId
-		,CL.intItemIssuedUOMId
+		,IU1.intUnitMeasureId
 		,CL.intCreatedUserId
 		,CL.dtmCreated
 		--,(
@@ -213,12 +214,13 @@ BEGIN TRY
 				NULL
 				), I.intLayerPerPallet)
 		,intSequenceNo
-		,CL.intItemIssuedUOMId
+		,IU1.intUnitMeasureId
 		,L.dblWeightPerQty
 		,IU.intUnitMeasureId
 		,L.strLotAlias
 		--,CL.intWorkOrderInputLotId
 		,L.intLotId
+		
 
 	COMMIT TRANSACTION
 

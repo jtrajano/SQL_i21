@@ -20,7 +20,11 @@ FROM (
 		[Transaction].intItemLocationId,
 		[Transaction].intSubLocationId,
 		dblQuantity = SUM([Transaction].dblQty * [Transaction].dblUOMQty),
-		dblValue = SUM(([Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost) + [Transaction].dblValue)
+		dblValue = SUM (
+			ISNULL([Transaction].dblQty, 0)
+			* ISNULL([Transaction].dblCost, 0) 
+			+ ISNULL([Transaction].dblValue, 0)
+		)
 	FROM tblICInventoryTransaction [Transaction]
 	GROUP BY [Transaction].intItemId,
 		[Transaction].intItemLocationId,

@@ -13,6 +13,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal		NUMERIC(18, 6)
 	  , @DateNow			DATETIME
 	  , @DefaultCurrencyId	INT
+	  , @DefaultAccountId	INT
 	  , @CreatedIvoices		NVARCHAR(MAX)
 	  , @BOLNumber			NVARCHAR(50)
 
@@ -22,6 +23,7 @@ DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 SET @ZeroDecimal = 0.000000
 SET @DateNow = CAST(GETDATE() AS DATE)
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+SET @DefaultAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference)
 
 INSERT INTO 
 	@InvoicesForImport
@@ -47,7 +49,7 @@ BEGIN
 		[intImportLogDetailId]
 		
 	DECLARE	@EntityCustomerId			INT
-		,@InvoiceDate					DATETIME
+		,@Date							DATETIME
 		,@CompanyLocationId				INT
 		,@EntityId						INT
 		,@NewTransactionId				INT				= NULL		
@@ -72,10 +74,11 @@ BEGIN
 		,@TaxGroupId					INT				= NULL
 		,@AmountDue						NUMERIC(18,6)	= @ZeroDecimal
 		,@TaxAmount						NUMERIC(18,6)	= @ZeroDecimal
+		,@Total							NUMERIC(18,6)	= @ZeroDecimal
 			
 	SELECT 
 		 @EntityCustomerId				= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
-		,@InvoiceDate					= D.[dtmDate] 					
+		,@Date							= D.[dtmDate] 					
 		,@CompanyLocationId				= (SELECT TOP 1 [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strLocationName])
 		,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
 		,@TermId						= (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTerm] = D.[strTerms])
@@ -102,6 +105,7 @@ BEGIN
 		,@TaxGroupId					= (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.[strTaxGroup])
 		,@AmountDue						= CASE WHEN D.[strTransactionType] <> 'Sales Order' THEN ISNULL(D.[dblAmountDue], @ZeroDecimal) ELSE @ZeroDecimal END
 		,@TaxAmount						= ISNULL(D.[dblTax], @ZeroDecimal)
+		,@Total							= ISNULL(D.[dblTotal], @ZeroDecimal)
 	FROM
 		[tblARImportLogDetail] D
 	INNER JOIN
@@ -215,7 +219,7 @@ BEGIN
 						,[intCompanyLocationId]		= @CompanyLocationId
 						,[intCurrencyId]			= @DefaultCurrencyId
 						,[intTermId]				= @TermId
-						,[dtmDate]					= @InvoiceDate
+						,[dtmDate]					= @Date
 						,[dtmDueDate]				= @DueDate
 						,[dtmShipDate]				= @ShipDate
 						,[intEntitySalespersonId]	= @EntitySalespersonId
@@ -292,7 +296,128 @@ BEGIN
 				END
 			ELSE
 				BEGIN
-					SET @NewTransactionId = 1
+					DECLARE @computedDueDate DATETIME
+					      , @shipToId		 INT
+						  , @shipToName		 NVARCHAR(50)
+						  , @shipToAddress	 NVARCHAR(300)
+						  , @shipToCity		 NVARCHAR(100)
+						  , @shipToState	 NVARCHAR(100)
+						  , @shipToZipCode	 NVARCHAR(100)
+						  , @shipToCountry	 NVARCHAR(100)
+
+					SELECT @computedDueDate = dbo.fnGetDueDateBasedOnTerm(@Date, @TermId)
+					SELECT TOP 1 
+					       @shipToId		= intEntityLocationId
+					     , @shipToName		= strLocationName
+						 , @shipToAddress	= strAddress
+						 , @shipToCity		= strCity
+						 , @shipToState		= strState
+						 , @shipToZipCode	= strZipCode
+						 , @shipToCountry	= strCountry
+					FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+					SET @DueDate = ISNULL(@DueDate, @computedDueDate)
+
+					INSERT INTO tblSOSalesOrder 
+						([strSalesOrderOriginId]
+						,[intEntityCustomerId]
+						,[dtmDate]
+						,[dtmDueDate]
+						,[intCurrencyId]
+						,[intCompanyLocationId]
+						,[intEntitySalespersonId]
+						,[intShipViaId]
+						,[strPONumber]
+						,[intTermId]
+						,[dblSalesOrderSubtotal]
+						,[dblTax]
+						,[dblSalesOrderTotal]
+						,[dblDiscount]
+						,[dblAmountDue]
+						,[dblPayment]
+						,[strTransactionType]
+						,[strType]
+						,[strOrderStatus]
+						,[intAccountId]
+						,[strComments]
+						,[intFreightTermId]
+						,[intEntityId]
+						,[intShipToLocationId]
+						,[intBillToLocationId]
+						,[strShipToLocationName]
+						,[strBillToLocationName]
+						,[strShipToAddress]
+						,[strBillToAddress]
+						,[strShipToCity]
+						,[strBillToCity]
+						,[strShipToState]
+						,[strBillToState]
+						,[strShipToZipCode]
+						,[strBillToZipCode]
+						,[strShipToCountry]
+						,[strBillToCountry])
+					SELECT @OriginId
+						, @EntityCustomerId
+						, @Date
+						, @DueDate
+						, @DefaultCurrencyId
+						, @CompanyLocationId
+						, @EntitySalespersonId
+						, @ShipViaId
+						, @PONumber
+						, @TermId
+						, @ItemPrice
+						, @TaxAmount
+						, @Total
+						, @DiscountAmount
+					    , @ZeroDecimal
+						, @ZeroDecimal
+						, 'Order'
+						, 'Standard'
+						, 'Open'
+						, @DefaultAccountId
+						, @OriginId
+						, @FreightTermId
+						, @UserEntityId
+						, @shipToId
+						, @shipToId
+						, @shipToName
+						, @shipToName
+						, @shipToAddress
+						, @shipToAddress
+						, @shipToCity
+						, @shipToCity
+						, @shipToState
+						, @shipToState
+						, @shipToZipCode
+						, @shipToZipCode
+						, @shipToCountry
+						, @shipToCountry
+					
+					SET @NewTransactionId = SCOPE_IDENTITY()
+
+					INSERT INTO tblSOSalesOrderDetail
+						([intSalesOrderId]
+					    ,[intItemId]
+					    ,[strItemDescription]
+					    ,[intItemUOMId]
+					    ,[dblQtyOrdered]
+					    ,[dblQtyAllocated]
+					    ,[dblQtyShipped]
+					    ,[dblDiscount]
+					    ,[dblPrice]
+					    ,[dblTotalTax]
+					    ,[dblTotal])
+					SELECT @NewTransactionId
+					     , NULL
+						 , @ItemDescription
+						 , NULL
+						 , @ItemQtyShipped
+						 , @ZeroDecimal
+						 , @ZeroDecimal
+						 , @DiscountPercentage
+						 , @ItemPrice
+						 , @TaxAmount
+						 , @Total
 				END
 		END TRY
 		BEGIN CATCH
@@ -303,14 +428,14 @@ BEGIN
 		BEGIN
 			UPDATE tblARImportLogDetail
 			SET [ysnImported]		= 0
-			   ,[ysnSuccess]       = 0
+			   ,[ysnSuccess]        = 0
 			   ,[strEventResult]	= @ErrorMessage
 			WHERE [intImportLogDetailId] = @ImportLogDetailId
 
 			UPDATE tblARImportLog 
-			SET intSuccessCount = intSuccessCount - 1
-			  , intFailedCount = intFailedCount + 1
-			WHERE intImportLogId = @ImportLogId
+			SET [intSuccessCount]	= intSuccessCount - 1
+			  , [intFailedCount]	= intFailedCount + 1
+			WHERE [intImportLogId]  = @ImportLogId
 		END
 	ELSE IF(ISNULL(@NewTransactionId,0) <> 0)
 		BEGIN
@@ -333,6 +458,5 @@ BEGIN
 	DELETE FROM @InvoicesForImport WHERE [intImportLogDetailId] = @ImportLogDetailId
 
 END
-	
 	
 END

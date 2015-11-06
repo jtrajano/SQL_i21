@@ -36,7 +36,8 @@ SELECT
 	--strApprover = (SELECT TOP 1 strUserName FROM dbo.tblSMApprovalListUserSecurity F
 	--					INNER JOIN dbo.tblSMUserSecurity G ON F.intUserSecurityId = G.intUserSecurityID WHERE B.intApprovalListId = F.intApprovalListId),
 	G.strApprovalList AS strApprover,
-	dtmApprovalDate
+	dtmApprovalDate,
+	GL.strBatchId
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -61,3 +62,7 @@ FROM
 	) Payment
 	LEFT JOIN dbo.tblEntityCredential F ON A.intEntityId = F.intEntityId
 	LEFT JOIN dbo.tblSMApprovalList G ON B.intApprovalListId = G.intApprovalListId
+	OUTER APPLY 
+	(
+		SELECT TOP 1 strBatchId FROM dbo.tblGLDetail H WHERE A.intBillId = H.intTransactionId AND A.strBillId = H.strTransactionId AND H.ysnIsUnposted = 0
+	) GL

@@ -23,6 +23,7 @@ SELECT BR.intBlendRequirementId
 	,OH.intOrderHeaderId
 	,OS.strOrderStatus
 	,W.intLocationId
+	,W.intConcurrencyId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFBlendRequirement BR ON W.intBlendRequirementId = BR.intBlendRequirementId

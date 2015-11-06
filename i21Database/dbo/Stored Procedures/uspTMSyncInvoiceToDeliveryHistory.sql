@@ -245,8 +245,8 @@ BEGIN
 					SELECT 
 						intDeliveryHistoryID = @intNewDeliveryHistoryId
 						,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
-						,dblExtendedAmount = ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)
-						,dblQuantityDelivered = dblQtyShipped
+						,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) ELSE ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0) END
+						,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - dblQtyShipped ELSE dblQtyShipped END
 						,strInvoiceNumber = B.strInvoiceNumber
 						,strItemNumber = C.strItemNo
 						,intInvoiceDetailId
@@ -294,11 +294,11 @@ BEGIN
 					IF(@strBillingBy <> 'Virtual Meter')
 					BEGIN
 						UPDATE tblTMSite
-						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
-							,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.)
+						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal 
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.0)
 						FROM(
-							SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
-								,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+							SELECT dblQuantityTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - SUM(ISNULL(dblQtyShipped,0)) ELSE SUM(ISNULL(dblQtyShipped,0)) END
+								,dblSalesTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))) ELSE SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0)) END
 							FROM #tmpSiteInvoiceLineItems
 						)A
 						WHERE intSiteID = @intSiteId
@@ -390,8 +390,8 @@ BEGIN
 						SELECT 
 							intDeliveryHistoryID = @intNewDeliveryHistoryId
 							,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
-							,dblExtendedAmount = ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)
-							,dblQuantityDelivered = dblQtyShipped
+							,dblExtendedAmount = (CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)) ELSE ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0) END)
+							,dblQuantityDelivered = (CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - A.dblQtyShipped ELSE A.dblQtyShipped END)
 							,strInvoiceNumber = B.strInvoiceNumber
 							,strItemNumber = C.strItemNo
 							,intInvoiceDetailId
@@ -443,8 +443,8 @@ BEGIN
 								,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
 								,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 							FROM(
-								SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
-									,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+								SELECT dblQuantityTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - SUM(ISNULL(dblQtyShipped,0)) ELSE dblQtyShipped END
+									,dblSalesTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))) ELSE SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0)) END
 								FROM #tmpSiteInvoiceLineItems
 							)A
 							WHERE intSiteID = @intSiteId
@@ -506,7 +506,7 @@ BEGIN
 							,strBulkPlantNumber = D.strLocationName
 							,dtmInvoiceDate = C.dtmDate
 							,strProductDelivered = E.strItemNo
-							,dblQuantityDelivered = (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems)
+							,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) END
 							,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
 							,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
 							,dblBurnRateAfterDelivery = A.dblBurnRate
@@ -527,7 +527,7 @@ BEGIN
 							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,intSiteID = A.intSiteID
 							,strSalesPersonID = I.strSalespersonId
-							,dblExtendedAmount = (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems)
+							,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) END
 							,ysnForReview = 1
 							,dtmMarkForReviewDate = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,dblWillCallCalculatedQuantity  = NULL
@@ -580,8 +580,8 @@ BEGIN
 						SELECT 
 							intDeliveryHistoryID = @intNewDeliveryHistoryId
 							,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
-							,dblExtendedAmount = ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)
-							,dblQuantityDelivered = dblQtyShipped
+							,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) ELSE ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0) END
+							,dblQuantityDelivered =  CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - dblQtyShipped ELSE dblQtyShipped END
 							,strInvoiceNumber = B.strInvoiceNumber
 							,strItemNumber = C.strItemNo
 							,intInvoiceDetailId
@@ -925,7 +925,7 @@ BEGIN
 			,strBulkPlantNumber = D.strLocationName
 			,dtmInvoiceDate = C.dtmDate
 			,strProductDelivered = E.strItemNo
-			,dblQuantityDelivered = ISNULL(B.dblQtyShipped,0.0)
+			,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(B.dblQtyShipped,0.0) ELSE ISNULL(B.dblQtyShipped,0.0) END
 			,intDegreeDayOnDeliveryDate = NULL
 			,intDegreeDayOnLastDeliveryDate = NULL
 			,dblBurnRateAfterDelivery = A.dblBurnRate
@@ -946,7 +946,7 @@ BEGIN
 			,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 			,intSiteID = A.intSiteID
 			,strSalesPersonID = I.strSalespersonId
-			,dblExtendedAmount = ISNULL(B.dblTotal,0.0)
+			,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(B.dblTotal,0.0) ELSE ISNULL(B.dblTotal,0.0) END
 			,ysnForReview = 0
 			,dtmMarkForReviewDate = NULL
 			,dblWillCallCalculatedQuantity  = NULL
@@ -989,8 +989,8 @@ BEGIN
 
 		----Update Site Info
 		UPDATE tblTMSite
-		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + ISNULL(@dblQuantityShipped,0.0)
-			,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0)
+		SET	dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(@dblQuantityShipped,0.0) ELSE ISNULL(@dblQuantityShipped,0.0) END
+			,dblYTDSales = ISNULL(dblYTDSales,0.0) + CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0)) ELSE ISNULL(@dblItemTotal,0.0) + ISNULL(@dblTotalTax,0.0) END
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		WHERE intSiteID = @intSiteId
 
