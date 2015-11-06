@@ -8,17 +8,28 @@ AS
 BEGIN TRY
 
 	DECLARE @intItemId INT
+	DECLARE @intItemUOMId INT
 	DECLARE @dblOrderedQty NUMERIC(18,6)
+	DECLARE @dblLotQty NUMERIC(18,6)
 	DECLARE @intUnitsPerPallet INT
 	DECLARE @intOrderLineItemId INT
 	DECLARE @intItemRecordId INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intUserId INT
+	DECLARE @intStorageLocationId INT
+	DECLARE @strBOLNo NVARCHAR(100)
+	DECLARE @STARTING_NUMBER_BATCH AS INT = 24
+	DECLARE @strLotNumber NVARCHAR(50) 
+	DECLARE @strLotAlias NVARCHAR(100)
+	DECLARE @strItemType NVARCHAR(100)
+	DECLARE @intLotId INT
 	
 	DECLARE @tblLineItem TABLE 
 			(intItemRecordId INT Identity(1, 1), 
 			 intOrderHeaderId INT, 
 			 intItemId INT, 
 			 dblOrderedQty NUMERIC(18, 6), 
+			 dblLotQty NUMERIC(18, 6), 
 			 intUnitsPerPallet INT,
 			 intOrderLineItemId INT)
 
@@ -27,20 +38,23 @@ BEGIN TRANSACTION
 		intOrderHeaderId,
 		intItemId,
 		dblOrderedQty,
+		dblLotQty,
 		intUnitsPerPallet,
 		intOrderLineItemId
 		)
 	SELECT li.intOrderHeaderId,
 		   li.intItemId, 
 		   li.dblQty AS dblQty, 
+		   li.dblQty AS dblLotQty, 
 		   ISNULL((m.intUnitPerLayer * m.intLayerPerPallet), 1) intUnitsPerPallet, 
 		   li.intOrderLineItemId
 	FROM tblWHOrderLineItem li
 	INNER JOIN tblICItem m ON m.intItemId = li.intItemId
 	WHERE li.intOrderHeaderId = @intOrderHeaderId
 	
-	
-	SELECT * FROM  @tblLineItem
+	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intStorageLocationId = intStorageLocationId FROM tblICStorageLocation WHERE strName = @strUnitName
+	SELECT @strBOLNo = strBOLNo FROM tblWHOrderHeader WHERE intOrderHeaderId = @intOrderHeaderId
 	
 	SELECT @intItemRecordId = MIN(intItemRecordId)
 	FROM @tblLineItem
@@ -49,12 +63,14 @@ BEGIN TRANSACTION
 		BEGIN
 			SET @intItemId = NULL 
 			SET @dblOrderedQty = NULL
+			SET @dblLotQty = NULL
 			SET @intUnitsPerPallet = NULL
 			SET @intOrderLineItemId = NULL
 
 			SELECT @intOrderLineItemId = intOrderLineItemId,
 				   @intItemId = intItemId,
 				   @dblOrderedQty = dblOrderedQty,
+				   @dblLotQty = dblLotQty,
 				   @intUnitsPerPallet = intUnitsPerPallet
 			FROM @tblLineItem
 			WHERE intItemRecordId = @intItemRecordId
@@ -115,6 +131,62 @@ BEGIN TRANSACTION
 						BREAK;
 					END
 			END			 
+			
+			SELECT @strItemType = strType FROM tblICItem WHERE intItemId = @intItemId
+			
+			IF (@strItemType <> 'Finished Good')
+			BEGIN
+				SELECT @strLotAlias = strLotAlias
+				FROM tblWHOrderLineItem
+				WHERE intOrderHeaderId = @intOrderHeaderId
+					AND intItemId = @intItemId
+				
+				SELECT @intItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intItemId
+					AND ysnStockUnit = 1
+					
+
+				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
+				
+				EXEC uspWHCreateLot 
+							@ysnPost = 1
+							,@ysnRecap=0
+							,@intOrderHeaderId=@intOrderHeaderId
+							,@intItemId =@intItemId
+							,@intUserId=@intUserId
+							,@intEntityId =NULL
+							,@intStorageLocationId = @intStorageLocationId
+							,@dblWeight = @dblLotQty
+							,@intWeightUOMId = @intItemUOMId
+							,@dblUnitQty = 1
+							,@dblProduceQty= @dblLotQty
+							,@intProduceUOMKey =@intItemUOMId
+							,@strBatchId = @strBOLNo
+							,@strLotNumber = @strLotNumber
+							,@intBatchId = NULL
+							,@intLotId =@intLotId OUT
+							,@strLotAlias=@strLotAlias
+							,@strVendorLotNo = NULL
+							,@strParentLotNumber= NULL
+								
+				UPDATE tblWHSKU
+				SET intLotId = @intLotId
+				WHERE intSKUId IN (
+						SELECT intSKUId
+						FROM tblWHOrderManifest om
+						JOIN tblWHOrderLineItem oli ON oli.intOrderLineItemId = om.intOrderLineItemId
+						WHERE oli.intOrderHeaderId = @intOrderHeaderId
+							AND oli.intItemId = @intItemId)
+							
+				UPDATE om
+				SET om.intLotId = @intLotId
+				FROM tblWHOrderManifest om
+				JOIN tblWHOrderLineItem oli ON oli.intOrderLineItemId = om.intOrderLineItemId
+				WHERE oli.intOrderHeaderId = @intOrderHeaderId
+					AND oli.intItemId = @intItemId
+					
+			END
 			
 			SELECT @intItemRecordId = MIN(intItemRecordId)
 			FROM @tblLineItem WHERE intItemRecordId > @intItemRecordId

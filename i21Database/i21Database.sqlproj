@@ -2845,6 +2845,8 @@
     <Build Include="dbo\Functions\fnGetCustomerTaxCodeExemption.sql" />
     <Build Include="dbo\Functions\fnGetVendorTaxCodeExemption.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreateLot.sql" />
+    <Build Include="dbo\Views\vyuWHItemDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
