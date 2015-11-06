@@ -38,6 +38,7 @@ AS
 			,@LastCost
 			,@ShipToLocationId
 			,@VendorLocationId
+			,NULL
 		)
 
 RETURN 0

@@ -46,6 +46,7 @@ BEGIN
 			,@LastCost
 			,@ShipToLocationId
 			,@VendorLocationId
+			,NULL
 		)
 
 	RETURN @ItemPrice
