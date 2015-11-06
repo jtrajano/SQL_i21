@@ -811,6 +811,15 @@
 		   [ysnSupported]					=		1,
 	       [intSort]						=		90
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Energy Trac')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		91,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Energy Trac',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		91
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO
