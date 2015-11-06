@@ -12,17 +12,24 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-BEGIN TRANSACTION #duplicateBill
-SAVE TRANSACTION #duplicateBill
+DECLARE @transCount INT = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
 
 DECLARE @generatedBillRecordId NVARCHAR(50);
-EXEC uspSMGetStartingNumber 9, @generatedBillRecordId OUT
+DECLARE @tranRecordId INT;
+DECLARE @tranType INT;
 
 --DUPLICATING tblAPBill
 IF OBJECT_ID('tempdb..#tmpDuplicateBill') IS NOT NULL DROP TABLE #tmpDuplicateBill
 
 SELECT * INTO #tmpDuplicateBill FROM tblAPBill WHERE intBillId = @billId
 ALTER TABLE #tmpDuplicateBill DROP COLUMN intBillId
+
+SELECT TOP 1 @tranType = intTransactionType FROM #tmpDuplicateBill
+
+SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 END
+
+EXEC uspSMGetStartingNumber @tranRecordId, @generatedBillRecordId OUT
 
 UPDATE A
 	SET ysnPosted = 0
@@ -248,7 +255,8 @@ INNER JOIN @billDetailTaxes B ON A.intBillDetailId = B.originalBillDetailId
 INSERT INTO tblAPBillDetailTax
 SELECT * FROM #tmpDuplicateBillDetailTaxes
 
-COMMIT TRANSACTION #duplicateBill
+IF @transCount = 0 COMMIT TRANSACTION
+
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
@@ -271,9 +279,6 @@ BEGIN CATCH
     IF @ErrorState  = 0
     SET @ErrorState = 1
     -- If the error renders the transaction as uncommittable or we have open transactions, we may want to rollback
-    IF @@TRANCOUNT > 0
-    BEGIN
-		ROLLBACK TRANSACTION #duplicateBill
-		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-    END
+    IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+    RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
