@@ -125,13 +125,13 @@ BEGIN TRY
 		,WP.dblTareWeight
 		,WP.dblQuantity + ISNULL(WP.dblTareWeight, 0) AS dblGrossWeight
 		,Ltrim(S.intShiftSequence) + ' ' + '(' + CONVERT(NVARCHAR, L.dtmDateCreated, 108) + ')' AS strShiftName
-		,@strPropertyName1 AS strPropertyName1
+		,ISNULL(@strPropertyName1,'') AS strPropertyName1
 		,@strPropertyValue1 AS strPropertyValue1
-		,@strPropertyName2 AS strPropertyName2
+		,ISNULL(@strPropertyName2,'') AS strPropertyName2
 		,@strPropertyValue2 AS strPropertyValue2
-		,@strPropertyName3 AS strPropertyName3
+		,ISNULL(@strPropertyName3,'') AS strPropertyName3
 		,@strPropertyValue3 AS strPropertyValue3
-		,@strPropertyName4 AS strPropertyName4
+		,ISNULL(@strPropertyName4,'') AS strPropertyName4
 		,@strPropertyValue4 AS strPropertyValue4
 	FROM dbo.tblICLot AS L
 	JOIN dbo.tblSMUserSecurity US ON L.intCreatedEntityId = US.intEntityUserSecurityId
