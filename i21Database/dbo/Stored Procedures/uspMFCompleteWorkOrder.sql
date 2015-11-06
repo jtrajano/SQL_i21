@@ -446,6 +446,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 				,@strRetBatchId = @strRetBatchId OUTPUT
+				,@intBatchId = @intBatchId
 		End
 	END
 	IF @intProductionTypeId in (2,3) 
