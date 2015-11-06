@@ -1214,28 +1214,49 @@ BEGIN
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 	WHERE t.intCommodityId= @intCommodityId
-	SELECT @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
+	SELECT @StrUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
 END
 ELSE
 BEGIN
-	SELECT @strUnitMeasure=c.strUnitMeasure
+	SELECT @StrUnitMeasure=c.strUnitMeasure
 	FROM tblICCommodity t
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
 	join tblICUnitMeasure c on c.intUnitMeasureId=cuc.intUnitMeasureId 	
 	WHERE t.intCommodityId= @intCommodityId
 END
 
-IF ISNULL(@intUnitMeasureId, 0) <> 0
+IF ISNULL(@intLocationId, 0) <> 0 
 BEGIN
-SELECT intSeqId,strType,@strUnitMeasure as strUnitMeasure, 
-		CASE WHEN strType = 'Net Payable  ($)' THEN dblTotal
-			 WHEN strType = 'Net Receivable  ($)' THEN dblTotal
-			 else dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) end dblTotal
-FROM #temp 
 
+		IF ISNULL(@intUnitMeasureId, 0) <> 0
+		BEGIN
+		SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure, 
+				CASE WHEN strType = 'Net Payable  ($)' THEN dblTotal
+					 WHEN strType = 'Net Receivable  ($)' THEN dblTotal
+					 else dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) end dblTotal
+		FROM #temp 
+
+		END
+		ELSE
+		BEGIN
+			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,dblTotal FROM #temp
+		END
 END
-ELSE
+ELSE 
 BEGIN
-	SELECT intSeqId,strType,@strUnitMeasure as strUnitMeasure,dblTotal
-FROM #temp1
+
+	IF ISNULL(@intUnitMeasureId, 0) <> 0
+		BEGIN
+		SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure, 
+				CASE WHEN strType = 'Net Payable  ($)' THEN dblTotal
+					 WHEN strType = 'Net Receivable  ($)' THEN dblTotal
+					 else dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) end dblTotal
+		FROM #temp1 
+
+		END
+		ELSE
+		BEGIN
+			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,dblTotal FROM #temp1
+		END
+
 END

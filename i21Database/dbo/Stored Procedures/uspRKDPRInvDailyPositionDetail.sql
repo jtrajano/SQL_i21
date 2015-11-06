@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKDPRInvDailyPositionDetail] 
- 
+﻿CREATE PROCEDURE [dbo].[uspRKDPRInvDailyPositionDetail]  
 	 @intCommodityId INT
 	,@intLocationId INT = NULL
 AS
@@ -622,14 +621,32 @@ JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cu
 JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 WHERE t.intCommodityId= @intCommodityId
 
-IF ISNULL(@intUnitMeasureId,'') <> ''
+IF ISNULL(@intLocationId, 0) <> 0 
 BEGIN
-SELECT intSeqId,strType, 
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
-FROM #temp 
+		IF ISNULL(@intUnitMeasureId,'') <> ''
+		BEGIN
+		SELECT intSeqId,strType, 
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+		FROM #temp 
 
+		END
+		ELSE
+		BEGIN
+			SELECT intSeqId,strType,dblTotal FROM #temp
+		END
 END
-ELSE
+ELSE 
 BEGIN
-	SELECT intSeqId,strType,dblTotal FROM #temp1
+		IF ISNULL(@intUnitMeasureId,'') <> ''
+		BEGIN
+		SELECT intSeqId,strType, 
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+		FROM #temp1 
+
+		END
+		ELSE
+		BEGIN
+			SELECT intSeqId,strType,dblTotal FROM #temp1
+		END
 END
+
