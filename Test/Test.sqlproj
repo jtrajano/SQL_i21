@@ -869,6 +869,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 2.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and reserved qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for parent lot.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
