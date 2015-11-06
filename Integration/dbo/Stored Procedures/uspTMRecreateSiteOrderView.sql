@@ -75,6 +75,7 @@ BEGIN
 				,dblCreditLimit = ISNULL(C.vwcus_cred_limit,0.0)
 				,intLocationId = A.intLocationId
 				,A.intCustomerID
+				,intSitePriceLevel = CAST(NULL AS INT)
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -147,6 +148,7 @@ BEGIN
 				,intLocationId = A.intLocationId
 				,A.intCustomerID
 				,intClockLocation = A.intClockID
+				,intSitePriceLevel = A.intCompanyLocationPricingLevelId
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
