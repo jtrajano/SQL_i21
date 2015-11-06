@@ -28,7 +28,12 @@
 	,@ItemContractHeaderId			INT				= NULL
 	,@ItemContractDetailId			INT				= NULL			
 	,@ItemShipmentId				INT				= NULL			
-	,@ItemShipmentPurchaseSalesContractId	INT		= NULL			
+	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
+	,@ItemShipmentUOMId				INT				= NULL	
+	,@ItemShipmentQtyShipped		NUMERIC(18,6)	= 0.000000		
+	,@ItemShipmentGrossWt			NUMERIC(18,6)	= 0.000000		
+	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
+	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000		
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
@@ -169,6 +174,11 @@ BEGIN TRY
 		,[intContractDetailId]
 		,[intShipmentId]
 		,[intShipmentPurchaseSalesContractId]
+		,[intShipmentItemUOMId]
+		,[dblShipmentQtyShipped]
+		,[dblShipmentGrossWt]
+		,[dblShipmentTareWt]
+		,[dblShipmentNetWt]
 		,[intTicketId]
 		,[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]
@@ -215,6 +225,11 @@ BEGIN TRY
 		,[intContractDetailId]				= @ItemContractDetailId
 		,[intShipmentId]					= @ItemShipmentId
 		,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
+		,[intShipmentItemUOMId]				= @ItemShipmentUOMId
+		,[dblShipmentQtyShipped]			= @ItemShipmentQtyShipped
+		,[dblShipmentGrossWt]				= @ItemShipmentGrossWt
+		,[dblShipmentTareWt]				= @ItemShipmentTareWt
+		,[dblShipmentNetWt]					= @ItemShipmentNetWt
 		,[intTicketId]						= @ItemTicketId
 		,[intTicketHoursWorkedId]			= @ItemTicketHoursWorkedId 
 		,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId 

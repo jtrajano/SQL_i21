@@ -51,6 +51,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
+	,[dblGrossWt]						= 0.00
+	,[dblTareWt]						= 0.00
+	,[dblNetWt]							= 0.00
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -195,6 +198,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
+	,[dblGrossWt]						= 0.00
+	,[dblTareWt]						= 0.00
+	,[dblNetWt]							= 0.00
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -287,6 +293,9 @@ SELECT
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblGrossWt]						= 0.00
+	,[dblTareWt]						= 0.00
+	,[dblNetWt]							= 0.00
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -433,6 +442,9 @@ SELECT
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL --ISI.[intTaxCodeId] 
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup] 
+	,[dblGrossWt]						= 0.00
+	,[dblTareWt]						= 0.00
+	,[dblNetWt]							= 0.00
 FROM
 	tblICInventoryShipmentItem ISI
 INNER JOIN
@@ -548,6 +560,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL
 	,[strTaxGroup]						= NULL
+	,[dblGrossWt]						= 0.00
+	,[dblTareWt]						= 0.00
+	,[dblNetWt]							= 0.00
 FROM
 	vyuLGShipmentHeader LGS		
 INNER JOIN

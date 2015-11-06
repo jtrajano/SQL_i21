@@ -40,6 +40,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional Invoice/ Duplicate/ Import/ Recurring) 	
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEntity			
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
+	,[ysnRecap]								BIT												NULL		-- If [ysnRecap] = 1 > Recap Invoices
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
@@ -71,6 +72,11 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intContractHeaderId]					INT												NULL		-- Key Value from tblCTContractHeader(If NULL, it will be populated using [intContractDetailId])
 	,[intContractDetailId]					INT												NULL		-- Key Value from tblCTContractDetail (Sales Contract)
 	,[intShipmentPurchaseSalesContractId]	INT												NULL		-- Key Value from tblLGShipmentPurchaseSalesContract (Inbound Shipment)
+	,[intShipmentItemUOMId]					INT												NULL
+	,[dblShipmentQtyShipped]				NUMERIC(18, 6)									NULL
+	,[dblShipmentGrossWt]					NUMERIC(18, 6)									NULL
+	,[dblShipmentTareWt]					NUMERIC(18, 6)									NULL
+	,[dblShipmentNetWt]						NUMERIC(18, 6)									NULL
 	,[intTicketId]							INT												NULL		-- Key Value from tblSCTicket (Scale Ticket)
 	,[intTicketHoursWorkedId]				INT												NULL		-- Key Value from tblHDTicketHoursWorked (Help Desk)
 	,[intOriginalInvoiceDetailId]			INT												NULL		-- Key Value from tblARInvoiceDetail (Provisional Invoice)

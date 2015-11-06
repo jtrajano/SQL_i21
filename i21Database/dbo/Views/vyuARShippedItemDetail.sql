@@ -17,8 +17,8 @@ SELECT
 	,[strItemNo]							= ICI.[strItemNo]
 	,[strItemDescription]					= ICI.[strDescription]
 	,[intItemUOMId]							= CTCD.[intItemUOMId]
-	,[strUnitMeasure]						= ICUM.[strUnitMeasure]
-	,[intShipmentItemUOMId]					= CTCD.[intItemUOMId]
+	,[strUnitMeasure]						= ICUM1.[strUnitMeasure]
+	,[intShipmentItemUOMId]					= CTCD.[intPriceItemUOMId]
 	,[strShipmentUnitMeasure]				= ICUM.[strUnitMeasure]
 	,[dblQtyShipped]						= LGSPS.[dblSAllocatedQty]
 	,[dblQtyOrdered]						= LGSPS.[dblSAllocatedQty]
@@ -27,7 +27,7 @@ SELECT
 	,[dblQtyRemaining]						= LGSPS.[dblSAllocatedQty]
 	,[dblDiscount]							= 0.00
 	,[dblPrice]								= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],1) * CTCD.[dblCashPrice]
-	,[dblShipmentUnitPrice]					= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],1) * CTCD.[dblCashPrice]
+	,[dblShipmentUnitPrice]					= CTCD.[dblCashPrice]
 	,[dblTotalTax]							= 0.00
 	,[dblTotal]								= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],LGSPS.[dblSAllocatedQty]) * CTCD.[dblCashPrice]
 	,[intAccountId]							= ARIA.[intAccountId]
@@ -38,6 +38,9 @@ SELECT
 	,[strStorageLocationName]				= NULL	
 	,[intTaxGroupId]						= NULL
 	,[strTaxGroup]							= NULL
+	,[dblGrossWt]							= LGSPS.[dblGrossWt] 
+	,[dblTareWt]							= LGSPS.[dblTareWt] 
+	,[dblNetWt]								= LGSPS.[dblNetWt] 
 FROM
 	vyuLGDropShipmentDetails LGSPS
 INNER JOIN
@@ -48,10 +51,16 @@ INNER JOIN
 		ON LGSPS.[intPItemId] = ICI.[intItemId]
 LEFT JOIN
 	tblICItemUOM ICIU
-		ON CTCD.[intItemUOMId] = ICIU.[intItemUOMId]
+		ON CTCD.[intPriceItemUOMId] = ICIU.[intItemUOMId]
 LEFT JOIN
 	tblICUnitMeasure ICUM
-		ON ICUM.[intUnitMeasureId] = ICIU.[intUnitMeasureId]			
+		ON ICUM.[intUnitMeasureId] = ICIU.[intUnitMeasureId]		
+LEFT JOIN
+	tblICItemUOM ICIU1
+		ON CTCD.[intItemUOMId] = ICIU1.[intItemUOMId]
+LEFT JOIN
+	tblICUnitMeasure ICUM1
+		ON ICUM1.[intUnitMeasureId] = ICIU1.[intUnitMeasureId]				
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
 		ON LGSPS.[intPItemId] = ARIA.[intItemId]

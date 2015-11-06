@@ -154,6 +154,11 @@ BEGIN TRY
 		,[intContractHeaderId]
 		,[intContractDetailId]
 		,[intShipmentPurchaseSalesContractId]
+		,[intShipmentItemUOMId]
+		,[dblShipmentQtyShipped]
+		,[dblShipmentGrossWt]
+		,[dblShipmentTareWt]
+		,[dblShipmentNetWt]
 		,[intTicketId]
 		,[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]
@@ -210,11 +215,11 @@ BEGIN TRY
 		,[ysnInventory]						= 1
 		,[strDocumentNumber]				= @InvoiceNumber
 		,[strItemDescription]				= ARSID.[strItemDescription] 
-		,[intItemUOMId]						= ARSID.[intItemUOMId] 
-		,[dblQtyOrdered]					= ARSID.[dblQtyOrdered] 
-		,[dblQtyShipped]					= ARSID.[dblQtyShipped]  
+		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
+		,[dblQtyOrdered]					= ARSID.[dblNetWt] 
+		,[dblQtyShipped]					= ARSID.[dblNetWt]
 		,[dblDiscount]						= ARSID.[dblDiscount]
-		,[dblPrice]							= ARSID.[dblPrice]
+		,[dblPrice]							= ARSID.[dblShipmentUnitPrice] 
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]
@@ -232,6 +237,11 @@ BEGIN TRY
 		,[intContractHeaderId]				= ARSID.[intContractHeaderId] 
 		,[intContractDetailId]				= ARSID.[intContractDetailId] 
 		,[intShipmentPurchaseSalesContractId]	= ARSID.[intShipmentPurchaseSalesContractId] 
+		,[intShipmentItemUOMId]				= ARSID.[intItemUOMId]
+		,[dblShipmentQtyShipped]			= ARSID.[dblQtyShipped] 
+		,[dblShipmentGrossWt]				= ARSID.[dblGrossWt]
+		,[dblShipmentTareWt]				= ARSID.[dblTareWt]
+		,[dblShipmentNetWt]					= ARSID.[dblNetWt]
 		,[intTicketId]						= ARID.[intTicketId]
 		,[intTicketHoursWorkedId]			= ARID.[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]		= ARID.[intInvoiceDetailId] 
@@ -328,6 +338,11 @@ SELECT
 		,[intContractHeaderId]				= ARID.[intContractHeaderId] 
 		,[intContractDetailId]				= ARID.[intContractDetailId] 
 		,[intShipmentPurchaseSalesContractId]	= NULL
+		,[intShipmentItemUOMId]				= NULL
+		,[dblShipmentQtyShipped]			= 0.00
+		,[dblShipmentGrossWt]				= 0.00
+		,[dblShipmentTareWt]				= 0.00
+		,[dblShipmentNetWt]					= 0.00
 		,[intTicketId]						= ARID.[intTicketId]
 		,[intTicketHoursWorkedId]			= ARID.[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]		= ARID.[intInvoiceDetailId] 

@@ -13,10 +13,16 @@
 											-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]
 											-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
 											-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
-	,@RaiseError		BIT				= 0
-	,@ErrorMessage		NVARCHAR(250)	= NULL			OUTPUT
-	,@CreatedIvoices	NVARCHAR(MAX)	= NULL			OUTPUT
-	,@UpdatedIvoices	NVARCHAR(MAX)	= NULL			OUTPUT
+	,@RaiseError				BIT				= 0
+	,@ErrorMessage				NVARCHAR(250)	= NULL			OUTPUT
+	,@CreatedIvoices			NVARCHAR(MAX)	= NULL			OUTPUT
+	,@UpdatedIvoices			NVARCHAR(MAX)	= NULL			OUTPUT
+	,@BatchIdForNewPost			NVARCHAR(50)	= NULL			OUTPUT
+	,@BatchIdForNewPostRecap	NVARCHAR(50)	= NULL			OUTPUT
+	,@BatchIdForExistingPost	NVARCHAR(50)	= NULL			OUTPUT
+	,@BatchIdForExistingRecap	NVARCHAR(50)	= NULL			OUTPUT
+	,@BatchIdForExistingUnPost	NVARCHAR(50)	= NULL			OUTPUT
+	,@BatchIdForExistingUnRecap	NVARCHAR(50)	= NULL			OUTPUT
 AS
 
 BEGIN
@@ -64,6 +70,7 @@ BEGIN TRY
 		,[ysnRecomputed]				BIT												NULL
 		,[ysnForInsert]					BIT												NULL
 		,[ysnForUpdate]					BIT												NULL
+		,[ysnRecap]						BIT												NULL
 		,[ysnPost]						BIT												NULL
 	)
 
@@ -141,6 +148,7 @@ DECLARE  @Id									INT
 		,@OriginalInvoiceId						INT
 		,@EntityId								INT
 		,@ResetDetails							BIT
+		,@Recap									BIT
 		,@Post									BIT
 
 		,@InvoiceDetailId						INT
@@ -170,6 +178,11 @@ DECLARE  @Id									INT
 		,@ItemContractHeaderId					INT
 		,@ItemContractDetailId					INT
 		,@ItemShipmentPurchaseSalesContractId	INT
+		,@ItemShipmentUOMId						INT
+		,@ItemShipmentQtyShipped				NUMERIC(18,6)
+		,@ItemShipmentGrossWt					NUMERIC(18,6)
+		,@ItemShipmentTareWt					NUMERIC(18,6)
+		,@ItemShipmentNetWt						NUMERIC(18,6)
 		,@ItemTicketId							INT
 		,@ItemTicketHoursWorkedId				INT
 		,@ItemOriginalInvoiceDetailId			INT			
@@ -246,6 +259,7 @@ BEGIN
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional Invoice' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@ResetDetails					= [ysnResetDetails]
+		,@Recap							= [ysnRecap]
 		,@Post							= [ysnPost]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
@@ -275,6 +289,11 @@ BEGIN
 		,@ItemContractHeaderId			= (CASE WHEN @GroupingOption = 0 THEN [intContractHeaderId] ELSE NULL END)
 		,@ItemContractDetailId			= (CASE WHEN @GroupingOption = 0 THEN [intContractDetailId] ELSE NULL END)
 		,@ItemShipmentPurchaseSalesContractId = (CASE WHEN @GroupingOption = 0 THEN [intShipmentPurchaseSalesContractId] ELSE NULL END)
+		,@ItemShipmentUOMId				= (CASE WHEN @GroupingOption = 0 THEN [intShipmentItemUOMId] ELSE NULL END)
+		,@ItemShipmentQtyShipped		= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentQtyShipped] ELSE NULL END)
+		,@ItemShipmentGrossWt			= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentGrossWt] ELSE NULL END)
+		,@ItemShipmentTareWt			= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentTareWt] ELSE NULL END)
+		,@ItemShipmentNetWt				= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentNetWt] ELSE NULL END)
 		,@ItemTicketId					= (CASE WHEN @GroupingOption = 0 THEN [intTicketId] ELSE NULL END)
 		,@ItemTicketHoursWorkedId		= (CASE WHEN @GroupingOption = 0 THEN [intTicketHoursWorkedId] ELSE NULL END)
 		,@ItemOriginalInvoiceDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intOriginalInvoiceDetailId] ELSE NULL END)
@@ -417,7 +436,12 @@ BEGIN
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 			,@ItemContractHeaderId			= @ItemContractHeaderId
 			,@ItemContractDetailId			= @ItemContractDetailId
-			,@ItemShipmentPurchaseSalesContractId = @ItemShipmentPurchaseSalesContractId		
+			,@ItemShipmentPurchaseSalesContractId = @ItemShipmentPurchaseSalesContractId
+			,@ItemShipmentUOMId				= @ItemShipmentUOMId
+			,@ItemShipmentQtyShipped		= @ItemShipmentQtyShipped
+			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
+			,@ItemShipmentTareWt			= @ItemShipmentTareWt
+			,@ItemShipmentNetWt				= @ItemShipmentNetWt		
 			,@ItemTicketId					= @ItemTicketId
 			,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
@@ -498,45 +522,50 @@ BEGIN
 			SELECT TOP 1 @ForDetailId = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @NewInvoiceId ORDER BY [intId]
 			
 				SELECT TOP 1
-					 @ShipmentId					=  [intShipmentId]		 	
-					,@ItemId						=  [intItemId]
-					,@Inventory						=  [ysnInventory]
-					,@ItemDocumentNumber			=  [strDocumentNumber]
-					,@ItemDescription				=  [strItemDescription]
-					,@ItemUOMId						=  [intItemUOMId]
-					,@ItemQtyOrdered				=  [dblQtyOrdered]
-					,@ItemQtyShipped				=  [dblQtyShipped]
-					,@ItemDiscount					=  [dblDiscount]
-					,@ItemPrice						=  [dblPrice]
-					,@RefreshPrice					=  [ysnRefreshPrice]
-					,@ItemMaintenanceType			=  [strMaintenanceType]
-					,@ItemFrequency					=  [strFrequency]
-					,@ItemMaintenanceDate			=  [dtmMaintenanceDate]
-					,@ItemMaintenanceAmount			=  [dblMaintenanceAmount]
-					,@ItemLicenseAmount				=  [dblLicenseAmount]
-					,@ItemTaxGroupId				=  [intTaxGroupId]
-					,@RecomputeTax					=  [ysnRecomputeTax]
-					,@ItemSCInvoiceId				=  [intSCInvoiceId]
-					,@ItemSCInvoiceNumber			=  [strSCInvoiceNumber]
-					,@ItemInventoryShipmentItemId	=  [intInventoryShipmentItemId]
-					,@ItemShipmentNumber			=  [strShipmentNumber]
-					,@ItemSalesOrderDetailId		=  [intSalesOrderDetailId]
-					,@ItemSalesOrderNumber			=  [strSalesOrderNumber]
-					,@ItemContractHeaderId			=  [intContractHeaderId]
-					,@ItemContractDetailId			=  [intContractDetailId]
+					 @ShipmentId					= [intShipmentId]		 	
+					,@ItemId						= [intItemId]
+					,@Inventory						= [ysnInventory]
+					,@ItemDocumentNumber			= [strDocumentNumber]
+					,@ItemDescription				= [strItemDescription]
+					,@ItemUOMId						= [intItemUOMId]
+					,@ItemQtyOrdered				= [dblQtyOrdered]
+					,@ItemQtyShipped				= [dblQtyShipped]
+					,@ItemDiscount					= [dblDiscount]
+					,@ItemPrice						= [dblPrice]
+					,@RefreshPrice					= [ysnRefreshPrice]
+					,@ItemMaintenanceType			= [strMaintenanceType]
+					,@ItemFrequency					= [strFrequency]
+					,@ItemMaintenanceDate			= [dtmMaintenanceDate]
+					,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
+					,@ItemLicenseAmount				= [dblLicenseAmount]
+					,@ItemTaxGroupId				= [intTaxGroupId]
+					,@RecomputeTax					= [ysnRecomputeTax]
+					,@ItemSCInvoiceId				= [intSCInvoiceId]
+					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
+					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
+					,@ItemShipmentNumber			= [strShipmentNumber]
+					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
+					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
+					,@ItemContractHeaderId			= [intContractHeaderId]
+					,@ItemContractDetailId			= [intContractDetailId]
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
-					,@ItemTicketId					=  [intTicketId]
-					,@ItemTicketHoursWorkedId		=  [intTicketHoursWorkedId]
-					,@ItemOriginalInvoiceDetailId	=	[intOriginalInvoiceDetailId]
-					,@ItemSiteId					=  [intSiteId]
-					,@ItemBillingBy					=  [strBillingBy]
-					,@ItemPercentFull				=  [dblPercentFull]
-					,@ItemNewMeterReading			=  [dblNewMeterReading]
-					,@ItemPreviousMeterReading		=  [dblPreviousMeterReading]
-					,@ItemConversionFactor			=  [dblConversionFactor]
-					,@ItemPerformerId				=  [intPerformerId]
-					,@ItemLeaseBilling				=  [ysnLeaseBilling]
-					,@ItemVirtualMeterReading		=  [ysnVirtualMeterReading]
+					,@ItemShipmentUOMId				= [intShipmentItemUOMId]
+					,@ItemShipmentQtyShipped		= [dblShipmentQtyShipped]
+					,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
+					,@ItemShipmentTareWt			= [dblShipmentTareWt]
+					,@ItemShipmentNetWt				= [dblShipmentNetWt]
+					,@ItemTicketId					= [intTicketId]
+					,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
+					,@ItemSiteId					= [intSiteId]
+					,@ItemBillingBy					= [strBillingBy]
+					,@ItemPercentFull				= [dblPercentFull]
+					,@ItemNewMeterReading			= [dblNewMeterReading]
+					,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
+					,@ItemConversionFactor			= [dblConversionFactor]
+					,@ItemPerformerId				= [intPerformerId]
+					,@ItemLeaseBilling				= [ysnLeaseBilling]
+					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -575,6 +604,11 @@ BEGIN
 						,@ItemContractDetailId			= @ItemContractDetailId
 						,@ItemShipmentId				= @ShipmentId
 						,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
+						,@ItemShipmentUOMId				= @ItemShipmentUOMId
+						,@ItemShipmentQtyShipped		= @ItemShipmentQtyShipped
+						,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
+						,@ItemShipmentTareWt			= @ItemShipmentTareWt
+						,@ItemShipmentNetWt				= @ItemShipmentNetWt
 						,@ItemTicketId					= @ItemTicketId
 						,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 						,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
@@ -623,7 +657,8 @@ BEGIN
 	SET
 		 [ysnProcessed]	= 1
 		,[intInvoiceId]	= @NewInvoiceId
-		,[ysnPost]		= ISNULL(@Post,0)
+		,[ysnPost]		= @Post
+		,[ysnRecap] 	= @Recap
 	FROM
 		@InvoiceEntries I
 	WHERE
@@ -748,14 +783,15 @@ BEGIN TRY
 			,@Calculated					= [ysnCalculated]
 			,@Splitted						= [ysnSplitted]
 			,@PaymentId						= [intPaymentId]
-			,@SplitId						= [intSplitId]
-			,@DistributionHeaderId			= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
-			,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
-			,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
-			,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
-			,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional Invoice' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
+			,@SplitId						= [intSplitId]			
+			,@DistributionHeaderId			= [intDistributionHeaderId]
+			,@ActualCostId					= [strActualCostId]
+			,@ShipmentId					= [intShipmentId]
+			,@TransactionId 				= [intTransactionId]
+			,@OriginalInvoiceId				= [intOriginalInvoiceId]
 			,@EntityId						= [intEntityId]
 			,@ResetDetails					= [ysnResetDetails]
+			,@Recap							= [ysnRecap] 
 			,@Post							= [ysnPost]
 		FROM
 			@InvoiceEntries
@@ -909,45 +945,50 @@ BEGIN TRY
 				SELECT TOP 1 @ForExistingDetailId = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @ExistingInvoiceId ORDER BY [intId]
 				
 					SELECT TOP 1
-						 @ShipmentId					=  [intShipmentId]		 	
-						,@ItemId						=  [intItemId]
-						,@Inventory						=  [ysnInventory]
-						,@ItemDocumentNumber			=  [strDocumentNumber]
-						,@ItemDescription				=  [strItemDescription]
-						,@ItemUOMId						=  [intItemUOMId]
-						,@ItemQtyOrdered				=  [dblQtyOrdered]
-						,@ItemQtyShipped				=  [dblQtyShipped]
-						,@ItemDiscount					=  [dblDiscount]
-						,@ItemPrice						=  [dblPrice]
-						,@RefreshPrice					=  [ysnRefreshPrice]
-						,@ItemMaintenanceType			=  [strMaintenanceType]
-						,@ItemFrequency					=  [strFrequency]
-						,@ItemMaintenanceDate			=  [dtmMaintenanceDate]
-						,@ItemMaintenanceAmount			=  [dblMaintenanceAmount]
-						,@ItemLicenseAmount				=  [dblLicenseAmount]
-						,@ItemTaxGroupId				=  [intTaxGroupId]
-						,@RecomputeTax					=  [ysnRecomputeTax]
-						,@ItemSCInvoiceId				=  [intSCInvoiceId]
-						,@ItemSCInvoiceNumber			=  [strSCInvoiceNumber]
-						,@ItemInventoryShipmentItemId	=  [intInventoryShipmentItemId]
-						,@ItemShipmentNumber			=  [strShipmentNumber]
-						,@ItemSalesOrderDetailId		=  [intSalesOrderDetailId]
-						,@ItemSalesOrderNumber			=  [strSalesOrderNumber]
-						,@ItemContractHeaderId			=  [intContractHeaderId]
-						,@ItemContractDetailId			=  [intContractDetailId]
+						 @ShipmentId					= [intShipmentId]		 	
+						,@ItemId						= [intItemId]
+						,@Inventory						= [ysnInventory]
+						,@ItemDocumentNumber			= [strDocumentNumber]
+						,@ItemDescription				= [strItemDescription]
+						,@ItemUOMId						= [intItemUOMId]
+						,@ItemQtyOrdered				= [dblQtyOrdered]
+						,@ItemQtyShipped				= [dblQtyShipped]
+						,@ItemDiscount					= [dblDiscount]
+						,@ItemPrice						= [dblPrice]
+						,@RefreshPrice					= [ysnRefreshPrice]
+						,@ItemMaintenanceType			= [strMaintenanceType]
+						,@ItemFrequency					= [strFrequency]
+						,@ItemMaintenanceDate			= [dtmMaintenanceDate]
+						,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
+						,@ItemLicenseAmount				= [dblLicenseAmount]
+						,@ItemTaxGroupId				= [intTaxGroupId]
+						,@RecomputeTax					= [ysnRecomputeTax]
+						,@ItemSCInvoiceId				= [intSCInvoiceId]
+						,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
+						,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
+						,@ItemShipmentNumber			= [strShipmentNumber]
+						,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
+						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
+						,@ItemContractHeaderId			= [intContractHeaderId]
+						,@ItemContractDetailId			= [intContractDetailId]
 						,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
-						,@ItemTicketId					=  [intTicketId]
-						,@ItemTicketHoursWorkedId		=  [intTicketHoursWorkedId]
-						,@ItemOriginalInvoiceDetailId	=  [intOriginalInvoiceDetailId]
-						,@ItemSiteId					=  [intSiteId]
-						,@ItemBillingBy					=  [strBillingBy]
-						,@ItemPercentFull				=  [dblPercentFull]
-						,@ItemNewMeterReading			=  [dblNewMeterReading]
-						,@ItemPreviousMeterReading		=  [dblPreviousMeterReading]
-						,@ItemConversionFactor			=  [dblConversionFactor]
-						,@ItemPerformerId				=  [intPerformerId]
-						,@ItemLeaseBilling				=  [ysnLeaseBilling]
-						,@ItemVirtualMeterReading		=  [ysnVirtualMeterReading]
+						,@ItemShipmentUOMId				= [intShipmentItemUOMId]
+						,@ItemShipmentQtyShipped		= [dblShipmentQtyShipped]
+						,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
+						,@ItemShipmentTareWt			= [dblShipmentTareWt]
+						,@ItemShipmentNetWt				= [dblShipmentNetWt]
+						,@ItemTicketId					= [intTicketId]
+						,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
+						,@ItemSiteId					= [intSiteId]
+						,@ItemBillingBy					= [strBillingBy]
+						,@ItemPercentFull				= [dblPercentFull]
+						,@ItemNewMeterReading			= [dblNewMeterReading]
+						,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
+						,@ItemConversionFactor			= [dblConversionFactor]
+						,@ItemPerformerId				= [intPerformerId]
+						,@ItemLeaseBilling				= [ysnLeaseBilling]
+						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1067,6 +1108,11 @@ BEGIN TRY
 					,@ItemContractHeaderId			= [intContractHeaderId]
 					,@ItemContractDetailId			= [intContractDetailId]
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
+					,@ItemShipmentUOMId				= [intShipmentItemUOMId]
+					,@ItemShipmentQtyShipped		= [dblShipmentQtyShipped]
+					,@ItemShipmentGrossWt			= [dblShipmentGrossWt]
+					,@ItemShipmentTareWt			= [dblShipmentTareWt]
+					,@ItemShipmentNetWt				= [dblShipmentNetWt]
 					,@ItemTicketId					= [intTicketId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
@@ -1140,6 +1186,11 @@ BEGIN TRY
 						,[intContractDetailId]					= @ItemContractDetailId			
 						,[intShipmentId]						= @ShipmentId			
 						,[intShipmentPurchaseSalesContractId]	= @ItemShipmentPurchaseSalesContractId
+						,[intShipmentItemUOMId]					= @ItemShipmentUOMId
+						,[dblShipmentQtyShipped]				= @ItemShipmentQtyShipped
+						,[dblShipmentGrossWt]					= @ItemShipmentGrossWt
+						,[dblShipmentTareWt]					= @ItemShipmentTareWt
+						,[dblShipmentNetWt]						= @ItemShipmentNetWt
 						,[intTicketId]							= @ItemTicketId
 						,[intTicketHoursWorkedId]				= @ItemTicketHoursWorkedId
 						,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId
@@ -1220,10 +1271,12 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
+
+SET @batchIdUsed = ''
 		
 --Posting newly added Invoices
-BEGIN TRY
-	DECLARE @IdsForPosting VARCHAR(MAX)
+DECLARE @IdsForPosting VARCHAR(MAX)
+BEGIN TRY	
 	SELECT DISTINCT
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
@@ -1232,9 +1285,11 @@ BEGIN TRY
 		ISNULL([ysnForInsert],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceID],0) <> 0
-		AND ISNULL([ysnPost],0) = 1		
+		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnRecap],0) <> 1	
 		
-	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0		
+	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
+		BEGIN		
 		EXEC [dbo].[uspARPostInvoice]
 			@batchId			= NULL,
 			@post				= 1,
@@ -1254,6 +1309,47 @@ BEGIN TRY
 			@transType			= N'all',
 			@raiseError			= 1
 
+			SET @BatchIdForNewPost = @batchIdUsed
+		END
+	
+	SET @IdsForPosting = ''
+	SET @batchIdUsed = ''
+
+	SELECT DISTINCT
+		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		#EntriesForProcessing
+	WHERE
+		ISNULL([ysnForInsert],0) = 1
+		AND ISNULL([ysnProcessed],0) = 1
+		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnRecap],0) = 1	
+		
+	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
+		BEGIN	
+		EXEC [dbo].[uspARPostInvoice]
+			@batchId			= NULL,
+			@post				= 1,
+			@recap				= 1,
+			@param				= @IdsForPosting,
+			@userId				= @UserId,
+			@beginDate			= NULL,
+			@endDate			= NULL,
+			@beginTransaction	= NULL,
+			@endTransaction		= NULL,
+			@exclude			= NULL,
+			@successfulCount	= @successfulCount OUTPUT,
+			@invalidCount		= @invalidCount OUTPUT,
+			@success			= @success OUTPUT,
+			@batchIdUsed		= @batchIdUsed OUTPUT,
+			@recapId			= @recapId OUTPUT,
+			@transType			= N'all',
+			@raiseError			= 1	
+
+			SET @BatchIdForNewPostRecap = @batchIdUsed
+		END
+
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
@@ -1265,8 +1361,8 @@ BEGIN CATCH
 END CATCH
 
 --Posting Updated Invoices
-BEGIN TRY
-	DECLARE @IdsForPostingUpdated VARCHAR(MAX)
+DECLARE @IdsForPostingUpdated VARCHAR(MAX)
+BEGIN TRY	
 	SELECT DISTINCT
 		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
@@ -1276,11 +1372,11 @@ BEGIN TRY
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceID],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnRecap],0) <> 1
 		
 		
-	SET @UpdatedIvoices = @IdsForPostingUpdated
-
-	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0				
+	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
+		BEGIN			
 		EXEC [dbo].[uspARPostInvoice]
 			@batchId			= NULL,
 			@post				= 1,
@@ -1299,6 +1395,138 @@ BEGIN TRY
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
 			@raiseError			= 1
+
+			SET @BatchIdForExistingPost = @batchIdUsed
+		END
+
+	SET @IdsForPostingUpdated = ''
+	SET @batchIdUsed = ''
+
+	SELECT DISTINCT
+		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		#EntriesForProcessing
+	WHERE
+		ISNULL([ysnForUpdate],0) = 1
+		AND ISNULL([ysnProcessed],0) = 1
+		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnRecap],0) = 1
+		
+		
+	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
+		BEGIN			
+		EXEC [dbo].[uspARPostInvoice]
+			@batchId			= NULL,
+			@post				= 1,
+			@recap				= 1,
+			@param				= @IdsForPostingUpdated,
+			@userId				= @UserId,
+			@beginDate			= NULL,
+			@endDate			= NULL,
+			@beginTransaction	= NULL,
+			@endTransaction		= NULL,
+			@exclude			= NULL,
+			@successfulCount	= @successfulCount OUTPUT,
+			@invalidCount		= @invalidCount OUTPUT,
+			@success			= @success OUTPUT,
+			@batchIdUsed		= @batchIdUsed OUTPUT,
+			@recapId			= @recapId OUTPUT,
+			@transType			= N'all',
+			@raiseError			= 1
+
+			SET @BatchIdForExistingPost = @batchIdUsed
+		END
+
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
+--UnPosting Updated Invoices
+DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
+BEGIN TRY	
+	SELECT DISTINCT
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		#EntriesForProcessing
+	WHERE
+		ISNULL([ysnForUpdate],0) = 1
+		AND ISNULL([ysnProcessed],0) = 1
+		AND ISNULL([intInvoiceID],0) <> 0
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 0
+		AND ISNULL([ysnRecap],0) <> 1
+		
+		
+	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
+		BEGIN			
+		EXEC [dbo].[uspARPostInvoice]
+			@batchId			= NULL,
+			@post				= 0,
+			@recap				= 0,
+			@param				= @IdsForUnPostingUpdated,
+			@userId				= @UserId,
+			@beginDate			= NULL,
+			@endDate			= NULL,
+			@beginTransaction	= NULL,
+			@endTransaction		= NULL,
+			@exclude			= NULL,
+			@successfulCount	= @successfulCount OUTPUT,
+			@invalidCount		= @invalidCount OUTPUT,
+			@success			= @success OUTPUT,
+			@batchIdUsed		= @batchIdUsed OUTPUT,
+			@recapId			= @recapId OUTPUT,
+			@transType			= N'all',
+			@raiseError			= 1
+
+			SET @BatchIdForExistingUnPost = @batchIdUsed
+		END
+
+	SET @IdsForUnPostingUpdated = ''
+	SET @batchIdUsed = ''
+
+	SELECT DISTINCT
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		#EntriesForProcessing
+	WHERE
+		ISNULL([ysnForUpdate],0) = 1
+		AND ISNULL([ysnProcessed],0) = 1
+		AND ISNULL([intInvoiceID],0) <> 0
+		AND [ysnPost] IS NOT NULL
+		AND [ysnPost] = 0
+		AND ISNULL([ysnRecap],0) = 1
+		
+		
+	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
+		BEGIN			
+		EXEC [dbo].[uspARPostInvoice]
+			@batchId			= NULL,
+			@post				= 0,
+			@recap				= 1,
+			@param				= @IdsForUnPostingUpdated,
+			@userId				= @UserId,
+			@beginDate			= NULL,
+			@endDate			= NULL,
+			@beginTransaction	= NULL,
+			@endTransaction		= NULL,
+			@exclude			= NULL,
+			@successfulCount	= @successfulCount OUTPUT,
+			@invalidCount		= @invalidCount OUTPUT,
+			@success			= @success OUTPUT,
+			@batchIdUsed		= @batchIdUsed OUTPUT,
+			@recapId			= @recapId OUTPUT,
+			@transType			= N'all',
+			@raiseError			= 1
+
+			SET @BatchIdForExistingUnRecap = @batchIdUsed
+		END
 
 END TRY
 BEGIN CATCH

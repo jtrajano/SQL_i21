@@ -37,7 +37,10 @@ SELECT
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId]
 	,[strStorageLocationName]				= ARSI.[strStorageLocationName]
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId]
-	,[strTaxGroup]							= ARSI.[strTaxGroup] 
+	,[strTaxGroup]							= ARSI.[strTaxGroup]
+	,[dblGrossWt]							= ARSI.[dblGrossWt] 
+	,[dblTareWt]							= ARSI.[dblTareWt]
+	,[dblNetWt]								= ARSI.[dblNetWt]
 FROM
 	vyuARShippedItems ARSI
 WHERE
@@ -84,6 +87,9 @@ SELECT
 	,[strStorageLocationName]				= ARSI.[strStorageLocationName]
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId]
 	,[strTaxGroup]							= ARSI.[strTaxGroup] 
+	,[dblGrossWt]							= ARSI.[dblGrossWt] 
+	,[dblTareWt]							= ARSI.[dblTareWt]
+	,[dblNetWt]								= ARSI.[dblNetWt]
 FROM
 	vyuARShippedItemDetail ARSI
 	
