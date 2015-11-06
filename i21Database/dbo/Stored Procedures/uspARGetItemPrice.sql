@@ -20,6 +20,7 @@
 	,@LastCost				NUMERIC(18,6)	= NULL
 	,@ShipToLocationId      INT				= NULL
 	,@VendorLocationId		INT				= NULL
+	,@PricingLevelId		INT				= NULL
 AS	
 	
 	SELECT
@@ -52,6 +53,7 @@ AS
 			,@LastCost
 			,@ShipToLocationId
 			,@VendorLocationId
+			,@PricingLevelId
 		)
 
 RETURN 0

@@ -7,6 +7,7 @@
 	,@TransactionDate		DATETIME
 	,@Quantity				NUMERIC(18,6)
 	,@VendorId				INT
+	,@PricingLevelId		INT
 )
 RETURNS @returntable TABLE
 (
@@ -85,6 +86,42 @@ BEGIN
 		END
 	
 	--Item Pricing Level
+
+	IF ISNULL(@PricingLevelId,0) <> 0
+	BEGIN
+
+		DECLARE @PriceLevel AS NVARCHAR(100)
+		SELECT TOP 1 @PriceLevel = strPricingLevelName FROM tblSMCompanyLocationPricingLevel WHERE intCompanyLocationPricingLevelId = @PricingLevelId
+		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId AND strPricing = 'Multi-Level Pricing')
+			BEGIN
+				SELECT TOP 1 
+					@Price			= @UOMQuantity * PL.dblUnitPrice
+					,@PriceBasis	= PL.dblUnitPrice		
+					,@Deviation		= 0.00		
+					,@Pricing		= 'Inventory - Pricing Level'		
+				FROM
+					tblICItemPricingLevel PL																														
+				INNER JOIN vyuICGetItemStock VIS
+						ON PL.intItemId = VIS.intItemId
+						AND PL.intItemLocationId = VIS.intItemLocationId															
+				WHERE
+					PL.strPriceLevel = @PriceLevel	
+					AND PL.intItemId = @ItemId
+					AND PL.intItemLocationId = @ItemLocationId
+					AND PL.intItemUnitMeasureId = @ItemUOMId
+					AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
+				ORDER BY
+					PL.intItemPricingLevelId
+		
+				IF(ISNULL(@Price,0) <> 0)
+					BEGIN
+						INSERT @returntable(dblPrice, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
+						SELECT @Price, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
+						RETURN;
+					END	
+			END	
+	END
+
 	SELECT TOP 1 
 		@Price			= @UOMQuantity * PL.dblUnitPrice
 		,@PriceBasis	= PL.dblUnitPrice		

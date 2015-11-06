@@ -19,6 +19,7 @@
 	,@LastCost				NUMERIC(18,6)
 	,@ShipToLocationId      INT
 	,@VendorLocationId		INT
+	,@PricingLevelId		INT
 )
 RETURNS @returntable TABLE
 (
@@ -123,6 +124,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 				,@TransactionDate
 				,@Quantity
 				,@VendorId
+				,@PricingLevelId
 			);
 			
 			
