@@ -10,8 +10,9 @@ BEGIN TRY
 	
 	 
 
-	DECLARE @intCleanCostId			INT,
-			@xmlDocumentId			INT
+	DECLARE @intCleanCostId	INT,
+			@xmlDocumentId	INT,
+			@blbFile		VARBINARY(MAX)
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -49,12 +50,18 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intCleanCostId' 
 
-	
+	SELECT	@blbFile	=	B.blbFile 
+	FROM	tblSMAttachment A 
+	JOIN	tblSMUpload		B ON A.intAttachmentId = B.intAttachmentId
+	WHERE	A.strScreen = 'SystemManager.CompanyPreference'
+	AND		A.strComment = 'Header'
+
 	SELECT		CC.*,
 				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)  AS	strSequenceNumber,
 				EY.strName,
 				IR.strReceiptNumber,
-				LG.intTrackingNumber
+				LG.intTrackingNumber,
+				@blbFile blbFile
 	FROM		tblCTCleanCost CC
 	LEFT JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	CC.intContractDetailId
 	LEFT JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
