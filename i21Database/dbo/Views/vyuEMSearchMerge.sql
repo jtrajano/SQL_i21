@@ -11,7 +11,8 @@ select
 	strAddress = C.strAddress,
 	strZipCode = C.strZipCode,
 	strEntityType = D.strType,
-	strEntityNoType = Replace(A.strEntityNo,' ','') + ' ' + D.strType 
+	strEntityNoType = Replace(A.strEntityNo,' ','') + ' ' + D.strType,
+	strEntityIdType = CAST(A.intEntityId as nvarchar) + ' ' + D.strType
 	from tblEntity A	
 	JOIN tblEntityToContact AB
 		ON A.intEntityId = AB.intEntityId and AB.ysnDefaultContact = 1
@@ -20,4 +21,4 @@ select
 	JOIN tblEntityLocation C
 		ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 	JOIN tblEntityType D
-		ON A.intEntityId = D.intEntityId  and D.strType in ('Vendor', 'Customer')
+		ON A.intEntityId = D.intEntityId -- and D.strType in ('Vendor', 'Customer')
