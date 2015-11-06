@@ -11,7 +11,7 @@ declare  @tblTemp table
 			strType nvarchar(50),
 			strLocation nvarchar(50),
 			dtmDeliveryDate datetime,
-			intTicket int,
+			strTicket nvarchar(50),
 			strCustomerReference nvarchar(100),
 			strDPAReceiptNo nvarchar(50),
 			dblDiscDue numeric(24,10),
@@ -26,9 +26,9 @@ IF @strGrainType = 'Off-Site'
 BEGIN  
 IF ISNULL(@intLocationId, 0) <> 0  
 		BEGIN  
-		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId  
 		FROM vyuGRGetStorageDetail  
@@ -36,9 +36,9 @@ IF ISNULL(@intLocationId, 0) <> 0
 	END  
 ELSE  
 	BEGIN  
-	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal ,intCommodityId 
 		FROM vyuGRGetStorageDetail  WHERE ysnCustomerStorage = 1  AND strOwnedPhysicalStock = 'Company'  AND intCommodityId = @intCommodityId  
@@ -48,9 +48,9 @@ ELSE IF @strGrainType = 'DP'
 BEGIN  
 IF ISNULL(@intLocationId, 0) <> 0  
 	BEGIN  
-	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 		FROM vyuGRGetStorageDetail  
@@ -58,9 +58,9 @@ IF ISNULL(@intLocationId, 0) <> 0
 	END  
 ELSE  
 	BEGIN  
-	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 		FROM vyuGRGetStorageDetail  WHERE ysnDPOwnedType = 1  AND intCommodityId = @intCommodityId  
@@ -70,9 +70,9 @@ ELSE IF @strGrainType = 'Warehouse'
 BEGIN  
 	IF ISNULL(@intLocationId, 0) <> 0  
 		BEGIN  
-		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 			FROM vyuGRGetStorageDetail  
@@ -80,9 +80,9 @@ BEGIN
 		END  
 	ELSE  
 		BEGIN  
-		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 			FROM vyuGRGetStorageDetail  WHERE ysnReceiptedStorage = 1  	AND intCommodityId = @intCommodityId  
@@ -91,9 +91,9 @@ BEGIN
 	ELSE   
 	IF ISNULL(@intLocationId, 0) <> 0  
 		BEGIN  
-		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 			FROM vyuGRGetStorageDetail  
@@ -101,9 +101,9 @@ BEGIN
 		END  
 		ELSE	  
 		BEGIN  
-		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal ,intCommodityId    
 			FROM vyuGRGetStorageDetail  
@@ -116,7 +116,7 @@ SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 if isnull(@intUnitMeasureId,'')<> ''
 BEGIN
 
-SELECT intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,dblDiscDue,
+SELECT intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,dblDiscDue,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, 
 			isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,round(dblTotal,4)),0) dblTotal
 	FROM @tblTemp t
@@ -125,5 +125,5 @@ JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and 
 END
 ELSE
 BEGIN
-SELECT intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,intTicket ,strCustomerReference,strDPAReceiptNo ,dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal FROM @tblTemp
+SELECT intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal FROM @tblTemp
 END
