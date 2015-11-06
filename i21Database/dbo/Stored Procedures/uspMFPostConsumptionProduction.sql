@@ -42,12 +42,13 @@ BEGIN
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmDate datetime
 
-	SELECT TOP 1 @intLocationId = intLocationId
-		,@intSubLocationId = intSubLocationId
-		,@intStorageLocationId = intStorageLocationId
+	SELECT TOP 1 @intLocationId = W.intLocationId
+		,@intSubLocationId = SL.intSubLocationId
+		,@intStorageLocationId =  W.intStorageLocationId
 		,@dtmPlannedDate=dtmPlannedDate
 		,@strWorkOrderNo=strWorkOrderNo 
-	FROM dbo.tblMFWorkOrder
+	FROM dbo.tblMFWorkOrder W
+	JOIN dbo.tblICStorageLocation SL on W.intStorageLocationId=SL.intStorageLocationId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
