@@ -20,6 +20,9 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
+
+	IF ISNULL(@ItemUOMId,0) = 0
+		SELECT TOP 1 @ItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @ItemId AND ysnStockUnit = 1
 	
 	DECLARE @ItemVendorId		INT
 			,@ItemLocationId	INT
@@ -34,7 +37,7 @@ BEGIN
 		,@ItemLocationId	= intItemLocationId
 		,@ItemCategoryId	= I.intCategoryId
 		,@ItemCategory		= UPPER(LTRIM(RTRIM(ISNULL(C.strCategoryCode,''))))
-		,@UOMQuantity		= CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
+		,@UOMQuantity		= UOM.dblUnitQty
 	FROM
 		tblICItem I
 	INNER JOIN
@@ -49,7 +52,10 @@ BEGIN
 	WHERE
 		I.intItemId = @ItemId
 		AND (VI.intLocationId = @LocationId OR @LocationId IS NULL)
-		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)				
+		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
+		
+	IF ISNULL(@UOMQuantity,0) = 0 
+		SELECT TOP 1 @UOMQuantity = dblUnitQty FROM tblICItemUOM WHERE intItemId = @ItemId AND ysnStockUnit = 1 AND intItemUOMId = @ItemUOMId
 		
 	SELECT
 		@CustomerShipToLocationId = ISNULL(@ShipToLocationId, ShipToLocation.intEntityLocationId)
