@@ -137,6 +137,7 @@ BEGIN
 													ELSE     RTRIM(A.agcus_last_name) + '', '' + RTRIM(A.agcus_first_name)   
 													END   
 										 END)COLLATE Latin1_General_CI_AS
+				,intCustomerPricingLevel = CAST(NULL AS INT)
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
@@ -260,6 +261,7 @@ BEGIN
 													ELSE     RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_name_suffx) + '', '' + RTRIM(A.ptcus_first_name) + RTRIM(A.ptcus_mid_init)    
 													END   
 										 END)COLLATE Latin1_General_CI_AS
+				,intCustomerPricingLevel = CAST(NULL AS INT)
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
@@ -344,6 +346,7 @@ BEGIN
 				,intTaxId = CAST(NULL AS INT)
 				,ysnOriginIntegration = CAST(0 AS BIT)
 				,strFullCustomerName = Ent.strName
+				,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId
