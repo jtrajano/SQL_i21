@@ -10,7 +10,7 @@ BEGIN
 IF @intSeqId= 1
 		BEGIN		
 		
-			SELECT intCustomerStorageId, 'Off-Site' strType, Loc AS strLocation, [Delivery Date] AS dtmDeliveryDate, Ticket intTicket, Customer AS strCustomerReference, Receipt AS strDPAReceiptNo, [Disc Due] AS dblDiscDue, [Storage Due] AS dblStorageDue, dtmLastStorageAccrueDate, strScheduleId, ISNULL(Balance, 0) dblTotal, intCommodityId
+			SELECT intCustomerStorageId, 'Off-Site' strType, Loc AS strLocation, [Delivery Date] AS dtmDeliveryDate, Ticket strTicket, Customer AS strCustomerReference, Receipt AS strDPAReceiptNo, [Disc Due] AS dblDiscDue, [Storage Due] AS dblStorageDue, dtmLastStorageAccrueDate, strScheduleId, ISNULL(Balance, 0) dblTotal, intCommodityId
 			FROM vyuGRGetStorageDetail
 			WHERE intCommodityId = @intCommodityId AND ysnDPOwnedType = 0 AND ysnReceiptedStorage = 0 AND [Storage Type] = @strGrainType
 			AND intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
@@ -46,7 +46,7 @@ ELSE IF @intSeqId=4
 		
 ELSE IF @intSeqId=5
 		BEGIN
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket intTicket  
+			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 			FROM vyuGRGetStorageDetail  

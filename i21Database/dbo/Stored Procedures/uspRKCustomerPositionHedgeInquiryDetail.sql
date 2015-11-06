@@ -252,6 +252,8 @@ IF @intSeqId= 6
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId		
 			WHERE intSourceType = 1 AND strReceiptType IN ('Direct') AND st.intCommodityId = @intCommodityId  
 			AND r.intEntityVendorId=@intVendorCustomerId AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end)t
-	END
 	
+END
+
+
 END

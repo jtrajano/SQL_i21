@@ -7,9 +7,9 @@ isnull(CashExposure,0) as dblCaseExposure,
 (isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) as dblBasisExposure ,             
 (isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,  
   
-isnull(InHouse,0) as dblInHouse  into #temp            
+isnull(InHouse,0) as dblInHouse,intLocationId  into #temp            
  FROM(              
-SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,  
+SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId, intLocationId, 
    (invQty)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then OffSite else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
@@ -27,7 +27,7 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    AS InHouse              
                  
 FROM(  
-SELECT distinct c.intCommodityId, strLocationName,     
+SELECT distinct c.intCommodityId, strLocationName, intLocationId,    
   strCommodityCode,              
   u.intUnitMeasureId,              
   u.strUnitMeasure              
@@ -141,7 +141,8 @@ WHERE  ysnDefault=1
   c.intCommodityId   
  ,strCommodityCode    
  ,cl.intCompanyLocationId      
- ,cl.strLocationName,   
+ ,cl.strLocationName, 
+ intLocationId,  
   u.intUnitMeasureId      
  ,u.strUnitMeasure    
   )t  
@@ -154,7 +155,7 @@ SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 if isnull(@intUnitMeasureId,'')<> ''
 BEGIN
 SELECT @strUnitMeasure=strUnitMeasure FROM tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
-SELECT distinct t.strLocationName, 
+SELECT distinct t.strLocationName,intLocationId, 
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenPurchasesQty) OpenPurchasesQty,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenSalesQty) OpenSalesQty,
 		t.intCommodityId,strCommodityCode,@strUnitMeasure as strUnitMeasure, 
@@ -171,7 +172,7 @@ Where t.intCommodityId=@intCommodityId
 END
 ELSE
 BEGIN
-SELECT strLocationName,OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodityCode,strUnitMeasure,dblCompanyTitled,dblCaseExposure,dblBasisExposure as OpenSalQty,
+SELECT strLocationName,intLocationId,OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodityCode,strUnitMeasure,dblCompanyTitled,dblCaseExposure,dblBasisExposure as OpenSalQty,
 		dblAvailForSale,dblInHouse,dblBasisExposure	from #temp Where intCommodityId=@intCommodityId
 END
 
