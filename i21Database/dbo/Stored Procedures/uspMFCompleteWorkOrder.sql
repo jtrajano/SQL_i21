@@ -430,6 +430,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 				,@strRetBatchId = @strRetBatchId OUTPUT
+				,@intBatchId = @intBatchId
 		End
 		Else
 		Begin

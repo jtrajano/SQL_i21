@@ -87,7 +87,7 @@ BEGIN TRY
 
 	SELECT @strXML += '<intOrderStatusId>1</intOrderStatusId>'
 
-	SELECT @strXML += '<intOrderTypeId>8</intOrderTypeId>'
+	SELECT @strXML += '<intOrderTypeId>6</intOrderTypeId>'
 
 	SELECT @strXML += '<intOrderDirectionId>2</intOrderDirectionId>'
 

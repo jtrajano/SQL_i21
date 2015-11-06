@@ -400,7 +400,7 @@ BEGIN TRY
 	JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
 	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
-	WHERE CL.intWorkOrderInputLotId = @intWorkOrderInputLotId
+	WHERE CL.intWorkOrderId = @intWorkOrderId
 
 	COMMIT TRANSACTION
 
