@@ -62,7 +62,7 @@ SELECT
 											ELSE A.dblAmountDue  END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
+											THEN A.dblAmountDue 
 											ELSE A.dblAmountDue END
 									ELSE 0 END)
 									- ISNULL(A.dblPayment,0),
@@ -78,7 +78,7 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
+											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
 	[ysnApplied]			=	1,
@@ -149,7 +149,7 @@ SELECT
 											ELSE A.dblAmountDue  END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
+											THEN A.dblAmountDue 
 											ELSE A.dblAmountDue  END
 									ELSE 0 END)
 									- ISNULL(A.dblPayment,0),
@@ -165,7 +165,7 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
+											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
 	[ysnApplied]			=	1,
@@ -236,7 +236,7 @@ SELECT
 											ELSE A.dblAmountDue END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
+											THEN A.dblAmountDue
 											ELSE A.dblAmountDue END
 									ELSE 0 END)
 									- ISNULL(A.dblPayment,0),
@@ -252,8 +252,8 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
-											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
+											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
+											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END                                        
 									ELSE 0 END,
 	[ysnApplied]			=	1,
 	[intConcurrencyId]		=	0
@@ -323,7 +323,7 @@ SELECT
 											ELSE A.dblAmountDue  END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
+											THEN A.dblAmountDue 
 											ELSE A.dblAmountDue  END
 									ELSE 0 END)
 									- ISNULL(A.dblPayment,0),
@@ -339,7 +339,7 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
+											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
 	[ysnApplied]			=	1,
@@ -366,7 +366,7 @@ CROSS APPLY
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
 		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
-		WHERE C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and intBillId = 48222
+		WHERE C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and intBillId = @billId
 	) Total
 	WHERE intBillId = @billId 
 	AND C.intContractHeaderId = B.intContractHeaderId AND C.intItemId = B.intItemId --FOR CONTRACT W/ ITEM
