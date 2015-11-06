@@ -1,10 +1,10 @@
-﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForCustomer]
+﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForVendor]
 (
 	 @TaxGroupId		INT
-	,@CustomerId		INT
+	,@VendorId			INT
 	,@TransactionDate	DATETIME
 	,@ItemId			INT
-	,@ShipToLocationId	INT
+	,@BillToLocationId	INT
 )
 RETURNS @returntable TABLE
 (
@@ -35,7 +35,8 @@ BEGIN
 			,@ItemCategoryId INT
 
 	SET @ZeroDecimal = 0.000000
-	SELECT @TaxExempt = ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId
+	SET @TaxExempt = 0
+	--SELECT @TaxExempt = ysnTaxExempt FROM tblAPVendor WHERE intEntityCustomerId = @VendorId
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
 	
 	INSERT INTO @returntable
@@ -56,11 +57,11 @@ BEGIN
 		,TC.[ysnCheckoffTax]
 		,TC.[strTaxCode]
 		,(CASE WHEN ISNULL(@TaxExempt,0) = 0
-			THEN ISNULL(LEN([dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId)),0)
+			THEN ISNULL(LEN([dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @BillToLocationId)),0)
 			ELSE @TaxExempt
 		END) AS [ysnTaxExempt] 
 		,TG.[strTaxGroup]
-		,[dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId)				
+		,[dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @BillToLocationId)				
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN

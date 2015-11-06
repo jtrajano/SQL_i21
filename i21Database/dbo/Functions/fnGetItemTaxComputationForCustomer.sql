@@ -176,7 +176,7 @@ BEGIN
 		,[ysnTaxExempt]
 		,[strTaxGroup]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @ShipToLocationId)
 					
 	
 	UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL WHERE intTaxGroupMasterId NOT IN (SELECT intTaxGroupMasterId FROM tblSMTaxGroupMaster)

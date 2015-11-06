@@ -33,7 +33,7 @@ AS
 				,[ysnTaxExempt]
 				,[strTaxGroup]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerShipToId)
 				
 			RETURN 1
 		END
@@ -157,7 +157,7 @@ AS
 				,[ysnTaxExempt]
 				,[strTaxGroup]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@LocationTaxGroupId, @CustomerId, @TransactionDate, @ItemId)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@LocationTaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerShipToId)
 				
 			RETURN 1											
 		END						
