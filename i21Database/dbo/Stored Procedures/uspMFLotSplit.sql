@@ -5,7 +5,8 @@
  @intSplitStorageLocationId INT,  
  @dblSplitQty NUMERIC(16,8),  
  @intUserId INT,
- @strNote NVARCHAR(1024) = NULL
+ @strNote NVARCHAR(1024) = NULL,
+ @intInventoryAdjustmentId int=NULL OUTPUT
 
 AS
 
@@ -22,7 +23,6 @@ BEGIN TRY
 	DECLARE @intLotStatusId INT
 	DECLARE @intItemUOMId INT
 		
-	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	
@@ -49,10 +49,10 @@ BEGIN TRY
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	IF ISNULL(@strLotNumber,'') = ''
-	BEGIN
-		RAISERROR(51192,11,1)
-	END
+	--IF ISNULL(@strLotNumber,'') = ''
+	--BEGIN
+	--	RAISERROR(51192,11,1)
+	--END
 							 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,

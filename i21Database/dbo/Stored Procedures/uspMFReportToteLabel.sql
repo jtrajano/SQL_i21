@@ -116,12 +116,8 @@ BEGIN TRY
 		,I.strItemNo
 		,SUBSTRING(I.strDescription, 1, 26) AS strDescription
 		,I.strShortName
-		,Isnull(C.strContainerNo,SL.strName) as strName
-		,CASE 
-			WHEN L.intWeightUOMId IS NOT NULL
-				THEN L.dblWeight
-			ELSE dblQty
-			END dblWeight
+		,Isnull(C.strContainerNo,SL.strName) AS strName
+		,WP.dblQuantity AS dblWeight
 		,WP.dblTareWeight
 		,WP.dblQuantity + ISNULL(WP.dblTareWeight, 0) AS dblGrossWeight
 		,Ltrim(S.intShiftSequence) + ' ' + '(' + CONVERT(NVARCHAR, L.dtmDateCreated, 108) + ')' AS strShiftName
@@ -136,7 +132,8 @@ BEGIN TRY
 	FROM dbo.tblICLot AS L
 	JOIN dbo.tblSMUserSecurity US ON L.intCreatedEntityId = US.intEntityUserSecurityId
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
-	JOIN dbo.tblMFWorkOrderProducedLot AS WP ON L.intLotId = WP.intLotId
+	JOIN dbo.tblMFWorkOrderProducedLot AS WP ON L.intLotId = WP.intLotId 
+	AND WP.intWorkOrderProducedLotId =(Select MAX(WP1.intWorkOrderProducedLotId) From tblMFWorkOrderProducedLot  WP1 Where L.intLotId = WP1.intLotId )
 	LEFT JOIN dbo.tblMFShift S ON WP.intShiftId = S.intShiftId
 	LEFT JOIN dbo.tblICStorageLocation AS SL ON WP.intStorageLocationId = SL.intStorageLocationId
 	LEFT JOIN dbo.tblWHContainer C ON WP.intContainerId = C.intContainerId

@@ -43,6 +43,8 @@ BEGIN TRY
 		,@strLotAlias NVARCHAR(50)
 		,@intWorkOrderProducedLotId INT
 		,@intOrderLineItemId INT
+		,@intInventoryAdjustmentId INT
+		,@strLotTracking NVARCHAR(50)
 
 	SELECT @strDefaultStatusForSanitizedLot = strDefaultStatusForSanitizedLot
 	FROM dbo.tblMFCompanyPreference
@@ -97,9 +99,13 @@ BEGIN TRY
 
 	SELECT @dblInputWeight = dblWeight
 		,@dblInputWeightPerQty = dblWeightPerQty
-		,@intInputStorageLocationId=intStorageLocationId 
+		,@intInputStorageLocationId = intStorageLocationId
 	FROM tblICLot
 	WHERE intLotId = @intInputLotId
+
+	SELECT @strLotTracking = strLotTracking
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
 
 	IF @dblWeight > @dblInputWeight
 	BEGIN
@@ -120,13 +126,14 @@ BEGIN TRY
 		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	IF @intOutputLotId IS NULL or @intOutputLotId=0
+	IF @intOutputLotId IS NULL
+		OR @intOutputLotId = 0
 	BEGIN
 		IF (
 				@strOutputLotNumber = ''
 				OR @strOutputLotNumber IS NULL
 				)
-			
+			--AND @strLotTracking <> 'Yes - Serial Number'
 		BEGIN
 			EXEC dbo.uspSMGetStartingNumber 24
 				,@strOutputLotNumber OUTPUT
@@ -139,23 +146,41 @@ BEGIN TRY
 			,@dblSplitQty = @dblQty
 			,@intUserId = @intUserId
 			,@strNote = 'Sanitized'
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
-		SELECT @intOutputLotId = intLotId
-			,@intLotStatusId = intLotStatusId
-			,@strLotAlias = strLotAlias
-		FROM tblICLot
-		WHERE strLotNumber = @strOutputLotNumber
-			AND intStorageLocationId = @intStorageLocationId
+		IF @strLotTracking = 'Yes - Serial Number'
+		BEGIN
+			SELECT @intOutputLotId = intNewLotId
+			FROM tblICInventoryAdjustmentDetail
+			WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+			SELECT @intLotStatusId = intLotStatusId
+				,@strLotAlias = strLotAlias
+			FROM tblICLot
+			WHERE intLotId = @intOutputLotId
+		END
+		ELSE
+		BEGIN
+			SELECT @intOutputLotId = intLotId
+				,@intLotStatusId = intLotStatusId
+				,@strLotAlias = strLotAlias
+			FROM tblICLot
+			WHERE strLotNumber = @strOutputLotNumber
+				AND intStorageLocationId = @intStorageLocationId
+		END
 
 		IF (
 				SELECT intLotStatusId
 				FROM tblICLotStatus
 				WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot
-				) <> @intLotStatusId AND EXISTS(SELECT intLotStatusId
-												FROM tblICLotStatus
-												WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot)
+				) <> @intLotStatusId
+			AND EXISTS (
+				SELECT intLotStatusId
+				FROM tblICLotStatus
+				WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot
+				)
 		BEGIN
-			SELECT @intLotStatusId=intLotStatusId
+			SELECT @intLotStatusId = intLotStatusId
 			FROM tblICLotStatus
 			WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot
 
@@ -251,7 +276,7 @@ BEGIN TRY
 		,@intWeightUnitMeasureId INT
 		,@intUOMId INT
 		,@dblWeightperUnit NUMERIC(18, 6)
-		,@strSKUNo nvarchar(50)
+		,@strSKUNo NVARCHAR(50)
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM dbo.tblMFWorkOrder
@@ -277,7 +302,7 @@ BEGIN TRY
 			,intItemId INT
 			,intLotId INT
 			,intSKUId INT
-			,strSKUNo nvarchar(50)
+			,strSKUNo NVARCHAR(50)
 			,intContainerId INT
 			,intUOMId INT
 			,dblQuantity NUMERIC(16, 8)
@@ -307,7 +332,7 @@ BEGIN TRY
 		SELECT S.intItemId
 			,S.intLotId
 			,S.intSKUId
-			,S.strSKUNo 
+			,S.strSKUNo
 			,C.intContainerId
 			,S.intUOMId
 			,S.dblQty
@@ -337,21 +362,21 @@ BEGIN TRY
 		BEGIN
 			SELECT @intSKUId = NULL
 				,@dblWeight = NULL
-				,@intUOMId=NULL
-				,@intItemUnitMeasureId=NULL
-				,@intWeightUnitMeasureId=NULL
-				,@dblWeightperUnit=NULL
-				,@intContainerId=NULL
-				,@strSKUNo=NULL
+				,@intUOMId = NULL
+				,@intItemUnitMeasureId = NULL
+				,@intWeightUnitMeasureId = NULL
+				,@dblWeightperUnit = NULL
+				,@intContainerId = NULL
+				,@strSKUNo = NULL
 
 			SELECT @intSKUId = intSKUId
-				,@strSKUNo=strSKUNo
+				,@strSKUNo = strSKUNo
 				,@intUOMId = intUOMId
 				,@dblWeight = dblWeight
 				,@intItemUnitMeasureId = intItemUnitMeasureId
 				,@intWeightUnitMeasureId = intWeightUnitMeasureId
 				,@dblWeightperUnit = dblWeightperUnit
-				,@intContainerId=intContainerId
+				,@intContainerId = intContainerId
 			FROM @tblWHSKU
 			WHERE intRecordId = @intRecordId
 
@@ -701,7 +726,7 @@ BEGIN TRY
 			,intBatchId
 			,intShiftId
 			,dtmCreated
-			,intCreatedUserId			
+			,intCreatedUserId
 			)
 		SELECT @intWorkOrderId
 			,intItemId
@@ -748,9 +773,8 @@ BEGIN TRY
 		SELECT @intNoOfPallet = @intNoOfPallet - 1
 	END
 
-		IF @intTransactionCount = 0
+	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
-
 END TRY
 
 BEGIN CATCH
