@@ -99,7 +99,6 @@ BEGIN
 					SET @segmentId = SUBSTRING(@segmentcodes, 0, PATINDEX(''%;%'',@segmentcodes))
 			
 					INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@accountId, @segmentId)
-					UPDATE tblGLAccountSegment SET ysnBuild = 1 WHERE intAccountSegmentId = @segmentId
 					UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountSegment WHERE intAccountSegmentId = @segmentId)
 
 					SET @segmentcodes = SUBSTRING(@segmentcodes, LEN(@segmentId + '';'') + 1, LEN(@segmentcodes))
@@ -110,7 +109,6 @@ BEGIN
 					SET @segmentcodes = NULL
 			
 					INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@accountId, @segmentId)
-					UPDATE tblGLAccountSegment SET ysnBuild = 1 WHERE intAccountSegmentId = @segmentId
 					UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountSegment WHERE intAccountSegmentId = @segmentId)
 					
 				END
