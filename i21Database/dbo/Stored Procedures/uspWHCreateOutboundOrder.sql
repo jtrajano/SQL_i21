@@ -150,8 +150,8 @@ BEGIN TRY
 		UPDATE dbo.tblMFWorkOrder
 		SET intOrderHeaderId = @intOrderHeaderId, strBOLNo = @strBOLNo
 		WHERE intWorkOrderId IN (
-				SELECT PARAM
-				FROM dbo.fn_SQLInClause(@intWorkOrderId)
+				SELECT Item
+				FROM dbo.fnSplitString(@intWorkOrderId,',')
 				)
 	END
 
