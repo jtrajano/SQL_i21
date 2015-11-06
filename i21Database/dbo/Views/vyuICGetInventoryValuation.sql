@@ -24,7 +24,7 @@ SELECT TOP 100 PERCENT
 	dblRunningQtyBalance = dbo.fnICGetRunningQuantity([Transaction].intInventoryTransactionId),
 	dblCost = [Transaction].dblCost,
 	dblBeginningBalance = dbo.fnICGetRunningBalance([Transaction].intInventoryTransactionId) - ([Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost),
-	dblValue = [Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost,
+	dblValue = ISNULL([Transaction].dblQty, 0) * ISNULL([Transaction].dblCost, 0) + ISNULL([Transaction].dblValue, 0),
 	dblRunningBalance = dbo.fnICGetRunningBalance([Transaction].intInventoryTransactionId),
 	strBatchId
 FROM tblICInventoryTransaction [Transaction]

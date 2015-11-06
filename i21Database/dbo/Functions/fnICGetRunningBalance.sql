@@ -17,7 +17,12 @@ SELECT @intItemId = intItemId,
 FROM tblICInventoryTransaction
 WHERE intInventoryTransactionId = @intInventoryTransactionId
 
-SELECT @returnBalance = SUM(dblQty * dblUOMQty * dblCost) FROM tblICInventoryTransaction
+SELECT @returnBalance = SUM (
+			ISNULL(dblQty, 0) 
+			* ISNULL(dblCost, 0) 
+			+ ISNULL(dblValue, 0)
+		)
+FROM tblICInventoryTransaction
 WHERE @intItemId = intItemId AND
 	@intItemLocationId = intItemLocationId AND
 	dtmDate <= @dtmDate AND
