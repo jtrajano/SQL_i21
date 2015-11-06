@@ -30,8 +30,9 @@ BEGIN TRY
 	DECLARE @intSKUId INT
 	DECLARE @intUserSecurityId INT
 	DECLARE @intTaskTypeId INT
+	DECLARE @intLineItemLotId INT
+
 	DECLARE @dblPutbackQty NUMERIC(16,8)
-	
 	DECLARE @dblQty NUMERIC(18,6)
 	DECLARE @dblRemainingSKUQty NUMERIC(18,6)
 	
@@ -62,7 +63,8 @@ BEGIN TRY
 		intOrderLineItemId INT, 
 		intItemId INT,
 		dblRequiredQty NUMERIC(18, 6),
-		ysnStrictTracking BIT
+		ysnStrictTracking BIT,
+		intLotId INT
 		)
 
 		DECLARE @tblSKU TABLE
@@ -92,7 +94,8 @@ BEGIN TRY
 			intOrderLineItemId,
 			intItemId,
 			dblRequiredQty,
-			ysnStrictTracking
+			ysnStrictTracking,
+			intLotId
 			)
 			SELECT DISTINCT oh.intOrderHeaderId, 
 							oli.intOrderLineItemId, 
@@ -108,7 +111,8 @@ BEGIN TRY
 										 WHERE t.intOrderHeaderId = oh.intOrderHeaderId
 											AND t.intItemId = oli.intItemId
 										), 0) dblRemainingLineItemQty, 
-							i.ysnStrictFIFO
+							i.ysnStrictFIFO,
+							oli.intLotId
 			FROM tblWHOrderHeader oh
 			JOIN tblWHOrderLineItem oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 			JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -126,13 +130,15 @@ BEGIN TRY
 			SET @ysnStrictTracking = NULL
 			SET @dblRequiredQty = NULL
 			SET @dblQty = NULL
-			
+			SET @intLineItemLotId = NULL
+
 			DELETE FROM @tblSKU
 			
 			SELECT @intOrderLineItemId = @intOrderLineItemId,
 				   @intItemId=intItemId,
 				   @dblRequiredQty=dblRequiredQty,
-				   @ysnStrictTracking=ysnStrictTracking
+				   @ysnStrictTracking=ysnStrictTracking ,
+				   @intLineItemLotId = intLotId
 			FROM @tblLineItem
 			WHERE intItemRecordId = @intItemRecordId
 			
@@ -161,6 +167,7 @@ BEGIN TRY
 							WHERE intItemId = @intItemId
 							)
 					AND s.intSKUStatusId = 1
+					AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
 			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 			ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
@@ -181,6 +188,7 @@ BEGIN TRY
 			WHERE s.intItemId = @intItemId
 					AND s.intSKUStatusId = 1
 					AND NOT EXISTS (SELECT * FROM @tblSKU WHERE intSKUId = s.intSKUId)
+					AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
 			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 			ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
