@@ -32,7 +32,7 @@ LG.intCounterPartyEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as intEntitySalespersonId,
 (select strName from vyuARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strCustomerNumber,
 (select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = IsNull(LG.intCounterPartyCompanyLocationId,LG.intCompanyLocationId)) as strOutboundLocationName,
-(select top 1 SP.strEntityNo from tblARCustomer AR 
+(select top 1 SP.strName from tblARCustomer AR 
                                     Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strOutboundSalespersonId,
 LG.strCounterPartyShipFromTo as strShipTo,
@@ -126,7 +126,7 @@ LG.intEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intEntityId) as intEntitySalespersonId,
 (select strCustomerNumber from tblARCustomer AR where AR.intEntityCustomerId = LG.intEntityId) as strCustomerNumber,
 (select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = LG.intCompanyLocationId) as strOutboundLocationName,
-(select top 1 SP.strEntityNo from tblARCustomer AR 
+(select top 1 SP.strName from tblARCustomer AR 
                                     Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intEntityId) as strOutboundSalespersonId,
 (select strLocationName from tblEntityLocation EML where EML.intEntityLocationId = LG.intEntityLocationId) as strShipTo,
