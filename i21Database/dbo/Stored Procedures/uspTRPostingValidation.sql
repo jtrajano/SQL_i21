@@ -226,7 +226,7 @@ BEGIN
       BEGIN
 	     if @ysnPostOrUnPost = 1 and (@strBOL is NULL or LTRIM(RTRIM(@strBOL)) = '')
 		    BEGIN
-			   RAISERROR('Bill Of Ladding is Required', 16, 1);
+			   RAISERROR('Bill Of Lading is Required', 16, 1);
 			END
          if (@intTerminal is null  )
          BEGIN

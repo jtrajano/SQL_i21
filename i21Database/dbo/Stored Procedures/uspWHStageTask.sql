@@ -28,11 +28,13 @@ BEGIN TRY
 	DECLARE @intTaskStateId INT
 	DECLARE @intSourceSubLocationId INT
 	DECLARE @intTaskRecordId INT
+	DECLARE @intOrderTypeId INT
 		
 	DECLARE @strTaskType NVARCHAR(32)
 	DECLARE @strTaskState NVARCHAR(32)
 	DECLARE @strSourceStorageLocationType NVARCHAR(32)
 	DECLARE @strDestStorageLocationType NVARCHAR(32)
+	DECLARE @strOrderType NVARCHAR(32)
 	DECLARE @strCycleCountTitle NVARCHAR(32)
 	DECLARE @strICStorageLocationRestriction NVARCHAR(50)
 	DECLARE @strSubstituteValueList NVARCHAR(MAX)
@@ -115,11 +117,15 @@ BEGIN TRY
 	
 		--Get all the info we need to process the tasks for each SKU on this container
 			SELECT @intDockDoorLocationId = ISNULL(t.intDockDoorLocationId, 0), 
-				   @intStagingLocationId = ISNULL(h.intStagingLocationId, 0)
+				   @intStagingLocationId = ISNULL(h.intStagingLocationId, 0),
+				   @intOrderTypeId = ISNULL(h.intOrderTypeId, 0)
 			FROM tblWHOrderHeader h
 			LEFT JOIN tblWHTruck t ON t.intTruckId = h.intTruckId
 			WHERE h.intOrderHeaderId = @intOrderHeaderId
 			
+		--Get Order Type
+			SELECT @strOrderType = strOrderType FROM tblWHOrderType WHERE intOrderTypeId = @intOrderTypeId
+
 		 --Check that the StorageLocation exists        	
 			SELECT @intStorageLocationId = u.intStorageLocationId, 
 				   @strDestStorageLocationType = ut.strInternalCode, 
@@ -386,6 +392,16 @@ BEGIN TRY
 					SET intOrderStatusId = 256
 					WHERE intOrderHeaderId = @intOrderHeaderId --PUT-AWAY                                                
 			END
+			
+			IF @strOrderType IN ('Sanitization Staging','WO Prod Staging')
+			BEGIN
+				UPDATE tblWHTask
+				SET intTaskTypeId = 3,
+					intToStorageLocationId = @intStorageLocationId,
+					intTaskStateId = 4
+				WHERE intTaskId = @intTaskId
+			END
+
 			SELECT @intTaskRecordId = MIN(intTaskRecordId)
 			FROM @tblTask WHERE intTaskRecordId > @intTaskRecordId	
 		END
