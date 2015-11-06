@@ -27,8 +27,11 @@ END
 
 
 DECLARE @intUserId INT, @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT
+
 SELECT @intUserId =intUserSecurityID from tblSMUserSecurity WHERE intEntityId = @intEntityId
-SELECT @intStartingNumberId = intStartingNumberId, @strPrefix = strPrefix ,@intNumber = intNumber + 1 FROM tblSMStartingNumber WHERE strTransactionType = 'General Journal Reversal'
+DECLARE @strJournalId NVARCHAR(100)
+EXEC uspGLGetNewID 5, @strJournalId OUTPUT
+
 INSERT INTO [tblGLJournal]
            ([strJournalId]
            ,[strTransactionType]
@@ -71,8 +74,6 @@ INSERT INTO [tblGLJournal]
            FROM tblGLJournal WHERE intJournalId = @intJournalId
 DECLARE @newIntJournalId INT
 SELECT @newIntJournalId = @@IDENTITY
-
-UPDATE tblSMStartingNumber SET intNumber = @intNumber where intStartingNumberId = @intStartingNumberId
 
 INSERT INTO [dbo].[tblGLJournalDetail]
            ([intLineNo]
