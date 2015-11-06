@@ -96,7 +96,7 @@ Begin
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
 	Exec uspMFGetTraceabilityLotReceiptDetail @intLotId
 
-	Update @tblNodeData Set intRecordId=1,intParentId=0,strType='L'
+	Update @tblNodeData Set intRecordId=1,intParentId=0
 
 	--Lot Detail
 	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
@@ -194,7 +194,7 @@ Begin
 					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 	Exec uspMFGetTraceabilityLotShipDetail @intLotId
 
-	Update @tblNodeData Set intRecordId=1,intParentId=0,strType='L'
+	Update @tblNodeData Set intRecordId=1,intParentId=0
 
 	--Lot Detail
 	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
@@ -276,15 +276,25 @@ Begin
 End
 
 	Select intRecordId AS [key],*,
-	Case When strType='L' Then 
-		Case When strTransactionName='Receipt' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Receipt.png' 
-		When strTransactionName='Ship' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Ship.png' 
-		Else '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'FG.png' End
-	When strType='W' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'WIP.png' End AS strImage,
-	'Item No.     : ' + ISNULL(strItemNo,'') + CHAR(13) +
+	--Case When strType='L' Then 
+	--	Case When strTransactionName='Receipt' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Receipt.png' 
+	--	When strTransactionName='Ship' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Ship.png' 
+	--	Else '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'FG.png' End
+	--When strType='W' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'WIP.png' 
+	--When strType='R' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Receipt.png'
+	--When strType='S' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Ship.png'
+	--End AS strImage,
+	'../resources/images/graphics/i21-logo.png' AS strImage,
+	CASE When ISNULL(strProcessName,'')='' THEN  strLotNumber Else strLotNumber + CHAR(13) + '(' + strProcessName + ')' End AS strNodeText,
+	'Item No.	  : ' + ISNULL(strItemNo,'') + CHAR(13) +
 	'Item Desc.   : ' + ISNULL(strItemDesc,'') + CHAR(13) +
 	'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(dblQuantity),'') + ' ' + ISNULL(strUOM + CHAR(13),'') + CHAR(13) +
-	'Process Name : ' + ISNULL(strProcessName,'') + CHAR(13) +  
-	'Vendor       : ' + ISNULL(strVendor,'') + CHAR(13) +
-	'Customer     : ' + ISNULL(strCustomer,'') AS strToolTip
+	'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR,dtmTransactionDate),'') + CHAR(13) +
+	CASE WHEN strType='R' THEN 'Vendor     : ' + ISNULL(strVendor,'') ELSE '' END + 
+	CASE WHEN strType='S' THEN 'Customer     : ' + ISNULL(strCustomer,'') ELSE '' END
+	AS strToolTip,
+	CASE WHEN strType='L' AND strTransactionName='Receipt' THEN 5
+		 WHEN strType='L' AND strTransactionName='Produce' THEN 6
+		 ELSE 5
+	END AS intControlPointId
 	From @tblNodeData
