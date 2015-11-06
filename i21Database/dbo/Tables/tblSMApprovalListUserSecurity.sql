@@ -7,6 +7,7 @@
 	[intAlternateEntityUserSecurityId] INT NULL, 
 	[dblAmountOver] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 	[dblAmountLessThanEqual] NUMERIC(18, 6) NOT NULL DEFAULT 0,
+	[ysnEmailApprovalRequest] BIT NOT NULL DEFAULT 0,
 	[intSort] INT NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMApprovalListUserSecurity_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES tblSMUserSecurity([intEntityUserSecurityId]),
