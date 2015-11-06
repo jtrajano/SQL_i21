@@ -417,8 +417,8 @@ BEGIN
 	BEGIN
 		DECLARE @intJournalId INT = (SELECT TOP 1 intJournalId FROM @tmpReverseJournals)
 		DECLARE @strJournalId NVARCHAR(100) = ''
-		
-		EXEC [dbo].uspSMGetStartingNumber 5, @strJournalId OUTPUT 		
+				
+		EXEC [dbo].uspGLGetuspGLGetNewID 5, @strJournalId OUTPUT 		
 		
 		INSERT INTO tblGLJournal (
 				 [dtmReverseDate]
