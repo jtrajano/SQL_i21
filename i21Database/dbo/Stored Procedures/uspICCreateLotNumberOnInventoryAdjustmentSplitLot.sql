@@ -193,8 +193,8 @@ BEGIN
 			,[strLotAlias]				= SourceLot.strLotAlias
 			,[intLotStatusId]			= SourceLot.intLotStatusId
 			,[intParentLotId]			= SourceLot.intParentLotId
-			,[strParentLotNumber]		= ParentLotSourceLot.strLotNumber
-			,[strParentLotAlias]		= ParentLotSourceLot.strLotAlias
+			,[strParentLotNumber]		= ParentLotSourceLot.strParentLotNumber
+			,[strParentLotAlias]		= ParentLotSourceLot.strParentLotAlias
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
 			,[dblWeight]				= CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
@@ -238,8 +238,8 @@ BEGIN
 				ON SourceLot.intLotId = Detail.intLotId
 			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
-			LEFT JOIN dbo.tblICLot ParentLotSourceLot
-				ON ParentLotSourceLot.intLotId = SourceLot.intParentLotId
+			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
+				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 END 
 
