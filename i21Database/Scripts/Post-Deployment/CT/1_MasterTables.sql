@@ -336,3 +336,109 @@ BEGIN
 	SELECT 1,'Refund Insurance (Damage)','Refund Insurance (Damage)',1 
 END
 GO
+
+-- Inventory Planning Report -- Vinoth
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportMaster WHERE strReportName = 'Inventory Planning Report')
+BEGIN
+	INSERT INTO tblCTReportMaster(intReportMasterID,strReportName)
+	VALUES(1,'Inventory Planning Report')
+END
+GO
+
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 1)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,1,'Item and Source of data')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 2)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,2,'Opening Inventory')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 3)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,3,'Expected Deliveries')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 4)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,4,'Existing Purchases')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 5)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,5,'Planned Purchases - Bags')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 6)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,6,'Planned Purchases - ')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 7)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,7,'Total Deliveries')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 8)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,8,'Forecasted Consumption')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 9)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,9,'Ending Inventory')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 10)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,10,'Weeks of Supply')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 11)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,11,'Weeks of Supply Target')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 12)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,12,'Short/Excess Inventory')
+END
+GO

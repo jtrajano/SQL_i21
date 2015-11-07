@@ -2847,6 +2847,15 @@
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateLot.sql" />
     <Build Include="dbo\Views\vyuWHItemDetails.sql" />
+    <Build Include="dbo\Tables\tblCTReportMaster.sql" />
+    <Build Include="dbo\Tables\tblCTReportAttribute.sql" />
+    <Build Include="dbo\Tables\tblCTForecastedConsumption.sql" />
+    <Build Include="dbo\Tables\tblCTPlannedPurchases.sql" />
+    <Build Include="dbo\Tables\tblCTWeeksofSupplyTarget.sql" />
+    <Build Include="dbo\Tables\tblCTItemDefaultUOM.sql" />
+    <Build Include="dbo\Tables\tblCTInvPlngReportMaster.sql" />
+    <Build Include="dbo\Tables\tblCTInvPlngReportMaterial.sql" />
+    <Build Include="dbo\Tables\tblCTInvPlngReportAttributeValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
