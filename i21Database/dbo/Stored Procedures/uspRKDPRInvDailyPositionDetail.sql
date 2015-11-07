@@ -613,40 +613,54 @@ END
 DECLARE @intUnitMeasureId int
 DECLARE @intFromCommodityUnitMeasureId int
 DECLARE @intToCommodityUnitMeasureId int
+DECLARE @StrUnitMeasure nvarchar(50)
+
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 
+IF ISNULL(@intUnitMeasureId,'') <> ''
+BEGIN
 SELECT @intFromCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId,@intToCommodityUnitMeasureId=cuc1.intCommodityUnitMeasureId 
 FROM tblICCommodity t
 JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 WHERE t.intCommodityId= @intCommodityId
+	SELECT @StrUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
+END
+ELSE
+BEGIN
+	SELECT @StrUnitMeasure=c.strUnitMeasure
+	FROM tblICCommodity t
+	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
+	JOIN tblICUnitMeasure c on c.intUnitMeasureId=cuc.intUnitMeasureId 	
+	WHERE t.intCommodityId= @intCommodityId
+END
 
 IF ISNULL(@intLocationId, 0) <> 0 
 BEGIN
 		IF ISNULL(@intUnitMeasureId,'') <> ''
 		BEGIN
-		SELECT intSeqId,strType, 
+		SELECT intSeqId,strType, @StrUnitMeasure as strUnitMeasure, 
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
 		FROM #temp 
 
 		END
 		ELSE
 		BEGIN
-			SELECT intSeqId,strType,dblTotal FROM #temp
+			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,dblTotal  FROM #temp
 		END
 END
 ELSE 
 BEGIN
 		IF ISNULL(@intUnitMeasureId,'') <> ''
 		BEGIN
-		SELECT intSeqId,strType, 
+		SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,  
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
 		FROM #temp1 
 
 		END
 		ELSE
 		BEGIN
-			SELECT intSeqId,strType,dblTotal FROM #temp1
+			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,dblTotal FROM #temp1
 		END
 END
 
