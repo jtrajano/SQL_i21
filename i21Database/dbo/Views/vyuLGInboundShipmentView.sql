@@ -44,7 +44,7 @@ SELECT
 		S.strForwardingAgentRef,
 		S.dblInsuranceValue,
 		S.intInsuranceCurrencyId,
-		InsCur.strCurrency,
+		InsCur.strCurrency as strInsuranceCurrency,
 		S.dtmDocsToBroker,
 		S.dtmShipmentDate,
 		CASE WHEN S.ysnInventorized = 1 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnInventorized,
@@ -65,6 +65,7 @@ SELECT
 		strPContractNumber = CAST(CT.strContractNumber as VARCHAR(100)) + '/' + CAST(CT.intContractSeq AS VARCHAR(100)),
 		CT.dblCashPrice,
 		CT.dblCashPriceInQtyUOM,
+		CT.strCurrency,
 		CT.strPriceUOM,
 		CT.intItemId,
 		CT.intItemUOMId,
@@ -77,6 +78,8 @@ SELECT
 		SCQ.dblTareWt as dblPurchaseContractShippedTareWt,
 		SCQ.dblNetWt as dblPurchaseContractShippedNetWt,
 		IsNull(SCQ.dblReceivedQty, 0) as dblPurchaseContractReceivedQty,
+		CT.intWeightId,
+		IsNull(WG.dblFranchise, 0) as dblFranchise,
 
 -- BL details
 		BL.strBLNumber,
@@ -119,7 +122,9 @@ SELECT
 		dblContainerContractGrossWt = (Container.dblGrossWt / Container.dblQuantity) * SC.dblQuantity,
 		dblContainerContractTareWt = (Container.dblTareWt / Container.dblQuantity) * SC.dblQuantity,
 		dblContainerContractlNetWt = (Container.dblNetWt / Container.dblQuantity) * SC.dblQuantity,	
-		SC.dblReceivedQty as dblContainerContractReceivedQty
+		SC.dblReceivedQty as dblContainerContractReceivedQty,
+		dblReceivedGrossWt = IsNull((SELECT sum(ICItem.dblGross) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=SCQ.intShipmentContractQtyId AND ICItem.intContainerId=Container.intShipmentBLContainerId), 0),
+		dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=SCQ.intShipmentContractQtyId AND ICItem.intContainerId=Container.intShipmentBLContainerId), 0)
 
 FROM tblLGShipmentBLContainerContract SC
 JOIN tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
@@ -128,6 +133,7 @@ JOIN tblLGShipmentBL BL ON BL.intShipmentBLId = SC.intShipmentBLId
 LEFT JOIN tblLGShipmentBLContainer Container ON Container.intShipmentBLContainerId = SC.intShipmentBLContainerId
 LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = Container.intContainerTypeId
 JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = SCQ.intContractDetailId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CT.intWeightId
 JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = S.intWeightUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = S.intSubLocationId
 LEFT JOIN tblEntity Customer ON Customer.intEntityId = S.intCustomerEntityId
@@ -137,4 +143,3 @@ LEFT JOIN tblEntity FwdAgent ON FwdAgent.intEntityId = S.intForwardingAgentEntit
 LEFT JOIN tblSMCurrency InsCur ON InsCur.intCurrencyID = S.intInsuranceCurrencyId
 LEFT JOIN tblICUnitMeasure BLUOM ON BLUOM.intUnitMeasureId = BL.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure CONTUOM ON CONTUOM.intUnitMeasureId = Container.intUnitMeasureId
-
