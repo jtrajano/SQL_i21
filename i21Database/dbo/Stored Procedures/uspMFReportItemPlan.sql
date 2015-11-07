@@ -1,15 +1,145 @@
-﻿CREATE PROCEDURE uspMFReportItemPlan @intNoOfDays INT = 20
-	,@strShowOpenWorkOrder NVARCHAR(50) = 'Yes'
-	,@strShowFrozenWorkOrder NVARCHAR(50) = 'Yes'
-	,@strShowPausedWorkOrder NVARCHAR(50) = 'Yes'
-	,@strShowReleasedWorkOrder NVARCHAR(50) = 'Yes'
-	,@strShowStartedWorkOrder NVARCHAR(50) = 'Yes'
-	,@strItemNo NVARCHAR(50) = '%'
-	,@strCompanyLocationName NVARCHAR(50) = ''
-	,@strItemGroupName NVARCHAR(50) = ''
-	,@strShowStorage NVARCHAR(50) = ''
+﻿CREATE PROCEDURE uspMFReportItemPlan @xmlParam NVARCHAR(MAX) = NULL
 AS
 BEGIN
+	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @xmlDocumentId INT
+		,@intNoOfDays INT
+		,@strNoOfDays NVARCHAR(50)
+		,@strShowOpenWorkOrder NVARCHAR(50)
+		,@strShowFrozenWorkOrder NVARCHAR(50)
+		,@strShowPausedWorkOrder NVARCHAR(50)
+		,@strShowReleasedWorkOrder NVARCHAR(50)
+		,@strShowStartedWorkOrder NVARCHAR(50)
+		,@strItemNo NVARCHAR(50)
+		,@strCompanyLocationName NVARCHAR(50)
+		,@strItemGroupName NVARCHAR(50)
+		,@strShowStorage NVARCHAR(50)
+
+	IF LTRIM(RTRIM(@xmlParam)) = ''
+		SET @xmlParam = NULL
+
+	DECLARE @temp_xml_table TABLE (
+		[fieldname] NVARCHAR(50)
+		,condition NVARCHAR(20)
+		,[from] NVARCHAR(50)
+		,[to] NVARCHAR(50)
+		,[join] NVARCHAR(10)
+		,[begingroup] NVARCHAR(50)
+		,[endgroup] NVARCHAR(50)
+		,[datatype] NVARCHAR(50)
+		)
+
+	EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT
+		,@xmlParam
+
+	INSERT INTO @temp_xml_table
+	SELECT *
+	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
+			[fieldname] NVARCHAR(50)
+			,condition NVARCHAR(20)
+			,[from] NVARCHAR(50)
+			,[to] NVARCHAR(50)
+			,[join] NVARCHAR(10)
+			,[begingroup] NVARCHAR(50)
+			,[endgroup] NVARCHAR(50)
+			,[datatype] NVARCHAR(50)
+			)
+
+	SELECT @strNoOfDays = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strNoOfDays'
+
+	IF @strNoOfDays = ''
+		OR @strNoOfDays IS NULL
+	BEGIN
+		SELECT @strNoOfDays = '20'
+	END
+
+	SELECT @intNoOfDays = @strNoOfDays
+
+	SELECT @strShowOpenWorkOrder = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strShowOpenWorkOrder'
+
+	IF @strShowOpenWorkOrder = ''
+		OR @strShowOpenWorkOrder IS NULL
+	BEGIN
+		SELECT @strShowOpenWorkOrder = 'Yes'
+	END
+
+	SELECT @strShowFrozenWorkOrder = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strShowFrozenWorkOrder'
+
+	IF @strShowFrozenWorkOrder = ''
+		OR @strShowFrozenWorkOrder IS NULL
+	BEGIN
+		SELECT @strShowFrozenWorkOrder = 'Yes'
+	END
+
+	SELECT @strShowPausedWorkOrder = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strShowPausedWorkOrder'
+
+	IF @strShowPausedWorkOrder = ''
+		OR @strShowPausedWorkOrder IS NULL
+	BEGIN
+		SELECT @strShowPausedWorkOrder = 'Yes'
+	END
+
+	SELECT @strShowReleasedWorkOrder = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strShowReleasedWorkOrder'
+
+	IF @strShowReleasedWorkOrder = ''
+		OR @strShowReleasedWorkOrder IS NULL
+	BEGIN
+		SELECT @strShowReleasedWorkOrder = 'Yes'
+	END
+
+	SELECT @strShowStartedWorkOrder = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strShowStartedWorkOrder'
+
+	IF @strShowStartedWorkOrder = ''
+		OR @strShowStartedWorkOrder IS NULL
+	BEGIN
+		SELECT @strShowStartedWorkOrder = 'Yes'
+	END
+
+	SELECT @strItemNo = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strItemNo'
+
+	IF @strItemNo = ''
+		OR @strItemNo IS NULL
+	BEGIN
+		SELECT @strItemNo = '%'
+	END
+
+	SELECT @strCompanyLocationName = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strCompanyLocationName'
+
+	IF @strCompanyLocationName IS NULL
+		SELECT @strCompanyLocationName = ''
+
+	SELECT @strItemGroupName = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strItemGroupName'
+
+	IF @strItemGroupName IS NULL
+		SELECT @strItemGroupName = ''
+
+	SELECT @strShowStorage = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strShowStorage'
+
+	IF @strShowStorage IS NULL
+	BEGIN
+		SELECT @strShowStorage = ''
+	END
+
 	DECLARE @strShowShrtgWithAvlblUnblendedTea NVARCHAR(50)
 		,@strShowShrtgWithUnvlblUnblendedTea NVARCHAR(50)
 		,@intNoOfDays1 INT
@@ -21,7 +151,7 @@ BEGIN
 		,@intStartedStatusId INT
 		,@intCompanyLocationId NUMERIC(18, 0)
 		,@dtmCurrentDate AS DATETIME
-		,@intCategoryId INT
+		--,@intCategoryId INT
 		,@dtmCalendarDate DATETIME
 
 	IF OBJECT_ID('tempdb..#tblMFWIPItem') IS NOT NULL
@@ -103,10 +233,9 @@ BEGIN
 		SELECT @intStartedStatusId = 10
 	END
 
-	SELECT @intCategoryId = intCategoryId
-	FROM tblICCategory
-	WHERE strCategoryCode = 'Blend'
-
+	--SELECT @intCategoryId = intCategoryId
+	--FROM tblICCategory
+	--WHERE strCategoryCode = 'Blend'
 	IF @strItemNo <> ''
 		AND @strItemGroupName <> ''
 	BEGIN
@@ -119,7 +248,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE intCategoryId = @intCategoryId
+		WHERE strType = 'Assembly/Blend'
 			AND strItemNo LIKE @strItemNo + '%'
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
@@ -135,7 +264,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE intCategoryId = @intCategoryId
+		WHERE strType = 'Assembly/Blend'
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
 	ELSE IF @strItemNo <> ''
@@ -150,7 +279,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE intCategoryId = @intCategoryId
+		WHERE strType = 'Assembly/Blend'
 			AND strItemNo LIKE @strItemNo + '%'
 	END
 	ELSE
@@ -164,7 +293,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE intCategoryId = @intCategoryId
+		WHERE strType = 'Assembly/Blend'
 	END
 
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
@@ -236,7 +365,7 @@ BEGIN
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-			AND II.intCategoryId = @intCategoryId
+			AND II.strType = 'Assembly/Blend'
 		JOIN @tblICItem I ON I.intItemId = II.intItemId
 		--JOIN dbo.tblEntity E ON E.intEntityId = I.intOwnerId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
@@ -919,7 +1048,7 @@ BEGIN
 			--,a.strItemType
 			,a.intRowNumber
 			,a.strWorkorderNo
-			,a.dtmPlannedDateTime 
+			,a.dtmPlannedDateTime
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner

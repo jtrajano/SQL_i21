@@ -1,8 +1,49 @@
-﻿CREATE PROCEDURE [dbo].uspMFReportItemPlanSummary @strItemNo NVARCHAR(50) = '%'
+﻿CREATE PROCEDURE [dbo].uspMFReportItemPlanSummary @xmlParam NVARCHAR(MAX) = NULL
 AS
 BEGIN
-	DECLARE @intCategoryId INT
-		,@intLocationId INT
+	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @strItemNo NVARCHAR(50) 
+		,@xmlDocumentId INT
+
+	IF LTRIM(RTRIM(@xmlParam)) = ''
+		SET @xmlParam = NULL
+
+	DECLARE @temp_xml_table TABLE (
+		[fieldname] NVARCHAR(50)
+		,condition NVARCHAR(20)
+		,[from] NVARCHAR(50)
+		,[to] NVARCHAR(50)
+		,[join] NVARCHAR(10)
+		,[begingroup] NVARCHAR(50)
+		,[endgroup] NVARCHAR(50)
+		,[datatype] NVARCHAR(50)
+		)
+
+	EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT
+		,@xmlParam
+
+	INSERT INTO @temp_xml_table
+	SELECT *
+	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
+			[fieldname] NVARCHAR(50)
+			,condition NVARCHAR(20)
+			,[from] NVARCHAR(50)
+			,[to] NVARCHAR(50)
+			,[join] NVARCHAR(10)
+			,[begingroup] NVARCHAR(50)
+			,[endgroup] NVARCHAR(50)
+			,[datatype] NVARCHAR(50)
+			)
+
+	SELECT @strItemNo = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strItemNo'
+	IF @strItemNo=''  OR @strItemNo IS NULL
+	BEGIN
+		SELECT @strItemNo='%'
+	END
+
+	DECLARE @intLocationId INT
 		,@strSQL NVARCHAR(Max)
 		,@dtmCurrentDate DATETIME
 		,@dtmCurrentDateTime DATETIME
@@ -44,9 +85,9 @@ BEGIN
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
 	SET @dtmCurrentDateTime = GetDate()
 
-	SELECT @intCategoryId = intCategoryId
-	FROM tblICCategory
-	WHERE strCategoryCode = 'Blend'
+	--SELECT @intCategoryId = intCategoryId
+	--FROM tblICCategory
+	--WHERE strCategoryCode = 'Blend'
 
 	INSERT INTO @tblMFItemPlanSummary
 	SELECT DATEPART(Month, CD.dtmShiftStartTime) dtmShiftStartTime
@@ -80,7 +121,8 @@ BEGIN
 	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		AND II.intCategoryId = @intCategoryId
+		--AND II.intCategoryId = @intCategoryId
+		AND II.strType='Assembly/Blend'
 	WHERE S.ysnStandard = 1
 		AND CD.dtmCalendarDate <= @dtmCurrentDate
 	GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
@@ -258,7 +300,8 @@ BEGIN
 	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		AND II.intCategoryId = @intCategoryId
+		--AND II.intCategoryId = @intCategoryId
+		AND II.strType='Assembly/Blend'
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	
 	UNION
@@ -270,7 +313,8 @@ BEGIN
 		,CL.strLocationName
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-		AND intCategoryId = @intCategoryId
+		--AND intCategoryId = @intCategoryId
+		AND I.strType='Assembly/Blend'
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	WHERE L.dblWeight > 0
 
