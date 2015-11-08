@@ -448,6 +448,8 @@ BEGIN TRY
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@intBatchId = @intBatchId
 		End
+
+		EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
 	END
 	IF @intProductionTypeId in (2,3) 
 	BEGIN

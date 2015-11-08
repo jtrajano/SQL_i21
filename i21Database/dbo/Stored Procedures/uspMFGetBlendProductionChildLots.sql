@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductionChildLots]
-@intWorkOrderId int
+﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductionChildLots] @intWorkOrderId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -7,33 +6,143 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-Declare @tblReservedQty table
-(
-	intLotId int,
-	dblReservedQty numeric(18,6)
-)
-Insert into @tblReservedQty
-Select cl.intLotId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-where w.intWorkOrderId=@intWorkOrderId and w.intStatusId<>13
-group by cl.intLotId
+DECLARE @intLocationId INT
 
-Select wcl.intWorkOrderConsumedLotId,wcl.intWorkOrderId,l.intLotId,l.strLotNumber,i.intItemId,i.strItemNo,i.strDescription,
-wcl.dblQuantity,wcl.intItemUOMId,um.strUnitMeasure AS strUOM,wcl.dblIssuedQuantity, 
-wcl.intItemIssuedUOMId,iu2.strUnitMeasure AS strIssuedUOM,
-sl.strName AS strStorageLocationName,i.dblRiskScore,ISNULL(wcl.ysnStaged,0) AS ysnStaged,
-(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty,ISNULL(l.dblWeightPerQty,0) AS dblWeightPerUnit,
-wcl.intRecipeItemId,l.intParentLotId,pl.strParentLotNumber
-from tblMFWorkOrderConsumedLot wcl
-Join tblICLot l on wcl.intLotId=l.intLotId
-Join tblICItem i on l.intItemId=i.intItemId
-Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
-Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-Join tblICItemUOM iu1 on wcl.intItemIssuedUOMId=iu1.intItemUOMId
-Join tblICUnitMeasure iu2 on iu1.intUnitMeasureId=iu2.intUnitMeasureId
-Left Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
-Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 
-Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
-Where wcl.intWorkOrderId=@intWorkOrderId
+SELECT @intLocationId = intLocationId
+FROM tblMFWorkOrder
+WHERE intWorkOrderId = @intWorkOrderId
+
+DECLARE @tblReservedQty TABLE (
+	intLotId INT
+	,dblReservedQty NUMERIC(18, 6)
+	)
+
+INSERT INTO @tblReservedQty
+SELECT cl.intLotId
+	,Sum(cl.dblQuantity) AS dblReservedQty
+FROM tblMFWorkOrderConsumedLot cl
+JOIN tblMFWorkOrder w ON cl.intWorkOrderId = w.intWorkOrderId
+JOIN tblICLot l ON l.intLotId = cl.intLotId
+WHERE w.intWorkOrderId = @intWorkOrderId
+	AND w.intStatusId <> 13
+GROUP BY cl.intLotId
+
+DECLARE @intStorageLocationId INT
+	,@strBlendProductionStagingLocation NVARCHAR(50)
+
+SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
+FROM dbo.tblMFCompanyPreference
+
+SELECT @intStorageLocationId = intStorageLocationId
+FROM dbo.tblICStorageLocation
+WHERE strName = @strBlendProductionStagingLocation
+	AND intLocationId = @intLocationId
+
+DECLARE @tblMFStagedLot TABLE (
+	intLotId INT
+	,dblRequiredQty NUMERIC(18, 6)
+	,dblStagedQty NUMERIC(18, 6)
+	)
+
+INSERT INTO @tblMFStagedLot
+SELECT WC.intLotId
+	,(
+		SELECT IsNULL(SUM(OL.dblQty), 0)
+		FROM dbo.tblWHOrderLineItem OL
+		JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = OL.intOrderHeaderId
+			AND intOrderTypeId = 6
+		WHERE OL.intLotId = WC.intLotId
+			AND EXISTS (
+				SELECT *
+				FROM dbo.tblWHOrderManifest OM
+				WHERE OM.intOrderLineItemId = OL.intOrderLineItemId
+				)
+		) AS dblRequiredQty
+	,ISNULL(SUM(CASE 
+				WHEN IU.intUnitMeasureId = S.intUOMId
+					THEN S.dblQty
+				ELSE S.dblQty * S.dblWeightPerUnit
+				END), 0) AS dblStagedQty
+FROM dbo.tblMFWorkOrderConsumedLot WC
+JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WC.intItemUOMId
+LEFT JOIN dbo.tblWHContainer C ON C.intStorageLocationId = @intStorageLocationId
+LEFT JOIN dbo.tblWHSKU S ON S.intContainerId = C.intContainerId
+WHERE WC.intWorkOrderId = @intWorkOrderId
+GROUP BY WC.intLotId
+
+SELECT wcl.intWorkOrderConsumedLotId
+	,wcl.intWorkOrderId
+	,l.intLotId
+	,l.strLotNumber
+	,i.intItemId
+	,i.strItemNo
+	,i.strDescription
+	,wcl.dblQuantity
+	,wcl.intItemUOMId
+	,um.strUnitMeasure AS strUOM
+	,wcl.dblIssuedQuantity
+	,wcl.intItemIssuedUOMId
+	,iu2.strUnitMeasure AS strIssuedUOM
+	,sl.strName AS strStorageLocationName
+	,i.dblRiskScore
+	,ISNULL(wcl.ysnStaged, 0) AS ysnStaged
+	,(ISNULL(l.dblWeight, 0) - ISNULL(rq.dblReservedQty, 0)) AS dblAvailableQty
+	,ISNULL(l.dblWeightPerQty, 0) AS dblWeightPerUnit
+	,wcl.intRecipeItemId
+	,l.intParentLotId
+	,pl.strParentLotNumber
+	,(
+		CASE 
+			WHEN C.ysnWarehouseTracked = 0
+				THEN wcl.dblIssuedQuantity
+			ELSE (
+					SELECT ISNULL(SUM(dblQty), 0)
+					FROM (
+						SELECT CASE 
+								WHEN ISNULL(SUM(CASE 
+												WHEN S.intWeightPerUnitUOMId = S.intUOMId
+													THEN S.dblQty
+												ELSE S.dblQty * S.dblWeightPerUnit
+												END), 0) >= wcl.dblIssuedQuantity
+									THEN isnull(wcl.dblIssuedQuantity, 0)
+								ELSE ISNULL(SUM(CASE 
+												WHEN S.intWeightPerUnitUOMId = S.intUOMId
+													THEN S.dblQty
+												ELSE S.dblQty * S.dblWeightPerUnit
+												END), 0)
+								END AS dblQty
+						FROM dbo.tblWHSKU S
+						JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
+							AND C.intStorageLocationId = @intStorageLocationId
+						JOIN dbo.tblWHOrderManifest RM ON RM.intSKUId = S.intSKUId
+						WHERE S.intLotId = wcl.intLotId
+							AND RM.intOrderHeaderId = W.intOrderHeaderId
+						
+						UNION ALL
+						
+						SELECT (
+								CASE 
+									WHEN dblStagedQty - dblRequiredQty > 0
+										THEN dblStagedQty - dblRequiredQty
+									ELSE 0
+									END
+								)
+						FROM @tblMFStagedLot SM
+						WHERE SM.intLotId = wcl.intLotId
+						) AS DT
+					)
+			END
+		) dblStagedQty
+FROM tblMFWorkOrderConsumedLot wcl
+JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId=wcl.intWorkOrderId
+JOIN tblICLot l ON wcl.intLotId = l.intLotId
+JOIN tblICItem i ON l.intItemId = i.intItemId
+JOIN tblICCategory C on C.intCategoryId=i.intCategoryId
+JOIN tblICItemUOM iu ON wcl.intItemUOMId = iu.intItemUOMId
+JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+JOIN tblICItemUOM iu1 ON wcl.intItemIssuedUOMId = iu1.intItemUOMId
+JOIN tblICUnitMeasure iu2 ON iu1.intUnitMeasureId = iu2.intUnitMeasureId
+LEFT JOIN tblICStorageLocation sl ON l.intStorageLocationId = sl.intStorageLocationId
+LEFT JOIN tblICParentLot pl ON l.intParentLotId = pl.intParentLotId
+LEFT JOIN @tblReservedQty rq ON l.intLotId = rq.intLotId
+WHERE wcl.intWorkOrderId = @intWorkOrderId
