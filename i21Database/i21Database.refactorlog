@@ -4326,4 +4326,18 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="tblQMReportProperty" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e96fdd48-9885-4efc-9e24-a6a3574e9a58" ChangeDateTime="11/08/2015 17:14:51">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractHeader].[strInternalComments]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPrintableRemarks" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b561cd94-f7f8-416d-974e-f46c5e47230c" ChangeDateTime="11/08/2015 17:15:33">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractHeader].[strContractComments]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strInternalComment" />
+  </Operation>
 </Operations>

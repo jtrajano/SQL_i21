@@ -127,7 +127,7 @@ BEGIN TRY
 			CH.dblQuantity,
 			SQ.strCurrency,
 			'To be covered by ' + IB.strInsuranceBy AS strInsuranceBy,
-			CH.strContractComments,
+			CH.strPrintableRemarks,
 			AN.strComment	AS strArbitrationComment
 			
 
