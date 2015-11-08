@@ -18,7 +18,7 @@ BEGIN TRY
 			END	AS	strPrice,
 			IM.strDescription,
 			BM.strBagMark,
-			'' AS strPO,
+			CD.strReference,
 			GETDATE() AS dtmETD,
 			CH.dtmContractDate,
 			CD.strGarden,
