@@ -13,10 +13,12 @@ SELECT	CD.intContractDetailId,
 		PF.intTotalLots,
 		PF.intLotsFixed,
 		IC.strContractItemName,
-		WU.strUnitMeasure strNetWeightUOM
+		WU.strUnitMeasure strNetWeightUOM,
+		RY.strCountry AS strOrigin
 		
 FROM	tblCTContractDetail CD	LEFT
 JOIN	tblICItemContract	IC	ON	IC.intItemContractId	=	CD.intItemContractId	LEFT
+JOIN	tblSMCountry		RY	ON	RY.intCountryID			=	IC.intCountryId			LEFT
 JOIN	tblICItemUOM		WM	ON	WM.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
 JOIN	tblICUnitMeasure	WU	ON	WU.intUnitMeasureId		=	WM.intUnitMeasureId		LEFT		
 JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId	=	PF.intContractDetailId	LEFT
