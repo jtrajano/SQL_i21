@@ -61,10 +61,16 @@ SELECT WC.intLotId
 	,ISNULL(SUM(CASE 
 				WHEN IU.intUnitMeasureId = S.intUOMId
 					THEN S.dblQty
-				ELSE S.dblQty * S.dblWeightPerUnit
+				ELSE S.dblQty / (
+						CASE 
+							WHEN S.dblWeightPerUnit = 0
+								THEN 1
+							ELSE S.dblWeightPerUnit
+							END
+						)
 				END), 0) AS dblStagedQty
 FROM dbo.tblMFWorkOrderConsumedLot WC
-JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WC.intItemUOMId
+JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WC.intItemIssuedUOMId
 LEFT JOIN dbo.tblWHContainer C ON C.intStorageLocationId = @intStorageLocationId
 LEFT JOIN dbo.tblWHSKU S ON S.intContainerId = C.intContainerId
 WHERE WC.intWorkOrderId = @intWorkOrderId
@@ -101,14 +107,26 @@ SELECT wcl.intWorkOrderConsumedLotId
 						SELECT CASE 
 								WHEN ISNULL(SUM(CASE 
 												WHEN S.intWeightPerUnitUOMId = S.intUOMId
-													THEN S.dblQty
-												ELSE S.dblQty * S.dblWeightPerUnit
+													THEN S.dblQty / (
+															CASE 
+																WHEN S.dblWeightPerUnit = 0
+																	THEN 1
+																ELSE S.dblWeightPerUnit
+																END
+															)
+												ELSE S.dblQty
 												END), 0) >= wcl.dblIssuedQuantity
 									THEN isnull(wcl.dblIssuedQuantity, 0)
 								ELSE ISNULL(SUM(CASE 
 												WHEN S.intWeightPerUnitUOMId = S.intUOMId
-													THEN S.dblQty
-												ELSE S.dblQty * S.dblWeightPerUnit
+													THEN S.dblQty / (
+															CASE 
+																WHEN S.dblWeightPerUnit = 0
+																	THEN 1
+																ELSE S.dblWeightPerUnit
+																END
+															)
+												ELSE S.dblQty
 												END), 0)
 								END AS dblQty
 						FROM dbo.tblWHSKU S
@@ -134,10 +152,10 @@ SELECT wcl.intWorkOrderConsumedLotId
 			END
 		) dblStagedQty
 FROM tblMFWorkOrderConsumedLot wcl
-JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId=wcl.intWorkOrderId
+JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICLot l ON wcl.intLotId = l.intLotId
 JOIN tblICItem i ON l.intItemId = i.intItemId
-JOIN tblICCategory C on C.intCategoryId=i.intCategoryId
+JOIN tblICCategory C ON C.intCategoryId = i.intCategoryId
 JOIN tblICItemUOM iu ON wcl.intItemUOMId = iu.intItemUOMId
 JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 JOIN tblICItemUOM iu1 ON wcl.intItemIssuedUOMId = iu1.intItemUOMId

@@ -132,6 +132,7 @@ BEGIN
 		WHERE C.intStorageLocationId = @intStagingLocationId
 			AND S.dblQty > 0
 			AND S.intLotId = @intLotId
+			AND S.intSKUStatusId in (1,2)
 		ORDER BY S.intSKUId
 
 		SELECT @dblRequiredWeight = @dblWeight
@@ -162,6 +163,10 @@ BEGIN
 				WHERE intSKUId = @intSKUId
 
 				PRINT 'Call Delete SKU'
+
+				EXEC dbo.uspWHDeleteSKUForWarehouse 
+								@intSKUId=@intSKUId, 
+								@strUserName=@strUserName
 
 				INSERT INTO dbo.tblMFWorkOrderConsumedSKU (
 					intWorkOrderId
@@ -243,12 +248,6 @@ BEGIN
 				FROM dbo.tblWHSKU
 				WHERE intContainerId = @intDestinationContainerId
 
-				UPDATE dbo.tblWHSKU
-				SET intSKUStatusId = 5
-				WHERE intSKUId = @intNewSKUId
-
-				PRINT 'Call Delete SKU proc'
-
 				INSERT INTO dbo.tblMFWorkOrderConsumedSKU (
 					intWorkOrderId
 					,intItemId
@@ -265,20 +264,31 @@ BEGIN
 					,intCreatedUserId
 					)
 				SELECT @intWorkOrderId
-					,intItemId
-					,intLotId
-					,intSKUId
-					,intContainerId
-					,dblWeight
-					,intWeightUOMId
-					,dblQuantity
-					,intItemUOMId
+					,S.intItemId
+					,S.intLotId
+					,S.intSKUId
+					,S.intContainerId
+					,S.dblQty*S.dblWeightPerUnit 
+					,L.intWeightUOMId
+					,S.dblQty
+					,L.intItemUOMId
 					,NULL
 					,@intBusinessShiftId
 					,@dtmCreated
 					,@intUserId
-				FROM @tblWHSKU
-				WHERE intRecordId = @intRecordId
+				FROM tblWHSKU S
+				JOIN tblICLot L on L.intLotId=S.intLotId
+				WHERE intSKUId = @intSKUId
+
+				UPDATE dbo.tblWHSKU
+				SET intSKUStatusId = 5
+				WHERE intSKUId = @intNewSKUId
+
+				EXEC dbo.uspWHDeleteSKUForWarehouse 
+						@intSKUId=@intNewSKUId, 
+						@strUserName=@strUserName
+
+				PRINT 'Call Delete SKU proc'
 
 				SELECT @dblRequiredWeight = 0
 			END

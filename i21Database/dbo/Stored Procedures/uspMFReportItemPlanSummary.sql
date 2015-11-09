@@ -2,7 +2,7 @@
 AS
 BEGIN
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @strItemNo NVARCHAR(50) 
+	DECLARE @strItemNo NVARCHAR(50)
 		,@xmlDocumentId INT
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
@@ -38,9 +38,11 @@ BEGIN
 	SELECT @strItemNo = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strItemNo'
-	IF @strItemNo=''  OR @strItemNo IS NULL
+
+	IF @strItemNo = ''
+		OR @strItemNo IS NULL
 	BEGIN
-		SELECT @strItemNo='%'
+		SELECT @strItemNo = '%'
 	END
 
 	DECLARE @intLocationId INT
@@ -88,7 +90,6 @@ BEGIN
 	--SELECT @intCategoryId = intCategoryId
 	--FROM tblICCategory
 	--WHERE strCategoryCode = 'Blend'
-
 	INSERT INTO @tblMFItemPlanSummary
 	SELECT DATEPART(Month, CD.dtmShiftStartTime) dtmShiftStartTime
 		,DATENAME(Month, CD.dtmShiftStartTime) dtmShiftStartTime
@@ -122,7 +123,7 @@ BEGIN
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 		--AND II.intCategoryId = @intCategoryId
-		AND II.strType='Assembly/Blend'
+		AND II.strType = 'Assembly/Blend'
 	WHERE S.ysnStandard = 1
 		AND CD.dtmCalendarDate <= @dtmCurrentDate
 	GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
@@ -138,10 +139,16 @@ BEGIN
 		,DATEPart(YEAR, CD.dtmShiftStartTime)
 		,DATEPart(MONTH, CD.dtmShiftStartTime)
 
+	DECLARE @tblMFQtyOnHand TABLE (
+		intCompanyLocationId INT
+		,intItemId INT
+		,dblWeight NUMERIC(18, 6)
+		)
+
+	INSERT INTO @tblMFQtyOnHand
 	SELECT L.intLocationId AS intCompanyLocationId
 		,I.intItemId
 		,Sum(L.dblWeight) AS dblWeight
-	INTO #tblMFQtyOnHand
 	FROM @tblMFItemPlanSummary I
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
@@ -154,13 +161,19 @@ BEGIN
 	UPDATE I
 	SET dblUnPackedPounds = Q.dblWeight
 	FROM @tblMFItemPlanSummary I
-	JOIN #tblMFQtyOnHand Q ON Q.intItemId = I.intItemId
+	JOIN @tblMFQtyOnHand Q ON Q.intItemId = I.intItemId
 		AND I.intCompanyLocationId = Q.intCompanyLocationId
 
+	DECLARE @tblMFQtyInProduction TABLE (
+		intCompanyLocationId INT
+		,intItemId INT
+		,dblWeight NUMERIC(18, 6)
+		)
+
+	INSERT INTO @tblMFQtyInProduction
 	SELECT W.intLocationId AS intCompanyLocationId
 		,I.intItemId
 		,Sum(W.dblQuantity) AS dblWeight
-	INTO #tblMFQtyInProduction
 	FROM @tblMFItemPlanSummary I
 	JOIN dbo.tblMFWorkOrder W ON I.intItemId = W.intItemId
 		AND W.intStatusId IN (
@@ -175,7 +188,7 @@ BEGIN
 	UPDATE I
 	SET dblPoundsAvailable = Q.dblWeight
 	FROM @tblMFItemPlanSummary I
-	JOIN #tblMFQtyInProduction Q ON Q.intItemId = I.intItemId
+	JOIN @tblMFQtyInProduction Q ON Q.intItemId = I.intItemId
 		AND I.intCompanyLocationId = Q.intCompanyLocationId
 
 	UPDATE @tblMFItemPlanSummary
@@ -287,12 +300,20 @@ BEGIN
 		WHERE intRecordId > @intRecordId
 	END
 
+	DECLARE @tblMFFinalItemPlanSummary TABLE (
+		intItemId INT
+		,strItemNo NVARCHAR(50)
+		,strDescription NVARCHAR(50)
+		,intCompanyLocationId INT
+		,strLocationName NVARCHAR(50)
+		)
+
+	INSERT INTO @tblMFFinalItemPlanSummary
 	SELECT DISTINCT II.intItemId
 		,II.strItemNo
 		,II.strDescription
 		,CL.intCompanyLocationId
 		,CL.strLocationName
-	INTO #tblMFFinalItemPlanSummary
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 		AND R.intLocationId = W.intLocationId
@@ -301,7 +322,7 @@ BEGIN
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 		--AND II.intCategoryId = @intCategoryId
-		AND II.strType='Assembly/Blend'
+		AND II.strType = 'Assembly/Blend'
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	
 	UNION
@@ -314,7 +335,7 @@ BEGIN
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		--AND intCategoryId = @intCategoryId
-		AND I.strType='Assembly/Blend'
+		AND I.strType = 'Assembly/Blend'
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	WHERE L.dblWeight > 0
 
@@ -357,7 +378,7 @@ BEGIN
 		,S.strComments
 		,dblAvlBreakup [dblPoundsAvailable]
 		,dblUnpackedBreakUp [dblUnPackedPounds]
-	FROM #tblMFFinalItemPlanSummary FS
+	FROM @tblMFFinalItemPlanSummary FS
 	CROSS JOIN @tblMFMonth M
 	JOIN tblICItem I ON FS.intItemId = I.intItemId
 		AND FS.strItemNo LIKE @strItemNo + '%'
@@ -370,4 +391,3 @@ BEGIN
 		,M.intYearName
 		,M.intMonthId
 END
-
