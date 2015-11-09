@@ -3,7 +3,8 @@
 	@intCompanyLocationId	INT = 0,
 	@intCurrencyId			INT = 0,
 	@intARAccountId			INT = 0,
-	@intSCAccountId			INT = 0,	
+	@intSCAccountId			INT = 0,
+	@dtmAsOfDate			DATETIME = NULL,
 	@tblTypeServiceCharge   [dbo].[ServiceChargeTableType] READONLY
 AS
 	DECLARE @dateNow		    DATE = CAST(GETDATE() AS DATE),			
@@ -61,8 +62,8 @@ AS
 	SELECT 
 		 @intEntityCustomerId
 		,NULL --[strInvoiceOriginId]
-		,@dateNow
-		,[dbo].fnGetDueDateBasedOnTerm(@dateNow, intTermsId)
+		,ISNULL(@dtmAsOfDate, @dateNow)
+		,[dbo].fnGetDueDateBasedOnTerm(ISNULL(@dtmAsOfDate, @dateNow), intTermsId)
 		,NULL --[dtmPostDate]
 		,@intCurrencyId
 		,@intCompanyLocationId

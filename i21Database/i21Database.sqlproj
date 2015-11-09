@@ -2453,6 +2453,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
