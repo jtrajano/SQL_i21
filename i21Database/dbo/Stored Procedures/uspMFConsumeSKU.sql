@@ -117,20 +117,20 @@ BEGIN
 			,S.strSKUNo
 			,S.intUOMId
 			,C.intContainerId
-			,S.dblQuantity
+			,S.dblQty
 			,L.intItemUOMId
 			,I.intUnitMeasureId
 			,S.dblWeightPerUnit
-			,S.dblQuantity * S.dblWeightPerUnit
+			,S.dblQty * S.dblWeightPerUnit
 			,L.intWeightUOMId
 			,W.intUnitMeasureId
 		FROM dbo.tblWHSKU S
 		JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
 		JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
-		JOIN dbo.tblItemUOM I ON I.intItemUOMId = L.intItemUOMId
-		LEFT JOIN dbo.tblItemUOM W ON W.intItemUOMId = L.intWeightUOMId
+		JOIN dbo.tblICItemUOM I ON I.intItemUOMId = L.intItemUOMId
+		LEFT JOIN dbo.tblICItemUOM W ON W.intItemUOMId = L.intWeightUOMId
 		WHERE C.intStorageLocationId = @intStagingLocationId
-			AND S.Qty > 0
+			AND S.dblQty > 0
 			AND S.intLotId = @intLotId
 		ORDER BY S.intSKUId
 
