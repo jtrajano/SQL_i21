@@ -11,7 +11,7 @@ AS
 			CH.intCropYearId,			CH.strPrintableRemarks,			CH.intAssociationId,							
 			CH.intTermId,				CH.intApprovalBasisId,			CH.intContractBasisId,				
 			CH.intPositionId,			CH.intInsuranceById,			CH.intInvoiceTypeId,
-			CH.dblTolerancePct,			CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
+			CH.dblTolerancePct,			CH.dblProvisionalInvoicePct,	NM.ysnPrepaid,
 			CH.ysnSubstituteItem,		CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,
 			CH.intINCOLocationTypeId,	CH.intCountryId,				CH.intPricingTypeId,
 			CH.ysnProvisional,			CH.ysnLoad,						CH.intCompanyLocationPricingLevelId,
@@ -37,6 +37,7 @@ AS
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
 			
 	FROM	tblCTContractHeader					CH	
+	jOIN	vyuCTContractHeaderNotMapped		NM	ON	NM.intContractHeaderId				=		CH.intContractHeaderId
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		CH.intEntityId			AND
 														EY.strEntityType					=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId

@@ -32,7 +32,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intInvoiceTypeId] [INT] NULL,
 	[dblTolerancePct] NUMERIC(12, 4) NULL,
 	[dblProvisionalInvoicePct] NUMERIC(12, 4) NULL,
-    [ysnPrepaid] BIT NULL, 
+    
     [ysnSubstituteItem] BIT NULL, 
     [ysnUnlimitedQuantity] BIT NULL, 
     [ysnMaxPrice] BIT NULL, 
