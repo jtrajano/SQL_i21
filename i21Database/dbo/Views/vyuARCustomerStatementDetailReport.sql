@@ -3,7 +3,7 @@ AS
 SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , I.strTransactionType
 	 , I.dtmDate
-	 , I.dtmDueDate
+	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Credit Memo') THEN NULL ELSE I.dtmDueDate END
 	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], GETDATE())
 	 , dblTotalAmount = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblAmountPaid = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
@@ -17,13 +17,13 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , C.strCustomerNumber
 	 , C.strName
 	 , I.strBOLNumber
-	 , CA.dblCreditLimit
-	 , dblCreditAvailable = CA.dblCreditLimit - CA.dblTotalAR
-	 , CA.dbl10Days
-	 , CA.dbl30Days
-	 , CA.dbl60Days
-	 , CA.dbl90Days
-	 , CA.dbl91Days
+	 , C.dblCreditLimit
+	 , dblCreditAvailable = ISNULL(C.dblCreditLimit, 0) - ISNULL(CA.dblTotalAR, 0)
+	 , dbl10Days = ISNULL(CA.dbl10Days, 0)
+	 , dbl30Days = ISNULL(CA.dbl30Days, 0)
+	 , dbl60Days = ISNULL(CA.dbl60Days, 0)
+	 , dbl90Days = ISNULL(CA.dbl90Days, 0)
+	 , dbl91Days = ISNULL(CA.dbl91Days, 0)
 	 , I.intInvoiceId
 	 , I.intEntityCustomerId
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
