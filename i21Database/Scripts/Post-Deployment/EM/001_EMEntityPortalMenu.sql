@@ -224,3 +224,9 @@ begin
 	')
 	SET IDENTITY_INSERT tblEntityPortalMenu OFF
 end
+
+--Vendor
+IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Bill' and strType = 'Screen' and strCommand = 'AccountsPayable.view.Bill')
+BEGIN
+	exec('update tblEntityPortalMenu set strCommand = ''AccountsPayable.view.Voucher'', strPortalMenuName=''Voucher'' where strPortalMenuName = ''Bill'' and strType = ''Screen'' and strCommand = ''AccountsPayable.view.Bill''')
+END
