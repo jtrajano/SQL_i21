@@ -2857,6 +2857,7 @@
     <Build Include="dbo\Tables\tblCTInvPlngReportMaterial.sql" />
     <Build Include="dbo\Tables\tblCTInvPlngReportAttributeValue.sql" />
     <Build Include="dbo\Views\vyuCTPriceFixationDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Generate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

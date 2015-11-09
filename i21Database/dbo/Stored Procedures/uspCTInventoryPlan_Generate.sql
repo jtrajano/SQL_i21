@@ -292,7 +292,7 @@ BEGIN TRY
 						AND intReportAttributeID = 8
 					)
 			BEGIN
-				SET @FETCHEXISTING = 0
+				SET @FetchExisting = 0
 			END
 
 		IF @PlannedPurchasesXML <> ''
@@ -312,7 +312,7 @@ BEGIN TRY
 						AND intReportAttributeID = 5
 					)
 			BEGIN
-				SET @FETCHEXISTING = 0
+				SET @FetchExisting = 0
 			END
 
 		IF @WeeksOfSupplyTargetXML <> ''
@@ -332,7 +332,7 @@ BEGIN TRY
 						AND intReportAttributeID = 11
 					)
 			BEGIN
-				SET @FETCHEXISTING = 0
+				SET @FetchExisting = 0
 			END
 
 		--If @MinReportAttributeID = 8 --Forecasted Consumption
@@ -586,7 +586,9 @@ BEGIN TRY
 
 			SET @SQL = @SQL + ')
 										) p
-									) Ext WHERE Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + ' AND [@Table].intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + ' AND Ext.intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + ' AND [@Table].AttributeId = Ext.intReportAttributeID  '
+									) Ext WHERE Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + 
+									' AND [@Table].intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + ' AND Ext.intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + 
+									' AND [@Table].AttributeId = Ext.intReportAttributeID  '
 
 			IF @NewMonthsToView > @ExistingMonthsToView
 			BEGIN
@@ -1420,7 +1422,8 @@ BEGIN TRY
 						IF @ysnCalculatePlannedPurchases = 1
 						BEGIN
 							SET @SQL = @SQL + ' Declare @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' Decimal(24,2) '
-							SET @SQL = @SQL + ' Set @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = convert(decimal(24,6),( CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0
+							SET @SQL = @SQL + ' Set @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + 
+									' = convert(decimal(24,6),( CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0
 									ELSE (ABS(@ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ')
 									/' + convert(VARCHAR, convert(DECIMAL(24, 10), @Conversion_Factor)) + ') END )) '
 							SET @SQL = @SQL + ' Update @Table SET   
@@ -1434,7 +1437,8 @@ BEGIN TRY
 							SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 5 '
 							SET @SQL = @SQL + ' Declare @6' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' Decimal(24,2) '
 							SET @SQL = @SQL + ' SET @6' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' 
-							= convert(decimal(24,6),( dbo.fnCTConvertQuantityToTargetItemUOM(' + Cast(@intItemId AS NVARCHAR(10)) + ',' + CAST(@SourceUOMKey AS NVARCHAR(5)) + '  , ' + CAST(@TargetUOMKey AS NVARCHAR(5)) + ' , ISNULL( @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' ,0) ) ))'
+								= convert(decimal(24,6),( dbo.fnCTConvertQuantityToTargetItemUOM(' + Cast(@intItemId AS NVARCHAR(10)) + ',' + CAST(@SourceUOMKey AS NVARCHAR(5)) + '  , ' + 
+								CAST(@TargetUOMKey AS NVARCHAR(5)) + ' , ISNULL( @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' ,0) ) ))'
 							SET @SQL = @SQL + ' Update @Table SET   
 							PastDue = PastDue '
 							SET @SQL = @SQL + ' , strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' =  @6' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' '
