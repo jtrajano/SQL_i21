@@ -9,7 +9,7 @@ BEGIN
 	DECLARE @result AS NUMERIC(18,6)
 
 	-- Act
-	SELECT @result = dbo.fnRecalculateAverageCost(@itemId, @locationId, @stockAverageCost);
+	SELECT @result = dbo.fnRecalculateAverageCost(@itemId, @locationId);
 
 	-- Assert the null dates are not equal dates
 	EXEC tSQLt.AssertEquals NULL, @result 

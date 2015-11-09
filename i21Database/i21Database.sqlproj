@@ -2384,6 +2384,9 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\EfficiencyReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

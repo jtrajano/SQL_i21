@@ -193,7 +193,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
-				,intItemUOMId = @WetGrains_BushelUOMId
+				,intItemUOMId = NULL 
 				,dtmDate = 'November 14, 2014'
 				,dblQty = 0
 				,dblCost = 0
