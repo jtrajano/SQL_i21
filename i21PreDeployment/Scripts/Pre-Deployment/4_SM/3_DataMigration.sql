@@ -143,3 +143,15 @@ GO
 		END
 	END
 GO
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' AND [COLUMN_NAME] = 'intEntityUserSecurityId') 
+	BEGIN
+		EXEC
+		(
+		'UPDATE tblSMRecurringTransaction SET intUserId = UserSecurity.intEntityId
+		FROM tblSMRecurringTransaction Recurring
+		INNER JOIN tblSMUserSecurity UserSecurity ON Recurring.intUserId = UserSecurity.intUserSecurityID'
+		)
+	END
+
+GO

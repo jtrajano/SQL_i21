@@ -70,3 +70,8 @@ GO
 	UPDATE tblSMCompanyLocation SET intDefaultInboundDockDoorUnitId = NULL WHERE intDefaultInboundDockDoorUnitId = 0
 
 GO
+
+	/* MAKE BILL TRANSACTION TYPE TO VOUCHER */
+	UPDATE tblSMRecurringTransaction SET strTransactionType = 'Voucher' WHERE strTransactionType = 'Bill'
+	UPDATE tblSMRecurringHistory SET strTransactionType = 'Voucher' WHERE strTransactionType = 'Bill'
+GO

@@ -22,7 +22,8 @@
     [ysnAvailable] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSMRecurringTransaction] PRIMARY KEY ([intRecurringId]), 
-    CONSTRAINT [AK_tblSMRecurringTransaction_strTransactionNumber] UNIQUE ([strTransactionNumber]) 
+    CONSTRAINT [AK_tblSMRecurringTransaction_strTransactionNumber] UNIQUE ([strTransactionNumber]), 
+    CONSTRAINT [FK_tblSMRecurringTransaction_tblSMUserSecurity] FOREIGN KEY ([intUserId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) 
 )
 
 GO
