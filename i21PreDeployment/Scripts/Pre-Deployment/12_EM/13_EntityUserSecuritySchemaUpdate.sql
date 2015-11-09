@@ -162,6 +162,7 @@ BEGIN
 	DECLARE @EntityContactId int
 	DECLARE @EntityLocationId int
 	DECLARE @Name NVARCHAR(100)
+	DECLARE @Email NVARCHAR(100)
 
 	DECLARE @Address NVARCHAR(MAX)
 	DECLARE @City NVARCHAR(MAX)
@@ -175,12 +176,13 @@ BEGIN
 			@CurUserSecurityId	= intUserSecurityID,
 			@CurEntityId		= intEntityId	
 		FROM #tmpUserSecurity
-
-		SELECT @Name = strName FROM tblEntity where intEntityId = @CurEntityId
+		SET @Email = ''''
+		SET @Name = ''''
+		SELECT @Name = strName,@Email=strEmail FROM tblEntity where intEntityId = @CurEntityId
 		SET @EntityId = @CurEntityId
 
-		INSERT INTO tblEntity(strName,strContactNumber)
-		VALUES (@Name, '''')
+		INSERT INTO tblEntity(strName,strContactNumber,strEmail)
+		VALUES (@Name, '''', @Email)
 
 		SET @EntityContactId = @@IDENTITY		
 
