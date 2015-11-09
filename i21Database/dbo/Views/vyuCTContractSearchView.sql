@@ -6,7 +6,7 @@ AS
 				CH.strContractType,					CH.dblHeaderQuantity,			CH.strContractNumber,
 				CH.strCustomerContract,				CH.ysnSigned,					CH.ysnPrinted,
 				BL.dblBalance,						CH.strHeaderUnitMeasure,		CH.dtmDeferPayDate,
-				CH.dblDeferPayRate,					CH.strInternalComments,			CH.strContractComments,									
+				CH.dblDeferPayRate,					CH.strInternalComment,			CH.strPrintableRemarks,									
 				CH.dblTolerancePct,
 				CH.dblProvisionalInvoicePct,		CH.ysnPrepaid,					CH.ysnSubstituteItem,
 				CH.ysnUnlimitedQuantity,			CH.ysnMaxPrice,					CH.ysnProvisional,

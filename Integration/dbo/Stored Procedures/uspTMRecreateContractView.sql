@@ -142,7 +142,7 @@ BEGIN
 				,vwcnt_amt_orig= ISNULL(B.dblCashPrice,0.0) * ISNULL(B.dblOriginalQty,0.0)
 				,vwcnt_amt_bal= ISNULL(B.dblBalance,0.0) * ISNULL(B.dblCashPrice,0.0)
 				,vwcnt_due_rev_dt= B.dtmEndDate
-				,vwcnt_hdr_comments=A.strContractComments
+				,vwcnt_hdr_comments=A.strInternalComment
 				,vwcnt_un_orig=ISNULL(B.dblOriginalQty,0.0)
 				,vwcnt_un_bal= B.dblBalance
 				,vwcnt_lc1_yn=''''
