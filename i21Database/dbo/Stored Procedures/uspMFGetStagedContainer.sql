@@ -135,7 +135,10 @@ BEGIN
 	LEFT OUTER JOIN dbo.tblEntity E ON E.intEntityId = S.intOwnerId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
 	JOIN dbo.tblWHContainerInboundOrder CI ON CI.intContainerId = C.intContainerId
-	JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId
+	JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId AND OH.intOrderStatusId NOT IN (
+		3
+		,10
+		)
 	JOIN dbo.tblWHOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 	GROUP BY L.intLotId
 		,L.strLotNumber
