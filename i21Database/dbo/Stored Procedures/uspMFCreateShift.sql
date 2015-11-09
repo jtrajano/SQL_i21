@@ -20,32 +20,36 @@ BEGIN TRY
 			,intUserId INT
 			)
 
-	DECLARE @intShiftId	int
-		,@strShiftName	nvarchar(50)
-		,@dtmShiftStartTime	datetime
-		,@dtmShiftEndTime	datetime
-		,@intDuration	int
-		,@intStartOffset	int
-		,@intEndOffset	int
-		,@intShiftSequence	int
-		,@intNextShiftId	int
-		,@strNextShiftName	nvarchar(50)
-		,@dtmNextShiftStartTime	datetime
-		,@dtmNextShiftEndTime	datetime
-		,@intNextDuration	int
-		,@intNextStartOffset	int
-		,@intNextEndOffset	int
-		,@intNextShiftSequence	int
+	DECLARE @intShiftId INT
+		,@strShiftName NVARCHAR(50)
+		,@dtmShiftStartTime DATETIME
+		,@dtmShiftEndTime DATETIME
+		,@intDuration INT
+		,@intStartOffset INT
+		,@intEndOffset INT
+		,@intShiftSequence INT
+		,@intNextShiftId INT
+		,@strNextShiftName NVARCHAR(50)
+		,@dtmNextShiftStartTime DATETIME
+		,@dtmNextShiftEndTime DATETIME
+		,@intNextDuration INT
+		,@intNextStartOffset INT
+		,@intNextEndOffset INT
+		,@intNextShiftSequence INT
 
 	IF EXISTS (
-				SELECT *
-				FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
-						strShiftName NVARCHAR(50)
-						,strRowState NVARCHAR(50)
-						) x
-				WHERE x.strRowState = 'ADDED'
-				AND EXISTS(SELECT *FROM tblMFShift S WHERE S.strShiftName=x.strShiftName Collate Latin1_General_CI_AS
-						)
+			SELECT *
+			FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
+					strShiftName NVARCHAR(50)
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.strRowState = 'ADDED'
+				AND EXISTS (
+					SELECT *
+					FROM tblMFShift S
+					WHERE S.intLocationId = @intLocationId
+						AND S.strShiftName = x.strShiftName Collate Latin1_General_CI_AS
+					)
 			)
 	BEGIN
 		RAISERROR (
@@ -55,15 +59,21 @@ BEGIN TRY
 				)
 	END
 
-	IF EXISTS (SELECT *
-				FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
-						intShiftId int
-						,strShiftName NVARCHAR(50)
-						,strRowState NVARCHAR(50)
-						) x
-				WHERE x.strRowState = 'MODIFIED'
-				AND EXISTS(SELECT *FROM tblMFShift S WHERE S.strShiftName=x.strShiftName Collate Latin1_General_CI_AS and S.intShiftId<>x.intShiftId 
-						)
+	IF EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
+					intShiftId INT
+					,strShiftName NVARCHAR(50)
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.strRowState = 'MODIFIED'
+				AND EXISTS (
+					SELECT *
+					FROM tblMFShift S
+					WHERE S.intLocationId = @intLocationId
+						AND S.strShiftName = x.strShiftName Collate Latin1_General_CI_AS
+						AND S.intShiftId <> x.intShiftId
+					)
 			)
 	BEGIN
 		RAISERROR (
@@ -72,7 +82,6 @@ BEGIN TRY
 				,1
 				)
 	END
-
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -127,8 +136,8 @@ BEGIN TRY
 		,intStartOffset = x.intStartOffset
 		,intEndOffset = x.intEndOffset
 		,intShiftSequence = x.intShiftSequence
-		,intLastModifiedUserId=@intUserId
-		,dtmLastModified=GetDate()
+		,intLastModifiedUserId = @intUserId
+		,dtmLastModified = GetDate()
 		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 	FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
 			intShiftId INT
@@ -156,23 +165,23 @@ BEGIN TRY
 				AND x.strRowState = 'DELETE'
 			)
 
-	If EXISTS (
+	IF EXISTS (
 			SELECT *
 			FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
 					intShiftId INT
 					,strRowState NVARCHAR(50)
 					) x
-			JOIN tblMFWorkOrderInputLot W on W.intShiftId =x.intShiftId
-			Where x.strRowState = 'DELETE'
+			JOIN tblMFWorkOrderInputLot W ON W.intShiftId = x.intShiftId
+			WHERE x.strRowState = 'DELETE'
 			)
 	BEGIN
-		SELECT @strShiftName =strShiftName
+		SELECT @strShiftName = strShiftName
 		FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
 				intShiftId INT
-				,strShiftName nvarchar(50)
+				,strShiftName NVARCHAR(50)
 				,strRowState NVARCHAR(50)
 				) x
-		JOIN tblMFWorkOrderInputLot W ON W.intShiftId =x.intShiftId
+		JOIN tblMFWorkOrderInputLot W ON W.intShiftId = x.intShiftId
 		WHERE x.strRowState = 'DELETE'
 
 		RAISERROR (
@@ -183,23 +192,32 @@ BEGIN TRY
 				)
 	END
 
-	If EXISTS (
+	IF EXISTS (
 			SELECT *
 			FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
 					intShiftId INT
 					,strRowState NVARCHAR(50)
 					) x
-			Where x.strRowState = 'DELETE'
-			AND EXISTS(SELECT *FROM dbo.tblMFWorkOrder W WHERE W.intPlannedShiftId =x.intShiftId)
+			WHERE x.strRowState = 'DELETE'
+				AND EXISTS (
+					SELECT *
+					FROM dbo.tblMFWorkOrder W
+					WHERE W.intPlannedShiftId = x.intShiftId
+					)
 			)
 	BEGIN
-		SELECT @strShiftName =strShiftName
+		SELECT @strShiftName = strShiftName
 		FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
 				intShiftId INT
-				,strShiftName nvarchar(50)
+				,strShiftName NVARCHAR(50)
 				,strRowState NVARCHAR(50)
 				) x
-		WHERE x.strRowState = 'DELETE' AND EXISTS(SELECT *FROM dbo.tblMFWorkOrder W WHERE W.intPlannedShiftId =x.intShiftId)
+		WHERE x.strRowState = 'DELETE'
+			AND EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder W
+				WHERE W.intPlannedShiftId = x.intShiftId
+				)
 
 		RAISERROR (
 				51171
@@ -226,47 +244,52 @@ BEGIN TRY
 
 	WHILE (@intShiftSequence > 0)
 	BEGIN
-		SELECT @intShiftId	=NULL	
-			,@strShiftName	=NULL
-			,@dtmShiftStartTime	=NULL	
-			,@dtmShiftEndTime	=NULL	
-			,@intDuration		=NULL	
-			,@intStartOffset	=NULL	
-			,@intEndOffset		=NULL	
+		SELECT @intShiftId = NULL
+			,@strShiftName = NULL
+			,@dtmShiftStartTime = NULL
+			,@dtmShiftEndTime = NULL
+			,@intDuration = NULL
+			,@intStartOffset = NULL
+			,@intEndOffset = NULL
 
-		SELECT @intShiftId	=intShiftId	
-			,@strShiftName	=strShiftName
-			,@dtmShiftStartTime	=dtmShiftStartTime	
-			,@dtmShiftEndTime	=dtmShiftEndTime	
-			,@intDuration		=intDuration	
-			,@intStartOffset	=intStartOffset	
-			,@intEndOffset		=intEndOffset	
+		SELECT @intShiftId = intShiftId
+			,@strShiftName = strShiftName
+			,@dtmShiftStartTime = dtmShiftStartTime
+			,@dtmShiftEndTime = dtmShiftEndTime
+			,@intDuration = intDuration
+			,@intStartOffset = intStartOffset
+			,@intEndOffset = intEndOffset
 		FROM dbo.tblMFShift
 		WHERE intShiftSequence = @intShiftSequence
 
-		SELECT @intNextShiftId	=NULL	
-			,@strNextShiftName	=NULL
-			,@dtmNextShiftStartTime	=NULL	
-			,@dtmNextShiftEndTime	=NULL	
-			,@intNextDuration		=NULL	
-			,@intNextStartOffset	=NULL	
-			,@intNextEndOffset		=NULL	
+		SELECT @intNextShiftId = NULL
+			,@strNextShiftName = NULL
+			,@dtmNextShiftStartTime = NULL
+			,@dtmNextShiftEndTime = NULL
+			,@intNextDuration = NULL
+			,@intNextStartOffset = NULL
+			,@intNextEndOffset = NULL
 
-		SELECT @intNextShiftId	=intShiftId	
-			,@strNextShiftName	=strShiftName
-			,@dtmNextShiftStartTime	=dtmShiftStartTime	
-			,@dtmNextShiftEndTime	=dtmShiftEndTime	
-			,@intNextDuration		=intDuration	
-			,@intNextStartOffset	=intStartOffset	
-			,@intNextEndOffset		=intEndOffset	
+		SELECT @intNextShiftId = intShiftId
+			,@strNextShiftName = strShiftName
+			,@dtmNextShiftStartTime = dtmShiftStartTime
+			,@dtmNextShiftEndTime = dtmShiftEndTime
+			,@intNextDuration = intDuration
+			,@intNextStartOffset = intStartOffset
+			,@intNextEndOffset = intEndOffset
 		FROM dbo.tblMFShift
-		WHERE intShiftSequence = @intShiftSequence+1
+		WHERE intShiftSequence = @intShiftSequence + 1
 
 		IF @dtmNextShiftStartTime IS NOT NULL
 		BEGIN
-			IF @dtmShiftEndTime+@intEndOffset>@dtmNextShiftStartTime+@intNextStartOffset
+			IF @dtmShiftEndTime + @intEndOffset > @dtmNextShiftStartTime + @intNextStartOffset
 			BEGIN
-				RAISERROR(51170,11,1)
+				RAISERROR (
+						51170
+						,11
+						,1
+						)
+
 				RETURN
 			END
 		END
@@ -319,8 +342,8 @@ BEGIN TRY
 		,dtmShiftBreakTypeEndTime = x.dtmShiftBreakTypeEndTime
 		,intShiftBreakTypeDuration = x.intShiftBreakTypeDuration
 		,intSequence = x.intSequence
-		,intLastModifiedUserId=@intUserId
-		,dtmLastModified=GetDate()
+		,intLastModifiedUserId = @intUserId
+		,dtmLastModified = GetDate()
 		,intConcurrencyId = Isnull(tblMFShiftDetail.intConcurrencyId, 0) + 1
 	FROM OPENXML(@idoc, 'root/ShiftDetails/ShiftDetail', 2) WITH (
 			intShiftDetailId INT
@@ -336,15 +359,25 @@ BEGIN TRY
 	WHERE x.intShiftDetailId = tblMFShiftDetail.intShiftDetailId
 		AND x.strRowState = 'MODIFIED'
 
-	Declare @tblMFShiftDetail table(intShiftDetailId int,intSequence int)
+	DECLARE @tblMFShiftDetail TABLE (
+		intShiftDetailId INT
+		,intSequence INT
+		)
 
-	Insert into @tblMFShiftDetail(intShiftDetailId,intSequence)
-	Select intShiftDetailId,ROW_NUMBER() Over(Partition by intShiftId Order by dtmShiftBreakTypeStartTime)  from tblMFShiftDetail
+	INSERT INTO @tblMFShiftDetail (
+		intShiftDetailId
+		,intSequence
+		)
+	SELECT intShiftDetailId
+		,ROW_NUMBER() OVER (
+			PARTITION BY intShiftId ORDER BY dtmShiftBreakTypeStartTime
+			)
+	FROM tblMFShiftDetail
 
-	Update SD
-	Set intSequence =S.intSequence 
-	From @tblMFShiftDetail S
-	JOIN tblMFShiftDetail SD on SD.intShiftDetailId=S.intShiftDetailId
+	UPDATE SD
+	SET intSequence = S.intSequence
+	FROM @tblMFShiftDetail S
+	JOIN tblMFShiftDetail SD ON SD.intShiftDetailId = S.intShiftDetailId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
