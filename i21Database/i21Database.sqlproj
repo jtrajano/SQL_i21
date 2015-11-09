@@ -2505,8 +2505,6 @@
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTransactionsCSV.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForCustomer.sql" />
-    <Build Include="dbo\Functions\fnGetTaxGroupTaxCodes.sql" />
-    <Build Include="dbo\Functions\fnGetTaxMasterIdForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
     <Build Include="dbo\Functions\fnGetItemTaxComputationForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetItemTaxComputationForVendor.sql" />
@@ -2858,6 +2856,8 @@
     <Build Include="dbo\Tables\tblCTInvPlngReportAttributeValue.sql" />
     <Build Include="dbo\Views\vyuCTPriceFixationDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Generate.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupIdForCustomer.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupIdForVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -13,6 +13,12 @@ RETURNS NVARCHAR(500)
 AS
 BEGIN
 	DECLARE @TaxCodeExemption	NVARCHAR(500)
+	
+	IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
+		SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		RETURN @TaxCodeExemption
 			
 	--Customer Location
 	SELECT TOP 1

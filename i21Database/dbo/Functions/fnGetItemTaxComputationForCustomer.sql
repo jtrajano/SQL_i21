@@ -29,6 +29,7 @@ RETURNS @returntable TABLE
 	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT
 	,[strTaxGroup]					NVARCHAR(100)
+	,[strNotes]						NVARCHAR(500)
 )
 AS
 BEGIN
@@ -55,88 +56,14 @@ BEGIN
 			,[strTaxCode]					NVARCHAR(100)						
 			,[ysnTaxExempt]					BIT
 			,[strTaxGroup]					NVARCHAR(100)
+			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT
 			,[ysnComputed]					BIT
 			)
 			
-	DECLARE @TaxGroupMasterId INT
 			
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupMasterId = [dbo].[fnGetTaxMasterIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId)
-		
-
-	IF ISNULL(@TaxGroupMasterId, 0) <> 0 AND ISNULL(@TaxGroupId, 0) = 0
-		BEGIN			
-			DECLARE @Country NVARCHAR(MAX)
-					,@County NVARCHAR(MAX)
-					,@City NVARCHAR(MAX)
-					,@State NVARCHAR(MAX)				
-					
-			IF ISNULL(@ShipToLocationId,0) <> 0
-				BEGIN
-					SELECT TOP 1
-						 @Country	= UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strCountry], EL.[strCountry]),''))))
-						,@State		= UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strState], EL.[strState]),''))))
-						,@County	= UPPER(RTRIM(LTRIM(ISNULL(TC.[strCounty],'')))) 
-						,@City		= UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strCity], EL.[strCity]),''))))
-					FROM
-						tblEntityLocation SL
-					LEFT OUTER JOIN
-						tblARCustomer C
-							ON SL.[intEntityLocationId] = C.[intShipToId] 							
-					LEFT OUTER JOIN
-						(	SELECT
-								[intEntityLocationId]
-								,[intEntityId] 
-								,[strCountry]
-								,[strState]
-								,[strCity]
-							FROM 
-							tblEntityLocation
-							WHERE
-								ysnDefaultLocation = 1
-						) EL
-							ON C.[intEntityCustomerId] = EL.[intEntityId]
-					LEFT OUTER JOIN
-						tblSMTaxCode TC
-							ON C.[intTaxCodeId] = TC.[intTaxCodeId] 								
-					WHERE
-						SL.[intEntityLocationId] = @ShipToLocationId
-				END
-				ELSE
-				BEGIN
-					SELECT TOP 1
-						 @Country	= UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strCountry], EL.[strCountry]),''))))
-						,@State		= UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strState], EL.[strState]),''))))
-						,@County	= UPPER(RTRIM(LTRIM(ISNULL(TC.[strCounty],'')))) 
-						,@City		= UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strCity], EL.[strCity]),''))))
-					FROM
-						tblARCustomer C
-					LEFT OUTER JOIN
-						(	SELECT
-								 [intEntityLocationId]
-								,[intEntityId] 
-								,[strCountry]
-								,[strState]
-								,[strCity]
-							FROM 
-							tblEntityLocation
-							WHERE
-								ysnDefaultLocation = 1
-						) EL
-							ON C.[intEntityCustomerId] = EL.[intEntityId]
-					LEFT OUTER JOIN
-						tblEntityLocation SL
-							ON C.[intShipToId] = SL.[intEntityLocationId]
-					LEFT OUTER JOIN
-						tblSMTaxCode TC
-							ON C.[intTaxCodeId] = TC.[intTaxCodeId] 								
-					WHERE
-						C.[intEntityCustomerId] = @CustomerId	
-				END
-										
-			SELECT @TaxGroupId = [dbo].[fnGetTaxGroupForLocation](@TaxGroupMasterId, @Country, @County, @City, @State)			
-		END
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @ShipToLocationId)			
 			
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
@@ -156,6 +83,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes] 
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -175,11 +103,12 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes]
 	FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @ShipToLocationId)
 					
 	
-	UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL WHERE intTaxGroupMasterId NOT IN (SELECT intTaxGroupMasterId FROM tblSMTaxGroupMaster)
+	UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL
 									
 			
 	-- Calculate Item Tax
@@ -187,7 +116,7 @@ BEGIN
 		BEGIN
 			DECLARE  @Id				INT
 					,@TaxableAmount		NUMERIC(18,6)
-					,@TaxClassId		INT
+					,@TaxCodeId			INT
 					,@TaxAdjusted		BIT
 					,@AdjustedTax		NUMERIC(18,6)
 					,@Tax				NUMERIC(18,6)
@@ -205,7 +134,7 @@ BEGIN
 				ISNULL([ysnComputed], 0) = 0
 															
 			SELECT 
-				 @TaxClassId		= [intTaxClassId]
+				 @TaxCodeId			= [intTaxCodeId]
 				,@TaxAdjusted		= ISNULL([ysnTaxAdjusted],0)
 				,@AdjustedTax		= [dblAdjustedTax]
 				,@Tax				= [dblTax]
@@ -220,7 +149,7 @@ BEGIN
 			
 			DECLARE @TaxableByOtherTaxes AS TABLE(
 				 [Id]						INT
-				,[intTaxClassId]			INT
+				,[intTaxCodeId]				INT
 				,[strTaxableByOtherTaxes]	NVARCHAR(MAX)
 				,[strCalculationMethod]		NVARCHAR(30)
 				,[numRate]					NUMERIC(18,6)
@@ -231,7 +160,7 @@ BEGIN
 				
 			INSERT INTO @TaxableByOtherTaxes (
 				Id
-				,intTaxClassId
+				,intTaxCodeId
 				,strTaxableByOtherTaxes
 				,strCalculationMethod
 				,numRate
@@ -241,7 +170,7 @@ BEGIN
 				)
 			SELECT
 				 Id
-				,intTaxClassId
+				,intTaxCodeId
 				,strTaxableByOtherTaxes
 				,strCalculationMethod
 				,numRate
@@ -252,7 +181,7 @@ BEGIN
 				@ItemTaxes
 			WHERE
 				Id <> @Id 
-				AND @TaxClassId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
+				AND @TaxCodeId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
 			
 			--Calculate Taxable Amount	
 			WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)
@@ -345,6 +274,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes] 
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -365,6 +295,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes]
 	FROM
 		@ItemTaxes 	
 	RETURN				

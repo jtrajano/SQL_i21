@@ -31,30 +31,30 @@ BEGIN
 		,[intEntityVendorId] INT
 		,[intItemId] INT
 		,[intCategoryId] INT
-		,[intTaxGroupMasterId] INT)
+		,[intTaxGroupId] INT)
 
-
-	INSERT INTO @CustomerSpecialTax(
-		 [intARSpecialTaxId]
-		,[intEntityCustomerId]
-		,[intEntityVendorId]
-		,[intItemId]
-		,[intCategoryId]
-		,[intTaxGroupMasterId])
-	SELECT
-		 ST.[intARSpecialTaxId]
-		,ST.[intEntityCustomerId]
-		,ST.[intEntityVendorId]
-		,ST.[intItemId]
-		,ST.[intCategoryId]
-		,ST.[intTaxGroupMasterId]
-	FROM
-		tblARSpecialTax ST
-	INNER JOIN
-		tblARCustomer C
-			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
-	WHERE
-		C.intEntityCustomerId = @CustomerId
+	--Commented until EM-667 is implemented; the entire function will be replaced by fnGetTaxGroupIdForCustomer
+	--INSERT INTO @CustomerSpecialTax(
+	--	 [intARSpecialTaxId]
+	--	,[intEntityCustomerId]
+	--	,[intEntityVendorId]
+	--	,[intItemId]
+	--	,[intCategoryId]
+	--	,[intTaxGroupId])
+	--SELECT
+	--	 ST.[intARSpecialTaxId]
+	--	,ST.[intEntityCustomerId]
+	--	,ST.[intEntityVendorId]
+	--	,ST.[intItemId]
+	--	,ST.[intCategoryId]
+	--	,ST.[intTaxGroupMasterId]
+	--FROM
+	--	tblARSpecialTax ST
+	--INNER JOIN
+	--	tblARCustomer C
+	--		ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	--WHERE
+	--	C.intEntityCustomerId = @CustomerId
 			
 	DECLARE @TaxGroupMasterId INT
 	--Customer Special Tax
@@ -62,7 +62,7 @@ BEGIN
 	BEGIN
 
 		SELECT
-			@TaxGroupMasterId = [intTaxGroupMasterId]
+			@TaxGroupMasterId = [intTaxGroupId]
 		FROM
 			@CustomerSpecialTax
 		WHERE
@@ -72,7 +72,7 @@ BEGIN
 		IF @TaxGroupMasterId IS NULL OR @TaxGroupMasterId = 0
 			BEGIN				
 				SELECT
-					@TaxGroupMasterId = [intTaxGroupMasterId]
+					@TaxGroupMasterId = [intTaxGroupId]
 				FROM
 					@CustomerSpecialTax
 				WHERE
@@ -83,7 +83,7 @@ BEGIN
 		IF @TaxGroupMasterId IS NULL OR @TaxGroupMasterId = 0
 			BEGIN				
 				SELECT
-					@TaxGroupMasterId = [intTaxGroupMasterId]
+					@TaxGroupMasterId = [intTaxGroupId]
 				FROM
 					@CustomerSpecialTax
 				WHERE
@@ -93,7 +93,7 @@ BEGIN
 		IF @TaxGroupMasterId IS NULL OR @TaxGroupMasterId = 0
 			BEGIN				
 				SELECT
-					@TaxGroupMasterId = [intTaxGroupMasterId]
+					@TaxGroupMasterId = [intTaxGroupId]
 				FROM
 					@CustomerSpecialTax
 				WHERE
@@ -103,7 +103,7 @@ BEGIN
 		IF @TaxGroupMasterId IS NULL OR @TaxGroupMasterId = 0
 			BEGIN				
 				SELECT
-					@TaxGroupMasterId = [intTaxGroupMasterId]
+					@TaxGroupMasterId = [intTaxGroupId]
 				FROM
 					@CustomerSpecialTax
 				WHERE

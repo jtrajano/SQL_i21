@@ -31,12 +31,9 @@ AS
 BEGIN
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
-			,@TaxExempt BIT
 			,@ItemCategoryId INT
 
 	SET @ZeroDecimal = 0.000000
-	SET @TaxExempt = 0
-	--SELECT @TaxExempt = ysnTaxExempt FROM tblAPVendor WHERE intEntityCustomerId = @VendorId
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
 	
 	INSERT INTO @returntable
@@ -56,10 +53,7 @@ BEGIN
 		,0 AS [ysnSeparateOnInvoice] 
 		,TC.[ysnCheckoffTax]
 		,TC.[strTaxCode]
-		,(CASE WHEN ISNULL(@TaxExempt,0) = 0
-			THEN ISNULL(LEN([dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @BillToLocationId)),0)
-			ELSE @TaxExempt
-		END) AS [ysnTaxExempt] 
+		,LEN(ISNULL([dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @BillToLocationId),'')) AS [ysnTaxExempt] 
 		,TG.[strTaxGroup]
 		,[dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @BillToLocationId)				
 	FROM
@@ -74,5 +68,6 @@ BEGIN
 		TG.intTaxGroupId = @TaxGroupId
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
+
 	RETURN				
 END

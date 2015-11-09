@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemTaxComputationForVendor]
 (
 	 @ItemId			INT
+	,@VendorId			INT
 	,@TransactionDate	DATETIME
 	,@ItemPrice			NUMERIC(18,6)
 	,@QtyShipped		NUMERIC(18,6)
@@ -27,6 +28,7 @@ RETURNS @returntable TABLE
 	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT DEFAULT 0
 	,[strTaxGroup]					NVARCHAR(100)
+	,[strNotes]						NVARCHAR(500)
 )
 AS
 BEGIN
@@ -53,36 +55,14 @@ BEGIN
 			,[strTaxCode]					NVARCHAR(100)						
 			,[ysnTaxExempt]					BIT
 			,[strTaxGroup]					NVARCHAR(100)
+			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT DEFAULT 0
 			,[ysnComputed]					BIT
 			)
-			
-	DECLARE @TaxGroupMasterId INT
-			
-	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupMasterId = intPurchaseTaxGroupId FROM tblICItem WHERE intItemId = @ItemId
-		
-
-	IF ISNULL(@TaxGroupMasterId, 0) <> 0 AND ISNULL(@TaxGroupId, 0) = 0
-		BEGIN			
-			DECLARE @Country NVARCHAR(MAX)
-					,@County NVARCHAR(MAX)
-					,@City NVARCHAR(MAX)
-					,@State NVARCHAR(MAX)				
 					
-			SELECT
-				@Country = UPPER(RTRIM(LTRIM(ISNULL(strCountry, ''))))
-				,@State = UPPER(RTRIM(LTRIM(ISNULL(strStateProvince, ''))))
-				,@County = '' 
-				,@City = UPPER(RTRIM(LTRIM(ISNULL(strCity, ''))))
-			FROM
-				tblSMCompanyLocation
-			WHERE
-				intCompanyLocationId = @CompanyLocationId
-										
-			SELECT @TaxGroupId = [dbo].[fnGetTaxGroupForLocation](@TaxGroupMasterId, @Country, @County, @City, @State)			
-		END
-			
+	IF ISNULL(@TaxGroupId, 0) = 0
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, NULL)	
+					
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
 		,[intTransactionDetailId]
@@ -101,6 +81,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes]
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -120,11 +101,12 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodes](@TaxGroupId, @TransactionDate)
+		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, NULL)
 					
 	
-	UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL WHERE intTaxGroupMasterId NOT IN (SELECT intTaxGroupMasterId FROM tblSMTaxGroupMaster)
+	UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL
 									
 			
 	-- Calculate Item Tax
@@ -132,7 +114,7 @@ BEGIN
 		BEGIN
 			DECLARE  @Id				INT
 					,@TaxableAmount		NUMERIC(18,6)
-					,@TaxClassId		INT
+					,@TaxCodeId			INT
 					,@TaxAdjusted		BIT
 					,@AdjustedTax		NUMERIC(18,6)
 					,@Tax				NUMERIC(18,6)
@@ -150,7 +132,7 @@ BEGIN
 				ISNULL([ysnComputed], 0) = 0
 															
 			SELECT 
-				 @TaxClassId		= [intTaxClassId]
+				 @TaxCodeId			= [intTaxCodeId]
 				,@TaxAdjusted		= ISNULL([ysnTaxAdjusted],0)
 				,@AdjustedTax		= [dblAdjustedTax]
 				,@Tax				= [dblTax]
@@ -165,7 +147,7 @@ BEGIN
 			
 			DECLARE @TaxableByOtherTaxes AS TABLE(
 				 [Id]						INT
-				,[intTaxClassId]			INT
+				,[intTaxCodeId]				INT
 				,[strTaxableByOtherTaxes]	NVARCHAR(MAX)
 				,[strCalculationMethod]		NVARCHAR(30)
 				,[numRate]					NUMERIC(18,6)
@@ -176,7 +158,7 @@ BEGIN
 				
 			INSERT INTO @TaxableByOtherTaxes (
 				Id
-				,intTaxClassId
+				,intTaxCodeId
 				,strTaxableByOtherTaxes
 				,strCalculationMethod
 				,numRate
@@ -186,7 +168,7 @@ BEGIN
 				)
 			SELECT
 				 Id
-				,intTaxClassId
+				,intTaxCodeId
 				,strTaxableByOtherTaxes
 				,strCalculationMethod
 				,numRate
@@ -197,7 +179,7 @@ BEGIN
 				@ItemTaxes
 			WHERE
 				Id <> @Id 
-				AND @TaxClassId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
+				AND @TaxCodeId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
 			
 			--Calculate Taxable Amount	
 			WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)
@@ -290,6 +272,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes]
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -310,6 +293,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[strTaxGroup]
+		,[strNotes]
 	FROM
 		@ItemTaxes 	
 	RETURN				
