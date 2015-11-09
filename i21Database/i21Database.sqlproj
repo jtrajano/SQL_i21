@@ -2384,6 +2384,7 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\EfficiencyReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
