@@ -141,7 +141,9 @@ BEGIN TRY
 				   @intLineItemLotId = intLotId
 			FROM @tblLineItem
 			WHERE intItemRecordId = @intItemRecordId
-			
+
+	IF @strOrderType = 'SS'		
+	BEGIN
 			INSERT INTO @tblSKU (intSKUId, 
 								 intItemId, 
 								 dblQty, 
@@ -166,7 +168,7 @@ BEGIN TRY
 							FROM tblWHSKU
 							WHERE intItemId = @intItemId
 							)
-					AND s.intSKUStatusId = 1
+					AND s.intSKUStatusId IN (1,2)
 					AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
 			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
@@ -186,13 +188,66 @@ BEGIN TRY
 			FROM tblWHSKU s
 			LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId AND t.intTaskTypeId NOT IN (5,6,8,9,10,11)
 			WHERE s.intItemId = @intItemId
-					AND s.intSKUStatusId = 1
+					AND s.intSKUStatusId IN (1,2)
 					AND NOT EXISTS (SELECT * FROM @tblSKU WHERE intSKUId = s.intSKUId)
 					AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
 			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 			ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
+	END
+	ELSE 
+	BEGIN
+				INSERT INTO @tblSKU (intSKUId, 
+								 intItemId, 
+								 dblQty, 
+								 dblRemainingSKUQty, 
+								 dtmProductionDate,
+								 intGroupId)
+				SELECT s.intSKUId, 
+					   s.intItemId, 
+					   s.dblQty, 
+					   s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) AS dblRemainingSKUQty, 
+					   s.dtmProductionDate,1
+				FROM tblWHSKU s
+				LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId AND t.intTaskTypeId NOT IN (5,6,8,9,10,11)
+				WHERE s.intItemId = @intItemId
+					AND dtmProductionDate BETWEEN (
+								SELECT MIN(dtmProductionDate)
+								FROM tblWHSKU
+								WHERE intItemId = @intItemId
+								)
+						AND (
+								SELECT MIN(dtmProductionDate) + @AllowablePickDayRange
+								FROM tblWHSKU
+								WHERE intItemId = @intItemId
+								)
+						AND s.intSKUStatusId = 1
+						AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
+				GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
+				HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
+				ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
 
+				INSERT INTO @tblSKU (intSKUId, 
+										intItemId, 
+										dblQty, 
+										dblRemainingSKUQty, 
+										dtmProductionDate,
+										intGroupId)
+				SELECT s.intSKUId, 
+						s.intItemId, 
+						s.dblQty, 
+						s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) AS dblRemainingSKUQty, 
+						s.dtmProductionDate,2
+				FROM tblWHSKU s
+				LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId AND t.intTaskTypeId NOT IN (5,6,8,9,10,11)
+				WHERE s.intItemId = @intItemId
+						AND s.intSKUStatusId = 1
+						AND NOT EXISTS (SELECT * FROM @tblSKU WHERE intSKUId = s.intSKUId)
+						AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
+				GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
+				HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
+				ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
+	END
 
 			SELECT @intSKURecordId = MIN(intSKURecordId) 
 			FROM @tblSKU 
