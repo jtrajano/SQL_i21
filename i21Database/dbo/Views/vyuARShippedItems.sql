@@ -338,7 +338,7 @@ SELECT
 	,ISI.[dblQuantity]					AS [dblQtyRemaining]
 	,0.00								AS [dblDiscount] 
 	,ISI.[dblUnitPrice]					AS [dblPrice]
-	,ISI.[dblUnitPrice]					AS [dblShipmentUnitPrice]
+	,ISNULL(CT.[dblCashPrice], ISI.[dblUnitPrice]) 					AS [dblShipmentUnitPrice]
 	,0.00								AS [dblTotalTax]
 	,ISI.[dblQuantity] * 
 		ISI.[dblUnitPrice]				AS [dblTotal]
@@ -406,7 +406,11 @@ SELECT
 	LEFT OUTER JOIN
 		vyuARGetItemAccount A
 			ON ISI.[intItemId] = A.[intItemId]
-			AND ISH.[intShipFromLocationId] = A.[intLocationId] 						 
+			AND ISH.[intShipFromLocationId] = A.[intLocationId]
+	LEFT OUTER JOIN
+		vyuCTContractDetailView CT
+			ON 	ISI.[intOrderId] = CT.[intContractHeaderId]
+			AND ISI.[intLineNo] = CT.[intContractDetailId]
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISH.[intOrderType] <> 2
