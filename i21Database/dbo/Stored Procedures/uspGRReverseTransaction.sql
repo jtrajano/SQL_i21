@@ -56,7 +56,7 @@ BEGIN TRY
 			,[intTicketId]
 			,[intInventoryReceiptId]
 			,[intInvoiceId]
-			,[intContractDetailId]
+			,[intContractHeaderId]
 			,[dblUnits]
 			,[dtmHistoryDate]
 			,[dblPaidAmount]

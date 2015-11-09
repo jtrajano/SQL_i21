@@ -6,7 +6,7 @@
     [intTicketId] INT NULL, 
     [intInventoryReceiptId] INT NULL, 
     [intInvoiceId] INT NULL, 
-    [intContractDetailId] INT NULL, 
+    [intContractHeaderId] INT NULL, 
     [dblUnits] NUMERIC(18, 6) NULL, 
     [dtmHistoryDate] DATETIME NULL, 
     [dblPaidAmount] NUMERIC(18, 6) NULL, 
@@ -24,7 +24,7 @@
 	CONSTRAINT [FK_tblGRStorageHistory_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),	
 	CONSTRAINT [FK_tblGRStorageHistory_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),	
 	CONSTRAINT [FK_tblGRStorageHistory_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]),
-	CONSTRAINT [FK_tblGRStorageHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
+	CONSTRAINT [FK_tblGRStorageHistory_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
 )
 
 GO
@@ -89,7 +89,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblGRStorageHistory',
     @level2type = N'COLUMN',
-    @level2name = 'intContractDetailId'
+    @level2name = 'intContractHeaderId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Currency Rate',

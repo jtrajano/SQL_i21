@@ -4326,4 +4326,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="tblQMReportProperty" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b28e4324-e870-4165-8f27-7fc4125e4055" ChangeDateTime="11/09/2015 06:11:31">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageHistory].[intContractDetailId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intContractHeaderId" />
+  </Operation>
 </Operations>
