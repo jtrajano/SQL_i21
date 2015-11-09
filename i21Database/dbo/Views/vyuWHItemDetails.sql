@@ -49,9 +49,11 @@ AS
 		   i.strWarehouseStatus, 
 		   i.ysnSellableItem, 
 		   um.strUnitMeasure AS strWeightUOM, 
-		   um1.strUnitMeasure AS strItemUOM
+		   iu.intUnitMeasureId AS intItemUOMId,
+		   um1.strUnitMeasure AS strItemUOM,
+		   ISNULL(um.strUnitMeasure,um1.strUnitMeasure) AS strUOM
 	FROM tblICItem i
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = i.intWeightUOMId
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId
 	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu.intUnitMeasureId
-	WHERE iu.ysnStockUnit = 1
+	WHERE iu.ysnStockUnit = 1 

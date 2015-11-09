@@ -31,13 +31,13 @@ BEGIN
 				'' AS strNotes, 
 				us.strUserName AS strUser
 		FROM tblICLot l
-		JOIN tblICInventoryLotTransaction ilt ON ilt.intLotId = l.intLotId
-		JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
-		JOIN tblICItem i ON i.intItemId = l.intItemId
-		JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
-		JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
-		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ilt.intItemUOMId
-		JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedUserId
+		LEFT JOIN tblICInventoryLotTransaction ilt ON ilt.intLotId = l.intLotId
+		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
+		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
+		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
+		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
+		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ilt.intItemUOMId
+		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedUserId
 		WHERE l.intLotId = @intLotId
 		
 		UNION
@@ -69,9 +69,9 @@ BEGIN
 				'' AS strNotes, 
 				'' AS strUser
 		FROM tblICInventoryAdjustment ia
-		JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
-		JOIN tblICLot l ON l.intLotId = iad.intLotId
-		JOIN tblICItem i ON i.intItemId = l.intItemId
+		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
+		LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
+		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iad.intItemUOMId

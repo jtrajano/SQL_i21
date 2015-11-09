@@ -22,7 +22,10 @@ BEGIN TRY
 	DECLARE @strLotNumber NVARCHAR(50) 
 	DECLARE @strLotAlias NVARCHAR(100)
 	DECLARE @strItemType NVARCHAR(100)
+	DECLARE @dblWeightPerQty NUMERIC(18,6)
+	DECLARE @dblLotWeight NUMERIC(18,6)
 	DECLARE @intLotId INT
+	DECLARE @intWeightPerUnitUOMId INT
 	
 	DECLARE @tblLineItem TABLE 
 			(intItemRecordId INT Identity(1, 1), 
@@ -145,6 +148,14 @@ BEGIN TRANSACTION
 				FROM tblICItemUOM
 				WHERE intItemId = @intItemId
 					AND ysnStockUnit = 1
+
+				SELECT @dblWeightPerQty = dblWeightPerUnit, 
+					   @intWeightPerUnitUOMId = intWeightPerUnitUOMId 
+				FROM tblWHOrderLineItem 
+				WHERE intOrderHeaderId = @intOrderHeaderId
+					AND intItemId = @intItemId 
+
+				SET @dblLotWeight = @dblLotQty * @dblWeightPerQty
 					
 
 				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
@@ -157,8 +168,8 @@ BEGIN TRANSACTION
 							,@intUserId=@intUserId
 							,@intEntityId =NULL
 							,@intStorageLocationId = @intStorageLocationId
-							,@dblWeight = @dblLotQty
-							,@intWeightUOMId = @intItemUOMId
+							,@dblWeight = @dblLotWeight
+							,@intWeightUOMId = @intWeightPerUnitUOMId
 							,@dblUnitQty = 1
 							,@dblProduceQty= @dblLotQty
 							,@intProduceUOMKey =@intItemUOMId
