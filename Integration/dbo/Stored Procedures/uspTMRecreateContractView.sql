@@ -152,7 +152,7 @@ BEGIN
 				,vwcnt_lc5_yn =''''
 				,vwcnt_lc6_yn =''''
 				,vwcnt_ppd_yndm = (CASE 
-										WHEN A.ysnPrepaid = 1 THEN ''Y'' 
+										WHEN ISNULL(H.ysnPrepaid,0) = 1 THEN ''Y'' 
 										ELSE ''N''
 									END)
 						  	
@@ -163,6 +163,8 @@ BEGIN
 				,strCustomerName = C.strName
 				,strItemUnitDescription = G.strUnitMeasure
 			FROM tblCTContractHeader A
+			INNER JOIN vyuCTContractHeaderNotMapped H
+				ON A.intContractHeaderId = H.intContractHeaderId
 			INNER JOIN tblCTContractDetail B
 				ON A.intContractHeaderId = B.intContractHeaderId
 			INNER JOIN tblEntity C
