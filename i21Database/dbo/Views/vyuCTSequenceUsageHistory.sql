@@ -144,3 +144,23 @@ AS
 	 JOIN	tblPOPurchase				HR	ON	HR.intPurchaseId			=	DL.intPurchaseId
 	 JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]		=	UH.intUserId
 	 WHERE	UH.strScreenName	=	'Purchase Order'
+
+	UNION ALL
+
+	SELECT	UH.intSequenceUsageHistoryId,
+			UH.intContractDetailId,
+			CD.intContractHeaderId,
+			CD.intContractSeq,
+			UH.dtmTransactionDate,
+			UH.strScreenName,
+			LTRIM(DL.strStorageTicketNumber)	AS	strNumber,
+			UH.strFieldName,
+			UH.dblOldValue,
+			UH.dblTransactionQuantity,
+			UH.dblNewValue,
+			US.strUserName
+	FROM	tblCTSequenceUsageHistory	UH
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	UH.intContractDetailId
+	JOIN	tblGRCustomerStorage		DL	ON	DL.intCustomerStorageId		=	UH.intExternalId 
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]		=	UH.intUserId
+	WHERE	UH.strScreenName	=	'Settle Storage'

@@ -6,4 +6,4 @@ SELECT Distinct
  ,Item.strItemNo
 FROM tblGRCustomerStorage Cs
 JOIN tblICItem Item ON Item.intItemId = Cs.intItemId
-Where Cs.dblOpenBalance >0 
+Where Cs.dblOpenBalance >0 AND ISNULL(Cs.strStorageType,'') <> 'ITR'
