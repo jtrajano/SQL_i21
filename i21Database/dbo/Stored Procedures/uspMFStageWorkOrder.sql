@@ -399,7 +399,7 @@ BEGIN TRY
 					-- Parameters used for linking or FK (foreign key) relationships
 					,@intSourceId = 1
 					,@intSourceTransactionTypeId = 8
-					,@intUserId = @intUserId
+					,@intEntityUserSecurityId = @intUserId
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 			PRINT 'Call Lot Adjust routine.'
@@ -441,7 +441,7 @@ BEGIN TRY
 						-- Parameters used for linking or FK (foreign key) relationships
 						,@intSourceId = 1
 						,@intSourceTransactionTypeId = 8
-						,@intUserId = @intUserId
+						,@intEntityUserSecurityId = @intUserId
 						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 				END
@@ -477,7 +477,7 @@ BEGIN TRY
 					-- Parameters used for linking or FK (foreign key) relationships
 					,@intSourceId = 1
 					,@intSourceTransactionTypeId = 8
-					,@intUserId = @intUserId
+					,@intEntityUserSecurityId = @intUserId
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 			END
@@ -510,7 +510,7 @@ BEGIN TRY
 					-- Parameters used for linking or FK (foreign key) relationships
 					,@intSourceId = 1
 					,@intSourceTransactionTypeId = 8
-					,@intUserId = @intUserId
+					,@intEntityUserSecurityId = @intUserId
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 		END
 	END
