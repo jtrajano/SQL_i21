@@ -2388,6 +2388,8 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
+    <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
