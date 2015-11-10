@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCalculateServiceCharge]
+	@isRecap			BIT = 0,
 	@customers			NVARCHAR(MAX) = '',
 	@calculation        NVARCHAR(25) = '',
 	@asOfDate			DATE,
@@ -136,7 +137,9 @@ AS
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
-							EXEC dbo.uspARInsertInvoiceServiceCharge @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @tblTypeServiceCharge
+							IF @isRecap = 0
+								EXEC dbo.uspARInsertInvoiceServiceCharge @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @tblTypeServiceCharge				
+
 							DELETE FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @entityId
 						END
 					

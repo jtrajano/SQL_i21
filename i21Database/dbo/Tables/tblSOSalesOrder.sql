@@ -85,9 +85,11 @@ WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @strTransactionType = strTransactionType FROM @inserted
 
-	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Order' THEN 29 
-									WHEN @strTransactionType = 'Quote' THEN 51 END
-	
+	SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
+	FROM tblSMStartingNumber 
+	WHERE strTransactionType = CASE WHEN @strTransactionType = 'Order' THEN 'Sales Order' 
+									WHEN @strTransactionType = 'Quote' THEN 'Quote' END
+
 	IF(@intStartingNumberId <> 0)
 		EXEC uspSMGetStartingNumber @intStartingNumberId, @SalesOrderNumber OUT
 	
