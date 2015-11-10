@@ -103,7 +103,7 @@ BEGIN
 			,[intBankStatementImportId]	= 1
 			,[intBankFileAuditId]		= NULL
 			,[strSourceSystem]			= 'PR'
-			,[intEntityId]				= PC.[intEntityEmployeeId]
+			,[intEntityId]				= @intUserId
 			,[intCreatedUserId]			= @intUserId
 			,[intCompanyLocationId]		= NULL
 			,[dtmCreated]				= GETDATE()
