@@ -688,6 +688,15 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryReceiptId { get; set; }
         public int intInventoryReceiptItemId { get; set; }
+        public string strReceiptNumber { get; set; }
+        public string strReceiptType { get; set; }
+        public string strLocationName { get; set; }
+        public string strSourceType { get; set; }
+        public DateTime? dtmReceiptDate { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
+        public string strBillOfLading { get; set; }
+        public bool? ysnPosted { get; set; }
         public int? intLineNo { get; set; }
         public int? intOrderId { get; set; }
         public string strOrderNumber { get; set; }
@@ -699,12 +708,16 @@ namespace iRely.Inventory.Model
         public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
+        public decimal? dblQtyToReceive { get; set; }
+        public decimal? dblUnitCost { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblLineTotal { get; set; }
         public string strLotTracking { get; set; }
         public int? intCommodityId { get; set; }
-        public int? intContainerId { get; set; }
-        public string strContainer { get; set; }
         public int? intTaxGroupId { get; set; }
         public string strTaxGroup { get; set; }
+        public int? intContainerId { get; set; }
+        public string strContainer { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
         public int? intStorageLocationId { get; set; }
@@ -1105,6 +1118,19 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryReceiptItemLotId { get; set; }
         public int intInventoryReceiptItemId { get; set; }
+        public int intInventoryReceiptId { get; set; }
+        public string strReceiptNumber { get; set; }
+        public string strReceiptType { get; set; }
+        public string strOrderNumber { get; set; }
+        public string strLocationName { get; set; }
+        public string strSourceType { get; set; }
+        public string strSourceNumber { get; set; }
+        public DateTime? dtmReceiptDate { get; set; }
+        public string strBillOfLading { get; set; }
+        public bool? ysnPosted { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strItemUOM { get; set; }
         public int? intLotId { get; set; }
         public string strLotNumber { get; set; }
         public string strLotAlias { get; set; }
@@ -1119,6 +1145,7 @@ namespace iRely.Inventory.Model
         public decimal? dblQuantity { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
+        public decimal? dblNetWeight { get; set; }
         public decimal? dblCost { get; set; }
         public int? intUnitPallet { get; set; }
         public decimal? dblStatedGrossPerUnit { get; set; }
@@ -1126,6 +1153,7 @@ namespace iRely.Inventory.Model
         public string strContainerNo { get; set; }
         public int? intEntityVendorId { get; set; }
         public string strVendorId { get; set; }
+        public string strGarden { get; set; }
         public string strMarkings { get; set; }
         public int? intOriginId { get; set; }
         public string strOrigin { get; set; }

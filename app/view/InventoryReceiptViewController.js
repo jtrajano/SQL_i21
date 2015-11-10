@@ -47,6 +47,66 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'dblActualTempReading', text: 'dblActualTempReading', flex: 1, dataType: 'float', hidden: true },
                 {dataIndex: 'strEntityName', text: 'strEntityName', flex: 1, dataType: 'string', hidden: true },
                 {dataIndex: 'strActualCostId', text: 'strActualCostId', flex: 1, dataType: 'string', hidden: true }
+            ],
+            searchConfig: [
+                {
+                    title: 'Details',
+                    api: {
+                        read: '../Inventory/api/InventoryReceipt/SearchReceiptItems'
+                    },
+                    columns: [
+                        {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
+                        {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
+                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string'},
+
+                        { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float'},
+
+                        {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true},
+                        {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName', hidden: true},
+                        {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName', hidden: true},
+                        {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true},
+                        {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true}
+                    ]
+                },
+                {
+                    title: 'Lots',
+                    api: {
+                        read: '../Inventory/api/InventoryReceipt/SearchReceiptItemLots'
+                    },
+                    columns: [
+                        {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
+                        {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
+                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+
+                        {dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strUnitMeasure', text: 'Lot UOM', flex: 1, dataType: 'string'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblQuantity', text: 'Lot Qty', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblGrossWeight', text: 'Gross Wgt', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblTareWeight', text: 'Tare Wgt', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblNetWeight', text: 'Net Wgt', flex: 1, dataType: 'float'},
+                        {dataIndex: 'dtmExpiryDate', text: 'Expiry Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+
+                        {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', hidden: true},
+                        {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', hidden: true},
+                        {dataIndex: 'strItemUOM', text: 'Receipt UOM', flex: 1, dataType: 'string', hidden: true},
+                        {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true},
+                        {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName', hidden: true},
+                        {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true},
+                        {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true}
+                    ]
+                }
             ]
         },
         binding: {
@@ -527,15 +587,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         origValueField: 'intContractHeaderId',
                         origUpdateField: 'intContractId',
                         store: '{contract}',
-                        defaultFilters: [{
-                            column: 'strContractType',
-                            value: 'Purchase',
-                            conjunction: 'and'
-                        },{
-                            column: 'intEntityId',
-                            value: '{current.intEntityVendorId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'strContractType',
+                                value: 'Purchase',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intEntityId',
+                                value: '{current.intEntityVendorId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colOtherCharge: {
@@ -1339,6 +1402,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onViewLocationName: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'LocationName');
+    },
+
+    onViewItemNo: function (value, record) {
+        var itemId = record.get('intItemId');
+        i21.ModuleMgr.Inventory.showScreen(itemId, 'ItemId');
     },
 
     onViewTaxDetailsClick: function (ReceiptItemId) {

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
-
 
 namespace iRely.Inventory.WebApi
 {
@@ -95,6 +95,20 @@ namespace iRely.Inventory.WebApi
                     button = result.Exception.Button.ToString()
                 }
             });
+        }
+
+        [HttpGet]
+        [ActionName("SearchReceiptItems")]
+        public async Task<HttpResponseMessage> SearchReceiptItems(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchReceiptItems(param));
+        }
+
+        [HttpGet]
+        [ActionName("SearchReceiptItemLots")]
+        public async Task<HttpResponseMessage> SearchReceiptItemLots(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchReceiptItemLots(param));
         }
     }
 }
