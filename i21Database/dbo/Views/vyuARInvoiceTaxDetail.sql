@@ -22,7 +22,8 @@ SELECT
 	,ITX.dblTax 
 	,ITX.dblAdjustedTax 
 	,ITX.ysnTaxAdjusted
-	,TG.strTaxGroup  	
+	,TG.strTaxGroup
+	,ITX.strNotes
 FROM
 	tblARInvoiceDetailTax ITX
 INNER JOIN

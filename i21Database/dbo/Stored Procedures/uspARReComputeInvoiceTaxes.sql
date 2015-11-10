@@ -98,7 +98,6 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		
 	INSERT INTO [tblARInvoiceDetailTax]
            ([intInvoiceDetailId]
-           ,[intTaxGroupMasterId]
            ,[intTaxGroupId]
            ,[intTaxCodeId]
            ,[intTaxClassId]
@@ -112,10 +111,10 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[ysnSeparateOnInvoice]
            ,[ysnCheckoffTax]
            ,[ysnTaxExempt]
+		   ,[strNotes] 
            ,[intConcurrencyId])		
 		SELECT
 			 @InvoiceDetailId
-			,NULL
 			,[intTaxGroupId]
 			,[intTaxCodeId]
 			,[intTaxClassId]
@@ -129,6 +128,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]
 			,[ysnTaxExempt]
+			,[strNotes] 
 			,1
 		FROM
 			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @ShipToLocationId)
