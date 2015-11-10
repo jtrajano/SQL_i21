@@ -10,6 +10,7 @@ BEGIN TRY
 		,@intLocationId INT
 		,@strItemNo NVARCHAR(MAX)
 		,@intScheduleId int
+		,@strWorkOrderNo nvarchar(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -25,6 +26,7 @@ BEGIN TRY
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
+		,@strWorkOrderNo=strWorkOrderNo 
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -63,6 +65,26 @@ BEGIN TRY
 				51147
 				,11
 				,1
+				,@strItemNo
+				)
+	END
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrder W
+			WHERE W.intWorkOrderId = @intWorkOrderId
+				AND EXISTS(SELECT *FROM dbo.tblICItemUOM IU WHERE IU.intItemUOMId =W.intItemUOMId)
+			)
+	BEGIN
+		SELECT @strItemNo = strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+
+		RAISERROR (
+				90006
+				,11
+				,1
+				,@strWorkOrderNo
 				,@strItemNo
 				)
 	END
