@@ -18,7 +18,7 @@
     [dtmEndDate] DATETIME NOT NULL, 
     [ysnActive] BIT NOT NULL, 
     [intIteration] INT NOT NULL, 
-    [intUserId] INT NOT NULL , 
+    [intUserId] INT NULL , 
     [ysnAvailable] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSMRecurringTransaction] PRIMARY KEY ([intRecurringId]), 

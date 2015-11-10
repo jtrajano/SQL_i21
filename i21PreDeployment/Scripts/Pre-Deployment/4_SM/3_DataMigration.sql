@@ -144,11 +144,17 @@ GO
 	END
 GO
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' AND [COLUMN_NAME] = 'intEntityUserSecurityId') 
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' AND [COLUMN_NAME] = 'intUserSecurityID') 
 	BEGIN
 		EXEC
 		(
-		'UPDATE tblSMRecurringTransaction SET intUserId = UserSecurity.intEntityId
+		'ALTER TABLE tblSMRecurringTransaction ALTER COLUMN intUserId INT NULL
+
+		UPDATE tblSMRecurringTransaction SET intUserId = NULL 
+		WHERE intUserId NOT IN (SELECT intUserSecurityID FROM tblSMUserSecurity) 
+		AND intUserId NOT IN (SELECT intEntityId FROM tblSMUserSecurity)
+		
+		UPDATE tblSMRecurringTransaction SET intUserId = UserSecurity.intEntityId
 		FROM tblSMRecurringTransaction Recurring
 		INNER JOIN tblSMUserSecurity UserSecurity ON Recurring.intUserId = UserSecurity.intUserSecurityID'
 		)
