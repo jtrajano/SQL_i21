@@ -3,6 +3,18 @@
 
 SELECT ReceiptItemLot.intInventoryReceiptItemLotId
 	, ReceiptItemLot.intInventoryReceiptItemId
+	, ReceiptItem.strReceiptNumber
+	, ReceiptItem.strReceiptType
+	, ReceiptItem.strOrderNumber
+	, ReceiptItem.strLocationName
+	, ReceiptItem.strSourceType
+	, ReceiptItem.strSourceNumber
+	, ReceiptItem.dtmReceiptDate
+	, ReceiptItem.strBillOfLading
+	, ReceiptItem.ysnPosted
+	, ReceiptItem.strItemNo
+	, ReceiptItem.strItemDescription
+	, strItemUOM = ReceiptItem.strUnitMeasure
 	, ReceiptItemLot.intLotId
 	, ReceiptItemLot.strLotNumber
 	, ReceiptItemLot.strLotAlias
@@ -42,6 +54,7 @@ SELECT ReceiptItemLot.intInventoryReceiptItemLotId
 	, ReceiptItemLot.strParentLotNumber
 	, ReceiptItemLot.strParentLotAlias
 FROM tblICInventoryReceiptItemLot ReceiptItemLot
+LEFT JOIN vyuICGetInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ReceiptItemLot.intSubLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ReceiptItemLot.intStorageLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItemLot.intItemUnitMeasureId

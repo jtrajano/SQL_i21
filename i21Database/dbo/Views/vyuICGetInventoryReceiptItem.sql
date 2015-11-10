@@ -3,6 +3,15 @@
 
 SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.intInventoryReceiptItemId
+	, Receipt.strReceiptNumber
+	, Receipt.strReceiptType
+	, Receipt.strLocationName
+	, Receipt.strSourceType
+	, Receipt.dtmReceiptDate
+	, Receipt.strVendorId
+	, Receipt.strVendorName
+	, Receipt.strBillOfLading
+	, Receipt.ysnPosted
 	, ReceiptItem.intLineNo
 	, ReceiptItemSource.intOrderId
 	, ReceiptItemSource.strOrderNumber
@@ -40,6 +49,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Item.intLifeTime
 	, Item.strLifeTimeType
 FROM tblICInventoryReceiptItem ReceiptItem
+	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
