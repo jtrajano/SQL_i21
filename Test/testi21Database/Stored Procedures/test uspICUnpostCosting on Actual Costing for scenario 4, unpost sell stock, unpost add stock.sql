@@ -559,7 +559,13 @@ BEGIN
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[intConcurrencyId]		
+		,[intConcurrencyId]	
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]			
 	)
 	EXEC dbo.uspICUnpostCosting
 		@intTransactionId
@@ -750,6 +756,12 @@ BEGIN
 		,[strTransactionForm]
 		,[strModuleName]
 		,[intConcurrencyId]		
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
 	)
 	EXEC dbo.uspICUnpostCosting
 		@intTransactionId

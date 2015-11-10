@@ -291,7 +291,13 @@ BEGIN
 		,[strTransactionForm]
 		,[strModuleName]
 		,[intConcurrencyId]
-		)
+		,[dblDebitForeign]	
+		,[dblDebitReport]	
+		,[dblCreditForeign]	
+		,[dblCreditReport]	
+		,[dblReportingRate]	
+		,[dblForeignRate]
+	)
 	EXEC dbo.uspICCreateGLEntries @strBatchId
 		,NULL
 		,@intUserId

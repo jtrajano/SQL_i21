@@ -323,6 +323,12 @@ BEGIN
 	--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 	--		,strModuleName				= @ModuleName
 	--		,intConcurrencyId			= 1
+	--		,dblDebitForeign			= NULL 
+	--		,dblDebitReport				= NULL 
+	--		,dblCreditForeign			= NULL 
+	--		,dblCreditReport			= NULL 
+	--		,dblReportingRate			= NULL 
+	--		,dblForeignRate				= NULL 
 	--FROM	ForGLEntries_CTE  
 	--		INNER JOIN @ItemGLAccounts ItemGLAccounts
 	--			ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
@@ -361,6 +367,12 @@ BEGIN
 	--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 	--		,strModuleName				= @ModuleName
 	--		,intConcurrencyId			= 1
+	--		,dblDebitForeign			= NULL 
+	--		,dblDebitReport				= NULL 
+	--		,dblCreditForeign			= NULL 
+	--		,dblCreditReport			= NULL 
+	--		,dblReportingRate			= NULL 
+	--		,dblForeignRate				= NULL 
 	--FROM	ForGLEntries_CTE INNER JOIN @ItemGLAccounts ItemGLAccounts
 	--			ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
 	--			AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -405,6 +417,12 @@ BEGIN
 	--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 	--		,strModuleName				= @ModuleName
 	--		,intConcurrencyId			= 1
+	--		,dblDebitForeign			= NULL 
+	--		,dblDebitReport				= NULL 
+	--		,dblCreditForeign			= NULL 
+	--		,dblCreditReport			= NULL 
+	--		,dblReportingRate			= NULL 
+	--		,dblForeignRate				= NULL 
 	--FROM	ForGLEntries_CTE  
 	--		INNER JOIN @ItemGLAccounts ItemGLAccounts
 	--			ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
@@ -443,6 +461,12 @@ BEGIN
 	--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 	--		,strModuleName				= @ModuleName
 	--		,intConcurrencyId			= 1
+	--		,dblDebitForeign			= NULL 
+	--		,dblDebitReport				= NULL 
+	--		,dblCreditForeign			= NULL 
+	--		,dblCreditReport			= NULL 
+	--		,dblReportingRate			= NULL 
+	--		,dblForeignRate				= NULL 
 	--FROM	ForGLEntries_CTE INNER JOIN @ItemGLAccounts ItemGLAccounts
 	--			ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
 	--			AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -486,6 +510,12 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+			,dblDebitForeign			= NULL 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= NULL 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NULL
 	FROM	ForGLEntries_CTE  
 			INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
@@ -524,6 +554,12 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+			,dblDebitForeign			= NULL 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= NULL 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NULL
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -568,6 +604,12 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+			,dblDebitForeign			= NULL 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= NULL 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NULL
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -605,6 +647,12 @@ BEGIN
 			,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+			,dblDebitForeign			= NULL 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= NULL 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NULL
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId

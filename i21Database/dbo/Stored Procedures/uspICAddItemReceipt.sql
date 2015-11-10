@@ -20,7 +20,6 @@ DECLARE @InventoryReceiptId AS INT
 		,@strReceiptNumber AS NVARCHAR(50)
 		
 -- Get the entity id
---this is a hiccup
 SELECT	@intEntityId = intEntityUserSecurityId
 FROM	dbo.tblSMUserSecurity 
 WHERE	intEntityUserSecurityId = @intUserId
