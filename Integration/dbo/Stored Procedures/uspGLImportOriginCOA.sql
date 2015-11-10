@@ -192,8 +192,6 @@ BEGIN
 					,intAccountGroupId
 					,ysnActive
 					,ysnSelected
-					,ysnBuild
-					,ysnIsNotExisting
 					,intAccountCategoryId)
 				SELECT
 					SegmentCode
@@ -202,8 +200,6 @@ BEGIN
 					,glact_type = CASE WHEN glact_type = '''' THEN NULL ELSE glact_type END
 					,1
 					,0
-					,0
-					,null
 					,@generalCategoryId
 				FROM @tblQuery
 				WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = @PrimaryStructureId)
@@ -238,9 +234,7 @@ BEGIN
 					,intAccountStructureId
 					,intAccountGroupId
 					,ysnActive
-					,ysnSelected
-					,ysnBuild
-					,ysnIsNotExisting)
+					,ysnSelected)
 				SELECT
 					REPLICATE(''0'', (select len(max(SegmentCode)) from #segments) - len(SegmentCode)) + '''' + CAST(SegmentCode AS NVARCHAR(50)) SegmentCode
 					,glprc_desc
@@ -248,8 +242,6 @@ BEGIN
 					,null
 					,1
 					,0
-					,0
-					,null
 				FROM #segments
 				WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = @SegmentStructureId)
 		
