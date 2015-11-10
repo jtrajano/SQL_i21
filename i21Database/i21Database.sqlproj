@@ -2859,6 +2859,7 @@
     <Build Include="dbo\Functions\fnCTGetBillIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
     <Build Include="dbo\Tables\tblPRTypeTimeOffDetail.sql" />
+    <Build Include="dbo\Views\vyuCFBatchPostTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

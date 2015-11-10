@@ -384,7 +384,7 @@ BEGIN
 		,[strTaxGroup]
 		FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer]
-		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId, NULL)
+		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId)
 		INSERT INTO @tblTaxRateTable
 		SELECT 
 		 [intTransactionDetailTaxId]
@@ -650,11 +650,12 @@ BEGIN
 			 @TransactionId = @Pk
 			,@UserId = 1
 			,@ErrorMessage = @ErrorMessage OUTPUT
+			,@Post = 1
 
-			IF (@ErrorMessage IS NULL)
-			BEGIN
-				UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId = @Pk
-			END
+			--IF (@ErrorMessage IS NULL)
+			--BEGIN
+			--	UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId = @Pk
+			--END
 		END
 		
 
