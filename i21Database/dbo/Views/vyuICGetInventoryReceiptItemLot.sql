@@ -3,6 +3,7 @@
 
 SELECT ReceiptItemLot.intInventoryReceiptItemLotId
 	, ReceiptItemLot.intInventoryReceiptItemId
+	, ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.strReceiptNumber
 	, ReceiptItem.strReceiptType
 	, ReceiptItem.strOrderNumber
@@ -29,6 +30,7 @@ SELECT ReceiptItemLot.intInventoryReceiptItemLotId
 	, ReceiptItemLot.dblQuantity
 	, ReceiptItemLot.dblGrossWeight
 	, ReceiptItemLot.dblTareWeight
+	, dblNetWeight = ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
 	, ReceiptItemLot.dblCost
 	, ReceiptItemLot.intUnitPallet
 	, ReceiptItemLot.dblStatedGrossPerUnit

@@ -23,6 +23,10 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
+	, dblQtyToReceive = ReceiptItem.dblOpenReceive
+	, ReceiptItem.dblUnitCost
+	, ReceiptItem.dblTax
+	, ReceiptItem.dblLineTotal
 	, Item.strLotTracking
 	, Item.intCommodityId
 	, ReceiptItem.intTaxGroupId
