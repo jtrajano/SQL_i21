@@ -6,7 +6,7 @@
     [strDescription]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strCategory]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strType]          NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
-    [strCommand]       NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strCommand]       NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strIcon]          NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [ysnVisible]       BIT            DEFAULT ((0)) NOT NULL,
     [ysnExpanded]      BIT            DEFAULT ((0)) NOT NULL,
