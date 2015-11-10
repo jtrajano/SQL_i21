@@ -115,6 +115,7 @@
 :r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM06.sql -- this should always be under entity security schema change 
 :r .\12_EM\12_EntityEmployeeSchemaUpdate.sql
 :r .\12_EM\12_UpdateCustomerFreightNullLocation.sql
+:r .\12_EM\15_DropSMUserSecurityTrigger.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 
