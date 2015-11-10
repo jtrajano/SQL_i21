@@ -169,7 +169,7 @@ BEGIN TRY
 							WHERE intItemId = @intItemId
 							)
 					AND s.intSKUStatusId IN (1,2)
-					AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
+					AND ISNULL(s.intLotId,0) = ISNULL((CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END ),0)
 			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 			ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
@@ -190,7 +190,7 @@ BEGIN TRY
 			WHERE s.intItemId = @intItemId
 					AND s.intSKUStatusId IN (1,2)
 					AND NOT EXISTS (SELECT * FROM @tblSKU WHERE intSKUId = s.intSKUId)
-					AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
+					AND ISNULL(s.intLotId,0) = ISNULL((CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END ),0)
 			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 			ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
@@ -222,7 +222,7 @@ BEGIN TRY
 								WHERE intItemId = @intItemId
 								)
 						AND s.intSKUStatusId = 1
-						AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
+						AND ISNULL(s.intLotId,0) = ISNULL((CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END ),0)
 				GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 				HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 				ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
@@ -243,7 +243,7 @@ BEGIN TRY
 				WHERE s.intItemId = @intItemId
 						AND s.intSKUStatusId = 1
 						AND NOT EXISTS (SELECT * FROM @tblSKU WHERE intSKUId = s.intSKUId)
-						AND s.intLotId = (CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END )
+						AND ISNULL(s.intLotId,0) = ISNULL((CASE WHEN @intLineItemLotId IS NULL THEN s.intLotId ELSE @intLineItemLotId END ),0)
 				GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 				HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 				ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC

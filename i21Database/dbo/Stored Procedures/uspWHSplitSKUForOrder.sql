@@ -5,8 +5,9 @@
 	@dblSplitQty NUMERIC(18, 6), 
 	@strSKUNo NVARCHAR(32) = '', 
 	@intOrderHeaderId INT = 0, 
-	@ysnGeneratePickTask BIT OUT,
-	@strDestContainerNo NVARCHAR(32) OUT
+	@strDestContainerNo NVARCHAR(32) OUT,
+	@ysnGeneratePickTask BIT OUT
+
 AS
 BEGIN TRY
 	SET NOCOUNT ON
