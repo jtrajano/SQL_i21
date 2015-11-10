@@ -50,8 +50,6 @@ Type the overview for the table here.
 		[strMask3] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intPatronageCategoryId] INT NULL,
 		[intPatronageCategoryDirectId] INT NULL,
-		[intSalesTaxGroupId] INT NULL,
-		[intPurchaseTaxGroupId] INT NULL,
 		[ysnStockedItem] BIT NULL DEFAULT ((0)), 
 		[ysnDyedFuel] BIT NULL DEFAULT ((0)), 
 		[strBarcodePrint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -160,8 +158,6 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
 		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
-		CONSTRAINT [FK_tblICItem_SalesTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
-		CONSTRAINT [FK_tblICItem_PurchaseTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID]), 
 		CONSTRAINT [FK_tblICItem_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblICItem_Owner] FOREIGN KEY ([intOwnerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
@@ -948,23 +944,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intItemId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Sales Tax Group Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItem',
-    @level2type = N'COLUMN',
-    @level2name = N'intSalesTaxGroupId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Purchase Tax Group Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItem',
-    @level2type = N'COLUMN',
-    @level2name = N'intPurchaseTaxGroupId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Fuel Item',

@@ -108,10 +108,6 @@ SELECT
 	Item.strMaintenanceCalculationMethod,
 	Item.dblOverReceiveTolerance,
 	Item.dblWeightTolerance,
-	Item.intSalesTaxGroupId,
-	strSalesTax = SalesTax.strTaxGroupMaster,
-	Item.intPurchaseTaxGroupId,
-	strPurchaseTax = PurchaseTax.strTaxGroupMaster,
 	Item.intGradeId,
 	strGrade = Grade.strDescription,
 	Item.intLifeTime,
@@ -129,6 +125,4 @@ LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND I
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON ItemLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
-LEFT JOIN tblSMTaxGroupMaster SalesTax ON SalesTax.intTaxGroupMasterId = Item.intSalesTaxGroupId
-LEFT JOIN tblSMTaxGroupMaster PurchaseTax ON PurchaseTax.intTaxGroupMasterId = Item.intPurchaseTaxGroupId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId

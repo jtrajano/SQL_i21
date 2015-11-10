@@ -2860,6 +2860,7 @@
     <Build Include="dbo\Functions\fnGetTaxGroupIdForVendor.sql" />
     <Build Include="dbo\Functions\fnCTGetBillIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
+    <Build Include="dbo\Tables\tblICCategoryTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
