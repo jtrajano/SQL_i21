@@ -39,6 +39,65 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'dtmFreeTime', text: 'Free Time', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true },
                 {dataIndex: 'strReceivedBy', text: 'Received By', flex: 1, dataType: 'string', hidden: true },
                 {dataIndex: 'strComment', text: 'Comment', flex: 1, dataType: 'string', hidden: true }
+            ],
+            searchConfig: [
+                {
+                    title: 'Details',
+                    api: {
+                        read: '../Inventory/api/InventoryShipment/SearchShipmentItems'
+                    },
+                    columns: [
+                        {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                        {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewShipmentNo'},
+                        {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                        {dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'int'},
+                        {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
+                        {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo', hidden: true },
+                        {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName', hidden: true },
+                        {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+
+                        {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strUnitMeasure', text: 'Ship UOM', flex: 1, dataType: 'string'},
+
+                        { xtype: 'numbercolumn', dataIndex: 'dblQtyToShip', text: 'Quantity', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblPrice', text: 'Unit Price', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float'}
+                    ]
+                },
+                {
+                    title: 'Lots',
+                    api: {
+                        read: '../Inventory/api/InventoryShipment/SearchShipmentItemLots'
+                    },
+                    columns: [
+                        {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                        {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewShipmentNo'},
+                        {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                        {dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'int'},
+                        {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
+                        {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo', hidden: true },
+                        {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName', hidden: true },
+                        {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+
+                        {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+                        {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string', hidden: true },
+                        {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string', hidden: true },
+                        {dataIndex: 'strUnitMeasure', text: 'Ship UOM', flex: 1, dataType: 'string', hidden: true },
+
+                        {dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strStorageLocationName', text: 'Storage Location', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strLotUOM', text: 'Lot UOM', flex: 1, dataType: 'string'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblLotQty', text: 'Lot Qty', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblGrossWeight', text: 'Gross Wgt', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblTareWeight', text: 'Tare Wgt', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', dataIndex: 'dblNetWeight', text: 'Net Wgt', flex: 1, dataType: 'float'}
+                    ]
+                }
             ]
         },
         binding: {

@@ -200,5 +200,31 @@ namespace iRely.Inventory.BusinessLayer
             }
             return postResult;
         }
+
+        public async Task<SearchResult> SearchShipmentItems(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryShipmentItem>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> SearchShipmentItemLots(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryShipmentItemLot>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }
