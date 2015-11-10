@@ -62,7 +62,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	CROSS APPLY (
-		SELECT * FROM fnGetItemTaxComputationForVendor(B.intItemId, A.dtmDate, B.dblCost, B.dblQtyReceived, B.intTaxGroupId, A.intShipToId)
+		SELECT * FROM fnGetItemTaxComputationForVendor(B.intItemId, NULL, A.dtmDate, B.dblCost, B.dblQtyReceived, B.intTaxGroupId, A.intShipToId)
 	) Taxes
 	WHERE (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)
 	OR NOT EXISTS(

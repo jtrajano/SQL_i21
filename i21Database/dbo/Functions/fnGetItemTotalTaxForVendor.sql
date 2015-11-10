@@ -15,7 +15,7 @@ BEGIN
 	SELECT
 		@LineItemTotal = SUM([dblAdjustedTax])
 	FROM
-		[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @CompanyLocationId)
+		[dbo].[fnGetItemTaxComputationForVendor](@ItemId, NULL, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @CompanyLocationId)
 		
 	RETURN @LineItemTotal		
 END
