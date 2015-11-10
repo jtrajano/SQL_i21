@@ -16,6 +16,6 @@ SELECT S.intScheduleId
 	,S.dtmLastModified
 	,S.intLastModifiedUserId
 FROM tblMFSchedule S
-JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
+JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId and MC.ysnActive =1
 JOIN tblMFScheduleCalendar SC ON SC.intCalendarId = S.intCalendarId
 JOIN tblSMCompanyLocation L on L.intCompanyLocationId =S.intLocationId 
