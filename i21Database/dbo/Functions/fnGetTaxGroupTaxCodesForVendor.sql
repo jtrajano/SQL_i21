@@ -10,7 +10,6 @@ RETURNS @returntable TABLE
 (
 	 [intTransactionDetailTaxId]	INT
 	,[intTransactionDetailId]		INT
-	,[intTaxGroupMasterId]			INT
 	,[intTaxGroupId]				INT
 	,[intTaxCodeId]					INT
 	,[intTaxClassId]				INT
@@ -40,7 +39,6 @@ BEGIN
 	SELECT
 		 0 AS [intTransactionDetailTaxId]
 		,0 AS [intTransactionDetailId]
-		,0 AS [intTaxGroupMasterId] 
 		,TG.[intTaxGroupId] 
 		,TC.[intTaxCodeId]
 		,TC.[intTaxClassId]				

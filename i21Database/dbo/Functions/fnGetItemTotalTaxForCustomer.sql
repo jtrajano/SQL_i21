@@ -6,8 +6,8 @@
 	,@ItemPrice			NUMERIC(18,6)
 	,@QtyShipped		NUMERIC(18,6)
 	,@TaxGroupId		INT
-	,@ShipToLocationId	INT
 	,@CompanyLocationId	INT
+	,@ShipToLocationId	INT	
 )
 RETURNS NUMERIC(18,6)
 AS

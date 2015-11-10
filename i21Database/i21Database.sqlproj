@@ -2503,7 +2503,6 @@
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTransactionsCSV.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForCustomer.sql" />
-    <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
     <Build Include="dbo\Functions\fnGetItemTaxComputationForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetItemTaxComputationForVendor.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalTaxForVendor.sql" />

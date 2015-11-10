@@ -115,7 +115,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[intConcurrencyId])		
 		SELECT
 			 @InvoiceDetailId
-			,[intTaxGroupMasterId]
+			,NULL
 			,[intTaxGroupId]
 			,[intTaxCodeId]
 			,[intTaxClassId]
@@ -131,7 +131,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[ysnTaxExempt]
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @ShipToLocationId, @LocationId)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @ShipToLocationId)
 								
 		UPDATE tblARInvoiceDetail SET dblTotalTax = @TotalItemTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
 					

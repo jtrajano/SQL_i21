@@ -367,7 +367,7 @@ BEGIN
 		SELECT
 		[intTransactionDetailTaxId]
 		,[intTransactionDetailId]  AS [intInvoiceDetailId]
-		,[intTaxGroupMasterId]
+		,NULL
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -384,7 +384,7 @@ BEGIN
 		,[strTaxGroup]
 		FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer]
-		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId,NULL)
+		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId, NULL)
 		INSERT INTO @tblTaxRateTable
 		SELECT 
 		 [intTransactionDetailTaxId]
