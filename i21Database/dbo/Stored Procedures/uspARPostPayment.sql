@@ -384,19 +384,19 @@ SET @batchIdUsed = @batchId
 					@ARReceivablePostData P
 						ON A.intPaymentId = P.intPaymentId
 				INNER JOIN
-					tblGLAccount GL
+					vyuGLAccountDetail GL
 						ON A.intAccountId = GL.intAccountId 
-				INNER JOIN 
-					tblGLAccountGroup AG
-						ON GL.intAccountGroupId = AG.intAccountGroupId
-				INNER JOIN 
-					tblGLAccountCategory AC
-						ON GL.intAccountCategoryId = AC.intAccountCategoryId											 
+				--INNER JOIN 
+				--	tblGLAccountGroup AG
+				--		ON GL.intAccountGroupId = AG.intAccountGroupId
+				--INNER JOIN 
+				--	tblGLAccountCategory AC
+				--		ON GL.intAccountCategoryId = AC.intAccountCategoryId											 
 				LEFT OUTER JOIN
 					tblCMBankAccount BA
 						ON A.intAccountId = BA.intGLAccountId 						
 				WHERE
-					AC.strAccountCategory = 'Cash Account'
+					GL.strAccountCategory = 'Cash Account'
 					AND (BA.intGLAccountId IS NULL
 						 OR BA.ysnActive = 0)
 						 

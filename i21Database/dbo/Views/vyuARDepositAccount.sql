@@ -5,24 +5,18 @@ SELECT
 	,GL.strAccountId
 	,GL.intAccountGroupId
 	,GL.strDescription 
-	,AG.strAccountGroup 
+	,GL.strAccountGroup 
 	,GL.intAccountCategoryId 
 	,GL.ysnActive
 	,BA.intBankAccountId 
 	,BA.strBankAccountNo 
 FROM
-	tblGLAccount GL
-INNER JOIN 
-	tblGLAccountGroup AG
-		ON GL.intAccountGroupId = AG.intAccountGroupId
-INNER JOIN 
-	tblGLAccountCategory AC
-		ON GL.intAccountCategoryId = AC.intAccountCategoryId												 
+	vyuGLAccountDetail GL												 
 INNER JOIN
 	tblCMBankAccount BA
 		ON GL.intAccountId = BA.intGLAccountId 						
 WHERE
-	AC.strAccountCategory = 'Cash Account'
+	GL.strAccountCategory = 'Cash Account'
 	AND BA.intGLAccountId IS NOT NULL
 	AND BA.ysnActive = 1
 		
@@ -33,18 +27,12 @@ SELECT
 	,GL.strAccountId
 	,GL.intAccountGroupId
 	,GL.strDescription 
-	,AG.strAccountGroup 
+	,GL.strAccountGroup 
 	,GL.intAccountCategoryId 
 	,GL.ysnActive
 	,NULL AS intBankAccountId 
 	,'' AS strBankAccountNo 
 FROM
-	tblGLAccount GL
-INNER JOIN 
-	tblGLAccountGroup AG
-		ON GL.intAccountGroupId = AG.intAccountGroupId
-INNER JOIN 
-	tblGLAccountCategory AC
-		ON GL.intAccountCategoryId = AC.intAccountCategoryId													 						
+	vyuGLAccountDetail GL												 						
 WHERE
-	AC.strAccountCategory = 'Undeposited Funds'
+	GL.strAccountCategory = 'Undeposited Funds'
