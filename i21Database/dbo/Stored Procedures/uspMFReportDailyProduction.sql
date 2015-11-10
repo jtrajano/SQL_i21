@@ -42,11 +42,16 @@ BEGIN TRY
 
 	SELECT @dtmStartDate = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'dtmStartDate'
+	WHERE [fieldname] = 'dtmPlannedDate'
 
-	SELECT @dtmEndDate = [from]
+	SELECT @dtmEndDate = [to]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'dtmEndDate'
+	WHERE [fieldname] = 'dtmPlannedDate'
+
+	IF @dtmEndDate IS NULL
+	BEGIN
+		SELECT @dtmEndDate = @dtmStartDate
+	END
 
 	SELECT @dtmStartDate1 = @dtmStartDate
 		,@dtmEndDate1 = @dtmEndDate
