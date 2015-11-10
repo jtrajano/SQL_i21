@@ -180,7 +180,7 @@ GO
 		SELECT  TOP 1 @CashCategoryId =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cash Account'
 		SELECT  TOP 1 @APClearing =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'AP Clearing'
 
-		UPDATE tblGLAccount SET intAccountCategoryId = @GenealCategoryId
+		UPDATE tblGLAccountSegment SET intAccountCategoryId = @GenealCategoryId
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
 		UPDATE tblGLAccountGroup SET intAccountCategoryId = @GenealCategoryId
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
@@ -191,14 +191,14 @@ GO
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
 		UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @CashCategoryId
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
-		UPDATE tblGLAccount SET intAccountCategoryId = @CashCategoryId
+		UPDATE tblGLAccountSegment SET intAccountCategoryId = @CashCategoryId
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
 
 		UPDATE tblGLAccountGroup SET intAccountCategoryId = @APClearing
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
 		UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @APClearing
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
-		UPDATE tblGLAccount SET intAccountCategoryId = @APClearing
+		UPDATE tblGLAccountSegment SET intAccountCategoryId = @APClearing
 			WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
 
 		DELETE FROM tblGLAccountCategory WHERE strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Cash in Bank','Petty Cash','Pending AP')
