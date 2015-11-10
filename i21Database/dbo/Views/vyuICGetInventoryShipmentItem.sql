@@ -3,6 +3,16 @@
 
 SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.intInventoryShipmentItemId
+	, Shipment.strOrderType
+	, Shipment.strSourceType
+	, Shipment.strShipmentNumber
+	, Shipment.strShipFromLocation
+	, Shipment.strShipToLocation
+	, Shipment.strBOLNumber
+	, Shipment.dtmShipDate
+	, Shipment.strCustomerNumber
+	, Shipment.strCustomerName
+	, Shipment.ysnPosted
 	, ShipmentItem.intLineNo
 	, ShipmentItem.intOrderId
 	, ShipmentItemSource.strOrderNumber
@@ -27,9 +37,13 @@ SELECT ShipmentItem.intInventoryShipmentId
     , dblUnitPrice = ISNULL(ShipmentItemSource.dblUnitPrice, 0)
     , dblDiscount = ISNULL(ShipmentItemSource.dblDiscount, 0)
     , dblTotal = ISNULL(ShipmentItemSource.dblTotal, 0)
+	, dblQtyToShip = ISNULL(ShipmentItem.dblQuantity, 0)
+	, dblPrice = ISNULL(ShipmentItem.dblUnitPrice, 0)
+	, dblLineTotal = ISNULL(ShipmentItem.dblQuantity, 0) * ISNULL(ShipmentItem.dblUnitPrice, 0)
 	, ShipmentItem.intGradeId
 	, strGrade = Grade.strDescription
 FROM tblICInventoryShipmentItem ShipmentItem
+	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ShipmentItem.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ShipmentItem.intSubLocationId
