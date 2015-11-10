@@ -43,7 +43,7 @@ FROM
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId		AND 
 												CU.intUnitMeasureId		=	IM.intUnitMeasureId
 	JOIN  tblICItemUOM                  TU  ON  TU.intItemUOMId			=   CD.intItemUOMId
-    JOIN  tblICCommodityUnitMeasure     QM  ON  QM.intCommodityId       =   QM.intCommodityId       AND 
+    JOIN  tblICCommodityUnitMeasure     QM  ON  QM.intCommodityId       =   CD.intCommodityId       AND 
 												QM.intUnitMeasureId     =   TU.intUnitMeasureId     
 	WHERE	PF.intContractDetailId IS NULL
 )t
