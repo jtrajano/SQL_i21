@@ -328,9 +328,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @dblStdLineEfficiency = dblStdLineEfficiency
-	FROM dbo.tblMFManufacturingCell
-	WHERE intManufacturingCellId = @intManufacturingCellId
+
 
 	INSERT INTO @tblMFScheduleWorkOrderCalendarDetail (
 		intCalendarDetailId
@@ -407,6 +405,7 @@ BEGIN TRY
 				,@intChangeoverDuration = NULL
 				,@intSetupDuration = NULL
 				,@intMaxChangeoverTime = NULL
+				,@dblStdLineEfficiency=NULL
 
 			SELECT @intWorkOrderId = intWorkOrderId
 				,@intNoOfUnit = intNoOfUnit
@@ -418,6 +417,11 @@ BEGIN TRY
 				,@intSetupDuration = intSetupDuration
 			FROM @tblMFScheduleWorkOrder
 			WHERE intRecordId = @intRecordId
+
+			SELECT @dblStdLineEfficiency = dblLineEfficiencyRate 
+			FROM dbo.tblMFManufacturingCellPackType 
+			WHERE intManufacturingCellId = @intManufacturingCellId
+				AND intPackTypeId =@intPackTypeId
 
 			IF @dtmEarliestStartDate IS NOT NULL
 				AND @dtmEarliestStartDate >= @dtmShiftEndTime
