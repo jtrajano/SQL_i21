@@ -13,13 +13,24 @@ AS
 			@dblInvoiceTotal    NUMERIC(18,6) = 0,
 			@NewInvoiceId		INT,
 			@newComment         NVARCHAR(500) = NULL,
-			@totalCount			INT = 0,
-			@counter			INT = 1
+			@intServiceChargeId INT
 
 	EXEC [dbo].[uspARGetDefaultComment] @intCompanyLocationId, @intEntityCustomerId, 'Invoice', 'Service Charge', @newComment OUT
 
 	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
 	FROM @tblTypeServiceCharge
+
+	DECLARE @tempServiceChargeTable TABLE (
+		 [intServiceChargeId]  INT
+		,[intInvoiceId]		   INT
+		,[intEntityCustomerId] INT
+		,[strInvoiceNumber]    NVARCHAR(25)
+		,[dblAmountDue]		   NUMERIC(18,6)
+		,[dblTotalAmount]	   NUMERIC(18,6))
+
+	INSERT INTO @tempServiceChargeTable
+	SELECT * FROM @tblTypeServiceCharge 
+	WHERE intEntityCustomerId = @intEntityCustomerId
 
 	IF @ysnRecap = 0
 		BEGIN
@@ -111,13 +122,14 @@ AS
 
 			--INSERT INVOICE DETAILS
 			SET @NewInvoiceId = SCOPE_IDENTITY()
+			
+			WHILE EXISTS(SELECT NULL FROM @tempServiceChargeTable)
+			BEGIN
+				SELECT TOP 1 @intServiceChargeId = intServiceChargeId FROM @tempServiceChargeTable ORDER BY intServiceChargeId ASC
 
-			SELECT @totalCount = COUNT(*) FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @intEntityCustomerId
-			WHILE (@counter <= @totalCount)
-				BEGIN
-					DECLARE @intInvoiceIdToUpdate INT = 0
+				DECLARE @intInvoiceIdToUpdate INT = 0
 
-					SELECT @intInvoiceIdToUpdate = intInvoiceId FROM @tblTypeServiceCharge WHERE intServiceChargeId = @counter
+					SELECT @intInvoiceIdToUpdate = intInvoiceId FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
 
 					INSERT INTO [tblARInvoiceDetail]
 						([intInvoiceId]
@@ -135,57 +147,48 @@ AS
 						,[dblTotalAmount]
 						,[dblTotalAmount]
 						,0
-					FROM @tblTypeServiceCharge WHERE intServiceChargeId = @counter
+					FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
 
 					UPDATE tblARInvoice SET ysnCalculated = 1 WHERE intInvoiceId = @intInvoiceIdToUpdate
-
-					SET @counter += 1
-				END
+			END
 		END
 	ELSE
 		BEGIN
-			DECLARE @calculationType NVARCHAR(50) = NULL
-				  , @frequency		 NVARCHAR(50) = NULL
-				  , @newRecapId		 INT
+			DECLARE @newRecapId		 INT			       
 			
-			SELECT TOP 1 @calculationType = strServiceChargeCalculation
-						,@frequency = strServiceChargeFrequency
-			FROM tblARCompanyPreference
-
 			--INSERT INTO RECAP TABLE
 			INSERT INTO tblARServiceChargeRecap
 				([strBatchId]
 				,[intEntityId]
 				,[intServiceChargeAccountId]
-				,[strCalculationType]
-				,[strFrequency]
 				,[dtmServiceChargeDate]
 				,[dblTotalAmount])
 			SELECT @batchId
 				 , @intEntityCustomerId
 				 , @intSCAccountId
-				 , @calculationType
-				 , @frequency
 				 , @dtmAsOfDate
 				 , @dblInvoiceTotal
 
+			--INSERT INTO RECAP DETAIL TABLE
 			SET @newRecapId = SCOPE_IDENTITY()
+			
+			WHILE EXISTS(SELECT NULL FROM @tempServiceChargeTable)
+			BEGIN
+				SELECT TOP 1 @intServiceChargeId = intServiceChargeId FROM @tempServiceChargeTable ORDER BY intServiceChargeId ASC
 
-			SELECT @totalCount = COUNT(*) FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @intEntityCustomerId
-			WHILE (@counter <= @totalCount)
-				BEGIN
-					INSERT INTO [tblARServiceChargeRecapDetail]
-						([intSCRecapId]
-						,[strInvoiceNumber]
-						,[dblAmount]
-						,[intConcurrencyId])
-					SELECT 	
-						 @newRecapId
-						,[strInvoiceNumber]				
-						,[dblTotalAmount]
-						,0
-					FROM @tblTypeServiceCharge WHERE intServiceChargeId = @counter
-					
-					SET @counter += 1
-				END
+				INSERT INTO [tblARServiceChargeRecapDetail]
+					([intSCRecapId]
+					,[strInvoiceNumber]
+					,[dblAmount]
+					,[intConcurrencyId])
+				SELECT 	
+					 @newRecapId
+					,[strInvoiceNumber]				
+					,[dblTotalAmount]
+					,0
+				FROM @tempServiceChargeTable 
+				WHERE intServiceChargeId = @intServiceChargeId
+
+				DELETE FROM @tempServiceChargeTable WHERE intServiceChargeId = @intServiceChargeId
+			END			
 		END
