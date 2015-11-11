@@ -2,7 +2,7 @@
 		[intRefundId] [int] NOT NULL IDENTITY,
 		[intFiscalYearId] [int] NULL,
 		[dtmRefundDate] [datetime] NULL,
-		[strRefund] [char](1) NULL,
+		[strRefund] [char](1) COLLATE Latin1_General_CI_AS NULL,
 		[dblMinimumRefund] [numeric](18, 6) NULL,
 		[dblServiceFee] [numeric](18, 6) NULL,
 		[dblCashCutoffAmount] [numeric](18, 6) NULL,
