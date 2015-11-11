@@ -7,7 +7,7 @@ CREATE TABLE [dbo].[tblCTWeightGrade]
 	[ysnActive] [bit] NOT NULL CONSTRAINT [DF_tblCTWeightGrade_ysnActive]  DEFAULT ((1)),
 	[ysnWeight] BIT NULL, 
     [ysnGrade] BIT NULL, 
-    [dblFranchise] NUMERIC(4, 2) NULL, 
+    [dblFranchise] NUMERIC(6, 4) NULL, 
     [ysnSample] BIT NULL, 
 	CONSTRAINT [PK_tblCTWeightGrade_intWeightGradeId] PRIMARY KEY CLUSTERED ([intWeightGradeId] ASC), 	
 	CONSTRAINT [UQ_tblCTWeightGrade_strWeightGradeDesc] UNIQUE ([strWeightGradeDesc])
