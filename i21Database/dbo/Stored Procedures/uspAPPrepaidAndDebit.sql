@@ -58,14 +58,13 @@ SELECT
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblCost * B.dblQtyReceived
-											ELSE A.dblAmountDue  END
+											THEN B.dblTotal 
+											ELSE B.dblTotal END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN A.dblAmountDue 
-											ELSE A.dblAmountDue END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+											THEN B.dblTotal 
+											ELSE B.dblTotal END
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN
@@ -78,7 +77,7 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
-											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
+											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
 	[ysnApplied]			=	1,
@@ -145,14 +144,13 @@ SELECT
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblCost * B.dblQtyReceived
-											ELSE A.dblAmountDue  END
+											THEN B.dblTotal 
+											ELSE B.dblTotal END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN A.dblAmountDue 
-											ELSE A.dblAmountDue  END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+											THEN B.dblTotal  
+											ELSE B.dblTotal END
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
@@ -165,7 +163,7 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
-											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
+											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
 	[ysnApplied]			=	1,
@@ -232,14 +230,13 @@ SELECT
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblCost * B.dblQtyReceived
-											ELSE A.dblAmountDue END
+											THEN B.dblTotal
+											ELSE B.dblTotal END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN A.dblAmountDue
-											ELSE A.dblAmountDue END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+											THEN B.dblTotal
+											ELSE B.dblTotal END
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN
@@ -252,7 +249,7 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
-											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
+											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END                                        
 									ELSE 0 END,
 	[ysnApplied]			=	1,
@@ -319,14 +316,14 @@ SELECT
 											A.dblAmountDue 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblCost * B.dblQtyReceived
-											ELSE A.dblAmountDue  END
+											THEN B.dblTotal
+											ELSE B.dblTotal  END
 									WHEN 3 THEN
+                                    
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN A.dblAmountDue 
-											ELSE A.dblAmountDue  END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+											THEN B.dblTotal
+											ELSE B.dblTotal END
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
@@ -339,7 +336,7 @@ SELECT
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
-											THEN ((SELECT SUM(dblBalance) FROM dbo.tblAPAppliedPrepaidAndDebit WHERE strTransactionNumber = A.strBillId) * CurrentBill.allocatedAmount)
+											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
 	[ysnApplied]			=	1,

@@ -1,21 +1,21 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMGetItemTaxes]
-	 @ItemId					INT
+	 @ItemId				INT
 	,@LocationId			INT
 	,@TransactionDate		DATETIME
 	,@TransactionType		NVARCHAR(20) -- Purchase/Sale
 	,@EntityId				INT			= NULL
-	,@TaxMasterId			INT			= NULL
+	,@TaxGroupId			INT			= NULL
 	,@BillShipToLocationId	INT			= NULL
 AS
 
 BEGIN
 
-	IF ISNULL(@TaxMasterId,0) = 0
+	IF ISNULL(@TaxGroupId,0) = 0
 		BEGIN				
 			IF (@TransactionType = 'Sale')
-				SELECT @TaxMasterId = [dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId)
+				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId)
 			ELSE
-				SELECT @TaxMasterId = [dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId)
+				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId)
 		END
 			
 				
@@ -24,7 +24,7 @@ BEGIN
 			SELECT
 				 [intTransactionDetailTaxId]
 				,[intTransactionDetailId]		AS [intInvoiceDetailId]
-				,NULL							AS [intTaxGroupMasterId]
+				--,NULL							AS [intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
 				,[intTaxClassId]
@@ -41,7 +41,7 @@ BEGIN
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxMasterId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId)
 					
 			RETURN 1
 		END
@@ -50,7 +50,7 @@ BEGIN
 			SELECT
 				 [intTransactionDetailTaxId]
 				,[intTransactionDetailId]		AS [intInvoiceDetailId]
-				,NULL							AS [intTaxGroupMasterId]
+				--,NULL							AS [intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
 				,[intTaxClassId]
@@ -67,7 +67,7 @@ BEGIN
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxMasterId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId)
+				[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId)
 					
 			RETURN 1
 		END

@@ -3,7 +3,7 @@
 	[intSupplyPointId] INT NOT NULL IDENTITY,
 	[intEntityVendorId] INT NOT NULL,		
 	[intEntityLocationId] INT NOT NULL,	
-	[strTerminalNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[intTerminalControlNumberId] INT NULL,
 	[strGrossOrNet] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strFuelDealerId1] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strFuelDealerId2] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
@@ -18,5 +18,6 @@
 	CONSTRAINT [FK_tblTRSupplyPoint_tblAPVendor_intEntityVendorId] FOREIGN KEY (intEntityVendorId) REFERENCES [dbo].[tblAPVendor] (intEntityVendorId),
 	CONSTRAINT [FK_tblTRSupplyPoint_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblTRSupplyPoint_tblEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
-	CONSTRAINT [FK_tblTRSupplyPoint_tblTRSupplyPoint_intRackPriceSupplyPointId] FOREIGN KEY (intRackPriceSupplyPointId) REFERENCES [dbo].[tblTRSupplyPoint] (intSupplyPointId)
+	CONSTRAINT [FK_tblTRSupplyPoint_tblTRSupplyPoint_intRackPriceSupplyPointId] FOREIGN KEY (intRackPriceSupplyPointId) REFERENCES [dbo].[tblTRSupplyPoint] (intSupplyPointId),
+	CONSTRAINT [FK_tblTRSupplyPoint_tblTFTerminalControlNumber_intTerminalControlNumberId] FOREIGN KEY (intTerminalControlNumberId) REFERENCES [dbo].[tblTFTerminalControlNumber] (intTerminalControlNumberId)
 )
