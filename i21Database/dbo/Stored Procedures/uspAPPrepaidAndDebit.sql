@@ -59,13 +59,12 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN B.dblTotal 
-											ELSE B.dblTotal   END
+											ELSE B.dblTotal END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN B.dblTotal 
 											ELSE B.dblTotal END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN
@@ -146,13 +145,12 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN B.dblTotal 
-											ELSE B.dblTotal   END
+											ELSE B.dblTotal END
 									WHEN 3 THEN
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN B.dblTotal  
-											ELSE B.dblTotal   END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+											ELSE B.dblTotal END
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
@@ -238,8 +236,7 @@ SELECT
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN B.dblTotal
 											ELSE B.dblTotal END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN
@@ -325,9 +322,8 @@ SELECT
                                     
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN B.dblTotal
-											ELSE B.dblTotal  END
-									ELSE 0 END)
-									- ISNULL(A.dblPayment,0),
+											ELSE B.dblTotal END
+									ELSE 0 END),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
