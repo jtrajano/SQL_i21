@@ -127,3 +127,6 @@
 
 --HD
 :r .\16_HD\Drop_Constraint.sql
+
+--TR
+:r .\17_TR\01_Drop_Column.sql
