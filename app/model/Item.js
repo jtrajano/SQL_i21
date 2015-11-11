@@ -195,7 +195,7 @@ Ext.define('Inventory.model.Item', {
 
     validate: function(options){
         var errors = this.callParent(arguments);
-        if (iRely.Functions.isEmpty(this.get('intCommodityId')) && iRely.Functions.isEmpty(this.get('intCategoryId'))) {
+        if (iRely.Functions.isEmpty(this.get('intCategoryId'))) {
             if (this.get('strType') !== 'Non-Inventory' && this.get('strType') !== 'Other Charge' && this.get('strType') !== 'Service' && this.get('strType') !== 'Software') {
                 errors.add({
                     field: 'intCategoryId',
