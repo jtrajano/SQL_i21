@@ -428,14 +428,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colTax: {
                     dataIndex: 'dblTax'
                 },
-                colTaxGroup: {
-                    dataIndex: 'strTaxGroup',
-                    editor: {
-                        origValueField: 'intTaxGroupId',
-                        origUpdateField: 'intTaxGroupId',
-                        store: '{taxGroup}'
-                    }
-                },
                 colUnitRetail: 'dblUnitRetail',
                 colGross: {
                     dataIndex: 'dblGross',

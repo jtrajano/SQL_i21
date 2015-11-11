@@ -76,8 +76,12 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         var win = me.getView();
         var btnSave = win.down('#btnSave');
         var btnUndo = win.down('#btnUndo');
+        var btnInsert = win.down('#btnInsert');
+        var btnDelete = win.down('#btnDelete');
         btnSave.setHidden(true);
         btnUndo.setHidden(true);
+        btnInsert.setHidden(true);
+        btnDelete.setHidden(true);
         win.show();
 
         var context = me.setupContext();

@@ -1166,38 +1166,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                xtype: 'gridcolumn',
-                                                                                itemId: 'colTaxGroup',
-                                                                                width: 85,
-                                                                                dataIndex: 'strTax',
-                                                                                text: 'Tax Group',
-                                                                                editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intTaxGroupId',
-                                                                                            dataType: 'numeric',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strTaxGroup',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Tax Group',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strDescription',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Description',
-                                                                                            flex: 1
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboTaxGroup',
-                                                                                    displayField: 'strTaxGroup',
-                                                                                    valueField: 'strTaxGroup'
-                                                                                }
-                                                                            },
-                                                                            {
                                                                                 xtype: 'numbercolumn',
                                                                                 summaryType: 'sum',
                                                                                 itemId: 'colTax',
