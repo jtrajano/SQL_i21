@@ -311,6 +311,12 @@ BEGIN
 					,[strTransactionForm]
 					,[strModuleName]
 					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
 			)
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForPost  
@@ -443,6 +449,12 @@ BEGIN
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId

@@ -8,7 +8,7 @@
 	)
 AS
 BEGIN
-	SELECT M.intMachineId
+	SELECT DISTINCT M.intMachineId
 		,M.strName
 		,CONVERT(BIT, CASE 
 				WHEN EXISTS (

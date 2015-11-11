@@ -6,14 +6,13 @@
 	,@ItemPrice			NUMERIC(18,6)
 	,@QtyShipped		NUMERIC(18,6)
 	,@TaxGroupId		INT
-	,@ShipToLocationId	INT
 	,@CompanyLocationId	INT
+	,@ShipToLocationId	INT	
 )
 RETURNS @returntable TABLE
 (
 	 [intTransactionDetailTaxId]	INT
 	,[intTransactionDetailId]		INT
-	,[intTaxGroupMasterId]			INT
 	,[intTaxGroupId]				INT
 	,[intTaxCodeId]					INT
 	,[intTaxClassId]				INT
@@ -41,7 +40,6 @@ BEGIN
 			 [Id]							INT IDENTITY(1,1)
 			,[intTransactionDetailTaxId]	INT
 			,[intTransactionDetailId]		INT
-			,[intTaxGroupMasterId]			INT
 			,[intTaxGroupId]				INT
 			,[intTaxCodeId]					INT
 			,[intTaxClassId]				INT
@@ -68,7 +66,6 @@ BEGIN
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -88,7 +85,6 @@ BEGIN
 	SELECT
 		 [intTransactionDetailTaxId]
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -106,10 +102,7 @@ BEGIN
 		,[strNotes]
 	FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @ShipToLocationId)
-					
-	
-	UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL
-									
+															
 			
 	-- Calculate Item Tax
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
@@ -258,7 +251,6 @@ BEGIN
 	INSERT INTO @returntable(
 		[intTransactionDetailTaxId]
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -279,7 +271,6 @@ BEGIN
 	SELECT
 		 [intTransactionDetailTaxId]
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]

@@ -290,7 +290,13 @@ BEGIN
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[intConcurrencyId]		
+		,[intConcurrencyId]	
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
 	)
 	EXEC dbo.uspICUnpostCosting
 		@intTransactionId
@@ -395,8 +401,8 @@ BEGIN
 				AND ItemStock.intItemLocationId = ItemPricing.intItemLocationId	
 				
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
-	--EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
-	--EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
+	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
+	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
 END 
 
 -- Clean-up: remove the tables used in the unit test

@@ -433,7 +433,6 @@ BEGIN
 						
 			INSERT INTO [tblARInvoiceDetailTax]
 				([intInvoiceDetailId]
-				,[intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
 				,[intTaxClassId]
@@ -446,10 +445,10 @@ BEGIN
 				,[ysnTaxAdjusted]
 				,[ysnSeparateOnInvoice]
 				,[ysnCheckoffTax]
+				,[strNotes] 
 				,[intConcurrencyId])
 			SELECT
 				@intInvoiceDetailId
-				,[intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
 				,[intTaxClassId]
@@ -462,6 +461,7 @@ BEGIN
 				,[ysnTaxAdjusted]
 				,[ysnSeparateOnInvoice]
 				,[ysnCheckoffTax]
+				,[strNotes] 
 				,0
 			FROM 
 				[tblSOSalesOrderDetailTax]

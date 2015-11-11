@@ -49,7 +49,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT
 		[intBillDetailId]		=	B.intBillDetailId, 
-		[intTaxGroupMasterId]	=	Taxes.intTaxGroupMasterId, 
+		[intTaxGroupMasterId]	=	NULL, 
 		[intTaxGroupId]			=	Taxes.intTaxGroupId, 
 		[intTaxCodeId]			=	Taxes.intTaxCodeId, 
 		[intTaxClassId]			=	Taxes.intTaxClassId, 
@@ -65,7 +65,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId
-	CROSS APPLY fnGetItemTaxComputationForVendor(B.intItemId, NULL, A.dtmDate, B.dblCost, B.dblQtyReceived, B.intTaxGroupId, A.intShipToId) Taxes
+	CROSS APPLY fnGetItemTaxComputationForVendor(B.intItemId, A.intEntityVendorId, A.dtmDate, B.dblCost, B.dblQtyReceived, B.intTaxGroupId,A.intShipToId,A.intShipFromId) Taxes
 	WHERE Taxes.dblTax IS NOT NULL
 
 	UPDATE A

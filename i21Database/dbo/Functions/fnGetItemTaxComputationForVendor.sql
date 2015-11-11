@@ -3,16 +3,16 @@
 	 @ItemId			INT
 	,@VendorId			INT
 	,@TransactionDate	DATETIME
-	,@ItemPrice			NUMERIC(18,6)
-	,@QtyShipped		NUMERIC(18,6)
+	,@ItemCost			NUMERIC(18,6)
+	,@Quantity			NUMERIC(18,6)
 	,@TaxGroupId		INT
 	,@CompanyLocationId	INT
+	,@BillToLocationId	INT
 )
 RETURNS @returntable TABLE
 (
 	 [intTransactionDetailTaxId]	INT
 	,[intTransactionDetailId]		INT
-	,[intTaxGroupMasterId]			INT
 	,[intTaxGroupId]				INT
 	,[intTaxCodeId]					INT
 	,[intTaxClassId]				INT
@@ -40,7 +40,6 @@ BEGIN
 			 [Id]							INT IDENTITY(1,1)
 			,[intTransactionDetailTaxId]	INT
 			,[intTransactionDetailId]		INT
-			,[intTaxGroupMasterId]			INT
 			,[intTaxGroupId]				INT
 			,[intTaxCodeId]					INT
 			,[intTaxClassId]				INT
@@ -61,12 +60,11 @@ BEGIN
 			)
 					
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, NULL)	
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @BillToLocationId)	
 					
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -86,7 +84,6 @@ BEGIN
 	SELECT
 		 [intTransactionDetailTaxId]
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -103,11 +100,8 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, NULL)
-					
-	
-	UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL
-									
+		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @BillToLocationId)
+												
 			
 	-- Calculate Item Tax
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
@@ -125,7 +119,7 @@ BEGIN
 					
 			SELECT TOP 1 
 				 @Id			= [Id]
-				,@TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@QtyShipped, @ZeroDecimal)
+				,@TaxableAmount	= ISNULL(@ItemCost, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
 			FROM
 				@ItemTaxes
 			WHERE
@@ -218,11 +212,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/100.00) END))
+										SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@ItemCost * @Quantity) * (@TaxRate/100.00) END))
 									END
 								ELSE
 									BEGIN
-										SET @TaxableAmount = (@ItemPrice * @QtyShipped) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@QtyShipped * @TaxRate) END))
+										SET @TaxableAmount = (@ItemCost * @Quantity) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@Quantity * @TaxRate) END))
 									END
 							END
 					END 
@@ -235,7 +229,7 @@ BEGIN
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
 			ELSE
-				SET @ItemTaxAmount = (@QtyShipped * @Rate);
+				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
 			IF(@TaxExempt = 1)
 				SET @ItemTaxAmount = 0.00;
@@ -254,9 +248,8 @@ BEGIN
 		END
 				
 	INSERT INTO @returntable(
-		[intTransactionDetailTaxId]
+		 [intTransactionDetailTaxId]
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -277,7 +270,6 @@ BEGIN
 	SELECT
 		 [intTransactionDetailTaxId]
 		,[intTransactionDetailId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]

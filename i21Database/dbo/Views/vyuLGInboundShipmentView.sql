@@ -122,6 +122,7 @@ SELECT
 		dblContainerContractGrossWt = (Container.dblGrossWt / Container.dblQuantity) * SC.dblQuantity,
 		dblContainerContractTareWt = (Container.dblTareWt / Container.dblQuantity) * SC.dblQuantity,
 		dblContainerContractlNetWt = (Container.dblNetWt / Container.dblQuantity) * SC.dblQuantity,	
+		dblContainerWeightPerQty = (Container.dblNetWt / Container.dblQuantity),
 		SC.dblReceivedQty as dblContainerContractReceivedQty,
 		dblReceivedGrossWt = IsNull((SELECT sum(ICItem.dblGross) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=SCQ.intShipmentContractQtyId AND ICItem.intContainerId=Container.intShipmentBLContainerId), 0),
 		dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=SCQ.intShipmentContractQtyId AND ICItem.intContainerId=Container.intShipmentBLContainerId), 0)

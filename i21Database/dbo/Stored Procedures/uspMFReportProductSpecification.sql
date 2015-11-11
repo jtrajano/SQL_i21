@@ -57,8 +57,6 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFWorkOrderProductSpecification PS ON W.intWorkOrderId = PS.intWorkOrderId
 	LEFT JOIN dbo.tblMFWorkOrderItem WI ON W.intWorkOrderId = WI.intWorkOrderId
 	LEFT JOIN dbo.tblICItem I1 ON WI.intItemId = I1.intItemId
-	LEFT JOIN dbo.tblICItemUOM IU1 ON WI.intItemUOMId = IU1.intItemUOMId
-	LEFT JOIN dbo.tblICUnitMeasure U1 ON IU1.intUnitMeasureId = U1.intUnitMeasureId
 		AND (
 			I1.strItemNo = left(PS.strParameterValue, 4)
 			OR I1.strItemNo = left(PS.strParameterValue, 8)
@@ -66,6 +64,8 @@ BEGIN TRY
 			OR I1.strItemNo = left(PS.strParameterValue, 11)
 			)
 		AND PS.strParameterName = 'BOM Item'
+	LEFT JOIN dbo.tblICItemUOM IU1 ON WI.intItemUOMId = IU1.intItemUOMId
+	LEFT JOIN dbo.tblICUnitMeasure U1 ON IU1.intUnitMeasureId = U1.intUnitMeasureId
 	ORDER BY PS.strParameterName
 
 	EXEC sp_xml_removedocument @xmlDocumentId

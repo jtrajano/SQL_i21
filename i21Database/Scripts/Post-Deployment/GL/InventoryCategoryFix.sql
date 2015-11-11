@@ -15,10 +15,6 @@ GO
 	SELECT TOP 1 @GeneralCatId = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'General'
 	SELECT TOP 1 @OtherChargeAssetCatId = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Other Charge (Asset)'
 
-	UPDATE	dbo.tblGLAccount
-	SET		intAccountCategoryId = @GeneralCatId
-	WHERE	intAccountCategoryId = @OtherChargeAssetCatId
-
 	UPDATE tblGLAccountSegment
 	SET intAccountCategoryId  = @GeneralCatId
 	WHERE  intAccountCategoryId = @OtherChargeAssetCatId 

@@ -1,7 +1,7 @@
 ﻿/*  
  This stored procedure is used as data source in the Voucher Check Middle Report
 */  
-CREATE PROCEDURE uspCMVoucherCheckMiddleReport
+CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleReport]
  @xmlParam NVARCHAR(MAX) = NULL  
 AS  
   
@@ -123,10 +123,31 @@ SELECT	CHK.dtmDate
 		,CHK.intBankAccountId
 		
 		-- Bank and company info related fields
-		,strCompanyName = ''
-		,strCompanyAddress = ''
-		,strBank = ''
-		,strBankAddress = ''
+		,strCompanyName = CASE
+							WHEN ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> '' THEN 
+								COMPANY.strCompanyName
+							ELSE
+								NULL
+							END
+		,strCompanyAddress = CASE	
+									WHEN ISNULL(dbo.fnConvertToFullAddress( COMPANY.strAddress,  COMPANY.strCity, COMPANY.strState,  COMPANY.strZip), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
+										dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+									ELSE 
+										NULL
+							END
+		,strBank = CASE
+						WHEN ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> '' THEN 
+							BNK.strBankName
+						ELSE
+							NULL
+					END
+		,strBankAddress =  CASE	
+									WHEN ISNULL(dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
+										dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode) + CHAR(13) + BNK.strRTN
+									ELSE 
+										NULL
+							END
+							
 		,strMIRC = [dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo)
 		
 		-- A/P Related fields: 
@@ -144,6 +165,10 @@ SELECT	CHK.dtmDate
 FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
 			ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
 			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
+		INNER JOIN tblCMBankAccount BNKACCNT
+			ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
+		INNER JOIN tblCMBank BNK
+			ON BNK.intBankId = BNKACCNT.intBankId
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
@@ -152,6 +177,7 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 			ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
 		LEFT JOIN tblEntityLocation LOCATION
 			ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+		LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
 		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)

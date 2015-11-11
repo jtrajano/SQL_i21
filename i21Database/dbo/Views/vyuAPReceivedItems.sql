@@ -18,7 +18,7 @@ FROM
 		,[strMiscDescription]		=	B.strMiscDescription
 		,[strItemNo]				=	C.strItemNo
 		,[strDescription]			=	C.strDescription
-		,[intPurchaseTaxGroupId]	=	C.intPurchaseTaxGroupId
+		,[intPurchaseTaxGroupId]	=	NULL
 		,[dblOrderQty]				=	tblReceived.dblOrderQty
 		,[dblPOOpenReceive]			=	tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
 		,[dblOpenReceive]			=	tblReceived.dblOpenReceive
@@ -98,7 +98,7 @@ FROM
 	,[strMiscDescription]		=	B.strMiscDescription
 	,[strItemNo]				=	C.strItemNo
 	,[strDescription]			=	C.strDescription
-	,[intPurchaseTaxGroupId]	=	C.intPurchaseTaxGroupId
+	,[intPurchaseTaxGroupId]	=	NULL
 	,[dblOrderQty]				=	B.dblQtyOrdered
 	,[dblPOOpenReceive]			=	B.dblQtyOrdered -B.dblQtyReceived
 	,[dblOpenReceive]			=	B.dblQtyOrdered
@@ -143,7 +143,7 @@ FROM
 	,[strMiscDescription]		=	C.strDescription
 	,[strItemNo]				=	C.strItemNo
 	,[strDescription]			=	C.strDescription
-	,[intPurchaseTaxGroupId]	=	C.intPurchaseTaxGroupId
+	,[intPurchaseTaxGroupId]	=	NULL
 	,[dblOrderQty]				=	B.dblOpenReceive
 	,[dblPOOpenReceive]			=	B.dblReceived
 	,[dblOpenReceive]			=	B.dblOpenReceive

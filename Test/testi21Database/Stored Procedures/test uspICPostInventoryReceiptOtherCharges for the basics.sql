@@ -161,6 +161,12 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
 		)		
 		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
@@ -172,59 +178,71 @@ BEGIN
 	-- Setup expected table
 	BEGIN 
 		CREATE TABLE expected (
-			[dtmDate]                   DATETIME         NOT NULL,
-			[strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
-			[intAccountId]              INT              NULL,
-			[dblDebit]                  NUMERIC (18, 6)  NULL,
-			[dblCredit]                 NUMERIC (18, 6)  NULL,
-			[dblDebitUnit]              NUMERIC (18, 6)  NULL,
-			[dblCreditUnit]             NUMERIC (18, 6)  NULL,
-			[strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,    
-			[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[intCurrencyId]             INT              NULL,
-			[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
-			[dtmDateEntered]            DATETIME         NOT NULL,
-			[dtmTransactionDate]        DATETIME         NULL,
-			[strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
-			[intJournalLineNo]			INT              NULL,
-			[ysnIsUnposted]             BIT              NOT NULL,    
-			[intUserId]                 INT              NULL,
-			[intEntityId]				INT              NULL,
-			[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
-			[intTransactionId]          INT              NULL,
-			[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
+			[dtmDate]                   DATETIME
+			,[strBatchId]               NVARCHAR (40)    COLLATE Latin1_General_CI_AS
+			,[intAccountId]             INT
+			,[dblDebit]                 NUMERIC (18, 6)
+			,[dblCredit]                NUMERIC (18, 6)
+			,[dblDebitUnit]             NUMERIC (18, 6)
+			,[dblCreditUnit]            NUMERIC (18, 6)
+			,[strDescription]           NVARCHAR (255)   COLLATE Latin1_General_CI_AS
+			,[strCode]                  NVARCHAR (40)    COLLATE Latin1_General_CI_AS
+			,[strReference]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS
+			,[intCurrencyId]            INT
+			,[dblExchangeRate]          NUMERIC (38, 20) 
+			,[dtmDateEntered]           DATETIME         
+			,[dtmTransactionDate]       DATETIME         
+			,[strJournalLineDescription]NVARCHAR (250)   COLLATE Latin1_General_CI_AS 
+			,[intJournalLineNo]			INT              
+			,[ysnIsUnposted]            BIT              
+			,[intUserId]                INT              
+			,[intEntityId]				INT              
+			,[strTransactionId]         NVARCHAR (40)    COLLATE Latin1_General_CI_AS 
+			,[intTransactionId]         INT              
+			,[strTransactionType]       NVARCHAR (255)   COLLATE Latin1_General_CI_AS 
+			,[strTransactionForm]       NVARCHAR (255)   COLLATE Latin1_General_CI_AS 
+			,[strModuleName]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS 
+			,[intConcurrencyId]         INT              DEFAULT 1 
+			,[dblDebitForeign]			NUMERIC (18, 9) 
+			,[dblDebitReport]			NUMERIC (18, 9) 
+			,[dblCreditForeign]			NUMERIC (18, 9) 
+			,[dblCreditReport]			NUMERIC (18, 9) 
+			,[dblReportingRate]			NUMERIC (18, 9) 
+			,[dblForeignRate]			NUMERIC (18, 9)
 		)
 
 		CREATE TABLE actual (
-			[dtmDate]                   DATETIME         NOT NULL,
-			[strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
-			[intAccountId]              INT              NULL,
-			[dblDebit]                  NUMERIC (18, 6)  NULL,
-			[dblCredit]                 NUMERIC (18, 6)  NULL,
-			[dblDebitUnit]              NUMERIC (18, 6)  NULL,
-			[dblCreditUnit]             NUMERIC (18, 6)  NULL,
-			[strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,    
-			[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[intCurrencyId]             INT              NULL,
-			[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
-			[dtmDateEntered]            DATETIME         NOT NULL,
-			[dtmTransactionDate]        DATETIME         NULL,
-			[strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
-			[intJournalLineNo]			INT              NULL,
-			[ysnIsUnposted]             BIT              NOT NULL,    
-			[intUserId]                 INT              NULL,
-			[intEntityId]				INT              NULL,
-			[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
-			[intTransactionId]          INT              NULL,
-			[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-			[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
+			[dtmDate]                   DATETIME
+			,[strBatchId]               NVARCHAR (40)    COLLATE Latin1_General_CI_AS
+			,[intAccountId]             INT
+			,[dblDebit]                 NUMERIC (18, 6)
+			,[dblCredit]                NUMERIC (18, 6)
+			,[dblDebitUnit]             NUMERIC (18, 6)
+			,[dblCreditUnit]            NUMERIC (18, 6)
+			,[strDescription]           NVARCHAR (255)   COLLATE Latin1_General_CI_AS
+			,[strCode]                  NVARCHAR (40)    COLLATE Latin1_General_CI_AS
+			,[strReference]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS
+			,[intCurrencyId]            INT
+			,[dblExchangeRate]          NUMERIC (38, 20) 
+			,[dtmDateEntered]           DATETIME         
+			,[dtmTransactionDate]       DATETIME         
+			,[strJournalLineDescription]NVARCHAR (250)   COLLATE Latin1_General_CI_AS 
+			,[intJournalLineNo]			INT              
+			,[ysnIsUnposted]            BIT              
+			,[intUserId]                INT              
+			,[intEntityId]				INT              
+			,[strTransactionId]         NVARCHAR (40)    COLLATE Latin1_General_CI_AS 
+			,[intTransactionId]         INT              
+			,[strTransactionType]       NVARCHAR (255)   COLLATE Latin1_General_CI_AS 
+			,[strTransactionForm]       NVARCHAR (255)   COLLATE Latin1_General_CI_AS 
+			,[strModuleName]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS 
+			,[intConcurrencyId]         INT              DEFAULT 1 
+			,[dblDebitForeign]			NUMERIC (18, 9) 
+			,[dblDebitReport]			NUMERIC (18, 9) 
+			,[dblCreditForeign]			NUMERIC (18, 9) 
+			,[dblCreditReport]			NUMERIC (18, 9) 
+			,[dblReportingRate]			NUMERIC (18, 9) 
+			,[dblForeignRate]			NUMERIC (18, 9)
 		)
 	END 
 
@@ -255,7 +273,13 @@ BEGIN
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
-			,[intConcurrencyId]		
+			,[intConcurrencyId]	
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
 		)
 		SELECT 
 			[dtmDate] 
@@ -283,6 +307,12 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intConcurrencyId]		
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
 		FROM @GLEntries
 	END 
 

@@ -116,6 +116,12 @@ BEGIN
 			,strTransactionForm			= GLEntries.strTransactionForm
 			,strModuleName				= GLEntries.strModuleName
 			,intConcurrencyId			= 1
+			,dblDebitForeign			= GLEntries.dblDebitForeign 
+			,dblDebitReport				= GLEntries.dblDebitReport
+			,dblCreditForeign			= GLEntries.dblCreditForeign
+			,dblCreditReport			= GLEntries.dblCreditReport
+			,dblReportingRate			= GLEntries.dblReportingRate
+			,dblForeignRate				= GLEntries.dblForeignRate
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
 				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND (
@@ -162,6 +168,12 @@ BEGIN
 			,strTransactionForm			= ItemTransactions.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+			,dblDebitForeign			= NULL 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= NULL 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NULL 
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
@@ -200,6 +212,12 @@ BEGIN
 			,strTransactionForm			= ItemTransactions.strTransactionForm 
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+			,dblDebitForeign			= NULL 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= NULL 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NULL 
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId

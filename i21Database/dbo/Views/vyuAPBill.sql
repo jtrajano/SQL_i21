@@ -26,12 +26,14 @@ SELECT
 	Payment.ysnPrinted,
 	Payment.ysnVoid,
 	Payment.intPaymentId,
-	strApprovalStatus = CASE WHEN A.ysnForApproval = 1 OR A.dtmApprovalDate IS NOT NULL
+	strApprovalStatus = CASE WHEN (A.ysnForApproval = 1 OR A.dtmApprovalDate IS NOT NULL) AND A.ysnForApprovalSubmitted = 1
 							THEN (
 								CASE WHEN A.dtmApprovalDate IS NOT NULL AND A.ysnApproved = 1 THEN 'Approved'
 									WHEN A.dtmApprovalDate IS NOT NULL AND A.ysnApproved = 0 THEN 'Rejected'
 									ELSE 'Awaiting approval' END
 							)
+							WHEN A.ysnForApproval = 1 AND A.ysnForApprovalSubmitted = 0
+								THEN 'Ready for submit'
 							ELSE NULL END,
 	--strApprover = (SELECT TOP 1 strUserName FROM dbo.tblSMApprovalListUserSecurity F
 	--					INNER JOIN dbo.tblSMUserSecurity G ON F.intUserSecurityId = G.intUserSecurityID WHERE B.intApprovalListId = F.intApprovalListId),

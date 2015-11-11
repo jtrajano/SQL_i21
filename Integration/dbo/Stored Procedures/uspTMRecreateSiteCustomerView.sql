@@ -14,7 +14,9 @@ BEGIN
 		DROP VIEW [vyuTMSiteCustomer]
 	END
 
-	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1)
+	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
+	)
 	BEGIN
 
 		EXEC ('
@@ -31,8 +33,8 @@ BEGIN
 											THEN     RTRIM(C.vwcus_last_name) + RTRIM(C.vwcus_name_suffix)    
 											ELSE     RTRIM(C.vwcus_last_name) + RTRIM(C.vwcus_name_suffix) + '', '' + RTRIM(C.vwcus_first_name) + RTRIM(C.vwcus_mid_init)    
 											END   
-									END  )
-						,strEntityNo = C.vwcus_key
+									END  ) COLLATE Latin1_General_CI_AS
+						,strEntityNo = C.vwcus_key COLLATE Latin1_General_CI_AS
 						,A.intConcurrencyId
 					FROM tblTMSite A
 					INNER JOIN tblTMCustomer B

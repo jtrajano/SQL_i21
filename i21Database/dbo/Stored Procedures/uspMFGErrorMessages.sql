@@ -36,3 +36,8 @@ EXEC sp_addmessage 90004,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90005) EXEC sp_dropmessage 90005, 'us_english'	
 SET @strmessage = 'Owner is not configured for the item %s.'
 EXEC sp_addmessage 90005,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90006) EXEC sp_dropmessage 90006, 'us_english'	
+SET @strmessage = 'The UOM used in the work order %s is not added for the item %s in item maintenance.'
+EXEC sp_addmessage 90006,11,@strmessage,'us_english','False'
+

@@ -33,9 +33,12 @@
     [intSalesPersonId]        INT             NULL,
     [ysnInvalid]              BIT             NULL,
     [ysnPosted]               BIT             NULL,
+    [intInvoiceId]            INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC)
 );
+
+
 
 
 

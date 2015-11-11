@@ -8,7 +8,7 @@ BEGIN TRY
 		,@dtmEndDate1 DATETIME
 		,@intLocationId INT
 		,@xmlDocumentId INT
-		,@strLocationName nvarchar(50)
+		,@strLocationName NVARCHAR(50)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -42,11 +42,16 @@ BEGIN TRY
 
 	SELECT @dtmStartDate = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'dtmStartDate'
+	WHERE [fieldname] = 'dtmPlannedDate'
 
-	SELECT @dtmEndDate = [from]
+	SELECT @dtmEndDate = [to]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'dtmEndDate'
+	WHERE [fieldname] = 'dtmPlannedDate'
+
+	IF @dtmEndDate IS NULL
+	BEGIN
+		SELECT @dtmEndDate = @dtmStartDate
+	END
 
 	SELECT @dtmStartDate1 = @dtmStartDate
 		,@dtmEndDate1 = @dtmEndDate
@@ -55,7 +60,9 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strLocationName'
 
-	SELECT @intLocationId=intCompanyLocationId FROM dbo.tblSMCompanyLocation WHERE strLocationName=@strLocationName
+	SELECT @intLocationId = intCompanyLocationId
+	FROM dbo.tblSMCompanyLocation
+	WHERE strLocationName = @strLocationName
 
 	DECLARE @dtmShiftStartTime DATETIME
 		,@dtmShiftEndTime DATETIME
@@ -78,6 +85,25 @@ BEGIN TRY
 
 	SELECT @dtmEndDate = @dtmEndDate + @dtmShiftEndTime
 
+	DECLARE @tblMFDailyProduction TABLE (
+		strLotNumber NVARCHAR(50)
+		,dtmDate DATETIME
+		,dtmCreated DATETIME
+		,strName NVARCHAR(50)
+		,strItemNo NVARCHAR(50)
+		,strDescription NVARCHAR(250)
+		,dblQty NUMERIC(18, 6)
+		,strUnitMeasure NVARCHAR(50)
+		,strStorageLocationName NVARCHAR(50)
+		,strCompanyName NVARCHAR(50)
+		,dtmStartDate DATETIME
+		,dtmEndDate DATETIME
+		,strShiftName NVARCHAR(50)
+		,dtmExpiryDate DATETIME
+		,strSecondaryStatus NVARCHAR(50)
+		)
+
+	INSERT INTO @tblMFDailyProduction
 	SELECT L.strLotNumber
 		,LT.dtmDate
 		,LT.dtmCreated
@@ -92,12 +118,11 @@ BEGIN TRY
 		,@dtmEndDate1 AS dtmEndDate
 		,'' AS strShiftName
 		,L.dtmExpiryDate
-		,LS.strSecondaryStatus 
-	INTO #tblMFDailyProduction
+		,LS.strSecondaryStatus
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICInventoryLotTransaction LT ON L.intLotId = LT.intLotId
 	JOIN dbo.tblICInventoryTransactionType LTT ON LT.intTransactionTypeId = LTT.intTransactionTypeId
-	JOIN dbo.tblICLotStatus  LS on L.intLotStatusId =LS.intLotStatusId 
+	JOIN dbo.tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
 	JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
@@ -127,7 +152,7 @@ BEGIN TRY
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICInventoryLotTransaction LT ON L.intLotId = LT.intLotId
 	JOIN dbo.tblICInventoryTransactionType LTT ON LT.intTransactionTypeId = LTT.intTransactionTypeId
-	JOIN dbo.tblICLotStatus  LS on L.intLotStatusId =LS.intLotStatusId 
+	JOIN dbo.tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
 	JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
@@ -158,7 +183,7 @@ BEGIN TRY
 	JOIN tblICInventoryAdjustmentDetail AD ON A.intInventoryAdjustmentId = AD.intInventoryAdjustmentId
 	JOIN tblICLot L ON AD.intLotId = L.intLotId
 	JOIN dbo.tblICInventoryTransactionType LTT ON A.intAdjustmentType = LTT.intTransactionTypeId
-	JOIN dbo.tblICLotStatus  LS on L.intLotStatusId =LS.intLotStatusId 
+	JOIN dbo.tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 	JOIN dbo.tblICItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
 	JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
@@ -188,7 +213,7 @@ BEGIN TRY
 	JOIN tblICInventoryAdjustmentDetail AD ON A.intInventoryAdjustmentId = AD.intInventoryAdjustmentId
 	JOIN tblICLot L ON AD.intLotId = L.intLotId
 	JOIN dbo.tblICInventoryTransactionType LTT ON A.intAdjustmentType = LTT.intTransactionTypeId
-	JOIN dbo.tblICLotStatus  LS on L.intLotStatusId =LS.intLotStatusId 
+	JOIN dbo.tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 	JOIN dbo.tblICItem I ON AD.intNewItemId = I.intItemId
 	JOIN dbo.tblICItemUOM IU ON L.intItemUOMId = IU.intItemUOMId
 	JOIN dbo.tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
@@ -200,9 +225,9 @@ BEGIN TRY
 	SELECT DP.*
 		,(
 			SELECT Count(DISTINCT DP1.strLotNumber)
-			FROM #tblMFDailyProduction DP1
+			FROM @tblMFDailyProduction DP1
 			) AS intNoOfPallets
-	FROM #tblMFDailyProduction DP
+	FROM @tblMFDailyProduction DP
 	ORDER BY DP.dtmCreated
 
 	EXEC sp_xml_removedocument @xmlDocumentId

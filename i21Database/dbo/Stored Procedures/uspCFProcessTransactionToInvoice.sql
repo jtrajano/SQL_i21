@@ -1,9 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
-	 @TransactionId	INT
-	,@UserId		INT	
-	,@Post			BIT	= NULL
-	,@ErrorMessage  NVARCHAR(250) OUTPUT
-AS
+	 @TransactionId		INT
+	,@UserId			INT	
+	,@Post				BIT	= NULL
+	,@Recap				BIT	= NULL
+	,@InvoiceId			INT = NULL
+	,@ErrorMessage		NVARCHAR(250) OUTPUT
+	,@CreatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
+	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
+AS	
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -16,7 +20,7 @@ SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecur
 
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
-
+BEGIN TRANSACTION
 INSERT INTO @EntriesForInvoice(
 	 [strSourceTransaction]
 	,[intSourceId]
@@ -95,14 +99,14 @@ SELECT
 	 [strSourceTransaction]					= 'Card Fueling Transaction'
 	,[intSourceId]							= cfTrans.intTransactionId
 	,[strSourceId]							= ''
-	,[intInvoiceId]							= NULL --NULL Value will create new invoice
+	,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
 	,[intEntityCustomerId]					= cfCardAccount.intCustomerId
 	,[intCompanyLocationId]					= cfSiteItem.intARLocationId
 	,[intCurrencyId]						= 1
 	,[intTermId]							= cfCardAccount.intTermsCode
-	,[dtmDate]								= CAST(GETDATE() AS DATE)
+	,[dtmDate]								= cfTrans.dtmTransactionDate
 	,[dtmDueDate]							= NULL
-	,[dtmShipDate]							= NULL
+	,[dtmShipDate]							= cfTrans.dtmTransactionDate
 	,[intEntitySalespersonId]				= cfCardAccount.intSalesPersonId
 	,[intFreightTermId]						= NULL 
 	,[intShipViaId]							= NULL 
@@ -194,7 +198,7 @@ INNER JOIN (SELECT icfSite.*
 ON cfTrans.intSiteId = cfSiteItem.intSiteId
 INNER JOIN (SELECT * 
 			FROM tblCFTransactionPrice
-			WHERE strTransactionPriceId = 'Total Amount')
+			WHERE strTransactionPriceId = 'Net Price')
 			AS cfTransPrice
 ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
 INNER JOIN tblCFNetwork cfNetwork
@@ -202,10 +206,8 @@ ON cfTrans.intNetworkId = cfNetwork.intNetworkId
 LEFT JOIN vyuCTContractDetailView ctContracts
 ON cfTrans.intContractId = ctContracts.intContractDetailId
 WHERE cfTrans.intTransactionId = @TransactionId
-	
-DECLARE	@CreatedIvoices NVARCHAR(MAX)
-		,@UpdatedIvoices NVARCHAR(MAX)
 		
+
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries	= @EntriesForInvoice
 	,@UserId			= @UserId
@@ -214,5 +216,23 @@ EXEC [dbo].[uspARProcessInvoices]
 	,@ErrorMessage		= @ErrorMessage OUTPUT
 	,@CreatedIvoices	= @CreatedIvoices OUTPUT
 	,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+
+
+IF (@ErrorMessage IS NULL)
+	BEGIN
+		COMMIT TRANSACTION
+	END
+ELSE
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
+
+IF (@CreatedIvoices IS NOT NULL AND @ErrorMessage IS NULL)
+BEGIN
+	UPDATE tblCFTransaction 
+	SET intInvoiceId = @CreatedIvoices,
+		ysnPosted = 1 
+	WHERE intTransactionId = @TransactionId
+END
 	
 GO

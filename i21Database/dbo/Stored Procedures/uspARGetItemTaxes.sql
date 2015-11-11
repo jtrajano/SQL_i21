@@ -1,10 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemTaxes]
-	@ItemId				INT			= NULL
+	 @ItemId			INT			= NULL
 	,@LocationId		INT
 	,@CustomerId		INT			= NULL	
 	,@CustomerShipToId	INT			= NULL	
 	,@TransactionDate	DATETIME
-	,@TaxMasterId		INT			= NULL	
 	,@TaxGroupId		INT			= NULL		
 AS
 
@@ -17,7 +16,7 @@ AS
 			SELECT
 				 [intTransactionDetailTaxId]
 				,[intTransactionDetailId]		AS [intInvoiceDetailId]
-				,[intTaxGroupMasterId]
+				,NULL							AS [intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
 				,[intTaxClassId]

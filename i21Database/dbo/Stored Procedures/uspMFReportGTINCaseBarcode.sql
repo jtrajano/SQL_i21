@@ -6,6 +6,10 @@ BEGIN TRY
 		,@xmlDocumentId INT
 		,@strUserName NVARCHAR(50)
 		,@strGTINCaseCode NVARCHAR(50)
+		,@intAttributeId int
+		,@intManufacturingProcessId int
+		,@intLocationId int
+		,@strAttributeValue nvarchar(50)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -47,6 +51,17 @@ BEGIN TRY
 
 	SELECT @strGTINCaseCode = strGTINCaseCode
 	FROM tblMFCompanyPreference
+
+	SELECT @intManufacturingProcessId=intManufacturingProcessId
+		,@intLocationId=intLocationId
+	FROM tblMFWorkOrder
+	WHERE strWorkOrderNo = @strWorkOrderNo
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='GTIN Case Code Parameter Name'
+	
+	Select @strAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 
 	SELECT I.intItemId
 		,'Product : '+I.strItemNo AS strItemNo

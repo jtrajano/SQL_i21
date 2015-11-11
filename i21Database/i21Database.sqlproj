@@ -1676,7 +1676,6 @@
     <Build Include="dbo\Views\vyuARTaxReport.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateSegmentCategory.sql" />
     <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceAmounts.sql" />
@@ -1692,7 +1691,6 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptCharge.sql" />
     <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateDynamicXML.sql" />
-    <Build Include="dbo\Views\vyuGLChartOfAccounts.sql" />
     <Build Include="dbo\Tables\tblMFBlendRequirementRule.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
@@ -2505,7 +2503,6 @@
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTransactionsCSV.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForCustomer.sql" />
-    <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
     <Build Include="dbo\Functions\fnGetItemTaxComputationForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetItemTaxComputationForVendor.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalTaxForVendor.sql" />
@@ -2861,6 +2858,26 @@
     <Build Include="dbo\Functions\fnCTGetBillIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
     <Build Include="dbo\Tables\tblICCategoryTax.sql" />
+    <Build Include="dbo\Tables\tblPRTypeTimeOffDetail.sql" />
+    <Build Include="dbo\Views\vyuCFBatchPostTransactions.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentItemLot.sql" />
+    <Build Include="dbo\Views\vyuCTContStsMain.sql" />
+    <Build Include="dbo\Views\vyuCTContStsContractSummary.sql" />
+    <Build Include="dbo\Views\vyuMFGetProductionSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportProcessProductionDetail.sql" />
+    <Build Include="dbo\Tables\tblPATAdjustVolume.sql" />
+    <Build Include="dbo\Tables\tblPATAdjustVolumeDetails.sql" />
+    <Build Include="dbo\Tables\tblLGWeightClaim.sql" />
+    <Build Include="dbo\Tables\tblLGWeightClaimDetail.sql" />
+    <Build Include="dbo\Views\vyuLGLotConditionSummaryView.sql" />
+    <Build Include="dbo\Views\vyuAPVendorSearch.sql" />
+    <Build Include="dbo\Tables\tblRKCurrencyContract.sql" />
+    <Build Include="dbo\Tables\tblRKCurrencyContractSwapped.sql" />
+    <Build Include="dbo\Tables\tblICCategoryTax.sql" />
+    <Build Include="dbo\Views\vyuICGetCategoryTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherApprover.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetVoucherNextApproverEmail.sql" />
+    <Build Include="dbo\tblETCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2930,6 +2947,7 @@
     <None Include="Scripts\Post-Deployment\AP\RemoveBillTemplate.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\ResetEaningHoursToProcess.sql" />
     <None Include="Scripts\Post-Deployment\EM\016_MoveCustomerAccountStatusToNewTable.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateVoucherForApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

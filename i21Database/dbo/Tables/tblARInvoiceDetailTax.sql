@@ -1,8 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARInvoiceDetailTax]
 (
 	[intInvoiceDetailTaxId] INT NOT NULL IDENTITY, 
-    [intInvoiceDetailId] INT NOT NULL, 
-    [intTaxGroupMasterId] INT NULL, 
+    [intInvoiceDetailId] INT NOT NULL,     
     [intTaxGroupId] INT NOT NULL, 
     [intTaxCodeId] INT NOT NULL, 
     [intTaxClassId] INT NOT NULL, 

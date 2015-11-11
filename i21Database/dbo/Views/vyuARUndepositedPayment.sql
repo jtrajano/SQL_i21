@@ -14,14 +14,8 @@ FROM
 INNER JOIN tblARCustomer B
 		ON A.[intEntityCustomerId] = B.[intEntityCustomerId]
 INNER JOIN
-	tblGLAccount GL
-		ON A.intAccountId = GL.intAccountId 
-INNER JOIN 
-	tblGLAccountGroup AG
-		ON GL.intAccountGroupId = AG.intAccountGroupId 		
-INNER JOIN 
-	tblGLAccountCategory AC
-		ON GL.intAccountCategoryId = AC.intAccountCategoryId 
+	vyuGLAccountDetail GL
+		ON A.intAccountId = GL.intAccountId  
 INNER JOIN
 	tblEntity E
 		ON B.intEntityCustomerId = E.intEntityId 
