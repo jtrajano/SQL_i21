@@ -1,4 +1,4 @@
-﻿create PROC uspRKM2MInquiryTransaction  
+﻿CREATE PROC uspRKM2MInquiryTransaction  
 			@intM2MBasisId int = null,
 			@intFutureSettlementPriceId int = null,
 			@intQuantityUOMId int = null,
@@ -20,28 +20,29 @@ SELECT @ysnIncludeBasisDifferentialsInResults=ysnIncludeBasisDifferentialsInResu
 SELECT @dtmSettlemntPriceDate=dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId=@intFutureSettlementPriceId
 select @strLocationName=strLocationName from tblSMCompanyLocation where intCompanyLocationId=@intLocationId
 SELECT * INTO #temp1 FROM (
-SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) AS dblAdjustedContractPrice,
-		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblCashPrice,
+SELECT *,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash FROM(
+SELECT *,
+		  
 		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblMarketPrice,
-	 	 CASE WHEN intContractTypeId = 1 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) < 0
-		      THEN ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 1 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) >= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) <= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) > 0
-		      THEN -((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
+	 	  CASE WHEN intContractTypeId = 1 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) < 0
+		      THEN (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice)*dblOpenQty
+		      WHEN intContractTypeId = 1 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) >= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) <= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)-dblAdjustedContractPrice) > 0
+		      THEN -(isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)- dblAdjustedContractPrice)*dblOpenQty
 		   end dblResult,
-		   
-		   	  CASE WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-(dblContractBasis+dblCosts))) < 0
-		   	  THEN (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 1 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) >= 0
-		      THEN abs(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) <= 0
-		      THEN abs(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) > 0
-		      THEN -(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		     end dblResultBasis,
+		 case WHEN intPricingTypeId = 6  then 0 else 
+ 	      CASE WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		     end end dblResultBasis,
 		     
 		 CASE WHEN intContractTypeId = 1 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) < 0)
 		      THEN (dblFuturesClosingPrice - dblFutures) *dblOpenQty
@@ -52,7 +53,7 @@ SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) 
 		      WHEN intContractTypeId = 2 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) > 0)
 		      THEN -(dblFuturesClosingPrice - dblFutures) *dblOpenQty
 		   end dblMarketFuturesResult,	
-		     
+		       
 		      CASE WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) < 0
 		      THEN (isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
 		      WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) >= 0
@@ -61,9 +62,14 @@ SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) 
 		      THEN abs(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
 		      WHEN intContractTypeId = 2 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) > 0
 		      THEN -(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
-		   end dblResultCash
+		    end dblResultCash1
 		   ,isnull(dblContractBasis,0)+isnull(dblFutures,0) dblContractPrice 
-FROM 
+FROM (
+SELECT *,CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(dblMarketBasis1,0) ELSE 0 END dblMarketBasis,
+case when intPricingTypeId<>6 then 0 else  isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis1,0) end dblCashPrice,
+case WHEN intPricingTypeId = 6  then  isnull(dblCosts,0)+(isnull(dblCash,0)) 
+else isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) end AS dblAdjustedContractPrice
+  FROM
 (SELECT		cd.intContractDetailId,
 			'Contract'+'('+LEFT(ch.strContractType,1)+')' as strContractOrInventoryType,
 			cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
@@ -84,7 +90,8 @@ FROM
 			cd.strPricingStatus as strPriOrNotPriOrParPriced,
 			cd.intPricingTypeId,
 			cd.strPricingType,
-			isnull(cd.dblBasis,0) dblContractBasis,
+			CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END dblContractBasis,
+			--isnull(cd.dblBasis,0) dblContractBasis,
 			(SELECT avgLot/intTotLot FROM(
 				SELECT
 					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
@@ -96,6 +103,29 @@ FROM
 				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
 				)t 
 			) dblFutures ,
+			(SELECT avgLot FROM(
+				SELECT
+					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
+				FROM tblCTContractDetail  cdv
+				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
+				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
+				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
+				)t 
+			) avgLot, 
+			
+			(SELECT intTotLot FROM(
+				SELECT
+					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
+				FROM tblCTContractDetail  cdv
+				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
+				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
+				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
+				)t 
+			) intTotLot, 
 			
 			CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,
 		
@@ -106,7 +136,7 @@ FROM
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
-			),0) AS dblMarketBasis,											
+			),0) AS dblMarketBasis1,											
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
 
@@ -131,31 +161,31 @@ LEFT JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityI
 LEFT JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityId and cuc2.intUnitMeasureId=@intPriceUOMId
 LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId 
 WHERE  intContractStatusId<>3 and convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t
-
+)t)t1
 UNION 
 
-SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) AS dblAdjustedContractPrice,
-		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblCashPrice,
+SELECT *,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash FROM(
+SELECT *,
 		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblMarketPrice,
-	 	 	 CASE WHEN intContractTypeId = 1 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) < 0
-		      THEN ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 1 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) >= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) <= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) > 0
-		      THEN -((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
+	 	  CASE WHEN intContractTypeId = 1 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) < 0
+		      THEN (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice)*dblOpenQty
+		      WHEN intContractTypeId = 1 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) >= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) <= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)-dblAdjustedContractPrice) > 0
+		      THEN -(isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)- dblAdjustedContractPrice)*dblOpenQty
 		   end dblResult,
-		   
-		   	  CASE WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-(dblContractBasis+dblCosts))) < 0
-		   	  THEN (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 1 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) >= 0
-		      THEN abs(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) <= 0
-		      THEN abs(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) > 0
-		      THEN -(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		     end dblResultBasis,
+		 case WHEN intPricingTypeId = 6  then 0 else 
+ 	      CASE WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		     end end dblResultBasis,
 		     
 		 CASE WHEN intContractTypeId = 1 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) < 0)
 		      THEN (dblFuturesClosingPrice - dblFutures) *dblOpenQty
@@ -166,7 +196,7 @@ SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) 
 		      WHEN intContractTypeId = 2 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) > 0)
 		      THEN -(dblFuturesClosingPrice - dblFutures) *dblOpenQty
 		   end dblMarketFuturesResult,	
-		     
+		       
 		      CASE WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) < 0
 		      THEN (isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
 		      WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) >= 0
@@ -175,9 +205,13 @@ SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) 
 		      THEN abs(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
 		      WHEN intContractTypeId = 2 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) > 0
 		      THEN -(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
-		   end dblResultCash
+		    end dblResultCash1
 		   ,isnull(dblContractBasis,0)+isnull(dblFutures,0) dblContractPrice 
-FROM 
+		FROM (select *,CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(dblMarketBasis1,0) ELSE 0 END dblMarketBasis,
+		case when intPricingTypeId<>6 then 0 else  isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis1,0) end dblCashPrice,
+		case WHEN intPricingTypeId = 6  then  isnull(dblCosts,0)+(isnull(dblCash,0)) 
+		else isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) end AS dblAdjustedContractPrice
+  FROM
 (SELECT		cd.intContractDetailId,
 			'Inventory'+'(P)' as strContractOrInventoryType,
 			cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
@@ -198,7 +232,8 @@ FROM
 			cd.strPricingStatus as strPriOrNotPriOrParPriced,
 			cd.intPricingTypeId,
 			cd.strPricingType,
-			isnull(cd.dblBasis,0) dblContractBasis,
+			CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END dblContractBasis,
+			--isnull(cd.dblBasis,0) dblContractBasis,
 			(SELECT avgLot/intTotLot FROM(
 				SELECT
 					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
@@ -206,12 +241,35 @@ FROM
 				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
 				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
 				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
-				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) 
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
 				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
 				)t 
 			) dblFutures ,
+			(SELECT avgLot FROM(
+				SELECT
+					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
+				FROM tblCTContractDetail  cdv
+				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
+				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
+				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
+				)t 
+			) avgLot, 
 			
-				CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,
+			(SELECT intTotLot FROM(
+				SELECT
+					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
+				FROM tblCTContractDetail  cdv
+				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
+				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
+				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
+				)t 
+			) intTotLot, 
+			
+			CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,
 		
 			isnull((SELECT SUM(dblRate) FROM tblCTContractCost ct WHERE cd.intContractDetailId=ct.intContractDetailId),0) dblCosts,
 			
@@ -220,11 +278,9 @@ FROM
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
-			),0) AS dblMarketBasis,		
-															
+			),0) AS dblMarketBasis1,											
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
-			--ri.dblOpenReceive as dblOpenQty,
 			SUM(ri.dblOpenReceive) OVER (PARTITION BY cd.intContractDetailId) dblOpenQty,dblRate,
 			cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId
 			,null as intltemPrice
@@ -242,31 +298,32 @@ LEFT JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityI
 LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId  
 WHERE  strReceiptType ='Purchase Contract' and intSourceType=2 and intContractStatusId<>3 
 		AND convert(datetime,convert(varchar, ir.dtmReceiptDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) )t
-		
-UNION 
+)t)t2
 
-SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) AS dblAdjustedContractPrice,
-		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblCashPrice,
+UNION
+SELECT *,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash FROM(
+SELECT *,
+	
 		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblMarketPrice,
-	 	 	 CASE WHEN intContractTypeId = 1 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) < 0
-		      THEN ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 1 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) >= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) <= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))) > 0
-		      THEN -((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (isnull(dblCosts,0)+isnull(dblContractBasis,0)+isnull(dblFutures,0)))*dblOpenQty
+	 		  CASE WHEN intContractTypeId = 1 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) < 0
+		      THEN (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice)*dblOpenQty
+		      WHEN intContractTypeId = 1 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) >= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) <= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)-dblAdjustedContractPrice) > 0
+		      THEN -(isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)- dblAdjustedContractPrice)*dblOpenQty
 		   end dblResult,
-		   
-		   	  CASE WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-(dblContractBasis+dblCosts))) < 0
-		   	  THEN (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 1 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) >= 0
-		      THEN abs(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) <= 0
-		      THEN abs(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		      WHEN intContractTypeId = 2 and (isnull((dblContractBasis+dblCosts)-dblMarketBasis,0)) > 0
-		      THEN -(isnull((dblContractBasis+dblCosts)-dblMarketBasis,0))*dblOpenQty
-		     end dblResultBasis,
+		 case WHEN intPricingTypeId = 6  then 0 else 
+ 	      CASE WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		     end end dblResultBasis,
 		     
 		 CASE WHEN intContractTypeId = 1 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) < 0)
 		      THEN (dblFuturesClosingPrice - dblFutures) *dblOpenQty
@@ -277,7 +334,17 @@ SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) 
 		      WHEN intContractTypeId = 2 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) > 0)
 		      THEN -(dblFuturesClosingPrice - dblFutures) *dblOpenQty
 		   end dblMarketFuturesResult,	
-		     
+		     CASE WHEN intPricingTypeId = 6  THEN
+		   CASE WHEN intContractTypeId = 1 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) < 0
+		      THEN ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 1 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) >= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) <= 0
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      WHEN intContractTypeId = 2 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) > 0
+		      THEN -((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		   end
+		   else		     
 		      CASE WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) < 0
 		      THEN (isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
 		      WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) >= 0
@@ -286,9 +353,14 @@ SELECT *,isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) 
 		      THEN abs(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
 		      WHEN intContractTypeId = 2 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) > 0
 		      THEN -(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
-		   end dblResultCash
-		   ,isnull(dblContractBasis,0)+isnull(dblFutures,0) dblContractPrice 
-FROM 
+		   end  end dblResultCash1
+		   ,isnull(dblContractBasis,0)+isnull(dblFutures,0) dblContractPrice
+FROM (select *,CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(dblMarketBasis1,0) ELSE 0 END dblMarketBasis
+,
+case when intPricingTypeId<>6 then 0 else  isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis1,0) end dblCashPrice,
+		case WHEN intPricingTypeId = 6  then  isnull(dblCosts,0)+(isnull(dblCash,0)) 
+		else isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) end AS dblAdjustedContractPrice
+  from
 (SELECT		cd.intContractDetailId,
 			'In-transit' as strContractOrInventoryType,
 			cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
@@ -309,7 +381,8 @@ FROM
 			cd.strPricingStatus as strPriOrNotPriOrParPriced,
 			cd.intPricingTypeId,
 			cd.strPricingType,
-			isnull(cd.dblBasis,0) dblContractBasis,
+			CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END dblContractBasis,
+			--isnull(cd.dblBasis,0) dblContractBasis,
 			(SELECT avgLot/intTotLot FROM(
 				SELECT
 					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
@@ -317,21 +390,47 @@ FROM
 				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
 				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
 				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
-				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) 
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
 				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
 				)t 
-			) dblFutures ,			
-				CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,		
-			isnull((SELECT SUM(dblRate) FROM tblCTContractCost ct WHERE cd.intContractDetailId=ct.intContractDetailId),0) dblCosts,			
+			) dblFutures ,
+			(SELECT avgLot FROM(
+				SELECT
+					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
+				FROM tblCTContractDetail  cdv
+				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
+				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
+				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
+				)t 
+			) avgLot, 
+			
+			(SELECT intTotLot FROM(
+				SELECT
+					sum(isnull(intNoOfLots,0) *isnull(dblFixationPrice,0))+ ((max(isnull(cdv.dblNoOfLots,0))-sum(isnull(intNoOfLots,0)))*max(dbo.fnRKGetLatestClosingPrice(cdv.intFutureMarketId,cdv.intFutureMonthId,@dtmSettlemntPriceDate))) avgLot,max(cdv.dblNoOfLots) intTotLot
+				FROM tblCTContractDetail  cdv
+				LEFT JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
+				LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId 
+				and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
+				AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)
+				WHERE cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
+				)t 
+			) intTotLot, 
+			
+			CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,
+		
+			isnull((SELECT SUM(dblRate) FROM tblCTContractCost ct WHERE cd.intContractDetailId=ct.intContractDetailId),0) dblCosts,
+			
 			isnull((SELECT top 1 isnull(dblBasisOrDiscount,0)+isnull(dblCashOrFuture,0) FROM tblRKM2MBasisDetail temp 
 				WHERE temp.intM2MBasisId=@intM2MBasisId 
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
-			),0) AS dblMarketBasis,		
-															
+			),0) AS dblMarketBasis1,											
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
+
 			SUM(iv.dblStockQty) OVER (PARTITION BY cd.intContractDetailId) dblOpenQty,dblRate,
 			cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId
 			,null as intltemPrice
@@ -346,17 +445,18 @@ LEFT JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityI
 LEFT JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityId and cuc2.intUnitMeasureId=@intPriceUOMId
 LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=cd.intOriginId  
 WHERE intContractStatusId<>3 AND convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) )t		
-
+)t)t2
 UNION 
 
 SELECT *,null AS dblAdjustedContractPrice,
 		 NUll AS dblCashPrice,
 		null as dblMarketPrice,
-	 	 	dblOpenQty * intltemPrice as   dblResult,		   
-		    null as dblResultBasis,		     
-			null as dblMarketFuturesResult,	
-			null as dblResultCash
-		   ,null as dblContractPrice 
+ 	 	dblOpenQty * intltemPrice as   dblResult,		   
+	    null as dblResultBasis,		     
+		null as dblMarketFuturesResult,	
+		null as dblResultCash
+	   ,null as dblContractPrice 
+	   ,null as dblMarketBasis,null as dblResultCash1
 FROM 
 (SELECT		null intContractDetailId,
 			'Inventory' as strContractOrInventoryType,
@@ -382,7 +482,9 @@ FROM
 			null dblFutures ,		
 			null dblCash,	
 			null dblCosts,
-			null AS dblMarketBasis,		
+			null AS avgLot,
+			null AS intTotLot,
+			null AS dblMarketBasis1	,
 			null as dblFuturesClosingPrice,					  
 			null as intContractTypeId ,
 			0 as intConcurrencyId ,
@@ -418,7 +520,7 @@ SELECT Convert(int,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRow
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblMarketBasis) as dblMarketBasis, 
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblFuturesClosingPrice) as dblFuturesClosingPrice, 
     dbo.fnRKGetCurrencyConvertion(intCurrencyId,@intCurrencyUOMId)* dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblContractPrice) as dblContractPrice, 
-	intContractTypeId,intConcurrencyId,
+	CONVERT(int,intContractTypeId) as intContractTypeId,CONVERT(int,0) as intConcurrencyId,
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblAdjustedContractPrice) as dblAdjustedContractPrice,
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblCashPrice) as dblCashPrice, 
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblMarketPrice) as dblMarketPrice,
@@ -461,7 +563,7 @@ BEGIN
 		else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblContractPrice) end 
 		end
 		as dblContractPrice, 		
-		intContractTypeId,intConcurrencyId,
+		CONVERT(int,intContractTypeId) as intContractTypeId,CONVERT(int,0) as intConcurrencyId,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblAdjustedContractPrice) as dblAdjustedContractPrice,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblCashPrice) as dblCashPrice, 
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intPriceUOMId,dblMarketPrice) as dblMarketPrice,
