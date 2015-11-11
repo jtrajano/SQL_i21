@@ -2869,6 +2869,7 @@
     <Build Include="dbo\Tables\tblLGWeightClaim.sql" />
     <Build Include="dbo\Tables\tblLGWeightClaimDetail.sql" />
     <Build Include="dbo\Views\vyuLGLotConditionSummaryView.sql" />
+    <Build Include="dbo\Views\vyuAPVendorSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
