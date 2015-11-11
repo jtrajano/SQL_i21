@@ -43,7 +43,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
 WHERE I.ysnPosted = 1
   AND I.strTransactionType = 'Invoice'
-  AND I.dtmDueDate <= GETDATE()
+  AND I.dtmDate <= GETDATE()
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -77,7 +77,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
  AND I.ysnPaid = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
- AND I.dtmDueDate <= GETDATE()
+ AND I.dtmDate <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -113,7 +113,7 @@ FROM tblARInvoice I
 WHERE ISNULL(I.ysnPosted, 1) = 1
  AND I.ysnPosted  = 1
  AND I.strTransactionType = 'Invoice'
- AND I.dtmDueDate <= GETDATE()
+ AND I.dtmDate <= GETDATE()
  AND P.dtmDatePaid <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -151,7 +151,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 WHERE I.ysnPosted = 1
  AND I.strTransactionType = 'Invoice'
- AND I.dtmDueDate <= GETDATE()
+ AND I.dtmDate <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -171,7 +171,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
  AND I.ysnPaid = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
- AND I.dtmDueDate <= GETDATE()
+ AND I.dtmDate <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -193,7 +193,7 @@ FROM tblARInvoice I
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted  = 1
  AND I.strTransactionType = 'Invoice'
- AND I.dtmDueDate <= GETDATE()
+ AND I.dtmDate <= GETDATE()
  AND P.dtmDatePaid <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
