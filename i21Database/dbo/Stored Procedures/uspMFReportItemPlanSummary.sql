@@ -341,6 +341,7 @@ BEGIN
 
 	SELECT M.*
 		,S.intRecordId
+		,FS.strItemNo
 		,FS.strItemNo + ' - ' + FS.strDescription AS strItemDesc
 		,FS.strLocationName
 		,(

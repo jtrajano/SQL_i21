@@ -155,6 +155,10 @@ BEGIN
 		,intStorageLocationId = @intStorageLocationId
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	UPDATE dbo.tblMFWorkOrder
+	SET dtmLastProducedDate =@dtmCreated
+	WHERE intItemId=@intItemId
+
 	IF NOT EXISTS(SELECT *FROM tblMFProductionSummary WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId)
 	BEGIN
 		INSERT INTO tblMFProductionSummary (
