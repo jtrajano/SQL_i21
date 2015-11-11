@@ -1757,11 +1757,15 @@ Ext.define('Inventory.view.ItemViewController', {
                             }
                         });
                         if (!exists) {
+                            var defaultUOMId = null;
+                            if (win.defaultUOM) {
+                                defaultUOMId = win.defaultUOM.get('intItemUOMId');
+                            }
                             var newRecord = {
                                 intItemId : location.data.intItemId,
                                 intLocationId : location.data.intCompanyLocationId,
-                                intIssueUOMId : win.defaultUOM.get('intItemUOMId'),
-                                intReceiveUOMId : win.defaultUOM.get('intItemUOMId'),
+                                intIssueUOMId : defaultUOMId,
+                                intReceiveUOMId : defaultUOMId,
                                 strLocationName : location.data.strLocationName
                             };
                             currentVM.tblICItemLocations().add(newRecord);
