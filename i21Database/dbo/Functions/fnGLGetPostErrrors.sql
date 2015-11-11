@@ -19,6 +19,7 @@ RETURN (
 				FROM tblGLJournal A 
 				WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
 				AND A.strSourceType <> 'AA'
+				AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 				UNION 
 				SELECT DISTINCT A.intJournalId,'Unable to post. Account id:' + B.strAccountId + ' is under the ' + C.strAccountCategory + ' category. Please remove it from the transaction detail.' AS strMessage
 					FROM tblGLJournalDetail A JOIN vyuGLAccountDetail B
