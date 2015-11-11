@@ -31,8 +31,6 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
 	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
 	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
-	,[intTaxMasterId] INT NULL								-- Manually specify a tax master id. It overrides the 'Purchase Tax Code' for an item found in its item setup screen.
-	,[intTaxGroupId] INT NULL								-- Manually specify a tax group id. It overrides the 'Purchase Tax Code' for an item found in its item setup screen.
 	,[dblGross] NUMERIC(18,6) NULL 
 	,[dblNet] NUMERIC(18,6) NULL 
 	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0       -- Fuel Surcharge	
