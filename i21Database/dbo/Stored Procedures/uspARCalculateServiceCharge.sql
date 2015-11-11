@@ -8,7 +8,8 @@
 	@scAccountId		INT = 0,
 	@currencyId			INT = 0,
 	@locationId			INT = 0,
-	@batchId			NVARCHAR(100) = NULL OUTPUT
+	@batchId			NVARCHAR(100) = NULL OUTPUT,
+	@totalAmount		NUMERIC(18,6) = NULL OUTPUT
 AS
 	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT)
 	
@@ -26,7 +27,10 @@ AS
 		END
 
 	IF (@isRecap = 1)
-		SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+		BEGIN
+			SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+			SET @totalAmount = 0.000000
+		END
 	ELSE
 		SET @batchId = NULL
 
@@ -143,7 +147,8 @@ AS
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
-							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @tblTypeServiceCharge				
+							SET @totalAmount = @totalAmount + (SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
+							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @tblTypeServiceCharge
 
 							DELETE FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @entityId
 						END
