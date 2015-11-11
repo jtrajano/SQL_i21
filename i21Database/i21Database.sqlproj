@@ -2876,6 +2876,7 @@
     <Build Include="dbo\Views\vyuICGetCategoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVoucherNextApproverEmail.sql" />
+    <Build Include="dbo\tblETCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
