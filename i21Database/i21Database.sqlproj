@@ -2877,6 +2877,9 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVoucherNextApproverEmail.sql" />
     <Build Include="dbo\tblETCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Save.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Delete.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_LoadPlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

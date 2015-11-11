@@ -1422,10 +1422,14 @@ BEGIN TRY
 						IF @ysnCalculatePlannedPurchases = 1
 						BEGIN
 							SET @SQL = @SQL + ' Declare @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' Decimal(24,2) '
-							SET @SQL = @SQL + ' Set @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + 
-									' = convert(decimal(24,6),( CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0
-									ELSE (ABS(@ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ')
-									/' + convert(VARCHAR, convert(DECIMAL(24, 10), @Conversion_Factor)) + ') END )) '
+							SET @SQL = @SQL + ' SET @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' 
+								= convert(decimal(24,6),( dbo.fnCTConvertQuantityToTargetItemUOM(' + Cast(@intItemId AS NVARCHAR(10)) + ',' + CAST(@TargetUOMKey AS NVARCHAR(5)) + '  , ' + 
+								CAST(@SourceUOMKey AS NVARCHAR(5)) + ' , CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0 ELSE
+								 ISNULL( ABS(@ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ') ,0) END ) ))'
+							--SET @SQL = @SQL + ' Set @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + 
+							--		' = convert(decimal(24,6),( CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0
+							--		ELSE (ABS(@ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ')
+							--		/' + convert(VARCHAR, convert(DECIMAL(24, 10), @Conversion_Factor)) + ') END )) '
 							SET @SQL = @SQL + ' Update @Table SET   
 							PastDue = PastDue '
 							--SET @Cnt = 1
