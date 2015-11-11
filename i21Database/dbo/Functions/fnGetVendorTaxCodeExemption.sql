@@ -13,13 +13,34 @@ RETURNS NVARCHAR(500)
 AS
 BEGIN
 	DECLARE @TaxCodeExemption	NVARCHAR(500)
+	
+	--Item Category Tax Class
+	SELECT TOP 1
+		@TaxCodeExemption = ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
+							+ ISNULL(' is not included in Item Category - ' + ICC.[strCategoryCode] + ' tax class setup.', '') 							 
+	FROM
+		tblICItem ICI
+	INNER JOIN
+		tblICCategory ICC
+			ON ICI.[intCategoryId] = ICC.[intCategoryId]
+	LEFT OUTER JOIN
+		tblICCategoryTax ICCT
+			ON ICC.[intCategoryId] = ICCT.[intCategoryId]
+			AND ICCT.[ysnActive] = 1
+	WHERE
+		ISNULL(ICCT.[intCategoryTaxId],0) = 0
+		AND ICI.[intItemId] = @ItemId 
+		AND ICI.[intCategoryId] = @ItemCategoryId
+		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		RETURN @TaxCodeExemption
 			
 	--Vendor Location
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + strException, '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
 	FROM
@@ -47,7 +68,7 @@ BEGIN
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + strException, '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Tax Class: ' + SMTC.[strTaxClass], '')
 	FROM
@@ -75,7 +96,7 @@ BEGIN
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + strException, '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Tax State: ' + TE.[strState], '')
 	FROM
@@ -101,7 +122,7 @@ BEGIN
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + strException, '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
 	FROM
@@ -129,7 +150,7 @@ BEGIN
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + strException, '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxClass], '')
 	FROM
@@ -157,7 +178,7 @@ BEGIN
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + strException, '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Tax Code: ' + TE.[strState], '')
 	FROM
