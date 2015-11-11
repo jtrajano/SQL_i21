@@ -118,7 +118,8 @@ BEGIN
 					CONVERT(INT, CONVERT(VARCHAR(8), GETDATE(), 112))
 				FROM tblGLAccount WHERE intAccountId = @Id_update
 		
-				UPDATE tblGLCOACrossReference SET intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21Id = @Id_update		
+				UPDATE tblGLCOACrossReference SET stri21IdNumber = REPLACE(strExternalId ,''.'',''''),
+				intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21Id = @Id_update		
 			END
 					
 			DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update
