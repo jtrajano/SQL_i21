@@ -182,7 +182,7 @@ BEGIN TRY
 	IF @ysnStandard=1
 	BEGIN
 		UPDATE dbo.tblMFWorkOrder 
-		SET intStatusId =(CASE WHEN @intManufacturingCellId =x.intManufacturingCellId THEN (Case When tblMFWorkOrder.intStatusId in (10,11,13) Then tblMFWorkOrder.intStatusId Else x.intStatusId End) ELSE 1 END)
+		SET intStatusId =(CASE WHEN @intManufacturingCellId =x.intManufacturingCellId THEN (Case When tblMFWorkOrder.intStatusId in (10,13) Then tblMFWorkOrder.intStatusId Else x.intStatusId End) ELSE 1 END)
 			,dblQuantity =x.dblQuantity
 			,intManufacturingCellId =x.intManufacturingCellId
 			,intPlannedShiftId =x.intPlannedShiftId
