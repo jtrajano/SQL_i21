@@ -2864,6 +2864,8 @@
     <Build Include="dbo\Views\vyuCTContStsContractSummary.sql" />
     <Build Include="dbo\Views\vyuMFGetProductionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportProcessProductionDetail.sql" />
+    <Build Include="dbo\Tables\tblPATAdjustVolume.sql" />
+    <Build Include="dbo\Tables\tblPATAdjustVolumeDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
