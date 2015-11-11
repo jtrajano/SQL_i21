@@ -1116,6 +1116,7 @@ BEGIN TRY
 		,@intUserId intLastModifiedUserId
 		,WS.intSequenceNo
 		,W.ysnIngredientAvailable
+		,W.dtmLastProducedDate
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		AND W.intManufacturingCellId = @intManufacturingCellId
