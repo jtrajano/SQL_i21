@@ -1588,7 +1588,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (jsonData.success) {
                         var buttonAction = function(button) {
                             if (button === 'yes') {
-                                iRely.Functions.openScreen('AccountsPayable.view.Bill', {
+                                iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
                                     filters: [
                                         {
                                             column: 'intBillId',
