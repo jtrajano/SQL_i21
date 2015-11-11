@@ -1,38 +1,25 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPGetVendorContact]
-	@intEntityId INT = NULL
+	@voucherId INT
 AS
 BEGIN
-	SET NOCOUNT ON;
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
 -- ==================================================================
 -- Begin Transaction
 -- ==================================================================
-DECLARE @VendorContact INT
-
-	SELECT DISTINCT @VendorContact = COUNT(*) FROM tblAPVendor A 
-	INNER JOIN tblEntityToContact D ON A.intEntityVendorId = D.intEntityId
-	INNER JOIN tblSMApprovalListUserSecurity B ON A.intApprovalListId = B.intApprovalListId 
-	INNER JOIN tblSMUserSecurity E ON E.intEntityUserSecurityId = B.intEntityUserSecurityId 
-	INNER JOIN tblEntity F ON E.intEntityUserSecurityId = F.intEntityId WHERE A.intEntityVendorId = @intEntityId
-
-PRINT  @VendorContact
-IF (@VendorContact > 0) 
-	BEGIN
-		--HAS VENDOR CONTACT  
-		SELECT DISTINCT F.strEmail FROM tblAPVendor A 
-		INNER JOIN tblEntityToContact D ON A.intEntityVendorId = D.intEntityId
-		INNER JOIN tblSMApprovalListUserSecurity B ON A.intApprovalListId = B.intApprovalListId 
-		INNER JOIN tblSMUserSecurity E ON E.intEntityUserSecurityId = B.intEntityUserSecurityId 
-		INNER JOIN tblEntity F ON E.intEntityUserSecurityId = F.intEntityId WHERE A.intEntityVendorId = @intEntityId
-	END
-ELSE
-	BEGIN
-		--USE COMPANY PREFERENCE
-		SELECT  F.strEmail FROM dbo.tblAPCompanyPreference A 
-		INNER JOIN tblSMApprovalListUserSecurity B ON A.intApprovalListId = B.intApprovalListId
-		INNER JOIN tblSMUserSecurity E ON E.intEntityUserSecurityId = B.intEntityUserSecurityId 
-		INNER JOIN tblEntity F ON E.intEntityUserSecurityId = F.intEntityId
-	END
+SELECT 
+	DISTINCT ISNULL(B2.strEmail, C.strEmail) AS strEmail
+FROM tblAPBill A 
+INNER JOIN tblAPVendor B ON A.intEntityVendorId = B.intEntityVendorId
+LEFT JOIN (tblEntityToContact B1 INNER JOIN tblEntity B2 ON B1.intEntityContactId = B2.intEntityId)
+	 ON A.intEntityVendorId = B1.intEntityId AND B1.intEntityContactId = A.intEntityId
+LEFT JOIN tblEntity C ON A.intEntityId = C.intEntityId
+WHERE A.intBillId = @voucherId
 -- ==================================================================
 -- End Transaction
 -- ==================================================================
