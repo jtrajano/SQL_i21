@@ -63,6 +63,7 @@ DECLARE @tblFinalDetail TABLE (
 							dblCosts NUMERIC(24, 10),
 							dblMarketBasis NUMERIC(24, 10), 
 							dblFuturesClosingPrice NUMERIC(24, 10), 
+							dblContractPrice NUMERIC(24, 10),
 							intContractTypeId INT,
 							intConcurrencyId INT,
 							dblAdjustedContractPrice NUMERIC(24, 10),
@@ -71,8 +72,8 @@ DECLARE @tblFinalDetail TABLE (
 							dblResult NUMERIC(24, 10),
 							dblResultBasis NUMERIC(24, 10),
 							dblMarketFuturesResult NUMERIC(24, 10),
-							dblResultCash NUMERIC(24, 10),
-							dblContractPrice NUMERIC(24, 10)
+							dblResultCash NUMERIC(24, 10)
+							
 						)
 
 INSERT INTO @#tempSummary 
@@ -153,11 +154,7 @@ BEGIN
 			,'' strCommodityCode
 			,strContractOrInventoryType
 			,sum(isnull(dblOpenQty, 0)) dblQty
-			,CASE 
-				WHEN sum(ISNULL(dblCash, 0)) = 0
-					THEN sum(ISNULL(dblMarketFuturesResult, 0)) + sum(isnull(dblResultBasis, 0))
-				ELSE sum(isnull(dblResultCash, 0))
-				END AS dblTotal
+			,sum(isnull(dblResult,0)) AS dblTotal
 			,sum(isnull(dblMarketFuturesResult, 0)) AS dblFutures
 			,sum(isnull(dblResultBasis, 0)) AS dblBasis
 			,sum(isnull(dblResultCash, 0)) AS dblCash

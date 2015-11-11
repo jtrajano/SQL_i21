@@ -15,10 +15,16 @@ DECLARE @ysnIncludeBasisDifferentialsInResults bit
 DECLARE @dtmPriceDate DATETIME    
 DECLARE @dtmSettlemntPriceDate DATETIME  
 DECLARE @strLocationName nvarchar(50)
+DECLARE @ysnIncludeInventoryM2M bit
+DECLARE @ysnEnterForwardCurveForMarketBasisDifferential bit
+
 SELECT @dtmPriceDate=dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId=@intM2MBasisId  
 SELECT @ysnIncludeBasisDifferentialsInResults=ysnIncludeBasisDifferentialsInResults FROM tblRKCompanyPreference
+SELECT @ysnEnterForwardCurveForMarketBasisDifferential=ysnEnterForwardCurveForMarketBasisDifferential FROM tblRKCompanyPreference
 SELECT @dtmSettlemntPriceDate=dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId=@intFutureSettlementPriceId
-select @strLocationName=strLocationName from tblSMCompanyLocation where intCompanyLocationId=@intLocationId
+SELECT @strLocationName=strLocationName from tblSMCompanyLocation where intCompanyLocationId=@intLocationId
+SELECT @ysnIncludeInventoryM2M= ysnIncludeInventoryM2M from tblRKCompanyPreference
+
 SELECT * INTO #temp1 FROM (
 SELECT *,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash FROM(
 SELECT *,
@@ -136,6 +142,7 @@ else isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) end 
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
+				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8))  END else isnull(temp.strPeriodTo,'') end
 			),0) AS dblMarketBasis1,											
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
@@ -278,6 +285,7 @@ SELECT *,
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
+				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8))  END else isnull(temp.strPeriodTo,'') end
 			),0) AS dblMarketBasis1,											
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
@@ -298,7 +306,7 @@ LEFT JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityI
 LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId  
 WHERE  strReceiptType ='Purchase Contract' and intSourceType=2 and intContractStatusId<>3 
 		AND convert(datetime,convert(varchar, ir.dtmReceiptDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) )t
-)t)t2
+)t)t2 WHERE strContractOrInventoryType= case when @ysnIncludeInventoryM2M = 1	then 'Inventory(P)' else '' end 
 
 UNION
 SELECT *,case when intPricingTypeId=6 THEN dblResult else 0 end dblResultCash FROM(
@@ -355,7 +363,7 @@ SELECT *,
 		      THEN -(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
 		   end  end dblResultCash1
 		   ,isnull(dblContractBasis,0)+isnull(dblFutures,0) dblContractPrice
-FROM (select *,CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(dblMarketBasis1,0) ELSE 0 END dblMarketBasis
+FROM (SELECT *,CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(dblMarketBasis1,0) ELSE 0 END dblMarketBasis
 ,
 case when intPricingTypeId<>6 then 0 else  isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis1,0) end dblCashPrice,
 		case WHEN intPricingTypeId = 6  then  isnull(dblCosts,0)+(isnull(dblCash,0)) 
@@ -427,6 +435,7 @@ case when intPricingTypeId<>6 then 0 else  isnull(dblFuturesClosingPrice,0)+isnu
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
+				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8))  END else isnull(temp.strPeriodTo,'') end
 			),0) AS dblMarketBasis1,											
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
@@ -446,6 +455,7 @@ LEFT JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityI
 LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=cd.intOriginId  
 WHERE intContractStatusId<>3 AND convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) )t		
 )t)t2
+
 UNION 
 
 SELECT *,null AS dblAdjustedContractPrice,
@@ -471,7 +481,7 @@ FROM
 			c.intCommodityId,
 			i.strItemNo,
 			i.intItemId as intItemId,
-			 '' as strOrgin,
+			'' as strOrgin,
 			0 intOriginId,
 			'' as strPosition, 
 			'' AS strPeriod,
@@ -502,7 +512,8 @@ JOIN tblICItem i on iv.intItemId=i.intItemId
 JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId
 WHERE i.intCommodityId= case when isnull(@intCommodityId,0)=0 then i.intCommodityId else @intCommodityId end
 AND strLocationName= case when isnull(@strLocationName,0)=0 then strLocationName else @strLocationName end
-)t		
+)t WHERE strContractOrInventoryType= case when @ysnIncludeInventoryM2M = 1	then 'Inventory' else '' end 
+
 ) f
 
 IF (@strRateType='Exchange')
