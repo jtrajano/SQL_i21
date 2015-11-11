@@ -237,6 +237,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRemoveLot: {
                 hidden: '{current.ysnPosted}'
             },
+            btnPrintLabel: {
+                hidden: '{!current.ysnPosted}'
+            },
             btnInsertCharge: {
                 hidden: '{current.ysnPosted}'
             },
@@ -2414,7 +2417,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataType: 'string',
                         text: 'Contract Comments',
                         width: 150
-                    },
+                    }
                 ],
                 itemId: 'cboOrderNumber',
                 displayField: 'strContractNumber',
@@ -3073,6 +3076,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onPrintLabelClick:function(button, e, eOpts) {
+        var win = button.up('window'),
+            gridObj = button.up('grid'),
+            selectedObj = gridObj.getSelectionModel().getSelection(),
+            me = this;
+
+        if(selectedObj.length <= 0)
+        {
+            i21.functions.showErrorDialog('Please select a lot.');
+            return;
+        }
+
+        var strLotNo = selectedObj[0].data.strLotNumber
+
+        iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+            selectedReport: 'LotLabel',
+            selectedGroup: 'Manufacturing',
+            selectedParameters: [{
+                Name: 'strLotNo',
+                Type: 'int',
+                Condition:'EQUAL TO',
+                From: strLotNo,
+                To: '',
+                Operator: ''
+            }],
+            directPrint: true
+        });
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -3132,6 +3164,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnInsertLot": {
                 click: this.onInsertChargeClick
+            },
+            "#btnPrintLabel": {
+                click: this.onPrintLabelClick
             },
             "#btnInsertCharge": {
                 click: this.onInsertChargeClick

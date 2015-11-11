@@ -3012,6 +3012,24 @@
                                                                             "designerId": "131ac682-4590-4809-87d1-be3759f028c3"
                                                                         },
                                                                         {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-print",
+                                                                                "itemId": "btnPrintLabel",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Print Label"
+                                                                            },
+                                                                            "name": "MyButton18",
+                                                                            "designerId": "adb4c59e-34cb-4952-b70d-7785aa3379aa"
+                                                                        },
+                                                                        {
                                                                             "type": "linkedinstance",
                                                                             "reference": {
                                                                                 "name": "items",

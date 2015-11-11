@@ -1516,6 +1516,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         text: 'Remove'
                                                                                     },
                                                                                     {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnPrintLabel',
+                                                                                        iconCls: 'small-print',
+                                                                                        text: 'Print Label'
+                                                                                    },
+                                                                                    {
                                                                                         xtype: 'filter1'
                                                                                     }
                                                                                 ]
