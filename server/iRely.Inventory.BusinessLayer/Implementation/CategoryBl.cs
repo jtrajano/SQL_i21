@@ -50,6 +50,10 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "Please specify a valid Costing Method.";
                 }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICCategoryTax'"))
+                {
+                    msg = "Tax Class must be unique.";
+                }
             }
 
             return new BusinessResult<tblICCategory>()

@@ -67,6 +67,17 @@ Ext.define('Inventory.view.CategoryViewController', {
                 store: '{inventoryTypes}'
             },
 
+            grdTax: {
+                colTaxClass: {
+                    dataIndex: 'strTaxClass',
+                    editor: {
+                        origValueField: 'intTaxClassId',
+                        origUpdateField: 'intTaxClassId',
+                        store: '{taxClass}'
+                    }
+                }
+            },
+
             grdUnitOfMeasure: {
                 colDetailUnitMeasure: {
                     dataIndex: 'strUnitMeasure',
@@ -219,6 +230,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             include: 'tblICCategoryAccounts.tblGLAccount, ' +
                 'tblICCategoryAccounts.tblGLAccountCategory, ' +
                 'tblICCategoryLocations.tblSMCompanyLocation, ' +
+                'tblICCategoryTaxes.vyuICGetCategoryTax, ' +
                 'tblICCategoryVendors.vyuAPVendor, ' +
                 'tblICCategoryVendors.Family, ' +
                 'tblICCategoryVendors.SellClass, ' +
@@ -255,6 +267,13 @@ Ext.define('Inventory.view.CategoryViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdUnitOfMeasure'),
                         deleteButton : win.down('#btnDeleteUom')
+                    })
+                },
+                {
+                    key: 'tblICCategoryTaxes',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdTax'),
+                        deleteButton : win.down('#btnDeleteTax')
                     })
                 }
             ]

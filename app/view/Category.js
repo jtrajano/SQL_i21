@@ -27,18 +27,19 @@ Ext.define('Inventory.view.Category', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.grid.Panel',
-        'Ext.grid.column.Number',
-        'Ext.grid.column.Check',
         'Ext.grid.View',
         'Ext.grid.plugin.CellEditing',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.column.Number',
+        'Ext.grid.column.Check',
         'Ext.form.FieldSet',
         'Ext.form.Label',
         'Ext.toolbar.Paging'
     ],
 
-    height: 414,
+    height: 530,
     hidden: false,
+    minHeight: 530,
     width: 860,
     layout: 'fit',
     collapsible: true,
@@ -144,7 +145,8 @@ Ext.define('Inventory.view.Category', {
                                                 xtype: 'container',
                                                 layout: {
                                                     type: 'hbox',
-                                                    align: 'stretch'
+                                                    align: 'stretch',
+                                                    padding: 5
                                                 },
                                                 items: [
                                                     {
@@ -167,6 +169,15 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
                                                                 labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboInventoryType',
+                                                                modelValidation: true,
+                                                                fieldLabel: 'Inventory Type',
+                                                                labelWidth: 130,
+                                                                displayField: 'strType',
+                                                                valueField: 'strType'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -207,6 +218,18 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strDescription',
                                                                 valueField: 'strDescription'
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber',
+                                                                fieldLabel: 'GL Division Number',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkSalesAnalysisByTon',
+                                                                fieldLabel: 'Sales Analysis by Ton',
+                                                                labelWidth: 130
                                                             }
                                                         ]
                                                     },
@@ -219,18 +242,6 @@ Ext.define('Inventory.view.Category', {
                                                             align: 'stretch'
                                                         },
                                                         items: [
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber',
-                                                                fieldLabel: 'GL Division Number',
-                                                                labelWidth: 130
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkSalesAnalysisByTon',
-                                                                fieldLabel: 'Sales Analysis by Ton',
-                                                                labelWidth: 130
-                                                            },
                                                             {
                                                                 xtype: 'combobox',
                                                                 hidden: true,
@@ -319,15 +330,6 @@ Ext.define('Inventory.view.Category', {
                                                                 valueField: 'intItemId'
                                                             },
                                                             {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboInventoryType',
-                                                                modelValidation: true,
-                                                                fieldLabel: 'Inventory Type',
-                                                                labelWidth: 130,
-                                                                displayField: 'strType',
-                                                                valueField: 'strType'
-                                                            },
-                                                            {
                                                                 xtype: 'numberfield',
                                                                 itemId: 'txtStandardQty',
                                                                 fieldLabel: 'Standard Qty',
@@ -371,6 +373,86 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strUnitMeasure',
                                                                 valueField: 'intCategoryUOMId'
+                                                            },
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 1,
+                                                                itemId: 'grdTax',
+                                                                title: 'Taxes',
+                                                                forceFit: true,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        componentCls: 'i21-toolbar-grid',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertTax',
+                                                                                iconCls: 'small-insert',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteTax',
+                                                                                iconCls: 'small-remove',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colTaxClass',
+                                                                        minWidth: 95,
+                                                                        dataIndex: 'intUnitMeasureId',
+                                                                        text: 'Tax Class',
+                                                                        flex: 2,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intTaxClassId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strTaxClass',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Tax Class',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboTaxClass',
+                                                                            displayField: 'strTaxClass',
+                                                                            valueField: 'strTaxClass'
+                                                                        }
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'gvwTax'
+                                                                },
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepTax',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ],
+                                                                selModel: {
+                                                                    selType: 'checkboxmodel'
+                                                                }
                                                             }
                                                         ]
                                                     }

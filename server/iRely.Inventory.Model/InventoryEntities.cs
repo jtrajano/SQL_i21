@@ -145,6 +145,7 @@ namespace iRely.Inventory.Model
         {
             modelBuilder.Configurations.Add(new tblICBrandMap());
             modelBuilder.Configurations.Add(new tblICCategoryMap());
+            modelBuilder.Configurations.Add(new tblICCategoryTaxMap());
             modelBuilder.Configurations.Add(new tblICCategoryAccountMap());
             modelBuilder.Configurations.Add(new tblICCategoryLocationMap());
             modelBuilder.Configurations.Add(new tblICCategoryVendorMap());
@@ -308,6 +309,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
+
+            modelBuilder.Configurations.Add(new vyuICGetCategoryTaxMap());
 
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingMap());
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingConversionMap());

@@ -49,6 +49,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnYieldAdjustment).HasColumnName("ysnYieldAdjustment");
             this.Property(t => t.ysnWarehouseTracked).HasColumnName("ysnWarehouseTracked");
 
+            this.HasMany(p => p.tblICCategoryTaxes)
+                .WithRequired(p => p.tblICCategory)
+                .HasForeignKey(p => p.intCategoryId);
             this.HasMany(p => p.tblICCategoryAccounts)
                 .WithRequired(p => p.tblICCategory)
                 .HasForeignKey(p => p.intCategoryId);
@@ -208,6 +211,43 @@ namespace iRely.Inventory.Model
             this.HasRequired(p => p.tblICUnitMeasure)
                 .WithMany(p => p.tblICCategoryUOMs)
                 .HasForeignKey(p => p.intUnitMeasureId);
+        }
+    }
+
+    public class tblICCategoryTaxMap : EntityTypeConfiguration<tblICCategoryTax>
+    {
+        public tblICCategoryTaxMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intCategoryTaxId);
+
+            // Table & Column Mappings
+            this.ToTable("tblICCategoryTax");
+            this.Property(t => t.intCategoryTaxId).HasColumnName("intCategoryTaxId");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
+            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
+
+            this.HasOptional(p => p.vyuICGetCategoryTax)
+                .WithRequired(p => p.tblICCategoryTax);
+        }
+    }
+
+    public class vyuICGetCategoryTaxMap : EntityTypeConfiguration<vyuICGetCategoryTax>
+    {
+        public vyuICGetCategoryTaxMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intCategoryTaxId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetCategoryTax");
+            this.Property(t => t.intCategoryTaxId).HasColumnName("intCategoryTaxId");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.strCategory).HasColumnName("strCategory");
+            this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
+            this.Property(t => t.strTaxClass).HasColumnName("strTaxClass");
+            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
         }
     }
 }

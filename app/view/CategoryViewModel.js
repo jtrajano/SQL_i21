@@ -11,6 +11,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'GeneralLedger.store.BufAccountId',
         'EntityManagement.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
+        'i21.store.TaxClassBuffered',
         'Store.store.SubCategoryBuffered',
         'GeneralLedger.store.BufAccountCategoryGroup'
     ],
@@ -160,6 +161,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
         },
         vendor: {
             type: 'emvendorbuffered'
+        },
+        taxClass: {
+            type: 'smtaxclassbuffered'
         }
     },
 

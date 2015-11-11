@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ namespace iRely.Inventory.Model
             this.tblICCategoryLocations = new List<tblICCategoryLocation>();
             this.tblICCategoryVendors = new List<tblICCategoryVendor>();
             this.tblICCategoryUOMs = new List<tblICCategoryUOM>();
+            this.tblICCategoryTaxes = new List<tblICCategoryTax>();
         }
 
         public int intCategoryId { get; set; }
@@ -61,6 +62,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
         public ICollection<tblICCategoryUOM> tblICCategoryUOMs { get; set; }
+        public ICollection<tblICCategoryTax> tblICCategoryTaxes { get; set; }
         public ICollection<tblICItem> tblICItems { get; set; }
 
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
@@ -450,6 +452,70 @@ namespace iRely.Inventory.Model
         public tblSTSubcategory OrderClass { get; set; }
         public tblICCategoryLocation tblICCategoryLocation { get; set; }
 
+    }
+
+    public class tblICCategoryTax : BaseEntity
+    {
+        public int intCategoryTaxId { get; set; }
+        public int intCategoryId { get; set; }
+        public int? intTaxClassId { get; set; }
+        public bool ysnActive { get; set; }
+
+        private string _category;
+        [NotMapped]
+        public string strCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_category))
+                    if (vyuICGetCategoryTax != null)
+                        return vyuICGetCategoryTax.strCategory;
+                    else
+                        return null;
+                else
+                    return _category;
+            }
+            set
+            {
+                _category = value;
+            }
+        }
+
+        private string _taxClass;
+        [NotMapped]
+        public string strTaxClass
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_taxClass))
+                    if (vyuICGetCategoryTax != null)
+                        return vyuICGetCategoryTax.strTaxClass;
+                    else
+                        return null;
+                else
+                    return _taxClass;
+            }
+            set
+            {
+                _taxClass = value;
+            }
+        }
+        
+        public vyuICGetCategoryTax vyuICGetCategoryTax { get; set; }
+        public tblICCategory tblICCategory { get; set; }
+    }
+
+    public class vyuICGetCategoryTax
+    {
+        [Key]
+        public int intCategoryTaxId { get; set; }
+        public int intCategoryId { get; set; }
+        public string strCategory { get; set; }
+        public int? intTaxClassId { get; set; }
+        public string strTaxClass { get; set; }
+        public bool? ysnActive { get; set; }
+
+        public tblICCategoryTax tblICCategoryTax { get; set; }
     }
 
 }
