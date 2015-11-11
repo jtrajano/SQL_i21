@@ -132,6 +132,8 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,1
 		FROM
 			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @ShipToLocationId, @LocationId)
+
+		SELECT @TotalItemTax = SUM([dblAdjustedTax]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
 								
 		UPDATE tblARInvoiceDetail SET dblTotalTax = @TotalItemTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
 					

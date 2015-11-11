@@ -19,8 +19,8 @@ UPDATE
 SET
 	 [numRate]			= ISNULL([numRate], @ZeroDecimal)
 	,[dblTax]			= ISNULL([dblTax], @ZeroDecimal)
-	,[dblAdjustedTax]	= ISNULL([dblAdjustedTax], @ZeroDecimal)
-	,[ysnTaxAdjusted]	= ISNULL([ysnTaxAdjusted], @ZeroDecimal)
+	,[dblAdjustedTax]	= ROUND(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,[ysnTaxAdjusted]	= ROUND(ISNULL([ysnTaxAdjusted], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 WHERE 
 	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 	
@@ -74,16 +74,16 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	[dblTotal]		= ([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))
+	[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
 WHERE
 	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId
 	
-UPDATE
-	tblARInvoiceDetail
-SET
-	[dblTotal]	= ([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))
-WHERE
-	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId	
+--UPDATE
+--	tblARInvoiceDetail
+--SET
+--	[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
+--WHERE
+--	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId	
 	
 	
 UPDATE

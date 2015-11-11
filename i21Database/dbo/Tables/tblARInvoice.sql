@@ -89,26 +89,30 @@ ON dbo.tblARInvoice
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25))
-DECLARE @count INT = 0
-DECLARE @intInvoiceId INT
-DECLARE @InvoiceNumber NVARCHAR(50)
-DECLARE @strTransactionType NVARCHAR(25)
-DECLARE @intMaxCount INT = 0
-DECLARE @intStartingNumberId INT = 0
+DECLARE @inserted				TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100))
+DECLARE @count					INT = 0
+	  , @intInvoiceId			INT
+	  , @InvoiceNumber			NVARCHAR(50)
+	  , @strTransactionType		NVARCHAR(25)
+	  , @strType				NVARCHAR(25)
+	  , @intMaxCount			INT = 0
+	  , @intStartingNumberId	INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId, strTransactionType FROM INSERTED ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType FROM INSERTED ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SET @intStartingNumberId = 19
 	
-	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType FROM @inserted
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType FROM @inserted
 
-	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Prepayment' THEN 64 
-									WHEN @strTransactionType = 'Overpayment' THEN 65
-									ELSE 19 END
+	SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
+	FROM tblSMStartingNumber 
+	WHERE strTransactionType = CASE WHEN @strTransactionType = 'Prepayment' THEN 'Customer Prepayment' 
+									WHEN @strTransactionType = 'Overpayment' THEN 'Customer Overpayment'
+									WHEN @strTransactionType = 'Invoice' AND @strType = 'Service Charge' THEN 'Service Charge'
+									ELSE 'Invoice' END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT	
 	

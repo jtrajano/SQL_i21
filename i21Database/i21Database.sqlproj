@@ -2384,9 +2384,13 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\EfficiencyReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\EfficiencyReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
+    <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
+    <None Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2452,6 +2456,8 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
+    <None Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
