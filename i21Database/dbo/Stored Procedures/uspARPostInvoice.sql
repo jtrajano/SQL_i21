@@ -834,6 +834,12 @@ IF @post = 1
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
 			)
 			EXEC	dbo.uspICPostCosting  
 					@ItemsForPost  
