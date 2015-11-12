@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTInventoryPlan_Save] @XML NVARCHAR(MAX)
+﻿CREATE PROCEDURE [dbo].[uspCTInventoryPlan_Save] @strXML NVARCHAR(MAX)
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -15,7 +15,7 @@ BEGIN TRY
 		,@strInvPlngReportName NVARCHAR(150)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@XML
+		,@strXML
 
 	SELECT @strReportName = strReportName
 	FROM OPENXML(@idoc, 'root', 2) WITH (strReportName NVARCHAR(50))
@@ -177,7 +177,7 @@ BEGIN TRY
 
 	EXEC sp_xml_removedocument @idoc
 
-	SELECT @intInvPlngReportMasterID
+	SELECT @intInvPlngReportMasterID AS intInvPlngReportMasterID
 END TRY
 
 BEGIN CATCH

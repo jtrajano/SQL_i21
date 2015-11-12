@@ -16,7 +16,7 @@ BEGIN
 				WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 				), 0) = 0
 	BEGIN
-		SELECT NULL
+		--SELECT NULL
 
 		RETURN
 	END
@@ -96,7 +96,7 @@ BEGIN
 						pivot
 						(
 							max(strValue)
-							for FieldName in (OpeningInv,PastDue'
+							for strFieldName in (OpeningInv,PastDue'
 	SET @Cnt = 1
 
 	WHILE @Cnt <= @intNoOfMonths

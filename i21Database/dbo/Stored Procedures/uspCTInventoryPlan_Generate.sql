@@ -224,7 +224,12 @@ BEGIN TRY
 
 		IF @ysnIncludeInventory = 1
 			SET @OpeningInventory = (
-					SELECT SUM(dblQty)
+					--SELECT SUM(dblQty)
+					SELECT SUM(CASE 
+									WHEN intWeightUOMId IS NOT NULL
+										THEN dblWeight
+									ELSE dblQty
+								END)
 					FROM tblICLot
 					WHERE intItemId IN (
 							SELECT M.intItemId

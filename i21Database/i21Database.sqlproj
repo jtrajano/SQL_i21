@@ -2900,6 +2900,8 @@
     <Build Include="dbo\Stored Procedures\uspCFProcessBatchTransactionToInvoice.sql" />
     <Build Include="dbo\Functions\fnCFSplitString.sql" />
     <Build Include="dbo\Functions\fnTrackMovedLots.sql" />
+    <Build Include="dbo\Views\vyuCTInventoryPlanList.sql" />
+    <Build Include="dbo\Functions\fnCTGetItemNames.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
