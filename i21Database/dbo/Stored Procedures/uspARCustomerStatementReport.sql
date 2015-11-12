@@ -71,6 +71,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strBOLNumber]			 NVARCHAR(100)
 	,[dblCreditLimit]		 NUMERIC(18,6)
 	,[strFullAddress]		 NVARCHAR(MAX)
+	,[strCompanyAddress]		 NVARCHAR(MAX)
 )
 
 -- Prepare the XML 
@@ -156,6 +157,8 @@ SET @query = 'SELECT * FROM
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
+	 , strCompanyAddress = (SELECT dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
+
 FROM tblARInvoice I
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId	
 WHERE I.ysnPosted = 1
@@ -192,6 +195,7 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
 	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,STATEMENTREPORT.strFullAddress
+	  ,STATEMENTREPORT.strCompanyAddress
 	  ,dtmAsOfDate = @dtmDateTo
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 
