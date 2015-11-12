@@ -2885,7 +2885,7 @@
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
-          <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
     <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
@@ -2896,6 +2896,7 @@
     <None Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
     <Build Include="dbo\Tables\tblPATChangeStatus.sql" />
     <Build Include="dbo\Tables\tblPATChangeStatusDetail.sql" />
+    <Build Include="dbo\Views\vyuCTContStsQuality.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
