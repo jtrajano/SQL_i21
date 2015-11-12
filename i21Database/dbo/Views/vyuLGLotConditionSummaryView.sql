@@ -12,6 +12,8 @@ SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intShipmentId)) 
 		ELSE 
 			CASE WHEN strCondition = 'Damaged' THEN
 				 (dblNetShippedWt - dblNetReceivedWt)
+				 ELSE
+				 (dblNetShippedWt - dblNetReceivedWt)
 			END
 		END as dblClaimableWt
 FROM (
@@ -29,13 +31,7 @@ FROM (
 		END as intSequence,
 	ReceiptLot.strCondition,
 	sum(ReceiptLot.dblQuantity) as dblQuantity, 
-	CASE WHEN ReceiptLot.strCondition = 'Sound/Full' THEN
-			sum(Shipment.dblContainerContractlNetWt)
-		ELSE 
-			CASE WHEN ReceiptLot.strCondition = 'Damaged' THEN
-				sum(ReceiptLot.dblQuantity * Shipment.dblContainerWeightPerQty) 
-			END
-		END as dblNetShippedWt,
+	sum(ReceiptLot.dblQuantity * Shipment.dblContainerWeightPerQty) as dblNetShippedWt,
 	sum(ReceiptLot.dblGrossWeight-ReceiptLot.dblTareWeight) as dblNetReceivedWt
 FROM vyuICGetInventoryReceiptItemLot ReceiptLot
 LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
