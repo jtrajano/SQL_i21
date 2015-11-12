@@ -61,8 +61,14 @@ Ext.define('Inventory.model.ReceiptItemLot', {
 
         { name: 'intParentLotId', type: 'int', allowNull: true },
         { name: 'strParentLotNumber', type: 'string' },
-        { name: 'strParentLotAlias', type: 'string' }
+        { name: 'strParentLotAlias', type: 'string' },
+        { name: 'strStorageLocation', type: 'string' },
+        { name: 'strSubLocationName', type: 'string' },
 
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strStorageLocation'}
     ],
 
     validate: function(options){
