@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspSCProcessScaleTransfer]
-	 @intTicketId AS INT
+	@intTicketId AS INT
 	,@intMatchTicketId AS INT
 	,@strInOutIndicator AS NVARCHAR(1)
 	,@intUserId AS INT
@@ -11,553 +11,157 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intCustomerStorageId AS INT
-DECLARE @ysnAddDiscount BIT
-DECLARE @intHoldCustomerStorageId AS INT
-DECLARE @strGRStorage AS nvarchar(3)
-DECLARE @intTicketUOM AS INT
-DECLARE @intTicketItemUOMId AS INT
-DECLARE @intMatchTicketUOM AS INT
-DECLARE @intMatchTicketItemUOMId AS INT
-DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
-DECLARE @GLEntries AS RecapTableType
-DECLARE @strBatchId AS NVARCHAR(40) 
-DECLARE @STARTING_NUMBER_BATCH AS INT = 3
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP AS NVARCHAR(255) = 'AP Clearing'
-DECLARE @ACCOUNT_CATEGORY AS NVARCHAR(255) = 'AP Clearing'
-DECLARE @dblOriginNetUnits AS DECIMAL (13,3)
-DECLARE @dblDestinationNetUnits AS DECIMAL (13,3)
-DECLARE @strOriginDestination AS NVARCHAR(30)
-DECLARE @differenceUnits AS DECIMAL (13,3)
+DECLARE @ErrorMessage NVARCHAR(4000);
+DECLARE @ErrorSeverity INT;
+DECLARE @ErrorState INT;
+DECLARE @InventoryReceiptId AS INT; 
+DECLARE @ErrMsg                    NVARCHAR(MAX);
+ IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
+    BEGIN
+        CREATE TABLE #tmpAddInventoryTransferResult (
+            intSourceId INT
+			,intInventoryTransferId INT
+        )
+    END
 
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
-BEGIN
-    SELECT TOP 1 @strOriginDestination = strTransferUpdateOption
-	FROM dbo.tblGRCompanyPreference 
-END
-IF @strOriginDestination IS NULL
-BEGIN 
-    RAISERROR('Invalid option selected for Transfer Update Option under Grain Company Preferences.', 11, 1);
-    GOTO _Exit
-END 
-BEGIN 
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId
-	FROM	dbo.tblSCTicket SC	        
-			JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
-END
+BEGIN TRY
+DECLARE @TransferEntries AS InventoryTransferStagingTable,
+        @total as int;
 
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId
-		FROM	dbo.tblICItemUOM UM	
-		  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
-END
-BEGIN 
-	SELECT	@intMatchTicketUOM = UOM.intUnitMeasureId
-	FROM	dbo.tblSCTicket SC	        
-			JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-	WHERE	SC.intTicketId = @intMatchTicketId AND UOM.ysnStockUnit = 1		
-END
+-- Insert the data needed to create the inventory transfer.
+    INSERT INTO @TransferEntries (
+                -- Header
+                [dtmTransferDate]
+                ,[strTransferType]
+                ,[intSourceType]
+                ,[strDescription]
+                ,[intFromLocationId]
+                ,[intToLocationId]
+                ,[ysnShipmentRequired]
+                ,[intStatusId]
+                ,[intShipViaId]
+                ,[intFreightUOMId]
+                -- Detail
+                ,[intItemId]
+                ,[intLotId]
+                ,[intItemUOMId]
+                ,[dblQuantityToTransfer]
+                ,[strNewLotId]
+                ,[intFromSubLocationId]
+                ,[intToSubLocationId]
+                ,[intFromStorageLocationId]
+                ,[intToStorageLocationId]
+                -- Integration Field
+				,[intInventoryTransferId]
+                ,[intSourceId]   
+				,[strSourceId]  
+				,[strSourceScreenName]
+    )
+    SELECT      -- Header
+                [dtmTransferDate]           = SC.dtmTicketTransferDateTime
+                ,[strTransferType]          = 'Location to Location'
+                ,[intSourceType]            = 3
+                ,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
+                ,[intFromLocationId]        = SC.intProcessingLocationId
+                ,[intToLocationId]          = (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
+                ,[ysnShipmentRequired]      = 1
+                ,[intStatusId]              = 1
+                ,[intShipViaId]             = SC.intFreightCarrierId
+                ,[intFreightUOMId]          = (SELECT	TOP 1 
+											            IU.intUnitMeasureId											
+											            FROM dbo.tblICItemUOM IU 
+											            WHERE	IU.intItemId = SC.intItemId and IU.ysnStockUnit = 1)
+                -- Detail
+                ,[intItemId]                = SC.intItemId
+                ,[intLotId]                 = NULL
+                ,[intItemUOMId]             = (SELECT	TOP 1 
+											            IU.intItemUOMId											
+											            FROM dbo.tblICItemUOM IU 
+											            WHERE	IU.intItemId = SC.intItemId and IU.ysnStockUnit = 1)
+                ,[dblQuantityToTransfer]    = SC.dblNetUnits
+                ,[strNewLotId]              = NULL
+                ,[intFromSubLocationId]     = NULL
+                ,[intToSubLocationId]       = NULL
+                ,[intFromStorageLocationId] = NULL
+                ,[intToStorageLocationId]   = NULL
+                -- Integration Field
+				,[intInventoryTransferId]   = NULL
+                ,[intSourceId]              = SC.intTicketId
+				,[strSourceId]				= SC.strTicketNumber
+				,[strSourceScreenName]		= 'Scale Ticket'
+    FROM	tblSCTicket SC 
+    WHERE	SC.intTicketId = @intTicketId 
+			
 
-BEGIN 
-	SELECT	@intMatchTicketItemUOMId = UM.intItemUOMId
-		FROM	dbo.tblICItemUOM UM	
-		  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.intUnitMeasureId = @intMatchTicketUOM AND SC.intTicketId = @intMatchTicketId
-END
+	--if No Records to Process exit
+    SELECT @total = COUNT(*) FROM @TransferEntries;
+    IF (@total = 0)
+	   RETURN;
 
--- Get the items to post  
-DECLARE @ItemsForRemovalPost AS ItemCostingTableType
-DECLARE @ItemsForTransferPost AS ItemCostingTableType
+    -- If the integrating module needs to know the created transfer(s), the create a temp table called tmpAddInventoryTransferResult
+    -- The temp table will be accessed by uspICAddInventoryTransfer to send feedback on the created transfer transaction.
+    --IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
+    --BEGIN
+    --    CREATE TABLE #tmpAddInventoryTransferResult (
+    --        intSourceId INT
+    --        ,intInventoryTransferId INT
+    --    )
+    --END
+     
+     
+    -- Call uspICAddInventoryTransfer stored procedure.
+    EXEC dbo.uspICAddInventoryTransfer
+            @TransferEntries
+            ,@intUserId
+ 
+	-- Update the Inventory Transfer Key to the Transaction Table
+	UPDATE	SC
+	SET		SC.intInventoryTransferId = addResult.intInventoryTransferId
+	FROM	dbo.tblSCTicket SC INNER JOIN #tmpAddInventoryTransferResult addResult
+				ON SC.intTicketId = addResult.intSourceId;
+_PostOrUnPost:
+	-- Post the Inventory Transfers                                            
+	DECLARE @TransferId INT
+			,@intEntityId INT
+			,@strTransactionId NVARCHAR(50);
 
-IF @strInOutIndicator = 'I'
-BEGIN  
-	BEGIN 
-		SELECT	@dblOriginNetUnits = SC.dblNetUnits
-		FROM	dbo.tblSCTicket SC	  
-		WHERE SC.intTicketId = @intMatchTicketId
-	END
-		BEGIN 
-		SELECT	@dblDestinationNetUnits = SC.dblNetUnits
-		FROM	dbo.tblSCTicket SC	  
-		WHERE SC.intTicketId = @intTicketId
-	END
-	SET @differenceUnits = 0
-	IF @dblOriginNetUnits != @dblDestinationNetUnits
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddInventoryTransferResult) 
 	BEGIN
-		IF @dblOriginNetUnits > @dblDestinationNetUnits
+
+		SELECT TOP 1 
+				@TransferId = intInventoryTransferId  
+		FROM	#tmpAddInventoryTransferResult 
+  
+		-- Post the Inventory Transfer that was created
+		SELECT	@strTransactionId = strTransferNo 
+		FROM	tblICInventoryTransfer 
+		WHERE	intInventoryTransferId = @TransferId
+
+		SELECT	TOP 1 @intEntityId = [intEntityUserSecurityId] 
+		FROM	dbo.tblSMUserSecurity 
+		WHERE	[intEntityUserSecurityId] = @intUserId
+
 		BEGIN
-			SET @differenceUnits = @dblOriginNetUnits - @dblDestinationNetUnits
-		END 
-		IF @dblDestinationNetUnits > @dblOriginNetUnits
-		BEGIN
-			SET @differenceUnits = @dblDestinationNetUnits - @dblOriginNetUnits
-		END
-	END
-	IF @strOriginDestination = 'Destination Weights'
-		BEGIN
-		IF @differenceUnits != 0
-		BEGIN
-			SET @differenceUnits = @dblOriginNetUnits - @dblDestinationNetUnits
-			INSERT INTO @ItemsForRemovalPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		) 
-		SELECT Ticket.intItemId  
-				,dbo.fnICGetItemLocation(Ticket.intItemId, Ticket.intProcessingLocationId)
-				,@intMatchTicketItemUOMId  
-				,Ticket.dtmTicketDateTime
-				,@differenceUnits
-				,ItemUOM.dblUnitQty
-				,0  
-				,0
-				,NULL
-				,1
-				,Ticket.intTicketId 
-				,Ticket.strTicketNumber
-				,@INVENTORY_TRANSFER_TYPE
-				,NULL
-				,Ticket.intSubLocationId
-				,Ticket.intStorageLocationId
-		FROM tblSCTicket Ticket
-		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intMatchTicketItemUOMId
-		WHERE intTicketId = @intMatchTicketId
-
-		-- Call the post routine 
-		BEGIN 
-		SET @ACCOUNT_CATEGORY = CASE WHEN @differenceUnits > 0 THEN @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP ELSE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY END
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-			)
-			EXEC	dbo.uspICPostCosting  
-					@ItemsForRemovalPost  
-					,@strBatchId  
-					,@ACCOUNT_CATEGORY
-					,@intUserId
-		END
+	    	EXEC dbo.uspICPostInventoryTransfer 1, 0, @strTransactionId, @intUserId;			
 		END
 
-		-- Get the assembly item to post    
-		INSERT INTO @ItemsForTransferPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		) 
-		SELECT Ticket.intItemId  
-				,dbo.fnICGetItemLocation(Ticket.intItemId, Ticket.intProcessingLocationId)
-				,@intMatchTicketItemUOMId  
-				,Ticket.dtmTicketDateTime
-				,Ticket.dblNetUnits
-				,ItemUOM.dblUnitQty
-				,0  
-				,0
-				,NULL
-				,1
-				,Ticket.intTicketId 
-				,Ticket.strTicketNumber
-				,@INVENTORY_TRANSFER_TYPE
-				,NULL
-				,Ticket.intSubLocationId
-				,Ticket.intStorageLocationId
-		FROM tblSCTicket Ticket
-		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
-		WHERE intTicketId = @intTicketId
+		DELETE	FROM #tmpAddInventoryTransferResult 
+		WHERE	intInventoryTransferId = @TransferId
+	END;
 
-				-- Call the post routine 
-		BEGIN 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-			)
-			EXEC	dbo.uspICPostCosting  
-					 @ItemsForTransferPost  
-					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP
-					,@intUserId
-		END
-	END
-	IF @strOriginDestination = 'Origin Weights'
-	BEGIN
-			-- Get the assembly item to post    
-		INSERT INTO @ItemsForTransferPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		) 
-		SELECT Ticket.intItemId  
-				,dbo.fnICGetItemLocation(Ticket.intItemId, Ticket.intProcessingLocationId)
-				,@intMatchTicketItemUOMId  
-				,Ticket.dtmTicketDateTime
-				,@dblOriginNetUnits
-				,ItemUOM.dblUnitQty
-				,0  
-				,0
-				,NULL
-				,1
-				,Ticket.intTicketId 
-				,Ticket.strTicketNumber
-				,@INVENTORY_TRANSFER_TYPE
-				,NULL
-				,Ticket.intSubLocationId
-				,Ticket.intStorageLocationId
-		FROM tblSCTicket Ticket
-		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
-		WHERE intTicketId = @intTicketId
+END TRY
+BEGIN CATCH
+	SELECT 
+		@ErrorMessage = ERROR_MESSAGE(),
+		@ErrorSeverity = ERROR_SEVERITY(),
+		@ErrorState = ERROR_STATE();
 
-				-- Call the post routine 
-		BEGIN 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-			)
-			EXEC	dbo.uspICPostCosting  
-					 @ItemsForTransferPost  
-					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP
-					,@intUserId
-		END
-	END
-	IF @strOriginDestination = 'Actual Weights'
-	BEGIN
-		-- Get the assembly item to post    
-		INSERT INTO @ItemsForTransferPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		) 
-		SELECT Ticket.intItemId  
-				,dbo.fnICGetItemLocation(Ticket.intItemId, Ticket.intProcessingLocationId)
-				,@intMatchTicketItemUOMId  
-				,Ticket.dtmTicketDateTime
-				,Ticket.dblNetUnits
-				,ItemUOM.dblUnitQty
-				,0  
-				,0
-				,NULL
-				,1
-				,Ticket.intTicketId 
-				,Ticket.strTicketNumber
-				,@INVENTORY_TRANSFER_TYPE
-				,NULL
-				,Ticket.intSubLocationId
-				,Ticket.intStorageLocationId
-		FROM tblSCTicket Ticket
-		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
-		WHERE intTicketId = @intTicketId
-
-				-- Call the post routine 
-		BEGIN 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-			)
-			EXEC	dbo.uspICPostCosting  
-					 @ItemsForTransferPost  
-					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP
-					,@intUserId
-		END
-	END
-
-	UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 
-	WHERE intTicketId = @intMatchTicketId
-
-END
-IF @strInOutIndicator = 'O'
-BEGIN
-	INSERT INTO @ItemsForRemovalPost (  
-			intItemId  
-			,intItemLocationId 
-			,intItemUOMId  
-			,dtmDate  
-			,dblQty  
-			,dblUOMQty  
-			,dblCost  
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-	) 
-	SELECT Ticket.intItemId  
-			,dbo.fnICGetItemLocation(Ticket.intItemId, Ticket.intProcessingLocationId)
-			,@intTicketItemUOMId  
-			,Ticket.dtmTicketDateTime
-			,Ticket.dblNetUnits * -1
-			,ItemUOM.dblUnitQty
-			,0  
-			,0
-			,NULL
-			,1
-			,Ticket.intTicketId 
-			,Ticket.strTicketNumber
-			,@INVENTORY_TRANSFER_TYPE
-			,NULL 
-			,Ticket.intSubLocationId
-			,Ticket.intStorageLocationId
-	FROM tblSCTicket Ticket
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
-	WHERE intTicketId = @intTicketId
-
-	-- Call the post routine 
-	BEGIN 
-		-- Call the post routine 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
-		EXEC	dbo.uspICPostCosting  
-				@ItemsForRemovalPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
-	END
-
-	-- Insert the Customer Storage Record 
-	INSERT INTO [dbo].[tblGRCustomerStorage]
-			   ([intConcurrencyId]
-			   ,[intEntityId]
-			   ,[intCommodityId]
-			   ,[intStorageScheduleId]
-			   ,[intStorageTypeId]
-			   ,[intCompanyLocationId]
-			   ,[intTicketId]
-			   ,[intDiscountScheduleId]
-			   ,[dblTotalPriceShrink]
-			   ,[dblTotalWeightShrink]
-			   ,[dblOriginalBalance]
-			   ,[dblOpenBalance]
-			   ,[dtmDeliveryDate]
-			   ,[dtmZeroBalanceDate]
-			   ,[strDPARecieptNumber]
-			   ,[dtmLastStorageAccrueDate]
-			   ,[dblStorageDue]
-			   ,[dblStoragePaid]
-			   ,[dblInsuranceRate]
-			   ,[strOriginState]
-			   ,[strInsuranceState]
-			   ,[dblFeesDue]
-			   ,[dblFeesPaid]
-			   ,[dblFreightDueRate]
-			   ,[ysnPrinted]
-			   ,[dblCurrencyRate]
-			   ,[strStorageType]
-			   ,[strStorageTicketNumber]
-			   ,[intItemId])
-	SELECT 	[intConcurrencyId]		= 1
-			,[intEntityId]			= SC.intEntityId
-			,[intCommodityId]		= SC.intCommodityId
-			,[intStorageScheduleId]	= NULL -- TODO Storage Schedule
-			,[intStorageTypeId]		= NULL
-			,[intCompanyLocationId]= SC.intProcessingLocationId
-			,[intTicketId]= SC.intTicketId
-			,[intDiscountScheduleId]= SC.intDiscountSchedule
-			,[dblTotalPriceShrink]= 0
-			,[dblTotalWeightShrink]= 0 
-			,[dblOriginalBalance]= SC.dblNetUnits 
-			,[dblOpenBalance]= SC.dblNetUnits
-			,[dtmDeliveryDate]= GETDATE()
-			,[dtmZeroBalanceDate]= NULL
-			,[strDPARecieptNumber]= NULL
-			,[dtmLastStorageAccrueDate]= NULL 
-			,[dblStorageDue]= NULL 
-			,[dblStoragePaid]= 0
-			,[dblInsuranceRate]= 0 
-			,[strOriginState]= NULL 
-			,[strInsuranceState]= NULL
-			,[dblFeesDue]= 0 
-			,[dblFeesPaid]= 0 
-			,[dblFreightDueRate]= 0 
-			,[ysnPrinted]= 0 
-			,[dblCurrencyRate]= 1
-			,'ITR'
-			,[strStorageTicketNumber] = SC.strTicketNumber
-			, SC.[intItemId]
-	FROM	dbo.tblSCTicket SC
-	WHERE	SC.intTicketId = @intTicketId
-END
-
-_Exit:
-
-GO
-
-
+	-- Use RAISERROR inside the CATCH block to return error
+	-- information about the original error that caused
+	-- execution to jump to the CATCH block.
+	RAISERROR (
+		@ErrorMessage, -- Message text.
+		@ErrorSeverity, -- Severity.
+		@ErrorState -- State.
+	);
+END CATCH
