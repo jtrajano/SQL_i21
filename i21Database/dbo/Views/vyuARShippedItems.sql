@@ -499,9 +499,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	 tblARInvoiceDetail IND
 		ON ISI.[intInventoryShipmentItemId] = IND.[intInventoryShipmentItemId]	
-LEFT OUTER JOIN
-	tblSMTaxGroup TG
-		ON ISI.[intTaxCodeId] = TG.intTaxGroupId 											 
+--LEFT OUTER JOIN
+--	tblSMTaxGroup TG
+--		ON ISI.[intTaxCodeId] = TG.intTaxGroupId 											 
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISH.[intOrderType] <> 2

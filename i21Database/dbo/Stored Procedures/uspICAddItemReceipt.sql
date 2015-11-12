@@ -33,34 +33,34 @@ BEGIN
 	)
 END 
 
-CREATE TABLE #tmpComputeItemTaxes (
-	intId					INT IDENTITY(1, 1) PRIMARY KEY 
+--CREATE TABLE #tmpComputeItemTaxes (
+--	intId					INT IDENTITY(1, 1) PRIMARY KEY 
 
-	-- Integration fields. Foreign keys. 
-	,intHeaderId			INT
-	,intDetailId			INT 
-	,intTaxDetailId			INT 
-	,dtmDate				DATETIME 
-	,intItemId				INT
+--	-- Integration fields. Foreign keys. 
+--	,intHeaderId			INT
+--	,intDetailId			INT 
+--	,intTaxDetailId			INT 
+--	,dtmDate				DATETIME 
+--	,intItemId				INT
 
-	-- Taxes fields
-	,intTaxCodeId			INT
-	,intTaxClassId			INT
-	,strTaxableByOtherTaxes NVARCHAR(MAX) 
-	,strCalculationMethod	NVARCHAR(50)
-	,numRate				NUMERIC(18,6)
-	,dblTax					NUMERIC(18,6)
-	,dblAdjustedTax			NUMERIC(18,6)
-	,ysnCheckoffTax			BIT
+--	-- Taxes fields
+--	,intTaxCodeId			INT
+--	,intTaxClassId			INT
+--	,strTaxableByOtherTaxes NVARCHAR(MAX) 
+--	,strCalculationMethod	NVARCHAR(50)
+--	,numRate				NUMERIC(18,6)
+--	,dblTax					NUMERIC(18,6)
+--	,dblAdjustedTax			NUMERIC(18,6)
+--	,ysnCheckoffTax			BIT
 
-	-- Fields used in the calculation of the taxes
-	,dblAmount				NUMERIC(18,6) 
-	,dblQty					NUMERIC(18,6) 		
+--	-- Fields used in the calculation of the taxes
+--	,dblAmount				NUMERIC(18,6) 
+--	,dblQty					NUMERIC(18,6) 		
 		
-	-- Internal fields
-	,ysnCalculated			BIT 
-	,dblCalculatedTaxAmount	NUMERIC(18,6) 
-)
+--	-- Internal fields
+--	,ysnCalculated			BIT 
+--	,dblCalculatedTaxAmount	NUMERIC(18,6) 
+--)
 
 -- Ownership Types
 DECLARE	@OWNERSHIP_TYPE_Own AS INT = 1
@@ -425,28 +425,28 @@ BEGIN
 					,@EntityId			INT	
 					,@TaxMasterId		INT	
 					,@InventoryReceiptItemId INT
-					,@TaxGroupId		INT 
+					,@ShipFromId		INT 
 
-			DECLARE @Taxes AS TABLE (
-				id						INT
-				,intInvoiceDetailId		INT
-				,intTaxGroupMasterId	INT
-				,intTaxGroupId			INT 
-				,intTaxCodeId			INT
-				,intTaxClassId			INT
-				,strTaxableByOtherTaxes NVARCHAR (MAX) 
-				,strCalculationMethod	NVARCHAR(50)
-				,numRate				NUMERIC(18,6)
-				,dblTax					NUMERIC(18,6)
-				,dblAdjustedTax			NUMERIC(18,6)
-				,intTaxAccountId		INT
-				,ysnSeparateOnInvoice	BIT
-				,ysnCheckoffTax			BIT
-				,strTaxCode				NVARCHAR(50)
-				,ysnTaxExempt			BIT
-				,[strTaxGroup]			NVARCHAR(100)
-				,[strNotes]				NVARCHAR(500)
-			)
+			--DECLARE @Taxes AS TABLE (
+			--	id						INT
+			--	,intInvoiceDetailId		INT
+			--	,intTaxGroupMasterId	INT
+			--	,intTaxGroupId			INT 
+			--	,intTaxCodeId			INT
+			--	,intTaxClassId			INT
+			--	,strTaxableByOtherTaxes NVARCHAR (MAX) 
+			--	,strCalculationMethod	NVARCHAR(50)
+			--	,numRate				NUMERIC(18,6)
+			--	,dblTax					NUMERIC(18,6)
+			--	,dblAdjustedTax			NUMERIC(18,6)
+			--	,intTaxAccountId		INT
+			--	,ysnSeparateOnInvoice	BIT
+			--	,ysnCheckoffTax			BIT
+			--	,strTaxCode				NVARCHAR(50)
+			--	,ysnTaxExempt			BIT
+			--	,[strTaxGroup]			NVARCHAR(100)
+			--	,[strNotes]				NVARCHAR(500)
+			--)
 
 			-- Create the cursor
 			DECLARE loopReceiptItems CURSOR LOCAL FAST_FORWARD
@@ -456,7 +456,7 @@ BEGIN
 					,Receipt.dtmReceiptDate
 					,Receipt.intEntityId
 					,ReceiptItem.intInventoryReceiptItemId
-					,ReceiptItem.intTaxGroupId
+					,Receipt.intShipFromId
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
@@ -470,41 +470,56 @@ BEGIN
 				,@TransactionDate
 				,@EntityId
 				,@InventoryReceiptItemId
-				,@TaxGroupId
+				,@ShipFromId
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
-				-- Clear the contents of the table variable.
-				DELETE FROM @Taxes
+				---- Clear the contents of the table variable.
+				--DELETE FROM @Taxes
 
-				-- Get the taxes from uspSMGetItemTaxes
-				INSERT INTO @Taxes (
-					id
-					,intInvoiceDetailId
-					,intTaxGroupMasterId
-					,intTaxGroupId
-					,intTaxCodeId
-					,intTaxClassId
-					,strTaxableByOtherTaxes
-					,strCalculationMethod
-					,numRate
-					,dblTax
-					,dblAdjustedTax
-					,intTaxAccountId
-					,ysnSeparateOnInvoice
-					,ysnCheckoffTax
-					,strTaxCode
-					,ysnTaxExempt
-					,strTaxGroup 
-					,strNotes
-				)
-				EXEC dbo.uspSMGetItemTaxes 
-					@ItemId
-					,@LocationId
-					,@TransactionDate
-					,@TransactionType
-					,@EntityId
-					,@TaxGroupId
+				---- Get the taxes from uspSMGetItemTaxes
+				--INSERT INTO @Taxes (
+				--	id
+				--	,intInvoiceDetailId
+				--	,intTaxGroupMasterId
+				--	,intTaxGroupId
+				--	,intTaxCodeId
+				--	,intTaxClassId
+				--	,strTaxableByOtherTaxes
+				--	,strCalculationMethod
+				--	,numRate
+				--	,dblTax
+				--	,dblAdjustedTax
+				--	,intTaxAccountId
+				--	,ysnSeparateOnInvoice
+				--	,ysnCheckoffTax
+				--	,strTaxCode
+				--	,ysnTaxExempt
+				--	,strTaxGroup 
+				--	,strNotes
+				--)
+				--EXEC dbo.uspSMGetItemTaxes 
+				--	@ItemId
+				--	,@LocationId
+				--	,@TransactionDate
+				--	,@TransactionType
+				--	,@EntityId
+				--	,@TaxGroupId
+
+				DECLARE	@Amount	NUMERIC(18,6) 
+						,@Qty	NUMERIC(18,6)
+				-- Fields used in the calculation of the taxes
+
+				SELECT TOP 1
+					 @Amount = ReceiptItem.dblUnitCost
+					,@Qty	 = ReceiptItem.dblOpenReceive 
+
+				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
+							ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+				WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+						AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 
 				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
 				INSERT INTO dbo.tblICInventoryReceiptItemTax (
@@ -527,91 +542,91 @@ BEGIN
 					,[intConcurrencyId]				
 				)
 				SELECT 	[intInventoryReceiptItemId]		= @InventoryReceiptItemId
-						,[intTaxGroupMasterId]			= intTaxGroupMasterId
-						,[intTaxGroupId]				= intTaxGroupId
-						,[intTaxCodeId]					= intTaxCodeId
-						,[intTaxClassId]				= intTaxClassId
-						,[strTaxableByOtherTaxes]		= strTaxableByOtherTaxes
-						,[strCalculationMethod]			= strCalculationMethod
-						,[dblRate]						= numRate
-						,[dblTax]						= dblTax
-						,[dblAdjustedTax]				= dblAdjustedTax
-						,[intTaxAccountId]				= intTaxAccountId
-						,[ysnTaxAdjusted]				= CASE WHEN ISNULL(dblAdjustedTax, 0) <> 0 THEN 1 ELSE 0 END 
-						,[ysnSeparateOnInvoice]			= ysnSeparateOnInvoice
-						,[ysnCheckoffTax]				= ysnCheckoffTax
-						,[strTaxCode]					= strTaxCode
+						,NULL
+						,[intTaxGroupId]				= [intTaxGroupId]
+						,[intTaxCodeId]					= [intTaxCodeId]
+						,[intTaxClassId]				= [intTaxClassId]
+						,[strTaxableByOtherTaxes]		= [strTaxableByOtherTaxes]
+						,[strCalculationMethod]			= [strCalculationMethod]
+						,[dblRate]						= [numRate]
+						,[dblTax]						= [dblTax]
+						,[dblAdjustedTax]				= [dblAdjustedTax]
+						,[intTaxAccountId]				= [intTaxAccountId]
+						,[ysnTaxAdjusted]				= [ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]			= [ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]				= [ysnCheckoffTax]
+						,[strTaxCode]					= [strTaxCode]
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	@Taxes
+				FROM	[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, NULL, @LocationId, @ShipFromId)
 
 				-- Compute the tax
-				BEGIN 
-					-- Clear the temp table 
-					DELETE FROM #tmpComputeItemTaxes
+				--BEGIN 
+					---- Clear the temp table 
+					--DELETE FROM #tmpComputeItemTaxes
 
-					-- Insert data to the temp table in order to process the taxes. 
-					INSERT INTO #tmpComputeItemTaxes (
-						-- Integration fields. Foreign keys. 
-						intHeaderId
-						,intDetailId
-						,intTaxDetailId
-						,dtmDate
-						,intItemId
+					---- Insert data to the temp table in order to process the taxes. 
+					--INSERT INTO #tmpComputeItemTaxes (
+					--	-- Integration fields. Foreign keys. 
+					--	intHeaderId
+					--	,intDetailId
+					--	,intTaxDetailId
+					--	,dtmDate
+					--	,intItemId
 
-						-- Taxes fields
-						,intTaxCodeId
-						,intTaxClassId
-						,strTaxableByOtherTaxes
-						,strCalculationMethod
-						,numRate
-						,dblTax
-						,dblAdjustedTax
-						,ysnCheckoffTax
+					--	-- Taxes fields
+					--	,intTaxCodeId
+					--	,intTaxClassId
+					--	,strTaxableByOtherTaxes
+					--	,strCalculationMethod
+					--	,numRate
+					--	,dblTax
+					--	,dblAdjustedTax
+					--	,ysnCheckoffTax
 
-						-- Fields used in the calculation of the taxes
-						,dblAmount
-						,dblQty
-					)
-					SELECT 
-						-- Integration fields. Foreign keys. 
-						intHeaderId					= Receipt.intInventoryReceiptId
-						,intDetailId				= ReceiptItem.intInventoryReceiptItemId
-						,intTaxDetailId				= ItemTax.intInventoryReceiptItemTaxId
-						,dtmDate					= Receipt.dtmReceiptDate
-						,intItemId					= ReceiptItem.intItemId
+					--	-- Fields used in the calculation of the taxes
+					--	,dblAmount
+					--	,dblQty
+					--)
+					--SELECT 
+					--	-- Integration fields. Foreign keys. 
+					--	intHeaderId					= Receipt.intInventoryReceiptId
+					--	,intDetailId				= ReceiptItem.intInventoryReceiptItemId
+					--	,intTaxDetailId				= ItemTax.intInventoryReceiptItemTaxId
+					--	,dtmDate					= Receipt.dtmReceiptDate
+					--	,intItemId					= ReceiptItem.intItemId
 
-						-- Taxes fields
-						,intTaxCodeId				= ItemTax.intTaxCodeId
-						,intTaxClassId				= ItemTax.intTaxClassId
-						,strTaxableByOtherTaxes		= ItemTax.strTaxableByOtherTaxes
-						,strCalculationMethod		= ItemTax.strCalculationMethod
-						,numRate					= ItemTax.dblRate
-						,dblTax						= ItemTax.dblTax
-						,dblAdjustedTax				= ItemTax.dblAdjustedTax
-						,ysnCheckoffTax				= ItemTax.ysnCheckoffTax
+					--	-- Taxes fields
+					--	,intTaxCodeId				= ItemTax.intTaxCodeId
+					--	,intTaxClassId				= ItemTax.intTaxClassId
+					--	,strTaxableByOtherTaxes		= ItemTax.strTaxableByOtherTaxes
+					--	,strCalculationMethod		= ItemTax.strCalculationMethod
+					--	,numRate					= ItemTax.dblRate
+					--	,dblTax						= ItemTax.dblTax
+					--	,dblAdjustedTax				= ItemTax.dblAdjustedTax
+					--	,ysnCheckoffTax				= ItemTax.ysnCheckoffTax
 
-						-- Fields used in the calculation of the taxes
-						,dblAmount					= ReceiptItem.dblUnitCost
-						,dblQty						= ReceiptItem.dblOpenReceive 
+					--	-- Fields used in the calculation of the taxes
+					--	,dblAmount					= ReceiptItem.dblUnitCost
+					--	,dblQty						= ReceiptItem.dblOpenReceive 
 
-					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-							INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
-								ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-					WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
-							AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
+					--FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					--			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+					--		INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
+					--			ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+					--WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+					--		AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 					
-					-- Call the SM stored procedure to compute the tax. 
-					EXEC dbo.[uspSMComputeItemTaxes]
+					---- Call the SM stored procedure to compute the tax. 
+					--EXEC dbo.[uspSMComputeItemTaxes]
 
-					-- Get the computed tax. 
-					UPDATE	ItemTax
-					SET		dblTax = ComputedTax.dblCalculatedTaxAmount
-					FROM	dbo.tblICInventoryReceiptItemTax ItemTax INNER JOIN #tmpComputeItemTaxes ComputedTax
-								ON ItemTax.intInventoryReceiptItemId = ComputedTax.intDetailId
-								AND ItemTax.intInventoryReceiptItemTaxId = ComputedTax.intTaxDetailId
-				END
+					---- Get the computed tax. 
+					--UPDATE	ItemTax
+					--SET		dblTax = ComputedTax.dblCalculatedTaxAmount
+					--FROM	dbo.tblICInventoryReceiptItemTax ItemTax INNER JOIN #tmpComputeItemTaxes ComputedTax
+					--			ON ItemTax.intInventoryReceiptItemId = ComputedTax.intDetailId
+					--			AND ItemTax.intInventoryReceiptItemTaxId = ComputedTax.intTaxDetailId
+				--END
 									
 				-- Get the next item. 
 				FETCH NEXT FROM loopReceiptItems INTO 
@@ -620,7 +635,7 @@ BEGIN
 					,@TransactionDate
 					,@EntityId
 					,@InventoryReceiptItemId
-					,@TaxGroupId
+					,@ShipFromId
 			END 
 
 			CLOSE loopReceiptItems;
