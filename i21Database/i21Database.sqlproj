@@ -2899,6 +2899,7 @@
     <Build Include="dbo\Views\vyuCTContStsQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspCFProcessBatchTransactionToInvoice.sql" />
     <Build Include="dbo\Functions\fnCFSplitString.sql" />
+    <Build Include="dbo\Functions\fnTrackMovedLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
