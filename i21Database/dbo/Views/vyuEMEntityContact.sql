@@ -8,6 +8,7 @@ SELECT
 	D.strEmail,   
 	E.strLocationName,   
 	D.strPhone,   
+	D.strMobile,   
 	D.strTimezone,   
 	D.strTitle,   
 	C.ysnPortalAccess,  
