@@ -643,20 +643,20 @@ BEGIN
 		)
 		END
 
-		IF (@ysnInvalid = 0)
-		BEGIN
-			DECLARE	@ErrorMessage NVARCHAR(250)
-			EXEC [uspCFProcessTransactionToInvoice] 
-			 @TransactionId = @Pk
-			,@UserId = 1
-			,@ErrorMessage = @ErrorMessage OUTPUT
-			,@Post = 1
+		--IF (@ysnInvalid = 0)
+		--BEGIN
+		--	DECLARE	@ErrorMessage NVARCHAR(250)
+		--	EXEC [uspCFProcessTransactionToInvoice] 
+		--	 @TransactionId = @Pk
+		--	,@UserId = 1
+		--	,@ErrorMessage = @ErrorMessage OUTPUT
+		--	,@Post = 1
 
-			--IF (@ErrorMessage IS NULL)
-			--BEGIN
-			--	UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId = @Pk
-			--END
-		END
+		--	--IF (@ErrorMessage IS NULL)
+		--	--BEGIN
+		--	--	UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId = @Pk
+		--	--END
+		--END
 		
 
 		print @dblCalcOverfillQuantity
@@ -676,6 +676,3 @@ BEGIN
 			GOTO CALCULATEPRICE
 		END
 	END
-GO
-
-

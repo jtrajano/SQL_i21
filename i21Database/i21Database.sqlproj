@@ -2897,6 +2897,8 @@
     <Build Include="dbo\Tables\tblPATChangeStatus.sql" />
     <Build Include="dbo\Tables\tblPATChangeStatusDetail.sql" />
     <Build Include="dbo\Views\vyuCTContStsQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFProcessBatchTransactionToInvoice.sql" />
+    <Build Include="dbo\Functions\fnCFSplitString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

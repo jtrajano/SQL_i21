@@ -193,7 +193,7 @@ INNER JOIN (SELECT icfSite.*
 			INNER JOIN tblICItem iicItem
 			ON icfItem.intARItemId = iicItem.intItemId
 			INNER JOIN tblICItemLocation iicItemLoc
-			ON icfItem.intARItemId = iicItemLoc.intItemId) 
+			ON iicItemLoc.intItemLocationId = icfSite.intARLocationId)
 			AS cfSiteItem
 ON cfTrans.intSiteId = cfSiteItem.intSiteId
 INNER JOIN (SELECT * 
@@ -234,5 +234,3 @@ BEGIN
 		ysnPosted = 1 
 	WHERE intTransactionId = @TransactionId
 END
-	
-GO
