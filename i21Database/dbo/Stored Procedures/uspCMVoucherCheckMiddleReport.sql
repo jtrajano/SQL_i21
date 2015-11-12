@@ -148,7 +148,7 @@ SELECT	CHK.dtmDate
 										NULL
 							END
 							
-		,strMIRC = [dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo)
+		,strMICR = [dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo)
 		
 		-- A/P Related fields: 
 		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
@@ -161,7 +161,9 @@ SELECT	CHK.dtmDate
 										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
 							END
 		-- Used to change the sub-report during runtime. 
-		,CHK.intBankTransactionTypeId		
+		,CHK.intBankTransactionTypeId
+		--Use to display the MICR
+		,BNKACCNT.ysnCheckEnableMICRPrint		
 FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
 			ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
 			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
