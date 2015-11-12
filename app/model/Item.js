@@ -173,6 +173,7 @@ Ext.define('Inventory.model.Item', {
     validators: [
         {type: 'presence', field: 'strItemNo'},
         {type: 'presence', field: 'strStatus'},
+        {type: 'presence', field: 'intCategoryId'},
         {type: 'presence', field: 'strInventoryTracking'},
         {type: 'presence', field: 'strLotTracking'},
 
@@ -195,14 +196,6 @@ Ext.define('Inventory.model.Item', {
 
     validate: function(options){
         var errors = this.callParent(arguments);
-        if (iRely.Functions.isEmpty(this.get('intCategoryId'))) {
-            if (this.get('strType') !== 'Non-Inventory' && this.get('strType') !== 'Other Charge' && this.get('strType') !== 'Service' && this.get('strType') !== 'Software') {
-                errors.add({
-                    field: 'intCategoryId',
-                    message: 'Category is required when there is no Commodity selected.'
-                })
-            }
-        }
         if (this.get('strType') === 'Raw Material' || this.get('strType') === 'Finished Good') {
             if (this.get('intLifeTime') <= 0) {
                 errors.add({
