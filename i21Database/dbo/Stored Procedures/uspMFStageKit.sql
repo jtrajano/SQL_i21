@@ -58,14 +58,16 @@ Declare @tblPickListDetail table
 	dblPickQuantity numeric(18,6),
 	intPickUOMId int,
 	dblPhysicalQty numeric(18,6),
-	dblWeightPerQty numeric(18,6)
+	dblWeightPerQty numeric(18,6),
+	intItemUOMId int,
+	intItemIssuedUOMId int
 )
 
 Insert Into @tblPickListDetail(intPickListId,intPickListDetailId,intLotId,strLotNumber,intParentLotId,intItemId,intStorageLocationId,
-dblPickQuantity,intPickUOMId,dblPhysicalQty,dblWeightPerQty)
+dblPickQuantity,intPickUOMId,dblPhysicalQty,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId)
 Select pld.intPickListId,pld.intPickListDetailId,pld.intLotId,l.strLotNumber,pld.intParentLotId,pld.intItemId,pld.intStorageLocationId,
 pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
-CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty
+CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId
 
@@ -78,7 +80,9 @@ While(@intMinLot is not null)
 Begin
 	Set @intNewLotId=NULL
 
-	Select @intLotId=intLotId,@strLotNumber=strLotNumber,@dblMoveQty=dblPickQuantity,@intItemId=intItemId,
+	Select @intLotId=intLotId,@strLotNumber=strLotNumber,
+	@dblMoveQty=CASE WHEN intItemUOMId = intItemIssuedUOMId THEN dblPickQuantity / dblWeightPerQty ELSE dblPickQuantity END,
+	@intItemId=intItemId,
 	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty 
 	From @tblPickListDetail Where intRowNo=@intMinLot
 

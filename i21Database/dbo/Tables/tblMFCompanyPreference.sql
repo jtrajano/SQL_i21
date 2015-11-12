@@ -12,5 +12,7 @@
     [ysnSanitizationInboundPutaway] BIT NULL, 
     [strGTINCaseCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBlendProductionStagingLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnBlendRequirementRequired] BIT NULL DEFAULT 1, 
+    [ysnBlendSheetRequired] BIT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )

@@ -17,6 +17,8 @@ Declare @intPickListPreferenceId int
 Declare @intManufacturingProcessId int
 Declare @intItemUOMId int
 Declare @dblWeightPerUnit numeric(38,20)
+Declare @ysnBlendSheetRequired bit
+Declare @intBlendRequirementId int
 
 Declare @tblWorkOrder AS table
 (
@@ -93,6 +95,38 @@ Declare @tblReservedQty table
 	dblReservedQty numeric(18,6)
 )
 
+--Temp Table to hold picked Lots when ysnBlendSheetRequired setting is false, 
+--Picked the Lots based on FIFO using Recipe
+Declare @tblPickedLots AS table
+( 
+	intWorkOrderInputLotId int,
+	intLotId int,
+	strLotNumber nvarchar(50),
+	strItemNo nvarchar(50),
+	strDescription nvarchar(200),
+	dblQuantity numeric(18,6),
+	intItemUOMId int,
+	strUOM nvarchar(50),
+	dblIssuedQuantity numeric(18,6),
+	intItemIssuedUOMId int,
+	strIssuedUOM nvarchar(50),
+	intItemId int,
+	intRecipeItemId int,
+	dblUnitCost numeric(18,6),
+	dblDensity numeric(18,6),
+	dblRequiredQtyPerSheet numeric(18,6),
+	dblWeightPerUnit numeric(18,6),
+	dblRiskScore numeric(18,6),
+	intStorageLocationId int,
+	strStorageLocationName nvarchar(50),
+	strLocationName nvarchar(50),
+	intLocationId int,
+	strSubLocationName nvarchar(50),
+	strLotAlias nvarchar(50),
+	ysnParentLot bit,
+	strRowState nvarchar(50)
+)
+
 --Get the Comma Separated Work Order Ids into a table
 SET @index = CharIndex(',',@strWorkOrderIds)
 WHILE @index > 0
@@ -108,6 +142,42 @@ INSERT INTO @tblWorkOrder values (@id)
 
 Select @intManufacturingProcessId=intManufacturingProcessId From tblMFWorkOrder 
 Where intWorkOrderId in (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+
+Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
+
+If @ysnBlendSheetRequired=0
+Begin
+	Select @dblQuantity=SUM(dblQuantity) From tblMFWorkOrder 
+	Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder)
+
+	Select @intBlendRequirementId=intBlendRequirementId From tblMFWorkOrder 
+	Where intWorkOrderId in (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+
+	Insert Into @tblPickedLots
+	Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,@dblQuantity
+
+	Insert @tblReservedQty(intLotId,dblReservedQty)
+	Select sr.intLotId,sum(sr.dblQty) from tblICLot l join tblICStockReservation sr on l.intLotId=sr.intLotId 
+	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
+	Group by sr.intLotId
+
+	Insert Into @tblChildLot(intLotId,dblQuantity)
+	Select l.intLotId,(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty 
+	from tblICLot l 
+	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
+	Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
+
+	Select tpl.*,cl.dblQuantity AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,(cl.dblQuantity / tpl.dblWeightPerUnit) AS dblAvailableUnit,tpl.strIssuedUOM AS strAvailableUnitUOM,
+	tpl.dblIssuedQuantity AS dblPickQuantity,tpl.intItemIssuedUOMId AS intPickUOMId,tpl.strIssuedUOM AS strPickUOM,
+	l.intParentLotId,pl.strParentLotNumber
+	From @tblPickedLots tpl Join @tblChildLot cl on tpl.intLotId=cl.intLotId 
+	Join tblICLot l on tpl.intLotId=l.intLotId
+	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
+	Left Join @tblReservedQty rq on tpl.intLotId = rq.intLotId
+
+	return
+End
+
 
 Select @intPickListPreferenceId=pa.strAttributeValue
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId

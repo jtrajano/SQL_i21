@@ -2902,6 +2902,9 @@
     <Build Include="dbo\Functions\fnTrackMovedLots.sql" />
     <Build Include="dbo\Views\vyuCTInventoryPlanList.sql" />
     <Build Include="dbo\Functions\fnCTGetItemNames.sql" />
+    <Build Include="dbo\Views\vyuMFGetSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSalesOrderRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateWorkOrderFromSalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
