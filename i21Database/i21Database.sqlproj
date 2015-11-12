@@ -2894,6 +2894,8 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
     <None Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
+    <Build Include="dbo\Tables\tblPATChangeStatus.sql" />
+    <Build Include="dbo\Tables\tblPATChangeStatusDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
