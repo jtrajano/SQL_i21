@@ -252,7 +252,7 @@
                                 "itemId": "btnBill",
                                 "layout|flex": null,
                                 "tabIndex": -1,
-                                "text": "Bill",
+                                "text": "Voucher",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },

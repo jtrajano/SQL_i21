@@ -134,7 +134,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         tabIndex: -1,
                                         itemId: 'btnBill',
                                         ui: 'i21-button-toolbar-small',
-                                        text: 'Bill'
+                                        text: 'Voucher'
                                     },
                                     {
                                         xtype: 'button',
