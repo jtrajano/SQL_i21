@@ -87,3 +87,19 @@ Type the overview for the table here.
 		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+
+CREATE TRIGGER [dbo].[trgPurchaseSale]
+    ON [dbo].[tblPATPatronageCategory]
+   FOR UPDATE
+AS 
+
+if (UPDATE (strPurchaseSale))   
+BEGIN
+    SET NOCOUNT ON;
+
+   UPDATE tblPATRefundRateDetail
+      SET strPurchaseSale = inserted.strPurchaseSale
+     FROM   inserted
+    WHERE tblPATRefundRateDetail.intPatronageCategoryId = inserted.intPatronageCategoryId
+END
