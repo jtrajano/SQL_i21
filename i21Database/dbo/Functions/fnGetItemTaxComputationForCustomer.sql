@@ -241,8 +241,8 @@ BEGIN
 			UPDATE
 				@ItemTaxes
 			SET
-				 dblTax			= @ItemTaxAmount
-				,dblAdjustedTax = @ItemTaxAmount
+				 dblTax			= ROUND(@ItemTaxAmount, [dbo].[fnARGetDefaultDecimal]())
+				,dblAdjustedTax = ROUND(@ItemTaxAmount, [dbo].[fnARGetDefaultDecimal]())
 				,ysnComputed	= 1 
 			WHERE
 				[Id] = @Id				

@@ -28,3 +28,5 @@ GO
 :r "..\Scripts\NR\uspNRCreateAREntry.sql"
 :r "..\Scripts\NR\uspNRGenerateEFTSchedule.sql"
 
+--Entity
+:r "..\dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql"

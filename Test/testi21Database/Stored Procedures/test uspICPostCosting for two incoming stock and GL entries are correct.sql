@@ -273,6 +273,66 @@ BEGIN
 			,intConcurrencyId			= 1
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @CostOfGoods_Default 
+
+		-- Auto-Negative
+		UNION ALL 
+		SELECT	
+			dtmDate						= 'November 14, 2014'
+			,strBatchId					= 'BATCH-000001'
+			,intAccountId				= @Inventory_Default
+			,dblDebit					= (18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
+			,dblCredit					= 0
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= 'IAN'
+			,strReference				= ''
+			,intCurrencyId				= @USD
+			,dblExchangeRate			= 1
+			,dtmTransactionDate			= 'November 14, 2014'
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 8
+			,ysnIsUnposted				= 0
+			,intUserId					= 1 
+			,intEntityId				= 1 
+			,strTransactionId			= 'PURCHASE-000001'
+			,intTransactionId			= 1
+			,strTransactionType			= 'Inventory Auto Negative'
+			,strTransactionForm			= 'Inventory Receipt'
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+		FROM dbo.tblGLAccount   
+		WHERE tblGLAccount.intAccountId = @Inventory_Default
+			
+		UNION ALL 
+		SELECT	
+			dtmDate						= 'November 14, 2014'
+			,strBatchId					= 'BATCH-000001'
+			,intAccountId				= @AutoNegative_Default
+			,dblDebit					= 0
+			,dblCredit					= (18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= 'IAN'
+			,strReference				= ''
+			,intCurrencyId				= @USD
+			,dblExchangeRate			= 1
+			,dtmTransactionDate			= 'November 14, 2014'
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 8
+			,ysnIsUnposted				= 0
+			,intUserId					= 1 
+			,intEntityId				= 1 
+			,strTransactionId			= 'PURCHASE-000001'
+			,intTransactionId			= 1
+			,strTransactionType			= 'Inventory Auto Negative'
+			,strTransactionForm			= 'Inventory Receipt'
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+		FROM dbo.tblGLAccount   
+		WHERE tblGLAccount.intAccountId = @AutoNegative_Default 
+
 	END 
 	
 	-- Act

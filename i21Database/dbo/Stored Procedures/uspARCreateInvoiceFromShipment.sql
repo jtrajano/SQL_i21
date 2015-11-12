@@ -232,7 +232,7 @@ SELECT
 	,SD.[dblQuantity]						--[dblQtyOrdered]
 	,SD.[dblQuantity]						--[dblQtyShipped]
 	,@ZeroDecimal							--[dblDiscount] 
-	,SD.[dblUnitPrice]						--[dblPrice]
+	,ISNULL(COD.[dblCashPrice], SD.[dblUnitPrice])						--[dblPrice]
 	,@ZeroDecimal							--[dblTotalTax]
 	,SD.[dblQuantity] * SD.[dblUnitPrice]	--[dblTotal]
 	,ACCT.[intAccountId]					--[intAccountId]

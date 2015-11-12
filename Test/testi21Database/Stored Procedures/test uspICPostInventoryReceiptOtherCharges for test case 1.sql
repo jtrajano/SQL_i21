@@ -319,7 +319,7 @@ BEGIN
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @OtherChargeExpense_Default
-			,[dblDebit]					= 856.732500
+			,[dblDebit]					= 856.73 -- 856.732500
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
@@ -347,7 +347,7 @@ BEGIN
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @OtherChargeIncome_Default
 			,[dblDebit]					= 0
-			,[dblCredit]				= 856.732500
+			,[dblCredit]				= 856.73 --856.732500
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
 			,[strDescription]			= 'OTHER CHARGE INCOME-DEFAULT'
@@ -373,7 +373,7 @@ BEGIN
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @OtherChargeExpense_Default
-			,[dblDebit]					= 1999.042500
+			,[dblDebit]					= 1999.05 -- 1999.042500
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
@@ -401,7 +401,7 @@ BEGIN
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @OtherChargeIncome_Default
 			,[dblDebit]					= 0
-			,[dblCredit]				= 1999.042500
+			,[dblCredit]				= 1999.05 -- 1999.042500
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
 			,[strDescription]			= 'OTHER CHARGE INCOME-DEFAULT'

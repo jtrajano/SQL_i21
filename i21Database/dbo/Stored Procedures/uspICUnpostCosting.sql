@@ -43,6 +43,20 @@ DECLARE @AVERAGECOST AS INT = 1
 
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
+DECLARE @intItemId AS INT
+		,@intItemUOMId AS INT 
+		,@intItemLocationId AS INT 
+		,@intSubLocationId AS INT
+		,@intStorageLocationId AS INT 					
+		,@dblQty AS NUMERIC(18, 6) 
+		,@dblUOMQty AS NUMERIC(18, 6)
+		,@dblCost AS NUMERIC(18, 6)
+		,@intLotId AS INT
+		,@dtmDate AS DATETIME
+		,@intCurrencyId AS INT 
+		,@dblExchangeRate AS DECIMAL (38, 20) 
+		,@strTransactionForm AS NVARCHAR(255)
+
 -- Get the list of items to unpost
 BEGIN 
 	-- Insert the items per location, UOM, and if it exists, Lot
@@ -52,7 +66,8 @@ BEGIN
 			,intItemUOMId
 			,intLotId
 			,dblQty
-			--,dblUOMQty
+			,dblCost
+			,dblUOMQty
 			,intSubLocationId
 			,intStorageLocationId
 			,intTransactionTypeId
@@ -62,8 +77,9 @@ BEGIN
 			,ItemTrans.intItemLocationId
 			,ItemTrans.intItemUOMId
 			,ItemTrans.intLotId
-			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)	
-			--,ItemTrans.dblUOMQty		
+			,-1 * ISNULL(ItemTrans.dblQty, 0) 
+			,ItemTrans.dblCost
+			,ItemTrans.dblUOMQty		
 			,ItemTrans.intSubLocationId
 			,ItemTrans.intStorageLocationId
 			,ItemTrans.intTransactionTypeId
@@ -72,6 +88,7 @@ BEGIN
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
+			AND ISNULL(ItemTrans.dblQty, 0) <> 0
 	GROUP BY	ItemTrans.intItemId
 				, ItemTrans.intItemLocationId
 				, ItemTrans.intItemUOMId
@@ -92,10 +109,43 @@ END
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
+	DECLARE @ValidateItemsToUnpost AS dbo.UnpostItemsTableType
 	DECLARE @returnValue AS INT 
 
+	-- Aggregate the stock qty for a faster validation. 
+	INSERT INTO @ValidateItemsToUnpost (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,dblQty
+			,intSubLocationId
+			,intStorageLocationId			
+	)
+	SELECT	intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,SUM(ISNULL(dblQty, 0) * -1)				
+			,intSubLocationId
+			,intStorageLocationId
+	FROM	@ItemsToUnpost
+	GROUP BY 
+		intItemId
+		, intItemLocationId
+		, intItemUOMId
+		, intLotId
+		, intSubLocationId
+		, intStorageLocationId
+
+	-- Fill-in the Unit qty from the UOM
+	UPDATE	ValidateItemsToUnpost
+	SET		dblUOMQty = ItemUOM.dblUnitQty
+	FROM	@ValidateItemsToUnpost ValidateItemsToUnpost INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON ValidateItemsToUnpost.intItemUOMId = ItemUOM.intItemUOMId
+
 	EXEC @returnValue = dbo.uspICValidateCostingOnUnpost 
-		@ItemsToUnpost
+		@ValidateItemsToUnpost
 		,@ysnRecap
 
 	IF @returnValue < 0 RETURN -1;
@@ -150,6 +200,15 @@ BEGIN
 		,@intTransactionId
 
 	EXEC dbo.uspICUnpostActualCostOut
+		@strTransactionId
+		,@intTransactionId
+END
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Unpost the auto-negative gl entries
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC dbo.uspICUnpostAutoNegative
 		@strTransactionId
 		,@intTransactionId
 END
@@ -290,24 +349,15 @@ BEGIN
 			AND RelatedLotTransactions.strTransactionId = @strTransactionId
 			AND RelatedLotTransactions.ysnIsUnposted = 0
 
-	---------------------------------------------------
-	-- Calculate the new average cost (if applicable)
-	---------------------------------------------------
+	------------------------------------------------------------
+	-- Update the Stock Quantity and Average Cost
+	------------------------------------------------------------
 	BEGIN 
 		------------------------------------------------------------
 		-- Update the Stock Quantity
 		------------------------------------------------------------
 		BEGIN 
-			DECLARE @intItemId AS INT
-					,@intItemUOMId AS INT 
-					,@intItemLocationId AS INT 
-					,@intSubLocationId AS INT
-					,@intStorageLocationId AS INT 					
-					,@dblQty AS NUMERIC(18, 6) 
-					,@dblUOMQty AS NUMERIC(18, 6)
-					,@intLotId AS INT
-
-			DECLARE loopItems CURSOR LOCAL FAST_FORWARD
+			DECLARE loopItemsToUnpost CURSOR LOCAL FAST_FORWARD
 			FOR 
 			SELECT  intItemId 
 					,intItemUOMId 
@@ -316,13 +366,14 @@ BEGIN
 					,intStorageLocationId 
 					,dblQty 
 					,dblUOMQty 
+					,dblCost
 					,intLotId 
 			FROM	@ItemsToUnpost
 
-			OPEN loopItems;	
+			OPEN loopItemsToUnpost;	
 
 			-- Initial fetch attempt
-			FETCH NEXT FROM loopItems INTO 
+			FETCH NEXT FROM loopItemsToUnpost INTO 
 				@intItemId
 				,@intItemUOMId
 				,@intItemLocationId 
@@ -330,6 +381,7 @@ BEGIN
 				,@intStorageLocationId 
 				,@dblQty 
 				,@dblUOMQty 
+				,@dblCost
 				,@intLotId;
 
 			-----------------------------------------------------------------------------------------------------------------------------
@@ -337,6 +389,18 @@ BEGIN
 			-----------------------------------------------------------------------------------------------------------------------------
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
+
+				-- Recalculate the average cost from the inventory transaction table. 
+				UPDATE	ItemPricing
+				SET		dblAverageCost = ISNULL(
+							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
+							, dblAverageCost
+						) 
+				FROM	dbo.tblICItemPricing AS ItemPricing 
+				WHERE	ItemPricing.intItemId = @intItemId
+						AND ItemPricing.intItemLocationId = @intItemLocationId			
+
+				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				EXEC [dbo].[uspICPostStockQuantity]
 					@intItemId
 					,@intItemLocationId
@@ -347,7 +411,7 @@ BEGIN
 					,@dblUOMQty
 					,@intLotId
 
-				FETCH NEXT FROM loopItems INTO 
+				FETCH NEXT FROM loopItemsToUnpost INTO 
 					@intItemId
 					,@intItemUOMId
 					,@intItemLocationId 
@@ -355,14 +419,15 @@ BEGIN
 					,@intStorageLocationId 
 					,@dblQty 
 					,@dblUOMQty 
+					,@dblCost
 					,@intLotId;
 			END;
 
 			-----------------------------------------------------------------------------------------------------------------------------
 			-- End of the loop
 			-----------------------------------------------------------------------------------------------------------------------------
-			CLOSE loopItems;
-			DEALLOCATE loopItems;
+			CLOSE loopItemsToUnpost;
+			DEALLOCATE loopItemsToUnpost;
 		END
 
 		-- Update the Lot's Qty and Weights. 
@@ -509,6 +574,7 @@ BEGIN
 					AND intItemLocationId = @intItemLocationId
 		END 
 	END
+
 END
 
 -----------------------------------------

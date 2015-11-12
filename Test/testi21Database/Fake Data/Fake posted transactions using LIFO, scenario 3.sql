@@ -686,6 +686,7 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryTransaction (
 				dtmDate
 				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice
@@ -703,6 +704,7 @@ BEGIN
 		)
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -720,6 +722,7 @@ BEGIN
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -737,6 +740,7 @@ BEGIN
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -754,6 +758,7 @@ BEGIN
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -771,6 +776,7 @@ BEGIN
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23

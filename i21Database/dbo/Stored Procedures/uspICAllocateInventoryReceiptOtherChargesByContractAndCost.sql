@@ -90,12 +90,16 @@ BEGIN
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
 		UPDATE 
-		SET		dblAmount = ISNULL(dblAmount, 0) + (
-					Source_Query.dblTotalOtherCharge
-					* Source_Query.dblOpenReceive 
-					* Source_Query.dblUnitCost
-					/ Source_Query.dblTotalCost 
-				)
+		SET		dblAmount = ROUND (
+								ISNULL(dblAmount, 0) 
+								+ (
+									Source_Query.dblTotalOtherCharge
+									* Source_Query.dblOpenReceive 
+									* Source_Query.dblUnitCost
+									/ Source_Query.dblTotalCost 
+								)
+								, 2
+							)
 
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
@@ -113,10 +117,11 @@ BEGIN
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
-			,(	Source_Query.dblTotalOtherCharge
+			,ROUND (	Source_Query.dblTotalOtherCharge
 				* Source_Query.dblOpenReceive 
 				* Source_Query.dblUnitCost
 				/ Source_Query.dblTotalCost 
+				, 2
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
