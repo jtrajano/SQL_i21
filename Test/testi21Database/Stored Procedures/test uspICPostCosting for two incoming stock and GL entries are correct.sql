@@ -293,7 +293,6 @@ BEGIN
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= 8
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 
 			,intEntityId				= 1 
 			,strTransactionId			= 'PURCHASE-000001'
 			,intTransactionId			= 1
@@ -322,7 +321,6 @@ BEGIN
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= 8
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 
 			,intEntityId				= 1 
 			,strTransactionId			= 'PURCHASE-000001'
 			,intTransactionId			= 1
