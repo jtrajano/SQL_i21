@@ -73,7 +73,7 @@ GO
 GO
 
 UPDATE tblFRRowDesign SET strBalanceSide = '' 
-	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strBalanceSide <> ''
+	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts','Current Year Earnings','Retained Earnings') AND strBalanceSide <> ''
 
 GO
 	PRINT N'END REMOVE'
@@ -123,10 +123,10 @@ GO
 GO
 
 UPDATE tblFRRowDesign SET strSource = '' 
-	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strSource IS NULL
+	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts','Current Year Earnings','Retained Earnings') AND strSource IS NULL
 
 UPDATE tblFRRowDesign SET strSource = 'Column' 
-	WHERE strRowType IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strSource IS NULL
+	WHERE strRowType IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts','Current Year Earnings','Retained Earnings') AND strSource IS NULL
 
 GO
 	PRINT N'END SET VALUE'

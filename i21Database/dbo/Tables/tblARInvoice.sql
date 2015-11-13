@@ -116,10 +116,12 @@ BEGIN
 	
 	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType FROM @inserted
 
-	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Prepayment' THEN 64 
-									WHEN @strTransactionType = 'Overpayment' THEN 65
-									WHEN @strType = 'Provisional Invoice' THEN 81
-									ELSE 19 END
+	SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
+	FROM tblSMStartingNumber 
+	WHERE strTransactionType = CASE WHEN @strTransactionType = 'Prepayment' THEN 'Customer Prepayment' 
+									WHEN @strTransactionType = 'Overpayment' THEN 'Customer Overpayment'
+									WHEN @strTransactionType = 'Invoice' AND @strType = 'Service Charge' THEN 'Service Charge'
+									ELSE 'Invoice' END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT	
 	

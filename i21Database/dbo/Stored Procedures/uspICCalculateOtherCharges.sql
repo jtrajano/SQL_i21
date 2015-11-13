@@ -17,7 +17,7 @@ BEGIN
 	END
 
 	UPDATE tblICInventoryReceiptCharge
-	SET dblAmount = ComputedCharges.dblCalculatedAmount
+	SET dblAmount = ROUND (ComputedCharges.dblCalculatedAmount, 2) 
 	FROM (
 		SELECT intInventoryReceiptChargeId, dblCalculatedAmount = SUM(dblCalculatedAmount) FROM tblICInventoryReceiptChargePerItem
 		WHERE intInventoryReceiptId = @intInventoryReceiptId

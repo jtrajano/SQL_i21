@@ -83,6 +83,7 @@ DECLARE
 	,@strParentLotNumber		AS NVARCHAR(50) 
 	,@strParentLotAlias			AS NVARCHAR(50) 
 	,@intLotStatusId_ItemLotTable AS INT 
+	,@intSplitFromLotId			AS INT 
 
 DECLARE @OwnerShipType_Own AS INT = 1
 
@@ -149,6 +150,7 @@ SELECT  intId
 		,strParentLotNumber
 		,strParentLotAlias
 		,intLotStatusId
+		,intSplitFromLotId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -188,6 +190,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strParentLotNumber
 		,@strParentLotAlias
 		,@intLotStatusId_ItemLotTable
+		,@intSplitFromLotId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -344,6 +347,7 @@ BEGIN
 				,strGarden				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strGarden ELSE LotMaster.strGarden END
 				,strContractNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContractNo ELSE LotMaster.strContractNo END 
 				,dtmManufacturedDate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
+				,intSplitFromLotId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSplitFromLotId ELSE LotMaster.intSplitFromLotId END 
 								
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
@@ -498,6 +502,8 @@ BEGIN
 				,intConcurrencyId
 				,intOwnershipType
 				,dblGrossWeight
+				,intSplitFromLotId
+
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -536,6 +542,7 @@ BEGIN
 				,1
 				,@intOwnershipType
 				,@dblGrossWeight
+				,@intSplitFromLotId
 			)
 		;
 	
@@ -691,6 +698,7 @@ BEGIN
 		,@strParentLotNumber
 		,@strParentLotAlias
 		,@intLotStatusId_ItemLotTable
+		,@intSplitFromLotId
 	;
 END
 

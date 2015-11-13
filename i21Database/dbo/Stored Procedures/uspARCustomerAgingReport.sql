@@ -144,7 +144,7 @@ SELECT A.strCustomerName
 FROM
 
 (SELECT I.dtmDate AS dtmDate
-		, I.strInvoiceNumber
+		, I.intInvoiceId
 		, 0 AS dblAmountPaid   
 		, dblInvoiceTotal = ISNULL(I.dblInvoiceTotal,0)
 		, dblAmountDue = ISNULL(I.dblAmountDue,0)
@@ -170,7 +170,7 @@ FROM tblARInvoice I
 	'+ @joinQuery +'
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = ''Invoice''
-	AND I.dtmDueDate <= '+ @strAsOfDate +'
+	AND I.dtmDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -179,7 +179,7 @@ WHERE I.ysnPosted = 1
 UNION ALL
 						
 SELECT I.dtmPostDate
-		, I.strInvoiceNumber
+		, I.intInvoiceId
 		, dblAmountPaid = 0
 		, dblInvoiceTotal = 0
 		, dblAmountDue = 0    
@@ -206,7 +206,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Credit'', ''Prepayment'')
-	AND I.dtmDueDate <= '+ @strAsOfDate +'
+	AND I.dtmDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -215,8 +215,8 @@ WHERE I.ysnPosted = 1
 UNION ALL      
       
 SELECT I.dtmPostDate      
-		, I.strInvoiceNumber
-		, dblAmountPaid = ISNULL(I.dblPayment,0)
+		, I.intInvoiceId
+		, dblAmountPaid = ISNULL(PD.dblPayment,0)
 		, dblInvoiceTotal = 0    
 		, I.dblAmountDue     
 		, ISNULL(I.dblDiscount, 0) AS dblDiscount    
@@ -239,11 +239,13 @@ FROM tblARInvoice I
 		INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
 		INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
 		INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+		LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId	
 		'+ @joinQuery +'
 WHERE ISNULL(I.ysnPosted, 1) = 1
 	AND I.ysnPosted  = 1
 	AND I.strTransactionType = ''Invoice''
-	AND I.dtmDueDate <= '+ @strAsOfDate +'
+	AND I.dtmDate <= '+ @strAsOfDate +'
+	AND P.dtmDatePaid <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -253,7 +255,7 @@ LEFT JOIN
     
 (SELECT DISTINCT 
 	intEntityCustomerId
-	, strInvoiceNumber  
+	, intInvoiceId  
 	, dblInvoiceTotal
 	, dblAmountPaid
 	, (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) AS dblTotalDue
@@ -269,7 +271,7 @@ LEFT JOIN
 	, CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,'+ @strAsOfDate +')>90      
 			THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl91Days    
 FROM
-(SELECT I.strInvoiceNumber
+(SELECT I.intInvoiceId
 		, 0 AS dblAmountPaid
 		, dblInvoiceTotal = ISNULL(dblInvoiceTotal,0)
 		, dblAmountDue = 0    
@@ -282,7 +284,7 @@ FROM tblARInvoice I
 	'+ @joinQuery +'
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = ''Invoice''
-	AND I.dtmDueDate <= '+ @strAsOfDate +'
+	AND I.dtmDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -290,7 +292,7 @@ WHERE I.ysnPosted = 1
 
 UNION ALL
 
-SELECT I.strInvoiceNumber
+SELECT I.intInvoiceId
 		, 0 AS dblAmountPaid
 		, dblInvoiceTotal = 0
 		, dblAmountDue = 0    
@@ -304,7 +306,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Credit'', ''Prepayment'')
-	AND I.dtmDueDate <= '+ @strAsOfDate +'
+	AND I.dtmDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -313,8 +315,8 @@ WHERE I.ysnPosted = 1
 UNION ALL      
       
 SELECT DISTINCT 
-	I.strInvoiceNumber
-	, dblAmountPaid = ISNULL(I.dblPayment,0)
+	I.intInvoiceId
+	, dblAmountPaid = ISNULL(PD.dblPayment,0)
 	, dblInvoiceTotal = 0
 	, dblAmountDue = 0
 	, ISNULL(I.dblDiscount, 0) AS dblDiscount
@@ -324,10 +326,12 @@ SELECT DISTINCT
 FROM tblARInvoice I 
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId	
 	'+ @joinQuery +'	
 WHERE I.ysnPosted  = 1
 	AND I.strTransactionType = ''Invoice''
-	AND I.dtmDueDate <= '+ @strAsOfDate +'
+	AND I.dtmDate <= '+ @strAsOfDate +'
+	AND P.dtmDatePaid <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -335,7 +339,7 @@ WHERE I.ysnPosted  = 1
     
 ON
 A.intEntityCustomerId = B.intEntityCustomerId
-AND A.strInvoiceNumber = B.strInvoiceNumber
+AND A.intInvoiceId = B.intInvoiceId
 AND A.dblInvoiceTotal = B.dblInvoiceTotal
 AND A.dblAmountPaid =B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit

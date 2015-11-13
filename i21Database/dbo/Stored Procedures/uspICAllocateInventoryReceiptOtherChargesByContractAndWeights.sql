@@ -149,12 +149,15 @@ BEGIN
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalWeight, 0) <> 0 THEN 
 		UPDATE 
-		SET		dblAmount = ISNULL(dblAmount, 0) + (
-					Source_Query.dblTotalOtherCharge
-					* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
-					/ Source_Query.dblTotalWeight 
-				)
-
+		SET		dblAmount = ROUND (
+								ISNULL(dblAmount, 0) 
+								+ (
+									Source_Query.dblTotalOtherCharge
+									* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+									/ Source_Query.dblTotalWeight 
+								)
+								, 2
+							)
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalWeight, 0) <> 0 THEN 
 		INSERT (
@@ -171,10 +174,11 @@ BEGIN
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
-			,(
+			,ROUND (
 				Source_Query.dblTotalOtherCharge
 				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
 				/ Source_Query.dblTotalWeight 
+				, 2
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost

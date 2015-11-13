@@ -721,10 +721,11 @@ BEGIN
 	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
 			AND ItemLocation.intLocationId = @BetterHaven
 				
-	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
-	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
-	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
-	EXEC tSQLt.AssertEqualsTable 'expectedLIFO', 'actualLIFO';
+	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction', 'Failed to generate the expected Inventory Transaction records.';
+	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail', 'Failed to generate the expected GL Detail records.';
+	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock', 'Failed to generate the expected Item Stock records.';
+	EXEC tSQLt.AssertEqualsTable 'expectedLIFO', 'actualLIFO', 'Failed to generate the expected LIFO Stock records. ';
+
 END 
 
 -- Clean-up: remove the tables used in the unit test

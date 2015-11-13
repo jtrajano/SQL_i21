@@ -31,6 +31,15 @@ WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
 		)
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
+-- Update any outdated records from the Deposit Entry table that does not have bank account.
+UPDATE tblCMUndepositedFund
+set intBankAccountId = @intBankAccountId
+WHERE strSourceSystem = 'AR'
+	AND intSourceTransactionId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1 AND intBankAccountId IS NULL)
+	AND intBankDepositId IS NULL
+
+IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
+
 -- Insert records from the Deposit Entry
 INSERT INTO tblCMUndepositedFund (
 		intBankAccountId
@@ -75,7 +84,7 @@ WHERE	b.intBankAccountId = @intBankAccountId
 						) COLLATE Latin1_General_CI_AS
 		)
 
-UNION SELECT 
+UNION SELECT DISTINCT
 	@intBankAccountId,
 	strSourceTransactionId,
 	intSourceTransactionId,
@@ -88,8 +97,9 @@ UNION SELECT
 	intLastModifiedUserId = @intUserId,
 	dtmLastModified = GETDATE()
 FROM vyuARUndepositedPayment v INNER JOIN tblCMBankAccount b
-			ON b.intBankAccountId = v.intBankAccountId
-WHERE	b.intBankAccountId = @intBankAccountId
+			ON b.intBankAccountId = v.intBankAccountId OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
+WHERE	(v.intBankAccountId = @intBankAccountId
+		OR ISNULL(v.intBankAccountId,0) = 0)
 		AND	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f

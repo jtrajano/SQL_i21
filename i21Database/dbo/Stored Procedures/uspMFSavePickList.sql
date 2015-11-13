@@ -29,6 +29,7 @@ DECLARE @dblReqQtySum numeric(18,6)
 DECLARE @dblPickQtySum numeric(18,6)
 DECLARE @dblPickQty numeric(18,6)
 DECLARE @dblAvailableUnit numeric(18,6)
+Declare @ysnBlendSheetRequired bit
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -121,6 +122,11 @@ If @intAssignedToId=0
 If (Select count(1) from @tblWorkOrder)=0
 	Raiserror('No Blend Sheet(s) are selected for picking.',16,1)
 
+Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
+
+If @ysnBlendSheetRequired = 1
+Begin
+
 Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail
 While(@intMinPickDetail is not null) --Pick List Detail Loop
 Begin
@@ -161,6 +167,8 @@ Begin
 		End
 
 	Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail where intRowNo>@intMinPickDetail
+End
+
 End
 
 If ISNULL(@strPickListNo,'') = ''

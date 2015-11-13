@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeEarning] (
     [intEmployeeEarningId]		INT				IDENTITY (1, 1) NOT NULL,
-    [intEntityEmployeeId]				INT             NOT NULL,
+    [intEntityEmployeeId]		INT             NOT NULL,
     [intTypeEarningId]			INT             NOT NULL,
     [strCalculationType]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]					NUMERIC (18, 6) DEFAULT ((0)) NULL,
@@ -9,6 +9,7 @@
     [intAccountId]				INT             NULL,
     [strW2Code]					NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intEmployeeTimeOffId]		INT             NULL,
+	[intEmployeeAccrueTimeOffId] INT            NULL,
 	[intEmployeeEarningLinkId]	INT             NULL,
 	[intPayGroupId]				INT             NULL,
     [ysnDefault]				BIT             DEFAULT ((1)) NOT NULL,
@@ -102,7 +103,7 @@ GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Time Off Type Id',
+    @value = N'Deduct Time Off Type Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -163,3 +164,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
     @level2name = N'dblHoursToProcess'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Accrue Time Off Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intEmployeeAccrueTimeOffId'

@@ -18,7 +18,7 @@ w.dblBinSize,w.intBlendRequirementId,
 w.ysnKittingEnabled,w.strComment,w.intLocationId,w.intStorageLocationId,
 br.strDemandNo,ISNULL(ws.strBackColorName,'') AS strBackColorName,us.strUserName,w.intExecutionOrder,
 ws.strName AS strStatus,sl.strName AS strStorageLocation,
-@dblConfirmedQty AS dblConfirmedQty
+@dblConfirmedQty AS dblConfirmedQty,w.intPickListId,pl.strPickListNo
 From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId
 Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -26,5 +26,6 @@ Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementI
 Join tblMFWorkOrderStatus ws on w.intStatusId=ws.intStatusId
 Left Join tblSMUserSecurity us on w.intCreatedUserId=us.[intEntityUserSecurityId]
 Left Join tblICStorageLocation sl on w.intStorageLocationId=sl.intStorageLocationId
+Left Join tblMFPickList pl on w.intPickListId=pl.intPickListId
 Where w.intWorkOrderId=@intWorkOrderId AND w.intStatusId in (9,10,11,12) 
 Order By w.dtmExpectedDate,w.intExecutionOrder

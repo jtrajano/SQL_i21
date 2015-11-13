@@ -19,6 +19,8 @@ SELECT S.intSampleId
 	,S.strSamplingMethod
 	,S.dtmTestedOn
 	,U.strUserName AS strTestedUserName
+	,S.dblSampleQty
+	,S.intContractDetailId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId

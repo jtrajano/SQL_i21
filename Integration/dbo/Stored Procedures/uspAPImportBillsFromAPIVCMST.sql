@@ -60,6 +60,21 @@ BEGIN
 			CREATE TABLE #InsertedPostedBillDetail(intBillDetailId INT PRIMARY KEY CLUSTERED, A4GLIdentity INT)
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedPostedBillDetail_intBillDetailId] ON #InsertedPostedBillDetail([intBillDetailId]);
 
+			
+			--CHECK FOR MISSING VENDOR IN i21
+			DECLARE @missingVendor NVARCHAR(100), @missingVendorError NVARCHAR(200);
+			SELECT TOP 1 @missingVendor = dbo.fnTrim(apivc_vnd_no) FROM (
+					SELECT apivc_vnd_no FROM apivcmst A
+						LEFT JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+						WHERE B.strVendorId IS NULL
+			) MissingVendors
+
+			IF @missingVendor IS NOT NULL
+			BEGIN
+				SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
+				RAISERROR(@missingVendorError, 16, 1);
+			END
+
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
 			WHERE intEntityUserSecurityId = @UserId
