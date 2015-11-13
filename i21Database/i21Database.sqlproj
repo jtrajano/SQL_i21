@@ -2390,7 +2390,7 @@
     </Build>
     <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
     <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
-    <None Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2457,7 +2457,7 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
-    <None Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
