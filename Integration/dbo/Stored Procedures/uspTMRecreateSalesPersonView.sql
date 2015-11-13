@@ -255,7 +255,7 @@ BEGIN
 				,vwsls_profit_ly_10  = 0.0
 				,vwsls_profit_ly_11  = 0.0
 				,vwsls_profit_ly_12  = 0.0
-				,vwsls_email   = A.strEmail
+				,vwsls_email   = E.strEmail
 				,vwsls_textmsg_email = ''''
 				,vwsls_dispatch_email = ''Y''
 				,vwsls_user_id   = ''''
@@ -266,6 +266,11 @@ BEGIN
 			LEFT JOIN tblEntityLocation B
 				ON A.intEntityId = B.intEntityId
 					AND B.ysnDefaultLocation = 1
+			INNER JOIN tblEntityToContact D
+				ON A.intEntityId = D.intEntityId
+					AND D.ysnDefaultContact = 1
+			INNER JOIN tblEntity E
+				ON D.intEntityContactId = E.intEntityId
 			INNER JOIN tblEntityType C
 				ON A.intEntityId = C.intEntityId
 			WHERE strType = ''Salesperson''

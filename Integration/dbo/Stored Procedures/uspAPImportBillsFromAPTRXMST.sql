@@ -49,6 +49,20 @@ BEGIN
 			CREATE TABLE #ReInsertedToaptrxmst(intA4GLIdentity INT)
 			CREATE TABLE #ReInsertedToapeglmst(intA4GLIdentity INT, aptrx_ivc_no_header CHAR(50))
 
+			--CHECK FOR MISSING VENDOR IN i21
+			DECLARE @missingVendor NVARCHAR(100), @missingVendorError NVARCHAR(200);
+			SELECT TOP 1 @missingVendor = dbo.fnTrim(aptrx_vnd_no) FROM (
+				SELECT aptrx_vnd_no FROM aptrxmst A
+						LEFT JOIN tblAPVendor B ON A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+						WHERE B.strVendorId IS NULL
+			) MissingVendors
+
+			IF @missingVendor IS NOT NULL
+			BEGIN
+				SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
+				RAISERROR(@missingVendorError, 16, 1);
+			END
+
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
 			WHERE intEntityId = @UserId

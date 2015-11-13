@@ -66,8 +66,11 @@ BEGIN
 			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			= Charge.dblRate 
+			,[dblCalculatedAmount]			= ROUND (			
+												Charge.dblRate 
 												* dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ReceiptItem.dblOpenReceive) 
+												, 2
+											 )
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
@@ -139,9 +142,12 @@ BEGIN
 			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			=	(ISNULL(Charge.dblRate, 0) / 100)
+			,[dblCalculatedAmount]			= ROUND (
+												(ISNULL(Charge.dblRate, 0) / 100)
 												* ReceiptItem.dblOpenReceive
 												* ReceiptItem.dblUnitCost
+												, 2
+											)
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
@@ -184,7 +190,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			= Charge.dblRate
+			,[dblCalculatedAmount]			= ROUND(Charge.dblRate, 2)
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
@@ -210,7 +216,7 @@ END
 -- Update the Other Charge amounts
 BEGIN 
 	UPDATE	Charge
-	SET		dblAmount = ISNULL(CalculatedCharges.dblAmount, 0)
+	SET		dblAmount = ROUND(ISNULL(CalculatedCharges.dblAmount, 0), 2)
 	FROM	dbo.tblICInventoryReceiptCharge Charge 	INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = Charge.intChargeId		
 			LEFT JOIN (

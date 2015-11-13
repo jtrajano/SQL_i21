@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCalculateServiceCharge]
+	@isRecap			BIT = 0,
 	@customers			NVARCHAR(MAX) = '',
 	@calculation        NVARCHAR(25) = '',
 	@asOfDate			DATE,
@@ -6,7 +7,9 @@
 	@arAccountId		INT = 0,
 	@scAccountId		INT = 0,
 	@currencyId			INT = 0,
-	@locationId			INT = 0
+	@locationId			INT = 0,
+	@batchId			NVARCHAR(100) = NULL OUTPUT,
+	@totalAmount		NUMERIC(18,6) = NULL OUTPUT
 AS
 	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT)
 	
@@ -22,6 +25,14 @@ AS
 			RAISERROR('There is no setup for Service Charge Account in the Company Preference.', 11, 1) 
 			RETURN 0
 		END
+
+	IF (@isRecap = 1)
+		BEGIN
+			SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+			SET @totalAmount = 0.000000
+		END
+	ELSE
+		SET @batchId = NULL
 
 	--GET SELECTED CUSTOMERS
 	IF (@customers = '')
@@ -136,7 +147,9 @@ AS
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
-							EXEC dbo.uspARInsertInvoiceServiceCharge @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @tblTypeServiceCharge
+							SET @totalAmount = @totalAmount + (SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
+							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @tblTypeServiceCharge
+
 							DELETE FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @entityId
 						END
 					

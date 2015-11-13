@@ -163,6 +163,8 @@
     <Folder Include="Scripts\Utility\IC\IC-1090" />
     <Folder Include="Scripts\Utility\IC\IC-1092" />
     <Folder Include="Scripts\Post-Deployment\ST" />
+    <Folder Include="Scripts\Utility\IC\Repost Costing" />
+    <Folder Include="Scripts\Utility\IC\Repost Costing\WM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -2391,6 +2393,13 @@
     <Build Include="dbo\Tables\tblICInventoryLotCostAdjustmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLIFO.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
+    <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
+    <None Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2455,6 +2464,10 @@
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
     <None Include="i21Database_1.publish.xml" />
+    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
+    <None Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

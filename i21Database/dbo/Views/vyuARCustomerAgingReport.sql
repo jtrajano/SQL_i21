@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerAgingReport]
 AS
 SELECT A.strCustomerName
+	 , A.strEntityNo
+     , A.intEntityCustomerId
 	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , dblTotalAR = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
 	 , dblFuture = 0
@@ -16,7 +18,7 @@ SELECT A.strCustomerName
 FROM
 
 (SELECT I.dtmDate AS dtmDate
-	 , I.strInvoiceNumber
+	 , I.intInvoiceId
 	 , 0 AS dblAmountPaid   
      , dblInvoiceTotal = ISNULL(I.dblInvoiceTotal,0)
 	 , dblAmountDue = ISNULL(I.dblAmountDue,0)
@@ -26,20 +28,22 @@ FROM
 	 , I.dtmDueDate    
 	 , I.intTermId
 	 , T.intBalanceDue    
-     , E.strName AS strCustomerName	 
+     , E.strName AS strCustomerName
+	 , E.strEntityNo
 	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=10 THEN '0 - 10 Days'
 				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=30 THEN '11 - 30 Days'
 					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=60 THEN '31 - 60 Days'     
 					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=90 THEN '61 - 90 Days'    
 					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>90 THEN 'Over 90' END
 	, I.ysnPosted
-	, dblAvailableCredit = 0
+	, dblAvailableCredit = 0	
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
 WHERE I.ysnPosted = 1
   AND I.strTransactionType = 'Invoice'
+  AND I.dtmDate <= GETDATE()
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -47,7 +51,7 @@ WHERE I.ysnPosted = 1
 UNION ALL
 						
 SELECT I.dtmPostDate
-	 , I.strInvoiceNumber
+	 , I.intInvoiceId
      , dblAmountPaid = 0
      , dblInvoiceTotal = 0
 	 , dblAmountDue = 0    
@@ -58,13 +62,14 @@ SELECT I.dtmPostDate
 	 , I.intTermId
 	 , T.intBalanceDue
 	 , E.strName AS strCustomerName
+	 , E.strEntityNo
 	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=10 THEN '0 - 10 Days'
 			         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '11 - 30 Days'
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=60 THEN '31 - 60 Days'     
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=90 THEN '61 - 90 Days'    
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>90 THEN 'Over 90' END
 	 , I.ysnPosted
-	 , dblAvailableCredit = ISNULL(I.dblAmountDue,0)
+	 , dblAvailableCredit = ISNULL(I.dblAmountDue,0)	 
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -72,6 +77,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
  AND I.ysnPaid = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
+ AND I.dtmDate <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -79,8 +85,8 @@ WHERE I.ysnPosted = 1
 UNION ALL      
       
 SELECT I.dtmPostDate      
-     , I.strInvoiceNumber
-	 , dblAmountPaid = ISNULL(I.dblPayment,0)
+     , I.intInvoiceId
+	 , dblAmountPaid = ISNULL(PD.dblPayment,0)
      , dblInvoiceTotal = 0    
 	 , I.dblAmountDue     
 	 , ISNULL(I.dblDiscount, 0) AS dblDiscount    
@@ -89,7 +95,8 @@ SELECT I.dtmPostDate
 	 , ISNULL(I.dtmDueDate, GETDATE())    
 	 , ISNULL(T.intTermID, '')
      , ISNULL(T.intBalanceDue, 0)    
-     , ISNULL(E.strName, '') AS strCustomerName	 
+     , ISNULL(E.strName, '') AS strCustomerName
+	 , E.strEntityNo
      , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=10 THEN '0 - 10 Days'
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '11 - 30 Days'
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=60 THEN '31 - 60 Days'
@@ -102,9 +109,12 @@ FROM tblARInvoice I
 	 INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
 	 INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
 	 INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId
 WHERE ISNULL(I.ysnPosted, 1) = 1
  AND I.ysnPosted  = 1
  AND I.strTransactionType = 'Invoice'
+ AND I.dtmDate <= GETDATE()
+ AND P.dtmDatePaid <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')) AS A  
@@ -113,7 +123,7 @@ LEFT JOIN
     
 (SELECT DISTINCT 
 	intEntityCustomerId
-  , strInvoiceNumber  
+  , intInvoiceId  
   , dblInvoiceTotal
   , dblAmountPaid
   , (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) AS dblTotalDue
@@ -129,7 +139,7 @@ LEFT JOIN
   , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,GETDATE())>90      
 	     THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl91Days    
 FROM
-(SELECT I.strInvoiceNumber
+(SELECT I.intInvoiceId
       , 0 AS dblAmountPaid
       , dblInvoiceTotal = ISNULL(dblInvoiceTotal,0)
 	  , dblAmountDue = 0    
@@ -141,13 +151,14 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 WHERE I.ysnPosted = 1
  AND I.strTransactionType = 'Invoice'
+ AND I.dtmDate <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
 
 UNION ALL
 
-SELECT I.strInvoiceNumber
+SELECT I.intInvoiceId
       , 0 AS dblAmountPaid
       , dblInvoiceTotal = 0
 	  , dblAmountDue = 0    
@@ -160,6 +171,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
  AND I.ysnPaid = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
+ AND I.dtmDate <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -167,8 +179,8 @@ WHERE I.ysnPosted = 1
 UNION ALL      
       
 SELECT DISTINCT 
-	I.strInvoiceNumber
-  , dblAmountPaid = ISNULL(I.dblPayment,0)
+	I.intInvoiceId
+  , dblAmountPaid = ISNULL(PD.dblPayment,0)
   , dblInvoiceTotal = 0
   , dblAmountDue = 0
   , ISNULL(I.dblDiscount, 0) AS dblDiscount
@@ -177,18 +189,21 @@ SELECT DISTINCT
   , dblAvailableCredit = 0
 FROM tblARInvoice I 
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
-	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
+	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted  = 1
  AND I.strTransactionType = 'Invoice'
+ AND I.dtmDate <= GETDATE()
+ AND P.dtmDatePaid <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 										WHERE AG.strAccountGroup = 'Receivables')) AS TBL) AS B    
     
 ON
 A.intEntityCustomerId = B.intEntityCustomerId
-AND A.strInvoiceNumber = B.strInvoiceNumber
+AND A.intInvoiceId = B.intInvoiceId
 AND A.dblInvoiceTotal = B.dblInvoiceTotal
 AND A.dblAmountPaid =B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
 
-GROUP BY A.strCustomerName, A.intEntityCustomerId
+GROUP BY A.strCustomerName, A.intEntityCustomerId, A.strEntityNo

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLGetNewID]
 	-- Add the parameters for the stored procedure here
-	(@i INT,@strID VARCHAR(50) OUTPUT)
+	(@i INT,@strID NVARCHAR(100) OUTPUT)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
