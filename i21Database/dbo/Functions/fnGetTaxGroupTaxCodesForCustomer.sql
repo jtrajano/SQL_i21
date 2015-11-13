@@ -5,7 +5,7 @@
 	,@TransactionDate		DATETIME
 	,@ItemId				INT
 	,@ShipToLocationId		INT
-	--,@IncludeExemptedCodes	BIT
+	,@IncludeExemptedCodes	INT
 )
 RETURNS @returntable TABLE
 (
@@ -69,6 +69,7 @@ BEGIN
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R			
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
+		AND (ISNULL(E.ysnTaxExempt,0) = 1 OR ISNULL(@IncludeExemptedCodes,0) = 1)
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
 

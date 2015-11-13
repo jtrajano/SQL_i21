@@ -34,7 +34,7 @@ BEGIN
 		
 	INSERT INTO @returntable
 	SELECT 
-		 [ysnTaxExempt] = 1
+		 [ysnTaxExempt] = 0
 		,[strExemptionNotes] = @TaxCodeExemption
 		
 		

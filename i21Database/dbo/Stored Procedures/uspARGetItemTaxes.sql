@@ -33,7 +33,7 @@ AS
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerShipToId)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerShipToId, 1)
 				
 			RETURN 1
 		END

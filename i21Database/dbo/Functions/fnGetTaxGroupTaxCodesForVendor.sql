@@ -1,10 +1,11 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForVendor]
 (
-	 @TaxGroupId		INT
-	,@VendorId			INT
-	,@TransactionDate	DATETIME
-	,@ItemId			INT
+	 @TaxGroupId			INT
+	,@VendorId				INT
+	,@TransactionDate		DATETIME
+	,@ItemId				INT
 	,@ShipFromLocationId	INT
+	,@IncludeExemptedCodes	INT
 )
 RETURNS @returntable TABLE
 (
@@ -68,6 +69,7 @@ BEGIN
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
+		AND (ISNULL(E.ysnTaxExempt,0) = 1 OR ISNULL(@IncludeExemptedCodes,0) = 1)
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
 
