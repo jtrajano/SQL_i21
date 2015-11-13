@@ -74,7 +74,7 @@ namespace iRely.Inventory.BusinessLayer
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId, @ysnOpenStatus", idParameter, openStatus);
                     }
 
-                    result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+                    result = await _db.SaveAsync(true).ConfigureAwait(false);
                                         
                     // Update the stock reservation for the deleted shipments                    
                     foreach (var shipment in deletedShipments)
