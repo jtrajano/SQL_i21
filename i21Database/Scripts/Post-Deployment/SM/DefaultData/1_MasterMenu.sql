@@ -2102,6 +2102,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Demand An
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.DemandAnalysisView' WHERE strMenuName = 'Demand Analysis View' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Blend Demand', N'Contract Management', @ContractManagementParentMenuId, N'Blend Demand', N'Maintenance', N'Screen', N'ContractManagement.view.BlendDemand', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.BlendDemand' WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
+
 
 /* NOTES RECEIVABLE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable' AND strModuleName = 'Notes Receivable' AND intParentMenuID = 0)
