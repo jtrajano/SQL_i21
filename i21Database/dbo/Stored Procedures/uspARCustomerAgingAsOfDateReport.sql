@@ -1,19 +1,29 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
 	@dtmDateFrom	DATETIME = NULL,
-	@dtmDateTo		DATETIME = NULL
+	@dtmDateTo		DATETIME = NULL,
+	@strSalesperson NVARCHAR(100) = NULL
 AS
 
 IF @dtmDateTo IS NULL
 	SET @dtmDateTo = GETDATE()
 
-SELECT A.intEntityCustomerId
-	 , dblTotalAR = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
-	 , dbl10Days = SUM(B.dbl10Days)
-	 , dbl30Days = SUM(B.dbl30Days)
-	 , dbl60Days = SUM(B.dbl60Days)
-	 , dbl90Days = SUM(B.dbl90Days)
-	 , dbl91Days = SUM(B.dbl91Days)
-	 , dblCredits = SUM(B.dblAvailableCredit)
+SELECT A.strCustomerName
+     , A.strEntityNo
+	 , A.intEntityCustomerId
+	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 , dblTotalAR			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
+	 , dblFuture			= 0
+	 , dbl10Days			= SUM(B.dbl10Days)
+	 , dbl30Days			= SUM(B.dbl30Days)
+	 , dbl60Days			= SUM(B.dbl60Days)
+	 , dbl90Days			= SUM(B.dbl90Days)
+	 , dbl91Days			= SUM(B.dbl91Days)
+	 , dblTotalDue			= SUM(B.dblTotalDue)
+	 , dblAmountPaid		= SUM(A.dblAmountPaid)
+	 , dblCredits			= SUM(B.dblAvailableCredit)
+	 , dblPrepaids			= 0
+	 , dtmAsOfDate			= @dtmDateTo
+	 , strSalespersonName	='strSalespersonName' 
 FROM
 
 (SELECT I.dtmDate AS dtmDate
@@ -40,9 +50,11 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -73,10 +85,12 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -109,11 +123,13 @@ FROM tblARInvoice I
 		INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
 		INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 		LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId
+		LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE ISNULL(I.ysnPosted, 1) = 1
 	AND I.ysnPosted  = 1
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
+	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')) AS A  
@@ -148,9 +164,11 @@ FROM
 		, dblAvailableCredit = 0
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -167,10 +185,12 @@ SELECT I.intInvoiceId
 		, dblAvailableCredit = ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -190,11 +210,12 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId	
-	
+	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted  = 1
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-	AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo	
+	AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
+	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 										WHERE AG.strAccountGroup = 'Receivables')) AS TBL) AS B    
