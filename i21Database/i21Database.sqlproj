@@ -2918,6 +2918,7 @@
     <Build Include="dbo\Tables\tblCTEventMatrix.sql" />
     <Build Include="dbo\Tables\tblCTEventMatrixDetail.sql" />
     <Build Include="dbo\Tables\tblCTContractEvent.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickListReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
