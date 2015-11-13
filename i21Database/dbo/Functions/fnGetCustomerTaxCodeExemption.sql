@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnGetCustomerTaxCodeExemption]
 ( 
-	 @CustomerId			INT
+	 @CustomerId		INT
 	,@TransactionDate	DATETIME
 	,@TaxCodeId			INT
 	,@TaxClassId		INT

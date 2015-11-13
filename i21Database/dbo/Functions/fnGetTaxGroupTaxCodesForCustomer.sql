@@ -1,10 +1,11 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForCustomer]
 (
-	 @TaxGroupId		INT
-	,@CustomerId		INT
-	,@TransactionDate	DATETIME
-	,@ItemId			INT
-	,@ShipToLocationId	INT
+	 @TaxGroupId			INT
+	,@CustomerId			INT
+	,@TransactionDate		DATETIME
+	,@ItemId				INT
+	,@ShipToLocationId		INT
+	--,@IncludeExemptedCodes	BIT
 )
 RETURNS @returntable TABLE
 (
@@ -37,23 +38,23 @@ BEGIN
 	
 	INSERT INTO @returntable
 	SELECT
-		 0 AS [intTransactionDetailTaxId]
-		,0 AS [intTransactionDetailId]
-		,TG.[intTaxGroupId] 
-		,TC.[intTaxCodeId]
-		,TC.[intTaxClassId]				
-		,TC.[strTaxableByOtherTaxes]
-		,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[strCalculationMethod] FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@TransactionDate AS DATE) ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 'Unit') AS [strCalculationMethod]
-		,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[numRate] FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@TransactionDate AS DATE) ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 0.00) AS [numRate]
-		,@ZeroDecimal AS [dblTax]
-		,@ZeroDecimal AS [dblAdjustedTax]				
-		,TC.[intSalesTaxAccountId]	AS [intTaxAccountId]							
-		,0 AS [ysnSeparateOnInvoice] 
-		,TC.[ysnCheckoffTax]
-		,TC.[strTaxCode]
-		,LEN(ISNULL([dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId),'')) AS [ysnTaxExempt] 
-		,TG.[strTaxGroup]
-		,[dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId)				
+		 [intTransactionDetailTaxId]	= 0
+		,[intTransactionDetailId]		= 0
+		,[intTaxGroupId]				= TG.[intTaxGroupId] 
+		,[intTaxCodeId]					= TC.[intTaxCodeId]
+		,[intTaxClassId]				= TC.[intTaxClassId]				
+		,[strTaxableByOtherTaxes]		= TC.[strTaxableByOtherTaxes]
+		,[strCalculationMethod]			= R.[strCalculationMethod]
+		,[numRate]						= R.[numRate]
+		,[dblTax]						= @ZeroDecimal
+		,[dblAdjustedTax]				= @ZeroDecimal
+		,[intTaxAccountId]				= TC.[intSalesTaxAccountId]
+		,[ysnSeparateOnInvoice]			= 0
+		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
+		,[strTaxCode]					= TC.[strTaxCode]
+		,[ysnTaxExempt]					= E.[ysnTaxExempt]
+		,[strTaxGroup]					= TG.[strTaxGroup]
+		,[strNotes]						= E.[strExemptionNotes]
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN
@@ -62,6 +63,10 @@ BEGIN
 	INNER JOIN
 		tblSMTaxGroup TG
 			ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+	CROSS APPLY
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId) E
+	CROSS APPLY
+		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R			
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
 	ORDER BY
