@@ -86,7 +86,7 @@ END
 			,dblSurcharge
 			,ysnFreightInPrice
 			,strActualCostId
-			,intTaxGroupId
+			--,intTaxGroupId
 			,strVendorRefNo
 			,strSourceId
 			,strSourceScreenName
@@ -146,7 +146,7 @@ END
 													AND HH.strDestination = 'Customer' 
 													AND RR.intTransportReceiptId = TR.intTransportReceiptId 
 										)
-			,intTaxGroupId				= NULL--TR.intTaxGroupId
+			--,intTaxGroupId				= NULL--TR.intTaxGroupId
 			,strVendorRefNo				= TR.strBillOfLadding
 			,strSourceId				= TL.strTransaction
 			,strSourceScreenName		= 'Transport Load'
