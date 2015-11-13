@@ -35,30 +35,29 @@ BEGIN
 		,[intCategoryId] INT
 		,[intTaxGroupId] INT)
 
-	--Commented until EM-667 is implemented
-	--INSERT INTO @CustomerSpecialTax(
-	--	 [intARSpecialTaxId]
-	--	,[intEntityCustomerId]
-	--	,[intEntityCustomerLocationId]
-	--	,[intEntityVendorId]
-	--	,[intItemId]
-	--	,[intCategoryId]
-	--	,[intTaxGroupId])
-	--SELECT
-	--	 ST.[intARSpecialTaxId]
-	--	,ST.[intEntityCustomerId]
-	--	,ST.[intEntityCustomerLocationId]
-	--	,ST.[intEntityVendorId]
-	--	,ST.[intItemId]
-	--	,ST.[intCategoryId]
-	--	,ST.[intTaxGroupMasterId]
-	--FROM
-	--	tblARSpecialTax ST
-	--INNER JOIN
-	--	tblARCustomer C
-	--		ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
-	--WHERE
-	--	C.intEntityCustomerId = @CustomerId
+	INSERT INTO @CustomerSpecialTax(
+		 [intARSpecialTaxId]
+		,[intEntityCustomerId]
+		,[intEntityCustomerLocationId]
+		,[intEntityVendorId]
+		,[intItemId]
+		,[intCategoryId]
+		,[intTaxGroupId])
+	SELECT
+		 ST.[intARSpecialTaxId]
+		,ST.[intEntityCustomerId]
+		,ST.[intEntityCustomerLocationId]
+		,ST.[intEntityVendorId]
+		,ST.[intItemId]
+		,ST.[intCategoryId]
+		,ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+		C.intEntityCustomerId = @CustomerId
 			
 	DECLARE @TaxGroupId INT
 	SET @TaxGroupId = NULL

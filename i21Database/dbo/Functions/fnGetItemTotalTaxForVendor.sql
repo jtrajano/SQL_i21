@@ -1,13 +1,13 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemTotalTaxForVendor]
 (
-	 @ItemId			INT
-	,@VendorId			INT
-	,@TransactionDate	DATETIME
-	,@ItemCost			NUMERIC(18,6)
-	,@Quantity			NUMERIC(18,6)
-	,@TaxGroupId		INT
-	,@CompanyLocationId	INT
-	,@BillToLocationId	INT
+	 @ItemId				INT
+	,@VendorId				INT
+	,@TransactionDate		DATETIME
+	,@ItemCost				NUMERIC(18,6)
+	,@Quantity				NUMERIC(18,6)
+	,@TaxGroupId			INT
+	,@CompanyLocationId		INT
+	,@ShipFromLocationId	INT
 )
 RETURNS NUMERIC(18,6)
 AS
@@ -17,7 +17,7 @@ BEGIN
 	SELECT
 		@LineItemTotal = SUM([dblAdjustedTax])
 	FROM
-		[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @VendorId, @TransactionDate, @ItemCost, @Quantity, @TaxGroupId, @CompanyLocationId, @BillToLocationId)
+		[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @VendorId, @TransactionDate, @ItemCost, @Quantity, @TaxGroupId, @CompanyLocationId, @ShipFromLocationId)
 		
 	RETURN @LineItemTotal		
 END

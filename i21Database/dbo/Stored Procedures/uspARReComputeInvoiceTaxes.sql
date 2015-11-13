@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceTaxes]
 	  @InvoiceId		AS INT
-	 ,@TaxMasterId	AS INT	= NULL	
 AS
 
 BEGIN
