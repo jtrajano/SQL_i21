@@ -2909,6 +2909,7 @@
     <Build Include="dbo\Functions\fnGetVendorTaxCodeExemptionDetails.sql" />
     <Build Include="dbo\Functions\fnGetTaxCodeRateDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransferIn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
