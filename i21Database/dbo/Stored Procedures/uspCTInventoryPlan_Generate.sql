@@ -246,11 +246,12 @@ BEGIN TRY
 
 		SET @PastDueExistingPurchases = ISNULL((
 					SELECT SUM(CASE 
-								WHEN @TargetUOMKey = SS.intItemUOMId
+								WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 									THEN SS.dblQuantity
-								ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, SS.intItemUOMId, @TargetUOMKey, SS.dblQuantity)
+								ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
 								END)
 					FROM [dbo].[tblCTContractDetail] SS
+					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
 					WHERE SS.intItemId = @intItemId
 						AND SS.intContractStatusId = 1
 						AND SS.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
@@ -660,11 +661,12 @@ BEGIN TRY
 
 							SET @SQL_ExistingPurchases_Exec_Ext = 'SELECT @ExistingPurchases = ' + CAST(ISNULL((
 											SELECT SUM(CASE 
-														WHEN @TargetUOMKey = SS.intItemUOMId
+														WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 															THEN SS.dblQuantity
-														ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, SS.intItemUOMId, @TargetUOMKey, SS.dblQuantity)
+														ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
 														END)
 											FROM [dbo].[tblCTContractDetail] SS
+											JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
 											WHERE SS.intItemId = @intItemId
 												AND SS.intContractStatusId = 1
 												AND left(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
@@ -1128,11 +1130,12 @@ BEGIN TRY
 
 						SET @SQL_ExistingPurchases_Exec = 'SELECT @ExistingPurchases = ' + CAST(ISNULL((
 										SELECT SUM(CASE 
-													WHEN @TargetUOMKey = SS.intItemUOMId
+													WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 														THEN SS.dblQuantity
-													ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, SS.intItemUOMId, @TargetUOMKey, SS.dblQuantity)
+													ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
 													END)
 										FROM [dbo].[tblCTContractDetail] SS
+										JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
 										WHERE SS.intItemId = @intItemId
 											AND SS.intContractStatusId = 1
 											AND left(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
