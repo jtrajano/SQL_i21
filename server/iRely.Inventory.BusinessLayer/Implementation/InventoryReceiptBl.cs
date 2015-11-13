@@ -180,11 +180,14 @@ namespace iRely.Inventory.BusinessLayer
                     {
                         ex = new Exception("Please setup default AP Account.", ex.InnerException);
                     }
+                    else if (ex.Message.Contains("All of the item in the receipt was fully billed"))
+                    {
+                        ex = new Exception("All of the item in the receipt was fully billed.", ex.InnerException);
+                    }
 
                     saveResult.BaseException = ex;
                     saveResult.Exception = new ServerException(ex);
                     saveResult.HasError = true;
-                    //transaction.Rollback();
                 }
             }
             newBill = newBillId;
