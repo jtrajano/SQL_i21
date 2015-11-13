@@ -2,7 +2,7 @@
 AS 
 SELECT DISTINCT
 Permission.intCompanyLocationId,
-Permission.intEntityId as intEntityId,
+Permission.intEntityUserSecurityId as intEntityId,
 RoleMenu.intMenuId,
 Menu.intParentMenuID as intParentMenuId,
 RoleMenu.ysnVisible,
