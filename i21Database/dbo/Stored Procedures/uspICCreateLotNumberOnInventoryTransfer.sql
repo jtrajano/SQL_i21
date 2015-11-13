@@ -155,7 +155,8 @@ BEGIN
 			,strGarden
 			,intDetailId
 			,strParentLotNumber
-			,strParentLotAlias	
+			,strParentLotAlias
+			,intSplitFromLotId	
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -181,8 +182,9 @@ BEGIN
 			,strVendorLotNo			= SourceLot.strVendorLotNo
 			,strGarden				= SourceLot.strGarden
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
-			,strParentLotNumber		= ParentLotSourceLot.strLotNumber
-			,strParentLotAlias		= ParentLotSourceLot.strLotAlias
+			,strParentLotNumber		= ParentLotSourceLot.strParentLotNumber
+			,strParentLotAlias		= ParentLotSourceLot.strParentLotAlias
+			,intSplitFromLotId		= SourceLot.intLotId
 
 	FROM	dbo.tblICInventoryTransfer Transfer INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId
@@ -193,8 +195,8 @@ BEGIN
 				AND Transfer.intToLocationId = ItemLocation.intLocationId	
 			INNER JOIN tblICLot SourceLot 
 				ON SourceLot.intLotId = TransferItem.intLotId
-			LEFT JOIN dbo.tblICLot ParentLotSourceLot
-				ON ParentLotSourceLot.intLotId = SourceLot.intParentLotId
+			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
+				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
 
 	WHERE	Transfer.strTransferNo = @strTransactionId
 

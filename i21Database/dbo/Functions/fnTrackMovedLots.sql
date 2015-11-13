@@ -13,7 +13,7 @@
 *	----------------------------------------------------------------------------
 *	Lot Id	Lot Number	     Qty	Location	Sub Location	Storage Location
 *	------	----------	--------	--------	------------	----------------
-*	1		ABC-123			  0		MAIN		NULL			NULL 
+*	1		ABC-123			   0	MAIN		NULL			NULL 
 *	2		ABC-123			  10	MAIN		NULL			BARN
 * 
 * This function will retrieve the lot with Lot id 2 because it shares the same Location and qty is non zero. 
