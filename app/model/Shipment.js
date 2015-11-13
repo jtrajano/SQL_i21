@@ -53,5 +53,16 @@ Ext.define('Inventory.model.Shipment', {
         {type: 'presence', field: 'intShipFromLocationId'},
         {type: 'presence', field: 'intShipToLocationId'},
         {type: 'presence', field: 'intFreightTermId'}
-    ]
+    ],
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+        if (this.get('intOrderType') !== 3 && iRely.Functions.isEmpty(this.get('intEntityCustomerId'))) {
+            errors.add({
+                field: 'intEntityCustomerId',
+                message: 'Customer must not be empty.'
+            })
+        }
+        return errors;
+    }
 });
