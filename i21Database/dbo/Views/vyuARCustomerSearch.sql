@@ -42,6 +42,7 @@ SELECT
 ,strSalesPersonName = T.strName
 ,Cus.dblCreditLimit
 ,Cus.dblARBalance
+,Cus.dtmLastActivityDate
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1

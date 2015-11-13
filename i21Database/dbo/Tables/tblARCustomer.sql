@@ -62,6 +62,7 @@
     [ysnTransmittedCustomer]          BIT             DEFAULT ((0)) NOT NULL,
     [dtmMembershipDate]               DATETIME        NULL,
     [dtmBirthDate]                    DATETIME        NULL,
+	[dtmLastActivityDate]               DATETIME        NULL,
     [strStockStatus]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strPatronClass]                  CHAR (1)        COLLATE Latin1_General_CI_AS NULL,
     [dtmDeceasedDate]                 DATETIME        NULL,
