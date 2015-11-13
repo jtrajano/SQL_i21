@@ -13,8 +13,10 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL 
 
 -- Declare the variables.
-DECLARE  @dtmDate					AS DATETIME
-		,@strDate					AS NVARCHAR(50)
+DECLARE  @dtmDateTo					AS DATETIME
+		,@dtmDateFrom				AS DATETIME
+		,@strDateTo					AS NVARCHAR(50)
+		,@strDateFrom				AS NVARCHAR(50)
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@innerQuery				AS NVARCHAR(MAX) = ''
@@ -43,15 +45,24 @@ DECLARE @temp_xml_table TABLE (
 	,[datatype]		NVARCHAR(50)
 )
 
-DECLARE @temp_aging_table TABLE(
-	 [intEntityCustomerId]		 INT
-	,[dblTotalAR]				 NUMERIC(18,6)
-	,[dbl10Days]				 NUMERIC(18,6)
-	,[dbl30Days]				 NUMERIC(18,6)
-	,[dbl60Days]				 NUMERIC(18,6)
-	,[dbl90Days]				 NUMERIC(18,6)
-	,[dbl91Days]				 NUMERIC(18,6)
-	,[dblCredits]				 NUMERIC(18,6)
+DECLARE @temp_aging_table TABLE(	
+	 [strCustomerName]			NVARCHAR(100)
+	,[strEntityNo]				NVARCHAR(100)
+	,[intEntityCustomerId]		INT
+	,[dblCreditLimit]			NUMERIC(18,6)
+	,[dblTotalAR]				NUMERIC(18,6)
+	,[dblFuture]				NUMERIC(18,6)
+	,[dbl10Days]				NUMERIC(18,6)
+	,[dbl30Days]				NUMERIC(18,6)
+	,[dbl60Days]				NUMERIC(18,6)
+	,[dbl90Days]				NUMERIC(18,6)
+	,[dbl91Days]				NUMERIC(18,6)
+	,[dblTotalDue]				NUMERIC(18,6)
+	,[dblAmountPaid]			NUMERIC(18,6)
+	,[dblCredits]				NUMERIC(18,6)
+	,[dblPrepaids]				NUMERIC(18,6)
+	,[dtmAsOfDate]				DATETIME
+	,[strSalespersonName]		NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -69,6 +80,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strBOLNumber]			 NVARCHAR(100)
 	,[dblCreditLimit]		 NUMERIC(18,6)
 	,[strFullAddress]		 NVARCHAR(MAX)
+	,[strCompanyAddress]	 NVARCHAR(MAX)
 )
 
 -- Prepare the XML 
@@ -90,21 +102,37 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
-SELECT	@dtmDate = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
+SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
+	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
+       ,@condition	 = [condition]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
-		
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
-IF @dtmDate IS NOT NULL
-	SET @dtmDate = CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)	
+IF @dtmDateTo IS NOT NULL
+	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
 ELSE 			  
-	SET @dtmDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+	SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+
+IF @dtmDateFrom IS NOT NULL
+	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
+ELSE 			  
+	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+	
+SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
+SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
+
+IF @condition = 'As Of'
+	BEGIN		
+		SET @innerQuery = 'AND I.dtmDate <= '+ @strDateTo +''
+	END
+ELSE
+	BEGIN
+		SET @innerQuery = 'AND I.dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo+''
+	END
 
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateReport] @dtmDate
-
-SET @strDate = ''''+ CONVERT(NVARCHAR(50),@dtmDate, 110) + ''''
-SET @innerQuery = 'AND I.dtmDate <= '+ @strDate +''
+EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 
@@ -138,10 +166,13 @@ SET @query = 'SELECT * FROM
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
+	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
+
 FROM tblARInvoice I
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId	
 WHERE I.ysnPosted = 1
   AND I.ysnPaid = 0
+  AND I.ysnForgiven = 0
   '+ @innerQuery +'
 ) MainQuery'
 
@@ -173,6 +204,8 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
 	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,STATEMENTREPORT.strFullAddress
+	  ,STATEMENTREPORT.strCompanyAddress
+	  ,dtmAsOfDate = @dtmDateTo
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
