@@ -2391,6 +2391,7 @@
     <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
     <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
