@@ -11,23 +11,7 @@ SET ANSI_WARNINGS OFF
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
-		SET @xmlParam = NULL 
-		SELECT  strCustomerName = ''
-			  , intEntityCustomerId = 0
-			  , dblCreditLimit = 0.000000
-			  , dblTotalAR = 0.000000
-			  , dblFuture = 0.000000
-			  , dbl10Days = 0.000000
-			  , dbl30Days = 0.000000
-			  , dbl60Days = 0.000000
-			  , dbl90Days = 0.000000
-			  , dbl91Days = 0.000000
-			  , dblTotalDue = 0.000000
-			  , dblAmountPaid = 0.000000
-			  , dblAvailableCredit = 0.000000
-			  , dblPrepaids = 0.000000
-			  , dtmAsOfDate = GETDATE()
-			  , intSalespersonId = 0
+		SET @xmlParam = NULL
 	END
 
 -- Declare the variables.

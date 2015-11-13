@@ -75,11 +75,16 @@ DECLARE @temp_statement_table TABLE(
 	,[dblTotalAmount]		 NUMERIC(18,6)
 	,[dblAmountPaid]		 NUMERIC(18,6)
 	,[dblAmountDue]			 NUMERIC(18,6)
+	,[dblPastDue]			 NUMERIC(18,6)
+	,[dblMonthlyBudget]		 NUMERIC(18,6)
 	,[strCustomerNumber]	 NVARCHAR(100)
 	,[strName]				 NVARCHAR(100)
 	,[strBOLNumber]			 NVARCHAR(100)
 	,[dblCreditLimit]		 NUMERIC(18,6)
 	,[strFullAddress]		 NVARCHAR(MAX)
+	,[strStatementFooterComment] NVARCHAR(MAX)
+	,[blbCompanyLogo]		 VARBINARY(MAX)
+	,[strCompanyName]		 NVARCHAR(MAX)
 	,[strCompanyAddress]	 NVARCHAR(MAX)
 )
 
@@ -157,19 +162,27 @@ SET @query = 'SELECT * FROM
 	 , I.intEntityCustomerId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'') THEN NULL ELSE I.dtmDueDate END
 	 , I.dtmDate
-	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], GETDATE())
+	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
 	 , dblTotalAmount = CASE WHEN I.strTransactionType <> ''Invoice'' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblAmountPaid = CASE WHEN I.strTransactionType <> ''Invoice'' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
 	 , dblAmountDue = CASE WHEN I.strTransactionType <> ''Invoice'' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+	 , dblPastDue = CASE WHEN DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +') > ISNULL(T.intBalanceDue, 0) 
+						THEN CASE WHEN I.strTransactionType <> ''Invoice'' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+						ELSE 0
+					END
+	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
 	 , C.strCustomerNumber
 	 , C.strName
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
+	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')
+	 , blbCompanyLogo = [dbo].fnSMGetCompanyLogo(''Header'')
+	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
-
 FROM tblARInvoice I
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId	
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
+	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 WHERE I.ysnPosted = 1
   AND I.ysnPaid = 0
   AND I.ysnForgiven = 0
@@ -192,6 +205,8 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.dblTotalAmount
 	  ,STATEMENTREPORT.dblAmountPaid
 	  ,STATEMENTREPORT.dblAmountDue
+	  ,STATEMENTREPORT.dblPastDue
+	  ,STATEMENTREPORT.dblMonthlyBudget
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
@@ -204,7 +219,10 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
 	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,STATEMENTREPORT.strFullAddress
-	  ,STATEMENTREPORT.strCompanyAddress
+	  ,STATEMENTREPORT.strStatementFooterComment
+	  ,STATEMENTREPORT.blbCompanyLogo
+	  ,STATEMENTREPORT.strCompanyName
+	  ,STATEMENTREPORT.strCompanyAddress	  
 	  ,dtmAsOfDate = @dtmDateTo
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 
