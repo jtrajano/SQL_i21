@@ -4,7 +4,7 @@
 	,@VendorId			INT
 	,@TransactionDate	DATETIME
 	,@ItemId			INT
-	,@BillToLocationId	INT
+	,@ShipFromLocationId	INT
 )
 RETURNS @returntable TABLE
 (
@@ -51,9 +51,9 @@ BEGIN
 		,0 AS [ysnSeparateOnInvoice] 
 		,TC.[ysnCheckoffTax]
 		,TC.[strTaxCode]
-		,LEN(ISNULL([dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @BillToLocationId),'')) AS [ysnTaxExempt] 
+		,LEN(ISNULL([dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId),'')) AS [ysnTaxExempt] 
 		,TG.[strTaxGroup]
-		,[dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @BillToLocationId)				
+		,[dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId)				
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN

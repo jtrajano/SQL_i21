@@ -1,9 +1,9 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupIdForVendor]
 (
-	 @VendorId			INT
-	,@CompanyLocationId	INT
-	,@ItemId			INT
-	,@BillToLocationId	INT
+	 @VendorId				INT
+	,@CompanyLocationId		INT
+	,@ItemId				INT
+	,@ShipFromLocationId	INT
 )
 RETURNS INT
 AS
@@ -34,30 +34,29 @@ BEGIN
 		,[intCategoryId] INT
 		,[intTaxGroupId] INT)
 
-	--Commented until EM-667 is implemented
-	--INSERT INTO @VendorSpecialTax(
-	--	 [intAPVendorSpecialTaxId]
-	--	,[intEntityVendorId]
-	--	,[intEntityVendorLocationId]
-	--	,[intTaxEntityVendorId]
-	--	,[intItemId]
-	--	,[intCategoryId]
-	--	,[intTaxGroupId])
-	--SELECT
-	--	 ST.[intAPVendorSpecialTaxId]
-	--	,ST.[intEntityVendorId]
-	--	,ST.[intEntityVendorLocationId]
-	--	,ST.[intTaxEntityVendorId]
-	--	,ST.[intItemId]
-	--	,ST.[intCategoryId]
-	--	,ST.[intTaxGroupMasterId]
-	--FROM
-	--	tblAPVendorSpecialTax ST
-	--INNER JOIN
-	--	tblAPVendor V
-	--		ON ST.[intEntityVendorId] = V.[intEntityVendorId]
-	--WHERE
-	--	V.[intEntityVendorId] = @VendorId
+	INSERT INTO @VendorSpecialTax(
+		 [intAPVendorSpecialTaxId]
+		,[intEntityVendorId]
+		,[intEntityVendorLocationId]
+		,[intTaxEntityVendorId]
+		,[intItemId]
+		,[intCategoryId]
+		,[intTaxGroupId])
+	SELECT
+		 ST.[intAPVendorSpecialTaxId]
+		,ST.[intEntityVendorId]
+		,ST.[intEntityVendorLocationId]
+		,ST.[intTaxEntityVendorId]
+		,ST.[intItemId]
+		,ST.[intCategoryId]
+		,ST.[intTaxGroupId]
+	FROM
+		tblAPVendorSpecialTax ST
+	INNER JOIN
+		tblAPVendor V
+			ON ST.[intEntityVendorId] = V.[intEntityVendorId]
+	WHERE
+		V.[intEntityVendorId] = @VendorId
 			
 	DECLARE @TaxGroupId INT
 	SET @TaxGroupId = NULL
@@ -71,7 +70,7 @@ BEGIN
 			@VendorSpecialTax
 		WHERE
 			[intTaxEntityVendorId] = @TaxVendorId
-			AND [intEntityVendorLocationId] = @BillToLocationId 
+			AND [intEntityVendorLocationId] = @ShipFromLocationId 
 			AND [intItemId] = @ItemId 
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
@@ -84,7 +83,7 @@ BEGIN
 			@VendorSpecialTax
 		WHERE
 			[intTaxEntityVendorId] = @TaxVendorId
-			AND [intEntityVendorLocationId] = @BillToLocationId 
+			AND [intEntityVendorLocationId] = @ShipFromLocationId 
 			AND [intCategoryId] = @ItemCategoryId
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
@@ -97,7 +96,7 @@ BEGIN
 			@VendorSpecialTax
 		WHERE
 			[intTaxEntityVendorId] = @TaxVendorId
-			AND [intEntityVendorLocationId] = @BillToLocationId 			
+			AND [intEntityVendorLocationId] = @ShipFromLocationId 			
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
 			RETURN @TaxGroupId;

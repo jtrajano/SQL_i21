@@ -1,13 +1,13 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemTaxComputationForVendor]
 (
-	 @ItemId			INT
-	,@VendorId			INT
-	,@TransactionDate	DATETIME
-	,@ItemCost			NUMERIC(18,6)
-	,@Quantity			NUMERIC(18,6)
-	,@TaxGroupId		INT
-	,@CompanyLocationId	INT
-	,@BillToLocationId	INT
+	 @ItemId				INT
+	,@VendorId				INT
+	,@TransactionDate		DATETIME
+	,@ItemCost				NUMERIC(18,6)
+	,@Quantity				NUMERIC(18,6)
+	,@TaxGroupId			INT
+	,@CompanyLocationId		INT
+	,@ShipFromLocationId	INT
 )
 RETURNS @returntable TABLE
 (
@@ -60,7 +60,7 @@ BEGIN
 			)
 					
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @BillToLocationId)	
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @ShipFromLocationId)	
 					
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
@@ -100,7 +100,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @BillToLocationId)
+		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @ShipFromLocationId)
 												
 			
 	-- Calculate Item Tax

@@ -23,7 +23,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotOut', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICStorageLocation';
 	EXEC tSQLt.FakeTable 'dbo.tblICCommodity';
-	EXEC tSQLt.FakeTable 'dbo.tblICCommodityAccount', @Identity = 1;		
+	EXEC tSQLt.FakeTable 'dbo.tblICCommodityAccount', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICParentLot', @Identity = 1;			
 		
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
