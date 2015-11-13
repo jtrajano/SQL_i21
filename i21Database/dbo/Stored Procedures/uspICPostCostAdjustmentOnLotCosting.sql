@@ -10,6 +10,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(18,6)
 	,@dblNewCost AS NUMERIC(38,20)
+	,@intCostUOMId AS INT	
+	,@intWeightUOMId AS INT
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
