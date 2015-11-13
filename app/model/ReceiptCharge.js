@@ -81,53 +81,54 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
         }
 
-        var data = this.getAssociatedData();
-        var ReceiptVendorId = null;
-        if (data) {
-            ReceiptVendorId = data.intInventoryReceipt.intVendorEntityId;
+        if (this.joined.length > 0) {
+            var data = this.joined[0].associatedEntity;
+            var ReceiptVendorId = null;
+            if (data) {
+                ReceiptVendorId = data.get('intEntityVendorId');
+            }
+            if (this.get('ysnInventoryCost') === true &&
+                this.get('ysnPrice') === true &&
+                this.get('ysnAccrue') === true &&
+                iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
+                this.get('intEntityVendorId') === ReceiptVendorId) {
+                errors.add({
+                    field: 'ysnAccrue',
+                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please correct the accrue or price checkbox.'
+                })
+                errors.add({
+                    field: 'ysnPrice',
+                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please correct the accrue or price checkbox.'
+                })
+            }
+            if (this.get('ysnInventoryCost') === true &&
+                this.get('ysnPrice') === true &&
+                this.get('ysnAccrue') === true &&
+                iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
+                this.get('intEntityVendorId') !== ReceiptVendorId) {
+                errors.add({
+                    field: 'ysnAccrue',
+                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                })
+                errors.add({
+                    field: 'ysnInventoryCost',
+                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                })
+            }
+            if (this.get('ysnInventoryCost') === true &&
+                this.get('ysnPrice') === true &&
+                this.get('ysnAccrue') === false &&
+                iRely.Functions.isEmpty(this.get('intEntityVendorId')) === true) {
+                errors.add({
+                    field: 'ysnAccrue',
+                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                })
+                errors.add({
+                    field: 'ysnInventoryCost',
+                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                })
+            }
         }
-        if (this.get('ysnInventoryCost') === true &&
-            this.get('ysnPrice') === true &&
-            this.get('ysnAccrue') === true &&
-            iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
-            this.get('intEntityVendorId') === ReceiptVendorId) {
-            errors.add({
-                field: 'ysnAccrue',
-                message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please correct the accrue or price checkbox.'
-            })
-            errors.add({
-                field: 'ysnPrice',
-                message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please correct the accrue or price checkbox.'
-            })
-        }
-        if (this.get('ysnInventoryCost') === true &&
-            this.get('ysnPrice') === true &&
-            this.get('ysnAccrue') === true &&
-            iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
-            this.get('intEntityVendorId') !== ReceiptVendorId) {
-            errors.add({
-                field: 'ysnAccrue',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
-            })
-            errors.add({
-                field: 'ysnInventoryCost',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
-            })
-        }
-        if (this.get('ysnInventoryCost') === true &&
-            this.get('ysnPrice') === true &&
-            this.get('ysnAccrue') === false &&
-            iRely.Functions.isEmpty(this.get('intEntityVendorId')) === true) {
-            errors.add({
-                field: 'ysnAccrue',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
-            })
-            errors.add({
-                field: 'ysnInventoryCost',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
-            })
-        }
-
         return errors;
     }
 
