@@ -45,15 +45,24 @@ DECLARE @temp_xml_table TABLE (
 	,[datatype]		NVARCHAR(50)
 )
 
-DECLARE @temp_aging_table TABLE(
-	 [intEntityCustomerId]		 INT
-	,[dblTotalAR]				 NUMERIC(18,6)
-	,[dbl10Days]				 NUMERIC(18,6)
-	,[dbl30Days]				 NUMERIC(18,6)
-	,[dbl60Days]				 NUMERIC(18,6)
-	,[dbl90Days]				 NUMERIC(18,6)
-	,[dbl91Days]				 NUMERIC(18,6)
-	,[dblCredits]				 NUMERIC(18,6)
+DECLARE @temp_aging_table TABLE(	
+	 [strCustomerName]			NVARCHAR(100)
+	,[strEntityNo]				NVARCHAR(100)
+	,[intEntityCustomerId]		INT
+	,[dblCreditLimit]			NUMERIC(18,6)
+	,[dblTotalAR]				NUMERIC(18,6)
+	,[dblFuture]				NUMERIC(18,6)
+	,[dbl10Days]				NUMERIC(18,6)
+	,[dbl30Days]				NUMERIC(18,6)
+	,[dbl60Days]				NUMERIC(18,6)
+	,[dbl90Days]				NUMERIC(18,6)
+	,[dbl91Days]				NUMERIC(18,6)
+	,[dblTotalDue]				NUMERIC(18,6)
+	,[dblAmountPaid]			NUMERIC(18,6)
+	,[dblCredits]				NUMERIC(18,6)
+	,[dblPrepaids]				NUMERIC(18,6)
+	,[dtmAsOfDate]				DATETIME
+	,[strSalespersonName]		NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -71,7 +80,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strBOLNumber]			 NVARCHAR(100)
 	,[dblCreditLimit]		 NUMERIC(18,6)
 	,[strFullAddress]		 NVARCHAR(MAX)
-	,[strCompanyAddress]		 NVARCHAR(MAX)
+	,[strCompanyAddress]	 NVARCHAR(MAX)
 )
 
 -- Prepare the XML 
@@ -157,7 +166,7 @@ SET @query = 'SELECT * FROM
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
-	 , strCompanyAddress = (SELECT dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
+	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
 
 FROM tblARInvoice I
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId	
