@@ -2912,6 +2912,12 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransferIn.sql" />
     <Build Include="dbo\Stored Procedures\uspSMApplyOriginMenusIcon.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportProcessProductionSummary.sql" />
+    <Build Include="dbo\Tables\tblCTAction.sql" />
+    <Build Include="dbo\Tables\tblCTEvent.sql" />
+    <Build Include="dbo\Tables\tblCTEventRecipient.sql" />
+    <Build Include="dbo\Tables\tblCTEventMatrix.sql" />
+    <Build Include="dbo\Tables\tblCTEventMatrixDetail.sql" />
+    <Build Include="dbo\Tables\tblCTContractEvent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
