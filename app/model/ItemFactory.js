@@ -21,7 +21,7 @@ Ext.define('Inventory.model.ItemFactory', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
-                            extraParams: { include: 'tblICItemFactoryManufacturingCells.tblICManufacturingCell, tblSMCompanyLocation' },
+                            extraParams: { include: 'tblICItemFactoryManufacturingCells.vyuICGetItemFactoryManufacturingCell, tblSMCompanyLocation' },
                             type: 'rest',
                             api: {
                                 read: '../Inventory/api/ItemFactory/Get'

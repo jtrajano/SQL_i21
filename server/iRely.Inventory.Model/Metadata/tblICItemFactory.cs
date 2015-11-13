@@ -64,8 +64,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_cellName))
-                    if (tblICManufacturingCell != null)
-                        return tblICManufacturingCell.strCellName;
+                    if (vyuICGetItemFactoryManufacturingCell != null)
+                        return vyuICGetItemFactoryManufacturingCell.strCellName;
                     else
                         return null;
                 else
@@ -77,8 +77,27 @@ namespace iRely.Inventory.Model
             }
         }
 
-        public tblICManufacturingCell tblICManufacturingCell { get; set; }
+        public vyuICGetItemFactoryManufacturingCell vyuICGetItemFactoryManufacturingCell { get; set; }
         public tblICItemFactory tblICItemFactory { get; set; }
+    }
+
+    public class vyuICGetItemFactoryManufacturingCell
+    {
+        public int intItemFactoryManufacturingCellId { get; set; }
+        public int intItemFactoryId { get; set; }
+        public int intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public int? intFactoryId { get; set; }
+        public string strLocationName { get; set; }
+        public int? intManufacturingCellId { get; set; }
+        public string strCellName { get; set; }
+        public string strManufacturingCellDescription { get; set; }
+        public bool? ysnDefault { get; set; }
+        public int? intPreference { get; set; }
+        public int? intSort { get; set; }
+
+        public tblICItemFactoryManufacturingCell tblICItemFactoryManufacturingCell { get; set; }
     }
 
     public class ItemFactoryVM
@@ -91,18 +110,5 @@ namespace iRely.Inventory.Model
         public string strLocationName { get; set; }
     }
 
-    public class ItemFactoryManufacturingCellVM
-    {
-        public int intItemFactoryManufacturingCellId { get; set; }
-        public int intItem { get; set; }
-        public int intFactoryId { get; set; }
-        public int intItemFactoryId { get; set; }
-        public int? intManufacturingCellId { get; set; }
-        public bool ysnDefault { get; set; }
-        public int? intPreference { get; set; }
-        public int? intSort { get; set; }
-        public string strCellName { get; set; }
-
-
-    }
+    
 }

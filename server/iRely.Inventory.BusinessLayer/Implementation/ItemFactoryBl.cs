@@ -46,22 +46,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<SearchResult> GetItemFactoryManufacturingCells(GetParameter param)
         {
-            var query = _db.GetQuery<tblICItemFactoryManufacturingCell>()
-                           .Include(p => p.tblICItemFactory.tblICItem)
-                           .Include(p => p.tblICItemFactory.tblSMCompanyLocation)
-                           .Include(p => p.tblICManufacturingCell)
-                           .Select(p => new ItemFactoryManufacturingCellVM
-                           {
-                                intItemFactoryManufacturingCellId = p.intItemFactoryManufacturingCellId,
-                                intItem = p.tblICItemFactory.intItemId,
-                                intFactoryId = p.tblICItemFactory.tblSMCompanyLocation.intCompanyLocationId,
-                                intItemFactoryId = p.intItemFactoryId,
-                                intManufacturingCellId = p.intManufacturingCellId,
-                                ysnDefault = p.ysnDefault,
-                                intPreference = p.intPreference,
-                                intSort = p.intSort,
-                                strCellName = p.tblICManufacturingCell.strCellName,
-                           })
+            var query = _db.GetQuery<vyuICGetItemFactoryManufacturingCell>()
                            .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemFactoryManufacturingCellId").ToListAsync();
 

@@ -309,28 +309,6 @@ namespace iRely.Inventory.Model
         }
     }
 
-    public class tblICManufacturingCellMap : EntityTypeConfiguration<tblICManufacturingCell>
-    {
-        public tblICManufacturingCellMap()
-        {
-            // Primary Key
-            this.HasKey(t => t.intManufacturingCellId);
-
-            // Table & Column Mappings
-            this.ToTable("tblMFManufacturingCell");
-            this.Property(t => t.dblStdCapacity).HasColumnName("dblStdCapacity").HasPrecision(18, 6);
-            this.Property(t => t.dblStdLineEfficiency).HasColumnName("dblStdLineEfficiency").HasPrecision(18, 6);
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
-            this.Property(t => t.intManufacturingCellId).HasColumnName("intManufacturingCellId");
-            this.Property(t => t.intStdCapacityRateId).HasColumnName("intStdCapacityRateId");
-            this.Property(t => t.intStdUnitMeasureId).HasColumnName("intStdUnitMeasureId");
-            this.Property(t => t.strCellName).HasColumnName("strCellName");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
-            this.Property(t => t.ysnIncludeSchedule).HasColumnName("ysnIncludeSchedule");
-        }
-    }
-
     public class tblICMaterialNMFCMap : EntityTypeConfiguration<tblICMaterialNMFC>
     {
         public tblICMaterialNMFCMap()

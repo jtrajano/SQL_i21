@@ -76,7 +76,6 @@ namespace iRely.Inventory.Model
         public DbSet<tblICLot> tblICLots { get; set; }
         public DbSet<tblICLotStatus> tblICLotStatuss { get; set; }
         public DbSet<tblICManufacturer> tblICManufacturers { get; set; }
-        public DbSet<tblICManufacturingCell> tblICManufacturingCells { get; set; }
         public DbSet<tblICMaterialNMFC> tblICMaterialNMFCs { get; set; }
         public DbSet<tblICMeasurement> tblICMeasurements { get; set; }
         public DbSet<tblICReadingPoint> tblICReadingPoints { get; set; }
@@ -192,7 +191,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICLineOfBusinessMap());
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
-            modelBuilder.Configurations.Add(new tblICManufacturingCellMap());
+            
             modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeWorkCenterMap());
@@ -309,7 +308,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
-
+            modelBuilder.Configurations.Add(new vyuICGetItemFactoryManufacturingCellMap());
             modelBuilder.Configurations.Add(new vyuICGetCategoryTaxMap());
 
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingMap());

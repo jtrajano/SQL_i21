@@ -43,9 +43,33 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
 
-            this.HasRequired(p => p.tblICManufacturingCell)
-                .WithMany(p => p.tblICItemFactoryManufacturingCells)
-                .HasForeignKey(p => p.intManufacturingCellId);
+            this.HasOptional(p => p.vyuICGetItemFactoryManufacturingCell)
+                .WithRequired(p => p.tblICItemFactoryManufacturingCell);
+        }
+    }
+
+    public class vyuICGetItemFactoryManufacturingCellMap : EntityTypeConfiguration<vyuICGetItemFactoryManufacturingCell>
+    {
+        public vyuICGetItemFactoryManufacturingCellMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intItemFactoryManufacturingCellId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemFactoryManufacturingCell");
+            this.Property(t => t.intItemFactoryManufacturingCellId).HasColumnName("intItemFactoryManufacturingCellId");
+            this.Property(t => t.intItemFactoryId).HasColumnName("intItemFactoryId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.intFactoryId).HasColumnName("intFactoryId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intManufacturingCellId).HasColumnName("intManufacturingCellId");
+            this.Property(t => t.strCellName).HasColumnName("strCellName");
+            this.Property(t => t.strManufacturingCellDescription).HasColumnName("strManufacturingCellDescription");
+            this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
+            this.Property(t => t.intPreference).HasColumnName("intPreference");
+            this.Property(t => t.intSort).HasColumnName("intSort");
         }
     }
 }

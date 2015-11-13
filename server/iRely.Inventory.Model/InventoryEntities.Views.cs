@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets64bd3944788b87dc314700da3a64b3d87781eecbbf92fc870afd36d0e2eec307))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets1ea6ec2f408d4dbc29243ff23560aa4e0e5216014861e6e0deea11993b8e3bef))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets64bd3944788b87dc314700da3a64b3d87781eecbbf92fc870afd36d0e2eec307 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets1ea6ec2f408d4dbc29243ff23560aa4e0e5216014861e6e0deea11993b8e3bef : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "64bd3944788b87dc314700da3a64b3d87781eecbbf92fc870afd36d0e2eec307"; }
+            get { return "1ea6ec2f408d4dbc29243ff23560aa4e0e5216014861e6e0deea11993b8e3bef"; }
         }
 
         /// <summary>
@@ -447,7 +447,7 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView79();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICManufacturingCell")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemFactoryManufacturingCell")
             {
                 return GetView80();
             }
@@ -982,7 +982,7 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView186();
             }
 
-            if (extentName == "InventoryEntities.tblICManufacturingCells")
+            if (extentName == "InventoryEntities.vyuICGetItemFactoryManufacturingCells")
             {
                 return GetView187();
             }
@@ -4247,29 +4247,31 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICManufacturingCell.
+        /// Gets the view for CodeFirstDatabase.vyuICGetItemFactoryManufacturingCell.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView80()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICManufacturingCell
-        [CodeFirstDatabaseSchema.tblICManufacturingCell](T1.tblICManufacturingCell_intManufacturingCellId, T1.tblICManufacturingCell_strCellName, T1.tblICManufacturingCell_strDescription, T1.tblICManufacturingCell_intLocationId, T1.tblICManufacturingCell_ysnActive, T1.tblICManufacturingCell_dblStdCapacity, T1.tblICManufacturingCell_intStdUnitMeasureId, T1.tblICManufacturingCell_intStdCapacityRateId, T1.tblICManufacturingCell_dblStdLineEfficiency, T1.tblICManufacturingCell_ysnIncludeSchedule, T1.tblICManufacturingCell_intConcurrencyId)
+    SELECT VALUE -- Constructing vyuICGetItemFactoryManufacturingCell
+        [CodeFirstDatabaseSchema.vyuICGetItemFactoryManufacturingCell](T1.vyuICGetItemFactoryManufacturingCell_intItemFactoryManufacturingCellId, T1.vyuICGetItemFactoryManufacturingCell_intItemFactoryId, T1.vyuICGetItemFactoryManufacturingCell_intItemId, T1.vyuICGetItemFactoryManufacturingCell_strItemNo, T1.vyuICGetItemFactoryManufacturingCell_strItemDescription, T1.vyuICGetItemFactoryManufacturingCell_intFactoryId, T1.vyuICGetItemFactoryManufacturingCell_strLocationName, T1.vyuICGetItemFactoryManufacturingCell_intManufacturingCellId, T1.vyuICGetItemFactoryManufacturingCell_strCellName, T1.vyuICGetItemFactoryManufacturingCell_strManufacturingCellDescription, T1.vyuICGetItemFactoryManufacturingCell_ysnDefault, T1.vyuICGetItemFactoryManufacturingCell_intPreference, T1.vyuICGetItemFactoryManufacturingCell_intSort)
     FROM (
         SELECT 
-            T.intManufacturingCellId AS tblICManufacturingCell_intManufacturingCellId, 
-            T.strCellName AS tblICManufacturingCell_strCellName, 
-            T.strDescription AS tblICManufacturingCell_strDescription, 
-            T.intLocationId AS tblICManufacturingCell_intLocationId, 
-            T.ysnActive AS tblICManufacturingCell_ysnActive, 
-            T.dblStdCapacity AS tblICManufacturingCell_dblStdCapacity, 
-            T.intStdUnitMeasureId AS tblICManufacturingCell_intStdUnitMeasureId, 
-            T.intStdCapacityRateId AS tblICManufacturingCell_intStdCapacityRateId, 
-            T.dblStdLineEfficiency AS tblICManufacturingCell_dblStdLineEfficiency, 
-            T.ysnIncludeSchedule AS tblICManufacturingCell_ysnIncludeSchedule, 
-            T.intConcurrencyId AS tblICManufacturingCell_intConcurrencyId, 
+            T.intItemFactoryManufacturingCellId AS vyuICGetItemFactoryManufacturingCell_intItemFactoryManufacturingCellId, 
+            T.intItemFactoryId AS vyuICGetItemFactoryManufacturingCell_intItemFactoryId, 
+            T.intItemId AS vyuICGetItemFactoryManufacturingCell_intItemId, 
+            T.strItemNo AS vyuICGetItemFactoryManufacturingCell_strItemNo, 
+            T.strItemDescription AS vyuICGetItemFactoryManufacturingCell_strItemDescription, 
+            T.intFactoryId AS vyuICGetItemFactoryManufacturingCell_intFactoryId, 
+            T.strLocationName AS vyuICGetItemFactoryManufacturingCell_strLocationName, 
+            T.intManufacturingCellId AS vyuICGetItemFactoryManufacturingCell_intManufacturingCellId, 
+            T.strCellName AS vyuICGetItemFactoryManufacturingCell_strCellName, 
+            T.strManufacturingCellDescription AS vyuICGetItemFactoryManufacturingCell_strManufacturingCellDescription, 
+            T.ysnDefault AS vyuICGetItemFactoryManufacturingCell_ysnDefault, 
+            T.intPreference AS vyuICGetItemFactoryManufacturingCell_intPreference, 
+            T.intSort AS vyuICGetItemFactoryManufacturingCell_intSort, 
             True AS _from0
-        FROM InventoryEntities.tblICManufacturingCells AS T
+        FROM InventoryEntities.vyuICGetItemFactoryManufacturingCells AS T
     ) AS T1");
         }
 
@@ -7577,29 +7579,31 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblICManufacturingCells.
+        /// Gets the view for InventoryEntities.vyuICGetItemFactoryManufacturingCells.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView187()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICManufacturingCells
-        [iRely.Inventory.Model.tblICManufacturingCell](T1.tblICManufacturingCell_intManufacturingCellId, T1.tblICManufacturingCell_strCellName, T1.tblICManufacturingCell_strDescription, T1.tblICManufacturingCell_intLocationId, T1.tblICManufacturingCell_ysnActive, T1.tblICManufacturingCell_dblStdCapacity, T1.tblICManufacturingCell_intStdUnitMeasureId, T1.tblICManufacturingCell_intStdCapacityRateId, T1.tblICManufacturingCell_dblStdLineEfficiency, T1.tblICManufacturingCell_ysnIncludeSchedule, T1.tblICManufacturingCell_intConcurrencyId)
+    SELECT VALUE -- Constructing vyuICGetItemFactoryManufacturingCells
+        [iRely.Inventory.Model.vyuICGetItemFactoryManufacturingCell](T1.vyuICGetItemFactoryManufacturingCell_intItemFactoryManufacturingCellId, T1.vyuICGetItemFactoryManufacturingCell_intItemFactoryId, T1.vyuICGetItemFactoryManufacturingCell_intItemId, T1.vyuICGetItemFactoryManufacturingCell_strItemNo, T1.vyuICGetItemFactoryManufacturingCell_strItemDescription, T1.vyuICGetItemFactoryManufacturingCell_intFactoryId, T1.vyuICGetItemFactoryManufacturingCell_strLocationName, T1.vyuICGetItemFactoryManufacturingCell_intManufacturingCellId, T1.vyuICGetItemFactoryManufacturingCell_strCellName, T1.vyuICGetItemFactoryManufacturingCell_strManufacturingCellDescription, T1.vyuICGetItemFactoryManufacturingCell_ysnDefault, T1.vyuICGetItemFactoryManufacturingCell_intPreference, T1.vyuICGetItemFactoryManufacturingCell_intSort)
     FROM (
         SELECT 
-            T.intManufacturingCellId AS tblICManufacturingCell_intManufacturingCellId, 
-            T.strCellName AS tblICManufacturingCell_strCellName, 
-            T.strDescription AS tblICManufacturingCell_strDescription, 
-            T.intLocationId AS tblICManufacturingCell_intLocationId, 
-            T.ysnActive AS tblICManufacturingCell_ysnActive, 
-            T.dblStdCapacity AS tblICManufacturingCell_dblStdCapacity, 
-            T.intStdUnitMeasureId AS tblICManufacturingCell_intStdUnitMeasureId, 
-            T.intStdCapacityRateId AS tblICManufacturingCell_intStdCapacityRateId, 
-            T.dblStdLineEfficiency AS tblICManufacturingCell_dblStdLineEfficiency, 
-            T.ysnIncludeSchedule AS tblICManufacturingCell_ysnIncludeSchedule, 
-            T.intConcurrencyId AS tblICManufacturingCell_intConcurrencyId, 
+            T.intItemFactoryManufacturingCellId AS vyuICGetItemFactoryManufacturingCell_intItemFactoryManufacturingCellId, 
+            T.intItemFactoryId AS vyuICGetItemFactoryManufacturingCell_intItemFactoryId, 
+            T.intItemId AS vyuICGetItemFactoryManufacturingCell_intItemId, 
+            T.strItemNo AS vyuICGetItemFactoryManufacturingCell_strItemNo, 
+            T.strItemDescription AS vyuICGetItemFactoryManufacturingCell_strItemDescription, 
+            T.intFactoryId AS vyuICGetItemFactoryManufacturingCell_intFactoryId, 
+            T.strLocationName AS vyuICGetItemFactoryManufacturingCell_strLocationName, 
+            T.intManufacturingCellId AS vyuICGetItemFactoryManufacturingCell_intManufacturingCellId, 
+            T.strCellName AS vyuICGetItemFactoryManufacturingCell_strCellName, 
+            T.strManufacturingCellDescription AS vyuICGetItemFactoryManufacturingCell_strManufacturingCellDescription, 
+            T.ysnDefault AS vyuICGetItemFactoryManufacturingCell_ysnDefault, 
+            T.intPreference AS vyuICGetItemFactoryManufacturingCell_intPreference, 
+            T.intSort AS vyuICGetItemFactoryManufacturingCell_intSort, 
             True AS _from0
-        FROM CodeFirstDatabase.tblICManufacturingCell AS T
+        FROM CodeFirstDatabase.vyuICGetItemFactoryManufacturingCell AS T
     ) AS T1");
         }
 

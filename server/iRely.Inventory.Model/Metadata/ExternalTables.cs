@@ -228,22 +228,6 @@ namespace iRely.Inventory.Model
         public string strTaxableByOtherTaxes { get; set; }
     }
 
-    public class tblICManufacturingCell : BaseEntity
-    {
-        public int intManufacturingCellId { get; set; }
-        public string strCellName { get; set; }
-        public string strDescription { get; set; }
-        public int? intLocationId { get; set; }
-        public bool ysnActive { get; set; }
-        public decimal? dblStdCapacity { get; set; }
-        public int? intStdUnitMeasureId { get; set; }
-        public int? intStdCapacityRateId { get; set; }
-        public decimal? dblStdLineEfficiency { get; set; }
-        public bool ysnIncludeSchedule { get; set; }
-
-        public ICollection<tblICItemFactoryManufacturingCell> tblICItemFactoryManufacturingCells { get; set; }
-    }
-
     public class tblICMeasurement : BaseEntity
     {
         public int intMeasurementId { get; set; }
