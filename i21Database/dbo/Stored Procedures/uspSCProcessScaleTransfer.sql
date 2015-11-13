@@ -60,7 +60,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
     SELECT      -- Header
                 [dtmTransferDate]           = SC.dtmTicketTransferDateTime
                 ,[strTransferType]          = 'Location to Location'
-                ,[intSourceType]            = 3
+                ,[intSourceType]            = 1
                 ,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
                 ,[intFromLocationId]        = SC.intProcessingLocationId
                 ,[intToLocationId]          = (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
