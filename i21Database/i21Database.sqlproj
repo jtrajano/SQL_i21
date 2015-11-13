@@ -1661,7 +1661,6 @@
     <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
     <Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
-    <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
     <Build Include="dbo\Tables\tblEntityPreferences.sql" />
@@ -1773,7 +1772,6 @@
     <Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddTransferOrderToInventoryReceipt.sql" />
-    <Build Include="dbo\Views\vyuARCustomerStatementDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetPONumber.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetMarketSymbolSuffix.sql" />
     <Build Include="dbo\Tables\tblWHContainer.sql" />
@@ -2889,11 +2887,11 @@
     </Build>
     <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
     <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
-    <None Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
-    <None Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
     <Build Include="dbo\Tables\tblPATChangeStatus.sql" />
     <Build Include="dbo\Tables\tblPATChangeStatusDetail.sql" />
     <Build Include="dbo\Views\vyuCTContStsQuality.sql" />
@@ -2910,6 +2908,7 @@
     <Build Include="dbo\Functions\fnGetCustomerTaxCodeExemptionDetails.sql" />
     <Build Include="dbo\Functions\fnGetVendorTaxCodeExemptionDetails.sql" />
     <Build Include="dbo\Functions\fnGetTaxCodeRateDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
