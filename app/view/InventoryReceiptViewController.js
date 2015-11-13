@@ -1593,7 +1593,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 win.close();
                             }
                         };
-                        iRely.Functions.showCustomDialog('question', 'yesno', 'Bill succesfully processed. Do you want to view this bill?', buttonAction);
+                        iRely.Functions.showCustomDialog('question', 'yesno', 'Bill successfully processed. Do you want to view this bill?', buttonAction);
                     }
                     else {
                         iRely.Functions.showErrorDialog(jsonData.message.statusText);

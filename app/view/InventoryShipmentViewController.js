@@ -953,7 +953,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 win.close();
                             }
                         };
-                        iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice succesfully processed. Do you want to view this Invoice?', buttonAction);
+                        iRely.Functions.showCustomDialog('question', 'yesno', 'Invoice successfully processed. Do you want to view this Invoice?', buttonAction);
                     }
                     else {
                         iRely.Functions.showErrorDialog(jsonData.message.statusText);
