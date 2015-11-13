@@ -68,7 +68,8 @@ BEGIN
 			,dblCost
 			,dblUOMQty
 			,intSubLocationId
-			,intStorageLocationId			
+			,intStorageLocationId
+			,intInventoryTransactionId
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
@@ -79,6 +80,7 @@ BEGIN
 			,ItemTrans.dblUOMQty		
 			,ItemTrans.intSubLocationId
 			,ItemTrans.intStorageLocationId
+			,ItemTrans.intInventoryTransactionId
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
@@ -101,7 +103,8 @@ BEGIN
 			,intLotId
 			,dblQty
 			,intSubLocationId
-			,intStorageLocationId			
+			,intStorageLocationId
+			,intInventoryTransactionId	
 	)
 	SELECT	intItemId
 			,intItemLocationId
@@ -110,6 +113,7 @@ BEGIN
 			,SUM(ISNULL(dblQty, 0) * -1)				
 			,intSubLocationId
 			,intStorageLocationId
+			,intInventoryTransactionId
 	FROM	@ItemsToUnpost
 	GROUP BY 
 		intItemId
@@ -118,6 +122,7 @@ BEGIN
 		, intLotId
 		, intSubLocationId
 		, intStorageLocationId
+		, intInventoryTransactionId
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ValidateItemsToUnpost
@@ -214,6 +219,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
+			,[intTransactionDetailId]			
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -226,6 +232,7 @@ BEGIN
 			,[dtmCreated]
 			,[intCreatedUserId]
 			,[intConcurrencyId]
+			,[intCostingMethod]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -242,6 +249,7 @@ BEGIN
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
 			,[intTransactionId]						= ActualTransaction.intTransactionId
+			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
 			,[strTransactionId]						= ActualTransaction.strTransactionId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
@@ -254,6 +262,7 @@ BEGIN
 			,[dtmCreated]							= GETDATE()
 			,[intCreatedUserId]						= @intUserId
 			,[intConcurrencyId]						= 1
+			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
@@ -433,6 +442,7 @@ BEGIN
 				,dblQty
 				,intSubLocationId
 				,intStorageLocationId
+				,intInventoryTransactionId
 		)
 		SELECT 
 				intItemId
@@ -442,9 +452,9 @@ BEGIN
 				,dblQty
 				,intSubLocationId
 				,intStorageLocationId
+				,intInventoryTransactionId
 		FROM	@ItemsToUnpost
-		WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
-				
+		WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST				
 				AND dblQty > 0 
 
 		SET @intInventoryTransactionId = NULL 

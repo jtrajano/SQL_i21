@@ -35,6 +35,8 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
 		,@INV_TRANS_Inventory_Transfer AS INT = 12
 
+DECLARE	@intItemId AS INT
+		,@intItemLocationId AS INT 
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvCostAdjustmentToReverse')) 
@@ -277,27 +279,55 @@ BEGIN
 	--		AND RelatedLotTransactions.strTransactionId = @strTransactionId
 	--		AND RelatedLotTransactions.ysnIsUnposted = 0
 
-	---------------------------------------------------
-	-- Calculate the new average cost (if applicable)
-	---------------------------------------------------
+	------------------------------------------------------------
+	-- Update the Average Cost
+	------------------------------------------------------------
 	BEGIN 
-		-- Update the avearge cost at the Item Pricing table
-		UPDATE	ItemPricing
-		SET		dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) > 0 THEN 
-													-- Recalculate the average cost
-													dbo.fnRecalculateAverageCost(Stock.intItemId, Stock.intItemLocationId, ItemPricing.dblAverageCost) 
-												ELSE 
-													-- Use the same average cost. 
-													ItemPricing.dblAverageCost
-										END
-		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
-					ON ItemPricing.intItemId = Stock.intItemId
-					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
-				INNER JOIN dbo.tblICInventoryTransaction InvTrans
-					ON InvTrans.intItemId = Stock.intItemId
-					AND InvTrans.intItemLocationId = Stock.intItemLocationId
-				INNER JOIN #tmpInvCostAdjustmentToReverse ItemToUnpost
-					ON ItemToUnpost.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+		BEGIN 
+			DECLARE loopUpdateAverageCost CURSOR LOCAL FAST_FORWARD
+			FOR 
+			SELECT  DISTINCT 
+					InvTrans.intItemId 					
+					,InvTrans.intItemLocationId 
+			FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN #tmpInvCostAdjustmentToReverse ItemToUnpost
+						ON ItemToUnpost.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+						
+			OPEN loopUpdateAverageCost;	
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM loopUpdateAverageCost INTO 
+				@intItemId
+				,@intItemLocationId 
+			;
+
+			-----------------------------------------------------------------------------------------------------------------------------
+			-- Start of the loop
+			-----------------------------------------------------------------------------------------------------------------------------
+			WHILE @@FETCH_STATUS = 0
+			BEGIN 
+
+				-- Recalculate the average cost from the inventory transaction table. 
+				UPDATE	ItemPricing
+				SET		dblAverageCost = ISNULL(
+							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
+							, dblAverageCost
+						) 
+				FROM	dbo.tblICItemPricing AS ItemPricing 
+				WHERE	ItemPricing.intItemId = @intItemId
+						AND ItemPricing.intItemLocationId = @intItemLocationId			
+				
+				FETCH NEXT FROM loopUpdateAverageCost INTO 
+					@intItemId
+					,@intItemLocationId 
+				;
+			END;
+
+			-----------------------------------------------------------------------------------------------------------------------------
+			-- End of the loop
+			-----------------------------------------------------------------------------------------------------------------------------
+			CLOSE loopUpdateAverageCost;
+			DEALLOCATE loopUpdateAverageCost;
+		END
 	END
 END
 
