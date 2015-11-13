@@ -2911,6 +2911,7 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransferIn.sql" />
     <Build Include="dbo\Stored Procedures\uspSMApplyOriginMenusIcon.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportProcessProductionSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

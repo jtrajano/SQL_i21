@@ -103,48 +103,124 @@ BEGIN
 			AND intSubLocationId = @intCompanyLocationSubLocationId
 	END
 
-	SELECT W.intWorkOrderId
-		,W.strWorkOrderNo
-		,W.dtmPlannedDate
-		,I1.strItemNo AS strTargetItemNo
-		,I1.strDescription AS strTargetDescription
-		,W.dblQuantity
-		,UM1.intUnitMeasureId
-		,UM1.strUnitMeasure
-		,I.intItemId
+	--Finding Opening Balance  
+	SELECT I.intItemId
 		,I.strItemNo
 		,I.strDescription
-		,(PS.dblOpeningQuantity + PS.dblOpeningOutputQuantity) AS dblOpeningQuantity
-		,PS.dblInputQuantity AS dblInputQuantity
-		,PS.dblOutputQuantity AS dblOutputQuantity
-		,(PS.dblCountQuantity + PS.dblCountOutputQuantity) AS dblCountQuantity
-		,(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) - (dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 		,UM.intUnitMeasureId
 		,UM.strUnitMeasure
-		,MC.intManufacturingCellId
-		,MC.strCellName + MC.strDescription AS strCellDesc
-		,MP.intManufacturingProcessId
-		,MP.strProcessName
-		,CLS.intCompanyLocationSubLocationId
-		,CLS.strSubLocationName
-		,CL.intCompanyLocationId
-		,CL.strLocationName
-	FROM dbo.tblMFProductionSummary PS
-	JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
+		,(PS.dblOpeningQuantity + PS.dblOpeningOutputQuantity) AS dblOpeningQuantity
+		,NULL AS dblInputQuantity
+		,NULL AS dblConsumeQuantity
+		,NULL AS dblProducedQuantity
+		,NULL AS dblCountQuantity
+		,0 AS intStorageLocationId
+		,'' AS strName
+		,1 AS intRowNumber
+	FROM tblMFProductionSummary PS
+	JOIN tblICItem I ON PS.intItemId = I.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.ysnStockUnit = 1
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PS.intWorkOrderId
-	JOIN dbo.tblICItem I1 ON I1.intItemId = W.intItemId
-	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = W.intItemUOMId
-	JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
-	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
-	JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-	JOIN dbo.tblSMCompanyLocationSubLocation CLS ON CLS.intCompanyLocationSubLocationId = W.intSubLocationId
-	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	WHERE PS.intWorkOrderId = @intWorkOrderId
-	ORDER BY I.strItemNo
+	
+	UNION
+	
+	--Finding Input Quantity  
+	SELECT I.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,UM.intUnitMeasureId
+		,UM.strUnitMeasure
+		,NULL AS dblOpeningQuantity
+		,WI.dblQuantity AS dblInputQty
+		,NULL AS dblConsumeQuantity
+		,NULL AS dblProducedQuantity
+		,NULL AS dblCountQuantity
+		,SL.intStorageLocationId
+		,SL.strName
+		,2 AS intRowNumber
+	FROM tblMFWorkOrderInputLot WI
+	JOIN tblICItem I ON WI.intItemId = I.intItemId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND IU.ysnStockUnit = 1
+	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocationId
+	WHERE WI.intWorkOrderId = @intWorkOrderId
+	
+	UNION
+	
+	--Finding FG Produced Quantity  
+	SELECT I.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,UM.intUnitMeasureId
+		,UM.strUnitMeasure
+		,NULL AS dblOpeningQuantity
+		,NULL AS dblInputQuantity
+		,NULL AS dblConsumeQuantity
+		,WP.dblQuantity
+		,NULL AS dblCountQuantity
+		,SL.intStorageLocationId
+		,SL.strName
+		,3 AS intRowNumber
+	FROM tblMFWorkOrderProducedLot WP
+	JOIN tblICItem I ON WP.intItemId = I.intItemId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND IU.ysnStockUnit = 1
+	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocationId
+	WHERE WP.intWorkOrderId = @intWorkOrderId
+	
+	UNION
+	
+	--Finding Consume Quantity  
+	SELECT I.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,UM.intUnitMeasureId
+		,UM.strUnitMeasure
+		,NULL AS dblOpeningQuantity
+		,NULL AS dblInputQuantity
+		,WC.dblQuantity
+		,NULL AS dblProducedQuantity
+		,NULL AS dblCountQuantity
+		,SL.intStorageLocationId
+		,SL.strName
+		,4 AS intRowNumber
+	FROM tblMFWorkOrderConsumedLot WC
+	JOIN tblICItem I ON WC.intItemId = I.intItemId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND IU.ysnStockUnit = 1
+	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WC.intStorageLocationId
+	WHERE WC.intWorkOrderId = @intWorkOrderId
+	
+	UNION
+	
+	--Finding Current Cyclecount Qty  
+	SELECT I.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,UM.intUnitMeasureId
+		,UM.strUnitMeasure
+		,NULL AS dblOpeningQuantity
+		,NULL AS dblInputQuantity
+		,NULL AS dblConsumeQuantity
+		,NULL AS dblProducedQuantity
+		,(PS.dblCountQuantity + PS.dblCountOutputQuantity) AS dblCountQuantity
+		,0 AS intStorageLocationId
+		,'' AS strName
+		,5 AS intRowNumber
+	FROM tblMFProductionSummary PS
+	JOIN tblICItem I ON PS.intItemId = I.intItemId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND IU.ysnStockUnit = 1
+	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	WHERE PS.intWorkOrderId = @intWorkOrderId
+	ORDER BY intRowNumber
+		,strItemNo
 END
-
+GO
 
 
