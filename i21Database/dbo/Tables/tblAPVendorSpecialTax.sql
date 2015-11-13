@@ -14,6 +14,8 @@
 	
 	[intEntityVendorLocationId]				INT	NULL,
 	
+	[intTaxGroupId]	INT	NULL,
+
 	[intConcurrencyId]	INT	DEFAULT(0) NOT NULL,
 	
 	CONSTRAINT [PK_dbo_tblAPVendorSpecialTax]					PRIMARY KEY CLUSTERED ([intAPVendorSpecialTaxId] ASC),
@@ -28,6 +30,8 @@
 	
 	CONSTRAINT FK_tblAPVendorSpecialTax_tblSMTaxGroupMaster		FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 	
-	CONSTRAINT FK_tblAPVendorSpecialTax_tblEntityLocation		FOREIGN KEY ([intEntityVendorLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId])
+	CONSTRAINT FK_tblAPVendorSpecialTax_tblEntityLocation		FOREIGN KEY ([intEntityVendorLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
+
+	CONSTRAINT FK_tblAPVendorSpecialTax_tblSMTaxGroup FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
 
 )
