@@ -57,13 +57,15 @@ GO
 	-- UPDATE ORIGIN MENUS SORT ORDER
 	EXEC uspSMSortOriginMenus
 GO
+	-- UPDATE ORIGIN MENUS ICON
+	EXEC uspSMApplyOriginMenusIcon
+GO
 	-- EXECUTE FIRST BEFORE MIGRATE RECURRING TRANSACTIONS
 	EXEC uspGLImportRecurring
 	-- UPDATE tblSMRecurringTransaction
 	EXEC uspSMMigrateRecurringTransaction
 
 GO
-	
 	-- MIGRATE SM COMPANY PREFERENCES
 	EXEC uspSMMigrateCompanyPreference
 GO
