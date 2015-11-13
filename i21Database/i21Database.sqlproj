@@ -2906,6 +2906,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetSalesOrderRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateWorkOrderFromSalesOrder.sql" />
     <Build Include="dbo\Views\vyuICGetItemFactoryManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblCTBlendDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
