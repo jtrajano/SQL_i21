@@ -7,7 +7,7 @@
 	,@TaxState			NVARCHAR(100)
 	,@ItemId			INT
 	,@ItemCategoryId	INT
-	,@BillToLocationId	INT
+	,@ShipFromLocationId	INT
 )
 RETURNS NVARCHAR(500)
 AS
@@ -26,7 +26,7 @@ BEGIN
 	LEFT OUTER JOIN
 		tblICCategoryTax ICCT
 			ON ICC.[intCategoryId] = ICCT.[intCategoryId]
-			AND ICCT.[ysnActive] = 1
+			--AND ICCT.[ysnActive] = 1
 	WHERE
 		ISNULL(ICCT.[intCategoryTaxId],0) = 0
 		AND ICI.[intItemId] = @ItemId 
@@ -53,7 +53,7 @@ BEGIN
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @BillToLocationId
+		AND TE.intEntityVendorLocationId = @ShipFromLocationId
 		AND TE.[intTaxCodeId] = @TaxCodeId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -81,7 +81,7 @@ BEGIN
 			ON TE.[intTaxClassId] = SMTC.[intTaxClassId]
 	WHERE
 		[intEntityVendorId] = @VendorId
-		AND intEntityVendorLocationId = @BillToLocationId
+		AND intEntityVendorLocationId = @ShipFromLocationId
 		AND TE.[intTaxClassId] = @TaxClassId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -106,7 +106,7 @@ BEGIN
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @BillToLocationId
+		AND TE.intEntityVendorLocationId = @ShipFromLocationId
 		AND LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0
 		AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = @TaxState
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)

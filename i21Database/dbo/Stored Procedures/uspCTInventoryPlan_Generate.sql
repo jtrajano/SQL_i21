@@ -375,29 +375,53 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
+					--SET @ForecastedConsumption = (
+					--		ISNULL((
+					--				SELECT [dblQuantity]
+					--				FROM tblCTForecastedConsumption
+					--				WHERE [intItemId] = @intItemId
+					--					AND intUnitMeasureId = @TargetUOMKey
+					--					AND left([strMonth], 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+					--					AND [strYear] = Right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+					--				), 0)
+					--		)
 					SET @ForecastedConsumption = (
-							ISNULL((
-									SELECT [dblQuantity]
-									FROM tblCTForecastedConsumption
-									WHERE [intItemId] = @intItemId
-										AND intUnitMeasureId = @TargetUOMKey
-										AND left([strMonth], 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
-										AND [strYear] = Right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
-									), 0)
-							)
+							ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+							FROM tblMFRecipeItem RI
+							JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+								AND R.ysnActive = 1
+								AND RI.intRecipeItemTypeId = 1
+							JOIN tblCTBlendDemand BD ON BD.intItemId = RI.intItemId
+								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+							WHERE RI.intItemId = @intItemId)
+							,0)
+						)
 				END
 			END
 			ELSE
 			BEGIN
+				--SET @ForecastedConsumption = (
+				--		ISNULL((
+				--				SELECT [dblQuantity]
+				--				FROM tblCTForecastedConsumption
+				--				WHERE [intItemId] = @intItemId
+				--					AND intUnitMeasureId = @TargetUOMKey
+				--					AND left([strMonth], 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+				--					AND [strYear] = Right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+				--				), 0)
+				--		)
 				SET @ForecastedConsumption = (
-						ISNULL((
-								SELECT [dblQuantity]
-								FROM tblCTForecastedConsumption
-								WHERE [intItemId] = @intItemId
-									AND intUnitMeasureId = @TargetUOMKey
-									AND left([strMonth], 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
-									AND [strYear] = Right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
-								), 0)
+							ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+							FROM tblMFRecipeItem RI
+							JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+								AND R.ysnActive = 1
+								AND RI.intRecipeItemTypeId = 1
+							JOIN tblCTBlendDemand BD ON BD.intItemId = RI.intItemId
+								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+							WHERE RI.intItemId = @intItemId)
+							,0)
 						)
 			END
 

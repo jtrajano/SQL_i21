@@ -40,7 +40,8 @@
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
 			,strTimeZone = ec.strTimezone
-			,strLocation = el.strLocationName
+			--,strLocation = el.strLocationName
+			,strLocation = (select top 1 el.strLocationName from tblEntityLocation el where el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId]))
 			,strSLAPlan = ''
 			,strReplyDue = ''
 			--,intUserId = ec.[intEntityContactId]
@@ -65,7 +66,7 @@
 			inner join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityId] from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId])
 			--left outer join tblEntity en on en.intEntityId = ec.[intEntityContactId]
 			--left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblARCustomerToContact et where et.[intEntityContactId] = ec.[intEntityId])
-			inner join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			--inner join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId])
 	--select
 	--		strCustomer = 'i21 User'
 	--		,strCompanyName = 'iRely'

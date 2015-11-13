@@ -8,6 +8,7 @@
 	,@TaxGroupId			INT
 	,@CompanyLocationId		INT
 	,@ShipFromLocationId	INT
+	,@IncludeExemptedCodes	INT
 )
 RETURNS @returntable TABLE
 (
@@ -100,7 +101,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @ShipFromLocationId)
+		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @ShipFromLocationId, @IncludeExemptedCodes)
 												
 			
 	-- Calculate Item Tax

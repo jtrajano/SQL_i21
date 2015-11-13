@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARCustomerStatementReport]
+﻿CREATE PROCEDURE [dbo].[uspARCustomerStatementDetailReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
@@ -77,6 +77,13 @@ DECLARE @temp_statement_table TABLE(
 	,[dblAmountDue]			 NUMERIC(18,6)
 	,[dblPastDue]			 NUMERIC(18,6)
 	,[dblMonthlyBudget]		 NUMERIC(18,6)
+	,[strDescription]		 NVARCHAR(100)
+	,[strItemNo]			 NVARCHAR(100)
+	,[dblQtyOrdered]		 NUMERIC(18,6)
+	,[dblQtyShipped]		 NUMERIC(18,6)
+	,[dblTotal]				 NUMERIC(18,6)
+	,[dblPrice]				 NUMERIC(18,6)
+	,[intInvoiceId]			 INT
 	,[strCustomerNumber]	 NVARCHAR(100)
 	,[strName]				 NVARCHAR(100)
 	,[strBOLNumber]			 NVARCHAR(100)
@@ -171,6 +178,13 @@ SET @query = 'SELECT * FROM
 						ELSE 0
 					END
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
+	 , IC.strDescription
+	 , IC.strItemNo
+	 , ID.dblQtyOrdered
+	 , ID.dblQtyShipped
+	 , ID.dblTotal
+	 , ID.dblPrice
+	 , I.intInvoiceId
 	 , C.strCustomerNumber
 	 , C.strName
 	 , I.strBOLNumber
@@ -181,6 +195,8 @@ SET @query = 'SELECT * FROM
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
 FROM tblARInvoice I
+	INNER JOIN (tblARInvoiceDetail ID 
+		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
 	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 WHERE I.ysnPosted = 1
@@ -207,6 +223,13 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.dblAmountDue
 	  ,STATEMENTREPORT.dblPastDue
 	  ,STATEMENTREPORT.dblMonthlyBudget
+	  ,STATEMENTREPORT.strDescription
+	  ,STATEMENTREPORT.strItemNo
+	  ,STATEMENTREPORT.dblQtyOrdered
+	  ,STATEMENTREPORT.dblQtyShipped
+	  ,STATEMENTREPORT.dblTotal
+	  ,STATEMENTREPORT.dblPrice
+	  ,STATEMENTREPORT.intInvoiceId
 	  ,STATEMENTREPORT.strCustomerNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber

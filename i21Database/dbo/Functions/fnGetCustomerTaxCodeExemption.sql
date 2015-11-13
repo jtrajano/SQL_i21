@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnGetCustomerTaxCodeExemption]
 ( 
-	 @CustomerId			INT
+	 @CustomerId		INT
 	,@TransactionDate	DATETIME
 	,@TaxCodeId			INT
 	,@TaxClassId		INT
@@ -33,7 +33,7 @@ BEGIN
 	LEFT OUTER JOIN
 		tblICCategoryTax ICCT
 			ON ICC.[intCategoryId] = ICCT.[intCategoryId]
-			AND ICCT.[ysnActive] = 1
+			--AND ICCT.[ysnActive] = 1
 	WHERE
 		ISNULL(ICCT.[intCategoryTaxId],0) = 0
 		AND ICI.[intItemId] = @ItemId 
