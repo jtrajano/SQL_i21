@@ -1,6 +1,6 @@
 ﻿CREATE VIEW dbo.vyuCFBatchPostTransactions
 AS
-SELECT        cfTrans.dtmTransactionDate, cfCardAccount.strCardNumber AS strTransactionId, 'Card Fueling' AS strTransactionType, cfTrans.ysnPosted, 
+SELECT        cfTrans.dtmTransactionDate, cfTrans.strTransactionId AS strTransactionId, 'Card Fueling' AS strTransactionType, cfTrans.ysnPosted, 
                          'Network: ' + cfNetwork.strNetwork + ' ,Site: ' + cfSiteItem.strSiteName + ' ,Quantity: ' + CAST(cfTrans.dblQuantity AS nvarchar) AS strDescription, cfTransPrice.dblCalculatedAmount AS dblAmount, 
                          cfTrans.intTransactionId,
                              (SELECT        TOP (1) intEntityId
@@ -22,7 +22,7 @@ FROM            dbo.tblCFTransaction AS cfTrans INNER JOIN
                                FROM            dbo.tblCFSite AS icfSite INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId INNER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId INNER JOIN
-                                                         dbo.tblICItemLocation AS iicItemLoc ON icfItem.intARItemId = iicItemLoc.intItemId) AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId INNER JOIN
+                                                         dbo.tblICItemLocation AS iicItemLoc ON icfSite.intARLocationId = iicItemLoc.intItemLocationId) AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId INNER JOIN
                              (SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                FROM            dbo.tblCFTransactionPrice
                                WHERE        (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId INNER JOIN
@@ -134,6 +134,26 @@ Begin DesignProperties =
             DisplayFlags = 280
             TopColumn = 0
          End
+         Begin Table = "cfCardAccount"
+            Begin Extent = 
+               Top = 6
+               Left = 296
+               Bottom = 136
+               Right = 471
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "cfTransPrice"
+            Begin Extent = 
+               Top = 6
+               Left = 813
+               Bottom = 136
+               Right = 1019
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
          Begin Table = "cfNetwork"
             Begin Extent = 
                Top = 6
@@ -154,32 +174,12 @@ Begin DesignProperties =
             DisplayFlags = 280
             TopColumn = 0
          End
-         Begin Table = "cfCardAccount"
-            Begin Extent = 
-               Top = 6
-               Left = 296
-               Bottom = 136
-               Right = 471
-            End
-            DisplayFlags = 280
-            TopColumn = 0
-         End
          Begin Table = "cfSiteItem"
             Begin Extent = 
                Top = 6
                Left = 509
                Bottom = 136
                Right = 775
-            End
-            DisplayFlags = 280
-            TopColumn = 0
-         End
-         Begin Table = "cfTransPrice"
-            Begin Extent = 
-               Top = 6
-               Left = 813
-               Bottom = 136
-               Right = 1019
             End
             DisplayFlags = 280
             TopColumn = 0
@@ -195,4 +195,6 @@ Begin DesignProperties =
    Begin CriteriaPane = 
       Begin ColumnWidths = 11
          Column = 144', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'vyuCFBatchPostTransactions';
+
+
 

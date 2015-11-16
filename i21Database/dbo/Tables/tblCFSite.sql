@@ -60,11 +60,14 @@
     [intLastModifiedUserId]          INT            NULL,
     [dtmLastModified]                DATETIME       NULL,
     [intConcurrencyId]               INT            CONSTRAINT [DF_tblCFSite_intConcurrencyId] DEFAULT ((1)) NULL,
-    [intImportMapperId] INT NULL, 
+    [intImportMapperId]              INT            NULL,
     CONSTRAINT [PK_tblCFSiteLocation] PRIMARY KEY CLUSTERED ([intSiteId] ASC),
     CONSTRAINT [FK_tblCFSite_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
-    CONSTRAINT [FK_tblCFSite_tblCFSiteGroup] FOREIGN KEY ([intAdjustmentSiteGroupId]) REFERENCES [dbo].[tblCFSiteGroup] ([intSiteGroupId])
+    CONSTRAINT [FK_tblCFSite_tblCFSiteGroup] FOREIGN KEY ([intAdjustmentSiteGroupId]) REFERENCES [dbo].[tblCFSiteGroup] ([intSiteGroupId]),
+    CONSTRAINT [FK_tblCFSite_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );
+
+
 
 
 
