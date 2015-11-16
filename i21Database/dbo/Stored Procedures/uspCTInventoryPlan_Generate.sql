@@ -243,7 +243,6 @@ BEGIN TRY
 			SET @OpeningInventory = 0
 
 		DECLARE @PastDueExistingPurchases DECIMAL(24, 6)
-
 		SET @PastDueExistingPurchases = ISNULL((
 					SELECT SUM(CASE 
 								WHEN @TargetUOMKey = IUOM.intUnitMeasureId
@@ -256,6 +255,16 @@ BEGIN TRY
 						AND SS.intContractStatusId = 1
 						AND SS.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
 					), 0)
+
+		DECLARE @PastDueIntransitPurchases DECIMAL(24, 6)
+		SET @PastDueIntransitPurchases = ISNULL((
+										SELECT SUM(dblQtyInStockUOM)
+										FROM [dbo].[vyuLGInventoryView]
+										WHERE intItemId = @intItemId
+											AND strStatus = 'In-transit'
+											AND dtmInventorizedDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
+										), 0)
+
 		SET @strItemNo = @strItemNo + ' (' + @TargetUOMName + ' per ' + @SourceUOMName + ' --> ' + CAST(@Conversion_Factor AS NVARCHAR(30)) + ')'
 		SET @SQL = @SQL + ' INSERT INTO @Table (intItemId , strItemNo , StdUOM , BaseUOM , AttributeId , strAttributeName ) 
 		SELECT ' + Cast(@intItemId AS NVARCHAR(10)) + ', ''' + @strItemNo + ''', ''' + @SourceUOMName + ''', ''' + @TargetUOMName + ''', intReportAttributeID, strAttributeName 
@@ -685,6 +694,34 @@ BEGIN TRY
 							SET @SQL_ExistingPurchases_Ext = @SQL_ExistingPurchases_Ext + ' SET @ExistingPurchases' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@ExistingPurchases_Ext, 0) AS NVARCHAR(50))
 							SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = ' + Cast(@MinReportAttributeID_Ext AS NVARCHAR(10)) + ' '
 							SET @SQL = @SQL + @SQL_ExistingPurchases_Ext
+
+							-- Open Purchases & In-transit Purchases
+							DECLARE @SQL_IntransitPurchases_Exec_Ext NVARCHAR(MAX)
+
+							SET @SQL_IntransitPurchases_Exec_Ext = 'SELECT @IntransitPurchases = ' + CAST(ISNULL((
+											SELECT SUM(dblQtyInStockUOM)
+											FROM [dbo].[vyuLGInventoryView]
+											WHERE intItemId = @intItemId
+												AND strStatus = 'In-transit'
+												AND left(convert(CHAR(12), dtmInventorizedDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+												AND right(convert(CHAR(12), dtmInventorizedDate, 107), 4) = right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+											), 0) AS NVARCHAR(50)) + ' '
+
+							DECLARE @IntransitPurchases_Ext DECIMAL(24, 6)
+
+							SET @IntransitPurchases_Ext = 0
+
+							EXEC sp_executesql @SQL_IntransitPurchases_Exec_Ext
+								,N'@IntransitPurchases decimal(24,6) out'
+								,@IntransitPurchases_Ext OUT
+
+							SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
+							SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@IntransitPurchases_Ext, 0) AS NVARCHAR(50))
+							SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 14'
+
+							SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueExistingPurchases) - convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
+							SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@ExistingPurchases_Ext, 0) - ISNULL(@IntransitPurchases_Ext, 0) AS NVARCHAR(50))
+							SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 13'
 						END
 
 						IF @MinReportAttributeID_Ext = 6 --Planned Purchases - (Convert to base UOM)
@@ -1154,6 +1191,34 @@ BEGIN TRY
 						SET @SQL_ExistingPurchases = @SQL_ExistingPurchases + ' SET @ExistingPurchases' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@ExistingPurchases, 0) AS NVARCHAR(50))
 						SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = ' + Cast(@MinReportAttributeID AS NVARCHAR(10)) + ' '
 						SET @SQL = @SQL + @SQL_ExistingPurchases
+
+						-- Open Purchases & In-transit Purchases
+						DECLARE @SQL_IntransitPurchases_Exec NVARCHAR(MAX)
+
+						SET @SQL_IntransitPurchases_Exec = 'SELECT @IntransitPurchases = ' + CAST(ISNULL((
+										SELECT SUM(dblQtyInStockUOM)
+										FROM [dbo].[vyuLGInventoryView]
+										WHERE intItemId = @intItemId
+											AND strStatus = 'In-transit'
+											AND left(convert(CHAR(12), dtmInventorizedDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+											AND right(convert(CHAR(12), dtmInventorizedDate, 107), 4) = right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+										), 0) AS NVARCHAR(50)) + ' '
+
+						DECLARE @IntransitPurchases DECIMAL(24, 6)
+
+						SET @IntransitPurchases = 0
+
+						EXEC sp_executesql @SQL_IntransitPurchases_Exec
+							,N'@IntransitPurchases decimal(24,6) out'
+							,@IntransitPurchases OUT
+
+						SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
+						SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@IntransitPurchases, 0) AS NVARCHAR(50))
+						SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 14'
+
+						SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueExistingPurchases) - convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
+						SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@ExistingPurchases, 0) - ISNULL(@IntransitPurchases, 0) AS NVARCHAR(50))
+						SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 13'
 					END
 
 					IF @MinReportAttributeID = 6 --Planned Purchases - (Convert to base UOM)
@@ -1613,7 +1678,9 @@ BEGIN TRY
 
 	SET @SQL2 = @SQL2 + '  WHERE AttributeId = 3 '
 	SET @SQL = @SQL + @SQL2
-	SET @SQL = @SQL + ' SELECT * FROM @Table ORDER By intItemId, AttributeId '
+	--SET @SQL = @SQL + ' SELECT * FROM @Table ORDER By intItemId, AttributeId '
+	SET @SQL = @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
+
 	-- ******* Plan Totals start *****************
 	SET @SQL = @SQL + 'DECLARE @Table_Sum table(AttributeId int, strAttributeName nvarchar(50)
 						, OpeningInv decimal(24,6), PastDue nvarchar(35)'
@@ -1641,7 +1708,8 @@ BEGIN TRY
 		SET @Cnt = @Cnt + 1
 	END
 
-	SET @SQL = @SQL + ' FROM @Table WHERE AttributeId <> 1 
+	--SET @SQL = @SQL + ' FROM @Table WHERE AttributeId <> 1 
+	SET @SQL = @SQL + ' FROM @Table WHERE AttributeId NOT IN (1,13,14) 
 						Group By AttributeId, strAttributeName 
 						Order By AttributeId'
 	-- Weeks Of Supply					

@@ -442,3 +442,38 @@ BEGIN
 	VALUES(1,12,'Short/Excess Inventory')
 END
 GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 13)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,13,'Open Purchases')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblCTReportAttribute WHERE intReportMasterID = 1 AND intReportAttributeID = 14)
+BEGIN
+	INSERT INTO tblCTReportAttribute(intReportMasterID,intReportAttributeID,strAttributeName)
+	VALUES(1,14,'In-transit Purchases')
+END
+GO
+
+GO
+UPDATE tblCTReportAttribute SET intDisplayOrder = 1 WHERE intReportAttributeID = 1
+UPDATE tblCTReportAttribute SET intDisplayOrder = 2 WHERE intReportAttributeID = 2
+UPDATE tblCTReportAttribute SET intDisplayOrder = 3 WHERE intReportAttributeID = 3
+UPDATE tblCTReportAttribute SET intDisplayOrder = 4 WHERE intReportAttributeID = 4
+
+UPDATE tblCTReportAttribute SET intDisplayOrder = 5 WHERE intReportAttributeID = 13
+UPDATE tblCTReportAttribute SET intDisplayOrder = 6 WHERE intReportAttributeID = 14
+
+UPDATE tblCTReportAttribute SET intDisplayOrder = 7 WHERE intReportAttributeID = 5
+UPDATE tblCTReportAttribute SET intDisplayOrder = 8 WHERE intReportAttributeID = 6
+UPDATE tblCTReportAttribute SET intDisplayOrder = 9 WHERE intReportAttributeID = 7
+UPDATE tblCTReportAttribute SET intDisplayOrder = 10 WHERE intReportAttributeID = 8
+UPDATE tblCTReportAttribute SET intDisplayOrder = 11 WHERE intReportAttributeID = 9
+UPDATE tblCTReportAttribute SET intDisplayOrder = 12 WHERE intReportAttributeID = 10
+UPDATE tblCTReportAttribute SET intDisplayOrder = 13 WHERE intReportAttributeID = 11
+UPDATE tblCTReportAttribute SET intDisplayOrder = 14 WHERE intReportAttributeID = 12
+GO
