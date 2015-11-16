@@ -2932,6 +2932,8 @@
     <Build Include="dbo\Views\vyuSMMenuPermissionUserRole.sql" />
     <Build Include="dbo\Views\vyuSMControlPermissionUserRole.sql" />
     <Build Include="dbo\Views\vyuSMUserSecurityMenuFavoriteUserRole.sql" />
+    <Build Include="dbo\Tables\tblMFMeasurement.sql" />
+    <Build Include="dbo\Tables\tblMFReadingPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
