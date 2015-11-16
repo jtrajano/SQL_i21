@@ -2927,6 +2927,7 @@
     <Build Include="dbo\Views\vyuPATCustomerStatus.sql" />
     <Build Include="dbo\Tables\tblPATCancelEquity.sql" />
     <Build Include="dbo\Tables\tblPATCancelEquityDetail.sql" />
+    <Build Include="dbo\Tables\tblWHCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
