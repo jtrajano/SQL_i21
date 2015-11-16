@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblWHCompanyPreference]
 (
 	intCompanyPreferenceId INT NOT NULL IDENTITY,
+	intCompanyLocationId INT,
 	intAllowablePickDayRange INT,
 	ysnAllowMoveAssignedTask BIT,
 	strHandheldType NVARCHAR(50),
