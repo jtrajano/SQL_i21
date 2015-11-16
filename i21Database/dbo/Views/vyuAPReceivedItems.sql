@@ -42,6 +42,7 @@ FROM
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
 		,[intScaleTicketNumber]		=	NULL
+		,[intShipmentContractQtyId]	=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -121,6 +122,7 @@ FROM
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
 	,[intScaleTicketNumber]		=	NULL
+	,[intShipmentContractQtyId]	=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -166,6 +168,7 @@ FROM
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
 	,[intScaleTicketNumber]		=	G.strTicketNumber
+	,[intShipmentContractQtyId]	=	NULL
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -216,5 +219,6 @@ FROM
 		,[intScaleTicketId]							=	NULL
 		,[intScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
+		,[intShipmentContractQtyId]					=	NULL
 	FROM [vyuAPChargesForBilling] A
 ) Items
