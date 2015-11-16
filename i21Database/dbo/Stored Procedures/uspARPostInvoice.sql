@@ -217,12 +217,14 @@ SET @batchIdUsed = @batchId
 					@batchId,
 					A.intInvoiceId
 				FROM 
-					tblARInvoice A 
+					tblARInvoice A
 				INNER JOIN 
 					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
+						ON A.intInvoiceId = B.intInvoiceId				
 				WHERE  
-					A.dblInvoiceTotal = 0.00
+					A.dblInvoiceTotal = 0.00			
+					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = A.intInvoiceId)		
+					
 					
 				--negative amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
