@@ -16,7 +16,10 @@ SELECT DISTINCT
 	 , P.intPaymentId	 
 	 , I.intEntityCustomerId
 	 , PM.strPaymentMethod
-	 , I.intInvoiceId	 
+	 , I.intInvoiceId
+	 , blbCompanyLogo = [dbo].fnSMGetCompanyLogo('Header')
+	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
 FROM tblARInvoice I
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId 
 							         LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) 
@@ -67,7 +70,10 @@ SELECT DISTINCT
 	 , P.intPaymentId	 
 	 , I.intEntityCustomerId
 	 , PM.strPaymentMethod
-	 , I.intInvoiceId	 
+	 , I.intInvoiceId
+	 , blbCompanyLogo = NULL
+	 , strCompanyName = NULL
+	 , strCompanyAddress = NULL
 FROM tblARInvoice I
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId 
 							         LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) 
@@ -119,6 +125,9 @@ SELECT DISTINCT
 	 , I.intEntityCustomerId
 	 , strPaymentMethod = ''
 	 , I.intInvoiceId
+	 , blbCompanyLogo = NULL
+	 , strCompanyName = NULL
+	 , strCompanyAddress = NULL
 	 , grandDblInvoiceTotal = I.dblInvoiceTotal
      , grandDblAmountApplied = I.dblPayment
 	 , grandDblAmountDue     = I.dblAmountDue
