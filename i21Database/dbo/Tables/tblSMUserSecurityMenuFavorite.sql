@@ -2,7 +2,7 @@
 (
 	[intUserSecurityMenuFavoriteId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intMenuId] INT NOT NULL, 
-	[intEntityUserSecurityId] INT NOT NULL, 
+	[intEntityUserSecurityId] INT NULL, 
 	[intCompanyLocationId] INT NULL, 
     [intSort] INT NULL DEFAULT (1), 
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
