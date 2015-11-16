@@ -39,14 +39,14 @@ DECLARE @intId AS INT
 		,@strActualCostId AS NVARCHAR(50)
 
 DECLARE @CostingMethod AS INT 
-		,@strTransactionForm AS NVARCHAR(255)
-		
--- Create the CONSTANT variables for the costing methods
+		,@strTransactionForm AS NVARCHAR(255)		
+
+-- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4
-		,@LOTCOST AS INT = 5
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5	
 		
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
