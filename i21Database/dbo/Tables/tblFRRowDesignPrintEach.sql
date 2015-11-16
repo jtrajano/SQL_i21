@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblFRRowDesign] (
+﻿CREATE TABLE [dbo].[tblFRRowDesignPrintEach] (
     [intRowDetailId]			INT             IDENTITY (1, 1) NOT NULL,
     [intRowId]					INT             NOT NULL,
     [intRefNo]					INT             NOT NULL,
@@ -23,8 +23,9 @@
 	[ysnOverrideFormula]		BIT             DEFAULT 0 NULL,
 	[ysnOverrideColumnFormula]	BIT             DEFAULT 0 NULL,
     [intSort]					INT             NULL,
+	[dtmEntered]				DATETIME        NULL,
     [intConcurrencyId]			INT             DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblFRRowDesign] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC),
-    CONSTRAINT [FK_tblFRRowDesign_tblFRRow] FOREIGN KEY([intRowId]) REFERENCES [dbo].[tblFRRow] ([intRowId]) ON DELETE CASCADE
+    CONSTRAINT [PK_tblFRRowDesignPrintEach] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC),
+    CONSTRAINT [FK_tblFRRowDesignPrintEach_tblFRRow] FOREIGN KEY([intRowId]) REFERENCES [dbo].[tblFRRow] ([intRowId]) ON DELETE CASCADE
 );
 

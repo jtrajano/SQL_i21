@@ -2921,6 +2921,8 @@
     <Build Include="dbo\Stored Procedures\uspMFPickListReport.sql" />
     <Build Include="dbo\Views\vyuCTContStsAllocation.sql" />
     <Build Include="dbo\Views\vyuCTContStsPickedLot.sql" />
+    <Build Include="dbo\Tables\tblFRRowDesignPrintEach.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDRowDesignPrintEach.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
