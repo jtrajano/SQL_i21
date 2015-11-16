@@ -51,7 +51,7 @@ INSERT INTO [tblGLJournal]
            ,[intFiscalPeriodId]
            ,[intFiscalYearId]
            ,[intJournalIdToReverse])
-	SELECT @strPrefix + CONVERT(NVARCHAR(10), @intNumber)
+	SELECT @strJournalId
            ,[strTransactionType]
            ,GETDATE()
            ,[strReverseLink]
