@@ -2923,6 +2923,8 @@
     <Build Include="dbo\Views\vyuCTContStsPickedLot.sql" />
     <Build Include="dbo\Tables\tblFRRowDesignPrintEach.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDRowDesignPrintEach.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostStockStatus.sql" />
+    <Build Include="dbo\Views\vyuPATCustomerStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
