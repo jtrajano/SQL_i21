@@ -208,6 +208,38 @@ BEGIN TRY
 		--,CL.intWorkOrderInputLotId
 		,S.intLotId
 
+	INSERT INTO dbo.tblWHOrderManifest (
+		intConcurrencyId
+		,intOrderLineItemId
+		,intOrderHeaderId
+		,strManifestItemNote
+		,intSKUId
+		,intLotId
+		,strSSCCNo
+		,intLastUpdateId
+		,dtmLastUpdateOn
+		)
+	SELECT 1
+		,(
+			SELECT TOP 1 LI.intOrderLineItemId
+			FROM dbo.tblWHOrderLineItem LI
+			WHERE LI.intLotId = S.intLotId
+				AND LI.intOrderHeaderId = @intOrderHeaderId
+			)
+		,@intOrderHeaderId
+		,''
+		,S.intSKUId
+		,S.intLotId
+		,''
+		,@intUserId
+		,@dtmCurrentDate
+	FROM dbo.tblWHSKU S
+	WHERE S.intContainerId IN (
+			SELECT x.intContainerId
+			FROM OPENXML(@idoc, 'root/Containers/Container', 2) WITH (intContainerId INT) x
+			)
+
+
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc

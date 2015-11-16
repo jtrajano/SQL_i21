@@ -3,7 +3,7 @@ AS
 BEGIN
 	DECLARE @strLocationName NVARCHAR(50)
 		,@idoc INT
-		,@strCompanyLocationSubLocation NVARCHAR(50)
+		,@strSubLocationName NVARCHAR(50)
 		,@dtmPlannedDate DATETIME
 		,@strShiftName NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
@@ -12,7 +12,6 @@ BEGIN
 		,@intCompanyLocationSubLocationId INT
 		,@intItemId INT
 		,@intWorkOrderId INT
-		,@strSubLocationName NVARCHAR(50)
 		,@intLocationId INT
 		,@intPlannedShiftId INT
 
@@ -47,9 +46,9 @@ BEGIN
 	FROM @temp_Params
 	WHERE [fieldname] = 'strLocationName'
 
-	SELECT @strCompanyLocationSubLocation = [from]
+	SELECT @strSubLocationName = [from]
 	FROM @temp_Params
-	WHERE [fieldname] = 'strCompanyLocationSubLocation'
+	WHERE [fieldname] = 'strSubLocationName'
 
 	SELECT @dtmPlannedDate = [from]
 	FROM @temp_Params
