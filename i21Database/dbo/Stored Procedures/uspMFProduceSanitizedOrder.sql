@@ -45,6 +45,7 @@ BEGIN TRY
 		,@intOrderLineItemId INT
 		,@intInventoryAdjustmentId INT
 		,@strLotTracking NVARCHAR(50)
+		,@dblOutputWeightPerQty numeric(18,6)
 
 	SELECT @strDefaultStatusForSanitizedLot = strDefaultStatusForSanitizedLot
 	FROM dbo.tblMFCompanyPreference
@@ -191,7 +192,8 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		IF @dblInputWeightPerQty <> @dblWeightPerQty
+		Select @dblOutputWeightPerQty =dblWeightPerQty from tblICLot Where intLotId=@intOutputLotId
+		IF @dblOutputWeightPerQty <> @dblWeightPerQty
 		BEGIN
 			RAISERROR (
 					90003
