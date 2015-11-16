@@ -139,6 +139,8 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
+	DELETE FROM tblICStockReservation WHERE intTransactionId=@intWorkOrderId
+
 	SELECT @intExecutionOrder = intExecutionOrder
 		,@intManufacturingCellId = intManufacturingCellId
 		,@dtmPlannedDate = dtmPlannedDate

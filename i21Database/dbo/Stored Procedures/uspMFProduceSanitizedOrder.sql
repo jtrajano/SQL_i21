@@ -117,6 +117,10 @@ BEGIN TRY
 			,@strNotes = 'Production - Adjust'
 	END
 
+	UPDATE tblICStockReservation
+	SET dblQty =dblQty-@dblWeight
+	WHERE intLotId=@intInputLotId and intTransactionId=@intWorkOrderId
+
 	SELECT @dtmCreated = Getdate()
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated, @intLocationId)
