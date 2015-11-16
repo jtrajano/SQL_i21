@@ -92,7 +92,8 @@ BEGIN TRY
 					ELSE	''
 			END		AS		strSummary,
 			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
-			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller
+			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
+			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 	
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
