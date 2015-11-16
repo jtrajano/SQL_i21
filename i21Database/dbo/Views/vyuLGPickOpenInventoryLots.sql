@@ -73,6 +73,7 @@ SELECT Lot.intLotId
 	, ShipmentBL.strBLNumber
 	, CTDetail.strEntityName as strVendor
 	, Shipment.intTrackingNumber
+	, Shipment.dtmInventorizedDate
 
 FROM tblICLot Lot
 LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
