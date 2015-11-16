@@ -2934,6 +2934,7 @@
     <Build Include="dbo\Views\vyuSMUserSecurityMenuFavoriteUserRole.sql" />
     <Build Include="dbo\Tables\tblMFMeasurement.sql" />
     <Build Include="dbo\Tables\tblMFReadingPoint.sql" />
+    <Build Include="dbo\Views\vyuRKCurrencyContractSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

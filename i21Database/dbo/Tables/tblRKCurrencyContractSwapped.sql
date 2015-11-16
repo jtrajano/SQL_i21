@@ -1,5 +1,4 @@
-﻿
-CREATE TABLE dbo.[tblRKCurrencyContractSwapped]
+﻿CREATE TABLE dbo.[tblRKCurrencyContractSwapped]
 (
 	[intCurrencyContractSwapId] [int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
@@ -16,4 +15,3 @@ CREATE TABLE dbo.[tblRKCurrencyContractSwapped]
     CONSTRAINT [PK_tblRKCurrencyContractSwapped_intCurrencyContractSwapId] PRIMARY KEY CLUSTERED ([intCurrencyContractSwapId] ASC),
 	CONSTRAINT [FK_tblRKCurrencyContractSwapped_tblRKCurrencyContract_intCurrencyContractId] FOREIGN KEY([intCurrencyContractId]) REFERENCES [dbo].[tblRKCurrencyContract] ([intCurrencyContractId]),
 )    
-
