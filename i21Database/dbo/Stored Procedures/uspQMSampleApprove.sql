@@ -27,6 +27,8 @@ BEGIN TRY
 	DECLARE @intStorageLocationId INT
 	DECLARE @intCurrentLotStatusId INT
 	DECLARE @intLotId INT
+	DECLARE @intApproveLotStatusId INT
+	DECLARE @ysnChangeLotStatusOnApproveforPreSanitizeLot BIT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -42,6 +44,12 @@ BEGIN TRY
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			)
+
+	SELECT @ysnChangeLotStatusOnApproveforPreSanitizeLot = ysnChangeLotStatusOnApproveforPreSanitizeLot
+	FROM dbo.tblQMCompanyPreference
+
+	SELECT @intApproveLotStatusId = ISNULL(intApproveLotStatus, @intLotStatusId)
+	FROM dbo.tblQMCompanyPreference
 
 	BEGIN TRAN
 
@@ -69,10 +77,16 @@ BEGIN TRY
 		FROM dbo.tblICLot
 		WHERE intLotId = @intProductValueId
 
-		IF @intCurrentLotStatusId <> @intLotStatusId
+		IF @intCurrentLotStatusId = 4 -- Pre-Sanitized
+		BEGIN
+			IF @ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
+				SET @intApproveLotStatusId = @intCurrentLotStatusId
+		END
+
+		IF @intCurrentLotStatusId <> @intApproveLotStatusId
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
-				,@intNewLotStatusId = @intLotStatusId
+				,@intNewLotStatusId = @intApproveLotStatusId
 				,@intUserId = @intLastModifiedUserId
 		END
 	END
@@ -125,10 +139,16 @@ BEGIN TRY
 			FROM @ParentLotData
 			WHERE intSeqNo = @intSeqNo
 
-			IF @intCurrentLotStatusId <> @intLotStatusId
+			IF @intCurrentLotStatusId = 4 -- Pre-Sanitized
+			BEGIN
+				IF @ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
+					SET @intApproveLotStatusId = @intCurrentLotStatusId
+			END
+
+			IF @intCurrentLotStatusId <> @intApproveLotStatusId
 			BEGIN
 				EXEC uspMFSetLotStatus @intLotId = @intLotId
-					,@intNewLotStatusId = @intLotStatusId
+					,@intNewLotStatusId = @intApproveLotStatusId
 					,@intUserId = @intLastModifiedUserId
 			END
 

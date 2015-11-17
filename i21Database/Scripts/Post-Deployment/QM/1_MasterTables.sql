@@ -555,3 +555,21 @@ UPDATE tblQMCompanyPreference
 SET ysnIsSamplePrintEnable = 0
 WHERE ysnIsSamplePrintEnable IS NULL
 GO
+
+GO
+UPDATE tblQMCompanyPreference
+SET intApproveLotStatus = 1
+WHERE intApproveLotStatus IS NULL
+GO
+
+GO
+UPDATE tblQMCompanyPreference
+SET intRejectLotStatus = 2
+WHERE intRejectLotStatus IS NULL
+GO
+
+GO
+UPDATE tblQMCompanyPreference
+SET ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
+WHERE ysnChangeLotStatusOnApproveforPreSanitizeLot IS NULL
+GO
