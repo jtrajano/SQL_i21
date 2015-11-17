@@ -378,6 +378,7 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
                                                                 itemId: 'grdTax',
+                                                                header: false,
                                                                 title: 'Taxes',
                                                                 forceFit: true,
                                                                 dockedItems: [
