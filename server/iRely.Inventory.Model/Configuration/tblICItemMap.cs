@@ -51,8 +51,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMask3).HasColumnName("strMask3");
             this.Property(t => t.intPatronageCategoryId).HasColumnName("intPatronageCategoryId");
             this.Property(t => t.intPatronageCategoryDirectId).HasColumnName("intPatronageCategoryDirectId");
-            this.Property(t => t.intSalesTaxGroupId).HasColumnName("intSalesTaxGroupId");
-            this.Property(t => t.intPurchaseTaxGroupId).HasColumnName("intPurchaseTaxGroupId");
             this.Property(t => t.ysnStockedItem).HasColumnName("ysnStockedItem");
             this.Property(t => t.ysnDyedFuel).HasColumnName("ysnDyedFuel");
             this.Property(t => t.strBarcodePrint).HasColumnName("strBarcodePrint");
@@ -378,7 +376,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStockUOMId).HasColumnName("intStockUOMId");
             this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.strStockUOMType).HasColumnName("strStockUOMType");
-            this.Property(t => t.dblStockUnitQty).HasColumnName("dblStockUnitQty");
+            this.Property(t => t.dblStockUnitQty).HasColumnName("dblStockUnitQty").HasPrecision(18, 6);
             this.Property(t => t.intReceiveUOMId).HasColumnName("intReceiveUOMId");
             this.Property(t => t.dblReceiveUOMConvFactor).HasColumnName("dblReceiveUOMConvFactor").HasPrecision(18, 6);
             this.Property(t => t.intIssueUOMId).HasColumnName("intIssueUOMId");
@@ -437,10 +435,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMaintenanceCalculationMethod).HasColumnName("strMaintenanceCalculationMethod");
             this.Property(t => t.dblOverReceiveTolerance).HasColumnName("dblOverReceiveTolerance").HasPrecision(18, 6);
             this.Property(t => t.dblWeightTolerance).HasColumnName("dblWeightTolerance").HasPrecision(18, 6);
-            this.Property(t => t.intSalesTaxGroupId).HasColumnName("intSalesTaxGroupId");
-            this.Property(t => t.strSalesTax).HasColumnName("strSalesTax");
-            this.Property(t => t.intPurchaseTaxGroupId).HasColumnName("intPurchaseTaxGroupId");
-            this.Property(t => t.strPurchaseTax).HasColumnName("strPurchaseTax");
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");

@@ -93,8 +93,7 @@ namespace iRely.Inventory.Model
         public int? intItemUnitMeasureId { get; set; }
         public decimal? dblConversionFactor { get; set; }
         public string strUnitMeasure { get; set; }
-        public decimal? dblUnit { get; set; }
-        public decimal? dblPrice { get; set; }
+        public decimal? dblUnitQty { get; set; }
         public int? intSort { get; set; }
     }
 

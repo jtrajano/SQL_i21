@@ -294,40 +294,6 @@ Ext.define('Inventory.view.Item', {
                                                                 fieldLabel: 'Lot Tracking',
                                                                 displayField: 'strLotTracking',
                                                                 valueField: 'strLotTracking'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intTaxGroupMasterId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Tax Group Master Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strTaxGroupMaster',
-                                                                        dataType: 'string',
-                                                                        text: 'Tax Group Master',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkcolumn',
-                                                                        dataIndex: 'ysnSeparateOnInvoice',
-                                                                        dataType: 'boolean',
-                                                                        text: 'Separate on Invoice',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboSalesTaxGroup',
-                                                                fieldLabel: 'Sales Tax Group',
-                                                                displayField: 'strTaxGroupMaster',
-                                                                valueField: 'intTaxGroupMasterId'
                                                             }
                                                         ]
                                                     },
@@ -441,41 +407,6 @@ Ext.define('Inventory.view.Item', {
                                                                 labelWidth: 116,
                                                                 displayField: 'strDescription',
                                                                 valueField: 'strDescription'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intTaxGroupMasterId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Tax Group Master Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strTaxGroupMaster',
-                                                                        dataType: 'string',
-                                                                        text: 'Tax Group Master',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkcolumn',
-                                                                        dataIndex: 'ysnSeparateOnInvoice',
-                                                                        dataType: 'boolean',
-                                                                        text: 'Separate on Invoice',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboPurchaseTaxGroup',
-                                                                fieldLabel: 'Purchase Tax Group',
-                                                                labelWidth: 116,
-                                                                displayField: 'strTaxGroupMaster',
-                                                                valueField: 'intTaxGroupMasterId'
                                                             }
                                                         ]
                                                     }

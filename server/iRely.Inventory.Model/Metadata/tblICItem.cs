@@ -51,8 +51,6 @@ namespace iRely.Inventory.Model
         public string strMask3 { get; set; }
         public int? intPatronageCategoryId { get; set; }
         public int? intPatronageCategoryDirectId { get; set; }
-        public int? intSalesTaxGroupId { get; set; }
-        public int? intPurchaseTaxGroupId { get; set; }
         public bool? ysnStockedItem { get; set; }
         public bool? ysnDyedFuel { get; set; }
         public string strBarcodePrint { get; set; }
@@ -418,10 +416,6 @@ namespace iRely.Inventory.Model
         public string strMaintenanceCalculationMethod { get; set; }
         public decimal? dblOverReceiveTolerance { get; set; }
         public decimal? dblWeightTolerance { get; set; }
-        public int? intSalesTaxGroupId { get; set; }
-        public string strSalesTax { get; set; }
-        public int? intPurchaseTaxGroupId { get; set; }
-        public string strPurchaseTax { get; set; }
         public int? intGradeId { get; set; }
         public string strGrade { get; set; }
         public int? intLifeTime { get; set; }
