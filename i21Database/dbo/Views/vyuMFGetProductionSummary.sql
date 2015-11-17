@@ -27,8 +27,8 @@ SELECT W.intWorkOrderId
 	,US.strUserName
 	,MP.intManufacturingProcessId 
 	,MP.strProcessName 
-FROM dbo.tblMFProductionSummary PS
-JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PS.intWorkOrderId
+FROM dbo.tblMFWorkOrder W
+LEFT JOIN dbo.tblMFProductionSummary PS  ON W.intWorkOrderId = PS.intWorkOrderId
 JOIN dbo.tblMFManufacturingProcess MP On MP.intManufacturingProcessId =W.intManufacturingProcessId 
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
