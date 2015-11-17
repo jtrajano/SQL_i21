@@ -4,6 +4,7 @@
 	intCompanyLocationId INT,
 	intAllowablePickDayRange INT,
 	ysnAllowMoveAssignedTask BIT,
+	ysnScanForkliftOnLogin BIT,
 	strHandheldType NVARCHAR(50),
 	strWarehouseType NVARCHAR(50),
 	intContainerMinimumLength INT,
