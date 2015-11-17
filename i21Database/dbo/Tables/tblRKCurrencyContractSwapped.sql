@@ -13,5 +13,5 @@
     [ysnSwapConfirm] BIT NULL,  
 
     CONSTRAINT [PK_tblRKCurrencyContractSwapped_intCurrencyContractSwapId] PRIMARY KEY CLUSTERED ([intCurrencyContractSwapId] ASC),
-	CONSTRAINT [FK_tblRKCurrencyContractSwapped_tblRKCurrencyContract_intCurrencyContractId] FOREIGN KEY([intCurrencyContractId]) REFERENCES [dbo].[tblRKCurrencyContract] ([intCurrencyContractId]),
+	CONSTRAINT [FK_tblRKCurrencyContractSwapped_tblRKCurrencyContract_intCurrencyContractId] FOREIGN KEY([intCurrencyContractId]) REFERENCES [dbo].[tblRKCurrencyContract] ([intCurrencyContractId]) ON DELETE CASCADE,
 )    
