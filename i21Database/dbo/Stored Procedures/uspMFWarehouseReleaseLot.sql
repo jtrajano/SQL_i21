@@ -22,21 +22,23 @@ BEGIN TRY
 		,@intUserId INT
 		,@idoc INT
 		,@ErrMsg NVARCHAR(MAX)
-		,@dtmCurrentDate datetime
-		,@strGTIN nvarchar(50)
-		,@dtmDateCreated datetime
-		,@intItemUOMId int
-		,@intLayerPerPallet int
-		,@intUnitPerLayer int
+		,@dtmCurrentDate DATETIME
+		,@strGTIN NVARCHAR(50)
+		,@dtmDateCreated DATETIME
+		,@intItemUOMId INT
+		,@intLayerPerPallet INT
+		,@intUnitPerLayer INT
 		,@intBatchId INT
 		,@strUserName NVARCHAR(50)
-		,@intOwnerId int
-		,@intUnitMeasureId int
-		,@intSKUId int
-		,@intStagingLocationId int
-		
-	Select @dtmCurrentDate	=GETDATE()
-	
+		,@intOwnerId INT
+		,@intUnitMeasureId INT
+		,@intSKUId INT
+		,@intStagingLocationId INT
+		,@intAttributeId INT
+		,@strAttributeValue NVARCHAR(50)
+
+	SELECT @dtmCurrentDate = GETDATE()
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -47,7 +49,7 @@ BEGIN TRY
 		,@intUserId = intUserId
 		,@strComment = strComment
 	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intLotId int
+			intLotId INT
 			,strGTINCaseBarCode NVARCHAR(50)
 			,dblReleaseQty NUMERIC(18, 6)
 			,intManufacturingProcessId INT
@@ -80,13 +82,13 @@ BEGIN TRY
 	END
 
 	SELECT @intLotId = intLotId
-		,@strLotNumber=strLotNumber
-		,@intLocationId=intLocationId
+		,@strLotNumber = strLotNumber
+		,@intLocationId = intLocationId
 		,@intItemId = intItemId
 		,@dblQty = dblQty
 		,@intLotStatusId = intLotStatusId
-		,@dtmDateCreated=dtmDateCreated
-		,@intItemUOMId=intItemUOMId
+		,@dtmDateCreated = dtmDateCreated
+		,@intItemUOMId = intItemUOMId
 	FROM dbo.tblICLot
 	WHERE intLotId = @intLotId
 
@@ -96,7 +98,6 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 			)
 	BEGIN
-		
 		RAISERROR (
 				51054
 				,11
@@ -155,9 +156,9 @@ BEGIN TRY
 
 	SELECT @CasesPerPallet = intLayerPerPallet * intUnitPerLayer
 		,@strItemNo = strItemNo
-		,@strGTIN=strGTIN
-		,@intLayerPerPallet=intLayerPerPallet
-		,@intUnitPerLayer=intUnitPerLayer
+		,@strGTIN = strGTIN
+		,@intLayerPerPallet = intLayerPerPallet
+		,@intUnitPerLayer = intUnitPerLayer
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -173,7 +174,10 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @strGTINCaseBarCode NOT IN (@strItemNo,@strGTIN)
+	IF @strGTINCaseBarCode NOT IN (
+			@strItemNo
+			,@strGTIN
+			)
 	BEGIN
 		RAISERROR (
 				51060
@@ -205,6 +209,16 @@ BEGIN TRY
 		AND @CurrentDate BETWEEN dtmShiftStartTime
 			AND dtmShiftEndTime + intEndOffset
 
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Is Warehouse Release Mandatory'
+
+	SELECT @strAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
 	BEGIN TRANSACTION
 
 	UPDATE dbo.tblMFWorkOrderProducedLot
@@ -218,45 +232,51 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
-	Update tblICLot Set intLotStatusId =1 Where intLotId=@intLotId
+	UPDATE tblICLot
+	SET intLotStatusId = 1
+	WHERE intLotId = @intLotId
 
-	Select @intStagingLocationId=intLocationId
-	FROM tblICStorageLocation
-	WHERE ysnDefaultWHStagingUnit=1 AND intLocationId =@intLocationId
+	IF @strAttributeValue = 'True'
+	BEGIN
+		SELECT @intStagingLocationId = intLocationId
+		FROM tblICStorageLocation
+		WHERE ysnDefaultWHStagingUnit = 1
+			AND intLocationId = @intLocationId
 
-	SELECT @strUserName = strUserName
-	FROM dbo.tblSMUserSecurity
-	WHERE intEntityUserSecurityId = @intUserId
+		SELECT @strUserName = strUserName
+		FROM dbo.tblSMUserSecurity
+		WHERE intEntityUserSecurityId = @intUserId
 
-	SELECT @intOwnerId = IO.intOwnerId
-	FROM dbo.tblICItemOwner IO
-	WHERE intItemId=@intItemId
-	
-	SELECT @intUnitMeasureId = intUnitMeasureId
-	FROM dbo.tblICItemUOM
-	WHERE intItemUOMId = @intItemUOMId
+		SELECT @intOwnerId = IO.intOwnerId
+		FROM dbo.tblICItemOwner IO
+		WHERE intItemId = @intItemId
 
-	EXEC dbo.uspSMGetStartingNumber 33
-		,@intBatchId OUTPUT
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM dbo.tblICItemUOM
+		WHERE intItemUOMId = @intItemUOMId
 
-	EXEC dbo.uspWHCreateSKUByLot @strUserName = @strUserName
-		,@intCompanyLocationSubLocationId = @intLocationId
-		,@intDefaultStagingLocationId = @intStagingLocationId
-		,@intItemId = @intItemId
-		,@dblQty = @dblReleaseQty
-		,@intLotId = @intLotId
-		,@dtmProductionDate = @dtmDateCreated
-		,@intOwnerAddressId = @intOwnerId
-		,@ysnStatus = 0
-		,@strPalletLotCode = @strLotNumber
-		,@ysnUseContainerPattern = 1
-		,@intUOMId = @intUnitMeasureId
-		,@intUnitPerLayer = @intUnitPerLayer
-		,@intLayersPerPallet = @intLayerPerPallet
-		,@ysnForced = 1
-		,@ysnSanitized = 0
-		,@strBatchNo = @intBatchId
-		,@intSKUId = @intSKUId OUTPUT
+		EXEC dbo.uspSMGetStartingNumber 33
+			,@intBatchId OUTPUT
+
+		EXEC dbo.uspWHCreateSKUByLot @strUserName = @strUserName
+			,@intCompanyLocationSubLocationId = @intLocationId
+			,@intDefaultStagingLocationId = @intStagingLocationId
+			,@intItemId = @intItemId
+			,@dblQty = @dblReleaseQty
+			,@intLotId = @intLotId
+			,@dtmProductionDate = @dtmDateCreated
+			,@intOwnerAddressId = @intOwnerId
+			,@ysnStatus = 0
+			,@strPalletLotCode = @strLotNumber
+			,@ysnUseContainerPattern = 1
+			,@intUOMId = @intUnitMeasureId
+			,@intUnitPerLayer = @intUnitPerLayer
+			,@intLayersPerPallet = @intLayerPerPallet
+			,@ysnForced = 1
+			,@ysnSanitized = 0
+			,@strBatchNo = @intBatchId
+			,@intSKUId = @intSKUId OUTPUT
+	END
 
 	COMMIT TRANSACTION
 

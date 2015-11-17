@@ -76,6 +76,7 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @ARAccount INT
 		,@DiscountAccount INT
 		,@WriteOffAccount INT
+		,@IncomeInterestAccount INT
 		
 DECLARE @totalInvalid INT
 DECLARE @totalRecords INT
@@ -85,6 +86,7 @@ DECLARE @ErrorMerssage NVARCHAR(MAX)
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPreference WHERE intWriteOffAccountId IS NOT NULL AND intWriteOffAccountId <> 0)
+SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblARCompanyPreference WHERE intInterestIncomeAccountId IS NOT NULL AND intInterestIncomeAccountId <> 0)
 		
 
 DECLARE @UserEntityID int
@@ -410,6 +412,27 @@ SET @batchIdUsed = @batchId
 					ISNULL(D.dblDiscount,0) <> 0
 					AND (@DiscountAccount IS NULL OR @DiscountAccount = 0)
 					
+				--Income Interest Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The Income Interest account in Company Preference was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblARPaymentDetail D
+						ON A.intPaymentId = D.intPaymentId
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				WHERE
+					ISNULL(D.dblInterest,0) <> 0
+					AND (@IncomeInterestAccount IS NULL OR @IncomeInterestAccount = 0)
+					
 				--Bank Account
 				INSERT INTO 
 					@ARReceivableInvalidData
@@ -572,7 +595,7 @@ SET @batchIdUsed = @batchId
 				WHERE
 					B.dblPayment <> 0 
 					AND C.ysnPaid = 0 
-					AND C.dblAmountDue + C.dblDiscount < (B.dblPayment + B.dblDiscount)
+					AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) < ((B.dblPayment + B.dblInterest) - B.dblDiscount)
 					
 				DECLARE @InvoiceIdsForChecking TABLE (
 						intInvoiceId int PRIMARY KEY,
@@ -705,6 +728,44 @@ SET @batchIdUsed = @batchId
 						tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
 					WHERE
 						PD.dblDiscount <> 0
+						AND I.dblAmountDue = 0
+					) AS P1
+						ON I.intInvoiceId = P1.intInvoiceId AND P.intPaymentId <> P1.intPaymentId 		
+						
+				--Invoice with Interest
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Interest has been applied to Invoice: ' + I.strInvoiceNumber + '. Payment: ' + P1.strRecordNumber + ' must unposted first!'
+					,'Receivable'
+					,P.strRecordNumber
+					,@batchId
+					,P.intPaymentId
+				FROM
+					tblARPaymentDetail PD		
+				INNER JOIN
+					tblARPayment P
+						ON PD.intPaymentId = P.intPaymentId
+				INNER JOIN
+					@ARReceivablePostData P2
+						ON P.intPaymentId = P2.intPaymentId	
+				INNER JOIN
+					tblARInvoice I
+						ON PD.intInvoiceId = I.intInvoiceId
+				INNER JOIN
+					(
+					SELECT
+						I.intInvoiceId
+						,P.intPaymentId
+						,P.strRecordNumber
+					FROM
+						tblARPaymentDetail PD		
+					INNER JOIN	
+						tblARPayment P ON PD.intPaymentId = P.intPaymentId	
+					INNER JOIN	
+						tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+					WHERE
+						ISNULL(PD.dblInterest,0) <> 0
 						AND I.dblAmountDue = 0
 					) AS P1
 						ON I.intInvoiceId = P1.intInvoiceId AND P.intPaymentId <> P1.intPaymentId 			
@@ -875,7 +936,7 @@ SET @batchIdUsed = @batchId
 				ON PD.intPaymentId = P.intPaymentId
 		WHERE
 			PD.dblPayment <> 0
-			AND PD.dblDiscount <> 0
+			AND (ISNULL(PD.dblDiscount,0) <> 0 OR ISNULL(PD.dblInterest,0) <> 0)
 		GROUP BY
 			PD.intInvoiceId
 		HAVING
@@ -885,6 +946,7 @@ SET @batchIdUsed = @batchId
 		BEGIN
 			DECLARE @DiscountedInvID INT
 					,@InvoiceDiscount NUMERIC(18,6) = 0
+					,@InvoiceInterest NUMERIC(18,6) = 0
 					,@DicountedInvoiceAmountDue NUMERIC(18,6) = 0
 					,@DicountedInvoicePayment NUMERIC(18,6) = 0	
 					
@@ -897,10 +959,11 @@ SET @batchIdUsed = @batchId
 						dblInvoiceTotal NUMERIC(18,6),
 						dblAmountDue NUMERIC(18,6),
 						dblPayment NUMERIC(18,6),
-						dblDiscount  NUMERIC(18,6)
+						dblDiscount  NUMERIC(18,6),
+						dblInterest NUMERIC(18,6)
 					);
 					
-			INSERT INTO @PaymentsWithDiscount(intPaymentId, intPaymentDetailId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, dblDiscount)
+			INSERT INTO @PaymentsWithDiscount(intPaymentId, intPaymentDetailId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, dblDiscount, dblInterest)
 			SELECT
 				 A.intPaymentId
 				,B.intPaymentDetailId
@@ -909,6 +972,7 @@ SET @batchIdUsed = @batchId
 				,C.dblAmountDue
 				,B.dblPayment
 				,B.dblDiscount
+				,B.dblInterest 
 			FROM
 				tblARPayment A
 			INNER JOIN
@@ -934,22 +998,25 @@ SET @batchIdUsed = @batchId
 					,@DiscountepPaymetDetailID = intPaymentDetailId
 					,@DicountedInvoiceAmountDue = dblAmountDue
 					,@InvoiceDiscount = @InvoiceDiscount + dblDiscount
+					,@InvoiceInterest = @InvoiceInterest + dblInterest
 					,@DicountedInvoicePayment = @DicountedInvoicePayment + dblPayment 
 				FROM
 					@PaymentsWithDiscount
 				ORDER BY intPaymentId
 				
-				IF @DicountedInvoiceAmountDue <> @DicountedInvoicePayment + @InvoiceDiscount
+				IF @DicountedInvoiceAmountDue <> ((@DicountedInvoicePayment - @InvoiceInterest) + @InvoiceDiscount)
 				BEGIN
 					UPDATE tblARPaymentDetail
 					SET
-						dblDiscount = 0.00
+						 dblDiscount = 0.00
+						,dblInterest = 0.00
 					WHERE
 						intPaymentDetailId = @DiscountepPaymetDetailID
 						
 					SET @InvoiceDiscount = 0										
+					SET @InvoiceInterest = 0										
 				END									
-				SET @DicountedInvoiceAmountDue = @DicountedInvoiceAmountDue - (@DicountedInvoicePayment + @InvoiceDiscount)
+				SET @DicountedInvoiceAmountDue = @DicountedInvoiceAmountDue - ((@DicountedInvoicePayment - @InvoiceInterest) + @InvoiceDiscount)
 				DELETE FROM @PaymentsWithDiscount WHERE intPaymentId = @DiscountepPaymetID	
 			END 						
 			DELETE FROM @DiscouuntedInvoices WHERE intInvoiceId = @DiscountedInvID							
@@ -1185,6 +1252,55 @@ IF @post = 1
 			,A.dtmDatePaid
 			,A.intCurrencyId	
 			
+		UNION ALL
+		--DEBIT Interest
+		SELECT
+			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			,strBatchID					= @batchId
+			,intAccountId				= @IncomeInterestAccount 
+			,dblDebit					= SUM(B.dblInterest)
+			,dblCredit					= 0 
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0				
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount) 
+			,strCode					= @CODE
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId  
+			,dblExchangeRate			= 1
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= A.dtmDatePaid
+			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,intJournalLineNo			= A.intPaymentId
+			,ysnIsUnposted				= 0
+			,intUserId					= @userId
+			,intEntityId				= @UserEntityID				
+			,strTransactionId			= A.strRecordNumber
+			,intTransactionId			= A.intPaymentId
+			,strTransactionType			= @SCREEN_NAME
+			,strTransactionForm			= @SCREEN_NAME
+			,strModuleName				= @MODULE_NAME
+			,intConcurrencyId			= 1				 
+		FROM
+			tblARPayment A 
+		INNER JOIN
+			tblARPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+		INNER JOIN
+			tblARCustomer C
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+		INNER JOIN
+			@ARReceivablePostData P
+				ON A.intPaymentId = P.intPaymentId
+		WHERE
+			B.dblInterest <> 0
+			AND B.dblPayment <> 0
+		GROUP BY
+			A.intPaymentId
+			,A.strRecordNumber
+			,C.strCustomerNumber
+			,A.dtmDatePaid
+			,A.intCurrencyId	
+			
 			
 		UNION ALL
 		--CREDIT
@@ -1193,8 +1309,8 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= B.intAccountId 
 			,dblDebit					= 0
-			,dblCredit					= SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
-												THEN B.dblPayment + B.dblDiscount
+			,dblCredit					= SUM((CASE WHEN (B.dblAmountDue = (B.dblPayment - B.dblInterest) + B.dblDiscount)
+												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
 												ELSE B.dblPayment END))
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
@@ -1284,7 +1400,56 @@ IF @post = 1
 			,A.strRecordNumber
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,A.intCurrencyId						
+			,A.intCurrencyId			
+			
+		UNION ALL
+		
+		SELECT
+			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			,strBatchID					= @batchId
+			,intAccountId				= @ARAccount
+			,dblDebit					= 0
+			,dblCredit					= SUM(B.dblInterest) 
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0				
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
+			,strCode					= @CODE
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId  
+			,dblExchangeRate			= 1
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= A.dtmDatePaid
+			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,intJournalLineNo			= A.intPaymentId
+			,ysnIsUnposted				= 0
+			,intUserId					= @userId
+			,intEntityId				= @UserEntityID				
+			,strTransactionId			= A.strRecordNumber
+			,intTransactionId			= A.intPaymentId
+			,strTransactionType			= @SCREEN_NAME
+			,strTransactionForm			= @SCREEN_NAME
+			,strModuleName				= @MODULE_NAME
+			,intConcurrencyId			= 1				 
+		FROM
+			tblARPayment A 
+		INNER JOIN
+			tblARPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+		INNER JOIN
+			tblARCustomer C
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+		INNER JOIN
+			@ARReceivablePostData P
+				ON A.intPaymentId = P.intPaymentId
+		WHERE
+			B.dblInterest <> 0
+			AND B.dblPayment <> 0
+		GROUP BY
+			A.intPaymentId
+			,A.strRecordNumber
+			,C.strCustomerNumber
+			,A.dtmDatePaid
+			,A.intCurrencyId								
 			
 	END TRY
 	BEGIN CATCH	
@@ -1495,11 +1660,13 @@ IF @recap = 0
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount
+				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) - P.dblInterest
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
 						, SUM(A.dblDiscount) dblDiscount
+						, SUM(A.dblInterest) dblInterest
 						,A.intInvoiceId 
 					FROM
 						tblARPaymentDetail A
@@ -1519,7 +1686,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - ((C.dblPayment - C.dblInterest) + C.dblDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1547,7 +1714,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblPayment = CASE WHEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
+				dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1561,7 +1728,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = (((ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) - A.dblPayment)
+				dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) - A.dblPayment)
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1745,11 +1912,13 @@ IF @recap = 0
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount
+				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
 						,SUM(A.dblDiscount) dblDiscount
+						,SUM(A.dblInterest) dblInterest
 						,A.intInvoiceId 
 					FROM
 						tblARPaymentDetail A
@@ -1769,7 +1938,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+				tblARInvoice.dblAmountDue = (C.dblInvoiceTotal + C.dblInterest) - (C.dblPayment + C.dblDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1941,7 +2110,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblPayment = CASE WHEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
+			dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -1957,7 +2126,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblAmountDue = (((ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END))) - A.dblPayment)
+			dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END))) - A.dblPayment)
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN

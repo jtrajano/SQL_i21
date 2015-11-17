@@ -2912,6 +2912,31 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransferIn.sql" />
     <Build Include="dbo\Stored Procedures\uspSMApplyOriginMenusIcon.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportProcessProductionSummary.sql" />
+    <Build Include="dbo\Tables\tblCTAction.sql" />
+    <Build Include="dbo\Tables\tblCTEvent.sql" />
+    <Build Include="dbo\Tables\tblCTEventRecipient.sql" />
+    <Build Include="dbo\Tables\tblCTEventMatrix.sql" />
+    <Build Include="dbo\Tables\tblCTEventMatrixDetail.sql" />
+    <Build Include="dbo\Tables\tblCTContractEvent.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickListReport.sql" />
+    <Build Include="dbo\Views\vyuCTContStsAllocation.sql" />
+    <Build Include="dbo\Views\vyuCTContStsPickedLot.sql" />
+    <Build Include="dbo\Tables\tblFRRowDesignPrintEach.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDRowDesignPrintEach.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostStockStatus.sql" />
+    <Build Include="dbo\Views\vyuPATCustomerStatus.sql" />
+    <Build Include="dbo\Tables\tblPATCancelEquity.sql" />
+    <Build Include="dbo\Tables\tblPATCancelEquityDetail.sql" />
+    <Build Include="dbo\Tables\tblWHCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuSMScreenPermissionUserRole.sql" />
+    <Build Include="dbo\Views\vyuSMMenuPermissionUserRole.sql" />
+    <Build Include="dbo\Views\vyuSMControlPermissionUserRole.sql" />
+    <Build Include="dbo\Views\vyuSMUserSecurityMenuFavoriteUserRole.sql" />
+    <Build Include="dbo\Tables\tblMFMeasurement.sql" />
+    <Build Include="dbo\Tables\tblMFReadingPoint.sql" />
+    <Build Include="dbo\Views\vyuRKCurrencyContractSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLBatchPostEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -14,8 +14,8 @@
 
 		CONSTRAINT [PK_tblMFMachineMeasurement] PRIMARY KEY ([intMachineMeasurementId]), 
 		CONSTRAINT [FK_tblMFMachineMeasurement_tblMFMachine] FOREIGN KEY ([intMachineId]) REFERENCES [tblMFMachine]([intMachineId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblMFMachineMeasurement_tblICMeasurement] FOREIGN KEY ([intMeasurementId]) REFERENCES [tblICMeasurement]([intMeasurementId]),
-		CONSTRAINT [FK_tblMFMachineMeasurement_tblICReadingPoint] FOREIGN KEY ([intReadingPointId]) REFERENCES [tblICReadingPoint]([intReadingPointId])  
+		CONSTRAINT [FK_tblMFMachineMeasurement_tblMFMeasurement] FOREIGN KEY ([intMeasurementId]) REFERENCES [tblMFMeasurement]([intMeasurementId]),
+		CONSTRAINT [FK_tblMFMachineMeasurement_tblMFReadingPoint] FOREIGN KEY ([intReadingPointId]) REFERENCES [tblMFReadingPoint]([intReadingPointId])  
 	)
 
 	GO

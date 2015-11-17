@@ -21,6 +21,9 @@ SELECT
 	,'' as strLotNumber
 	,Shipment.strSubLocationName as strWarehouse
 	,'' as strCondition
+	,Shipment.dtmInventorizedDate
+	,dblQtyInStockUOM = (Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0)) * dbo.fnICConvertUOMtoStockUnit (Shipment.intItemId, Shipment.intItemUOMId, 1)
+	,Shipment.intItemId
 
 FROM vyuLGInboundShipmentView Shipment
 WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 AND Shipment.ysnInventorized = 1
@@ -47,6 +50,9 @@ SELECT
 	,Spot.strLotNumber
 	,Spot.strSubLocationName as strWarehouse
 	,Spot.strCondition
+	,Spot.dtmInventorizedDate
+	,dblQtyInStockUOM = Spot.dblQty * dbo.fnICConvertUOMtoStockUnit (Spot.intItemId, Spot.intItemUOMId, 1)
+	,Spot.intItemId
 
 FROM vyuLGPickOpenInventoryLots Spot
 WHERE Spot.dblQty > 0.0

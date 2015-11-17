@@ -96,7 +96,7 @@ BEGIN TRY
 		,x.dblBalance
 		,x.dtmExpectedDate
 		,x.intStatusId
-		,Row_number() OVER (ORDER BY x.intSequenceNo Desc,x.intExecutionOrder
+		,Row_number() OVER (ORDER BY x.intSequenceNo Desc,x.intExecutionOrder,x.ysnEOModified Desc
 			) as intExecutionOrder
 		,x.strComments
 		,x.strNote
@@ -144,6 +144,7 @@ BEGIN TRY
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,intSequenceNo int
+			,ysnEOModified bit
 			) x Where x.intStatusId<>1
 	ORDER BY x.intExecutionOrder
 	
@@ -293,6 +294,7 @@ BEGIN TRY
 		,WS.intSequenceNo
 		,W.ysnIngredientAvailable 
 		,W.dtmLastProducedDate
+		,CONVERT(bit,0) AS ysnEOModified
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId

@@ -130,7 +130,9 @@ BEGIN
 				     LEFT JOIN tblICUnitMeasureConversion UOMCON ON UOMCON.intUnitMeasureId = UOM1.intUnitMeasureId
 						  AND UOMCON.intStockUnitMeasureId = MUOM.intUnitMeasureId
 					WHERE Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + ' order by intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
-	SET @SQL = CHAR(13) + @SQL + '	SELECT * FROM @Table'
+	--SET @SQL = CHAR(13) + @SQL + '	SELECT * FROM @Table'
+	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
+
 	SET @SQL = @SQL + ' SELECT AttributeId, strAttributeName
 	,SUM( CASE WHEN ISNUMERIC(OpeningInv)=1 THEN CAST(OpeningInv AS float)  
                      ELSE 0 END ) [OpeningInv]

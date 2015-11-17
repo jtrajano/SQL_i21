@@ -1354,3 +1354,39 @@ UPDATE tblMFCompanyPreference
 SET strBlendProductionStagingLocation = 'BLENDPRESTG'
 Where strBlendProductionStagingLocation IS NULL
 GO
+IF NOT EXISTS(SELECT * FROM tblMFReadingPoint WHERE intReadingPointId = 1)
+BEGIN
+    INSERT INTO tblMFReadingPoint(intReadingPointId,strName)
+    VALUES(1,'Both')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFReadingPoint WHERE intReadingPointId = 2)
+BEGIN
+    INSERT INTO tblMFReadingPoint(intReadingPointId,strName)
+    VALUES(2,'Consume')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFReadingPoint WHERE intReadingPointId = 3)
+BEGIN
+    INSERT INTO tblMFReadingPoint(intReadingPointId,strName)
+    VALUES(3,'Produce')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFMeasurement WHERE intMeasurementId = 1)
+BEGIN
+    INSERT INTO tblMFMeasurement(intMeasurementId,strName,strType)
+    VALUES(1,'Pulse Reading','F')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFMeasurement WHERE intMeasurementId = 2)
+BEGIN
+    INSERT INTO tblMFMeasurement(intMeasurementId,strName,strType)
+    VALUES(2,'Tape Reading','T')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFMeasurement WHERE intMeasurementId = 3)
+BEGIN
+    INSERT INTO tblMFMeasurement(intMeasurementId,strName,strType)
+    VALUES(3,'Totalizer Reading','F')
+END
+GO

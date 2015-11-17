@@ -812,6 +812,36 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Weight Claims')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 87
+			,[strTransactionType]	= N'Change Stock Status Number'
+			,[strPrefix]			= N'SS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Stock Status Number')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 88
+			,[strTransactionType]	= N'Currency Contract'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Currency Contract')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 89
+			,[strTransactionType]	= N'Cancel Equity'
+			,[strPrefix]			= N'CE-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Cancel Equity')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

@@ -42,6 +42,7 @@ FROM
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
 		,[intScaleTicketNumber]		=	NULL
+		,[intShipmentContractQtyId]	=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -121,6 +122,7 @@ FROM
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
 	,[intScaleTicketNumber]		=	NULL
+	,[intShipmentContractQtyId]	=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -166,6 +168,7 @@ FROM
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
 	,[intScaleTicketNumber]		=	G.strTicketNumber
+	,[intShipmentContractQtyId]	=	NULL
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -216,5 +219,47 @@ FROM
 		,[intScaleTicketId]							=	NULL
 		,[intScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
+		,[intShipmentContractQtyId]					=	NULL
 	FROM [vyuAPChargesForBilling] A
+
+	UNION ALL
+
+	SELECT
+		[intEntityVendorId]							=	A.intVendorEntityId
+		,[dtmDate]									=	A.dtmInventorizedDate
+		,[strReference]								=	''
+		,[strSourceNumber]							=	LTRIM(A.intTrackingNumber)
+		,[strPurchaseOrderNumber]					=	NULL
+		,[intPurchaseDetailId]						=	NULL
+		,[intItemId]								=	A.intItemId
+		,[strMiscDescription]						=	A.strItemDescription
+		,[strItemNo]								=	A.strItemNo
+		,[strDescription]							=	A.strItemDescription
+		,[intPurchaseTaxGroupId]					=	NULL
+		,[dblOrderQty]								=	A.dblNetWt
+		,[dblPOOpenReceive]							=	0
+		,[dblOpenReceive]							=	A.dblNetWt
+		,[dblQuantityToBill]						=	A.dblNetWt
+		,[dblQuantityBilled]						=	0
+		,[intLineNo]								=	A.intShipmentContractQtyId
+		,[intInventoryReceiptItemId]				=	NULL
+		,[intInventoryReceiptChargeId]				=	NULL
+		,[dblUnitCost]								=	A.dblCashPriceInWeightUOM
+		,[dblTax]									=	0
+		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strName]									=	A.strVendor
+		,[strVendorId]								=	LTRIM(A.intVendorEntityId)
+		,[strShipVia]								=	NULL
+		,[strTerm]									=	NULL
+		,[strContractNumber]						=	A.strContractNumber
+		,[strBillOfLading]							=	A.strBLNumber
+		,[intContractHeaderId]						=	A.intContractHeaderId
+		,[intContractDetailId]						=	A.intContractDetailId
+		,[intScaleTicketId]							=	NULL
+		,[intScaleTicketNumber]						=	NULL
+		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
+	FROM vyuLGShipmentPurchaseContracts A
+	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
+	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT intShipmentContractQtyId FROM tblAPBillDetail)
 ) Items

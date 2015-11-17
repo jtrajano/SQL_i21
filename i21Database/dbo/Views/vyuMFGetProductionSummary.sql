@@ -25,8 +25,11 @@ SELECT W.intWorkOrderId
 	,W.dtmLastModified
 	,W.intLastModifiedUserId
 	,US.strUserName
+	,MP.intManufacturingProcessId 
+	,MP.strProcessName 
 FROM dbo.tblMFProductionSummary PS
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PS.intWorkOrderId
+JOIN dbo.tblMFManufacturingProcess MP On MP.intManufacturingProcessId =W.intManufacturingProcessId 
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
@@ -56,3 +59,5 @@ GROUP BY W.intWorkOrderId
 	,W.dtmLastModified
 	,W.intLastModifiedUserId
 	,US.strUserName
+	,MP.intManufacturingProcessId 
+	,MP.strProcessName 

@@ -5,7 +5,6 @@ BEGIN TRY
 	DECLARE @strWorkOrderNo NVARCHAR(50)
 		,@xmlDocumentId INT
 		,@strUserName NVARCHAR(50)
-		,@strGTINCaseCode NVARCHAR(50)
 		,@intAttributeId int
 		,@intManufacturingProcessId int
 		,@intLocationId int
@@ -49,9 +48,6 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strUserName'
 
-	SELECT @strGTINCaseCode = strGTINCaseCode
-	FROM tblMFCompanyPreference
-
 	SELECT @intManufacturingProcessId=intManufacturingProcessId
 		,@intLocationId=intLocationId
 	FROM tblMFWorkOrder
@@ -72,7 +68,7 @@ BEGIN TRY
 	FROM tblMFWorkOrder W
 	JOIN tblICItem I ON W.intItemId = I.intItemId
 	LEFT JOIN dbo.tblMFWorkOrderProductSpecification PS ON W.intWorkOrderId = PS.intWorkOrderId
-		AND PS.strParameterName = @strGTINCaseCode
+		AND PS.strParameterName = @strAttributeValue
 	WHERE W.strWorkOrderNo = @strWorkOrderNo
 
 	EXEC sp_xml_removedocument @xmlDocumentId

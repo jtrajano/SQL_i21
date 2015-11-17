@@ -17,7 +17,8 @@ SELECT
            where PQH.strQuoteNumber < QH.strQuoteNumber and PQH.intEntityCustomerId = QH.intEntityCustomerId and PQH.strQuoteStatus = 'Confirmed' and PQD.intItemId = QD.intItemId and PQD.intShipToLocationId = QD.intShipToLocationId
            order by PQH.strQuoteNumber DESC)) as dblPriceChange,
    QD.dblQuotePrice,
-   ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = QH.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + 'Quotes' + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END 	
+   ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = QH.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + 'Quotes' + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END, 
+   QH.intQuoteHeaderId	
 FROM
     dbo.tblTRQuoteHeader QH
 	left join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId

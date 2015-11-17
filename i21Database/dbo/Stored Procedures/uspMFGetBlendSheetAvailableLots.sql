@@ -17,6 +17,14 @@ Declare @intManufacturingProcessId int
 Declare @ysnShowOtherFactoryLots bit
 Declare @ysnShowAvailableLotsByStorageLocation bit
 Declare @ysnEnableParentLot bit=0
+Declare @strLotStatusIds nvarchar(50)
+Declare @index int
+Declare @id int
+
+Declare @tblLotStatus AS table
+(
+	intLotStatusId int
+)
 
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
 
@@ -31,6 +39,30 @@ Select @ysnShowAvailableLotsByStorageLocation=CASE When UPPER(pa.strAttributeVal
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 and at.strAttributeName='Show Available Lots By Storage Location'
+
+Select @strLotStatusIds=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Blend Sheet Available Lots Status'
+
+If ISNULL(@strLotStatusIds,'') <> ''
+	Begin
+	--Get the Comma Separated Lot Status Ids into a table
+	SET @index = CharIndex(',',@strLotStatusIds)
+	WHILE @index > 0
+	BEGIN
+			SET @id = SUBSTRING(@strLotStatusIds,1,@index-1)
+			SET @strLotStatusIds = SUBSTRING(@strLotStatusIds,@index+1,LEN(@strLotStatusIds)-@index)
+
+			INSERT INTO @tblLotStatus(intLotStatusId) values (@id)
+			SET @index = CharIndex(',',@strLotStatusIds)
+	END
+	SET @id=@strLotStatusIds
+	INSERT INTO @tblLotStatus(intLotStatusId) values (@id)
+End
+Else
+	Insert Into @tblLotStatus(intLotStatusId)
+	Values(1)
 
 Select TOP 1 @intRecipeId = r.intRecipeId,@dblRecipeQty=r.dblQuantity 
 from tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId
@@ -82,7 +114,7 @@ Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
 Left Join tblMFRecipeItem ri on ri.intItemId=i.intItemId and ri.intRecipeItemId=@intRecipeItemId
 Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
 Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
-Where l.intItemId=@intItemId and l.dblWeight>0 and ls.strPrimaryStatus='Active' 
+Where l.intItemId=@intItemId and l.dblWeight>0 and ls.intLotStatusId in (Select intLotStatusId From @tblLotStatus)
 And l.intLocationId = Case When @ysnShowOtherFactoryLots=1 Then l.intLocationId Else @intLocationId End 
 Order by l.dtmExpiryDate, l.dtmDateCreated
 

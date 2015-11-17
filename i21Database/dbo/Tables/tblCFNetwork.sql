@@ -30,8 +30,11 @@
     [intImportMapperId]                INT             NULL,
     [strLinkNetwork]                   NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]                 INT             CONSTRAINT [DF_tblCFNetwork_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC)
+    CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
+    CONSTRAINT [FK_tblCFNetwork_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );
+
+
 
 
 

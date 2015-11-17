@@ -115,6 +115,7 @@ SELECT C.intManufacturingCellId
 	,WS.intSequenceNo
 	,W.ysnIngredientAvailable 
 	,W.dtmLastProducedDate
+	,CONVERT(bit,0) AS ysnEOModified
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
 	AND W.intStatusId <> 13

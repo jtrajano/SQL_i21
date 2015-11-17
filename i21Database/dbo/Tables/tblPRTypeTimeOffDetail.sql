@@ -3,6 +3,7 @@
 	[intTypeTimeOffDetailId] INT NOT NULL PRIMARY KEY IDENTITY,
 	[intTypeTimeOffId] INT NOT NULL,
 	[dblYearsOfService] NUMERIC (18, 6)  DEFAULT ((0)) NULL,
+	[strDescription]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[dblRate]          NUMERIC (18, 6)  DEFAULT ((0)) NULL,
     [dblPerPeriod]     NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [strPeriod]        NVARCHAR (30) COLLATE Latin1_General_CI_AS  DEFAULT ((0)) NULL,
@@ -93,3 +94,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTypeTimeOffDetail',
     @level2type = N'COLUMN',
     @level2name = N'dblYearsOfService'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Description',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOffDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'strDescription'

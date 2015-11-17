@@ -75,3 +75,12 @@ GO
 	UPDATE tblSMRecurringTransaction SET strTransactionType = 'Voucher' WHERE strTransactionType = 'Bill'
 	UPDATE tblSMRecurringHistory SET strTransactionType = 'Voucher' WHERE strTransactionType = 'Bill'
 GO
+	/* DELETE EXCESS Sales Analysis Reports */
+	DECLARE @AccountsReceivableParentMenuId INT
+	SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+
+	DECLARE @AccountsReceivableReportParentMenuId INT
+	SELECT @AccountsReceivableReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Analysis Reports' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+GO

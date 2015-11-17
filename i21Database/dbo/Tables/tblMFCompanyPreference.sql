@@ -10,9 +10,10 @@
     [strDefaultStatusForSanitizedLot] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblSanitizationOrderOutputQtyTolerancePercentage] NUMERIC(18, 6) NULL, 
     [ysnSanitizationInboundPutaway] BIT NULL, 
-    [strGTINCaseCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBlendProductionStagingLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnBlendRequirementRequired] BIT NULL DEFAULT 1, 
     [ysnBlendSheetRequired] BIT NULL DEFAULT 1, 
+	ysnSanitizationProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSanitizationProcessEnabled] DEFAULT 0,
+	ysnWIPStagingProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnWIPStagingProcessEnabled] DEFAULT 0,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )

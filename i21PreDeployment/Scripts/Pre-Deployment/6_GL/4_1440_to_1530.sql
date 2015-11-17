@@ -10,8 +10,8 @@ BEGIN
 				FROM    syscolumns
 				WHERE   id = OBJECT_ID('tblGLTempCOASegment')
 						AND name LIKE 'Location%'
-
-	EXEC sp_rename @oldName, 'Location', 'COLUMN'
+	IF @oldName IS NOT NULL
+		EXEC sp_rename @oldName, 'Location', 'COLUMN'
 END
 PRINT 'Finished Renaming tblGLTempCOASegment column Location to Location'
 GO

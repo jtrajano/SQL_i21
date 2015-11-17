@@ -7,7 +7,6 @@
     [strBalanceSide]			NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
 	[strSource]					NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [strRelatedRows]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strRelatedRowsById]		NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountsUsed]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnShowCredit]				BIT             DEFAULT 1 NULL,
     [ysnShowDebit]				BIT             DEFAULT 1 NULL,

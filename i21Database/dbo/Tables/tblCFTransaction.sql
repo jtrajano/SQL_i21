@@ -33,6 +33,7 @@
     [intSalesPersonId]        INT             NULL,
     [ysnInvalid]              BIT             NULL,
     [ysnPosted]               BIT             NULL,
+    [strTransactionId]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intInvoiceId]            INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC)
@@ -46,3 +47,25 @@
 
 
 
+
+
+
+GO
+CREATE TRIGGER [dbo].[trgCFTransactionRecordNumber]
+ON [dbo].[tblCFTransaction]
+AFTER INSERT
+AS
+	DECLARE @CFID NVARCHAR(50)
+
+	-- IF STARTING NUMBER IS EDITABLE --
+		 -- FIX STARTING NUMBER --
+
+	EXEC uspSMGetStartingNumber 52, @CFID OUT
+	
+	IF(@CFID IS NOT NULL)
+	BEGIN
+		UPDATE tblCFTransaction
+			SET tblCFTransaction.strTransactionId = @CFID
+		FROM tblCFTransaction A
+			INNER JOIN INSERTED B ON A.intTransactionId = B.intTransactionId
+	END

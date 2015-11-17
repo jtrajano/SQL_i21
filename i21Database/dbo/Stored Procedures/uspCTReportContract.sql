@@ -128,7 +128,8 @@ BEGIN TRY
 			SQ.strCurrency,
 			'To be covered by ' + IB.strInsuranceBy AS strInsuranceBy,
 			CH.strPrintableRemarks,
-			AN.strComment	AS strArbitrationComment
+			AN.strComment	AS strArbitrationComment,
+			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 			
 
 	FROM	tblCTContractHeader CH

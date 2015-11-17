@@ -36,9 +36,13 @@ AS
 																				DP.strCity						AS	strDestinationPoint,
 																				DC.strCity						AS	strDestinationCity,
 																				PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
+																				U4.strUnitMeasure				AS	strStockItemUOM,
+			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
+			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
 			ISNULL(CD.dblBalance,0) -	ISNULL(CD.dblScheduleQty,0)												AS	dblAvailableQty,
-			CH.strContractNumber + LTRIM(CD.intContractSeq)														AS	strSequenceNumber,
+			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)												AS	strSequenceNumber,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInQtyUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SM.intItemUOMId,CD.dblQuantity)					AS	dblQtyInStockUOM,
 			
 			--Required by other modules
 
@@ -105,6 +109,9 @@ AS
 	JOIN	tblICUnitMeasure				U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT	
 	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId				=	CD.intAdjItemUOMId			LEFT
 	JOIN	tblICUnitMeasure				U3	ON	U3.intUnitMeasureId			=	AU.intUnitMeasureId			LEFT	
+	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId				AND	
+													SM.ysnStockUnit				=	1							LEFT
+	JOIN	tblICUnitMeasure				U4	ON	U4.intUnitMeasureId			=	SM.intUnitMeasureId			LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
 	JOIN	tblSMShipVia					SV	ON	SV.[intEntityShipViaId]		=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT

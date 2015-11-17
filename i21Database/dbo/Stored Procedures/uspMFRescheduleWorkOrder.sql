@@ -1117,6 +1117,7 @@ BEGIN TRY
 		,WS.intSequenceNo
 		,W.ysnIngredientAvailable
 		,W.dtmLastProducedDate
+		,CONVERT(bit,0) AS ysnEOModified
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		AND W.intManufacturingCellId = @intManufacturingCellId
