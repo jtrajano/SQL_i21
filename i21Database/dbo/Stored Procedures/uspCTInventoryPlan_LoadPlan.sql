@@ -30,7 +30,7 @@ BEGIN
 	SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
 
 	SET @Txt1 = ''
-	SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + ','
+	SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
 	FROM tblCTInvPlngReportMaterial RM
 	JOIN tblICItem I ON I.intItemId = RM.intItemId
 	WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
