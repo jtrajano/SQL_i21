@@ -42,6 +42,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, strWeightUOM = WeightUOM.strUnitMeasure
 	, dblItemUOMConvFactor = ISNULL(ItemUOM.dblUnitQty, 0)
 	, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
+	, strCostUOM = CostUOM.strUnitMeasure
+	, dblCostUOMConvFactor = ISNULL(ItemCostUOM.dblUnitQty, 0)
 	, dblGrossMargin = (
 		CASE WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
 			ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
@@ -60,4 +62,6 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ReceiptItem.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = ReceiptItem.intCostUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItem.intGradeId
