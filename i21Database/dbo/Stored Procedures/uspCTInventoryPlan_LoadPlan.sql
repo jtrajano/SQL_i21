@@ -82,7 +82,7 @@ BEGIN
 	SET @SQL = @SQL + ' ) '
 	SET @SQL = @SQL + ' INSERT INTO @Table 
 						SELECT Ext.intItemId
-						, M.strItemNo + '' ('' + UOM1.strUnitMeasure + '' per '' + UOM.strUnitMeasure + '' --> '' + CAST(ISNULL(MUOM1.dblUnitQty,UOMCON.dblConversionToStock) as nvarchar(30)) + '')'' [strItemNo]
+						, M.strItemNo + '' ('' + UOM1.strUnitMeasure + '' per '' + UOM.strUnitMeasure + '' --> '' + CAST(CONVERT(DECIMAL(24,6),ISNULL(MUOM1.dblUnitQty,UOMCON.dblConversionToStock)) as nvarchar(30)) + '')'' [strItemNo]
 						, UOM.strUnitMeasure [StdUOM]
 						, UOM1.strUnitMeasure [BaseUOM]
 						, Ext.intReportAttributeID [AttributeId]
