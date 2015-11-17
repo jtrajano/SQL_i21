@@ -1631,7 +1631,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         intCommodityId: lot.get('intCommodityId'),
                                                         intItemUOMId: lot.get('intItemUOMId'),
                                                         strUnitMeasure: lot.get('strSaleUnitMeasure'),
-                                                        intWeightUOMId: lot.get('intWeightUnitMeasureId'),
+                                                        intWeightUOMId: lot.get('intWeightItemUOMId'),
                                                         strWeightUOM: lot.get('strWeightUnitMeasure'),
                                                         dblQuantity: 0,
                                                         strOrderUOM: lot.get('strSaleUnitMeasure'),
