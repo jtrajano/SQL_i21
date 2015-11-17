@@ -24,7 +24,7 @@ BEGIN
 		BEGIN
 			SELECT
 				 [intTransactionDetailTaxId]
-				,[intTransactionDetailId]		AS [intInvoiceDetailId]
+				,[intTransactionDetailId]		AS [intTransactionDetailId]
 				--,NULL							AS [intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
@@ -50,7 +50,7 @@ BEGIN
 		BEGIN
 			SELECT
 				 [intTransactionDetailTaxId]
-				,[intTransactionDetailId]		AS [intInvoiceDetailId]
+				,[intTransactionDetailId]		AS [intTransactionDetailId]
 				--,NULL							AS [intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
