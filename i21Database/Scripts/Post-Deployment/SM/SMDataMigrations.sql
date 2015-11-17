@@ -227,6 +227,5 @@ GO
 	INSERT INTO tblSMRecurringTransaction (intTransactionId, strTransactionNumber, strTransactionType,  strReference, strFrequency, dtmLastProcess, dtmNextProcess, ysnDue, strDayOfMonth, dtmStartDate, dtmEndDate, ysnActive, intIteration, intUserId, ysnAvailable)
 	SELECT journal.intJournalId, journal.strJournalId, 'General Journal', journal.strDescription, 'Monthly', journal.dtmDate, DATEADD(MM, 1, journal.dtmDate), 0, DAY(journal.dtmDate), DATEADD(MM, 1, journal.dtmDate), DATEADD(MM, 1, journal.dtmDate), 0, 1, journal.intEntityId, 1
 	FROM tblGLJournal journal
-	WHERE journal.strTransactionType = 'Recurring' AND intJournalId NOT IN (SELECT intTransactionId FROM tblSMRecurringTransaction WHERE strTransactionType = 'General Journal')
-
+	WHERE journal.strTransactionType = 'Recurring' AND journal.dtmDate IS NOT NULL AND intJournalId NOT IN (SELECT intTransactionId FROM tblSMRecurringTransaction WHERE strTransactionType = 'General Journal')
 GO
