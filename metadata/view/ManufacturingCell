@@ -10,10 +10,9 @@
         "defaultFocus": null,
         "designer|userAlias": "icmanufacturingcell",
         "designer|userClassName": "ManufacturingCell",
-        "height": 386,
+        "height": 396,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -205,6 +204,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabManufacturingCell",
                         "layout|flex": 1,
                         "plain": true
@@ -653,6 +655,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "itemId": "grdPackingType",
                                         "layout|flex": 1,
                                         "margin": -1,
@@ -705,7 +708,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter156",
+                                                    "name": "filter152",
                                                     "designerId": "c9ec8acc-5eda-44f2-b041-640223eb1297",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1062,7 +1065,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging122",
+                    "name": "statusbarpaging120",
                     "designerId": "b8c68781-2254-4e56-be5b-6f6e6ef770ac",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

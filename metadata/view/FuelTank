@@ -13,7 +13,6 @@
         "height": 621,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -143,6 +142,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabFuelTank",
                         "layout|flex": 1,
                         "plain": true
@@ -184,6 +186,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "itemId": "grdFuelTank",
                                         "layout|flex": 1,
                                         "title": null
@@ -235,7 +238,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter111",
+                                                    "name": "filter118",
                                                     "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -402,7 +405,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar11",
+                    "name": "statusbar12",
                     "designerId": "f1d262d7-d497-4c2d-84fb-fd762dfd64d2",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

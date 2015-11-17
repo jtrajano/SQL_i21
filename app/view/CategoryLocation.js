@@ -34,7 +34,6 @@ Ext.define('Inventory.view.CategoryLocation', {
     width: 880,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Category Location',
     maximizable: true,
 
@@ -118,6 +117,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabCategoryLocation',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

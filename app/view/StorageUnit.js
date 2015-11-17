@@ -34,12 +34,11 @@ Ext.define('Inventory.view.StorageUnit', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 565,
+    height: 572,
     hidden: false,
     width: 931,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Storage Location',
     maximizable: true,
 
@@ -125,6 +124,7 @@ Ext.define('Inventory.view.StorageUnit', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabStorageUnit',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -596,6 +596,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                     xtype: 'gridpanel',
                                     itemId: 'grdMeasurement',
                                     margin: -1,
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',
@@ -716,6 +717,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                     xtype: 'gridpanel',
                                     itemId: 'grdItemCategoryAllowed',
                                     margin: -1,
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',
@@ -800,6 +802,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                     xtype: 'gridpanel',
                                     itemId: 'grdContainer',
                                     margin: -1,
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',
@@ -876,6 +879,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                     xtype: 'gridpanel',
                                     itemId: 'grdSKU',
                                     margin: -1,
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',

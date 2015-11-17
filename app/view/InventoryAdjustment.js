@@ -40,7 +40,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
     width: 950,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Adjustment',
     maximizable: true,
 
@@ -150,6 +149,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                             {
                                 xtype: 'tabpanel',
                                 itemId: 'tabInventoryAdjustment',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -253,6 +253,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 itemId: 'grdInventoryAdjustment',
                                                 margin: '7 0 0 0',
                                                 title: 'Items',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1062,12 +1063,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        itemId: 'pgeNotes',
+                                        itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Notes',
+                                        title: 'Comments',
                                         tabConfig: {
                                             xtype: 'tab',
-                                            itemId: 'cfgNotes'
+                                            itemId: 'pgeComments'
                                         },
                                         items: [
                                             {
@@ -1084,6 +1085,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 xtype: 'attachmentgrid',
                                                 itemId: 'grdAttachment',
                                                 margin: -1,
+                                                columnLines: true,
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',

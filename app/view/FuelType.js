@@ -28,12 +28,11 @@ Ext.define('Inventory.view.FuelType', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 465,
+    height: 470,
     hidden: false,
     width: 481,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Fuel Types',
     maximizable: true,
 
@@ -117,6 +116,7 @@ Ext.define('Inventory.view.FuelType', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabFuelType',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

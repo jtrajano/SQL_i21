@@ -44,7 +44,6 @@ Ext.define('Inventory.view.Item', {
     width: 950,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Items',
     maximizable: true,
 
@@ -145,6 +144,7 @@ Ext.define('Inventory.view.Item', {
                                 xtype: 'tabpanel',
                                 flex: 1,
                                 itemId: 'tabItem',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -418,6 +418,7 @@ Ext.define('Inventory.view.Item', {
                                                 reference: 'grdUnitOfMeasure',
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
+                                                columnLines: true,
                                                 forceFit: true,
                                                 dockedItems: [
                                                     {
@@ -495,7 +496,7 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailUnitQty',
                                                         modelValidation: true,
-                                                        width: 62,
+                                                        width: 70,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
@@ -764,6 +765,7 @@ Ext.define('Inventory.view.Item', {
                                                 xtype: 'tabpanel',
                                                 flex: 1,
                                                 itemId: 'tabSetup',
+                                                bodyCls: 'i21-tab',
                                                 activeTab: 0,
                                                 plain: true,
                                                 items: [
@@ -787,6 +789,7 @@ Ext.define('Inventory.view.Item', {
                                                                 reference: 'grdGlAccounts',
                                                                 itemId: 'grdGlAccounts',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 forceFit: true,
                                                                 dockedItems: [
                                                                     {
@@ -945,6 +948,7 @@ Ext.define('Inventory.view.Item', {
                                                                 flex: 1,
                                                                 itemId: 'grdLocationStore',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -1655,6 +1659,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'grdCategory',
                                                                         margin: '0 5 0 0 ',
                                                                         title: 'Categories',
+                                                                        columnLines: true,
                                                                         dockedItems: [
                                                                             {
                                                                                 xtype: 'toolbar',
@@ -1739,6 +1744,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1.2,
                                                                         itemId: 'grdServiceLevelAgreement',
                                                                         title: 'Service Level Agreement Setup',
+                                                                        columnLines: true,
                                                                         dockedItems: [
                                                                             {
                                                                                 xtype: 'toolbar',
@@ -1838,6 +1844,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'tabpanel',
                                                                 flex: 1,
                                                                 itemId: 'tabManufacturing',
+                                                                bodyCls: 'i21-tab',
                                                                 activeTab: 0,
                                                                 plain: true,
                                                                 items: [
@@ -2525,6 +2532,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'advancefiltergrid',
                                                                 itemId: 'grdUPC',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -2641,8 +2649,9 @@ Ext.define('Inventory.view.Item', {
                                                                 flex: 1,
                                                                 reference: 'grdContractItem',
                                                                 itemId: 'grdContractItem',
-                                                                margin: '-1 -1 4 -1',
+                                                                margin: '0 -1 4 -1',
                                                                 title: 'Contract Item',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -2839,7 +2848,6 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 1,
-                                                                margin: '5 0 0 0',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     align: 'stretch'
@@ -2851,6 +2859,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'grdDocumentAssociation',
                                                                         margin: '0 4 -1 -1',
                                                                         title: 'Document Association',
+                                                                        columnLines: true,
                                                                         dockedItems: [
                                                                             {
                                                                                 xtype: 'toolbar',
@@ -2937,6 +2946,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'grdCertification',
                                                                         margin: '0 -1 -1 4',
                                                                         title: 'Certification',
+                                                                        columnLines: true,
                                                                         dockedItems: [
                                                                             {
                                                                                 xtype: 'toolbar',
@@ -3032,8 +3042,9 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
                                                                 itemId: 'grdCustomerXref',
-                                                                margin: '-1 -1 4 -1',
+                                                                margin: '0 -1 4 -1',
                                                                 title: 'Customer Item Cross Reference Grid',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -3188,8 +3199,9 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
                                                                 itemId: 'grdVendorXref',
-                                                                margin: '4 -1 -1 -1',
+                                                                margin: '0 -1 -1 -1',
                                                                 title: 'Vendor Item Cross Reference Grid',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -3565,6 +3577,7 @@ Ext.define('Inventory.view.Item', {
                                                                 margin: '-1 -1 4 -1',
                                                                 header: false,
                                                                 title: 'Customer Item Cross Reference Grid',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -3873,6 +3886,7 @@ Ext.define('Inventory.view.Item', {
                                                 flex: 1,
                                                 itemId: 'grdPricing',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -4062,6 +4076,7 @@ Ext.define('Inventory.view.Item', {
                                                 flex: 1,
                                                 itemId: 'tabPricing',
                                                 margin: '7 3 3 3',
+                                                bodyCls: 'i21-tab',
                                                 activeTab: 0,
                                                 plain: true,
                                                 items: [
@@ -4075,6 +4090,7 @@ Ext.define('Inventory.view.Item', {
                                                                 reference: 'grdPricingLevel',
                                                                 itemId: 'grdPricingLevel',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -4351,6 +4367,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'advancefiltergrid',
                                                                 itemId: 'grdSpecialPricing',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -4652,6 +4669,7 @@ Ext.define('Inventory.view.Item', {
                                                 xtype: 'advancefiltergrid',
                                                 itemId: 'grdStock',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -5036,6 +5054,7 @@ Ext.define('Inventory.view.Item', {
                                                                 flex: 1,
                                                                 itemId: 'grdCommodityCost',
                                                                 title: 'Commodity Cost',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -5184,6 +5203,7 @@ Ext.define('Inventory.view.Item', {
                                                 reference: 'grdAssembly',
                                                 itemId: 'grdAssembly',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -5366,6 +5386,7 @@ Ext.define('Inventory.view.Item', {
                                                 reference: 'grdBundle',
                                                 itemId: 'grdBundle',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -5553,6 +5574,7 @@ Ext.define('Inventory.view.Item', {
                                                 itemId: 'grdKit',
                                                 margin: '5 -1 5 -1',
                                                 title: 'Kit Components',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -5629,6 +5651,7 @@ Ext.define('Inventory.view.Item', {
                                                 itemId: 'grdKitDetails',
                                                 margin: -1,
                                                 title: 'Component Details',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -5815,6 +5838,8 @@ Ext.define('Inventory.view.Item', {
                                                 xtype: 'tabpanel',
                                                 flex: 1,
                                                 itemId: 'tabFactoryLines',
+                                                bodyCls: 'i21-tab',
+                                                bodyPadding: 3,
                                                 activeTab: 0,
                                                 plain: true,
                                                 items: [
@@ -5831,8 +5856,8 @@ Ext.define('Inventory.view.Item', {
                                                                 flex: 1,
                                                                 reference: 'grdFactory',
                                                                 itemId: 'grdFactory',
-                                                                margin: -1,
                                                                 title: 'Factory Association',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -5927,8 +5952,9 @@ Ext.define('Inventory.view.Item', {
                                                                 flex: 1,
                                                                 reference: 'grdManufacturingCellAssociation',
                                                                 itemId: 'grdManufacturingCellAssociation',
-                                                                margin: '-1 -1 -1 5',
+                                                                margin: '0 0 0 5',
                                                                 title: 'Manufacturing Cell Association',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -6036,8 +6062,8 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'advancefiltergrid',
                                                                 itemId: 'grdOwner',
-                                                                margin: -1,
                                                                 title: 'Owner Association',
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -6128,12 +6154,12 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        itemId: 'pgeNotes',
+                                        itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Notes',
+                                        title: 'Comments',
                                         tabConfig: {
                                             xtype: 'tab',
-                                            itemId: 'cfgNotes'
+                                            itemId: 'cfgComments'
                                         },
                                         items: [
                                             {
@@ -6151,6 +6177,7 @@ Ext.define('Inventory.view.Item', {
                                                 xtype: 'attachmentgrid',
                                                 itemId: 'grdAttachment',
                                                 margin: -1,
+                                                columnLines: true,
                                                 forceFit: true,
                                                 columns: [
                                                     {

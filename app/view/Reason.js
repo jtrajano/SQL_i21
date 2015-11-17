@@ -37,7 +37,6 @@ Ext.define('Inventory.view.Reason', {
     width: 520,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Reasons',
     maximizable: true,
 
@@ -121,6 +120,7 @@ Ext.define('Inventory.view.Reason', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabReason',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -212,6 +212,7 @@ Ext.define('Inventory.view.Reason', {
                                     flex: 1,
                                     itemId: 'grdWorkcenter',
                                     margin: -1,
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',

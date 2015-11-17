@@ -14,7 +14,6 @@
         "helpURL": null,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -293,6 +292,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabInventoryAdjustment",
                         "plain": true
                     },
@@ -560,6 +562,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "designer|createAlias": "advancefiltergrid",
                                         "dock": null,
                                         "itemId": "grdInventoryAdjustment",
@@ -652,7 +655,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter120",
                                                     "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2179,9 +2182,9 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "pgeNotes",
+                                "itemId": "pgeComments",
                                 "layout": "fit",
-                                "title": "Notes"
+                                "title": "Comments"
                             },
                             "name": "MyPanel",
                             "designerId": "d2693b84-70b4-4af0-8754-67eda3160581",
@@ -2194,7 +2197,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "cfgNotes"
+                                        "itemId": "pgeComments"
                                     },
                                     "name": "TabConfig3",
                                     "designerId": "ed26bf0e-df65-465d-8d0f-001615f712c3"
@@ -2207,10 +2210,11 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "commentbox"
+                                        "designer|createAlias": "commentbox",
+                                        "designer|displayName": "comments"
                                     },
-                                    "name": "MyContainer39",
-                                    "designerId": "a9e9e32e-31f5-4f21-bbca-9a8cddaba487"
+                                    "name": "MyContainer13",
+                                    "designerId": "f202ffe8-f482-413a-8123-1200f6623505"
                                 }
                             ]
                         },
@@ -2246,6 +2250,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "designer|createAlias": "attachmentgrid",
                                         "itemId": "grdAttachment",
                                         "margin": -1,
@@ -2295,7 +2300,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging110",
                     "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

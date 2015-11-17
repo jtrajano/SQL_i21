@@ -13,7 +13,6 @@
         "height": 773,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -304,6 +303,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabInventoryCount",
                         "layout|flex": 1,
                         "plain": true
@@ -1096,6 +1098,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdPhysicalCount",
                                         "layout|flex": 1,
@@ -1169,7 +1172,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter137",
+                                                    "name": "filter121",
                                                     "designerId": "8725b495-60b5-4fac-b7b6-11f36b61fc8d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1631,7 +1634,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "layout": "fit",
-                                "title": "Notes"
+                                "title": "Comments"
                             },
                             "name": "MyPanel34",
                             "designerId": "a21c6047-e07e-40f8-aed7-395cb9b04f74",
@@ -1645,6 +1648,20 @@
                                     "codeClass": null,
                                     "name": "TabConfig20",
                                     "designerId": "5421049d-fcef-4496-8b93-7a3408110f35"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "commentbox",
+                                        "designer|displayName": "comments"
+                                    },
+                                    "name": "MyContainer14",
+                                    "designerId": "ba80da37-850a-4fa6-933c-c3078d5c5f65"
                                 }
                             ]
                         },
@@ -1692,7 +1709,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging111",
                     "designerId": "819ea614-6c35-4e6e-8d56-521d4ef1d53e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

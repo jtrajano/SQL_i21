@@ -32,7 +32,6 @@ Ext.define('Inventory.view.InventoryTag', {
     width: 600,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Tag',
     maximizable: true,
 
@@ -111,6 +110,7 @@ Ext.define('Inventory.view.InventoryTag', {
                 {
                     xtype: 'tabpanel',
                     itemId: 'tabInventoryTag',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

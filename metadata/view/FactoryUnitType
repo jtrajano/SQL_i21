@@ -10,10 +10,9 @@
         "defaultFocus": null,
         "designer|userAlias": "icfactoryunittype",
         "designer|userClassName": "FactoryUnitType",
-        "height": 371,
+        "height": 385,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -205,6 +204,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabFactoryUnitType",
                         "layout|flex": 1,
                         "plain": true
@@ -622,7 +624,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging17",
                     "designerId": "1d4ebb2b-904c-462e-8f22-e82f1e2a5bad",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

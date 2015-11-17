@@ -13,7 +13,6 @@
         "height": 275,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maxHeight": null,
         "maximizable": null,
@@ -144,6 +143,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabBinToBinTransfer",
                         "plain": true
                     },

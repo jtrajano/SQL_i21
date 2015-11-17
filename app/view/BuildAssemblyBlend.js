@@ -39,7 +39,6 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
     width: 765,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Build Assembly/Blend',
     maximizable: true,
 
@@ -152,6 +151,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabBuildAssemblyBlend',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -385,6 +385,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                     flex: 1,
                                     reference: 'grdBuildAssemblyBlend',
                                     itemId: 'grdBuildAssemblyBlend',
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',

@@ -37,13 +37,12 @@ Ext.define('Inventory.view.Category', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 530,
+    height: 543,
     hidden: false,
     minHeight: 530,
     width: 860,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Category',
     maximizable: true,
 
@@ -129,6 +128,7 @@ Ext.define('Inventory.view.Category', {
                                 xtype: 'tabpanel',
                                 flex: 1,
                                 itemId: 'tabCategory',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -380,6 +380,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'grdTax',
                                                                 header: false,
                                                                 title: 'Taxes',
+                                                                columnLines: true,
                                                                 forceFit: true,
                                                                 dockedItems: [
                                                                     {
@@ -474,6 +475,7 @@ Ext.define('Inventory.view.Category', {
                                                         itemId: 'grdUnitOfMeasure',
                                                         header: false,
                                                         title: 'Unit of Measure',
+                                                        columnLines: true,
                                                         forceFit: true,
                                                         dockedItems: [
                                                             {
@@ -605,6 +607,7 @@ Ext.define('Inventory.view.Category', {
                                                 xtype: 'advancefiltergrid',
                                                 itemId: 'grdLocation',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -702,6 +705,7 @@ Ext.define('Inventory.view.Category', {
                                                 reference: 'grdGlAccounts',
                                                 itemId: 'grdGlAccounts',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -843,6 +847,7 @@ Ext.define('Inventory.view.Category', {
                                                 xtype: 'advancefiltergrid',
                                                 itemId: 'grdVendorCategoryXref',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',

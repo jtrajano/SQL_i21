@@ -34,12 +34,11 @@ Ext.define('Inventory.view.ManufacturingCell', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 386,
+    height: 396,
     hidden: false,
     width: 757,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Manufacturing Cell',
     maximizable: true,
 
@@ -123,6 +122,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabManufacturingCell',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -334,6 +334,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                     flex: 1,
                                     itemId: 'grdPackingType',
                                     margin: -1,
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',

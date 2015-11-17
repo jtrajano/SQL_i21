@@ -42,7 +42,6 @@ Ext.define('Inventory.view.Commodity', {
     width: 1000,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Commodity',
     maximizable: true,
 
@@ -130,6 +129,7 @@ Ext.define('Inventory.view.Commodity', {
                                 xtype: 'tabpanel',
                                 flex: 1,
                                 itemId: 'tabCommodity',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -510,6 +510,7 @@ Ext.define('Inventory.view.Commodity', {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
                                                         itemId: 'grdUom',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -636,7 +637,9 @@ Ext.define('Inventory.view.Commodity', {
                                                         includeFullTextSearch: false,
                                                         flex: 1,
                                                         itemId: 'grdOrigin',
+                                                        margin: '0 5 0 0',
                                                         title: 'Origins',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -703,8 +706,9 @@ Ext.define('Inventory.view.Commodity', {
                                                         includeFullTextSearch: false,
                                                         flex: 1,
                                                         itemId: 'grdProductType',
-                                                        margin: '0 0 0 5',
+                                                        margin: '0 5 0 0',
                                                         title: 'Product Types',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -767,138 +771,149 @@ Ext.define('Inventory.view.Commodity', {
                                                         ]
                                                     },
                                                     {
-                                                        xtype: 'advancefiltergrid',
-                                                        includeFullTextSearch: false,
-                                                        flex: 1,
-                                                        itemId: 'grdRegion',
-                                                        margin: '0 0 0 5',
-                                                        title: 'Regions',
-                                                        dockedItems: [
+                                                        xtype: 'container',
+                                                        flex: 2,
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
-                                                                xtype: 'toolbar',
-                                                                dock: 'top',
-                                                                componentCls: 'i21-toolbar-grid',
-                                                                itemId: 'tlbGridOptions',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    padding: '0 0 0 1'
+                                                                xtype: 'advancefiltergrid',
+                                                                includeFullTextSearch: false,
+                                                                flex: 1,
+                                                                itemId: 'grdRegion',
+                                                                margin: '0 5 0 0',
+                                                                title: 'Regions',
+                                                                columnLines: true,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        componentCls: 'i21-toolbar-grid',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteRegions',
+                                                                                iconCls: 'small-remove',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnMoveUpRegions',
+                                                                                iconCls: 'small-arrow-up',
+                                                                                text: 'Up'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnMoveDownRegions',
+                                                                                iconCls: 'small-arrow-down',
+                                                                                text: 'Down'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colRegion',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Region',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvRegion'
                                                                 },
-                                                                items: [
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                }),
+                                                                plugins: [
                                                                     {
-                                                                        xtype: 'button',
-                                                                        tabIndex: -1,
-                                                                        itemId: 'btnDeleteRegions',
-                                                                        iconCls: 'small-remove',
-                                                                        text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'button',
-                                                                        tabIndex: -1,
-                                                                        itemId: 'btnMoveUpRegions',
-                                                                        iconCls: 'small-arrow-up',
-                                                                        text: 'Up'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'button',
-                                                                        tabIndex: -1,
-                                                                        itemId: 'btnMoveDownRegions',
-                                                                        iconCls: 'small-arrow-down',
-                                                                        text: 'Down'
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepRegion',
+                                                                        clicksToEdit: 1
                                                                     }
                                                                 ]
-                                                            }
-                                                        ],
-                                                        columns: [
+                                                            },
                                                             {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colRegion',
-                                                                dataIndex: 'string',
-                                                                text: 'Region',
+                                                                xtype: 'advancefiltergrid',
+                                                                includeFullTextSearch: false,
                                                                 flex: 1,
-                                                                editor: {
-                                                                    xtype: 'textfield'
-                                                                }
-                                                            }
-                                                        ],
-                                                        viewConfig: {
-                                                            itemId: 'grvRegion'
-                                                        },
-                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                            selType: 'checkboxmodel'
-                                                        }),
-                                                        plugins: [
-                                                            {
-                                                                ptype: 'cellediting',
-                                                                pluginId: 'cepRegion',
-                                                                clicksToEdit: 1
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'advancefiltergrid',
-                                                        includeFullTextSearch: false,
-                                                        flex: 1,
-                                                        itemId: 'grdClassVariant',
-                                                        margin: '0 0 0 5',
-                                                        title: 'Classes and Variants',
-                                                        dockedItems: [
-                                                            {
-                                                                xtype: 'toolbar',
-                                                                dock: 'top',
-                                                                componentCls: 'i21-toolbar-grid',
-                                                                itemId: 'tlbGridOptions',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    padding: '0 0 0 1'
+                                                                itemId: 'grdClassVariant',
+                                                                title: 'Classes and Variants',
+                                                                columnLines: true,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        componentCls: 'i21-toolbar-grid',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteClasses',
+                                                                                iconCls: 'small-remove',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnMoveUpClasses',
+                                                                                iconCls: 'small-arrow-up',
+                                                                                text: 'Up'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnMoveDownClasses',
+                                                                                iconCls: 'small-arrow-down',
+                                                                                text: 'Down'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colClassVariant',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Class/Variant',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvClassVariant'
                                                                 },
-                                                                items: [
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                }),
+                                                                plugins: [
                                                                     {
-                                                                        xtype: 'button',
-                                                                        tabIndex: -1,
-                                                                        itemId: 'btnDeleteClasses',
-                                                                        iconCls: 'small-remove',
-                                                                        text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'button',
-                                                                        tabIndex: -1,
-                                                                        itemId: 'btnMoveUpClasses',
-                                                                        iconCls: 'small-arrow-up',
-                                                                        text: 'Up'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'button',
-                                                                        tabIndex: -1,
-                                                                        itemId: 'btnMoveDownClasses',
-                                                                        iconCls: 'small-arrow-down',
-                                                                        text: 'Down'
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepClass',
+                                                                        clicksToEdit: 1
                                                                     }
                                                                 ]
-                                                            }
-                                                        ],
-                                                        columns: [
-                                                            {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colClassVariant',
-                                                                dataIndex: 'string',
-                                                                text: 'Class/Variant',
-                                                                flex: 1,
-                                                                editor: {
-                                                                    xtype: 'textfield'
-                                                                }
-                                                            }
-                                                        ],
-                                                        viewConfig: {
-                                                            itemId: 'grvClassVariant'
-                                                        },
-                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                            selType: 'checkboxmodel'
-                                                        }),
-                                                        plugins: [
-                                                            {
-                                                                ptype: 'cellediting',
-                                                                pluginId: 'cepClass',
-                                                                clicksToEdit: 1
                                                             }
                                                         ]
                                                     }
@@ -918,7 +933,9 @@ Ext.define('Inventory.view.Commodity', {
                                                         includeFullTextSearch: false,
                                                         flex: 1,
                                                         itemId: 'grdSeason',
+                                                        margin: '0 5 0 0',
                                                         title: 'Seasons',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -985,8 +1002,9 @@ Ext.define('Inventory.view.Commodity', {
                                                         includeFullTextSearch: false,
                                                         flex: 1,
                                                         itemId: 'grdGrade',
-                                                        margin: '0 0 0 5',
+                                                        margin: '0 5 0 0',
                                                         title: 'Grades',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -1053,8 +1071,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         includeFullTextSearch: false,
                                                         flex: 2,
                                                         itemId: 'grdProductLine',
-                                                        margin: '0 0 0 5',
                                                         title: 'Product Lines',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -1148,6 +1166,7 @@ Ext.define('Inventory.view.Commodity', {
                                                 xtype: 'advancefiltergrid',
                                                 itemId: 'grdQuality',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1284,6 +1303,7 @@ Ext.define('Inventory.view.Commodity', {
                                                 itemId: 'grdFuturesExchange',
                                                 margin: -1,
                                                 title: 'Futures Exchange',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1390,6 +1410,7 @@ Ext.define('Inventory.view.Commodity', {
                                                 itemId: 'grdFuturesMonth',
                                                 margin: '5 -1 -1 -1',
                                                 title: 'Futures Month',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1487,6 +1508,7 @@ Ext.define('Inventory.view.Commodity', {
                                                 reference: 'grdGlAccounts',
                                                 itemId: 'grdGlAccounts',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',

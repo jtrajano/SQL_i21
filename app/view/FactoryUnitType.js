@@ -28,12 +28,11 @@ Ext.define('Inventory.view.FactoryUnitType', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 371,
+    height: 385,
     hidden: false,
     width: 637,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Storage Unit Type',
     maximizable: true,
 
@@ -117,6 +116,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabFactoryUnitType',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

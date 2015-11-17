@@ -27,12 +27,11 @@ Ext.define('Inventory.view.ContractDocument', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 268,
+    height: 284,
     hidden: false,
     width: 451,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Contract Document',
     maximizable: true,
 
@@ -111,6 +110,7 @@ Ext.define('Inventory.view.ContractDocument', {
                 {
                     xtype: 'tabpanel',
                     itemId: 'tabContractDocument',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

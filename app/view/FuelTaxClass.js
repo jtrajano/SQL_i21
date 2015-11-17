@@ -37,7 +37,6 @@ Ext.define('Inventory.view.FuelTaxClass', {
     width: 487,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Fuel Tax Class',
     maximizable: true,
 
@@ -124,6 +123,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                 xtype: 'tabpanel',
                                 flex: 1,
                                 itemId: 'tabFuelTaxClass',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -177,6 +177,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                                         flex: 1,
                                                         itemId: 'grdProductCode',
                                                         title: 'Product Codes',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',

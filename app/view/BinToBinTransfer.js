@@ -31,7 +31,6 @@ Ext.define('Inventory.view.BinToBinTransfer', {
     width: 400,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Bin to Bin Transfer',
 
     items: [
@@ -87,6 +86,7 @@ Ext.define('Inventory.view.BinToBinTransfer', {
                 {
                     xtype: 'tabpanel',
                     itemId: 'tabBinToBinTransfer',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

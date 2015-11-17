@@ -41,7 +41,6 @@ Ext.define('Inventory.view.InventoryShipment', {
     width: 1100,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Shipment',
     defaultFocus: 'cboVendorId',
     maximizable: true,
@@ -158,6 +157,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                             {
                                 xtype: 'tabpanel',
                                 itemId: 'tabInventoryShipment',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -356,7 +356,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             {
                                                 xtype: 'tabpanel',
                                                 height: 110,
+                                                itemId: 'tabShipping',
                                                 activeTab: 0,
+                                                plain: true,
                                                 items: [
                                                     {
                                                         xtype: 'panel',
@@ -692,6 +694,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 flex: 2,
                                                 itemId: 'tabItemLot',
                                                 margin: '5 0 0 0',
+                                                bodyCls: 'i21-tab',
                                                 activeTab: 0,
                                                 plain: true,
                                                 items: [
@@ -709,6 +712,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 reference: 'grdInventoryShipment',
                                                                 itemId: 'grdInventoryShipment',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -1364,6 +1368,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 hidden: true,
                                                                 itemId: 'grdLotTracking',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -1576,6 +1581,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 reference: 'grdLotSplit',
                                                                 itemId: 'grdLotSplit',
                                                                 margin: -1,
+                                                                columnLines: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -1680,6 +1686,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 reference: 'grdCharges',
                                                 itemId: 'grdCharges',
                                                 title: 'Charges',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1930,12 +1937,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        itemId: 'pgeNotes',
+                                        itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Notes',
+                                        title: 'Comments',
                                         tabConfig: {
                                             xtype: 'tab',
-                                            itemId: 'cfgNotes'
+                                            itemId: 'cfgComments'
                                         },
                                         items: [
                                             {
@@ -1952,6 +1959,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 xtype: 'attachmentgrid',
                                                 itemId: 'grdAttachment',
                                                 margin: -1,
+                                                columnLines: true,
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',

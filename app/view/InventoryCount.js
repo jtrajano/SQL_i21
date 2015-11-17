@@ -41,7 +41,6 @@ Ext.define('Inventory.view.InventoryCount', {
     width: 1048,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Count',
     maximizable: true,
 
@@ -160,6 +159,7 @@ Ext.define('Inventory.view.InventoryCount', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabInventoryCount',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -530,6 +530,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                     margins: '',
                                     itemId: 'grdPhysicalCount',
                                     margin: '5 0 0 0',
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',
@@ -747,7 +748,12 @@ Ext.define('Inventory.view.InventoryCount', {
                         {
                             xtype: 'panel',
                             layout: 'fit',
-                            title: 'Notes'
+                            title: 'Comments',
+                            items: [
+                                {
+                                    xtype: 'commentbox'
+                                }
+                            ]
                         },
                         {
                             xtype: 'panel',

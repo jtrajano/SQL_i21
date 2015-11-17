@@ -28,12 +28,11 @@ Ext.define('Inventory.view.InventoryCountGroup', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 384,
+    height: 388,
     hidden: false,
     width: 466,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Count Group',
 
     items: [
@@ -116,6 +115,7 @@ Ext.define('Inventory.view.InventoryCountGroup', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabInventoryCountGroup',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

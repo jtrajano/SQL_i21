@@ -10,10 +10,9 @@
         "defaultFocus": null,
         "designer|userAlias": "iccontractdocument",
         "designer|userClassName": "ContractDocument",
-        "height": 268,
+        "height": 284,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maxHeight": null,
         "maximizable": true,
@@ -205,6 +204,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabContractDocument",
                         "plain": true
                     },
@@ -461,7 +463,7 @@
                         "itemId": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging16",
                     "designerId": "402098fb-f9d8-4138-b21f-ad603c46de1f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

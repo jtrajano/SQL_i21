@@ -10,10 +10,9 @@
         "defaultFocus": null,
         "designer|userAlias": "icfueltype",
         "designer|userClassName": "FuelType",
-        "height": 465,
+        "height": 470,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maxHeight": null,
         "maximizable": true,
@@ -205,6 +204,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabFuelType",
                         "layout|flex": 1,
                         "plain": true
@@ -764,7 +766,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging111",
+                    "name": "statusbarpaging19",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

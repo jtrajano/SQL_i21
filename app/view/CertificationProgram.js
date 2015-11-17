@@ -41,7 +41,6 @@ Ext.define('Inventory.view.CertificationProgram', {
     width: 660,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Certification Programs',
     maximizable: true,
 
@@ -127,6 +126,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabCertificationProgram',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -220,6 +220,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                                     xtype: 'gridpanel',
                                     flex: 1,
                                     itemId: 'grdCertificationProgram',
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',

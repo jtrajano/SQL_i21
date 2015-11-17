@@ -33,7 +33,6 @@ Ext.define('Inventory.view.ItemLocation', {
     width: 1012,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Item Location',
     modal: true,
 
@@ -108,6 +107,7 @@ Ext.define('Inventory.view.ItemLocation', {
                 {
                     xtype: 'tabpanel',
                     itemId: 'tabItemLocation',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [

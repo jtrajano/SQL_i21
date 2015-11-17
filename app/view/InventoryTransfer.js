@@ -40,7 +40,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
     width: 950,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Transfer',
     maximizable: true,
 
@@ -142,6 +141,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                             {
                                 xtype: 'tabpanel',
                                 itemId: 'tabInventoryTransfer',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -463,6 +463,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                 itemId: 'grdInventoryTransfer',
                                                 margin: '7 0 0 0',
                                                 title: 'Items',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1073,12 +1074,12 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        itemId: 'pgeNotes',
+                                        itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Notes',
+                                        title: 'Comments',
                                         tabConfig: {
                                             xtype: 'tab',
-                                            itemId: 'cfgNotes'
+                                            itemId: 'cfgComments'
                                         },
                                         items: [
                                             {
@@ -1095,6 +1096,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                 xtype: 'attachmentgrid',
                                                 itemId: 'grdAttachment',
                                                 margin: -1,
+                                                columnLines: true,
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',

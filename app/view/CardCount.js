@@ -36,7 +36,6 @@ Ext.define('Inventory.view.CardCount', {
     width: 1050,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Card Count',
     maximizable: true,
 
@@ -86,6 +85,7 @@ Ext.define('Inventory.view.CardCount', {
                 {
                     xtype: 'tabpanel',
                     itemId: 'tabCardCount',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -133,6 +133,7 @@ Ext.define('Inventory.view.CardCount', {
                                     xtype: 'gridpanel',
                                     flex: 1,
                                     itemId: 'grdCardCount',
+                                    columnLines: true,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',

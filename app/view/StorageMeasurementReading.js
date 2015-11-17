@@ -38,7 +38,6 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
     width: 839,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Storage Measurement Reading',
     maximizable: true,
 
@@ -124,6 +123,7 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                 xtype: 'tabpanel',
                                 flex: 1,
                                 itemId: 'tabStorageMeasurementReading',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -199,6 +199,7 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                 reference: 'grdStorageMeasurementReading',
                                                 itemId: 'grdStorageMeasurementReading',
                                                 title: 'Conversion',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',

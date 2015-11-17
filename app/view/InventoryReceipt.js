@@ -44,7 +44,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
     width: 1100,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory Receipt',
     defaultFocus: 'cboVendorId',
     maximizable: true,
@@ -161,6 +160,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                             {
                                 xtype: 'tabpanel',
                                 itemId: 'tabInventoryReceipt',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -647,6 +647,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         reference: 'grdInventoryReceipt',
                                                                         itemId: 'grdInventoryReceipt',
                                                                         margin: '7 0 0 0',
+                                                                        columnLines: true,
                                                                         dockedItems: [
                                                                             {
                                                                                 xtype: 'toolbar',
@@ -1454,6 +1455,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         reference: 'grdLotTracking',
                                                                         itemId: 'grdLotTracking',
                                                                         margin: '5 0 0 0',
+                                                                        columnLines: true,
                                                                         dockedItems: [
                                                                             {
                                                                                 xtype: 'toolbar',
@@ -1943,6 +1945,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         reference: 'grdCharges',
                                                         itemId: 'grdCharges',
                                                         title: 'Charges',
+                                                        columnLines: true,
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -2309,6 +2312,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 xtype: 'gridpanel',
                                                 itemId: 'grdIncomingInspection',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -2477,6 +2481,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 xtype: 'gridpanel',
                                                 itemId: 'grdPutAway',
                                                 margin: -1,
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -2669,6 +2674,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 xtype: 'attachmentgrid',
                                                 itemId: 'grdBillAttachment',
                                                 margin: -1,
+                                                columnLines: true,
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',

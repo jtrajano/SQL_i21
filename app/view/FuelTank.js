@@ -36,7 +36,6 @@ Ext.define('Inventory.view.FuelTank', {
     width: 852,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Fuel Tank',
     maximizable: true,
 
@@ -101,6 +100,7 @@ Ext.define('Inventory.view.FuelTank', {
                                 xtype: 'tabpanel',
                                 flex: 1,
                                 itemId: 'tabFuelTank',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -117,6 +117,7 @@ Ext.define('Inventory.view.FuelTank', {
                                                 xtype: 'gridpanel',
                                                 flex: 1,
                                                 itemId: 'grdFuelTank',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',

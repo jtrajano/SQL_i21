@@ -14,7 +14,6 @@
         "helpURL": null,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -312,6 +311,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabInventoryShipment",
                         "plain": true
                     },
@@ -717,7 +719,9 @@
                                     "userConfig": {
                                         "activeTab": 0,
                                         "height": 110,
-                                        "layout|flex": null
+                                        "itemId": "tabShipping",
+                                        "layout|flex": null,
+                                        "plain": true
                                     },
                                     "name": "MyTabPanel3",
                                     "designerId": "460fca3f-7ee6-4b02-9667-c1ce855c535f",
@@ -1523,6 +1527,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "activeTab": 0,
+                                        "bodyCls": [
+                                            "i21-tab"
+                                        ],
                                         "itemId": "tabItemLot",
                                         "layout|flex": 2,
                                         "margin": "5 0 0 0",
@@ -1564,6 +1571,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columnLines": true,
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "dock": null,
                                                         "itemId": "grdInventoryShipment",
@@ -1690,7 +1698,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter133",
+                                                                    "name": "filter122",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2759,6 +2767,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columnLines": true,
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "hidden": true,
                                                         "itemId": "grdLotTracking",
@@ -2813,7 +2822,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter134",
+                                                                    "name": "filter123",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3254,6 +3263,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columnLines": true,
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "itemId": "grdLotSplit",
                                                         "margin": -1,
@@ -3306,7 +3316,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter135",
+                                                                    "name": "filter124",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3496,6 +3506,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "designer|createAlias": "advancefiltergrid",
                                         "itemId": "grdCharges",
                                         "layout|flex": 1,
@@ -3566,7 +3577,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter136",
+                                                    "name": "filter125",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4079,9 +4090,9 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "pgeNotes",
+                                "itemId": "pgeComments",
                                 "layout": "fit",
-                                "title": "Notes"
+                                "title": "Comments"
                             },
                             "name": "MyPanel",
                             "designerId": "a4324b71-fc4f-40fd-b4db-4faadbba31a8",
@@ -4094,7 +4105,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "cfgNotes"
+                                        "itemId": "cfgComments"
                                     },
                                     "name": "TabConfig3",
                                     "designerId": "b4a5f26f-cb1f-4b6d-abe0-91e1faf95116"
@@ -4107,10 +4118,11 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "commentbox"
+                                        "designer|createAlias": "commentbox",
+                                        "designer|displayName": "comments"
                                     },
-                                    "name": "MyContainer38",
-                                    "designerId": "da1fcb43-0586-4054-aebc-5181c8801426"
+                                    "name": "MyContainer20",
+                                    "designerId": "0110608d-3147-4a28-8cf7-92512bf0a120"
                                 }
                             ]
                         },
@@ -4146,6 +4158,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "designer|createAlias": "attachmentgrid",
                                         "itemId": "grdAttachment",
                                         "margin": -1,
@@ -4236,7 +4249,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging113",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

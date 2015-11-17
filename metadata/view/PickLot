@@ -13,7 +13,6 @@
         "height": 519,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -125,6 +124,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabPickLot",
                         "layout|flex": 1,
                         "plain": true
@@ -141,7 +143,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "container|align": "stretch",
-                                "container|padding": 7,
+                                "container|padding": 3,
                                 "layout": "vbox",
                                 "title": "Details"
                             },
@@ -186,6 +188,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "columnLines": true,
                                                 "itemId": "grdPickLots",
                                                 "layout|flex": 1,
                                                 "reference": "grdPickLots",
@@ -295,6 +298,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "columnLines": true,
                                                 "itemId": "grdLotDetails",
                                                 "layout|flex": 1,
                                                 "title": "Lot Details"
@@ -444,7 +448,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging121",
                     "designerId": "6044e841-1435-447f-b1e6-641568ee7e11",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

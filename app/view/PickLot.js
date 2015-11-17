@@ -35,7 +35,6 @@ Ext.define('Inventory.view.PickLot', {
     width: 867,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Pick Lots',
     maximizable: true,
 
@@ -91,6 +90,7 @@ Ext.define('Inventory.view.PickLot', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabPickLot',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -100,7 +100,7 @@ Ext.define('Inventory.view.PickLot', {
                             layout: {
                                 type: 'vbox',
                                 align: 'stretch',
-                                padding: 7
+                                padding: 3
                             },
                             items: [
                                 {
@@ -119,6 +119,7 @@ Ext.define('Inventory.view.PickLot', {
                                             reference: 'grdPickLots',
                                             itemId: 'grdPickLots',
                                             title: 'Pick Lots',
+                                            columnLines: true,
                                             columns: [
                                                 {
                                                     xtype: 'gridcolumn',
@@ -164,6 +165,7 @@ Ext.define('Inventory.view.PickLot', {
                                             flex: 1,
                                             itemId: 'grdLotDetails',
                                             title: 'Lot Details',
+                                            columnLines: true,
                                             viewConfig: {
                                                 itemId: 'gvwLotDetails'
                                             },

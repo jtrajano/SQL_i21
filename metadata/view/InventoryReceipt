@@ -14,7 +14,6 @@
         "helpURL": null,
         "hidden": false,
         "icon": null,
-        "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
         "minHeight": null,
@@ -310,6 +309,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
                         "itemId": "tabInventoryReceipt",
                         "plain": true
                     },
@@ -1360,6 +1362,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columnLines": true,
                                                                 "designer|createAlias": "advancefiltergrid",
                                                                 "itemId": "grdInventoryReceipt",
                                                                 "layout|flex": 1,
@@ -2869,6 +2872,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columnLines": true,
                                                                 "designer|createAlias": "advancefiltergrid",
                                                                 "itemId": "grdLotTracking",
                                                                 "layout|flex": 1,
@@ -4065,6 +4069,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "columnLines": true,
                                                 "designer|createAlias": "advancefiltergrid",
                                                 "itemId": "grdCharges",
                                                 "layout|flex": 1,
@@ -4964,6 +4969,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "itemId": "grdIncomingInspection",
                                         "margin": -1,
                                         "title": null
@@ -5396,6 +5402,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "itemId": "grdPutAway",
                                         "margin": -1,
                                         "title": null
@@ -5898,7 +5905,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "commentbox"
+                                        "designer|createAlias": "commentbox",
+                                        "designer|displayName": "comments"
                                     },
                                     "name": "MyContainer36",
                                     "designerId": "15f83a7f-8d43-474d-9d32-1170b88d5f43"
@@ -5938,6 +5946,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columnLines": true,
                                         "designer|createAlias": "attachmentgrid",
                                         "itemId": "grdBillAttachment",
                                         "margin": -1,

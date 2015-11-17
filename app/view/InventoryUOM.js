@@ -37,7 +37,6 @@ Ext.define('Inventory.view.InventoryUOM', {
     width: 500,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Inventory UOM',
     maximizable: true,
 
@@ -123,6 +122,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 xtype: 'tabpanel',
                                 flex: 1,
                                 itemId: 'tabInventoryUOM',
+                                bodyCls: 'i21-tab',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -173,6 +173,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 flex: 1,
                                                 itemId: 'grdConversion',
                                                 title: 'Conversion',
+                                                columnLines: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',

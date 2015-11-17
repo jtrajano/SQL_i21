@@ -37,7 +37,6 @@ Ext.define('Inventory.view.ItemSubstitution', {
     width: 1050,
     layout: 'fit',
     collapsible: true,
-    iconCls: 'small-icon-i21',
     title: 'Item Substitution',
     maximizable: true,
 
@@ -107,6 +106,7 @@ Ext.define('Inventory.view.ItemSubstitution', {
                     xtype: 'tabpanel',
                     flex: 1,
                     itemId: 'tabItemSubstitution',
+                    bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -175,6 +175,7 @@ Ext.define('Inventory.view.ItemSubstitution', {
                                             flex: 2,
                                             itemId: 'grdSubstituteWith',
                                             title: 'Substitute With',
+                                            columnLines: true,
                                             dockedItems: [
                                                 {
                                                     xtype: 'toolbar',
@@ -242,6 +243,7 @@ Ext.define('Inventory.view.ItemSubstitution', {
                                             itemId: 'grdApplyToBOM',
                                             margin: '0 0 0 5',
                                             title: 'Apply to BOMs',
+                                            columnLines: true,
                                             dockedItems: [
                                                 {
                                                     xtype: 'toolbar',
