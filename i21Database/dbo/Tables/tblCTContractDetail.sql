@@ -26,10 +26,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intCategoryUOMId] INT NULL, 
 	
 	[intNoOfLoad] INT NULL, 
-	[intBalanceNoOfLoad] INT NULL, 
 	[dblQuantityPerLoad] NUMERIC(18, 6) NULL, 
-    [intLoadItemUOMId] INT NULL, 
-    [intLoadCategoryUOMId] INT NULL, 
     
 	[intIndexId] INT NULL, 
 	[dblAdjustment] NUMERIC(18, 6) NULL, 
@@ -136,12 +133,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intAdjItemUOMId_intItemUOMId] FOREIGN KEY ([intAdjItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intLoadItemUOMId_intItemUOMId] FOREIGN KEY ([intLoadItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intNetWeightUOMId_intItemUOMId] FOREIGN KEY ([intNetWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intCategoryUOMId] FOREIGN KEY([intCategoryUOMId])REFERENCES [tblICCategoryUOM] ([intCategoryUOMId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intLoadCategoryUOMId_intCategoryUOMId] FOREIGN KEY ([intLoadCategoryUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId]),
-
+	
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intInvoiceCurrencyId_intCurrencyId] FOREIGN KEY ([intInvoiceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTContractDetail_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategory_intCategoryId] FOREIGN KEY([intCategoryId])REFERENCES [tblICCategory] ([intCategoryId]),

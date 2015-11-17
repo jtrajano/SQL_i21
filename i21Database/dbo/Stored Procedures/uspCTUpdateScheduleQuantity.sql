@@ -28,7 +28,7 @@ BEGIN TRY
 	
 	BEGINING:
 
-	SELECT	@dblQuantity			=	ISNULL(dblDetailQuantity,0),
+	SELECT	@dblQuantity			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblDetailQuantity,0) ELSE ISNULL(intNoOfLoad,0) END,
 			@dblScheduleQty			=	ISNULL(dblScheduleQty,0),
 			@dblBalance				=	ISNULL(dblBalance,0),
 			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0)

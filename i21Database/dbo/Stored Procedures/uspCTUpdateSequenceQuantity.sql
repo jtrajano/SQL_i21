@@ -20,21 +20,23 @@ BEGIN TRY
 			@IntFromUnitMeasureId		INT,
 			@intToUnitMeasureId			INT,
 			@intItemId					INT,
-			@intContractHeaderId		INT
+			@intContractHeaderId		INT,
+			@ysnLoad					BIT
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
 		RAISERROR('Sequence is deleted by other user.',16,1)
 	END 
 	
-	SELECT	@dblQuantity				=		dblDetailQuantity,
+	SELECT	@dblQuantity				=		CASE WHEN ISNULL(ysnLoad,0) = 0 THEN dblDetailQuantity ELSE ISNULL(intNoOfLoad,0) END,
 			@dblScheduleQty				=		ISNULL(dblScheduleQty,0),
 			@dblBalance					=		ISNULL(dblBalance,0),
 			@dblAvailable				=		ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0),
 			@intCommodityUnitMeasureId	=		intCommodityUnitMeasureId,
 			@intItemUOMId				=		intItemUOMId,
 			@intItemId					=		intItemId,
-			@intContractHeaderId		=		intContractHeaderId 
+			@intContractHeaderId		=		intContractHeaderId,
+			@ysnLoad					=		ysnLoad 
 	FROM	vyuCTContractDetailView
 	WHERE	intContractDetailId = @intContractDetailId
 	
@@ -47,7 +49,8 @@ BEGIN TRY
 	SELECT	@dblNewQuantity		=	@dblQuantity + @dblQuantityToUpdate
 
 	UPDATE 	tblCTContractDetail
-	SET		dblQuantity			=	@dblNewQuantity,
+	SET		dblQuantity			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewQuantity ELSE dblQuantity END,
+			intNoOfLoad			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN intNoOfLoad ELSE @dblNewQuantity END,
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractDetailId =	@intContractDetailId
 	

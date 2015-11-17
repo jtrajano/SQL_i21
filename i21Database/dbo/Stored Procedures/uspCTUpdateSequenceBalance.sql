@@ -19,7 +19,7 @@ BEGIN TRY
 	
 	BEGINING:
 
-	SELECT	@dblQuantity			=	ISNULL(dblDetailQuantity,0),
+	SELECT	@dblQuantity			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblDetailQuantity,0) ELSE ISNULL(intNoOfLoad,0) END,
 			@dblOldBalance			=	ISNULL(dblBalance,0),
 			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0)
 	FROM	vyuCTContractDetailView 

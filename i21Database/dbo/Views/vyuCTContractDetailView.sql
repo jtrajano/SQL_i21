@@ -25,7 +25,8 @@ AS
 			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
 			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
 			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
-			CD.strDestinationPointType,			CD.intItemContractId,
+			CD.strDestinationPointType,			CD.intItemContractId,			CD.intNoOfLoad,
+			CD.dblQuantityPerLoad,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -93,7 +94,7 @@ AS
 			CH.dblTolerancePct,					CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
 			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
-			CH.ysnMultiplePriceFixation,		CH.strINCOLocation
+			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad
 			
 	FROM	tblCTContractDetail				CD
 	
