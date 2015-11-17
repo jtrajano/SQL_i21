@@ -224,9 +224,21 @@ BEGIN TRY
 
 	SELECT DP.*
 		,(
-			SELECT Count(DISTINCT DP1.strLotNumber)
+			SELECT COUNT(DISTINCT DP1.strLotNumber)
 			FROM @tblMFDailyProduction DP1
 			) AS intNoOfPallets
+			,(
+			SELECT COUNT(DISTINCT DP1.strLotNumber)
+			FROM @tblMFDailyProduction DP1 Where DP1.strItemNo =DP.strItemNo
+			) AS intNoOfPalletsByItem
+			,(
+			SELECT COUNT(DISTINCT DP1.strLotNumber)
+			FROM @tblMFDailyProduction DP1 Where DP1.strItemNo =DP.strItemNo AND DP1.dtmDate =DP.dtmDate
+			) AS intNoOfPalletsByItemAndDate
+			,(
+			SELECT COUNT(DISTINCT DP1.strLotNumber)
+			FROM @tblMFDailyProduction DP1 Where DP1.strItemNo =DP.strItemNo AND DP1.dtmDate =DP.dtmDate and DP1.strShiftName =DP.strShiftName 
+			) AS intNoOfPalletsByItemAndDateAndShift
 	FROM @tblMFDailyProduction DP
 	ORDER BY DP.dtmCreated
 
@@ -234,7 +246,7 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	SET @ErrMsg = 'uspMFReportProductSpecification - ' + ERROR_MESSAGE()
+	SET @ErrMsg = 'uspMFReportDailyProduction - ' + ERROR_MESSAGE()
 
 	IF @xmlDocumentId <> 0
 		EXEC sp_xml_removedocument @xmlDocumentId
