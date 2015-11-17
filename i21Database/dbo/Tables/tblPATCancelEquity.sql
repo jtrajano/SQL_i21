@@ -11,5 +11,6 @@
     [dblCancelByAmount] NUMERIC(18, 6) NULL, 
     [dblCancelLessAmount] NUMERIC(18, 6) NULL, 
     [intIncludeEquityReserve] INT NULL, 
+	[ysnPosted] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NULL DEFAULT 0
 )
