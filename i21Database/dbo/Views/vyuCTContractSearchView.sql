@@ -22,7 +22,8 @@ AS
 				CH.strApprovalBasisDescription,		CH.strCommodityCode,			CH.strINCOLocationType,
 				CH.strApprovalBasis,				CH.strContractBasis,			CH.strPricingType,
 				CH.strPricingLevelName,				CH.strLoadUnitMeasure,			CH.strCategoryUnitMeasure,
-				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				CH.strStatuses
+				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				CH.strStatuses,
+				CH.dtmCreated
 
 	FROM		vyuCTContractHeaderView		CH	LEFT
 	JOIN

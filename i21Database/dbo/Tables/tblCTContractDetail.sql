@@ -94,7 +94,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPackingDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyExchangeRateId] INT NULL,
-    
+    intCreatedById INT,
+	dtmCreated DATETIME,
+	intLastModifiedById INT,
+	dtmLastModified DATETIME,
 	
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

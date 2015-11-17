@@ -28,11 +28,13 @@ AS
 			EY.strEntityCountry,		PO.strPosition,					IB.strDescription			AS	strInsuranceByDescription,
 			TP.strContractType,			IB.strInsuranceBy,				IT.strDescription			AS	strInvoiceTypeDescription,
 			IT.strInvoiceType,			CO.strCountry,					AB.strDescription			AS	strApprovalBasisDescription,
-			CY.strCommodityCode,		SP.strSalespersonId,			CB.strINCOLocationType,
-			AB.strApprovalBasis,		CB.strContractBasis,			PT.strPricingType,
-			PL.strPricingLevelName,										U3.strUnitMeasure			AS	strLoadUnitMeasure,
-																		U4.strUnitMeasure			AS	strCategoryUnitMeasure,
-																		U5.strUnitMeasure			AS	strLoadCategoryUnitMeasure,
+			CY.strCommodityCode,		SP.strSalespersonId,			U3.strUnitMeasure			AS	strLoadUnitMeasure,
+			AB.strApprovalBasis,		CB.strContractBasis,			U4.strUnitMeasure			AS	strCategoryUnitMeasure,
+			PL.strPricingLevelName,		PT.strPricingType,				U5.strUnitMeasure			AS	strLoadCategoryUnitMeasure,				
+			CB.strINCOLocationType,		CH.dtmCreated,					CE.strName					AS	strCreatedBy,
+			CH.dtmLastModified,											UE.strName					AS	strLastModifiedBy,					
+																		
+																		
 			CASE WHEN strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
 			
@@ -63,4 +65,6 @@ AS
 	JOIN	tblICUnitMeasure					U4	ON	U4.intUnitMeasureId					=		CH.intCategoryUnitMeasureId			LEFT
 	JOIN	tblICUnitMeasure					U5	ON	U5.intUnitMeasureId					=		CH.intLoadCategoryUnitMeasureId		LEFT
 	JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
-	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId
+	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId			LEFT
+	JOIN	tblEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
+	JOIN	tblEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById
