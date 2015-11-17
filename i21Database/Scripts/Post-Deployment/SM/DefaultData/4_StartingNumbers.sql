@@ -221,7 +221,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 23
 			,[strTransactionType]	= N'Inventory Receipt'
-			,[strPrefix]			= N'INVRCT-'
+			,[strPrefix]			= N'IR-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
@@ -284,7 +284,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 30
 			,[strTransactionType]	= N'Inventory Adjustment'
-			,[strPrefix]			= N'ADJ-'
+			,[strPrefix]			= N'IA-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
@@ -293,7 +293,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 31
 			,[strTransactionType]	= N'Inventory Shipment'
-			,[strPrefix]			= N'INVSHP-'
+			,[strPrefix]			= N'IS-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
@@ -326,15 +326,6 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order')
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 35
-			,[strTransactionType]	= N'Build Assembly'
-			,[strPrefix]			= N'BUILD-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Inventory'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Build Assembly')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 36
 			 ,[strTransactionType]	= N'ContractAdjNo'
@@ -383,7 +374,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 41
 			,[strTransactionType]	= N'Inventory Transfer'
-			,[strPrefix]			= N'INVTRN-'
+			,[strPrefix]			= N'IT-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
@@ -704,7 +695,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 76
 			,[strTransactionType]	= N'Inventory Count'
-			,[strPrefix]			= N'InvCount-'
+			,[strPrefix]			= N'IC-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
