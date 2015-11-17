@@ -2506,6 +2506,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Plant Sch
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.PlantSchedule' WHERE strMenuName = 'Plant Schedule' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Production Item Report' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Daily Production Item Report', N'Manufacturing', @ManufacturingParentMenuId, N'Daily Production Item Report', N'Activity', N'Screen', N'Reporting.view.FilterField?selectedReport=DailyProductionItemReport&selectedGroup=Manufacturing', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.FilterField?selectedReport=DailyProductionItemReport&selectedGroup=Manufacturing' WHERE strMenuName = 'Daily Production Item Report' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing Process' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Manufacturing Process', N'Manufacturing', @ManufacturingParentMenuId, N'Manufacturing Process', N'Maintenance', N'Screen', N'Manufacturing.view.ManufacturingProcess', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
