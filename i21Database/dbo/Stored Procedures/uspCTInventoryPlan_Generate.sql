@@ -258,11 +258,13 @@ BEGIN TRY
 
 		DECLARE @PastDueIntransitPurchases DECIMAL(24, 6)
 		SET @PastDueIntransitPurchases = ISNULL((
-										SELECT SUM(dblQtyInStockUOM)
-										FROM [dbo].[vyuLGInventoryView]
-										WHERE intItemId = @intItemId
-											AND strStatus = 'In-transit'
-											AND dtmInventorizedDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
+										SELECT SUM(IV.dblQtyInStockUOM)
+										FROM [dbo].[vyuLGInventoryView] IV
+										JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+										WHERE IV.intItemId = @intItemId
+											AND IV.strStatus = 'In-transit'
+											AND SS.intContractStatusId = 1
+											AND SS.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
 										), 0)
 
 		SET @strItemNo = @strItemNo + ' (' + @TargetUOMName + ' per ' + @SourceUOMName + ' --> ' + CAST(@Conversion_Factor AS NVARCHAR(30)) + ')'
@@ -699,12 +701,14 @@ BEGIN TRY
 							DECLARE @SQL_IntransitPurchases_Exec_Ext NVARCHAR(MAX)
 
 							SET @SQL_IntransitPurchases_Exec_Ext = 'SELECT @IntransitPurchases = ' + CAST(ISNULL((
-											SELECT SUM(dblQtyInStockUOM)
-											FROM [dbo].[vyuLGInventoryView]
-											WHERE intItemId = @intItemId
-												AND strStatus = 'In-transit'
-												AND left(convert(CHAR(12), dtmInventorizedDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
-												AND right(convert(CHAR(12), dtmInventorizedDate, 107), 4) = right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+											SELECT SUM(IV.dblQtyInStockUOM)
+											FROM [dbo].[vyuLGInventoryView] IV
+											JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+											WHERE IV.intItemId = @intItemId
+												AND IV.strStatus = 'In-transit'
+												AND SS.intContractStatusId = 1
+												AND left(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+												AND right(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate, 107), 4) = right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
 											), 0) AS NVARCHAR(50)) + ' '
 
 							DECLARE @IntransitPurchases_Ext DECIMAL(24, 6)
@@ -1196,12 +1200,14 @@ BEGIN TRY
 						DECLARE @SQL_IntransitPurchases_Exec NVARCHAR(MAX)
 
 						SET @SQL_IntransitPurchases_Exec = 'SELECT @IntransitPurchases = ' + CAST(ISNULL((
-										SELECT SUM(dblQtyInStockUOM)
-										FROM [dbo].[vyuLGInventoryView]
-										WHERE intItemId = @intItemId
-											AND strStatus = 'In-transit'
-											AND left(convert(CHAR(12), dtmInventorizedDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
-											AND right(convert(CHAR(12), dtmInventorizedDate, 107), 4) = right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+										SELECT SUM(IV.dblQtyInStockUOM)
+										FROM [dbo].[vyuLGInventoryView] IV
+										JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+										WHERE IV.intItemId = @intItemId
+											AND IV.strStatus = 'In-transit'
+											AND SS.intContractStatusId = 1
+											AND left(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+											AND right(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate, 107), 4) = right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
 										), 0) AS NVARCHAR(50)) + ' '
 
 						DECLARE @IntransitPurchases DECIMAL(24, 6)
