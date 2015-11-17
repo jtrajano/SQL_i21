@@ -16,6 +16,7 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [intEntityId] INT NOT NULL DEFAULT 0,
     [intEntityVendorId] INT NULL,
+	[intBatchId] INT NULL,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
     [ysnVoid] BIT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 

@@ -19,6 +19,7 @@ SELECT
 	A.strPaymentInfo ,
 	A.strPaymentRecordNum ,
 	A.ysnOrigin ,
+	A.intBatchId,
 	A.ysnPosted ,
 	CAST(CASE WHEN E.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted,
 	ISNULL(E.ysnCheckVoid,0) AS ysnVoid,

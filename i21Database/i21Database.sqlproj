@@ -2936,6 +2936,7 @@
     <Build Include="dbo\Tables\tblMFReadingPoint.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyContractSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBatchPostEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromVoucherBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
