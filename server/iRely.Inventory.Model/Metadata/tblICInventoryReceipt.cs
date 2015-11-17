@@ -204,7 +204,7 @@ namespace iRely.Inventory.Model
         public int? intContainerId { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
-        public int intOwnershipType { get; set; }
+        public int? intOwnershipType { get; set; }
         public decimal? dblOrderQty { get; set; }
         public decimal? dblBillQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
@@ -217,7 +217,6 @@ namespace iRely.Inventory.Model
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
         public decimal? dblTax { get; set; }
-        public int? intTaxGroupId { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
@@ -434,25 +433,6 @@ namespace iRely.Inventory.Model
             set
             {
                 _uomType = value;
-            }
-        }
-        private string _taxGroup;
-        [NotMapped]
-        public string strTaxGroup
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_taxGroup))
-                    if (vyuICGetInventoryReceiptItem != null)
-                        return vyuICGetInventoryReceiptItem.strTaxGroup;
-                    else
-                        return null;
-                else
-                    return _taxGroup;
-            }
-            set
-            {
-                _taxGroup = value;
             }
         }
         private string _subLocationName;
@@ -714,8 +694,6 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public string strLotTracking { get; set; }
         public int? intCommodityId { get; set; }
-        public int? intTaxGroupId { get; set; }
-        public string strTaxGroup { get; set; }
         public int? intContainerId { get; set; }
         public string strContainer { get; set; }
         public int? intSubLocationId { get; set; }
