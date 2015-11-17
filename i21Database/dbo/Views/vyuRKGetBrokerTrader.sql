@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuRKGetBrokerTrader]
 AS  
-SELECT intTradersbyBrokersAccountId,amm.intEntitySalespersonId,ba.intEntityId,ba.intBrokerageAccountId,strSalespersonId from tblRKBrokerageAccount ba
+SELECT intTradersbyBrokersAccountId,amm.intEntitySalespersonId,ba.intEntityId,ba.intBrokerageAccountId,strName strSalespersonId 
+FROM tblRKBrokerageAccount ba
 JOIN tblRKTradersbyBrokersAccountMapping amm on amm.intBrokerageAccountId=ba.intBrokerageAccountId
-JOIN tblARSalesperson fm on amm.intEntitySalespersonId=fm.intEntitySalespersonId
+JOIN tblEntity fm on amm.intEntitySalespersonId=fm.intEntityId 
