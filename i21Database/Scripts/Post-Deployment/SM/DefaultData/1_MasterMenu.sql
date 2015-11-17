@@ -2840,6 +2840,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer 
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.CustomerPositionInquiry' WHERE strMenuName = 'Customer Position Inquiry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Contract' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Currency Contract', N'Risk Management', @RiskManagementParentMenuId, N'Currency Contract', N'Activity', N'Screen', N'RiskManagement.view.CurrencyContract', N'small-menu-activity', 0, 0, 0, 1, 12, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'RiskManagement.view.CurrencyContract' WHERE strMenuName = 'Currency Contract' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Futures Markets' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Futures Markets', N'Risk Management', @RiskManagementParentMenuId, N'Futures Markets', N'Maintenance', N'Screen', N'RiskManagement.view.FuturesMarket', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
