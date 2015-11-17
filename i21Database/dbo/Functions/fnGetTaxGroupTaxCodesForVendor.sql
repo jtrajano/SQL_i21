@@ -48,7 +48,7 @@ BEGIN
 		,[numRate]						= R.[numRate]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
-		,[intTaxAccountId]				= TC.[intSalesTaxAccountId]
+		,[intTaxAccountId]				= TC.[intPurchaseTaxAccountId]
 		,[ysnSeparateOnInvoice]			= 0
 		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
 		,[strTaxCode]					= TC.[strTaxCode]
@@ -64,12 +64,12 @@ BEGIN
 		tblSMTaxGroup TG
 			ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 	CROSS APPLY
-		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
+		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
 	CROSS APPLY
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
-		AND (ISNULL(E.ysnTaxExempt,0) = 1 OR ISNULL(@IncludeExemptedCodes,0) = 1)
+		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
 
