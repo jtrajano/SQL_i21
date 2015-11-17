@@ -92,7 +92,7 @@ END
 										FROM dbo.tblICItemUOM IU 
 										WHERE	IU.intItemId = DD.intItemId and IU.ysnStockUnit = 1)
 							WHEN DD.intContractDetailId is NOT NULL 
-							   THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = DD.intContractDetailId)
+							   THEN	(select top 1 intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = DD.intContractDetailId)
 							   END, 	   
 	   DH.dtmInvoiceDateTime,
 	   DD.intContractDetailId,	   
@@ -125,7 +125,7 @@ END
 	   DD.dblDistSurcharge,
 	   DD.ysnFreightInPrice,
 	   DD.intTaxGroupId,
-	   (select strTransaction from tblTRTransportLoad TT
+	   (select top 1 strTransaction from tblTRTransportLoad TT
                    join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 			       join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
                    where RR.strOrigin = 'Terminal' 
