@@ -71,7 +71,7 @@ UNION
 UNION
 
 SELECT 3 AS intSeqId
-	,'Purchase Gross Dollers' [strType]
+	,'Purchase Gross Dollars' [strType]
 	,SUM(dblOpenReceive) AS dblTotal
 	FROM (
 		SELECT isnull(dblOpenReceive,0)*dblUnitCost  dblOpenReceive
@@ -95,7 +95,7 @@ SELECT 3 AS intSeqId
 UNION
 
 SELECT 4 AS intSeqId
-	,'Sales Gross Dollers' [strType]
+	,'Sales Gross Dollars' [strType]
 	,SUM(dblQuantity) AS dblTotal
 	FROM (
 		select isnull(dblQuantity,0)*dblUnitPrice dblQuantity from tblICInventoryShipment s
