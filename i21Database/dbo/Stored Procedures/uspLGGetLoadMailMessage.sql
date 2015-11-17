@@ -208,5 +208,4 @@ BEGIN
 									'<TD>' + IsNull(@strEquipmentType, '') + '</TD>' +
 								'</FONT></TR>' +
 							'</TABLE> </BODY> </HTML>'
-	SELECT @strMailMessage
 END
