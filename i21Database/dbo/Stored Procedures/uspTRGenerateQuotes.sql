@@ -137,12 +137,7 @@ INSERT INTO [dbo].[tblTRQuoteDetail]
            ,QD.intItemId --[intItemId]
            ,(select SP.intEntityVendorId from vyuTRSupplyPointView SP where QD.intSupplyPointId = SP.intSupplyPointId) --[intTerminalId]
            ,QD.intSupplyPointId --[intSupplyPointId]
-           ,[dbo].[fnTRGetRackPrice]    --[dblRackPrice]
-		          (
-		          @dtmEffectiveDate
-		          ,QD.intSupplyPointId
-		          ,QD.intItemId
-		          ) AS dblRackPrice
+		   ,NULL --[dblRackPrice]
 		   ,NULL  --[dblDeveationAmount]    
            ,NULL --[dblTempAdjustment]
            ,NULL --[dblFreightRate]
@@ -199,7 +194,25 @@ BEGIN
         select top 1 @detailId= intQuoteDetailId from @DataForDetailQuote where intQuoteHeaderId = @QuoteHeader
         
         select @intSpecialPriceId = intSpecialPriceId from tblTRQuoteDetail where intQuoteDetailId = @detailId
-        
+
+		update tblTRQuoteDetail 
+        SET dblRackPrice  = (select rackID = CASE	WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice]    --[dblRackPrice]
+		                                                       (
+		                                                       @dtmEffectiveDate
+		                                                       ,(select top 1 intSupplyPointId from vyuTRSupplyPointView where intEntityVendorId = SP.intRackVendorId)
+		                                                       ,SP.intRackItemId
+		                                                       ) 
+						                            WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice]    --[dblRackPrice]
+		                                                       (
+		                                                       @dtmEffectiveDate
+		                                                       ,(select top 1 intSupplyPointId from vyuTRSupplyPointView where intEntityVendorId = SP.intEntityVendorId)
+		                                                       ,SP.intItemId
+		                                                       ) 
+
+			                                    	END
+		                       from tblARCustomerSpecialPrice SP  where SP.intSpecialPriceId = @intSpecialPriceId)		     
+            where intQuoteDetailId = @detailId
+
         update tblTRQuoteDetail 
         SET dblDeviationAmount = (select top 1 SP.dblDeviation from tblARCustomerSpecialPrice SP where SP.intSpecialPriceId = @intSpecialPriceId)      
             where intQuoteDetailId = @detailId
