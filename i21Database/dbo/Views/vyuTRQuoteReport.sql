@@ -6,8 +6,8 @@ SELECT
    QH.strQuoteNumber,
    getdate() as dtmGeneratedDate,   
    QH.dtmQuoteDate,
-   strCustomer = [dbo].fnARFormatCustomerAddress(AR.strPhone, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName),
-   strSalesperson = [dbo].fnARFormatCustomerAddress(SP.strPhone, SP.strEmail, NULL, SP.strAddress, SP.strCity, SP.strState, SP.strZipCode, SP.strCountry, SP.strName),
+   strCustomer = [dbo].fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName),
+   strSalesperson = [dbo].fnARFormatCustomerAddress(SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, SP.strName),
    EL.strLocationName,
    IC.strItemNo,
    TR.strSupplyPoint,
@@ -18,7 +18,8 @@ SELECT
            order by PQH.strQuoteNumber DESC)) as dblPriceChange,
    QD.dblQuotePrice,
    ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = QH.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + 'Quotes' + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END, 
-   QH.intQuoteHeaderId	
+   QH.intQuoteHeaderId,
+   QH.strQuoteComments	
 FROM
     dbo.tblTRQuoteHeader QH
 	left join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
