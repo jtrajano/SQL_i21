@@ -145,6 +145,9 @@ SET @query = '
 	,B.[intEntityVendorId]
 	,A.intBillId
 	,A.strBillId
+	,A.strVendorOrderNumber
+	,T.strTerm
+	,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
 	,A.intAccountId
 	,D.strAccountId
 	,tmpAgingSummaryTotal.dblTotal
@@ -193,6 +196,7 @@ SET @query = '
 	LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.[intEntityVendorId] = C.intEntityId)
 	ON B.[intEntityVendorId] = A.[intEntityVendorId]
 	LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 
