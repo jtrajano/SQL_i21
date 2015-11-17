@@ -110,7 +110,6 @@ BEGIN
 			,dblQuantity
 			,intItemUOMId
 			,dblUnitPrice
-			,intTaxCodeId
 			,intDockDoorId
 			,strNotes
 			,intSort
@@ -125,7 +124,6 @@ BEGIN
 			,dblQuantity			= SODetail.dblQtyOrdered - SODetail.dblQtyShipped
 			,intItemUOMId			= SODetail.intItemUOMId
 			,dblUnitPrice			= SODetail.dblPrice
-			,intTaxCodeId			= SODetail.intTaxId
 			,intDockDoorId			= NULL
 			,strNotes				= SODetail.strComments
 			,intSort				= SODetail.intSalesOrderDetailId

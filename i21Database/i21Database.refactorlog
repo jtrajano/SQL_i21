@@ -4347,6 +4347,20 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strInternalComment" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7474d8dc-866c-4459-857f-49136e37aee7" ChangeDateTime="11/10/2015 06:04:54">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryTax].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCategoryTaxId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2ab16bc4-f939-4571-8f92-af75ea3978f3" ChangeDateTime="11/10/2015 06:08:37">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryTax].[intTaxGroupId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxClassId" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="80750c2f-4cba-41ce-aa00-529770f784b0" ChangeDateTime="11/06/2015 03:44:43">
     <Property Name="ElementName" Value="[dbo].[tblAPVoucherApprover].[intAlternateApprover]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />

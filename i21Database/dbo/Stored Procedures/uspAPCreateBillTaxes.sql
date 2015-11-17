@@ -28,7 +28,7 @@ BEGIN
 	)
 
 	SELECT
-		@purchaseTaxMasterId = C.intPurchaseTaxGroupId
+		@purchaseTaxMasterId = NULL
 		,@billShipFromLocation = A.intShipFromId
 		,@transactionDate = A.dtmDate
 	FROM tblAPBill A

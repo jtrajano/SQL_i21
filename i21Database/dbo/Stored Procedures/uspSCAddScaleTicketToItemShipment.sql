@@ -135,7 +135,6 @@ BEGIN
 			,dblQuantity
 			,intItemUOMId
 			,dblUnitPrice
-			,intTaxCodeId
 			,intDockDoorId
 			,strNotes
 			,intSort
@@ -152,7 +151,6 @@ BEGIN
 			,dblQuantity			= LI.dblQty
 			,intItemUOMId			= ItemUOM.intItemUOMId
 			,dblUnitPrice			= LI.dblCost
-			,intTaxCodeId			= NULL
 			,intDockDoorId			= NULL
 			,strNotes				= SC.strTicketComment
 			,intSort				= 1

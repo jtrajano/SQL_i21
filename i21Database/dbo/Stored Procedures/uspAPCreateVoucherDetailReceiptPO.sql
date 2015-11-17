@@ -63,7 +63,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE 0 END),
 		[int1099Category]				=	G.int1099CategoryId,
 		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1)),
-		[intTaxGroupId]					=	B.intTaxGroupId
+		[intTaxGroupId]					=	NULL
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId

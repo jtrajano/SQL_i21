@@ -61,7 +61,7 @@ BEGIN TRY
 			,dblSurcharge
 			,ysnFreightInPrice
 			,strActualCostId
-			,intTaxGroupId
+			--,intTaxGroupId
 			,strVendorRefNo
 			,strSourceId
 			,strSourceScreenName
@@ -113,7 +113,7 @@ BEGIN TRY
 			,dblSurcharge				= 0
 			,ysnFreightInPrice			= NULL
 			,strActualCostId			= NULL
-			,intTaxGroupId				= NULL
+			--,intTaxGroupId				= NULL
 			,strVendorRefNo				= NULL
 			,strSourceId				= SC.intTicketId
 			,strSourceScreenName		= 'Scale Ticket'

@@ -2857,6 +2857,7 @@
     <Build Include="dbo\Functions\fnGetTaxGroupIdForVendor.sql" />
     <Build Include="dbo\Functions\fnCTGetBillIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLotLabel.sql" />
+    <Build Include="dbo\Tables\tblICCategoryTax.sql" />
     <Build Include="dbo\Tables\tblPRTypeTimeOffDetail.sql" />
     <Build Include="dbo\Views\vyuCFBatchPostTransactions.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentItemLot.sql" />
@@ -2984,7 +2985,7 @@
     <None Include="Scripts\Post-Deployment\EM\007_MoveShippingLineData.sql" />
     <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
     <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
-    <None Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateApprovalRecords.sql" />
     <None Include="Scripts\Post-Deployment\CT\2_DataMigration.sql" />
     <None Include="Scripts\Post-Deployment\EM\009_UpdateEntityContactTypeData.sql" />

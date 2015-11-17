@@ -25,7 +25,6 @@ Type the overview for the table here.
 		[intItemUOMId] INT NOT NULL, 
 		[intWeightUOMId] INT NULL,
 		[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[intTaxCodeId] INT NULL,
 		[intDockDoorId] INT NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intGradeId] INT NULL,
@@ -36,7 +35,6 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
@@ -159,14 +157,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intSourceId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Tax Code Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryShipmentItem',
-    @level2type = N'COLUMN',
-    @level2name = N'intTaxCodeId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Line No',
