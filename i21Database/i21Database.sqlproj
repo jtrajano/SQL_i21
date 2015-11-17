@@ -2937,6 +2937,9 @@
     <Build Include="dbo\Views\vyuRKCurrencyContractSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBatchPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromVoucherBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetCompanyPreferenceValueList.sql" />
+    <Build Include="dbo\Stored Procedures\uspWMGetUserLocationListWMS.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetScannedObject.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
