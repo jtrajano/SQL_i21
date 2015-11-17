@@ -8,7 +8,7 @@
 	,@TaxGroupId			INT
 	,@CompanyLocationId		INT
 	,@ShipToLocationId		INT	
-	,@IncludeExemptedCodes	INT
+	,@IncludeExemptedCodes	BIT
 )
 RETURNS NUMERIC(18,6)
 AS

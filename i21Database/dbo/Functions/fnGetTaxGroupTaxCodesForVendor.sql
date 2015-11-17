@@ -5,7 +5,7 @@
 	,@TransactionDate		DATETIME
 	,@ItemId				INT
 	,@ShipFromLocationId	INT
-	,@IncludeExemptedCodes	INT
+	,@IncludeExemptedCodes	BIT
 )
 RETURNS @returntable TABLE
 (

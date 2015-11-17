@@ -8,7 +8,7 @@
 	,@TaxGroupId			INT
 	,@CompanyLocationId		INT
 	,@ShipFromLocationId	INT
-	,@IncludeExemptedCodes	INT
+	,@IncludeExemptedCodes	BIT
 )
 RETURNS @returntable TABLE
 (
