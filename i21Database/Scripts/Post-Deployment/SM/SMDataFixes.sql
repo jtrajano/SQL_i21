@@ -84,3 +84,9 @@ GO
 
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Analysis Reports' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 GO
+
+	/* UPDATE Audit Log Icon from small-menu-maintenance to small-gear */
+	UPDATE tblSMAuditLog 
+	SET strJsonData = REPLACE(strJsonData, 'small-menu-maintenance', 'small-gear') 
+	WHERE strJsonData LIKE '%small-menu-maintenance%'
+GO
