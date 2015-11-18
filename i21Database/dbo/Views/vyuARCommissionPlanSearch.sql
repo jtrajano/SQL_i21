@@ -6,6 +6,7 @@ SELECT CP.intCommissionId
 	 , CP.strDescription
 	 , CP.strBasis
 	 , strEntityNumbers = [dbo].[fnGetEntityNumberByEntityIds](CP.strEntities)
+	 , CP.strEntities
 	 , CP.strCalculationType
 	 , CP.strHurdleFrequency
 	 , CP.strHurdleType
