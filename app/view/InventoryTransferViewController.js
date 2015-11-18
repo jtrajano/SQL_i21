@@ -83,21 +83,21 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 readOnly: '{current.ysnPosted}'
             },
 
-            cboShipVia: {
-                value: '{current.intShipViaId}',
-                store: '{shipVia}',
-                readOnly: '{current.ysnPosted}'
-            },
-            cboFreightUOM: {
-                value: '{current.intFreightUOMId}',
-                store: '{uom}',
-                readOnly: '{current.ysnPosted}'
-            },
-            txtTaxAmount: '{current.dblTaxAmount}',
-
-            pnlFreight: {
-                hidden: '{hideOnStorageToStorage}'
-            },
+//            cboShipVia: {
+//                value: '{current.intShipViaId}',
+//                store: '{shipVia}',
+//                readOnly: '{current.ysnPosted}'
+//            },
+//            cboFreightUOM: {
+//                value: '{current.intFreightUOMId}',
+//                store: '{uom}',
+//                readOnly: '{current.ysnPosted}'
+//            },
+//            txtTaxAmount: '{current.dblTaxAmount}',
+//
+//            pnlFreight: {
+//                hidden: '{hideOnStorageToStorage}'
+//            },
 
             grdInventoryTransfer: {
                 readOnly: '{current.ysnPosted}',
@@ -242,22 +242,22 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 colNewLotID: {
                     dataIndex: 'strNewLotId'
                 },
-                colCost: 'dblCost',
-                colTaxCode: {
-                    dataIndex: 'strTaxCode',
-                    editor: {
-                        store: '{taxCode}'
-                    }
-                },
-                colTaxAmount: 'dblTaxAmount',
-                colFreightRate: {
-                    dataIndex: 'dblFreightRate',
-                    hidden: '{hideOnStorageToStorage}'
-                },
-                colFreightAmount: {
-                    dataIndex: 'dblFreightAmount',
-                    hidden: '{hideOnStorageToStorage}'
-                }
+                colCost: 'dblCost'
+//                colTaxCode: {
+//                    dataIndex: 'strTaxCode',
+//                    editor: {
+//                        store: '{taxCode}'
+//                    }
+//                },
+//                colTaxAmount: 'dblTaxAmount',
+//                colFreightRate: {
+//                    dataIndex: 'dblFreightRate',
+//                    hidden: '{hideOnStorageToStorage}'
+//                },
+//                colFreightAmount: {
+//                    dataIndex: 'dblFreightAmount',
+//                    hidden: '{hideOnStorageToStorage}'
+//                }
             }
         }
     },

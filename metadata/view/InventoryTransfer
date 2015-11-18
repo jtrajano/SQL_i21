@@ -853,6 +853,7 @@
                                                     "userConfig": {
                                                         "bodyPadding": 5,
                                                         "container|align": "stretch",
+                                                        "hidden": true,
                                                         "itemId": "pnlFreight",
                                                         "layout": "vbox",
                                                         "layout|flex": 1,
@@ -1114,7 +1115,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter1",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1977,182 +1978,6 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strTaxCode",
-                                                "itemId": "colTaxCode",
-                                                "text": "Tax Code",
-                                                "width": 69
-                                            },
-                                            "name": "MyColumn45",
-                                            "designerId": "25bb0f9c-29b8-4852-8d80-01c929d4dea5",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intTaxCodeId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Tax Code Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strTaxCode',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Tax Code',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strCalculationMethod',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Calculation Method',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strTaxCode",
-                                                        "itemId": "cboTaxCode",
-                                                        "valueField": "strTaxCode"
-                                                    },
-                                                    "name": "MyComboBox11",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "041960fe-c527-4ee8-ab3a-5c2e38f16710",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblTaxAmount",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colTaxAmount",
-                                                "text": "Tax Amount",
-                                                "width": 85
-                                            },
-                                            "name": "MyNumberColumn26",
-                                            "designerId": "a3212a75-b832-40ca-98fb-99adf6a2bf9e",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblFreightRate",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "hideMode": "visibility",
-                                                "itemId": "colFreightRate",
-                                                "text": "Freight Rate",
-                                                "width": 85
-                                            },
-                                            "name": "MyNumberColumn27",
-                                            "designerId": "2ca1d0b6-d7c4-48d2-b789-8795144e94e7",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyNumberField5",
-                                                    "designerId": "b8ee10a4-47c5-41a8-992c-7ddf785f4b1b"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblFreightAmount",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "hideMode": "visibility",
-                                                "itemId": "colFreightAmount",
-                                                "text": "Freight Amount",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn28",
-                                            "designerId": "ae5ad88e-71e9-4606-89c4-69c6ba49885c",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyNumberField6",
-                                                    "designerId": "a5df02cc-7dd1-4b07-99c9-0e300c36df60"
-                                                }
-                                            ]
-                                        },
-                                        {
                                             "type": "Ext.grid.plugin.CellEditing",
                                             "reference": {
                                                 "name": "plugins",
@@ -2310,7 +2135,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging115",
+                    "name": "statusbarpaging1",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

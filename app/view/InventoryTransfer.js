@@ -377,6 +377,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             {
                                                                 xtype: 'panel',
                                                                 flex: 1,
+                                                                hidden: true,
                                                                 itemId: 'pnlFreight',
                                                                 margin: '',
                                                                 bodyPadding: 5,
@@ -977,83 +978,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblCost',
                                                         text: 'Cost',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colTaxCode',
-                                                        width: 69,
-                                                        dataIndex: 'strTaxCode',
-                                                        text: 'Tax Code',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intTaxCodeId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Tax Code Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strTaxCode',
-                                                                    dataType: 'string',
-                                                                    text: 'Tax Code',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strCalculationMethod',
-                                                                    dataType: 'string',
-                                                                    text: 'Calculation Method',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboTaxCode',
-                                                            displayField: 'strTaxCode',
-                                                            valueField: 'strTaxCode'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colTaxAmount',
-                                                        width: 85,
-                                                        align: 'right',
-                                                        dataIndex: 'dblTaxAmount',
-                                                        text: 'Tax Amount',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        hideMode: 'visibility',
-                                                        itemId: 'colFreightRate',
-                                                        width: 85,
-                                                        align: 'right',
-                                                        dataIndex: 'dblFreightRate',
-                                                        text: 'Freight Rate',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        hideMode: 'visibility',
-                                                        itemId: 'colFreightAmount',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        dataIndex: 'dblFreightAmount',
-                                                        text: 'Freight Amount',
                                                         format: '0,000.##',
                                                         editor: {
                                                             xtype: 'numberfield'
