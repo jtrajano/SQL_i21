@@ -2512,6 +2512,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Pro
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.FilterField?selectedReport=DailyProductionItemReport&selectedGroup=Manufacturing' WHERE strMenuName = 'Daily Production Item Report' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Production True Up Report' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Process Production True Up Report', N'Manufacturing', @ManufacturingParentMenuId, N'Process Production True Up Report', N'Activity', N'Screen', N'Reporting.view.FilterField?selectedReport=ProcessProductionTrueUpReport&selectedGroup=Manufacturing', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.FilterField?selectedReport=ProcessProductionTrueUpReport&selectedGroup=Manufacturing' WHERE strMenuName = 'Process Production True Up Report' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing Process' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Manufacturing Process', N'Manufacturing', @ManufacturingParentMenuId, N'Manufacturing Process', N'Maintenance', N'Screen', N'Manufacturing.view.ManufacturingProcess', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
