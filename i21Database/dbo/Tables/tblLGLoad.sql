@@ -35,6 +35,9 @@
 [ysnDispatched] [bit] NULL,
 [dtmDispatchedDate] DATETIME NULL,
 [intDispatcherId] INT NULL, 	
+[ysnDispatchMailSent] [bit] NULL,
+[dtmDispatchMailSent] DATETIME NULL,
+[dtmCancelDispatchMailSent] DATETIME NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
