@@ -1932,6 +1932,7 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
         var grid = combo.up('grid');
         var selection = grid.getSelectionModel().getSelection();
         var copyLocation = records[0];
@@ -1998,6 +1999,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 location.set('strUnitMeasure', copyLocation.get('strUnitMeasure'));
             }
         });
+
+        win.context.data.saveRecord();
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
