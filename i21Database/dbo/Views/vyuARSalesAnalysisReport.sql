@@ -57,8 +57,8 @@ FROM
 	  , ID.strItemDescription
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
-	  , dblPrice = CASE WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, ID.intItemUOMId, SU.intUnitMeasureId, ID.dblQtyShipped), 0) > 0
-					    THEN ID.dblPrice / dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, ID.intItemUOMId, SU.intUnitMeasureId, ID.dblQtyShipped)
+	  , dblPrice = CASE WHEN ISNULL(dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped), 0) > 0
+					    THEN ID.dblPrice / dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped)
 						ELSE dblPrice
 					END
 	  , ID.dblTotalTax				  AS dblTax
@@ -87,8 +87,8 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SOD.strItemDescription
 	 , SOD.dblQtyOrdered
 	 , SOD.dblQtyShipped
-	 , dblPrice = CASE WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(SOD.intItemId, SOD.intItemUOMId, SU.intUnitMeasureId, SOD.dblQtyOrdered), 0) > 0 
-					   THEN SOD.dblPrice / dbo.fnCTConvertQuantityToTargetItemUOM(SOD.intItemId, SOD.intItemUOMId, SU.intUnitMeasureId, SOD.dblQtyOrdered)
+	 , dblPrice = CASE WHEN ISNULL(dbo.fnICConvertUOMtoStockUnit(SOD.intItemId, SOD.intItemUOMId, SOD.dblQtyOrdered), 0) > 0 
+					   THEN SOD.dblPrice / dbo.fnICConvertUOMtoStockUnit(SOD.intItemId, SOD.intItemUOMId, SOD.dblQtyOrdered)
 					   ELSE dblPrice
 				  END
 	 , SOD.dblTotalTax				  AS dblTax
