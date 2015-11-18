@@ -2,6 +2,7 @@
 	AS 
 	 SELECT CE.intCustomerEquityId,
 			CE.intRefundTypeId,
+			RR.strRefundType,
 			CE.intCustomerId,
 			ENT.strName,
 			CE.intFiscalYearId,

@@ -2942,6 +2942,7 @@
     <Build Include="dbo\Stored Procedures\uspWMGetUserLocationListWMS.sql" />
     <Build Include="dbo\Stored Procedures\uspWHGetScannedObject.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadMailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostCancelEquity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
