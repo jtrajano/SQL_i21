@@ -22,7 +22,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[strInternalComment] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[strPrintableRemarks] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[intAssociationId] INT NULL, 
-    [intTermId] INT NOT NULL, 
+    [intTermId] INT NULL, 
     [intPricingTypeId] INT NULL , 
 
 	[intApprovalBasisId] [INT] NULL,
