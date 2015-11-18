@@ -8,8 +8,10 @@ DECLARE @postSuccess BIT = 0;
 DECLARE @postParam NVARCHAR(50);
 DECLARE @batchId NVARCHAR(50);
 DECLARE @error NVARCHAR(200);
+DECLARE @debitMemoRecordNum NVARCHAR(50);
 
 EXEC uspAPDuplicateBill @billId, @userId, @createdReversal OUT
+EXEC uspSMGetStartingNumber 18, @debitMemoRecordNum OUTPUT
 
 UPDATE A
 	SET A.ysnPosted = 0
@@ -17,6 +19,9 @@ UPDATE A
 	,A.intTransactionType = 3
 	,A.dtmDate = GETDATE()
 	,A.dtmBillDate = (SELECT dtmBillDate FROM tblAPBill WHERE intBillId = @billId) --restore bill date
+	,A.dblAmountDue = A.dblTotal
+	,A.dblPayment = 0
+	,A.strBillId = @debitMemoRecordNum
 FROM tblAPBill A
 WHERE A.intBillId = @createdReversal
 
