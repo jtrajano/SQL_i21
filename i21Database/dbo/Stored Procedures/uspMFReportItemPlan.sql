@@ -154,27 +154,10 @@ BEGIN
 		--,@intCategoryId INT
 		,@dtmCalendarDate DATETIME
 
-	DECLARE @tblMFWIPItem Table(
-		--strItemType NVARCHAR(50) collate Latin1_General_CI_AS
-		strCellName NVARCHAR(50) collate Latin1_General_CI_AS
-		,intWorkOrderId INT
-		,strWorkorderNo NVARCHAR(50) collate Latin1_General_CI_AS
-		,dtmPlannedDateTime DATETIME
-		,intItemId INT
-		,strItemNo NVARCHAR(50) collate Latin1_General_CI_AS
-		,strDescription NVARCHAR(100) collate Latin1_General_CI_AS
-		,intCompanyLocationId INT
-		,strCompanyLocationName NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblItemRequired NUMERIC(18, 6)
-		,strOwner NVARCHAR(50) collate Latin1_General_CI_AS
-		,dtmPlannedDate DATETIME
-		,strComments NVARCHAR(MAX) collate Latin1_General_CI_AS
-		,strQtyType NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblQuantity NUMERIC(18, 6)
-		,intDisplayOrder INT
-		)
+	IF OBJECT_ID('tempdb..#tblMFWIPItem') IS NOT NULL
+		DROP TABLE #tblMFWIPItem
 
-	DECLARE @tblMFWIPItem_Initial Table(
+	CREATE TABLE #tblMFWIPItem (
 		--strItemType NVARCHAR(50) collate Latin1_General_CI_AS
 		strCellName NVARCHAR(50) collate Latin1_General_CI_AS
 		,intWorkOrderId INT
@@ -196,8 +179,8 @@ BEGIN
 
 	DECLARE @tblICItem TABLE (
 		intItemId INT
-		,strItemNo NVARCHAR(50) collate Latin1_General_CI_AS
-		,strDescription NVARCHAR(100) collate Latin1_General_CI_AS
+		,strItemNo NVARCHAR(50)
+		,strDescription NVARCHAR(100)
 		)
 
 	SELECT @strShowShrtgWithAvlblUnblendedTea = 'No'
@@ -336,7 +319,7 @@ BEGIN
 			AND CD.dtmCalendarDate >= @dtmCurrentDate
 		ORDER BY CD.dtmCalendarDate
 
-		INSERT INTO @tblMFWIPItem (
+		INSERT INTO #tblMFWIPItem (
 			--strItemType
 			strCellName
 			,intWorkOrderId
@@ -419,31 +402,23 @@ BEGIN
 				END
 	END
 
-	INSERT INTO @tblMFWIPItem_Initial
-	SELECT * FROM @tblMFWIPItem
+	IF OBJECT_ID('tempdb..#tblMFWIPItem_Initial') IS NOT NULL
+		DROP TABLE #tblMFWIPItem_Initial
 
-	DECLARE @tblMFWIPRequiredDate TABLE(dtmPlannedDate datetime)
-	
-	INSERT INTO @tblMFWIPRequiredDate
+	SELECT *
+	INTO #tblMFWIPItem_Initial
+	FROM #tblMFWIPItem
+
+	IF OBJECT_ID('tempdb..#tblMFWIPRequiredDate') IS NOT NULL
+		DROP TABLE #tblMFWIPRequiredDate
+
 	SELECT DISTINCT dtmPlannedDate
-	FROM @tblMFWIPItem
+	INTO #tblMFWIPRequiredDate
+	FROM #tblMFWIPItem
 
-	DECLARE @tblMFRequiredItem TABLE (
-	intItemId int
-	,strItemNo nvarchar(50) collate Latin1_General_CI_AS
-	,strDescription nvarchar(100) collate Latin1_General_CI_AS
-	,intCompanyLocationId int
-	,strCompanyLocationName nvarchar(50) collate Latin1_General_CI_AS
-	,strOwner nvarchar(50) collate Latin1_General_CI_AS
-	,strComments nvarchar(MAX) collate Latin1_General_CI_AS
-	)
-	INSERT INTO @tblMFRequiredItem(intItemId
-		,strItemNo
-		,strDescription
-		,intCompanyLocationId
-		,strCompanyLocationName
-		,strOwner
-		,strComments)
+	IF OBJECT_ID('tempdb..#tblMFRequiredItem') IS NOT NULL
+		DROP TABLE #tblMFRequiredItem
+
 	SELECT DISTINCT intItemId
 		,strItemNo
 		,strDescription
@@ -451,23 +426,12 @@ BEGIN
 		,strCompanyLocationName
 		,strOwner
 		,strComments
-	FROM @tblMFWIPItem
+	INTO #tblMFRequiredItem
+	FROM #tblMFWIPItem
 
-		DECLARE @tblMFRequiredItemByLocation table(
-			intItemId int
-			,strItemNo nvarchar(50) collate Latin1_General_CI_AS
-			,strDescription nvarchar(100) collate Latin1_General_CI_AS
-			,strOwner nvarchar(50) collate Latin1_General_CI_AS
-			,strComments nvarchar(MAX) collate Latin1_General_CI_AS
-			,dtmPlannedDate datetime
-			,intCompanyLocationId  int
-			,strCompanyLocationName nvarchar(50) collate Latin1_General_CI_AS
-			,dblQOH  NUMERIC(18, 6)
-			,dblQtyInProduction  NUMERIC(18, 6)
-			,dblDemandQty NUMERIC(18, 6)
-			,dbltDemandQty NUMERIC(18, 6)
-		)
-	Insert into @tblMFRequiredItemByLocation
+	IF OBJECT_ID('tempdb..#tblMFRequiredItemByLocation') IS NOT NULL
+		DROP TABLE #tblMFRequiredItemByLocation
+
 	SELECT RI.intItemId
 		,strItemNo
 		,strDescription
@@ -480,8 +444,9 @@ BEGIN
 		,CAST(NULL AS NUMERIC(18, 6)) dblQtyInProduction
 		,CAST(NULL AS NUMERIC(18, 6)) dblDemandQty
 		,CAST(NULL AS NUMERIC(18, 6)) dbltDemandQty
-	FROM @tblMFRequiredItem RI
-		,@tblMFWIPRequiredDate RD
+	INTO #tblMFRequiredItemByLocation
+	FROM #tblMFRequiredItem RI
+		,#tblMFWIPRequiredDate RD
 		,tblSMCompanyLocation CL
 	WHERE RI.strCompanyLocationName = CL.strLocationName
 		AND CL.strLocationName = CASE 
@@ -493,15 +458,10 @@ BEGIN
 		,2
 		,3
 
-	DECLARE @tblMFQtyOnHand TABLE (
-		intCompanyLocationId INT
-		,intItemId INT
-		,dblWeight NUMERIC(18, 6)
-		)
-	INSERT INTO @tblMFQtyOnHand
 	SELECT L.intLocationId AS intCompanyLocationId
 		,I.intItemId
 		,Sum(L.dblWeight) AS dblWeight
+	INTO #tblMFQtyOnHand
 	FROM @tblICItem I
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
@@ -511,10 +471,10 @@ BEGIN
 	GROUP BY L.intLocationId
 		,I.intItemId
 
-	UPDATE @tblMFRequiredItemByLocation
+	UPDATE #tblMFRequiredItemByLocation
 	SET dblQOH = Q.dblWeight
-	FROM @tblMFRequiredItemByLocation I
-	JOIN @tblMFQtyOnHand Q ON Q.intItemId = I.intItemId
+	FROM #tblMFRequiredItemByLocation I
+	JOIN #tblMFQtyOnHand Q ON Q.intItemId = I.intItemId
 		AND I.intCompanyLocationId = Q.intCompanyLocationId
 
 	--IF OBJECT_ID('tempdb..##QOH') IS NOT NULL
@@ -547,16 +507,10 @@ BEGIN
 	--		WHERE qoh IS NOT NULL
 	--		GROUP BY blend
 	--		)
-		DECLARE @tblMFQtyInProduction TABLE (
-		intCompanyLocationId INT
-		,intItemId INT
-		,dblWeight NUMERIC(18, 6)
-		)
-
-	INSERT INTO @tblMFQtyInProduction
 	SELECT W.intLocationId AS intCompanyLocationId
 		,I.intItemId
 		,Sum(W.dblQuantity) AS dblWeight
+	INTO #tblMFQtyInProduction
 	FROM @tblICItem I
 	JOIN dbo.tblMFWorkOrder W ON I.intItemId = W.intItemId
 		AND W.intStatusId IN (
@@ -568,33 +522,33 @@ BEGIN
 	GROUP BY W.intLocationId
 		,I.intItemId
 
-	UPDATE @tblMFRequiredItemByLocation
+	UPDATE #tblMFRequiredItemByLocation
 	SET dblQtyInProduction = Q.dblWeight
-	FROM @tblMFRequiredItemByLocation I
-	JOIN @tblMFQtyInProduction Q ON Q.intItemId = I.intItemId
+	FROM #tblMFRequiredItemByLocation I
+	JOIN #tblMFQtyInProduction Q ON Q.intItemId = I.intItemId
 		AND I.intCompanyLocationId = Q.intCompanyLocationId
 
-	UPDATE @tblMFRequiredItemByLocation
+	UPDATE #tblMFRequiredItemByLocation
 	SET dblDemandQty = ISNULL((
 				SELECT SUM(W.dblItemRequired)
-				FROM @tblMFWIPItem W
+				FROM #tblMFWIPItem W
 				WHERE W.intItemId = RI.intItemId
 					AND W.intCompanyLocationId = RI.intCompanyLocationId
 					AND W.dtmPlannedDate <= RI.dtmPlannedDate
 				), 0)
-	FROM @tblMFRequiredItemByLocation RI
+	FROM #tblMFRequiredItemByLocation RI
 
-	UPDATE @tblMFRequiredItemByLocation
+	UPDATE #tblMFRequiredItemByLocation
 	SET dbltDemandQty = ISNULL((
 				SELECT SUM(W.dblItemRequired)
-				FROM @tblMFWIPItem W
+				FROM #tblMFWIPItem W
 				WHERE W.intItemId = RI.intItemId
 					AND W.intCompanyLocationId = RI.intCompanyLocationId
 					AND W.dtmPlannedDate = RI.dtmPlannedDate
 				), 0)
-	FROM @tblMFRequiredItemByLocation RI
+	FROM #tblMFRequiredItemByLocation RI
 
-	INSERT INTO @tblMFWIPItem (
+	INSERT INTO #tblMFWIPItem (
 		strCellName
 		--,strItemType
 		,strWorkorderNo
@@ -626,7 +580,7 @@ BEGIN
 		,strComments
 		,'Total'
 		,1
-	FROM @tblMFWIPItem
+	FROM #tblMFWIPItem
 	GROUP BY strCellName
 		,intItemId
 		,strItemNo
@@ -638,7 +592,7 @@ BEGIN
 		,strComments
 	ORDER BY 1;
 
-	INSERT INTO @tblMFWIPItem (
+	INSERT INTO #tblMFWIPItem (
 		strCellName
 		--,strItemType
 		,strWorkorderNo
@@ -672,8 +626,8 @@ BEGIN
 		,'Inventory'
 		,dblQOH
 		,2
-	FROM @tblMFRequiredItemByLocation RI
-	JOIN @tblMFQtyOnHand Q ON Q.intItemId = RI.intItemId
+	FROM #tblMFRequiredItemByLocation RI
+	JOIN #tblMFQtyOnHand Q ON Q.intItemId = RI.intItemId
 		AND Q.intCompanyLocationId = RI.intCompanyLocationId
 	WHERE Q.dblWeight >= 0
 
@@ -699,15 +653,15 @@ BEGIN
 	--			,'Inventory' strQtyType
 	--			,Q.dblWeight AS dblQuantity
 	--			,2 intDisplayOrder
-	--		FROM @tblMFRequiredItemByLocation RI
-	--		JOIN @tblMFWIPItem_Initial WI ON WI.intItemId = RI.intItemId
+	--		FROM #tblMFRequiredItemByLocation RI
+	--		JOIN #tblMFWIPItem_Initial WI ON WI.intItemId = RI.intItemId
 	--			AND RI.intCompanyLocationId = WI.intCompanyLocationId
-	--		JOIN @tblMFQtyOnHand Q ON Q.intItemId = RI.intItemId
+	--		JOIN #tblMFQtyOnHand Q ON Q.intItemId = RI.intItemId
 	--			AND RI.intCompanyLocationId = Q.intCompanyLocationId
 	--		WHERE RI.dblQOH IS NULL
 	--			AND Q.dblWeight > 0
 	--		)
-	--INSERT INTO @tblMFWIPItem (
+	--INSERT INTO #tblMFWIPItem (
 	--	strCellName
 	--	,strItemType
 	--	,strWorkorderNo
@@ -743,7 +697,7 @@ BEGIN
 	--	,intDisplayOrder
 	--FROM CTE
 	--WHERE intRowNumber = 1
-	INSERT INTO @tblMFWIPItem (
+	INSERT INTO #tblMFWIPItem (
 		strCellName
 		--,strItemType
 		,strWorkorderNo
@@ -778,23 +732,23 @@ BEGIN
 	FROM (
 		SELECT intItemId
 			,intCompanyLocationId
-		FROM @tblMFQtyOnHand
+		FROM #tblMFQtyOnHand
 		WHERE intItemId IN (
 				SELECT intItemId
-				FROM @tblMFRequiredItem
+				FROM #tblMFRequiredItem
 				)
 		
 		EXCEPT
 		
 		SELECT intItemId
 			,intCompanyLocationId
-		FROM @tblMFRequiredItem
+		FROM #tblMFRequiredItem
 		) DT
-	JOIN @tblMFQtyOnHand Q ON Q.intItemId = DT.intItemId
+	JOIN #tblMFQtyOnHand Q ON Q.intItemId = DT.intItemId
 		AND Q.intCompanyLocationId = DT.intCompanyLocationId
-	JOIN @tblMFRequiredItemByLocation RI ON RI.intItemId = DT.intItemId;;
+	JOIN #tblMFRequiredItemByLocation RI ON RI.intItemId = DT.intItemId;;
 
-	INSERT INTO @tblMFWIPItem (
+	INSERT INTO #tblMFWIPItem (
 		strCellName
 		--,strItemType
 		,strWorkorderNo
@@ -833,12 +787,12 @@ BEGIN
 		,'Inventory'
 		,dblQtyInProduction
 		,3
-	FROM @tblMFRequiredItemByLocation RI
-	JOIN @tblMFQtyInProduction Q ON Q.intItemId = RI.intItemId
+	FROM #tblMFRequiredItemByLocation RI
+	JOIN #tblMFQtyInProduction Q ON Q.intItemId = RI.intItemId
 		AND Q.intCompanyLocationId = RI.intCompanyLocationId
 	WHERE Q.dblWeight >= 0
 
-	INSERT INTO @tblMFWIPItem (
+	INSERT INTO #tblMFWIPItem (
 		strCellName
 		--,strItemType
 		,strWorkorderNo
@@ -877,12 +831,12 @@ BEGIN
 		,'Inventory'
 		,dblQtyInProduction
 		,3
-	FROM @tblMFRequiredItemByLocation RI
-	JOIN @tblMFQtyInProduction Q ON Q.intItemId = RI.intItemId
+	FROM #tblMFRequiredItemByLocation RI
+	JOIN #tblMFQtyInProduction Q ON Q.intItemId = RI.intItemId
 		AND Q.intCompanyLocationId = RI.intCompanyLocationId
 	WHERE Q.dblWeight IS NULL
 
-	INSERT INTO @tblMFWIPItem (
+	INSERT INTO #tblMFWIPItem (
 		strCellName
 		--,strItemType
 		--,intWorkOrderId 
@@ -919,43 +873,26 @@ BEGIN
 	FROM (
 		SELECT intItemId
 			,Q.intCompanyLocationId
-		FROM @tblMFQtyInProduction Q
+		FROM #tblMFQtyInProduction Q
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Q.intCompanyLocationId
 		WHERE intItemId IN (
 				SELECT intItemId
-				FROM @tblMFRequiredItem
+				FROM #tblMFRequiredItem
 				)
 		
 		EXCEPT
 		
 		SELECT intItemId
 			,intCompanyLocationId
-		FROM @tblMFRequiredItem
+		FROM #tblMFRequiredItem
 		) dt
-	JOIN @tblMFQtyInProduction Q ON Q.intItemId = dt.intItemId
+	JOIN #tblMFQtyInProduction Q ON Q.intItemId = dt.intItemId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Q.intCompanyLocationId
-	JOIN @tblMFRequiredItemByLocation RI ON RI.intItemId = dt.intItemId
+	JOIN #tblMFRequiredItemByLocation RI ON RI.intItemId = dt.intItemId
 
-		Declare @tblMFFinalWIPItem table(
-		strCellName nvarchar(50) collate Latin1_General_CI_AS
-		,strItemNo nvarchar(150)collate Latin1_General_CI_AS
-		,intWorkOrderId int
-		,strWorkOrderNo nvarchar(50)collate Latin1_General_CI_AS
-		,dtmPlannedDateTime datetime
-		,intCompanyLocationId int
-		,strCompanyLocationName nvarchar(50)collate Latin1_General_CI_AS
-		,dblItemRequired numeric(18,6)
-		,strOwner nvarchar(50)collate Latin1_General_CI_AS
-		,dtmPlannedDate datetime
-		,strComments nvarchar(MAX)collate Latin1_General_CI_AS
-		,intNoOfDays nvarchar(MAX)collate Latin1_General_CI_AS
-		,dblQuantity numeric(18,6)
-		,intDays int
-		,strQtyType nvarchar(50)collate Latin1_General_CI_AS
-		,intDisplayOrder int
-		,intRowNumber int
-		)
-	Insert into @tblMFFinalWIPItem
+	IF OBJECT_ID('tempdb..#tblMFFinalWIPItem') IS NOT NULL
+		DROP TABLE tblMFFinalWIPItem
+
 	SELECT strCellName
 		,strItemNo + ' - ' + strDescription AS strItemNo
 		--,strItemType
@@ -980,14 +917,15 @@ BEGIN
 				,intDisplayOrder
 				,dtmPlannedDate
 			) AS intRowNumber
-	FROM @tblMFWIPItem
+	INTO #tblMFFinalWIPItem
+	FROM #tblMFWIPItem
 	WHERE strCompanyLocationName = CASE 
 			WHEN @strCompanyLocationName = ''
 				THEN strCompanyLocationName
 			ELSE @strCompanyLocationName
 			END
 
-	UPDATE @tblMFFinalWIPItem
+	UPDATE #tblMFFinalWIPItem
 	SET intRowNumber = NULL
 		--,strItemType = CASE 
 		--	WHEN strItemType = ''
@@ -1002,18 +940,18 @@ BEGIN
 	WHERE strWorkorderNo LIKE 'Inventory -%'
 		OR strWorkorderNo LIKE 'Demand Total%'
 
-	UPDATE @tblMFFinalWIPItem
+	UPDATE #tblMFFinalWIPItem
 	SET dtmPlannedDate = SW.dtmPlannedStartDate
-	FROM @tblMFFinalWIPItem WI
+	FROM #tblMFFinalWIPItem WI
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
 	JOIN tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 	WHERE intDisplayOrder = 0
 
-	UPDATE @tblMFFinalWIPItem
+	UPDATE #tblMFFinalWIPItem
 	SET dtmPlannedDate = '1900-01-01'
 	WHERE intDisplayOrder = 1
 
-	UPDATE @tblMFFinalWIPItem
+	UPDATE #tblMFFinalWIPItem
 	SET dtmPlannedDate = '1900-01-02'
 	WHERE intDisplayOrder IN (
 			2
@@ -1038,21 +976,21 @@ BEGIN
 			,a.intDays
 			,a.strQtyType
 			,a.intDisplayOrder
-		FROM @tblMFFinalWIPItem a
+		FROM #tblMFFinalWIPItem a
 		WHERE a.strCompanyLocationName <> 'WD'
 			AND a.strItemNo IN (
 				SELECT b.strItemNo
-				FROM @tblMFFinalWIPItem b
+				FROM #tblMFFinalWIPItem b
 				WHERE b.strWorkorderNo = 'Inventory - Blended'
 					AND b.dblItemRequired < 0
 					AND b.strItemNo IN (
 						SELECT c.strItemNo
-						FROM @tblMFFinalWIPItem c
+						FROM #tblMFFinalWIPItem c
 						WHERE c.strWorkorderNo = 'Inventory - Unblended'
 							AND c.dblItemRequired > 0
 							AND c.dtmPlannedDate IN (
 								SELECT Max(d.dtmPlannedDate)
-								FROM @tblMFFinalWIPItem d
+								FROM #tblMFFinalWIPItem d
 								WHERE d.intDisplayOrder = 0
 									AND d.strItemNo = a.strItemNo
 								)
@@ -1077,25 +1015,25 @@ BEGIN
 			,a.intDays
 			,a.strQtyType
 			,a.intDisplayOrder
-		FROM @tblMFFinalWIPItem a
+		FROM #tblMFFinalWIPItem a
 		WHERE a.strCompanyLocationName <> 'WD'
 			AND (
 				a.strItemNo IN (
 					SELECT b.strItemNo
-					FROM @tblMFFinalWIPItem b
+					FROM #tblMFFinalWIPItem b
 					WHERE b.strWorkorderNo = 'Inventory - Unblended'
 						AND b.dblItemRequired < 0
 					)
 				OR (
 					NOT EXISTS (
 						SELECT c.strItemNo
-						FROM @tblMFFinalWIPItem c
+						FROM #tblMFFinalWIPItem c
 						WHERE c.strWorkorderNo = 'Inventory - Unblended'
 							AND c.strItemNo = a.strItemNo
 						)
 					AND EXISTS (
 						SELECT d.strItemNo
-						FROM @tblMFFinalWIPItem d
+						FROM #tblMFFinalWIPItem d
 						WHERE d.strWorkorderNo = 'Inventory - blended'
 							AND d.dblItemRequired < 0
 							AND d.strItemNo = a.strItemNo
@@ -1121,7 +1059,7 @@ BEGIN
 			,a.intDays
 			,a.strQtyType
 			,a.intDisplayOrder
-		FROM @tblMFFinalWIPItem a
+		FROM #tblMFFinalWIPItem a
 		WHERE a.strCompanyLocationName <> 'WD'
 	END
 END
