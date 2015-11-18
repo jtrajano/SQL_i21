@@ -530,7 +530,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         var current = win.getViewModel().data.current;
         var accountCategoryList = win.getViewModel().storeInfo.accountCategoryList;
 
-        switch (current.get('strInventoryType')) {
+        switch (current.get('strType')) {
             case "Assembly/Blend":
             case "Inventory":
                 me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
@@ -539,6 +539,9 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
+                me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
+                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Raw Material":
@@ -547,7 +550,11 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
+                me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
+                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Finished Good":
@@ -555,9 +562,15 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
+                me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
+                me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
+                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Other Charge":
+                me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
                 me.addAccountCategory(current, 'Other Charge Income', accountCategoryList);
                 me.addAccountCategory(current, 'Other Charge Expense', accountCategoryList);
                 break;
@@ -566,6 +579,11 @@ Ext.define('Inventory.view.CategoryViewController', {
             case "Service":
             case "Software":
                 me.addAccountCategory(current, 'General', accountCategoryList);
+                break;
+
+            case "Bundle":
+            case "Kit":
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 break;
         }
 
