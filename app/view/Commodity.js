@@ -1502,6 +1502,10 @@ Ext.define('Inventory.view.Commodity', {
                                         xtype: 'panel',
                                         layout: 'fit',
                                         title: 'GL Accounts',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            hidden: true
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
