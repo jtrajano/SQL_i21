@@ -2943,6 +2943,7 @@
     <Build Include="dbo\Stored Procedures\uspWHGetScannedObject.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadMailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostCancelEquity.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateInventoryShipmentItemLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -342,3 +342,15 @@ EXEC sp_addmessage 80065,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80066) EXEC sp_dropmessage 80066, 'us_english'	
 SET @strmessage = 'Inventory Count is ongoing for Item %s and is locked under Location %s.'
 EXEC sp_addmessage 80066,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80067) EXEC sp_dropmessage 80067, 'us_english'	
+SET @strmessage = 'Inventory Shipment Line Item does not exist.'
+EXEC sp_addmessage 80067,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80068) EXEC sp_dropmessage 80068, 'us_english'	
+SET @strmessage = 'Item % is not a lot tracked item and cannot ship lots.'
+EXEC sp_addmessage 80068,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80069) EXEC sp_dropmessage 80069, 'us_english'	
+SET @strmessage = '% has only % available quantity. Cannot ship more than the available qty.'
+EXEC sp_addmessage 80069,11,@strmessage,'us_english','False'
