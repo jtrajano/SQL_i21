@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (@strXML NVARCHAR(MAX),@strOutputLotNumber nvarchar(50) Output)
+﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (@strXML NVARCHAR(MAX),@strOutputLotNumber nvarchar(50) Output,@intParentLotId int=NULL OUTPUT )
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -521,7 +521,7 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 		END
 
-		SELECT @strOutputLotNumber = strLotNumber
+		SELECT @strOutputLotNumber = strLotNumber,@intParentLotId=intParentLotId
 		FROM dbo.tblICLot
 		WHERE intLotId = @intLotId
 
