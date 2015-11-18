@@ -303,17 +303,20 @@ BEGIN
 	WHERE CD.intCalendarDetailId IS NULL
 		AND CD.ysnHoliday = 0
 
-	SELECT @strMachineName = Isnull(@strMachineName, '') + '[' + M.strName + '],'
-		,@strMachineName1 = Isnull(@strMachineName1, '') + 'Convert(bit,[' + M.strName + ']) as [' + M.strName + '],'
-	FROM dbo.tblMFMachine M
-	JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-	JOIN dbo.tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
-		AND LP.intManufacturingCellId = @intManufacturingCellId
-		AND M.intMachineId IN (
-			SELECT Item
-			FROM dbo.fnSplitString(@strMachineId, ',')
-			)
-	ORDER BY M.strName
+	SELECT @strMachineName = Isnull(@strMachineName, '') + '[' + DT.strName + '],'
+		,@strMachineName1 = Isnull(@strMachineName1, '') + 'Convert(bit,[' + DT.strName + ']) as [' + DT.strName + '],'
+	FROM (
+		SELECT DISTINCT M.strName
+		FROM dbo.tblMFMachine M
+		JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
+		JOIN dbo.tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
+			AND LP.intManufacturingCellId = @intManufacturingCellId
+			AND M.intMachineId IN (
+				SELECT Item
+				FROM dbo.fnSplitString(@strMachineId, ',')
+				)
+		) AS DT
+	ORDER BY DT.strName
 
 	IF Len(@strMachineName) > 0
 		SELECT @strMachineName = Left(@strMachineName, Len(@strMachineName) - 1)

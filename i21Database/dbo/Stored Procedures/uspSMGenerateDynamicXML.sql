@@ -205,7 +205,7 @@ BEGIN
 						SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' nvarchar(max) SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '''' '
 					END
 					SET @strMainSQL = @strMainSQL  + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + 
-					' + '' ''''' + @strDefaultValue + ''''' [' + @strXMLTag + ']'' '
+					' + '' ''''' + @strDefaultValue + ''''' [' + @strXMLTag + ']'' + '','' '
 				END
 					
 				IF (ISNULL(@strTagAttribute, '') <> '') -- ===========> Has attributes <=============
@@ -218,7 +218,7 @@ BEGIN
 					END
 					ELSE
 					BEGIN	
-						--IF CHARINDEX('@' + @strParentTag + '',@strMainSQL) = 0				
+						IF CHARINDEX('@' + @strParentTag +  CAST(@intMinPosition as nvarchar(5)) + '',@strMainSQL) = 0				
 						SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' nvarchar(max) SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '''' '
 							
 						SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' + '' ( select ' + @strTagAttribute + '
@@ -295,6 +295,13 @@ BEGIN
 					WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intCurrentLength AND ysnActive = 1
 					
 					IF ((ISNULL(@strParentParentTable,'') <> '' ) AND @intParentParentLength = 1 AND ISNULL(@strHeader,'') = ''	) --OR (@intParentLevel = 1 AND @intParentChild = 1))
+					BEGIN
+						SET @strMainSQL = @strMainSQL  + ' '' FROM [dbo].[' + @strMainTable + '] main ' + 
+						CASE WHEN (SELECT COUNT(1) FROM @tblWhereClause) = 0 THEN ' '' ' 
+						ELSE ' WHERE ' +  (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) + ' '' ' END 										
+					END
+					
+					IF ((ISNULL(@strParentParentTable,'') <> '' ) AND @intParentParentLength = 0 AND @intParentLevel = 1 AND ISNULL(@strHeader,'') = ''	) --OR (@intParentLevel = 1 AND @intParentChild = 1))
 					BEGIN
 						SET @strMainSQL = @strMainSQL  + ' '' FROM [dbo].[' + @strMainTable + '] main ' + 
 						CASE WHEN (SELECT COUNT(1) FROM @tblWhereClause) = 0 THEN ' '' ' 

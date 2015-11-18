@@ -43,7 +43,7 @@ AS
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		CH.intEntityId			AND
 														EY.strEntityType					=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
-	JOIN	tblARSalesperson					SP	ON	SP.intEntitySalespersonId			=		CH.intSalespersonId
+	JOIN	tblARSalesperson					SP	ON	SP.intEntitySalespersonId			=		CH.intSalespersonId					LEFT
 	JOIN	tblSMTerm							TM	ON	TM.intTermID						=		CH.intTermId						LEFT
 	JOIN	tblICCommodity						CY	ON	CY.intCommodityId					=		CH.intCommodityId					LEFT
 	JOIN	tblCTAssociation					AN	ON	AN.intAssociationId					=		CH.intAssociationId					LEFT

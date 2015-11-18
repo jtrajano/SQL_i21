@@ -13,16 +13,22 @@
 											-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]
 											-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
 											-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
-	,@RaiseError				BIT				= 0
-	,@ErrorMessage				NVARCHAR(250)	= NULL			OUTPUT
-	,@CreatedIvoices			NVARCHAR(MAX)	= NULL			OUTPUT
-	,@UpdatedIvoices			NVARCHAR(MAX)	= NULL			OUTPUT
-	,@BatchIdForNewPost			NVARCHAR(50)	= NULL			OUTPUT
-	,@BatchIdForNewPostRecap	NVARCHAR(50)	= NULL			OUTPUT
-	,@BatchIdForExistingPost	NVARCHAR(50)	= NULL			OUTPUT
-	,@BatchIdForExistingRecap	NVARCHAR(50)	= NULL			OUTPUT
-	,@BatchIdForExistingUnPost	NVARCHAR(50)	= NULL			OUTPUT
-	,@BatchIdForExistingUnRecap	NVARCHAR(50)	= NULL			OUTPUT
+	,@RaiseError					BIT				= 0
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
+	,@CreatedIvoices				NVARCHAR(MAX)	= NULL			OUTPUT
+	,@UpdatedIvoices				NVARCHAR(MAX)	= NULL			OUTPUT
+	,@BatchIdForNewPost				NVARCHAR(50)	= NULL			OUTPUT
+	,@PostedNewCount				INT				= 0				OUTPUT
+	,@BatchIdForNewPostRecap		NVARCHAR(50)	= NULL			OUTPUT
+	,@RecapNewCount					INT				= 0				OUTPUT
+	,@BatchIdForExistingPost		NVARCHAR(50)	= NULL			OUTPUT
+	,@PostedExistingCount			INT				= 0				OUTPUT
+	,@BatchIdForExistingRecap		NVARCHAR(50)	= NULL			OUTPUT
+	,@RecapPostExistingCount		INT				= 0				OUTPUT
+	,@BatchIdForExistingUnPost		NVARCHAR(50)	= NULL			OUTPUT
+	,@UnPostedExistingCount			INT				= 0				OUTPUT
+	,@BatchIdForExistingUnPostRecap	NVARCHAR(50)	= NULL			OUTPUT
+	,@RecapUnPostedExistingCount	INT				= 0				OUTPUT
 AS
 
 BEGIN
@@ -734,7 +740,7 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= 1
+			@raiseError			= @RaiseError
 
 END TRY
 BEGIN CATCH
@@ -1291,7 +1297,7 @@ BEGIN TRY
 	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
 		BEGIN		
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= NULL,
+			@batchId			= @BatchIdForNewPost,
 			@post				= 1,
 			@recap				= 0,
 			@param				= @IdsForPosting,
@@ -1307,13 +1313,15 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= 1
+			@raiseError			= @RaiseError
 
 			SET @BatchIdForNewPost = @batchIdUsed
+			SET @PostedNewCount = @successfulCount
 		END
 	
 	SET @IdsForPosting = ''
-	SET @batchIdUsed = ''
+	SET @batchIdUsed = ''	
+	SET @successfulCount = 0
 
 	SELECT DISTINCT
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
@@ -1329,7 +1337,7 @@ BEGIN TRY
 	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
 		BEGIN	
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= NULL,
+			@batchId			= @BatchIdForNewPostRecap,
 			@post				= 1,
 			@recap				= 1,
 			@param				= @IdsForPosting,
@@ -1345,10 +1353,16 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= 1	
+			@raiseError			= @RaiseError	
 
 			SET @BatchIdForNewPostRecap = @batchIdUsed
+			SET @RecapNewCount = @successfulCount
 		END
+		
+	SET @IdsForPosting = ''
+	SET @batchIdUsed = ''	
+	SET @successfulCount = 0
+
 
 END TRY
 BEGIN CATCH
@@ -1378,7 +1392,7 @@ BEGIN TRY
 	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
 		BEGIN			
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= NULL,
+			@batchId			= @BatchIdForExistingPost,
 			@post				= 1,
 			@recap				= 0,
 			@param				= @IdsForPostingUpdated,
@@ -1394,13 +1408,15 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= 1
+			@raiseError			= @RaiseError
 
 			SET @BatchIdForExistingPost = @batchIdUsed
+			SET @PostedExistingCount  = @successfulCount
 		END
 
 	SET @IdsForPostingUpdated = ''
 	SET @batchIdUsed = ''
+	SET @successfulCount = 0
 
 	SELECT DISTINCT
 		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
@@ -1417,7 +1433,7 @@ BEGIN TRY
 	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
 		BEGIN			
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= NULL,
+			@batchId			= @BatchIdForExistingPost,
 			@post				= 1,
 			@recap				= 1,
 			@param				= @IdsForPostingUpdated,
@@ -1433,10 +1449,15 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= 1
+			@raiseError			= @RaiseError
 
 			SET @BatchIdForExistingPost = @batchIdUsed
+			SET @RecapPostExistingCount  = @successfulCount
 		END
+		
+	SET @IdsForPostingUpdated = ''
+	SET @batchIdUsed = ''
+	SET @successfulCount = 0
 
 END TRY
 BEGIN CATCH
@@ -1467,7 +1488,7 @@ BEGIN TRY
 	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
 		BEGIN			
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= NULL,
+			@batchId			= @BatchIdForExistingUnPost,
 			@post				= 0,
 			@recap				= 0,
 			@param				= @IdsForUnPostingUpdated,
@@ -1483,13 +1504,15 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= 1
+			@raiseError			= @RaiseError
 
 			SET @BatchIdForExistingUnPost = @batchIdUsed
+			SET @UnPostedExistingCount = @successfulCount
 		END
 
 	SET @IdsForUnPostingUpdated = ''
 	SET @batchIdUsed = ''
+	SET @successfulCount = 0
 
 	SELECT DISTINCT
 		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
@@ -1507,7 +1530,7 @@ BEGIN TRY
 	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
 		BEGIN			
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= NULL,
+			@batchId			= @BatchIdForExistingUnPostRecap,
 			@post				= 0,
 			@recap				= 1,
 			@param				= @IdsForUnPostingUpdated,
@@ -1523,9 +1546,10 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= 1
+			@raiseError			= @RaiseError
 
-			SET @BatchIdForExistingUnRecap = @batchIdUsed
+			SET @BatchIdForExistingUnPostRecap = @batchIdUsed
+			SET @RecapUnPostedExistingCount = @successfulCount
 		END
 
 END TRY

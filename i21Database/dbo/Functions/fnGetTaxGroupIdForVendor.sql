@@ -15,7 +15,7 @@ BEGIN
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
 
 	SELECT
-		 @VendorId			= VI.intVendorId
+		 @TaxVendorId			= VI.intVendorId
 	FROM
 		tblICItem I
 	INNER JOIN

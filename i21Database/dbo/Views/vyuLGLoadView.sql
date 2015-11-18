@@ -60,6 +60,9 @@ SELECT Load.intLoadId
         ,Load.strComments
         ,ysnDispatched = CASE WHEN Load.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
 		,Load.dtmDispatchedDate
+		,Load.ysnDispatchMailSent
+		,Load.dtmDispatchMailSent
+		,Load.dtmCancelDispatchMailSent
 		,strDispatcher = US.strUserName 
 		,CDetail.strCustomerContract
         ,strCounterPartyName = (SELECT Entity1.strName From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)

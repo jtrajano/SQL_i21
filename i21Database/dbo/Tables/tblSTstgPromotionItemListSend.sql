@@ -11,7 +11,7 @@
     [ItemListDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
     [POSCodeFormat] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [POSCode] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
-    [PosCodeModifierName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [POSCodeModifierName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [POSCodeModifierValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[MerchandiseCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblSTstgPromotionItemListSend] PRIMARY KEY ([intPromotionItemListSend])

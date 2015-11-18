@@ -16,6 +16,7 @@
 	[ysnSeparateOnBill] BIT NOT NULL DEFAULT 0, 
 	[ysnCheckOffTax] BIT NOT NULL DEFAULT 0, 
     [intConcurrencyId] INT CONSTRAINT [DF_tblAPBillDetailTax_intConcurrencyId] DEFAULT 0 NOT NULL,
+    [ysnTaxExempt] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblAPBillDetailTax_intBillDetailTaxId] PRIMARY KEY CLUSTERED ([intBillDetailTaxId] ASC),
 	CONSTRAINT [FK_tblAPBillDetailTax_tblAPBillDetail_intBillDetailId] FOREIGN KEY ([intBillDetailId]) REFERENCES [dbo].[tblAPBillDetail] ([intBillDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),

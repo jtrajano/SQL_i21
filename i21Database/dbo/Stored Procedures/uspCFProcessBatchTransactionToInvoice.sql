@@ -3,9 +3,12 @@
 	,@UserId			INT	
 	,@Post				BIT
 	,@Recap				BIT
-	,@ErrorMessage		NVARCHAR(250) OUTPUT
-	,@CreatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
-	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
+	,@ErrorMessage		NVARCHAR(250)  = NULL	OUTPUT
+	,@CreatedIvoices	NVARCHAR(MAX)  = NULL	OUTPUT
+	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL	OUTPUT
+	,@SuccessfulCount	INT						OUTPUT
+	,@BatchId			NVARCHAR(MAX)
+
 AS	
 
 DECLARE @intRecordKey INT
@@ -59,6 +62,7 @@ FROM [fnCFSplitString](@TransactionId,',')
 					,[intEntityId]
 					,[ysnResetDetails]
 					,[ysnPost]
+					,[ysnRecap]
 					,[intInvoiceDetailId]
 					,[intItemId]
 					,[ysnInventory]
@@ -133,6 +137,7 @@ FROM [fnCFSplitString](@TransactionId,',')
 					,[intEntityId]							= @UserEntityId
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
+					,[ysnRecap]								= @Recap
 	
 					,[intInvoiceDetailId]					= NULL
 					,[intItemId]							= cfSiteItem.intARItemId
@@ -217,13 +222,17 @@ FROM [fnCFSplitString](@TransactionId,',')
 	
 	BEGIN TRANSACTION
 	EXEC [dbo].[uspARProcessInvoices]
-		 @InvoiceEntries	= @EntriesForInvoice
-		,@UserId			= @UserId
-		,@GroupingOption	= 0
-		,@RaiseError		= 1
-		,@ErrorMessage		= @ErrorMessage OUTPUT
-		,@CreatedIvoices	= @CreatedIvoices OUTPUT
-		,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+		 @InvoiceEntries			= @EntriesForInvoice
+		,@UserId					= @UserId
+		,@GroupingOption			= 0
+		,@RaiseError				= 1
+		,@ErrorMessage				= @ErrorMessage OUTPUT
+		,@CreatedIvoices			= @CreatedIvoices OUTPUT
+		,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
+		,@BatchIdForNewPost			= @BatchId OUTPUT
+		,@BatchIdForNewPostRecap	= @BatchId OUTPUT
+		
+	SELECT @SuccessfulCount = COUNT(*) FROM tblGLDetail WHERE strBatchId = @BatchId
 
 
 	IF (@ErrorMessage IS NULL)

@@ -12,7 +12,30 @@ BEGIN
 	
 	DECLARE @XMLGatewayVersion nvarchar(100)
 	SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @Register
-
+	SET @XMLGatewayVersion = ISNULL(@XMLGatewayVersion, '')
+	
+	-- Use table to get the list of items modified during change date range
+	DECLARE @Tab_UpdatedItems TABLE(intItemId int)
+	
+	INSERT INTO @Tab_UpdatedItems
+	Select DISTINCT CAST(strRecordNo as int) [intItemId] From dbo.tblSMAuditLog Where strTransactionType = 'Inventory.view.Item'
+	AND ( CHARINDEX('strItemNo', strJsonData) > 0  OR CHARINDEX('strUnitMeasure', strJsonData) > 0  
+		OR CHARINDEX('strStatus', strJsonData) > 0 OR CHARINDEX('dblSalePrice', strJsonData) > 0   
+		OR CHARINDEX('strCategoryCode', strJsonData) > 0 OR CHARINDEX('dtmBeginDate', strJsonData) > 0   
+		OR CHARINDEX('dtmEndDate', strJsonData) > 0 OR CHARINDEX('strDescription', strJsonData) > 0   
+		OR CHARINDEX('intItemTypeCode', strJsonData) > 0 OR CHARINDEX('intItemTypeSubCode', strJsonData) > 0 		 
+		OR CHARINDEX('strRegProdCode', strJsonData) > 0 OR CHARINDEX('ysnCarWash', strJsonData) > 0   
+		OR CHARINDEX('ysnFoodStampable', strJsonData) > 0 OR CHARINDEX('ysnIdRequiredLiquor', strJsonData) > 0   
+		OR CHARINDEX('ysnIdRequiredCigarette', strJsonData) > 0 OR CHARINDEX('ysnOpenPricePLU', strJsonData) > 0   
+		OR CHARINDEX('dblUnitQty', strJsonData) > 0 OR CHARINDEX('strUpcCode', strJsonData) > 0 		
+		OR CHARINDEX('ysnTaxFlag1', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag2', strJsonData) > 0   
+		OR CHARINDEX('ysnTaxFlag3', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag4', strJsonData) > 0   
+		OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0   
+		OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0 
+		OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0   
+		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  )
+	AND dtmDate BETWEEN @BeginingChangeDate AND @EndingChangeDate
+	
 --Insert data into Procebook staging table	
 	INSERT INTO tblSTstgPricebookSendFile
 	SELECT 
@@ -106,14 +129,29 @@ BEGIN
 	JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
 	JOIN tblICItemPricing Prc ON Prc.intItemId = I.intItemId
 	JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
+	JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId
 	WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation 
 	AND ','+@Category +',' like '%,'+cast(Cat.intCategoryId as varchar(100))+',%'
 	
-	
-	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
-	Where strLayoutTitle = 'Pricebook File' AND strFileType = 'XML'
+--Select * from tblSTstgPricebookSendFile	
 	
 --Generate XML for the pricebook data availavle in staging table
+	DECLARE @strRegister nvarchar(200)
+	SELECT @strRegister = strRegisterName FROM dbo.tblSTRegister Where intRegisterId = @Register
+	IF(UPPER(@strRegister) = UPPER('SAPPHIRE') or UPPER(@strRegister) = UPPER('COMMANDER'))
+	BEGIN
+		SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
+		Where strLayoutTitle = 'Pricebook Send Sapphire' AND strFileType = 'XML'
+		
+	END
+	ELSE
+	BEGIN
+		SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
+		Where strLayoutTitle = 'Pricebook File' AND strFileType = 'XML'
+		
+	END
+--select @intImportFileHeaderId
+		
 	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPricebookSendFile~intPricebookSendFile > 0', 0, @strGenerateXML OUTPUT
 
 --Once XML is generated delete the data from pricebook  staging table.

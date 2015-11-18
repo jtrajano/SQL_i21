@@ -3014,6 +3014,10 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\ResetEaningHoursToProcess.sql" />
     <None Include="Scripts\Post-Deployment\EM\016_MoveCustomerAccountStatusToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherForApproval.sql" />
+    <None Include="Scripts\Post-Deployment\ST\2_FileFieldMapping_PromotionItemList.sql" />
+    <None Include="Scripts\Post-Deployment\ST\3_FileFieldMapping_PromotionCombo.sql" />
+    <None Include="Scripts\Post-Deployment\ST\4_FileFieldMapping_PricebookMixMatch.sql" />
+    <None Include="Scripts\Post-Deployment\ST\5_FileFieldMapping_PricebookSendSapphire.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
