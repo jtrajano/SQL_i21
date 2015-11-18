@@ -3,6 +3,8 @@
 	, @Register int
 	, @BeginningItemListId int
 	, @EndingItemListId int
+	, @strGenerateXML nvarchar(max) OUTPUT
+	, @intImportFileHeaderId INT OUTPUT
 AS
 BEGIN
 
@@ -40,4 +42,13 @@ BEGIN
 	AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 	
 
+	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
+	Where strLayoutTitle = 'Promotion Item List' AND strFileType = 'XML'
+	
+--Generate XML for the pricebook data availavle in staging table
+	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPromotionItemListSend~intPromotionItemListSend > 0', 0, @strGenerateXML OUTPUT
+
+--Once XML is generated delete the data from pricebook  staging table.
+	DELETE FROM [tblSTstgPromotionItemListSend]	
+	
 END

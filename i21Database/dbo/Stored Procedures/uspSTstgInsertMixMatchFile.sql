@@ -4,6 +4,8 @@
 	, @BeginningMixMatchId int
 	, @EndingMixMatchId int
 	, @BuildFileThruEndingDate Datetime
+	, @strGenerateXML nvarchar(max) OUTPUT
+	, @intImportFileHeaderId INT OUTPUT
 AS
 BEGIN
 
@@ -59,5 +61,14 @@ BEGIN
 	JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
 	WHERE R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation AND PSL.strPromoType = 'M'
 	AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId
+
+	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
+	Where strLayoutTitle = 'Pricebook Mix Match' AND strFileType = 'XML'
+	
+--Generate XML for the pricebook data availavle in staging table
+	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgMixMatchFile~intMixMatchFile > 0', 0, @strGenerateXML OUTPUT
+
+--Once XML is generated delete the data from pricebook  staging table.
+	DELETE FROM tblSTstgMixMatchFile	
 
 END

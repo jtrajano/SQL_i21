@@ -3,6 +3,8 @@
 	, @Register int
 	, @BeginningComboId int
 	, @EndingComboId int
+	, @strGenerateXML nvarchar(max) OUTPUT
+	, @intImportFileHeaderId INT OUTPUT
 AS
 BEGIN
 
@@ -23,6 +25,7 @@ BEGIN
 		, PSL.dblPromoPrice [ComboPrice]
 		, PIL.intPromoItemListNo [ItemListID]
 		, PSLD.intQuantity [ComboItemQuantity]
+		, IUM.strUnitMeasure [ComboItemQuantityUOM]
 		, PSLD.dblPrice [ComboItemUnitPrice]
 		, CONVERT(nvarchar(10), PSL.dtmPromoBegPeriod, 126) [StartDate]
 		, '0:00:01' [StartTime]
@@ -56,5 +59,15 @@ BEGIN
 	JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
 	WHERE R.intRegisterId = @Register  AND ST.intStoreId = @StoreLocation AND PSL.strPromoType = 'C'
 	AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
+	
+
+	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
+	Where strLayoutTitle = 'Pricebook Combo' AND strFileType = 'XML'
+	
+--Generate XML for the pricebook data availavle in staging table
+	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgComboSalesFile~intComboSalesFile > 0', 0, @strGenerateXML OUTPUT
+
+--Once XML is generated delete the data from pricebook  staging table.
+	DELETE FROM tblSTstgComboSalesFile	
 
 END

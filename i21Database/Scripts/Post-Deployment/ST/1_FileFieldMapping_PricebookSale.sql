@@ -1,4 +1,5 @@
 ﻿
+GO
 
 IF NOT EXISTS (SELECT 1 FROM [tblSMImportFileHeader] WHERE strLayoutTitle = 'Pricebook File' AND strFileType = 'XML' AND [strXMLType] = 'Outbound')
 BEGIN
@@ -146,7 +147,7 @@ BEGIN
 			   , NULL, 6, '', 1, 1
 END
 
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'RecordAction' AND intLength = 9)
+IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'RecordAction' AND intLevel = 10)
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
 	SELECT @intImportFileHeaderId, NULL, 10,		1, 'RecordAction', NULL, NULL
@@ -320,7 +321,7 @@ BEGIN
 			   , NULL, 9, '', 1, 1
 END
 
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'radiant:ProhibitSaleLocation' AND intLength = 27)
+IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'radiant:ProhibitSaleLocation' AND intLevel = 28)
 BEGIN
 	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
 	SELECT @intImportFileHeaderId, NULL, 28,		1, 'radiant:ProhibitSaleLocation', NULL, NULL
@@ -345,5 +346,5 @@ BEGIN
 				   
 END
 
-
+GO
 

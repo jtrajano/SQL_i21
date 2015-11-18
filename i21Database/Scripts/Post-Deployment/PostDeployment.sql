@@ -258,6 +258,10 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Store Module
 :r .\ST\1_FileFieldMapping_PricebookSale.sql
+:r .\ST\2_FileFieldMapping_PromotionItemList.sql
+:r .\ST\3_FileFieldMapping_PromotionCombo.sql
+:r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
+:r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
 
 -- Common
 :r .\Common\ErrorMessages.sql 
