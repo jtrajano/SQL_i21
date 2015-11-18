@@ -52,7 +52,7 @@ AS
 			SB.intCompanyLocationSubLocationId,	SB.strSubLocationName,			ISNULL(SU.intStockUOM,0)		AS	intStockUOM,		
 			CU.strCurrency,						CS.strContractStatus,			ISNULL(SU.dblStockUOMCF,0)		AS	dblStockUOMCF,	
 			IX.strIndex,						VR.strVendorId,					CD.strReference,
-			SP.intSupplyPointId,			SP.intEntityVendorId			AS	intTerminalId,
+			SP.intSupplyPointId,												SP.intEntityVendorId			AS	intTerminalId,
 			SP.intRackPriceSupplyPointId,		IM.intOriginId,
 			RV.dblReservedQuantity,				IM.intLifeTime,					IM.strLifeTimeType,
 			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0) AS dblUnReservedQuantity,
