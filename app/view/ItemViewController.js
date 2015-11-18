@@ -2067,6 +2067,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
                 me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
@@ -2078,12 +2079,15 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
+                me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
                 me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
                 me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Other Charge":
+                me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
                 me.addAccountCategory(current, 'Other Charge Income', accountCategoryList);
                 me.addAccountCategory(current, 'Other Charge Expense', accountCategoryList);
                 break;
@@ -2092,6 +2096,11 @@ Ext.define('Inventory.view.ItemViewController', {
             case "Service":
             case "Software":
                 me.addAccountCategory(current, 'General', accountCategoryList);
+                break;
+
+            case "Bundle":
+            case "Kit":
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 break;
         }
 
