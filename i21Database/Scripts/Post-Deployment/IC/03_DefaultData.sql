@@ -75,3 +75,38 @@ BEGIN
 	INSERT INTO tblICCompanyPreference(intInheritSetup, intSort)
 	VALUES (1, 1)
 END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'STOCK' AND strDisplayMember = 'STOCK')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('STOCK','STOCK',1,1,'dbo',GETDATE())
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'RESTRICTED' AND strDisplayMember = 'RESTRICTED')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('RESTRICTED','RESTRICTED',0,1,'dbo',GETDATE())
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'RESTRICTED' AND strDisplayMember = 'HOLD')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('RESTRICTED','HOLD',0,1,'dbo',GETDATE())
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'RESTRICTED' AND strDisplayMember = 'DAMAGED')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('RESTRICTED','DAMAGED',0,1,'dbo',GETDATE())
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'RESTRICTED' AND strDisplayMember = 'QUARANTINED')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('RESTRICTED','QUARANTINED',0,1,'dbo',GETDATE())
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'RESTRICTED' AND strDisplayMember = 'QA-HOLD')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('RESTRICTED','QA-HOLD',0,1,'dbo',GETDATE())
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICRestriction WHERE strInternalCode = 'RESTRICTED' AND strDisplayMember = 'REPACK')
+BEGIN
+	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('RESTRICTED','REPACK',0,1,'dbo',GETDATE())
+END
