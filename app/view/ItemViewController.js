@@ -1243,7 +1243,34 @@ Ext.define('Inventory.view.ItemViewController', {
         var colStockUOM = grdStock.columns[1];
         colStockUOM.renderer = this.onRenderStockUOM;
 
+        var colStockOnOrder = grdStock.columns[2];
+        colStockOnOrder.summaryRenderer = this.StockSummaryRenderer;
+        var colStockInTransitInbound = grdStock.columns[3];
+        colStockInTransitInbound.summaryRenderer = this.StockSummaryRenderer
+        var colStockOnHand = grdStock.columns[4];
+        colStockOnHand.summaryRenderer = this.StockSummaryRenderer
+        var colStockInTransitOutbound = grdStock.columns[5];
+        colStockInTransitOutbound.summaryRenderer = this.StockSummaryRenderer
+        var colStockBackOrder = grdStock.columns[6];
+        colStockBackOrder.summaryRenderer = this.StockSummaryRenderer
+        var colStockCommitted = grdStock.columns[7];
+        colStockCommitted.summaryRenderer = this.StockSummaryRenderer
+        var colStockOnStorage = grdStock.columns[8];
+        colStockOnStorage.summaryRenderer = this.StockSummaryRenderer
+        var colStockConsignedPurchase = grdStock.columns[9];
+        colStockConsignedPurchase.summaryRenderer = this.StockSummaryRenderer
+        var colStockConsignedSale = grdStock.columns[10];
+        colStockConsignedSale.summaryRenderer = this.StockSummaryRenderer
+        var colStockReserved = grdStock.columns[11];
+        colStockReserved.summaryRenderer = this.StockSummaryRenderer
+        var colStockAvailable = grdStock.columns[12];
+        colStockAvailable.summaryRenderer = this.StockSummaryRenderer
+
         return win.context;
+    },
+
+    StockSummaryRenderer: function (value, params, data) {
+        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, 2);
     },
 
     createRecord: function(config, action) {
