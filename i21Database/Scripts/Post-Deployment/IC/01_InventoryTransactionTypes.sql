@@ -41,11 +41,11 @@ USING	(
 		UNION ALL 
 		SELECT	id = 8
 				,name = 'Consume'
-				,form = null
+				,form = 'Consume'
 		UNION ALL 
 		SELECT	id = 9
 				,name = 'Produce'
-				,form = null
+				,form = 'Produce'
 		UNION ALL 
 		SELECT	id = 10
 				,name = 'Inventory Adjustment - Quantity Change'
