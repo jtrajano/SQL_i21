@@ -2956,6 +2956,9 @@
     <Build Include="dbo\Stored Procedures\uspWHGetAvailableContainerForPick.sql" />
     <Build Include="dbo\Tables\tblMFRecipeType.sql" />
     <Build Include="dbo\Views\vyuMFGetItemByLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHPickFlexibilityValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHMBLSplitSKUForOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreateOrderLineItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
