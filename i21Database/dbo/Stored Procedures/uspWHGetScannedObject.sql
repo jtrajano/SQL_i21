@@ -35,7 +35,6 @@ BEGIN TRY
 	FROM tblICStorageLocation u
 	JOIN tblSMCompanyLocationSubLocation l ON l.intCompanyLocationSubLocationId = u.intSubLocationId
 	WHERE strName = @Scan
-		AND u.intLocationId = @intCompanyLocationId
 
 	IF @UnitCount > 0
 	BEGIN

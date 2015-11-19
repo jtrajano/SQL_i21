@@ -2950,6 +2950,10 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteInvoice.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailForDemandBlendItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHMBLCheckInSKU.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHMoveContainerForPutBack.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHMBLGetCountByTruck.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetAvailableContainerForPick.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
