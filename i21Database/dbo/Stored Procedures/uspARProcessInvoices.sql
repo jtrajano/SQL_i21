@@ -712,7 +712,7 @@ DECLARE	@successfulCount INT
 --UnPosting posted Invoices for update
 BEGIN TRY
 	DECLARE @IdsForUnPosting VARCHAR(MAX)
-	SELECT DISTINCT
+	SELECT --DISTINCT
 		@IdsForUnPosting = COALESCE(@IdsForUnPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
 		#EntriesForProcessing
@@ -1283,7 +1283,7 @@ SET @batchIdUsed = ''
 --Posting newly added Invoices
 DECLARE @IdsForPosting VARCHAR(MAX)
 BEGIN TRY	
-	SELECT DISTINCT
+	SELECT --DISTINCT
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
 		#EntriesForProcessing
@@ -1323,7 +1323,7 @@ BEGIN TRY
 	SET @batchIdUsed = ''	
 	SET @successfulCount = 0
 
-	SELECT DISTINCT
+	SELECT --DISTINCT
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
 		#EntriesForProcessing
@@ -1377,7 +1377,7 @@ END CATCH
 --Posting Updated Invoices
 DECLARE @IdsForPostingUpdated VARCHAR(MAX)
 BEGIN TRY	
-	SELECT DISTINCT
+	SELECT --DISTINCT
 		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
 		#EntriesForProcessing
@@ -1418,7 +1418,7 @@ BEGIN TRY
 	SET @batchIdUsed = ''
 	SET @successfulCount = 0
 
-	SELECT DISTINCT
+	SELECT --DISTINCT
 		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
 		#EntriesForProcessing
@@ -1472,7 +1472,7 @@ END CATCH
 --UnPosting Updated Invoices
 DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
 BEGIN TRY	
-	SELECT DISTINCT
+	SELECT --DISTINCT
 		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
 		#EntriesForProcessing
@@ -1514,7 +1514,7 @@ BEGIN TRY
 	SET @batchIdUsed = ''
 	SET @successfulCount = 0
 
-	SELECT DISTINCT
+	SELECT --DISTINCT
 		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 	FROM
 		#EntriesForProcessing
@@ -1564,7 +1564,7 @@ END CATCH
 
 
 DECLARE @CreateIds VARCHAR(MAX)
-SELECT DISTINCT
+SELECT --DISTINCT
 	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 FROM
 	#EntriesForProcessing
@@ -1577,7 +1577,7 @@ SET @CreatedIvoices = @CreateIds
 
 
 DECLARE @UpdatedIds VARCHAR(MAX)
-SELECT DISTINCT
+SELECT --DISTINCT
 	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
 FROM
 	#EntriesForProcessing
