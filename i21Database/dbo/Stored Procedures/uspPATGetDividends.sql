@@ -12,32 +12,28 @@ BEGIN
 			SET NOCOUNT ON;
 
 		
-			SELECT intCustomerId = CS.intCustomerPatronId,
+			SELECT DISTINCT intCustomerId = CS.intCustomerPatronId,
 				   ENT.strName,
 				   ARC.strStockStatus,
 				   TC.strTaxCode,
-				   SC.strStockName,
-				   SC.dblParValue,
-				   CS.dblSharesNo,
-				   SC.intDividendsPerShare,
 				   dtmLastActivityDate = GETDATE(),
-				   dblDividendAmount = CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+				   dblDividendAmount = SUM(CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
 										THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END,
+										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END),
 
-				   dblLessFWT = CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+				   dblLessFWT = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
 									 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 											(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END) < @dblMinimumDividend 
 									 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
 									 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-											(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END * @FWT) END,
+											(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END * @FWT) END),
 
-				   dblCheckAmount = CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+				   dblCheckAmount = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
 										 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 											  (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END) < @dblMinimumDividend 
 										 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
 										 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-											  (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END - CS.dblCheckAmount) END
+											  (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END - CS.dblCheckAmount) END)
 
 			 FROM tblPATStockClassification SC
 	   INNER JOIN tblPATCustomerStock CS
@@ -48,8 +44,7 @@ BEGIN
 			   ON ARC.intEntityCustomerId = ENT.intEntityId
 		LEFT JOIN tblSMTaxCode TC
 			   ON TC.intTaxCodeId = ARC.intTaxCodeId
+
+			   GROUP BY CS.intCustomerPatronId,ENT.strName, ARC.strStockStatus, TC.strTaxCode
 END
-
 GO
-
-
