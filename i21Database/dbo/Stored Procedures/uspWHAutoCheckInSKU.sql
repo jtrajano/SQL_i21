@@ -26,7 +26,9 @@ BEGIN TRY
 	DECLARE @dblLotWeight NUMERIC(18,6)
 	DECLARE @intLotId INT
 	DECLARE @intWeightPerUnitUOMId INT
-	
+	DECLARE @intPhysicalCountUOMId INT
+	DECLARE @intLotQtyUOMId INT
+		
 	DECLARE @tblLineItem TABLE 
 			(intItemRecordId INT Identity(1, 1), 
 			 intOrderHeaderId INT, 
@@ -150,10 +152,26 @@ BEGIN TRANSACTION
 					AND ysnStockUnit = 1
 
 				SELECT @dblWeightPerQty = dblWeightPerUnit, 
-					   @intWeightPerUnitUOMId = intWeightPerUnitUOMId 
+					   @intWeightPerUnitUOMId = intWeightPerUnitUOMId,
+					   @intPhysicalCountUOMId = intPhysicalCountUOMId 
 				FROM tblWHOrderLineItem 
 				WHERE intOrderHeaderId = @intOrderHeaderId
 					AND intItemId = @intItemId 
+
+								SELECT @intLotQtyUOMId = intItemUOMId
+				FROM tblICItemUOM u
+				JOIN tblICItem i ON i.intItemId = u.intItemId
+				WHERE i.intItemId = @intItemId
+					AND ysnStockUnit <> 1
+					AND u.intUnitMeasureId = @intPhysicalCountUOMId
+
+				IF ISNULL(@intLotQtyUOMId,0) = 0 
+				BEGIN
+					SELECT TOP 1 @intLotQtyUOMId = intItemUOMId
+					FROM tblICItemUOM u
+					JOIN tblICItem i ON i.intItemId = u.intItemId
+					WHERE i.intItemId = @intItemId
+				END
 
 				SET @dblLotWeight = @dblLotQty * @dblWeightPerQty
 					
@@ -169,10 +187,10 @@ BEGIN TRANSACTION
 							,@intEntityId =NULL
 							,@intStorageLocationId = @intStorageLocationId
 							,@dblWeight = @dblLotWeight
-							,@intWeightUOMId = @intWeightPerUnitUOMId
+							,@intWeightUOMId = @intItemUOMId
 							,@dblUnitQty = 1
 							,@dblProduceQty= @dblLotQty
-							,@intProduceUOMKey =@intItemUOMId
+							,@intProduceUOMKey =@intLotQtyUOMId
 							,@strBatchId = @strBOLNo
 							,@strLotNumber = @strLotNumber
 							,@intBatchId = NULL
