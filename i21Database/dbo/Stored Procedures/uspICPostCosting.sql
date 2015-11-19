@@ -2,7 +2,7 @@
 	This is the stored procedure that handles the "posting" of items. 
 	
 	It uses a cursor to iterate over the list of records found in @ItemsToPost, a table-valued parameter (variable). 
-
+	
 	In each iteration, it does the following: 
 		1. Determines if a stock is for incoming or outgoing then calls the appropriate stored procedure. 
 		2. Adjust the stock quantity and current average cost. 
@@ -152,6 +152,12 @@ BEGIN
 	-- Get the costing method of an item 
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
+
+	-- Initialize the dblUOMQty
+	SELECT	@dblUOMQty = dblUnitQty
+	FROM	dbo.tblICItemUOM
+	WHERE	intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMId
 
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
