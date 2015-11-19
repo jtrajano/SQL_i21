@@ -78,7 +78,7 @@ BEGIN
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
 		,dtmDate = @dtmPlannedDate
 		,dblQty = (- cl.dblQuantity)
-		,dblUOMQty = (Case When l.intWeightUOMId is null then 0 else ItemUOM.dblUnitQty End)
+		,dblUOMQty = (Case When l.intWeightUOMId is null then 1 else l.dblWeightPerQty End)
 		,dblCost = l.dblLastCost
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
