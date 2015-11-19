@@ -181,19 +181,20 @@ INNER JOIN (SELECT icfCards.intCardId
 			AS cfCardAccount
 ON cfTrans.intCardId = cfCardAccount.intCardId
 INNER JOIN (SELECT icfSite.* 
-				   ,icfItem.intItemId
-				   ,icfItem.intARItemId
-				   ,icfItem.intTaxGroupMaster
-				   ,iicItemLoc.intItemLocationId
-				   ,iicItemLoc.intIssueUOMId
-				   ,iicItem.strDescription
+					,icfItem.intItemId
+					,icfItem.intARItemId
+					,icfItem.intTaxGroupMaster
+					,iicItemLoc.intItemLocationId
+					,iicItemLoc.intIssueUOMId
+					,iicItem.strDescription
 			FROM tblCFSite icfSite
 			INNER JOIN tblCFItem icfItem
 			ON icfSite.intSiteId = icfItem.intSiteId
 			INNER JOIN tblICItem iicItem
 			ON icfItem.intARItemId = iicItem.intItemId
 			INNER JOIN tblICItemLocation iicItemLoc
-			ON iicItemLoc.intItemLocationId = icfSite.intARLocationId)
+			ON iicItemLoc.intItemLocationId = icfSite.intARLocationId 
+				AND iicItemLoc.intItemId = icfItem.intItemId)
 			AS cfSiteItem
 ON cfTrans.intSiteId = cfSiteItem.intSiteId
 INNER JOIN (SELECT * 
