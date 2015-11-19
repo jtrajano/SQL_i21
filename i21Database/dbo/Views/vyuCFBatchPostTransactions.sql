@@ -1,6 +1,6 @@
 ﻿CREATE VIEW dbo.vyuCFBatchPostTransactions
 AS
-SELECT        cfTrans.dtmTransactionDate, cfTrans.strTransactionId AS strTransactionId, 'Card Fueling' AS strTransactionType, cfTrans.ysnPosted, 
+SELECT        cfTrans.dtmTransactionDate, cfTrans.strTransactionId, 'Card Fueling' AS strTransactionType, cfTrans.ysnPosted, 
                          'Network: ' + cfNetwork.strNetwork + ' ,Site: ' + cfSiteItem.strSiteName + ' ,Quantity: ' + CAST(cfTrans.dblQuantity AS nvarchar) AS strDescription, cfTransPrice.dblCalculatedAmount AS dblAmount, 
                          cfTrans.intTransactionId,
                              (SELECT        TOP (1) intEntityId
@@ -22,12 +22,14 @@ FROM            dbo.tblCFTransaction AS cfTrans INNER JOIN
                                FROM            dbo.tblCFSite AS icfSite INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId INNER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId INNER JOIN
-                                                         dbo.tblICItemLocation AS iicItemLoc ON icfSite.intARLocationId = iicItemLoc.intItemLocationId) AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId INNER JOIN
+                                                         dbo.tblICItemLocation AS iicItemLoc ON icfSite.intARLocationId = iicItemLoc.intItemLocationId AND iicItemLoc.intItemId = icfItem.intItemId) AS cfSiteItem ON 
+                         cfTrans.intSiteId = cfSiteItem.intSiteId INNER JOIN
                              (SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                FROM            dbo.tblCFTransactionPrice
                                WHERE        (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId INNER JOIN
                          dbo.tblCFNetwork AS cfNetwork ON cfTrans.intNetworkId = cfNetwork.intNetworkId LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId
+						 WHERE cfTrans.ysnPosted = 1
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_DiagramPaneCount', @value = 2, @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'vyuCFBatchPostTransactions';
 
