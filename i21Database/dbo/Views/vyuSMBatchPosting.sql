@@ -27,6 +27,8 @@ FROM
 	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, dblInvoiceTotal, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDate, strComments FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo') AND ysnPosted = 0  AND ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(ysnTemplate,0) = 0
 	UNION ALL
 	SELECT 'Payment', intPaymentId, strRecordNumber, dblAmountPaid, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDatePaid, strNotes FROM tblARPayment WHERE ysnPosted = 0
+	UNION ALL
+	SELECT 'Card Fueling', intTransactionId, strTransactionId, dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmTransactionDate, strDescription FROM vyuCFBatchPostTransactions
 ) BatchPosting
 LEFT JOIN tblEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
 INNER JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
