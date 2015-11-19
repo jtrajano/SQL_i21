@@ -2947,6 +2947,8 @@
     <Build Include="dbo\Tables\tblCTBagMarkLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetDividendsCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteInvoicesFromTransport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
