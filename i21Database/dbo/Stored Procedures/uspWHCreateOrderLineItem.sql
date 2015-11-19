@@ -132,7 +132,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @intPickPreferenceId = intPickPreferenceId
 		FROM tblWHPickPreference
-		WHERE ysnDefault = 1
+		WHERE ysnIsDefault = 1
 	END
 
 	IF @intPickPreferenceId = 0
