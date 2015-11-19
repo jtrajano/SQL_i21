@@ -47,7 +47,9 @@ INSERT INTO @DataForQuote
 			,strQuoteNumber)
 select intEntityCustomerId,NULL from tblARCustomerGroup CG
           join tblARCustomerGroupDetail CD on CG.intCustomerGroupId = CD.intCustomerGroupId
-		  right join vyuTRQuoteSelection QS on QS.intEntityCustomerId = CD.intEntityId
+		  join tblEntityLocation EL on CD.intEntityId = EL.intEntityId
+		  right join vyuTRQuoteSelection QS on QS.intEntityCustomerId = CD.intEntityId and QS.intEntityCustomerLocationId = EL.intEntityLocationId
+		  
 		   where CD.ysnQuote = 1
 		         and QS.ysnQuote = 1
 		         and (CG.intCustomerGroupId = @intCustomerGroupId or isNull(@intCustomerGroupId,0) = 0)
@@ -168,8 +170,8 @@ INSERT INTO [dbo].[tblTRQuoteDetail]
            ,1 --[intConcurrencyId]
 from @DataForQuote QS
      join tblTRQuoteHeader QH on QS.strQuoteNumber = QH.strQuoteNumber
-	 join vyuTRQuoteSelection QD on QD.intEntityCustomerId = QS.intCustomerId
 	 join tblEntityLocation EL on QS.intCustomerId = EL.intEntityId
+	 join vyuTRQuoteSelection QD on QD.intEntityCustomerId = QS.intCustomerId and QD.intEntityCustomerLocationId = EL.intEntityLocationId 
      where QD.ysnQuote = 1
 
 INSERT INTO @DataForDetailQuote
