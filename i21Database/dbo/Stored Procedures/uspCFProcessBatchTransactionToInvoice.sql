@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFProcessBatchTransactionToInvoice]
-	  @TransactionId		NVARCHAR(MAX)
-	 ,@UserId				INT 
-	 ,@Post					BIT
-	 ,@Recap				BIT
-	 ,@BatchId				NVARCHAR(MAX)
-	 ,@SuccessfulCount		INT						OUTPUT
-	 ,@ErrorMessage			NVARCHAR(250)  = NULL	OUTPUT
-	 ,@CreatedIvoices		NVARCHAR(MAX)  = NULL	OUTPUT
-	 ,@UpdatedIvoices		NVARCHAR(MAX)  = NULL	OUTPUT
+	 @TransactionId		NVARCHAR(MAX)
+	,@UserId			INT	
+	,@Post				BIT
+	,@Recap				BIT
+	,@ErrorMessage		NVARCHAR(250)  = NULL	OUTPUT
+	,@CreatedIvoices	NVARCHAR(MAX)  = NULL	OUTPUT
+	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL	OUTPUT
+	,@SuccessfulCount	INT						OUTPUT
+	,@BatchId			NVARCHAR(MAX)
 
 AS	
 
@@ -220,6 +220,9 @@ FROM [fnCFSplitString](@TransactionId,',')
 			END
 
 	DROP TABLE #tmpTransactionId
+
+	--Select * from @EntriesForInvoice
+	--return
 	
 	BEGIN TRANSACTION
 	EXEC [dbo].[uspARProcessInvoices]
@@ -235,20 +238,34 @@ FROM [fnCFSplitString](@TransactionId,',')
 		
 	SELECT @SuccessfulCount = COUNT(*) FROM tblGLDetail WHERE strBatchId = @BatchId
 
+	DECLARE @intCreatedRecordKey INT
+	DECLARE @intCreatedInvoiceId INT
 
-	IF (@ErrorMessage IS NULL)
+	IF (@ErrorMessage IS NULL AND @CreatedIvoices IS NOT NULL)
 		BEGIN
 			COMMIT TRANSACTION
+			
+			SELECT DISTINCT RecordKey INTO #tmpCreatedInvoice
+			FROM [fnCFSplitString](@CreatedIvoices,',') 
+
+			WHILE (EXISTS(SELECT 1 FROM #tmpCreatedInvoice ))
+			BEGIN
+				SELECT @intCreatedRecordKey = RecordKey FROM #tmpCreatedInvoice
+				SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM [fnCFSplitString](@CreatedIvoices,',') WHERE RecordKey = @intCreatedRecordKey
+				
+				UPDATE tblCFTransaction 
+				SET ysnPosted = 1, intInvoiceId = @intCreatedInvoiceId
+				WHERE intTransactionId = (SELECT intTransactionId 
+											FROM tblARInvoice 
+											WHERE intInvoiceId = @intCreatedInvoiceId)
+				
+				DELETE FROM #tmpCreatedInvoice WHERE RecordKey = @intCreatedRecordKey
+
+			END
+
+			DROP TABLE #tmpCreatedInvoice
 		END
 	ELSE
 		BEGIN
 			ROLLBACK TRANSACTION
 		END
-
-	IF (@CreatedIvoices IS NOT NULL AND @ErrorMessage IS NULL)
-	BEGIN
-		UPDATE tblCFTransaction 
-		SET intInvoiceId = @CreatedIvoices,
-			ysnPosted = 1 
-		WHERE intTransactionId = @TransactionId
-	END
