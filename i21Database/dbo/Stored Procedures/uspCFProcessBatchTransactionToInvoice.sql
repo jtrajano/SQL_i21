@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFProcessBatchTransactionToInvoice]
-	 @TransactionId		NVARCHAR(MAX)
-	,@UserId			INT	
-	,@Post				BIT
-	,@Recap				BIT
-	,@ErrorMessage		NVARCHAR(250)  = NULL	OUTPUT
-	,@CreatedIvoices	NVARCHAR(MAX)  = NULL	OUTPUT
-	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL	OUTPUT
-	,@SuccessfulCount	INT						OUTPUT
-	,@BatchId			NVARCHAR(MAX)
+	  @TransactionId		NVARCHAR(MAX)
+	 ,@UserId				INT 
+	 ,@Post					BIT
+	 ,@Recap				BIT
+	 ,@BatchId				NVARCHAR(MAX)
+	 ,@SuccessfulCount		INT						OUTPUT
+	 ,@ErrorMessage			NVARCHAR(250)  = NULL	OUTPUT
+	 ,@CreatedIvoices		NVARCHAR(MAX)  = NULL	OUTPUT
+	 ,@UpdatedIvoices		NVARCHAR(MAX)  = NULL	OUTPUT
 
 AS	
 
