@@ -2949,6 +2949,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteInvoice.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailForDemandBlendItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
