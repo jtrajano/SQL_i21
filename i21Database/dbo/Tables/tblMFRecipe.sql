@@ -7,6 +7,7 @@
     [intManufacturingCellId] INT NOT NULL,
 	[intLocationId] INT NOT NULL,  
     [intVersionNo] INT NOT NULL CONSTRAINT [DF_tblMFRecipe_intVersionNo] DEFAULT 1, 
+	[intRecipeTypeId] INT NULL,
     [intCostDistributionMethodId] INT NOT NULL , 
 	[intManufacturingProcessId] INT NOT NULL,
     [ysnActive] BIT NOT NULL CONSTRAINT [DF_tblMFRecipe_ysnActive] DEFAULT 0, 
@@ -28,7 +29,8 @@
 	CONSTRAINT [FK_tblMFRecipe_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY ([intManufacturingProcessId]) REFERENCES [tblMFManufacturingProcess]([intManufacturingProcessId]),
 	CONSTRAINT [FK_tblMFRecipe_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
 	CONSTRAINT [FK_tblMFRecipe_tblARCustomerFarm_intFarmFieldId_intFarmId] FOREIGN KEY ([intFarmId]) REFERENCES [tblARCustomerFarm]([intFarmFieldId]),
-	CONSTRAINT [FK_tblMFRecipe_tblARCustomerFarm_intFarmFieldId_intFieldId] FOREIGN KEY ([intFieldId]) REFERENCES [tblARCustomerFarm]([intFarmFieldId])
+	CONSTRAINT [FK_tblMFRecipe_tblARCustomerFarm_intFarmFieldId_intFieldId] FOREIGN KEY ([intFieldId]) REFERENCES [tblARCustomerFarm]([intFarmFieldId]),
+	CONSTRAINT [FK_tblMFRecipe_tblMFRecipeType_intRecipeTypeId] FOREIGN KEY ([intRecipeTypeId]) REFERENCES [tblMFRecipeType]([intRecipeTypeId]),
 )
 
 GO

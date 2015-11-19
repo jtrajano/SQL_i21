@@ -2954,6 +2954,8 @@
     <Build Include="dbo\Stored Procedures\uspWHMoveContainerForPutBack.sql" />
     <Build Include="dbo\Stored Procedures\uspWHMBLGetCountByTruck.sql" />
     <Build Include="dbo\Stored Procedures\uspWHGetAvailableContainerForPick.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeType.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemByLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

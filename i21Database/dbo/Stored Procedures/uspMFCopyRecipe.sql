@@ -62,6 +62,7 @@ BEGIN TRY
 			,intManufacturingCellId
 			,intLocationId
 			,intVersionNo
+			,intRecipeTypeId
 			,intCostDistributionMethodId
 			,intManufacturingProcessId
 			,ysnActive
@@ -84,6 +85,7 @@ BEGIN TRY
 			,intManufacturingCellId
 			,intLocationId
 			,intVersionNo
+			,intRecipeTypeId
 			,intCostDistributionMethodId
 			,intManufacturingProcessId
 			,ysnActive

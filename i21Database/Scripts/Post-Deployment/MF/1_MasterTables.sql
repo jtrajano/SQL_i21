@@ -1390,3 +1390,18 @@ BEGIN
     VALUES(3,'Totalizer Reading','F')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFRecipeType WHERE intRecipeTypeId = 1)
+BEGIN
+    INSERT INTO tblMFRecipeType(intRecipeTypeId,strName)
+    VALUES(1,'By Quantity')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFRecipeType WHERE intRecipeTypeId = 2)
+BEGIN
+    INSERT INTO tblMFRecipeType(intRecipeTypeId,strName)
+    VALUES(2,'By Percentage')
+END
+GO
+Update tblMFRecipe Set intRecipeTypeId=1 Where intRecipeTypeId IS NULL
+GO
+

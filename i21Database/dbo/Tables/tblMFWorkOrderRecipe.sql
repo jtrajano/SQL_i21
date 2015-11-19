@@ -8,6 +8,7 @@
     [intManufacturingCellId] INT NOT NULL,
 	[intLocationId] INT NOT NULL,  
     [intVersionNo] INT NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_intVersionNo] DEFAULT 1, 
+	[intRecipeTypeId] INT,
     [intCostDistributionMethodId] INT NOT NULL , 
 	[intManufacturingProcessId] INT NOT NULL,
     [ysnActive] BIT NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_ysnActive] DEFAULT 0, 
