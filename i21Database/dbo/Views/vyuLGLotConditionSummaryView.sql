@@ -33,7 +33,7 @@ FROM (
 	sum(ReceiptLot.dblQuantity) as dblQuantity, 
 	sum(ReceiptLot.dblQuantity * Shipment.dblContainerWeightPerQty) as dblNetShippedWt,
 	sum(ReceiptLot.dblGrossWeight-ReceiptLot.dblTareWeight) as dblNetReceivedWt
-FROM vyuICGetInventoryReceiptItemLot ReceiptLot
+FROM tblICInventoryReceiptItemLot ReceiptLot
 LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN vyuLGInboundShipmentView Shipment ON Shipment.intShipmentContractQtyId = ReceiptItem.intSourceId and Shipment.intShipmentBLContainerId = ReceiptItem.intContainerId
 GROUP BY Shipment.intShipmentId, Shipment.intTrackingNumber, Shipment.dblFranchise, ReceiptLot.strCondition, ReceiptItem.intItemId) t1
