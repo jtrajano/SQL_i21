@@ -1,4 +1,6 @@
-﻿IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspICRepostCosting' AND type = 'P')
+﻿-- use irely98 
+
+IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspICRepostCosting' AND type = 'P')
 	DROP PROCEDURE [dbo].[uspICRepostCosting]
 	
 GO 
@@ -39,14 +41,14 @@ DECLARE @intId AS INT
 		,@strActualCostId AS NVARCHAR(50)
 
 DECLARE @CostingMethod AS INT 
-		,@strTransactionForm AS NVARCHAR(255)
-		
--- Create the CONSTANT variables for the costing methods
+		,@strTransactionForm AS NVARCHAR(255)		
+
+-- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4
-		,@LOTCOST AS INT = 5
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5	
 		
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
@@ -120,7 +122,8 @@ FETCH NEXT FROM loopItems INTO
 WHILE @@FETCH_STATUS = 0
 BEGIN 
 	-- Initialize the costing method and negative inventory option. 
-	SET @CostingMethod = NULL;
+	SET @CostingMethod = NULL
+	SET @strTransactionForm = NULL 
 
 	-- Initialize the transaction form
 	SELECT	@strTransactionForm = strTransactionForm
@@ -279,8 +282,8 @@ BEGIN
 	--------------------------------------------------
 	BEGIN 
 		-- Get the current average cost and stock qty 
-		DECLARE @CurrentStockQty AS NUMERIC(18,6)
-		DECLARE @CurrentStockAveCost AS NUMERIC(18,6)
+		DECLARE @CurrentStockQty AS NUMERIC(18,6) = NULL 
+		DECLARE @CurrentStockAveCost AS NUMERIC(18,6) = NULL 
 
 		SELECT	@CurrentStockAveCost = dblAverageCost
 		FROM	dbo.tblICItemPricing ItemPricing
@@ -292,123 +295,9 @@ BEGIN
 		WHERE	ItemStock.intItemId = @intItemId
 				AND ItemStock.intItemLocationId = @intItemLocationId
 
-		-----------------------------------
-		-- Update the Item Stock table
-		-----------------------------------
-		MERGE	
-		INTO	dbo.tblICItemStock 
-		WITH	(HOLDLOCK) 
-		AS		ItemStock	
-		USING (
-				SELECT	intItemId = @intItemId
-						,intItemLocationId = @intItemLocationId
-						,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
-		) AS StockToUpdate
-			ON ItemStock.intItemId = StockToUpdate.intItemId
-			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
-
-		-- If matched, update the unit on hand qty. 
-		WHEN MATCHED THEN 
-			UPDATE 
-			SET		dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
-
-		-- If none found, insert a new item stock record
-		WHEN NOT MATCHED THEN 
-			INSERT (
-				intItemId
-				,intItemLocationId
-				,dblUnitOnHand
-				,dblOrderCommitted
-				,dblOnOrder
-				,dblLastCountRetail
-				,intSort
-				,intConcurrencyId
-			)
-			VALUES (
-				StockToUpdate.intItemId
-				,StockToUpdate.intItemLocationId
-				,StockToUpdate.Qty -- dblUnitOnHand
-				,0
-				,0
-				,0
-				,NULL 
-				,1	
-			)
-		;
-
-		---------------------------------------
-		-- Update the Item Stock UOM table
-		---------------------------------------
-		MERGE	
-		INTO	dbo.tblICItemStockUOM 
-		WITH	(HOLDLOCK) 
-		AS		ItemStock	
-		USING (
-				SELECT	intItemId = @intItemId
-						,intItemLocationId = @intItemLocationId
-						,intItemUOMId = @intItemUOMId
-						,intSubLocationId = @intSubLocationId 
-						,intStorageLocationId = @intStorageLocationId
-						,Qty = ISNULL(@dblQty, 0)  
-				
-				-- If incoming Lot has a weight, then get value of the other UOM Id. 
-				UNION ALL 
-				SELECT	intItemId = @intItemId
-						,intItemLocationId = @intItemLocationId
-						,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN Lot.intWeightUOMId -- Stock is in packs, then get the weight UOM id. 
-												WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN Lot.intItemUOMId -- Stock is in weight, then get the pack UOM id. 
-												ELSE @intItemUOMId
-										END 
-						,intSubLocationId = @intSubLocationId 
-						,intStorageLocationId = @intStorageLocationId
-						,Qty =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert the qty to weight. 
-										WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN @dblQty / Lot.dblWeightPerQty -- Stock is in weights, then convert it to packs. 
-										ELSE @dblQty
-								END 
-				FROM	dbo.tblICLot Lot 
-				WHERE	Lot.intItemLocationId = @intItemLocationId
-						AND Lot.intLotId = @intLotId
-						AND Lot.intWeightUOMId IS NOT NULL 
-						AND Lot.intItemUOMId <> Lot.intWeightUOMId
-						AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
-
-		) AS StockToUpdate
-			ON ItemStock.intItemId = StockToUpdate.intItemId
-			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
-			AND ItemStock.intItemUOMId = StockToUpdate.intItemUOMId
-			AND ISNULL(ItemStock.intSubLocationId, 0) = ISNULL(StockToUpdate.intSubLocationId, 0)
-			AND ISNULL(ItemStock.intStorageLocationId, 0) = ISNULL(StockToUpdate.intStorageLocationId, 0)
-
-		-- If matched, update the unit on hand qty. 
-		WHEN MATCHED THEN 
-			UPDATE 
-			SET		dblOnHand = ISNULL(ItemStock.dblOnHand, 0) + StockToUpdate.Qty
-
-		-- If none found, insert a new item stock record
-		WHEN NOT MATCHED THEN 
-			INSERT (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,intSubLocationId
-				,intStorageLocationId
-				,dblOnHand
-				,dblOnOrder
-				,intConcurrencyId
-			)
-			VALUES (
-				StockToUpdate.intItemId
-				,StockToUpdate.intItemLocationId
-				,StockToUpdate.intItemUOMId
-				,StockToUpdate.intSubLocationId
-				,StockToUpdate.intStorageLocationId
-				,StockToUpdate.Qty 
-				,0
-				,1	
-			)
-		;
-
-		-- Update the Item Pricing table
+		--------------------------------------------------------------------------------
+		-- Update average cost, last cost, and standard cost in the Item Pricing table
+		--------------------------------------------------------------------------------
 		MERGE	
 		INTO	dbo.tblICItemPricing 
 		WITH	(HOLDLOCK) 
@@ -440,8 +329,8 @@ BEGIN
 				intItemId
 				,intItemLocationId
 				,dblAverageCost 
-				,dblLastCost 
 				,dblStandardCost
+				,dblLastCost 
 				,intConcurrencyId
 			)
 			VALUES (
@@ -453,6 +342,19 @@ BEGIN
 				,1
 			)
 		;
+
+		------------------------------------------------------------
+		-- Update the Stock Quantity
+		------------------------------------------------------------
+		EXEC [dbo].[uspICPostStockQuantity]
+			@intItemId
+			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@intItemUOMId
+			,@dblQty
+			,@dblUOMQty
+			,@intLotId
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -598,15 +500,3 @@ BEGIN
 				AND intItemLocationId = @intItemLocationId
 	END 
 END
-
------------------------------------------
--- Generate the g/l entries
------------------------------------------
-IF @strAccountToCounterInventory IS NOT NULL 
-BEGIN 
-	EXEC dbo.uspICCreateGLEntries 
-		@strBatchId
-		,@strAccountToCounterInventory
-		,@intUserId
-		,@strGLDescription
-END 

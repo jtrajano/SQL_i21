@@ -107,7 +107,7 @@ END
 															FROM dbo.tblICItemUOM IU 
 															WHERE	IU.intItemId = TR.intItemId and IU.ysnStockUnit = 1)
 												WHEN TR.intContractDetailId is NOT NULL 
-													THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
+													THEN	(select top 1 intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
 											END-- Need to add the Gallons UOM from Company Preference	   
 			,strBillOfLadding			= TR.strBillOfLadding
 			,intContractHeaderId		= CT.intContractHeaderId
@@ -138,7 +138,7 @@ END
 			,dblSurcharge				= TR.dblPurSurcharge
 			,ysnFreightInPrice			= TR.ysnFreightInPrice
 			,strActualCostId			= (
-											SELECT	strTransaction 
+											SELECT top 1	strTransaction 
 											FROM	tblTRTransportLoad TT JOIN tblTRTransportReceipt RR 
 														ON TT.intTransportLoadId = RR.intTransportLoadId
 													JOIN tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
@@ -193,13 +193,13 @@ END
 			,[intShipFromId]					= RE.intShipFromId
 			,[intCurrencyId]  					= RE.intCurrencyId
 			,[intChargeId]						= @intFreightItemId
-			,[ysnInventoryCost]					= CASE	WHEN (select strTransaction from tblTRTransportLoad TT
+			,[ysnInventoryCost]					= CASE	WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
 					                                                 	and HH.strDestination = 'Customer' 
 					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 1
-												    	WHEN (select strTransaction from tblTRTransportLoad TT
+												    	WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
@@ -210,21 +210,21 @@ END
 			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= RE.dblFreightRate
 			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
-			,[intOtherChargeEntityVendorId]		= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+			,[intOtherChargeEntityVendorId]		= CASE	WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
 															RE.intEntityVendorId
-														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+														WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
 															NULL
-														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+														WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
 															RE.intShipViaId
 												END
 			,[dblAmount]						= 0
-			,[strAllocateCostBy]				=  CASE	WHEN (select strTransaction from tblTRTransportLoad TT
+			,[strAllocateCostBy]				=  CASE	WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
 					                                                 	and HH.strDestination = 'Customer' 
 					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 'Unit'
-												    	WHEN (select strTransaction from tblTRTransportLoad TT
+												    	WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
@@ -234,11 +234,11 @@ END
 											    	END
 			,[intContractHeaderId]				= RE.intContractHeaderId
 			,[intContractDetailId]				= RE.intContractDetailId
-			,[ysnAccrue]						= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+			,[ysnAccrue]						= CASE	WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
 															1
-														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+														WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
 															0
-														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+														WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
 															1
 												END
     FROM	@ReceiptStagingTable RE 
@@ -254,13 +254,13 @@ END
 			,[intShipFromId]					= RE.intShipFromId
 			,[intCurrencyId]  					= RE.intCurrencyId
 			,[intChargeId]						= @intSurchargeItemId
-			,[ysnInventoryCost]					= CASE WHEN (select strTransaction from tblTRTransportLoad TT
+			,[ysnInventoryCost]					= CASE WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
 					                                                 	and HH.strDestination = 'Customer' 
 					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 1
-												    	WHEN (select strTransaction from tblTRTransportLoad TT
+												    	WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
@@ -270,21 +270,21 @@ END
 			,[strCostMethod]					= 'Percentage'
 			,[dblRate]							= RE.dblSurcharge
 			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intSurchargeItemId)
-			,[intOtherChargeEntityVendorId]		= CASE	WHEN (SELECT strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+			,[intOtherChargeEntityVendorId]		= CASE	WHEN (SELECT top 1 strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
 															RE.intEntityVendorId
-														WHEN (SELECT strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+														WHEN (SELECT top 1 strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
 															NULL
-														WHEN (SELECT strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+														WHEN (SELECT top 1 strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
 															RE.intShipViaId
 												END
 			,[dblAmount]						= 0
-			,[strAllocateCostBy]				= CASE	WHEN (select strTransaction from tblTRTransportLoad TT
+			,[strAllocateCostBy]				= CASE	WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
 					                                                 	and HH.strDestination = 'Customer' 
 					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 'Unit'
-												    	WHEN (select strTransaction from tblTRTransportLoad TT
+												    	WHEN (select top 1 strTransaction from tblTRTransportLoad TT
 					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
 					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
 					                                                 where RR.strOrigin = 'Terminal' 
@@ -294,11 +294,11 @@ END
 											    	END
 			,[intContractHeaderId]				= RE.intContractHeaderId
 			,[intContractDetailId]				= RE.intContractDetailId
-			,[ysnAccrue]						= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+			,[ysnAccrue]						= CASE	WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
 															1
-														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+														WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
 															0
-														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+														WHEN (select top 1 strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
 															1
 												END
     FROM	@ReceiptStagingTable RE 

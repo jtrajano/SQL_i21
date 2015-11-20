@@ -149,6 +149,8 @@ AS
 						,0
 					FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
 
+					DELETE FROM @tempServiceChargeTable WHERE intServiceChargeId = @intServiceChargeId
+
 					UPDATE tblARInvoice SET ysnCalculated = 1 WHERE intInvoiceId = @intInvoiceIdToUpdate
 			END
 		END
