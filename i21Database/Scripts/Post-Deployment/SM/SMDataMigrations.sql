@@ -139,89 +139,89 @@ SET @currentRow = @currentRow + 1
 END
 
 GO
-	-- INSERT DEFAULT LOCATION
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation)
-	BEGIN
-		INSERT INTO tblSMCompanyLocation([strLocationName], [strLocationNumber], [strLocationType], [strUseLocationAddress], [intAllowablePickDayRange], [intNoOfCopiesToPrintforPalletSlip], [intDemandNoMaxLength], [intDemandNoMinLength])
-		VALUES ('01', '', 'Office', 'No', 0, 0, 0, 0)
-	END
-GO
+--	-- INSERT DEFAULT LOCATION
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation)
+--	BEGIN
+--		INSERT INTO tblSMCompanyLocation([strLocationName], [strLocationNumber], [strLocationType], [strUseLocationAddress], [intAllowablePickDayRange], [intNoOfCopiesToPrintforPalletSlip], [intDemandNoMaxLength], [intDemandNoMinLength])
+--		VALUES ('01', '', 'Office', 'No', 0, 0, 0, 0)
+--	END
+--GO
 	-- FLAG IN COMPANY PREFERENCE MIGRATION
 	PRINT N'Updating strHelperUrlDomain in tblSMCompanyPreference'
 	UPDATE tblSMCompanyPreference SET strHelperUrlDomain = N'http://help.irelyserver.com'
 GO
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'User Roles per Company Location')
-	BEGIN
-		-- MIGRATE USER ROLE PER LOCATION AND PER USER
-		DECLARE @currentRow INT
-		DECLARE @totalRows INT
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'User Roles per Company Location')
+--	BEGIN
+--		-- MIGRATE USER ROLE PER LOCATION AND PER USER
+--		DECLARE @currentRow INT
+--		DECLARE @totalRows INT
 
-		SET @currentRow = 1
-		SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserSecurity]
+--		SET @currentRow = 1
+--		SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserSecurity]
 
-		WHILE (@currentRow <= @totalRows)
-		BEGIN
+--		WHILE (@currentRow <= @totalRows)
+--		BEGIN
 
-		Declare @userId INT
-		Declare @entityId INT
-		Declare @roleId INT
-		SELECT @userId = [intEntityUserSecurityId], @entityId = [intEntityUserSecurityId], @roleId = intUserRoleID FROM (  
-			SELECT ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID', *
-			FROM [dbo].[tblSMUserSecurity]
-		) a
-		WHERE ROWID = @currentRow
-		------ DEFAULT LOCATION ------
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId AND intCompanyLocationId IS NULL)
-		BEGIN
-			DECLARE @defaultLocation INT
-			SELECT TOP 1 @defaultLocation = intCompanyLocationId FROM tblSMCompanyLocation ORDER BY intCompanyLocationId
-			IF @defaultLocation IS NOT NULL
-			BEGIN
-				UPDATE tblSMUserSecurity SET intCompanyLocationId = @defaultLocation WHERE [intEntityUserSecurityId] = @userId
-			END
-		END
-		------ DEFAULT LOCATION ------
-			--------------------------------C O M P A N Y  L O C A T I O N--------------------------------
-			DECLARE @currentRowLocation INT
-			DECLARE @totalRowsLocation INT
+--		Declare @userId INT
+--		Declare @entityId INT
+--		Declare @roleId INT
+--		SELECT @userId = [intEntityUserSecurityId], @entityId = [intEntityUserSecurityId], @roleId = intUserRoleID FROM (  
+--			SELECT ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID', *
+--			FROM [dbo].[tblSMUserSecurity]
+--		) a
+--		WHERE ROWID = @currentRow
+--		------ DEFAULT LOCATION ------
+--		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId AND intCompanyLocationId IS NULL)
+--		BEGIN
+--			DECLARE @defaultLocation INT
+--			SELECT TOP 1 @defaultLocation = intCompanyLocationId FROM tblSMCompanyLocation ORDER BY intCompanyLocationId
+--			IF @defaultLocation IS NOT NULL
+--			BEGIN
+--				UPDATE tblSMUserSecurity SET intCompanyLocationId = @defaultLocation WHERE [intEntityUserSecurityId] = @userId
+--			END
+--		END
+--		------ DEFAULT LOCATION ------
+--			--------------------------------C O M P A N Y  L O C A T I O N--------------------------------
+--			DECLARE @currentRowLocation INT
+--			DECLARE @totalRowsLocation INT
 
-			SET @currentRowLocation = 1
-			SELECT @totalRowsLocation = Count(*) FROM [dbo].[tblSMCompanyLocation]
+--			SET @currentRowLocation = 1
+--			SELECT @totalRowsLocation = Count(*) FROM [dbo].[tblSMCompanyLocation]
 
-			WHILE (@currentRowLocation <= @totalRowsLocation)
-			BEGIN
+--			WHILE (@currentRowLocation <= @totalRowsLocation)
+--			BEGIN
 
-			Declare @companyLocationId INT
-			SELECT @companyLocationId = intCompanyLocationId FROM (  
-				SELECT ROW_NUMBER() OVER(ORDER BY intCompanyLocationId ASC) AS 'ROWID', *
-				FROM [dbo].[tblSMCompanyLocation]
-			) a
-			WHERE ROWID = @currentRowLocation
+--			Declare @companyLocationId INT
+--			SELECT @companyLocationId = intCompanyLocationId FROM (  
+--				SELECT ROW_NUMBER() OVER(ORDER BY intCompanyLocationId ASC) AS 'ROWID', *
+--				FROM [dbo].[tblSMCompanyLocation]
+--			) a
+--			WHERE ROWID = @currentRowLocation
 
-			PRINT N'INSERTING RECORD PER COMPANY LOCATION'
+--			PRINT N'INSERTING RECORD PER COMPANY LOCATION'
 
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE [intEntityUserSecurityId] = @userId AND intEntityId = @entityId AND intUserRoleId = @roleId AND intCompanyLocationId = @companyLocationId)
-			BEGIN
-				INSERT INTO tblSMUserSecurityCompanyLocationRolePermission ([intEntityUserSecurityId], [intEntityId], [intUserRoleId], [intCompanyLocationId])
-				VALUES (@userId, @entityId, @roleId, @companyLocationId)
-			END
+--			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE [intEntityUserSecurityId] = @userId AND intEntityId = @entityId AND intUserRoleId = @roleId AND intCompanyLocationId = @companyLocationId)
+--			BEGIN
+--				INSERT INTO tblSMUserSecurityCompanyLocationRolePermission ([intEntityUserSecurityId], [intEntityId], [intUserRoleId], [intCompanyLocationId])
+--				VALUES (@userId, @entityId, @roleId, @companyLocationId)
+--			END
 
-			SET @currentRowLocation = @currentRowLocation + 1
-			END
-			--------------------------------C O M P A N Y  L O C A T I O N--------------------------------
-		SET @currentRow = @currentRow + 1
-		END
+--			SET @currentRowLocation = @currentRowLocation + 1
+--			END
+--			--------------------------------C O M P A N Y  L O C A T I O N--------------------------------
+--		SET @currentRow = @currentRow + 1
+--		END
 		
-		PRINT N'ADD LOG TO tblMigrationLog'
-		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
-		VALUES('System Manager', 'User Roles per Company Location', 'Migration of User Roles per Company Location', GETDATE())
-	END
-GO
-	-- Update intCompanyLocationId in tblSMUserSecurityMenuFavorite with user default location.
-	UPDATE tblSMUserSecurityMenuFavorite SET intCompanyLocationId = UserSecurity.intCompanyLocationId
-	FROM tblSMUserSecurityMenuFavorite Favorite
-	JOIN tblSMUserSecurity UserSecurity ON Favorite.[intEntityUserSecurityId] = UserSecurity.[intEntityUserSecurityId]
-	WHERE Favorite.intCompanyLocationId IS NULL
+--		PRINT N'ADD LOG TO tblMigrationLog'
+--		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+--		VALUES('System Manager', 'User Roles per Company Location', 'Migration of User Roles per Company Location', GETDATE())
+--	END
+--GO
+--	-- Update intCompanyLocationId in tblSMUserSecurityMenuFavorite with user default location.
+--	UPDATE tblSMUserSecurityMenuFavorite SET intCompanyLocationId = UserSecurity.intCompanyLocationId
+--	FROM tblSMUserSecurityMenuFavorite Favorite
+--	JOIN tblSMUserSecurity UserSecurity ON Favorite.[intEntityUserSecurityId] = UserSecurity.[intEntityUserSecurityId]
+--	WHERE Favorite.intCompanyLocationId IS NULL
 GO
 	-- Import General Journal to tblSMRecurringTransaction
 	INSERT INTO tblSMRecurringTransaction (intTransactionId, strTransactionNumber, strTransactionType,  strReference, strFrequency, dtmLastProcess, dtmNextProcess, ysnDue, strDayOfMonth, dtmStartDate, dtmEndDate, ysnActive, intIteration, intUserId, ysnAvailable)

@@ -4,7 +4,7 @@ SELECT
 intUserSecurityMenuFavoriteId,
 Favorite.intMenuId,
 UserSecurity.intEntityUserSecurityId,
-NULL intCompanyLocationId,
+Favorite.intCompanyLocationId,
 Favorite.intSort,
 MasterMenu.strMenuName,
 MasterMenu.strModuleName,
