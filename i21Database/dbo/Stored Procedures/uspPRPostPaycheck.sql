@@ -167,50 +167,81 @@ BEGIN
 	WHERE A.dblTotal > 0
 	AND intPaycheckId = @intPaycheckId
 		
-	--Get Invalid Account Combinations
+	--Place Earning to Temporary Table to Validate Earning GL Distribution
+	SELECT * INTO #tmpEarningTemp FROM #tmpEarning WHERE intDepartmentId IS NOT NULL
+
+	DECLARE @intEarningTempEarningId INT
+	DECLARE @intEarningTempDepartmentId INT
+	DECLARE @intEarningTempAccountId INT
+	DECLARE @intEarningTempProfitCenter INT
 	DECLARE @strMsg NVARCHAR(MAX) = ''
 
-	SELECT 
-	TOP 1 
-	@strMsg = 'One or more accounts for ''' + (SELECT strEarning FROM tblPRTypeEarning WHERE intTypeEarningId = 1) + ''''
-	+ ' Earning GL Distribution does not have a corresponding account for Department ''' + strDepartment + '''.'
-	+ ' Make sure all accounts for this Earning GL Distribution and Department exists.'
-	FROM 
-	#tmpEarning X
-	WHERE NOT EXISTS (
-		SELECT intAccountId, intAccountSegmentId FROM tblGLAccountSegmentMapping 
-		WHERE intAccountId IN (
-			SELECT intAccountId FROM tblGLAccountSegmentMapping 
-			WHERE intAccountSegmentId = (
-				SELECT TOP 1 intSegmentPrimaryId = A.intAccountSegmentId 
-				FROM tblGLAccountSegmentMapping A INNER JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
-				WHERE intAccountStructureId = (
-					SELECT TOP 1 intAccountStructureId 
-					FROM tblGLAccountStructure WHERE strStructureName = 'Primary Account' AND strType = 'Primary')
-					AND intAccountId = X.intAccountId))
-		AND intAccountSegmentId = X.intProfitCenter)
+	--Validate Earning GL Distribution
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningTemp)
+	BEGIN
+		SELECT TOP 1 @intEarningTempEarningId = intTypeEarningId
+					,@intEarningTempDepartmentId = intDepartmentId
+					,@intEarningTempAccountId = intAccountId
+				    ,@intEarningTempProfitCenter = intProfitCenter
+					FROM #tmpEarningTemp
 
-	IF (LEN(@strMsg) > 0) 
-	BEGIN 
-		RAISERROR(@strMsg, 11, 1)
-		SET @isSuccessful = 0
-		GOTO Post_Exit
+		--Step 1: Get the Account Segment Mapping of the Account
+		SELECT A.intAccountId, A.intAccountSegmentId, C.strStructureName INTO #tmpSelectedAccountMap 
+		FROM tblGLAccountSegmentMapping A 
+			LEFT JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
+			LEFT JOIN tblGLAccountStructure C ON B.intAccountStructureId = C.intAccountStructureId
+			WHERE intAccountId = @intEarningTempAccountId
+
+		--Step 2: Replace the Profit Center Segment with what is specified in the Employee Location
+		UPDATE #tmpSelectedAccountMap SET intAccountSegmentId = @intEarningTempProfitCenter
+		WHERE strStructureName = 'Location'
+
+		--Step 3: Loop each Segment and Use Process of Elimination to find the correct account
+		DECLARE @intAccountSegmentId INT
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpSelectedAccountMap)
+		BEGIN
+			SELECT TOP 1 @intAccountSegmentId = intAccountSegmentId FROM #tmpSelectedAccountMap
+
+			IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLAccountSegmentMapping'))
+				SELECT * INTO #tmpGLAccountSegmentMapping FROM tblGLAccountSegmentMapping 
+				WHERE intAccountId IN (SELECT intAccountId FROM tblGLAccountSegmentMapping WHERE intAccountSegmentId = @intAccountSegmentId)
+			ELSE
+				DELETE FROM #tmpGLAccountSegmentMapping 
+				WHERE intAccountId NOT IN (SELECT intAccountId FROM #tmpGLAccountSegmentMapping WHERE intAccountSegmentId = @intAccountSegmentId)
+
+			SELECT * FROM #tmpGLAccountSegmentMapping
+			DELETE FROM #tmpSelectedAccountMap WHERE intAccountSegmentId = @intAccountSegmentId 
+		END
+
+		--Step 4: The remaining Account Id after the elimination is the Account Id to use, if no Id remains, return error
+		IF EXISTS(SELECT TOP 1 1 FROM #tmpGLAccountSegmentMapping)
+			--Update Earnings Account using the account with corresponding Department Location
+			UPDATE #tmpEarning SET intAccountId = (SELECT TOP 1 intAccountId FROM #tmpGLAccountSegmentMapping) WHERE intAccountId = @intEarningTempAccountId
+		ELSE
+			SELECT @strMsg = 'One or more accounts for ''' 
+				+ (SELECT TOP 1 strEarning FROM tblPRTypeEarning WHERE intTypeEarningId = @intEarningTempEarningId) + ''''
+				+ ' Earning GL Distribution does not have a corresponding account for Department ''' 
+				+ (SELECT TOP 1 strDepartment FROM tblPRDepartment WHERE intDepartmentId = @intEarningTempDepartmentId) + '''.'
+				+ ' Make sure all accounts for this Earning GL Distribution and Department exists.'
+
+		--Immediately end the process once an invalid account combination has been found
+		IF (LEN(@strMsg) > 0) 
+		BEGIN 
+			RAISERROR(@strMsg, 11, 1)
+			SET @isSuccessful = 0
+			GOTO Post_Exit
+		END
+
+		DELETE FROM #tmpEarningTemp 
+			WHERE intTypeEarningId = @intEarningTempEarningId
+			AND ISNULL(intDepartmentId, 0) = ISNULL(@intEarningTempDepartmentId, 0)
+			AND intAccountId = @intEarningTempAccountId
+			AND intProfitCenter = @intEarningTempProfitCenter
+
+		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpSelectedAccountMap')) DROP TABLE #tmpSelectedAccountMap
+		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLAccountSegmentMapping')) DROP TABLE #tmpGLAccountSegmentMapping
+		
 	END
-
-	--Update Earnings Account using the account with corresponding Department Location
-	UPDATE #tmpEarning 
-	SET intAccountId = ISNULL((
-		SELECT intAccountId FROM tblGLAccountSegmentMapping 
-		WHERE intAccountSegmentId = #tmpEarning.intProfitCenter  
-		AND intAccountId IN (
-			SELECT intAccountId FROM tblGLAccountSegmentMapping 
-			WHERE intAccountSegmentId = (
-				SELECT TOP 1 intSegmentPrimaryId = A.intAccountSegmentId 
-				FROM tblGLAccountSegmentMapping A INNER JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
-				WHERE intAccountStructureId = (
-					SELECT TOP 1 intAccountStructureId 
-					FROM tblGLAccountStructure WHERE strStructureName = 'Primary Account' AND strType = 'Primary')
-					AND intAccountId = #tmpEarning.intAccountId))), intAccountId)
 	 
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
