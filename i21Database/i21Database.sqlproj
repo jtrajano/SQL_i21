@@ -2962,6 +2962,7 @@
     <Build Include="dbo\Stored Procedures\uspPATGetCustomerPatronage.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetRefundPatronage.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetFiscalPatronage.sql" />
+    <Build Include="dbo\Tables\tblEntitySplitExceptionCategory.sql" />
     <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -3037,6 +3038,7 @@
     <None Include="Scripts\Post-Deployment\ST\3_FileFieldMapping_PromotionCombo.sql" />
     <None Include="Scripts\Post-Deployment\ST\4_FileFieldMapping_PricebookMixMatch.sql" />
     <None Include="Scripts\Post-Deployment\ST\5_FileFieldMapping_PricebookSendSapphire.sql" />
+    <None Include="Scripts\Post-Deployment\EM\017_MoveSplitCategoryToNewTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
