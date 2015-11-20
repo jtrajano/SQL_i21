@@ -2,8 +2,8 @@
 (
 		intEventMatrixDetailId [int] IDENTITY(1,1) NOT NULL,
 	intEventMatrixId [int] NOT NULL,
-	intPositionId [int] NOT NULL,
-	intWeightGradeId [int] NOT NULL,
+	intPositionId [int] NULL,
+	intWeightGradeId [int] NULL,
 	intEventId [int] NOT NULL,
 	intNoOfDays	 [int] NOT NULL,
 	intSort INT NOT NULL,
