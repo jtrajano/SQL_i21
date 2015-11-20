@@ -150,7 +150,8 @@ SELECT
 		WH.strState as strWarehouseState,
 		WH.strZipCode as strWarehouseZipCode,
 
-		WI.intWarehouseInstructionHeaderId
+		WI.intWarehouseInstructionHeaderId,
+		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
 FROM		tblLGShipment SH
 LEFT JOIN	tblEntity Vendor ON Vendor.intEntityId = SH.intVendorEntityId

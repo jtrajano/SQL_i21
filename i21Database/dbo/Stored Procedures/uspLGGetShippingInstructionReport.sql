@@ -207,7 +207,8 @@ SELECT
 	LoadUnit.strUnitMeasure as strLoadingUnit,
 	DisUnit.strUnitMeasure as strDischargeUnit,
 	SI.strLoadingPerUnit,
-	SI.strDischargePerUnit
+	SI.strDischargePerUnit,
+	dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
 FROM		tblLGShippingInstruction SI
 LEFT JOIN	tblEntity Vendor	ON Vendor.intEntityId = SI.intVendorEntityId

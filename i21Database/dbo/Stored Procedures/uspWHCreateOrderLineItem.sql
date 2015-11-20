@@ -259,12 +259,6 @@ BEGIN TRY
 						WHERE strLotAlias = @strLotAlias
 							AND ISNULL(@strLotAlias, '') <> ''
 						)
-					OR EXISTS (
-						SELECT 1
-						FROM iMake_Archive.dbo.ARC_OrderDetail
-						WHERE strLotAlias = @strLotAlias
-							AND ISNULL(@strLotAlias, '') <> ''
-						)
 					)
 			BEGIN
 				RAISERROR ('The Lot Alias exist. Please generate a new Lot Alias.', 16, 1)
