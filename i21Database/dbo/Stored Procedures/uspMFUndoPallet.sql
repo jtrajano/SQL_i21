@@ -128,6 +128,12 @@ BEGIN TRY
 		,[strTransactionForm]
 		,[strModuleName]
 		,[intConcurrencyId]
+		,[dblDebitForeign]	
+		,[dblDebitReport]	
+		,[dblCreditForeign]	
+		,[dblCreditReport]	
+		,[dblReportingRate]	
+		,[dblForeignRate]
 		)
 	EXEC dbo.uspICUnpostCosting @intTransactionId
 		,@strTransactionId
