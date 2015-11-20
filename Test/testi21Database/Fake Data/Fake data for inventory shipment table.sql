@@ -381,7 +381,7 @@ BEGIN
 				,intItemUOMId
 				,intWeightUOMId
 				,dblUnitPrice
-				,intTaxCodeId
+				--,intTaxCodeId
 				,intDockDoorId
 				,strNotes
 				,intSort
@@ -398,7 +398,7 @@ BEGIN
 				,intItemUOMId			= @WetGrains_PoundUOM
 				,intWeightUOMId			= NULL 
 				,dblUnitPrice			= 13.02
-				,intTaxCodeId			= NULL 
+				--,intTaxCodeId			= NULL 
 				,intDockDoorId			= NULL 
 				,strNotes				= NULL
 				,intSort				= 1

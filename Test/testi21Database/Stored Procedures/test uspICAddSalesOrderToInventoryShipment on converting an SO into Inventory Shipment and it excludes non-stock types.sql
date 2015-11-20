@@ -248,7 +248,7 @@ BEGIN
 				,dblQuantity
 				,intItemUOMId
 				,dblUnitPrice
-				,intTaxCodeId
+				--,intTaxCodeId
 				,intDockDoorId
 				,strNotes
 				,intSort
@@ -263,7 +263,7 @@ BEGIN
 				,dblQuantity			
 				,intItemUOMId			
 				,dblUnitPrice			
-				,intTaxCodeId			
+				--,intTaxCodeId			
 				,intDockDoorId			
 				,strNotes				
 				,intSort				
