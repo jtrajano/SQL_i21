@@ -40,7 +40,6 @@ DECLARE @dtmMembershipDate DATETIME,
 					   ,PC.strCategoryCode
 					   ,PC.strPurchaseSale
 					   ,PC.strUnitAmount
-					   ,PC.intUnitMeasureId
 				  INTO #tempTable
 				  FROM tblPATEstateCorporation EC
 			INNER JOIN tblPATRefundRate RR
