@@ -59,6 +59,7 @@ SELECT
 		SH.strOriginPort,
 		SH.strDestinationPort,
 		SH.strDestinationCity,
+		SH.dtmShipmentDate,
 		SH.dtmETAPOL,
 		SH.dtmETAPOD,
 		SH.dtmETSPOL,
