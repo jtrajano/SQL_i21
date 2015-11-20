@@ -9,7 +9,8 @@ BEGIN
 	-- Begin Transaction
 	-- ==================================================================
 
-SELECT DISTINCT RR.strRefundType,
+SELECT DISTINCT RR.intRefundTypeId,
+				RR.strRefundType,
 				RR.strRefundDescription,
 				RR.dblCashPayout,
 				RR.ysnQualified,
@@ -18,10 +19,7 @@ SELECT DISTINCT RR.strRefundType,
 				dblRefundAmount = (CASE WHEN AC.strStockStatus = @strStockStatus THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
 				dblNonRefundAmount = (CASE WHEN AC.strStockStatus <> @strStockStatus THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
 				dblCashRefund = ISNULL((SUM(RRD.dblRate) * (RR.dblCashPayout/100)),0),
-				dblEquityRefund = ISNULL((SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))), 0),
-				dblRefundRate = ISNULL(RRD.dblRate,0),
-				dblTotalVolume = ISNULL(SUM(dblVolume),0),
-				dblTotalRefund = ISNULL(SUM(RRD.dblRate),0)
+				dblEquityRefund = ISNULL((SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))), 0)
 		   FROM tblPATEstateCorporation EC
      INNER JOIN tblPATRefundRate RR
              ON RR.intRefundTypeId = EC.intRefundTypeId
@@ -41,6 +39,7 @@ SELECT DISTINCT RR.strRefundType,
 	   GROUP BY EC.intCorporateCustomerId, 
 				ENT.strName, 
 				AC.strStockStatus, 
+				RR.intRefundTypeId,
 				RR.strRefundType, 
 				RR.strRefundDescription, 
 				RR.dblCashPayout, 
@@ -59,7 +58,4 @@ SELECT DISTINCT RR.strRefundType,
 	-- End Transaction
 	-- ==================================================================
 END
-
 GO
-
-

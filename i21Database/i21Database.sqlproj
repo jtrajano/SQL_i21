@@ -2959,6 +2959,9 @@
     <Build Include="dbo\Stored Procedures\uspWHPickFlexibilityValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspWHMBLSplitSKUForOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateOrderLineItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetCustomerPatronage.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetRefundPatronage.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetFiscalPatronage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

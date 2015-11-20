@@ -19,9 +19,7 @@ SELECT DISTINCT intCustomerId = EC.intCorporateCustomerId,
 			   dblTotalPurchases = (CASE WHEN PC.strPurchaseSale = 'Purchase' THEN SUM(dblVolume) ELSE 0 END),
 			   dblTotalSales = (CASE WHEN PC.strPurchaseSale = 'Sale' THEN SUM(dblVolume) ELSE 0 END),
 			   dblRefundAmount = (CASE WHEN SUM(RRD.dblRate) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate) END),
-			   dblEquityRefund = (SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))),
-			   dblTotalVolume = SUM(dblVolume),
-			   dblTotalRefund = SUM(RRD.dblRate)
+			   dblEquityRefund = (SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100)))
 		   FROM tblPATEstateCorporation EC
      INNER JOIN tblPATRefundRate RR
              ON RR.intRefundTypeId = EC.intRefundTypeId
@@ -60,7 +58,4 @@ SELECT DISTINCT intCustomerId = EC.intCorporateCustomerId,
 	-- End Transaction
 	-- ==================================================================
 END
-
 GO
-
-

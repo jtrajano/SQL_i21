@@ -14,7 +14,8 @@ BEGIN
 	-- ==================================================================
 		
 	  
-SELECT DISTINCT dblVolume =  (CASE WHEN @strStockStatus = AC.strStockStatus THEN ISNULL(SUM(CV.dblVolume),0) ELSE 0 END),
+SELECT DISTINCT CV.intFiscalYear,
+				dblVolume =  (CASE WHEN @strStockStatus = AC.strStockStatus THEN ISNULL(SUM(CV.dblVolume),0) ELSE 0 END),
 				dblRefundAmount = (CASE WHEN @strStockStatus = AC.strStockStatus THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
 				dblNonRefundAmount = (CASE WHEN @strStockStatus <> AC.strStockStatus THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
 				dblCashRefund = (SUM(RRD.dblRate) * (RR.dblCashPayout/100)),
@@ -41,9 +42,7 @@ SELECT DISTINCT dblVolume =  (CASE WHEN @strStockStatus = AC.strStockStatus THEN
 							   FROM tblPATCustomerVolume CVV
 					     INNER JOIN tblARCustomer ARR
 								 ON ARR.intEntityCustomerId = CVV.intCustomerPatronId
-							  WHERE ARR.strStockStatus = 'Other'),
-				dblTotalVolume = SUM(dblVolume),
-				dblTotalRefund = SUM(RRD.dblRate)
+							  WHERE ARR.strStockStatus = 'Other')
 		   INTO #temptable		   
 		   FROM tblPATEstateCorporation EC
      INNER JOIN tblPATRefundRate RR
@@ -76,10 +75,12 @@ SELECT DISTINCT dblVolume =  (CASE WHEN @strStockStatus = AC.strStockStatus THEN
 				PC.intPatronageCategoryId, 
 				TC.strTaxCode, 
 				CV.dtmLastActivityDate,
-				PC.strPurchaseSale
+				PC.strPurchaseSale,
+				CV.intFiscalYear 
 
 
-	SELECT dblVolume = SUM(dblVolume), 
+	SELECT intFiscalYear,
+		   dblVolume = SUM(dblVolume), 
 		   dblRefundAmount = SUM(dblRefundAmount),
 		   dblNonRefundAmount = SUM(dblNonRefundAmount),
 		   dblCashRefund = SUM(dblCashRefund),
@@ -90,18 +91,13 @@ SELECT DISTINCT dblVolume =  (CASE WHEN @strStockStatus = AC.strStockStatus THEN
 		   intVoting,
 		   intNonVoting,
 		   intProducers,
-		   intOthers,
-		   dblTotalVolume = SUM(dblTotalVolume),
-		   dblTotalRefund = SUM(dblTotalRefund)
+		   intOthers
 	   FROM #tempTable
-   GROUP BY intVoting, intNonVoting, intProducers, intOthers
+   GROUP BY intFiscalYear, intVoting, intNonVoting, intProducers, intOthers
 
 	-- ==================================================================
 	-- End Transaction
 	-- ==================================================================
 
 END
-
 GO
-
-
