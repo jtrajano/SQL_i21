@@ -232,6 +232,14 @@ IF (@CreatedIvoices IS NOT NULL AND @ErrorMessage IS NULL)
 BEGIN
 	UPDATE tblCFTransaction 
 	SET intInvoiceId = @CreatedIvoices,
-		ysnPosted = 1 
+		ysnPosted = @Post 
 	WHERE intTransactionId = @TransactionId
+END
+
+IF (@UpdatedIvoices IS NOT NULL AND @ErrorMessage IS NULL)
+BEGIN
+	UPDATE tblCFTransaction 
+	SET ysnPosted = @Post 
+	WHERE intTransactionId = @TransactionId 
+	AND intInvoiceId = @UpdatedIvoices
 END
