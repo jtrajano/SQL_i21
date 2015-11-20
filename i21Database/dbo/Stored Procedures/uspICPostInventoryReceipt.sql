@@ -280,7 +280,7 @@ BEGIN
 							-- Check if Lot 
 							-- If it is a Lot:
 							--		Use Weight UOM if there is a weight. 
-							--		Otherwise, use the Weight UOM. 
+							--		Otherwise, use the Lot-Item UOM. 
 							-- If not lot, user the Item UOM. 
 							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
 										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
@@ -334,18 +334,15 @@ BEGIN
 							
 				,dblCost =	
 
-							-- If Item has a lot, then determine the cost either by weight or by Lot UOM. 
+									-- If Item has a lot, then determine the cost either by weight or by Lot UOM. 
 							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
+												-- If lot has weight, then convert cost from Cost UOM into Gross/Net UOM 
 										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-													dbo.fnCalculateCostPerWeight (
-														dbo.fnCalculateCostPerLot ( 
-															DetailItem.intUnitMeasureId
-															,DetailItem.intWeightUOMId
-															,DetailItemLot.intItemUnitMeasureId
-															,(DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId))
-														) * DetailItemLot.dblQuantity
-														,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-													) 
+													(
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+													)
+												-- If lot has no weight, then cost is in 'packs'. 
 												ELSE 
 													(
 														DetailItem.dblUnitCost 
@@ -354,9 +351,12 @@ BEGIN
 													* LotItemUOM.dblUnitQty
 													
 										END 
+									-- If non-lot, then cost is in Item UOM. 
 									ELSE 
 										DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 							END 		
+
+
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  

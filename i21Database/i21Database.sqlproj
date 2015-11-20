@@ -2962,6 +2962,7 @@
     <Build Include="dbo\Stored Procedures\uspPATGetCustomerPatronage.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetRefundPatronage.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetFiscalPatronage.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
