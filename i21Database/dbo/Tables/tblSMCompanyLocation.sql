@@ -22,6 +22,7 @@
 	[ysnPrintCashTendered] BIT NULL DEFAULT (1),
 	[strSalesTaxByLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL , 
 	[strDeliverPickupDefault] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intTaxGroupId] INT NULL,
 	[strTaxState] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strTaxAuthorityId1] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strTaxAuthorityId2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -391,6 +392,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMCompanyLocation',
     @level2type = N'COLUMN',
     @level2name = N'strDeliverPickupDefault'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax State',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intTaxGroupId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Tax State',
