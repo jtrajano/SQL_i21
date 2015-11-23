@@ -2393,6 +2393,7 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
