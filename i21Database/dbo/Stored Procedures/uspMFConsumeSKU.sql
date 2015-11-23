@@ -2,8 +2,8 @@
 AS
 BEGIN
 	DECLARE @intOrderHeaderId INT
-		,@strBlendProductionStagingLocation NVARCHAR(50)
-		,@intStagingLocationId INT
+		--,@strBlendProductionStagingLocation NVARCHAR(50)
+		--,@intStagingLocationId INT
 		,@dblRequiredWeight NUMERIC(18, 6)
 		,@intSKUId INT
 		,@intRecordId INT
@@ -29,22 +29,27 @@ BEGIN
 		,@intLotId INT
 		,@dblQuantity NUMERIC(18, 6)
 		,@strSKUNo NVARCHAR(50)
+		,@intBlendProductionStagingUnitId int
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
-	FROM dbo.tblMFCompanyPreference
+	SELECT @intBlendProductionStagingUnitId=intBlendProductionStagingUnitId
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId=@intLocationId
+
+	--SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
+	--FROM dbo.tblMFCompanyPreference
 
 	SELECT @strUserName = strUserName
 	FROM dbo.tblSMUserSecurity
 	WHERE intEntityUserSecurityId = @intUserId
 
-	SELECT @intStagingLocationId = intStorageLocationId
-	FROM dbo.tblICStorageLocation
-	WHERE strName = @strBlendProductionStagingLocation
-		AND intLocationId = @intLocationId
+	--SELECT @intStagingLocationId = intStorageLocationId
+	--FROM dbo.tblICStorageLocation
+	--WHERE strName = @strBlendProductionStagingLocation
+	--	AND intLocationId = @intLocationId
 
 	DECLARE @tblICLot TABLE (
 		intLotRecordId INT IDENTITY(1, 1)
@@ -129,7 +134,7 @@ BEGIN
 		JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
 		JOIN dbo.tblICItemUOM I ON I.intItemUOMId = L.intItemUOMId
 		LEFT JOIN dbo.tblICItemUOM W ON W.intItemUOMId = L.intWeightUOMId
-		WHERE C.intStorageLocationId = @intStagingLocationId
+		WHERE C.intStorageLocationId = @intBlendProductionStagingUnitId
 			AND S.dblQty > 0
 			AND S.intLotId = @intLotId
 			AND S.intSKUStatusId in (1,2)

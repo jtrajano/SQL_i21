@@ -1,24 +1,33 @@
 ﻿CREATE PROCEDURE [dbo].uspMFGetStagedContainer (@intLocationId INT)
 AS
 BEGIN
-	DECLARE @strSanitizationStagingLocation NVARCHAR(50)
-		,@strBlendProductionStagingLocation NVARCHAR(50)
-		,@intStagingLocationId INT
-		,@intBlendProductionStagingLocationId INT
+	DECLARE 
+		--@strSanitizationStagingLocation NVARCHAR(50)
+		--,@strBlendProductionStagingLocation NVARCHAR(50)
+		--,@intStagingLocationId INT
+		--,@intBlendProductionStagingLocationId INT
+		--,
+		@intSanitizationStagingUnitId int
+		,@intDefaultBlendProductionLocationId int
 
-	SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
-		,@strBlendProductionStagingLocation = strBlendProductionStagingLocation
-	FROM dbo.tblMFCompanyPreference
+	--SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
+	--	,@strBlendProductionStagingLocation = strBlendProductionStagingLocation
+	--FROM dbo.tblMFCompanyPreference
 
-	SELECT @intStagingLocationId = intStorageLocationId
-	FROM tblICStorageLocation
-	WHERE intLocationId = @intLocationId
-		AND strName = @strSanitizationStagingLocation
+	Select @intSanitizationStagingUnitId=intSanitizationStagingUnitId,
+		@intDefaultBlendProductionLocationId=intDefaultBlendProductionLocationId
+	From tblSMCompanyLocation
+	Where intCompanyLocationId=@intLocationId
 
-	SELECT @intBlendProductionStagingLocationId = intStorageLocationId
-	FROM tblICStorageLocation
-	WHERE intLocationId = @intLocationId
-		AND strName = @strBlendProductionStagingLocation
+	--SELECT @intStagingLocationId = intStorageLocationId
+	--FROM tblICStorageLocation
+	--WHERE intLocationId = @intLocationId
+	--	AND strName = @strSanitizationStagingLocation
+
+	--SELECT @intBlendProductionStagingLocationId = intStorageLocationId
+	--FROM tblICStorageLocation
+	--WHERE intLocationId = @intLocationId
+	--	AND strName = @strBlendProductionStagingLocation
 
 	SELECT L.intLotId
 		,L.strLotNumber
@@ -55,8 +64,8 @@ BEGIN
 	JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
 	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = C.intStorageLocationId
 		AND SL.intStorageLocationId IN (
-			@intStagingLocationId
-			,@intBlendProductionStagingLocationId
+			@intSanitizationStagingUnitId
+			,@intDefaultBlendProductionLocationId
 			)
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = S.intLotId

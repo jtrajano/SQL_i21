@@ -27,22 +27,27 @@ WHERE w.intWorkOrderId = @intWorkOrderId
 	AND w.intStatusId <> 13
 GROUP BY cl.intLotId
 
-DECLARE @intStorageLocationId INT
-	,@strBlendProductionStagingLocation NVARCHAR(50)
+--DECLARE @intStorageLocationId INT
+--	,@strBlendProductionStagingLocation NVARCHAR(50)
 
-SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
-FROM dbo.tblMFCompanyPreference
+--SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
+--FROM dbo.tblMFCompanyPreference
 
-SELECT @intStorageLocationId = intStorageLocationId
-FROM dbo.tblICStorageLocation
-WHERE strName = @strBlendProductionStagingLocation
-	AND intLocationId = @intLocationId
+--SELECT @intStorageLocationId = intStorageLocationId
+--FROM dbo.tblICStorageLocation
+--WHERE strName = @strBlendProductionStagingLocation
+--	AND intLocationId = @intLocationId
 
 DECLARE @tblMFStagedLot TABLE (
 	intLotId INT
 	,dblRequiredQty NUMERIC(18, 6)
 	,dblStagedQty NUMERIC(18, 6)
 	)
+Declare @intBlendProductionStagingUnitId int
+
+	SELECT @intBlendProductionStagingUnitId=intBlendProductionStagingUnitId
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId=@intLocationId
 
 INSERT INTO @tblMFStagedLot
 SELECT WC.intLotId
@@ -71,7 +76,7 @@ SELECT WC.intLotId
 				END), 0) AS dblStagedQty
 FROM dbo.tblMFWorkOrderConsumedLot WC
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WC.intItemIssuedUOMId
-LEFT JOIN dbo.tblWHContainer C ON C.intStorageLocationId = @intStorageLocationId
+LEFT JOIN dbo.tblWHContainer C ON C.intStorageLocationId = @intBlendProductionStagingUnitId
 LEFT JOIN dbo.tblWHSKU S ON S.intContainerId = C.intContainerId
 WHERE WC.intWorkOrderId = @intWorkOrderId
 GROUP BY WC.intLotId
@@ -131,7 +136,7 @@ SELECT wcl.intWorkOrderConsumedLotId
 								END AS dblQty
 						FROM dbo.tblWHSKU S
 						JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
-							AND C.intStorageLocationId = @intStorageLocationId
+							AND C.intStorageLocationId = @intBlendProductionStagingUnitId
 						JOIN dbo.tblWHOrderManifest RM ON RM.intSKUId = S.intSKUId
 						WHERE S.intLotId = wcl.intLotId
 							AND RM.intOrderHeaderId = W.intOrderHeaderId

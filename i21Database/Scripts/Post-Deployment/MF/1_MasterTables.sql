@@ -1345,14 +1345,10 @@ GO
 UPDATE tblMFCompanyPreference
 SET ysnSanitizationInboundPutaway = 0
 WHERE ysnSanitizationInboundPutaway IS NULL
-GO
-UPDATE tblMFCompanyPreference
-SET dblSanitizationOrderOutputQtyTolerancePercentage = 2
-WHERE dblSanitizationOrderOutputQtyTolerancePercentage IS NULL
-GO
-UPDATE tblMFCompanyPreference
-SET strBlendProductionStagingLocation = 'BLENDPRESTG'
-Where strBlendProductionStagingLocation IS NULL
+--GO
+--UPDATE tblMFCompanyPreference
+--SET dblSanitizationOrderOutputQtyTolerancePercentage = 2
+--WHERE dblSanitizationOrderOutputQtyTolerancePercentage IS NULL
 GO
 IF NOT EXISTS(SELECT * FROM tblMFReadingPoint WHERE intReadingPointId = 1)
 BEGIN

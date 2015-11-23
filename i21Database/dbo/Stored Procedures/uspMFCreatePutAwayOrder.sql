@@ -8,10 +8,10 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intUserId INT
 		,@intLocationId INT
-		,@intStorageLocationId INT
+		--,@intStorageLocationId INT
 		,@dtmCurrentDate DATETIME
 		,@intOwnerId INT
-		,@strBlendProductionStagingLocation NVARCHAR(50)
+		--,@strBlendProductionStagingLocation NVARCHAR(50)
 		,@intOrderTermsId INT
 		,@strUserName NVARCHAR(50)
 		,@strBOLNo NVARCHAR(50)
@@ -38,13 +38,19 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/Containers/Container', 2) WITH (intContainerId INT) x
 			)
 
-	SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
-	FROM dbo.tblMFCompanyPreference
+	--SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
+	--FROM dbo.tblMFCompanyPreference
 
-	SELECT @intStorageLocationId = intStorageLocationId
-	FROM dbo.tblICStorageLocation
-	WHERE strName = @strBlendProductionStagingLocation
-		AND intLocationId = @intLocationId
+	--SELECT @intStorageLocationId = intStorageLocationId
+	--FROM dbo.tblICStorageLocation
+	--WHERE strName = @strBlendProductionStagingLocation
+	--	AND intLocationId = @intLocationId
+
+	DECLARE @intBlendProductionStagingUnitId INT
+
+	SELECT @intBlendProductionStagingUnitId=intBlendProductionStagingUnitId
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId=@intLocationId
 
 	SELECT @intEntityId = E.intEntityId
 	FROM dbo.tblEntity E
@@ -98,7 +104,7 @@ BEGIN TRY
 
 	SELECT @strXML += '<intOwnerAddressId>' + LTRIM(@intOwnerId) + '</intOwnerAddressId>'
 
-	SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intStorageLocationId) + '</intStagingLocationId>'
+	SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intBlendProductionStagingUnitId) + '</intStagingLocationId>'
 
 	SELECT @strXML += '<intFreightTermId>' + LTRIM(@intOrderTermsId) + '</intFreightTermId>'
 

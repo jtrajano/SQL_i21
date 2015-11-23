@@ -250,6 +250,7 @@ BEGIN TRY
 		,@intEntityId INT
 		,@intOrderHeaderId INT
 		,@strItemNo nvarchar(50)
+		,@intSanitizationStagingUnitId int
 
 	SELECT @intOwnerId = IO.intOwnerId
 	FROM dbo.tblICItemOwner IO
@@ -258,13 +259,17 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intItemId INT) x
 			)
 
-	SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
-	FROM dbo.tblMFCompanyPreference
+	--SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
+	--FROM dbo.tblMFCompanyPreference
 
-	SELECT @intStorageLocationId = intStorageLocationId
-	FROM dbo.tblICStorageLocation
-	WHERE strName = @strSanitizationStagingLocation
-		AND intLocationId = @intLocationId
+	--SELECT @intStorageLocationId = intStorageLocationId
+	--FROM dbo.tblICStorageLocation
+	--WHERE strName = @strSanitizationStagingLocation
+	--	AND intLocationId = @intLocationId
+
+	SELECT @intSanitizationStagingUnitId=intSanitizationStagingUnitId
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId=@intLocationId
 
 	SELECT @intEntityId = E.intEntityId
 	FROM dbo.tblEntity E
@@ -314,7 +319,7 @@ BEGIN TRY
 
 	SELECT @strXML += '<intOwnerAddressId>' + LTRIM(@intOwnerId) + '</intOwnerAddressId>'
 
-	SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intStorageLocationId) + '</intStagingLocationId>'
+	SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intSanitizationStagingUnitId) + '</intStagingLocationId>'
 
 	SELECT @strXML += '<intFreightTermId>' + LTRIM(@intOrderTermsId) + '</intFreightTermId>'
 

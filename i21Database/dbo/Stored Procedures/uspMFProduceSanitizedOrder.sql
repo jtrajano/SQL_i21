@@ -283,13 +283,13 @@ BEGIN TRY
 		,@intUOMId INT
 		,@dblWeightperUnit NUMERIC(18, 6)
 		,@strSKUNo NVARCHAR(50)
+		,@intSanitizationStagingUnitId int
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
-		,@ysnSanitizationInboundPutaway = ysnSanitizationInboundPutaway
+	SELECT @ysnSanitizationInboundPutaway = ysnSanitizationInboundPutaway
 	FROM dbo.tblMFCompanyPreference
 
 	SELECT @strUserName = strUserName
@@ -298,10 +298,14 @@ BEGIN TRY
 
 	IF @intOrderHeaderId > 0
 	BEGIN
-		SELECT @intStagingLocationId = intStorageLocationId
-		FROM dbo.tblICStorageLocation
-		WHERE strName = @strSanitizationStagingLocation
-			AND intLocationId = @intLocationId
+		--SELECT @intStagingLocationId = intStorageLocationId
+		--FROM dbo.tblICStorageLocation
+		--WHERE strName = @strSanitizationStagingLocation
+		--	AND intLocationId = @intLocationId
+
+		SELECT @intSanitizationStagingUnitId=intSanitizationStagingUnitId
+		FROM tblSMCompanyLocation
+		WHERE intCompanyLocationId=@intLocationId
 
 		DECLARE @tblWHSKU TABLE (
 			intRecordId INT IDENTITY(1, 1)

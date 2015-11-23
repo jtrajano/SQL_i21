@@ -24,6 +24,7 @@ BEGIN TRY
 		,@intUnitMeasureId INT
 		,@strUnitMeasure NVARCHAR(50)
 		,@intTransactionCount INT
+		,@intLocationId int
 		
 	DECLARE @tblMFWorkOrderConsumedLot TABLE (
 		intRecordId INT identity(1, 1)
@@ -58,8 +59,15 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @dblOutputQtyTolerancePercentage = dblSanitizationOrderOutputQtyTolerancePercentage
-	FROM dbo.tblMFCompanyPreference
+	SELECT @intLocationId=intLocationId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	--SELECT @dblOutputQtyTolerancePercentage = dblSanitizationOrderOutputQtyTolerancePercentage
+	--FROM dbo.tblMFCompanyPreference
+	SELECT dblOutputQtyTolerancePercentage=dblSanitizationOrderOutputQtyTolerancePercentage
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId=@intLocationId
 
 	INSERT INTO @tblMFWorkOrderConsumedLot (
 		intLotId

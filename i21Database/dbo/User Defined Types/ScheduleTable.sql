@@ -11,9 +11,9 @@
 	,dtmExpectedDate DATETIME
 	,intStatusId INT
 	,intExecutionOrder INT
-	,strComments NVARCHAR(MAX)
-	,strNote NVARCHAR(MAX)
-	,strAdditionalComments NVARCHAR(MAX)
+	,strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strNote NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strAdditionalComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,intNoOfSelectedMachine INT
 	,dtmEarliestStartDate DATETIME
 	,intPackTypeId INT
@@ -30,7 +30,9 @@
 	,dtmChangeoverEndDate DATETIME
 	,ysnFrozen BIT
 	,intConcurrencyId INT
-	,strWIPItemNo nvarchar(50)
-	,strPackName nvarchar(50)
+	,strWIPItemNo nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strPackName nvarchar(50) COLLATE Latin1_General_CI_AS
 	,ysnPicked bit
+	,intLocationId int
+	,intDemandRatio int
 )

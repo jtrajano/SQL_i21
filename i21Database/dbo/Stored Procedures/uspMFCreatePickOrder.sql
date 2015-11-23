@@ -8,7 +8,7 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intUserId INT
 		,@intLocationId INT
-		,@intStorageLocationId INT
+		--,@intStorageLocationId INT
 		,@dtmCurrentDate DATETIME
 		,@intOwnerId INT
 		,@strBlendProductionStagingLocation NVARCHAR(50)
@@ -17,6 +17,7 @@ BEGIN TRY
 		,@strBOLNo NVARCHAR(50)
 		,@intEntityId INT
 		,@strItemNo NVARCHAR(50)
+		,@intBlendProductionStagingUnitId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -38,13 +39,17 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (intWorkOrderId INT) x
 			)
 
-	SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
-	FROM dbo.tblMFCompanyPreference
+	--SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
+	--FROM dbo.tblMFCompanyPreference
 
-	SELECT @intStorageLocationId = intStorageLocationId
-	FROM dbo.tblICStorageLocation
-	WHERE strName = @strBlendProductionStagingLocation
-		AND intLocationId = @intLocationId
+	--SELECT @intStorageLocationId = intStorageLocationId
+	--FROM dbo.tblICStorageLocation
+	--WHERE strName = @strBlendProductionStagingLocation
+	--	AND intLocationId = @intLocationId
+
+	SELECT @intBlendProductionStagingUnitId=intBlendProductionStagingUnitId
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId=@intLocationId
 
 	SELECT @intEntityId = E.intEntityId
 	FROM dbo.tblEntity E
@@ -97,7 +102,7 @@ BEGIN TRY
 
 	SELECT @strXML += '<intOwnerAddressId>' + LTRIM(@intOwnerId) + '</intOwnerAddressId>'
 
-	SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intStorageLocationId) + '</intStagingLocationId>'
+	SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intBlendProductionStagingUnitId) + '</intStagingLocationId>'
 
 	SELECT @strXML += '<intFreightTermId>' + LTRIM(@intOrderTermsId) + '</intFreightTermId>'
 
