@@ -62,7 +62,6 @@ RETURN (
 				,intErrorCode = 51189
 		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate) GLEntries
 		WHERE	dbo.isOpenAccountingDateByModule(dtmDate,strModuleName) = 0
-				AND dbo.isOpenAccountingDate(dtmDate) = 1
 
 	) AS Query		
 )
