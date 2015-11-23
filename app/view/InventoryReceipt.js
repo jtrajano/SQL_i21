@@ -1212,13 +1212,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 summaryType: 'sum',
+                                                                                dataIndex: 'strTax',
                                                                                 itemId: 'colTax',
                                                                                 width: 85,
-                                                                                dataIndex: 'strTax',
-                                                                                text: 'Tax',
-                                                                                editor: {
-                                                                                    xtype: 'numberfield'
-                                                                                }
+                                                                                text: 'Tax'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',

@@ -1866,10 +1866,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     context.record.set('dblWeightUOMConvFactor', 0);
                     context.record.set('dblItemUOMConvFactor', 0);
 
-                    var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots().data.items;
-                    Ext.Array.each(tblICInventoryReceiptItemLots, function (lot) {
-                        lot.set('strWeightUOM', '');
-                    });
+                    if (vw.data.currentReceiptItem) {
+                        var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots().data.items;
+                        Ext.Array.each(tblICInventoryReceiptItemLots, function (lot) {
+                            lot.set('strWeightUOM', '');
+                        });
+                    }
+
                     win.controller.calculateGrossWeight(context.record);
                     {
                         vw.data.currentReceiptItem = context.record;

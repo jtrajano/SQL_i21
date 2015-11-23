@@ -2304,19 +2304,7 @@
                                                                         "width": 85
                                                                     },
                                                                     "name": "MyNumberColumn56",
-                                                                    "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.field.Number",
-                                                                            "reference": {
-                                                                                "name": "editor",
-                                                                                "type": "object"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "name": "MyNumberField68",
-                                                                            "designerId": "750e6d39-8d57-48da-aa8f-c8d1d0e152a6"
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e"
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",

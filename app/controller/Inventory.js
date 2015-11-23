@@ -102,7 +102,7 @@ Ext.define('Inventory.controller.Inventory', {
     },
 
     roundDecimalFormat: function(number, precision) {
-        return parseFloat(Math.round(number * 100) / 100).toFixed(precision);
+        return parseFloat(parseFloat(Math.round(number * 100) / 100).toFixed(precision));
     },
 
     getTodayDate: function() {
