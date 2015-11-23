@@ -2977,6 +2977,8 @@
     <Build Include="dbo\Stored Procedures\uspWHGetLotDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspWHReportInboundOrderMaterialLabel.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageOffSiteDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCalculateDemandRatio.sql" />
+    <Build Include="dbo\Tables\tblMFItemDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
