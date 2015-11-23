@@ -2971,6 +2971,11 @@
     <Build Include="dbo\Tables\tblSTMarkUpDownDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetLotDetailByLotNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetLotItemDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotExists.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetLotDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHReportInboundOrderMaterialLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
