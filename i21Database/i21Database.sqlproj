@@ -2965,6 +2965,7 @@
     <Build Include="dbo\Tables\tblEntitySplitExceptionCategory.sql" />
     <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspARCalculateCommission.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDSortColumnDesign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
