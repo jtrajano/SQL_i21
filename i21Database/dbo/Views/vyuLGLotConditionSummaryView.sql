@@ -3,12 +3,16 @@
 SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intShipmentId)) as intKeyColumn, *, 
 	(dblNetShippedWt - dblNetReceivedWt) as dblWeightLoss,
 	CASE WHEN strCondition = 'Sound/Full' THEN
-			((dblNetShippedWt - dblNetReceivedWt) * dblFranchise)
+			(dblNetShippedWt * dblFranchisePercent)
 		ELSE 
 			0.0
 		END as dblFranchiseWt,
 	CASE WHEN strCondition = 'Sound/Full' THEN
-			((dblNetShippedWt - dblNetReceivedWt) - ((dblNetShippedWt - dblNetReceivedWt) * dblFranchise))
+			CASE WHEN ((dblNetShippedWt - dblNetReceivedWt) - (dblNetShippedWt * dblFranchisePercent)) > 0.0 THEN
+					((dblNetShippedWt - dblNetReceivedWt) - (dblNetShippedWt * dblFranchisePercent))
+				ELSE
+					0.0
+				END
 		ELSE 
 			CASE WHEN strCondition = 'Damaged' THEN
 				 (dblNetShippedWt - dblNetReceivedWt)
@@ -20,7 +24,7 @@ FROM (
 	SELECT
 	Shipment.intShipmentId,
 	Shipment.intTrackingNumber,
-	Shipment.dblFranchise,
+	dblFranchisePercent = Shipment.dblFranchise / 100,
 	ReceiptItem.intItemId,
 	CASE WHEN ReceiptLot.strCondition = 'Sound/Full' THEN
 			1
