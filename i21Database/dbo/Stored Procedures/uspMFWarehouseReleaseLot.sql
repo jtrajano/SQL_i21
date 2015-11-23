@@ -243,6 +243,15 @@ BEGIN TRY
 		WHERE ysnDefaultWHStagingUnit = 1
 			AND intLocationId = @intLocationId
 
+		IF @intStagingLocationId IS NULL
+		BEGIN
+			RAISERROR (
+				90007
+				,11
+				,1
+				)
+		END
+
 		SELECT @strUserName = strUserName
 		FROM dbo.tblSMUserSecurity
 		WHERE intEntityUserSecurityId = @intUserId

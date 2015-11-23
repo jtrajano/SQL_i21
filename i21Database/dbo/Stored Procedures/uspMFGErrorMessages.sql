@@ -41,3 +41,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90006) EXEC sp_dropmessa
 SET @strmessage = 'The UOM used in the work order %s is not added for the item %s in item maintenance.'
 EXEC sp_addmessage 90006,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90007) EXEC sp_dropmessage 90007, 'us_english'	
+SET @strmessage = 'Default warehouse staging unit is not configured.'
+EXEC sp_addmessage 90007,11,@strmessage,'us_english','False'
+
