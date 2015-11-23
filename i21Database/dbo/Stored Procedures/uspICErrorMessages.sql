@@ -354,3 +354,7 @@ EXEC sp_addmessage 80068,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80069) EXEC sp_dropmessage 80069, 'us_english'	
 SET @strmessage = '% has only % available quantity. Cannot ship more than the available qty.'
 EXEC sp_addmessage 80069,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80070) EXEC sp_dropmessage 80070, 'us_english'	
+SET @strmessage = 'Delete is not allowed. %s is posted.'
+EXEC sp_addmessage 80070,11,@strmessage,'us_english','False'
