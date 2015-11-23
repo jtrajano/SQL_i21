@@ -207,7 +207,7 @@ intEmployeeEarningId = CASE WHEN (intEmployeeEarningLinkId IS NULL)
 ,intSort
 FROM tblPREmployeeEarning E
 WHERE [intEntityEmployeeId] = @intEmployee
-	AND E.ysnDefault = 1
+	AND (E.ysnDefault = 1 OR E.dblHoursToProcess > 0)
 	AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END) E
 LEFT JOIN 
 (SELECT intEmployeeEarningId, intEmployeeDepartmentId 
