@@ -2968,6 +2968,8 @@
     <Build Include="dbo\Stored Procedures\uspFRDSortColumnDesign.sql" />
     <Build Include="dbo\Tables\tblSTMarkUpDown.sql" />
     <Build Include="dbo\Tables\tblSTMarkUpDownDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteInventoryTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
