@@ -142,6 +142,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        itemId: 'btnWarehouseInstruction',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Warehouse Instructions'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
                                         itemId: 'btnClose',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Close'

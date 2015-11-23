@@ -1594,6 +1594,54 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onWarehouseInstructionClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var vm = win.viewModel;
+        var current = vm.data.current;
+        var context = win.context;
+
+        if (current.phantom === true)
+            return;
+
+        if (context.data.hasChanges()) {
+            iRely.Functions.showErrorDialog('Please save changes before opening Warehouse Instructions screen');
+            return;
+        }
+
+        var commodity = Ext.Array.findBy(current.tblICInventoryShipmentItems().data.items, function (row) {
+            if (!iRely.Functions.isEmpty(row.get('intCommodityId'))) {
+                return true;
+            }
+        });
+
+        if (!commodity) {
+            iRely.Functions.showErrorDialog('Atleast one(1) line item must be a Commodity Item.');
+            return;
+        }
+
+        var subLocation = Ext.Array.findBy(current.tblICInventoryShipmentItems().data.items, function (row) {
+            if (!iRely.Functions.isEmpty(row.get('intSubLocationId'))) {
+                return true;
+            }
+        });
+
+        if (!commodity) {
+            iRely.Functions.showErrorDialog('Atleast one(1) line item must have a Sub Location specified.');
+            return;
+        }
+
+        iRely.Functions.openScreen('Logistics.view.WarehouseInstructions',
+            {
+                action: 'new',
+                intShipmentId: current.data.intInventoryShipmentId,
+                strReferenceNumber: current.data.strReferenceNumber,
+                intSourceType: 2,
+                intCommodityId: commodity.get('intComodityId'),
+                intCompanyLocationId: current.data.intShipFromLocationId,
+                intCompanyLocationSubLocationId: subLocation.get('intSubLocationId')
+            });
+    },
+
     onPickLotsClick: function(button, e, eOpts) {
         var grid = button.up('grid');
         var shipmentWin = button.up('window');
@@ -1739,6 +1787,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnPickLots": {
                 click: this.onPickLotsClick
+            },
+            "#btnWarehouseInstruction": {
+                click: this.onWarehouseInstructionClick
             }
         })
     }
