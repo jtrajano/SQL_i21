@@ -585,6 +585,10 @@ Ext.define('Inventory.view.CategoryViewController', {
             case "Kit":
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 break;
+
+            default:
+                iRely.Functions.showErrorDialog('Please select an Inventory Type.');
+                break;
         }
 
     },
