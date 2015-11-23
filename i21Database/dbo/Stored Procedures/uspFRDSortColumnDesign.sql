@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspFRDSortColumnDesign]
-	@ColumnId				AS INT,
+	@ColumnId			AS INT,
 	@ColumnDetailId		AS NVARCHAR(MAX)	=	'',
 	@ReOrder			AS BIT				=	0
 AS
@@ -13,7 +13,7 @@ BEGIN
 
 DECLARE @SplitOn			NVARCHAR(10) = ':'
 Declare @SORT				INT			 = 1
-DECLARE @intColumnDetailId		INT			 = 0
+DECLARE @intColumnDetailId	INT			 = 0
 DECLARE @intRefNoCurrent	INT			 = 0
 
 CREATE TABLE #TempColumnDesign (
