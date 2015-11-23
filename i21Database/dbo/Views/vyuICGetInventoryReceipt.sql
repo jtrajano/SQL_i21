@@ -60,5 +60,5 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Receipt.intFreightTermId
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Receipt.intShipViaId
 	LEFT JOIN tblSMUserSecurity Receiver ON Receiver.intEntityUserSecurityId = Receipt.intReceiverId
-	LEFT JOIN vyuEMEntity Entity ON Entity.intEntityId = Receipt.intEntityId
+	LEFT JOIN vyuEMEntity Entity ON Entity.intEntityId = Receipt.intEntityId AND Entity.strType = 'User'
 	LEFT JOIN tblEntityLocation ShipFrom ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
