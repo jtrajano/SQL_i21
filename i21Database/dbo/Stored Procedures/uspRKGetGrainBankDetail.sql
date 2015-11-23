@@ -31,8 +31,9 @@ IF ISNULL(@intLocationId, 0) <> 0
 		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId  
-		FROM vyuGRGetStorageDetail  
-		WHERE ysnCustomerStorage = 1 AND strOwnedPhysicalStock = 'Company' AND intCommodityId = @intCommodityId AND intCompanyLocationId = @intLocationId  
+		FROM vyuGRGetStorageOffSiteDetail  
+		WHERE ysnReceiptedStorage = 1 AND ysnExternal = 1 AND strOwnedPhysicalStock = 'Customer' AND intCommodityId = @intCommodityId 
+		AND intCompanyLocationId = @intLocationId  
 	END  
 ELSE  
 	BEGIN  
@@ -41,7 +42,7 @@ ELSE
 		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal ,intCommodityId 
-		FROM vyuGRGetStorageDetail  WHERE ysnCustomerStorage = 1  AND strOwnedPhysicalStock = 'Company'  AND intCommodityId = @intCommodityId  
+		FROM vyuGRGetStorageOffSiteDetail  WHERE ysnReceiptedStorage = 1 AND ysnExternal = 1 AND strOwnedPhysicalStock = 'Customer'  AND intCommodityId = @intCommodityId  
 	END  
 END  
 ELSE IF @strGrainType = 'DP'  
@@ -75,8 +76,7 @@ BEGIN
 			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
-			FROM vyuGRGetStorageDetail  
-			WHERE  ysnReceiptedStorage = 1  AND intCommodityId = @intCommodityId  AND intCompanyLocationId = @intLocationId  
+			FROM vyuGRGetStorageOffSiteDetail  WHERE ysnReceiptedStorage = 1 AND ysnExternal <> 1 AND strOwnedPhysicalStock = 'Customer'  AND intCommodityId = @intCommodityId  AND intCompanyLocationId = @intLocationId  
 		END  
 	ELSE  
 		BEGIN  
@@ -85,7 +85,7 @@ BEGIN
 			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
-			FROM vyuGRGetStorageDetail  WHERE ysnReceiptedStorage = 1  	AND intCommodityId = @intCommodityId  
+			 FROM vyuGRGetStorageOffSiteDetail  WHERE ysnReceiptedStorage = 1 AND ysnExternal <> 1 	AND intCommodityId = @intCommodityId  
 		END  
 	END  
 	ELSE   

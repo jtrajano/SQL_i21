@@ -40,9 +40,9 @@ SELECT * INTO #temp FROM (
 	SELECT 2 AS intSeqId
 		,'Off-Site' [Storage Type]
 		,isnull(sum(Balance), 0) dblTotal
-	FROM vyuGRGetStorageDetail
-	WHERE ysnCustomerStorage = 1
-		AND strOwnedPhysicalStock = 'Company'
+	FROM vyuGRGetStorageOffSiteDetail
+	WHERE ysnReceiptedStorage = 1 AND ysnExternal = 1
+		AND strOwnedPhysicalStock = 'Customer'
 		AND intCommodityId = @intCommodityId
 		AND intCompanyLocationId = @intLocationId
 	
@@ -155,10 +155,8 @@ SELECT * INTO #temp FROM (
 	FROM (
 		SELECT [Storage Type] strType
 			,isnull(SUM(Balance), 0) dblTotal
-		FROM vyuGRGetStorageDetail
-		WHERE intCommodityId = @intCommodityId
-			AND intCompanyLocationId = @intLocationId
-			AND ysnReceiptedStorage = 1
+		FROM vyuGRGetStorageOffSiteDetail
+		WHERE intCommodityId = @intCommodityId AND intCompanyLocationId = @intLocationId AND ysnReceiptedStorage = 1 AND ysnExternal <> 1
 		GROUP BY [Storage Type]
 		) t
 	
@@ -168,11 +166,9 @@ SELECT * INTO #temp FROM (
 		,'Total Receipted' AS [strType]
 		,isnull(dblTotal1, 0) + (isnull(CollateralSale, 0) - isnull(CollateralPurchases, 0)) dblTotal
 	FROM (
-		SELECT SUM(Balance) dblTotal1
-		FROM vyuGRGetStorageDetail
-		WHERE ysnReceiptedStorage = 1
-			AND intCommodityId = @intCommodityId
-			AND intCompanyLocationId = @intLocationId
+		SELECT isnull(SUM(Balance), 0) dblTotal1
+		FROM vyuGRGetStorageOffSiteDetail
+		WHERE intCommodityId = @intCommodityId AND intCompanyLocationId = @intLocationId AND ysnReceiptedStorage = 1 AND ysnExternal <> 1
 		) dblTotal1
 		,(
 			SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
@@ -238,8 +234,7 @@ SELECT * INTO #temp FROM (
 		
 		SELECT isnull(SUM(isnull(ri.dblReceived, 0)), 0) AS dblTotal
 		FROM tblICInventoryReceipt r
-		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			AND r.strReceiptType = 'Purchase Contract'
+		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId	AND r.strReceiptType = 'Purchase Contract'
 		INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
 			AND cd.intPricingTypeId = 2
 		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
@@ -360,9 +355,9 @@ SELECT * INTO #temp1 FROM (
 	SELECT 2 AS intSeqId
 		,'Off-Site' [Storage Type]
 		,isnull(sum(Balance), 0) dblTotal
-	FROM vyuGRGetStorageDetail
-	WHERE ysnCustomerStorage = 1
-		AND strOwnedPhysicalStock = 'Company'
+	FROM vyuGRGetStorageOffSiteDetail
+	WHERE ysnReceiptedStorage = 1 AND ysnExternal = 1
+		AND strOwnedPhysicalStock = 'Customer'
 		AND intCommodityId = @intCommodityId
 	
 	UNION ALL
@@ -451,9 +446,9 @@ SELECT * INTO #temp1 FROM (
 	FROM (
 		SELECT [Storage Type] strType
 			,isnull(SUM(Balance), 0) dblTotal
-		FROM vyuGRGetStorageDetail
+		FROM vyuGRGetStorageOffSiteDetail
 		WHERE intCommodityId = @intCommodityId
-			AND ysnReceiptedStorage = 1
+			AND ysnReceiptedStorage = 1 AND ysnExternal <> 1
 		GROUP BY [Storage Type]
 		) t
 	
@@ -463,10 +458,10 @@ SELECT * INTO #temp1 FROM (
 		,'Total Receipted' AS [strType]
 		,isnull(dblTotal1, 0) + (isnull(CollateralSale, 0) - isnull(CollateralPurchases, 0)) dblTotal
 	FROM (
-		SELECT SUM(Balance) dblTotal1
-		FROM vyuGRGetStorageDetail
-		WHERE ysnReceiptedStorage = 1
-			AND intCommodityId = @intCommodityId
+		SELECT isnull(SUM(Balance), 0) dblTotal1
+		FROM vyuGRGetStorageOffSiteDetail
+		WHERE intCommodityId = @intCommodityId
+			AND ysnReceiptedStorage = 1 AND ysnExternal <> 1
 		) dblTotal1
 		,(
 			SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
@@ -528,8 +523,7 @@ SELECT * INTO #temp1 FROM (
 		
 		SELECT isnull(SUM(isnull(ri.dblReceived, 0)), 0) AS dblTotal
 		FROM tblICInventoryReceipt r
-		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			AND r.strReceiptType = 'Purchase Contract'
+		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 		INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
 			AND cd.intPricingTypeId = 2
 		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
@@ -663,4 +657,3 @@ BEGIN
 			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,dblTotal FROM #temp1
 		END
 END
-
