@@ -2966,6 +2966,8 @@
     <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspARCalculateCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDSortColumnDesign.sql" />
+    <Build Include="dbo\Tables\tblSTMarkUpDown.sql" />
+    <Build Include="dbo\Tables\tblSTMarkUpDownDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

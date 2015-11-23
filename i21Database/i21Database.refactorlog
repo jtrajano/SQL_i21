@@ -4368,4 +4368,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intAlternateApproverId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4b79a6e6-5c4f-4a55-add4-a9f0ba4ea60e" ChangeDateTime="11/20/2015 06:33:59">
+    <Property Name="ElementName" Value="[dbo].[tblSTMarkUpDown].[dtmDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTMarkUpDown]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmMarkUpDownDate" />
+  </Operation>
 </Operations>
