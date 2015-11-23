@@ -72,7 +72,7 @@ BEGIN
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
 		,dtmDate = @dtmPlannedDate
 		,dblQty = (- cl.dblQuantity)
-		,dblUOMQty = (Case When l.intWeightUOMId is null then 1 else l.dblWeightPerQty End)
+		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty,ItemUOM.dblUnitQty)
 		,dblCost = l.dblLastCost
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
@@ -86,7 +86,8 @@ BEGIN
 		,intStorageLocationId = l.intStorageLocationId
 	FROM tblMFWorkOrderConsumedLot cl
 	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
-	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemUOMId = ItemUOM.intItemUOMId
+	INNER JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
+	LEFT JOIN dbo.tblICItemUOM WeightUOM on l.intWeightUOMId = WeightUOM.intItemUOMId
 	WHERE cl.intWorkOrderId = @intWorkOrderId and cl.intBatchId=@intBatchId
 
 	EXEC dbo.uspICPostCosting @ItemsForPost
