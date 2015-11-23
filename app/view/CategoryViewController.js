@@ -530,7 +530,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         var current = win.getViewModel().data.current;
         var accountCategoryList = win.getViewModel().storeInfo.accountCategoryList;
 
-        switch (current.get('strType')) {
+        switch (current.get('strInventoryType')) {
             case "Assembly/Blend":
             case "Inventory":
                 me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
