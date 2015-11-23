@@ -271,6 +271,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         weightUOM: {
             type: 'icbuffereditemweightvolumeuom'
         },
+        costtUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
         lotUOM: {
             type: 'icbuffereditemunitmeasure'
         },

@@ -1142,7 +1142,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
                                                                                 itemId: 'colQtyToReceive',
-                                                                                width: 95,
+                                                                                width: 100,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblQtyToReceive',
                                                                                 text: 'Qty to Receive',
@@ -1156,14 +1156,57 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 itemId: 'colUnitCost',
-                                                                                width: 85,
+                                                                                width: 120,
                                                                                 dataIndex: 'dblUnitCost',
-                                                                                text: 'Unit Cost',
+                                                                                text: 'Cost per Cost UOM',
                                                                                 format: '0,000.00####',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
                                                                                     itemId: 'txtUnitCost',
                                                                                     minValue: 0
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colCostUOM',
+                                                                                text: 'Cost UOM',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intItemUOMId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Unit Of Measure Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitMeasure',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Measure',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Type',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblUnitQty',
+                                                                                            dataType: 'float',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'checkcolumn',
+                                                                                            dataIndex: 'ysnStockUnit',
+                                                                                            dataType: 'boolean',
+                                                                                            text: 'Stock Unit',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboCostUOM',
+                                                                                    displayField: 'strUnitMeasure',
+                                                                                    valueField: 'strUnitMeasure'
                                                                                 }
                                                                             },
                                                                             {
@@ -1176,14 +1219,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 editor: {
                                                                                     xtype: 'numberfield'
                                                                                 }
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numbercolumn',
-                                                                                summaryType: 'sum',
-                                                                                itemId: 'colLineTotal',
-                                                                                width: 85,
-                                                                                dataIndex: 'dblLineTotal',
-                                                                                text: 'Line Total'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
@@ -1255,6 +1290,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     itemId: 'txtNet',
                                                                                     minValue: 0
                                                                                 }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                summaryType: 'sum',
+                                                                                itemId: 'colLineTotal',
+                                                                                width: 85,
+                                                                                dataIndex: 'dblLineTotal',
+                                                                                text: 'Line Total'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',

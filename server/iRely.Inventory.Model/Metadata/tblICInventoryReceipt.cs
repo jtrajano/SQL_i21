@@ -210,6 +210,7 @@ namespace iRely.Inventory.Model
         public decimal? dblOpenReceive { get; set; }
         public int? intUnitMeasureId { get; set; }
         public int? intWeightUOMId { get; set; }
+        public int? intCostUOMId { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
@@ -654,6 +655,41 @@ namespace iRely.Inventory.Model
                 _lifetime = value;
             }
         }
+        private string _costUOM;
+        [NotMapped]
+        public string strCostUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_costUOM))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strCostUOM;
+                    else
+                        return null;
+                else
+                    return _costUOM;
+            }
+            set
+            {
+                _costUOM = value;
+            }
+        }
+        private decimal _costCF;
+        [NotMapped]
+        public decimal dblCostUOMConvFactor
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblCostUOMConvFactor ?? 0;
+                else
+                    return _costCF;
+            }
+            set
+            {
+                _costCF = value;
+            }
+        }
         
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
@@ -707,6 +743,8 @@ namespace iRely.Inventory.Model
         public string strWeightUOM { get; set; }
         public decimal? dblItemUOMConvFactor { get; set; }
         public decimal? dblWeightUOMConvFactor { get; set; }
+        public string strCostUOM { get; set; }
+        public decimal? dblCostUOMConvFactor { get; set; }
         public decimal? dblGrossMargin { get; set; }
         public int? intGradeId { get; set; }
         public string strGrade { get; set; }
