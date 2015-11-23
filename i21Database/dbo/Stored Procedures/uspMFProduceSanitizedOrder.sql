@@ -121,6 +121,10 @@ BEGIN TRY
 	SET dblQty =dblQty-@dblWeight
 	WHERE intLotId=@intInputLotId and intTransactionId=@intWorkOrderId
 
+	UPDATE tblICStockReservation
+	SET dblQty =CASE WHEN dblQty <0 THEN 0 ELSE dblQty END
+	WHERE intLotId=@intInputLotId AND intTransactionId=@intWorkOrderId
+
 	SELECT @dtmCreated = Getdate()
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated, @intLocationId)
