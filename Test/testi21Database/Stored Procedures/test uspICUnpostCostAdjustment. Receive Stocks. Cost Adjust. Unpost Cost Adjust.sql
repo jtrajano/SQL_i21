@@ -372,6 +372,7 @@ BEGIN
 				,[ysnIsStorage] 
 				,[strActualCostId] 
 				,[intSourceTransactionId] 
+				,[intSourceTransactionDetailId] 
 				,[strSourceTransactionId] 		
 		)
 		SELECT	[intItemId]					= @WetGrains
@@ -393,6 +394,7 @@ BEGIN
 				,[ysnIsStorage]				= 0 
 				,[strActualCostId]			= NULL 
 				,[intSourceTransactionId]	= 1
+				,[intSourceTransactionDetailId] = 1
 				,[strSourceTransactionId]	= 'PURCHASE-100000'
 
 		INSERT INTO @GLEntries (

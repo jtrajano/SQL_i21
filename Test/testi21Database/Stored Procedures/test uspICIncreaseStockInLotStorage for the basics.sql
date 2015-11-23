@@ -58,6 +58,7 @@ BEGIN
 				,@dblCost AS NUMERIC(38,20)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
+				,@intTransactionDetailId AS INT 
 				,@intUserId AS INT
 				,@RemainingQty AS NUMERIC(18,6)
 				,@CostUsed AS NUMERIC(18,6)
@@ -78,6 +79,7 @@ BEGIN
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@intUserId
 			,@NewInventoryLotStorageId OUTPUT 
 

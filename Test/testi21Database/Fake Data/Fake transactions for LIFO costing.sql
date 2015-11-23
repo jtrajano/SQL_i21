@@ -172,6 +172,7 @@ BEGIN
 				, dblCost
 				, intConcurrencyId
 				, intTransactionId
+				, intTransactionDetailId
 				, strTransactionId
 		) 
 		SELECT	intItemId = @WetGrains
@@ -183,6 +184,7 @@ BEGIN
 				, dblCost = 22.00
 				, intConcurrencyId = 1
 				, intTransactionId = 1
+				, intTransactionDetailId = 1
 				, strTransactionId = 'PURCHASE-100000'
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
@@ -194,6 +196,7 @@ BEGIN
 				, dblCost = 33.00
 				, intConcurrencyId = 1
 				, intTransactionId = 2
+				, intTransactionDetailId = 2
 				, strTransactionId = 'PURCHASE-200000'
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
@@ -205,6 +208,7 @@ BEGIN
 				, dblCost = 44.00
 				, intConcurrencyId = 1
 				, intTransactionId = 3
+				, intTransactionDetailId = 3
 				, strTransactionId = 'PURCHASE-300000'
 		UNION ALL 
 		SELECT	intItemId = @ColdGrains
@@ -216,6 +220,7 @@ BEGIN
 				, dblCost = 55.00
 				, intConcurrencyId = 1
 				, intTransactionId = 4
+				, intTransactionDetailId = 4
 				, strTransactionId = 'PURCHASE-400000'
 		UNION ALL 
 		SELECT	intItemId = @HotGrains
@@ -227,6 +232,7 @@ BEGIN
 				, dblCost = 66.00
 				, intConcurrencyId = 1
 				, intTransactionId = 5
+				, intTransactionDetailId = 5
 				, strTransactionId = 'PURCHASE-500000'
 
 	END 

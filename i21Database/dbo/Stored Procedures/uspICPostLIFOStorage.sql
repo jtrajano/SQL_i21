@@ -117,6 +117,7 @@ BEGIN
 			,@intUserId
 			,@strTransactionId
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@NewInventoryCostBucketStorageId OUTPUT 
 
 

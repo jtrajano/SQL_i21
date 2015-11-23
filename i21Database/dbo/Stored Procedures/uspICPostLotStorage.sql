@@ -122,6 +122,7 @@ BEGIN
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@intUserId
 			,@NewInventoryLotStorageId OUTPUT 
 		IF @@ERROR <> 0 GOTO _Exit

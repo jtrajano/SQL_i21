@@ -118,6 +118,7 @@ BEGIN
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
+				,@intTransactionDetailId AS INT
 				,@TotalQtyOffset AS NUMERIC(18,6) = 0			
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
@@ -214,6 +215,7 @@ BEGIN
 				,@TotalQtyOffset
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 

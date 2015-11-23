@@ -63,6 +63,7 @@ BEGIN
 				,@intTransactionDetailId AS INT
 				,@strTransactionId AS NVARCHAR(20)
 				,@intSourceTransactionId AS INT
+				,@intSourceTransactionDetailId AS INT
 				,@strSourceTransactionId AS NVARCHAR(20)
 				,@strBatchId AS NVARCHAR(20)
 				,@intTransactionTypeId AS INT
@@ -178,6 +179,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intSourceTransactionId
+			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
 			,@strBatchId
 			,@intTransactionTypeId

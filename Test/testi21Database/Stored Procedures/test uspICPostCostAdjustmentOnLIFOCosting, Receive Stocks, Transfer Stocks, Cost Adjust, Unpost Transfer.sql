@@ -370,6 +370,7 @@ BEGIN
 				,@intTransactionDetailId AS INT				= 1
 				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
 				,@intSourceTransactionId AS INT				= 1
+				,@intSourceTransactionDetailId AS INT		= 1
 				,@strSourceTransactionId AS NVARCHAR(20)	= 'PURCHASE-100000'
 				,@strBatchId AS NVARCHAR(20)				= 'BATCH-10293'
 				,@intTransactionTypeId AS INT				= @CostAdjustmentType
@@ -391,6 +392,7 @@ BEGIN
 			,intTransactionDetailId
 			,strTransactionId
 			,intSourceTransactionId
+			,intSourceTransactionDetailId
 			,strSourceTransactionId
 			,intTransactionTypeId
 			,intCurrencyId
@@ -409,6 +411,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intSourceTransactionId
+			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
 			,@intTransactionTypeId
 			,@intCurrencyId

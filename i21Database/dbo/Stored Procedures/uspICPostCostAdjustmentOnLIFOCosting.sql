@@ -14,6 +14,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLIFOCosting]
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
 	,@intSourceTransactionId AS INT
+	,@intSourceTransactionDetailId AS INT 
 	,@strSourceTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
@@ -52,8 +53,9 @@ BEGIN
 		,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
 		,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 		,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
-		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
-		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
+		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. The integer id of INVRCT-10001 is 1934). 
+		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
+		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 	)
 END 
 
@@ -138,6 +140,7 @@ BEGIN
 			AND tblICInventoryLIFO.intItemLocationId = @intItemLocationId
 			AND tblICInventoryLIFO.intItemUOMId = @intItemUOMId
 			AND tblICInventoryLIFO.intTransactionId = @intSourceTransactionId
+			AND tblICInventoryLIFO.intTransactionDetailId = @intSourceTransactionDetailId
 			AND tblICInventoryLIFO.strTransactionId = @strSourceTransactionId
 			AND ISNULL(tblICInventoryLIFO.ysnIsUnposted, 0) = 0 
 END 
@@ -498,6 +501,7 @@ BEGIN
 						,[ysnIsStorage] 
 						,[strActualCostId] 
 						,[intSourceTransactionId] 
+						,[intSourceTransactionDetailId] 
 						,[strSourceTransactionId] 				
 				)
 				SELECT 
@@ -520,6 +524,7 @@ BEGIN
 						,[ysnIsStorage]					= NULL 
 						,[strActualCostId]				= NULL 
 						,[intSourceTransactionId]		= InvTran.intTransactionId
+						,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
 						,[strSourceTransactionId]		= InvTran.strTransactionId
 				FROM	dbo.tblICInventoryTransaction InvTran
 				WHERE	InvTran.strBatchId = @InvTranBatchId

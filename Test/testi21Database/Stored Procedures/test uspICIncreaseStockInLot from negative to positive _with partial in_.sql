@@ -143,6 +143,7 @@ BEGIN
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40) = 'NewStock-00001'
 				,@intTransactionId AS INT			= 5
+				,@intTransactionDetailId AS INT		= 5
 				,@TotalQtyOffset AS NUMERIC(18,6)	= 0			
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
@@ -260,6 +261,7 @@ BEGIN
 				,@TotalQtyOffset
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 

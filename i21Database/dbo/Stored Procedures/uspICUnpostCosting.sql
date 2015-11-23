@@ -58,7 +58,7 @@ DECLARE @intItemId AS INT
 
 -- Get the list of items to unpost
 BEGIN 
-	-- Insert the items per location, UOM, and if it exists, Lot
+	-- Insert the items per location, UOM, and if possible also by Lot. 
 	INSERT INTO @ItemsToUnpost (
 			intItemId
 			,intItemLocationId

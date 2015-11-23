@@ -83,6 +83,7 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[dblNewCost] NUMERIC(38, 20) NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,		
+		[intTransactionDetailId] INT NULL,		
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 

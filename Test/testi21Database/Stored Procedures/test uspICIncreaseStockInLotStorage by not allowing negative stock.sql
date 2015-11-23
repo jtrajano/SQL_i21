@@ -104,6 +104,7 @@ BEGIN
 				,@dblCost AS NUMERIC(38,20)			= 33.19
 				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'
 				,@intTransactionId AS INT			= 1
+				,@intTransactionDetailId AS INT		= 1
 				,@intUserId AS INT					= 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
@@ -175,6 +176,7 @@ BEGIN
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@intUserId
 			,@NewInventoryLotStorageId OUTPUT 
 

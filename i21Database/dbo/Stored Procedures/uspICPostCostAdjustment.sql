@@ -51,8 +51,9 @@ BEGIN
 		,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
 		,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 		,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
-		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
-		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
+		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. The integer id of INVRCT-10001 is 1934). 
+		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
+		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 	)
 END 
 
@@ -76,6 +77,7 @@ DECLARE @intId AS INT
 		,@intTransactionDetailId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
 		,@intSourceTransactionId AS INT
+		,@intSourceTransactionDetailId AS INT
 		,@strSourceTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
 		,@intCurrencyId AS INT 
@@ -128,6 +130,7 @@ BEGIN
 			,[ysnIsStorage] 
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 	
 	)
 	SELECT 
@@ -150,6 +153,7 @@ BEGIN
 			,[ysnIsStorage] 
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 	 
 	FROM	@ItemsToAdjust
 END 
@@ -177,6 +181,7 @@ SELECT  intId
 		,intTransactionDetailId
 		,strTransactionId
 		,intSourceTransactionId
+		,intSourceTransactionDetailId
 		,strSourceTransactionId
 		,intTransactionTypeId
 		-- ,intLotId 
@@ -201,6 +206,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intTransactionDetailId
 	,@strTransactionId
 	,@intSourceTransactionId
+	,@intSourceTransactionDetailId
 	,@strSourceTransactionId
 	,@intTransactionTypeId
 	--,@intLotId
@@ -239,6 +245,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intSourceTransactionId
+			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -265,6 +272,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intSourceTransactionId
+			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -291,6 +299,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intSourceTransactionId
+			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -317,6 +326,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intSourceTransactionId
+			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -342,6 +352,7 @@ BEGIN
 		,@intTransactionDetailId
 		,@strTransactionId
 		,@intSourceTransactionId
+		,@intSourceTransactionDetailId
 		,@strSourceTransactionId
 		,@intTransactionTypeId
 		--,@intLotId
@@ -514,6 +525,7 @@ BEGIN
 			,[ysnIsStorage] 
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 		
 	)
 	SELECT 
@@ -536,6 +548,7 @@ BEGIN
 			,[ysnIsStorage] 
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 	
 	FROM	#tmpRevalueProducedItems
 

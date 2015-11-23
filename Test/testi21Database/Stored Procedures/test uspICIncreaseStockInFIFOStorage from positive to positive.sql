@@ -117,6 +117,7 @@ BEGIN
 				,@intUserId AS INT						= 1
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
+				,@intTransactionDetailId AS INT 
 				,@NewFifoStorageId AS INT 
 
 		-- Setup the expected values 
@@ -194,6 +195,7 @@ BEGIN
 			,@intUserId 
 			,@strTransactionId 
 			,@intTransactionId 
+			,@intTransactionDetailId
 			,@NewFifoStorageId OUTPUT 
 	END 
 

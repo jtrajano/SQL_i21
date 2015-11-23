@@ -194,6 +194,7 @@ BEGIN
 				,@TotalQtyOffset
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 

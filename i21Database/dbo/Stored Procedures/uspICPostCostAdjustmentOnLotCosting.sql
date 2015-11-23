@@ -16,6 +16,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
 	,@intSourceTransactionId AS INT
+	,@intSourceTransactionDetailId AS INT
 	,@strSourceTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
@@ -54,8 +55,9 @@ BEGIN
 		,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
 		,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 		,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
-		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
-		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
+		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. The integer id of INVRCT-10001 is 1934). 
+		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
+		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 	)
 END 
 
@@ -121,65 +123,95 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 		,@CostAdjustmentValue AS NUMERIC(38,20)
 
 DECLARE @LoopTransactionTypeId AS INT 
-		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId
+		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId	
+	
+		,@intLotId AS INT 
+
+-- Exit immediately if item is a non-lot type. 
+IF dbo.fnGetItemLotType(@intItemId) = 0 
+BEGIN 
+	GOTO Post_Exit;
+END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- 1. Get the cost bucket and original cost. 
 -----------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	SELECT	@CostBucketId = intInventoryLotId
-			,@CostBucketCost = dblCost			
-			,@CostBucketStockInQty = dblStockIn
-			,@CostBucketStockOutQty = dblStockOut
-			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
-			,@CostBucketIntTransactionId = intTransactionId
-			,@CostBucketStrTransactionId = strTransactionId
-	FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
-				ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
-	WHERE	tblICInventoryLot.intItemId = @intItemId
-			-- AND tblICInventoryLot.intLotId = @intLotId
-			AND tblICInventoryLot.intItemLocationId = @intItemLocationId
-			AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
-			AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
-			AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
-END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Validation
 -----------------------------------------------------------------------------------------------------------------------------
 
+
+-- Get the number of Lots to process. 
+DECLARE @LotWithOldCost AS INT = 0 
+SELECT	@LotWithOldCost = COUNT(intLotId) 
+FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
+			ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
+WHERE	tblICInventoryLot.intItemId = @intItemId
+		AND tblICInventoryLot.intItemLocationId = @intItemLocationId
+		AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
+		AND tblICInventoryLot.intTransactionDetailId = @intSourceTransactionDetailId
+		AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
+		AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
+
+-- Pick a lot that is not using the new cost. 
+WHILE ISNULL(@LotWithOldCost, 0) > 0 
+BEGIN 
+	SET @CostBucketId = NULL 
+
+	-- Pick a lot.
+	BEGIN 
+		SELECT	@CostBucketId = intInventoryLotId
+				,@CostBucketCost = dblCost			
+				,@CostBucketStockInQty = dblStockIn
+				,@CostBucketStockOutQty = dblStockOut
+				,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
+				,@CostBucketIntTransactionId = intTransactionId
+				,@CostBucketStrTransactionId = strTransactionId
+				,@intLotId = intLotId
+		FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
+					ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
+		WHERE	tblICInventoryLot.intItemId = @intItemId
+				AND tblICInventoryLot.intItemLocationId = @intItemLocationId
+				AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
+				AND tblICInventoryLot.intTransactionDetailId = @intSourceTransactionDetailId
+				AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
+				AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
+				AND tblICInventoryLot.intLotId > ISNULL(@intLotId, 0) 
+	END 
+
+	-- Convert the new cost to match the UOM used in the Lot cost bucket.  
+	IF @CostBucketUOMQty IS NOT NULL 
+	BEGIN 
+		SET @dblNewCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, @CostBucketUOMQty, @dblNewCost) 
+	END 
+
+	-- Check if new cost is different from the lot cost. If different, then break out of the loop. 
+	-- The system has found what it needs to process. 
+	IF	@CostBucketUOMQty IS NOT NULL  
+		AND ISNULL(@dblNewCost, 0) <> ISNULL(@CostBucketCost, 0)
+	BEGIN 
+		BREAK;
+	END 
+
+	-- Reduce the counter. 
+	SET @LotWithOldCost -= 1		
+END 
+
 -- Validate the cost bucket
 BEGIN 
 	IF @CostBucketId IS NULL
 	BEGIN 
-		DECLARE @strItemNo AS NVARCHAR(50)
-				,@strLotNumber AS NVARCHAR(50)
+		DECLARE @strItemNo AS NVARCHAR(50)				
 
 		SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
 		FROM	dbo.tblICItem 
 		WHERE	intItemId = @intItemId
 
-		--SELECT	@strLotNumber = CASE WHEN ISNULL(strLotNumber, '') = '' THEN 'id: ' + CAST(@intLotId AS NVARCHAR(20)) ELSE strLotNumber END 
-		--FROM	dbo.tblICLot  
-		--WHERE	intItemId = @intItemId
-		--		AND intLotId = @intLotId 
-
-		-- 'Cost adjustment cannot continue. Unable to find the cost bucket for lot {Lot Number} in item {Item No}.'
-		RAISERROR(80066, 11, 1, @strItemNo, @strLotNumber)  
+		-- 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item {Item No}.'
+		RAISERROR(80066, 11, 1, @strItemNo)  
 		RETURN -1 
 	END
-END 
-
--- Convert the new cost to match the UOM used in the Lot cost bucket.  
-BEGIN 
-	SET @dblNewCost = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, @CostBucketUOMQty, @dblNewCost) 
-END 
-
--- Check if new cost is the same as the current cost
-BEGIN 
-	-- Exit and do nothing if the costs are the same. 
-	IF ISNULL(@dblNewCost, 0) = ISNULL(@CostBucketCost, 0)
-		GOTO Post_Exit
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -246,7 +278,7 @@ BEGIN
 		,@strTransactionId						= @strTransactionId
 		,@strBatchId							= @strBatchId
 		,@intTransactionTypeId					= @CostAdjustmentTransactionType -- @INV_TRANS_TYPE_Cost_Adjustment
-		,@intLotId								= NULL 
+		,@intLotId								= @intLotId 
 		,@intRelatedInventoryTransactionId		= NULL 
 		,@intRelatedTransactionId				= @CostBucketIntTransactionId 
 		,@strRelatedTransactionId				= @CostBucketStrTransactionId
@@ -393,7 +425,7 @@ BEGIN
 		FROM	dbo.tblICInventoryTransaction InvTran
 		WHERE	InvTran.intInventoryTransactionId = @LotOutInventoryTransactionId
 
-		-- Calculate the avaiable 'out' stocks that the system can revalue. 
+		-- Calculate the available 'out' stocks that the system can revalue. 
 		SET @StockQtyAvailableToRevalue = ISNULL(@LotOutQty, 0) - ISNULL(@LotCostAdjustQty, 0)
 		
 		-- If there are available out stocks, then revalue it.  
@@ -434,7 +466,7 @@ BEGIN
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
 					,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
-					,@intLotId								= NULL 
+					,@intLotId								= @intLotId 
 					,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
 					,@strRelatedTransactionId				= @InvTranStringTransactionId 
@@ -479,7 +511,7 @@ BEGIN
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
 					,@intTransactionTypeId					= @CostAdjustmentTransactionType
-					,@intLotId								= NULL 
+					,@intLotId								= @intLotId 
 					,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
 					,@strRelatedTransactionId				= @InvTranStringTransactionId 
@@ -511,6 +543,7 @@ BEGIN
 						,[ysnIsStorage] 
 						,[strActualCostId] 
 						,[intSourceTransactionId] 
+						,[intSourceTransactionDetailId] 
 						,[strSourceTransactionId] 				
 				)
 				SELECT 
@@ -533,7 +566,8 @@ BEGIN
 						,[ysnIsStorage]					= NULL 
 						,[strActualCostId]				= NULL 
 						,[intSourceTransactionId]		= InvTran.intTransactionId
-						,[strSourceTransactionId]		= InvTran.strTransactionId
+						,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
+						,[strSourceTransactionId]		= InvTran.strTransactionId						
 				FROM	dbo.tblICInventoryTransaction InvTran
 				WHERE	InvTran.strBatchId = @InvTranBatchId
 						AND InvTran.intTransactionId = @InvTranIntTransactionId

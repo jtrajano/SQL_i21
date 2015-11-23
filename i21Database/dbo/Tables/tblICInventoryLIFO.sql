@@ -84,6 +84,7 @@ Tracks all stocks in a LIFO manner. Records are physically arranged in a LIFO ma
 		[intItemUOMId] INT NOT NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,
+		[intTransactionDetailId] INT NULL,
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 

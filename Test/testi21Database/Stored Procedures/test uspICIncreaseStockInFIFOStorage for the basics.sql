@@ -39,6 +39,7 @@ BEGIN
 				,@intUserId AS INT
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
+				,@intTransactionDetailId AS INT 
 				,@NewFifoStorageId AS INT 
 	END 
 	
@@ -54,6 +55,7 @@ BEGIN
 				,@intUserId 
 				,@strTransactionId 
 				,@intTransactionId 
+				,@intTransactionDetailId
 				,@NewFifoStorageId OUTPUT 
 
 		INSERT INTO actual (

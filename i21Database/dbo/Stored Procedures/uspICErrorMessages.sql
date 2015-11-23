@@ -340,6 +340,6 @@ SET @strmessage = 'The %s is shouldered by the receipt vendor and can''t be adde
 EXEC sp_addmessage 80065,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80066) EXEC sp_dropmessage 80066, 'us_english'	
-SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for lot % in item %s.'
+SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item %s.'
 EXEC sp_addmessage 80066,11,@strmessage,'us_english','False'
 

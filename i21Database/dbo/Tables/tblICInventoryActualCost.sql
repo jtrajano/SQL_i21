@@ -84,6 +84,7 @@ Tracks all stocks in a Actual-Cost manner. Records are physically arranged in an
 		[dblNewCost] NUMERIC(38, 20) NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,		
+		[intTransactionDetailId] INT NOT NULL,		
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 

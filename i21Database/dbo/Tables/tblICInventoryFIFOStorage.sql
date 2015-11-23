@@ -83,6 +83,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,		
+		[intTransactionDetailId] INT NULL,		
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
