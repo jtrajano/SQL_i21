@@ -595,7 +595,7 @@ SET @batchIdUsed = @batchId
 				WHERE
 					B.dblPayment <> 0 
 					AND C.ysnPaid = 0 
-					AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) < ((B.dblPayment + B.dblInterest) - B.dblDiscount)
+					AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) < ((B.dblPayment - B.dblInterest) + B.dblDiscount)
 					
 				DECLARE @InvoiceIdsForChecking TABLE (
 						intInvoiceId int PRIMARY KEY,
