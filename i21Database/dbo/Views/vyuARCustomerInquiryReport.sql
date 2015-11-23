@@ -2,19 +2,19 @@
 AS 
 SELECT A.strCustomerName
 	 , A.intEntityCustomerId
-     , SUM(B.dbl10Days) AS dbl10Days
-	 , SUM(B.dbl30Days) AS dbl30Days
-	 , SUM(B.dbl60Days) AS dbl60Days
-	 , SUM(B.dbl90Days) AS dbl90Days
-	 , SUM(B.dbl91Days) AS dbl91Days
-	 , SUM(B.dblTotalDue) AS dblTotalDue
-	 , SUM(A.dblAmountPaid) AS dblAmountPaid
-	 , SUM(A.dblInvoiceTotal) AS dblInvoiceTotal
-	 , SUM(B.dblYTDSales) AS dblYTDSales
-	 , SUM(B.dblLastYearSales) AS dblLastYearSales
-	 , dblLastPayment = ISNULL((SELECT TOP 1 ISNULL(dblAmountPaid, 0) FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 1 ORDER BY dtmDatePaid DESC, intPaymentId DESC), 0)
-	 , dtmLastPaymentDate = (SELECT TOP 1 dtmDatePaid FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 1 ORDER BY dtmDatePaid DESC, intPaymentId DESC)
-	 , dblLastStatement = ISNULL((SELECT TOP 1 ISNULL(I.dblPayment, 0) FROM tblARInvoice I 
+     , dbl10Days			= SUM(B.dbl10Days)
+	 , dbl30Days			= SUM(B.dbl30Days)
+	 , dbl60Days			= SUM(B.dbl60Days)
+	 , dbl90Days			= SUM(B.dbl90Days)
+	 , dbl91Days			= SUM(B.dbl91Days)
+	 , dblTotalDue			= SUM(B.dblTotalDue)
+	 , dblAmountPaid		= SUM(A.dblAmountPaid)
+	 , dblInvoiceTotal		= SUM(A.dblInvoiceTotal)
+	 , dblYTDSales			= SUM(B.dblYTDSales)
+	 , dblLastYearSales		= SUM(B.dblLastYearSales)
+	 , dblLastPayment		= ISNULL((SELECT TOP 1 ISNULL(dblAmountPaid, 0) FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 1 ORDER BY dtmDatePaid DESC, intPaymentId DESC), 0)
+	 , dtmLastPaymentDate	= (SELECT TOP 1 dtmDatePaid FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 1 ORDER BY dtmDatePaid DESC, intPaymentId DESC)
+	 , dblLastStatement		= ISNULL((SELECT TOP 1 ISNULL(I.dblPayment, 0) FROM tblARInvoice I 
 									INNER JOIN tblARPayment P ON I.intEntityCustomerId = P.intEntityCustomerId
 								WHERE I.ysnPosted = 1 
 								  AND I.ysnPaid = 1
@@ -26,15 +26,18 @@ SELECT A.strCustomerName
 								  AND I.ysnPaid = 1
 								  AND I.intEntityCustomerId = A.intEntityCustomerId 
 								ORDER BY P.dtmDatePaid DESC, P.intPaymentId DESC)
-	 , dblUnappliedCredits = SUM(B.dblAvailableCredit)
-	 , dblPrepaids = 0
-	 , dblFuture = 0
-	 , dblPendingInvoice = (SELECT ISNULL(SUM(CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
-	 , dblPendingPayment = (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
-	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
-	 , strTerm
-	 , strContact = (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
-					 FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1 WHERE C.intEntityCustomerId = A.intEntityCustomerId)	 
+	 , dblUnappliedCredits	= SUM(B.dblAvailableCredit)
+	 , dblPrepaids			= 0.000000
+	 , dblFuture			= 0.000000
+	 , dblBudgetAmount		= 0.000000
+	 , dblBudgetMonth		= 0.000000
+	 , dblThru				= 0.000000
+	 , dblPendingInvoice	= (SELECT ISNULL(SUM(CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
+	 , dblPendingPayment	= (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
+	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 , strTerm				= (SELECT TOP 1 strTerm FROM vyuARCustomer C INNER JOIN tblSMTerm T ON C.intTermsId = T.intTermID WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 , strContact			= (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
+								FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1 WHERE C.intEntityCustomerId = A.intEntityCustomerId)	 
 FROM
 (SELECT I.dtmDate AS dtmDate
 	  , I.strInvoiceNumber
@@ -339,4 +342,3 @@ AND A.dblLastYearSales = A.dblLastYearSales
 
 GROUP BY A.strCustomerName
 	   , A.intEntityCustomerId
-	   , A.strTerm

@@ -32,6 +32,10 @@ SELECT
 ,Cus.intBillToId
 ,dblCreditLimit = ISNULL(Cus.dblCreditLimit, 0)
 ,Cus.strVatNumber
+,Con.strPhone as strPhone1
+,Con.strPhone2 as strPhone2
+,Loc.strCountry
+,Loc.strLocationName
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 INNER JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
