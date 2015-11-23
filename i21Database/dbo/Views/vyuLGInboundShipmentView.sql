@@ -80,6 +80,13 @@ SELECT
 		IsNull(SCQ.dblReceivedQty, 0) as dblPurchaseContractReceivedQty,
 		CT.intWeightId,
 		IsNull(WG.dblFranchise, 0) as dblFranchise,
+		CT.dtmStartDate,
+		CT.dtmEndDate,
+		CASE WHEN DATEDIFF (day, S.dtmInventorizedDate, CT.dtmEndDate) >= 0 THEN
+				CAST(1 as Bit)
+			ELSE
+				CAST (0 as Bit)
+			END as ysnOnTime,
 
 -- BL details
 		BL.strBLNumber,
