@@ -11,6 +11,7 @@ SELECT
 	D.strMobile,   
 	D.strTimezone,   
 	D.strTitle,   
+	D.imgPhoto,
 	C.ysnPortalAccess,  
 	D.ysnActive,  	
 	C.ysnDefaultContact,	
