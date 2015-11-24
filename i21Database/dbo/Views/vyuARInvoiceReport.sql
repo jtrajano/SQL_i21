@@ -57,7 +57,7 @@ SELECT INV.intInvoiceId
 	 , strPosted = CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
 	 , IDT.intTaxCodeId
 	 , strTaxCode = SMT.strTaxCode
-	 , dblTaxDetail = IDT.dblTax
+	 , dblTaxDetail = IDT.dblAdjustedTax
 	 , INV.strTransactionType
 	 , intDetailCount = (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = INV.intInvoiceId)
 	 , ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = INV.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + INV.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
