@@ -19,18 +19,21 @@ DECLARE @CustomerId					INT
 		,@LocationId				INT
 		,@TransactionDate			DATETIME
 		,@DistributionHeaderId		INT
-		,@ShipToLocationId			INT
+		,@CustomerLocationId			INT
 						
 SELECT
-	@CustomerId				= [intEntityCustomerId]
-	,@LocationId			= [intCompanyLocationId]
-	,@TransactionDate		= [dtmDate]
-	,@DistributionHeaderId	= [intDistributionHeaderId]
-	,@ShipToLocationId		= [intShipToLocationId]
+	@CustomerId				= I.[intEntityCustomerId]
+	,@LocationId			= I.[intCompanyLocationId]
+	,@TransactionDate		= I.[dtmDate]
+	,@DistributionHeaderId	= I.[intDistributionHeaderId]
+	,@CustomerLocationId	= (CASE WHEN ISNULL(F.[strFobPoint],'Destination') = 'Origin ' THEN I.[intBillToLocationId] ELSE I.[intShipToLocationId] END)
 FROM
-	tblARInvoice
+	tblARInvoice I
+LEFT OUTER JOIN
+	tblSMFreightTerms F
+		ON I.[intFreightTermId] = F.[intFreightTermId] 
 WHERE
-	[intInvoiceId] = @InvoiceId
+	I.[intInvoiceId] = @InvoiceId
 
 
 DECLARE @InvoiceDetail AS TABLE  (
@@ -130,7 +133,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[strNotes] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @ShipToLocationId, 1)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1)
 		
 		SELECT @TotalItemTax = SUM([dblAdjustedTax]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
 								
