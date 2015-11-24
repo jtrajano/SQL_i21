@@ -2,7 +2,8 @@
 	AS 
 
 SELECT       
-	B.intEntityId,   
+	B.intEntityId,     
+	B.imgPhoto, 
 	D.intEntityId intEntityContactId,   
 	D.strName,   
 	D.strEmail,   
@@ -10,8 +11,7 @@ SELECT
 	D.strPhone,   
 	D.strMobile,   
 	D.strTimezone,   
-	D.strTitle,   
-	D.imgPhoto,
+	D.strTitle,
 	C.ysnPortalAccess,  
 	D.ysnActive,  	
 	C.ysnDefaultContact,	
