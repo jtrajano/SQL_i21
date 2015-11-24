@@ -18,17 +18,6 @@ AS
 
 BEGIN
 
-DECLARE @UserId INT
-		,@ResponsibleUser NVARCHAR(100)
-SELECT
-	@ResponsibleUser = strFullName
-	,@UserId = [intEntityUserSecurityId] 
-FROM
-	tblSMUserSecurity
-WHERE
-	[intEntityUserSecurityId] = @EntityId
-
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -41,6 +30,7 @@ INSERT INTO [tblSMRecurringTransaction]
 	,[strTransactionType]
 	,[strReference]
 	,[strResponsibleUser]
+	,[intEntityId]
 	,[intWarningDays]
 	,[strFrequency]
 	,[dtmLastProcess]
@@ -58,9 +48,10 @@ INSERT INTO [tblSMRecurringTransaction]
 VALUES
 	(@TransactionId
 	,@TransactionNumber
-	,@TransactionType
+	,CASE WHEN @TransactionType = 'Order' THEN 'Sales Order' ELSE @TransactionType END
 	,@Reference
-	,@ResponsibleUser
+	,(SELECT TOP 1 strName FROM vyuEMEntity WHERE [intEntityId] = @EntityId)
+	,@EntityId
 	,@WarningDays
 	,@Frequency
 	,@LastProcess
@@ -72,7 +63,7 @@ VALUES
 	,@EndDate
 	,1
 	,@Iteration
-	,@UserId
+	,@EntityId
 	,1
 	,1)
 	
