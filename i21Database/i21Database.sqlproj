@@ -2980,6 +2980,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCalculateDemandRatio.sql" />
     <Build Include="dbo\Tables\tblMFItemDemand.sql" />
     <Build Include="dbo\Views\vyuCTEventMatrixDetailView.sql" />
+    <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
