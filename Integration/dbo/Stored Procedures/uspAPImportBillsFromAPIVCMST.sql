@@ -119,6 +119,7 @@ BEGIN
 					[dblDiscount]			=	A.apivc_disc_avail,
 					[dblWithheld]			=	A.apivc_wthhld_amt,
 					[ysnOrigin]				=	1,
+					[intCurrencyId]			=	(SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency LIKE ''%USD%''),
 					[intShipToId]			=	@userLocation,
 					[intShipFromId]			=	loc.intEntityLocationId,
 					[A4GLIdentity]			=	A.[A4GLIdentity]
@@ -172,6 +173,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intCurrencyId],
 				[ysnOrigin]
 			)
 			VALUES (
@@ -197,6 +199,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intCurrencyId],
 				[ysnOrigin])
 			OUTPUT inserted.intBillId
 				, inserted.strBillId
