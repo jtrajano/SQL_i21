@@ -43,7 +43,7 @@ BEGIN TRY
 	WHERE [fieldname] = 'strLotNo'
 
 	SELECT l.intItemId, 
-		   l.dblQty, 
+		   l.dblWeight dblQty, 
 		   l.strLotNumber, 
 		   l.dblWeight, 
 		   i.strItemNo, 
@@ -51,7 +51,7 @@ BEGIN TRY
 		   um.strUnitMeasure
 	FROM dbo.tblICLot l
 	INNER JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
-	INNER JOIN dbo.tblICItemUOM iu ON iu.intItemId = i.intItemId
+	INNER JOIN dbo.tblICItemUOM iu ON iu.intItemId = l.intItemId
 	INNER JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	WHERE iu.ysnStockUnit = 1 AND l.strLotNumber = @strLotNo 
 	
