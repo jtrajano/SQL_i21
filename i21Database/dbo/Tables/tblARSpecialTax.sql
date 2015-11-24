@@ -14,7 +14,7 @@
 	CONSTRAINT FK_tblARSpecialTax_tblAPVendor FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
 	CONSTRAINT FK_tblARSpecialTax_tbltblICItem FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT FK_tblARSpecialTax_tblICCategory FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
-	CONSTRAINT FK_tblARSpecialTax_tblSMTaxGroupMaster FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
+	--CONSTRAINT FK_tblARSpecialTax_tblSMTaxGroupMaster FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 	CONSTRAINT FK_tblARSpecialTax_tblSMTaxGroup FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]),
 	CONSTRAINT FK_tblARSpecialTax_tblEntityLocation FOREIGN KEY ([intEntityCustomerLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId])
 
