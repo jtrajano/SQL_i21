@@ -7,7 +7,7 @@
 	,@QtyShipped			NUMERIC(18,6)
 	,@TaxGroupId			INT
 	,@CompanyLocationId		INT
-	,@ShipToLocationId		INT	
+	,@CustomerLocationId	INT	
 	,@IncludeExemptedCodes	BIT
 )
 RETURNS @returntable TABLE
@@ -62,7 +62,7 @@ BEGIN
 			
 			
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @ShipToLocationId)			
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @CustomerLocationId)			
 			
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
@@ -102,7 +102,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @ShipToLocationId, @IncludeExemptedCodes)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes)
 															
 			
 	-- Calculate Item Tax

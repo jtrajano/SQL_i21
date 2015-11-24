@@ -3,7 +3,7 @@
 	 @VendorId				INT
 	,@CompanyLocationId		INT
 	,@ItemId				INT
-	,@ShipFromLocationId	INT
+	,@VendorLocationId		INT
 )
 RETURNS INT
 AS
@@ -70,7 +70,7 @@ BEGIN
 			@VendorSpecialTax
 		WHERE
 			[intTaxEntityVendorId] = @TaxVendorId
-			AND [intEntityVendorLocationId] = @ShipFromLocationId 
+			AND [intEntityVendorLocationId] = @VendorLocationId 
 			AND [intItemId] = @ItemId 
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
@@ -83,7 +83,7 @@ BEGIN
 			@VendorSpecialTax
 		WHERE
 			[intTaxEntityVendorId] = @TaxVendorId
-			AND [intEntityVendorLocationId] = @ShipFromLocationId 
+			AND [intEntityVendorLocationId] = @VendorLocationId 
 			AND [intCategoryId] = @ItemCategoryId
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
@@ -96,7 +96,7 @@ BEGIN
 			@VendorSpecialTax
 		WHERE
 			[intTaxEntityVendorId] = @TaxVendorId
-			AND [intEntityVendorLocationId] = @ShipFromLocationId 			
+			AND [intEntityVendorLocationId] = @VendorLocationId 			
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
 			RETURN @TaxGroupId;
@@ -159,7 +159,20 @@ BEGIN
 			RETURN @TaxGroupId;									
 																																
 	END
+
+	--Company Location
+	SELECT TOP 1
+		@TaxGroupId = [intTaxGroupId]
+	FROM
+		tblSMCompanyLocation
+	WHERE
+		intCompanyLocationId = @CompanyLocationId
 	
+	IF ISNULL(@TaxGroupId,0) <> 0
+		RETURN @TaxGroupId;
+
+
+	--Vendor Location
 	SELECT TOP 1
 		@TaxGroupId = EL.[intTaxGroupId]
 	FROM
@@ -167,9 +180,14 @@ BEGIN
 	INNER JOIN
 		tblEntityLocation EL
 			ON P.[intEntityVendorId] = EL.[intEntityId] 
-			AND EL.[ysnDefaultLocation] = 1
 	WHERE
-		[intEntityVendorId] = @VendorId 
+		P.[intEntityVendorId] = @VendorId
+		AND EL.[intEntityLocationId] = @VendorLocationId
+
+	IF ISNULL(@TaxGroupId,0) <> 0
+		RETURN @TaxGroupId;
+
+
 					
-	RETURN @TaxGroupId
+	RETURN NULL
 END
