@@ -9,7 +9,8 @@ SELECT
    QH.dtmQuoteDate,
    AR.strName,
    AR.intEntityCustomerId,
-   convert(decimal,0.000000) "dblQuoteTotal" 
+   convert(decimal,0.000000) "dblQuoteTotal",
+   DATEADD(dd, DATEDIFF(dd, 0, dtmQuoteDate), 0) "dtmQuote"
     	
 FROM
     tblTRQuoteHeader QH
