@@ -2,8 +2,8 @@
 	@intCustomerId INT = NULL,
 	@dblProcessingDays NUMERIC(18,6) = NULL,
 	@ysnProrateDividend BIT = NULL,
-	@dtmCutoffDate DATETIME = NULL,
-	@dtmProcessingDateTo DATETIME = NULL
+	@dtmProcessingDateTo DATETIME = NULL, 
+	@dtmCutoffDate DATETIME = NULL
 AS
 BEGIN
 		SELECT DISTINCT CS.intCustomerPatronId,
@@ -12,7 +12,7 @@ BEGIN
 			   SC.dblParValue,
 			   CS.dblSharesNo,
 			   SC.intDividendsPerShare,
-			   dblDividendAmount = CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+			   dblDividendAmount = CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> null 
 										THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END
 		  FROM tblPATStockClassification SC

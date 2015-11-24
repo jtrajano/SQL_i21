@@ -2,36 +2,35 @@
 	@intFiscalYearId INT = NULL,
 	@dblProcessingDays NUMERIC(18,6) = NULL,
 	@ysnProrateDividend BIT = NULL,
-	@dtmCutoffDate DATETIME = NULL,
 	@dtmProcessingDateFrom DATETIME = NULL,
 	@dtmProcessingDateTo DATETIME = NULL,
 	@dblMinimumDividend NUMERIC(18,6) = NULL,
-	@FWT NUMERIC(18,6) = NULL
+	@FWT NUMERIC(18,6) = NULL,
+	@dtmCutoffDate DATETIME = NULL
 AS
 BEGIN
 			SET NOCOUNT ON;
 
-		
 			SELECT DISTINCT intCustomerId = CS.intCustomerPatronId,
 				   ENT.strName,
 				   ARC.strStockStatus,
 				   TC.strTaxCode,
 				   dtmLastActivityDate = GETDATE(),
-				   dblDividendAmount = SUM(CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+				   dblDividendAmount = SUM(CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
 										THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END),
 
-				   dblLessFWT = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+				   dblLessFWT = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
 									 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 											(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END) < @dblMinimumDividend 
-									 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+									 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
 									 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 											(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END * @FWT) END),
 
-				   dblCheckAmount = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+				   dblCheckAmount = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
 										 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 											  (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END) < @dblMinimumDividend 
-										 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> '' 
+										 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
 										 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
 											  (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END - CS.dblCheckAmount) END)
 
