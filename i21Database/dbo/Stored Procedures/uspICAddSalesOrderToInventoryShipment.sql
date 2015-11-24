@@ -107,6 +107,7 @@ BEGIN
 			,intLineNo
 			,intItemId
 			,intSubLocationId
+			,intStorageLocationId
 			,dblQuantity
 			,intItemUOMId
 			,dblUnitPrice
@@ -121,6 +122,7 @@ BEGIN
 			,intLineNo				= SODetail.intSalesOrderDetailId
 			,intItemId				= SODetail.intItemId
 			,intSubLocationId		= NULL
+			,intStorageLocationId	= SODetail.intStorageLocationId
 			,dblQuantity			= SODetail.dblQtyOrdered - SODetail.dblQtyShipped
 			,intItemUOMId			= SODetail.intItemUOMId
 			,dblUnitPrice			= SODetail.dblPrice
