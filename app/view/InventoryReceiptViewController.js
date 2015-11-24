@@ -3087,10 +3087,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
+        var cboVendor = win.down('#cboVendor');
 
         if (combo.itemId === 'cboOtherCharge') {
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
+            current.set('ysnAccrue', record.get('ysnAccrue'));
+
+            if (record.get('ysnAccrue') === true) {
+                current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
+                current.set('strVendorId', cboVendor.getRawValue());
+            }
+            else {
+                current.set('intEntityVendorId', null);
+                current.set('strVendorId', null);
+            }
+
             current.set('dblRate', record.get('dblAmount'));
             current.set('intCostUOMId', record.get('intCostUOMId'));
             current.set('strCostMethod', record.get('strCostMethod'));
