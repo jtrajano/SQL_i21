@@ -161,6 +161,8 @@ BEGIN
 	CREATE CLUSTERED INDEX [IDX_tblICInventoryLot]
 		ON [dbo].[tblICInventoryLot]([dtmDate] ASC, [intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 
+	-- EXEC tSQLt.ApplyConstraint 'dbo.tblICLot', 'UN_tblICLot';	
+
 	-- Declare the variables for the transaction types
 	DECLARE @PurchaseType AS INT = 4
 	DECLARE @SalesType AS INT = 5
@@ -233,7 +235,7 @@ BEGIN
 				,[intStorageLocationId]	= NULL 
 				,[dblQty]				= 30 
 				,[dblLastCost]			= 22.00
-				,[dtmExpiryDate]		= GETDATE()
+				,[dtmExpiryDate]		= NULL
 				,[strLotAlias]			= 'LOT ALIAS FOR 0001'
 				,[intLotStatusId]		= @LotStatus_Active
 				,[intParentLotId]		= NULL 
@@ -272,7 +274,7 @@ BEGIN
 				,[intStorageLocationId]	= NULL 
 				,[dblQty]				= 30 
 				,[dblLastCost]			= 22.00
-				,[dtmExpiryDate]		= GETDATE()
+				,[dtmExpiryDate]		= NULL
 				,[strLotAlias]			= 'LOT ALIAS FOR 0002'
 				,[intLotStatusId]		= @LotStatus_Active
 				,[intParentLotId]		= NULL 
@@ -311,7 +313,7 @@ BEGIN
 				,[intStorageLocationId]	= NULL 
 				,[dblQty]				= 40 
 				,[dblLastCost]			= 22.00
-				,[dtmExpiryDate]		= GETDATE()
+				,[dtmExpiryDate]		= NULL
 				,[strLotAlias]			= 'LOT ALIAS FOR 0003'
 				,[intLotStatusId]		= @LotStatus_Active
 				,[intParentLotId]		= NULL 
@@ -351,7 +353,7 @@ BEGIN
 				,[intStorageLocationId]	= NULL 
 				,[dblQty]				= 150 
 				,[dblLastCost]			= 33.00
-				,[dtmExpiryDate]		= GETDATE()
+				,[dtmExpiryDate]		= NULL
 				,[strLotAlias]			= 'LOT ALIAS FOR 0004'
 				,[intLotStatusId]		= @LotStatus_Active
 				,[intParentLotId]		= NULL 
@@ -391,7 +393,7 @@ BEGIN
 				,[intStorageLocationId]	= NULL 
 				,[dblQty]				= 200
 				,[dblLastCost]			= 44.00
-				,[dtmExpiryDate]		= GETDATE()
+				,[dtmExpiryDate]		= NULL
 				,[strLotAlias]			= 'LOT ALIAS FOR 0005'
 				,[intLotStatusId]		= @LotStatus_Active
 				,[intParentLotId]		= NULL 
@@ -431,7 +433,7 @@ BEGIN
 				,[intStorageLocationId]	= NULL 
 				,[dblQty]				= 250
 				,[dblLastCost]			= 55.00
-				,[dtmExpiryDate]		= GETDATE()
+				,[dtmExpiryDate]		= NULL
 				,[strLotAlias]			= 'LOT ALIAS FOR 0006'
 				,[intLotStatusId]		= @LotStatus_Active
 				,[intParentLotId]		= NULL 
@@ -471,7 +473,7 @@ BEGIN
 				,[intStorageLocationId]	= NULL 
 				,[dblQty]				= 300
 				,[dblLastCost]			= 66.00
-				,[dtmExpiryDate]		= GETDATE()
+				,[dtmExpiryDate]		= NULL
 				,[strLotAlias]			= 'LOT ALIAS FOR 0007'
 				,[intLotStatusId]		= @LotStatus_Active
 				,[intParentLotId]		= NULL 
@@ -507,8 +509,8 @@ BEGIN
 				intItemId
 				, intItemLocationId
 				, intItemUOMId
-				, dtmDate
 				, intLotId 
+				, dtmDate				
 				, dblStockIn
 				, dblStockOut
 				, dblCost
@@ -520,7 +522,7 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
 				, intItemUOMId = @WetGrains_BushelUOM
-				, intLotId = @LotNumber_0001
+				, intLotId = @Lot_0001
 				, dtmDate = 'January 1, 2014'
 				, dblStockIn = 30 
 				, dblStockOut = 0
@@ -533,7 +535,7 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
 				, intItemUOMId = @WetGrains_BushelUOM
-				, intLotId = @LotNumber_0002
+				, intLotId = @Lot_0002
 				, dtmDate = 'January 1, 2014'
 				, dblStockIn = 30
 				, dblStockOut = 0
@@ -546,7 +548,7 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
 				, intItemUOMId = @WetGrains_BushelUOM
-				, intLotId = @LotNumber_0003
+				, intLotId = @Lot_0003
 				, dtmDate = 'January 1, 2014'
 				, dblStockIn = 40 
 				, dblStockOut = 0
@@ -559,7 +561,7 @@ BEGIN
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_DefaultLocation
 				, intItemUOMId = @StickyGrains_BushelUOM
-				, intLotId = @LotNumber_0004
+				, intLotId = @Lot_0004
 				, dtmDate = 'January 1, 2014'
 				, dblStockIn = 150
 				, dblStockOut = 0
@@ -572,7 +574,7 @@ BEGIN
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_DefaultLocation
 				, intItemUOMId = @PremiumGrains_BushelUOM
-				, intLotId = @LotNumber_0005
+				, intLotId = @Lot_0005
 				, dtmDate = 'January 1, 2014'
 				, dblStockIn = 200
 				, dblStockOut = 0
@@ -585,7 +587,7 @@ BEGIN
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_DefaultLocation
 				, intItemUOMId = @ColdGrains_BushelUOM
-				, intLotId = @LotNumber_0006
+				, intLotId = @Lot_0006
 				, dtmDate = 'January 1, 2014'
 				, dblStockIn = 250
 				, dblStockOut = 0
@@ -598,7 +600,7 @@ BEGIN
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_DefaultLocation
 				, intItemUOMId = @HotGrains_BushelUOM
-				, intLotId = @LotNumber_0007
+				, intLotId = @Lot_0007
 				, dtmDate = 'January 1, 2014'
 				, dblStockIn = 300
 				, dblStockOut = 0
@@ -709,7 +711,7 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
 				, intItemUOMId = @WetGrains_BushelUOM
-				, intLotId = @LotNumber_0001
+				, intLotId = @Lot_0001
 				, dtmDate = 'January 1, 2014'
 				, dblQty = 30
 				, dblUOMQty = 1
@@ -730,7 +732,7 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
 				, intItemUOMId = @WetGrains_BushelUOM
-				, intLotId = @LotNumber_0002
+				, intLotId = @Lot_0002
 				, dtmDate = 'January 1, 2014'
 				, dblQty = 30
 				, dblUOMQty = 1
@@ -751,7 +753,7 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
 				, intItemUOMId = @WetGrains_BushelUOM
-				, intLotId = @LotNumber_0003
+				, intLotId = @Lot_0003
 				, dtmDate = 'January 1, 2014'
 				, dblQty = 40
 				, dblUOMQty = 1
@@ -772,7 +774,7 @@ BEGIN
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_DefaultLocation
 				, intItemUOMId = @StickyGrains_BushelUOM
-				, intLotId = @LotNumber_0004
+				, intLotId = @Lot_0004
 				, dtmDate = 'January 1, 2014'
 				, dblQty = 150
 				, dblUOMQty = 1
@@ -793,7 +795,7 @@ BEGIN
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_DefaultLocation
 				, intItemUOMId = @PremiumGrains_BushelUOM
-				, intLotId = @LotNumber_0005
+				, intLotId = @Lot_0005
 				, dtmDate = 'January 1, 2014'
 				, dblQty = 200
 				, dblUOMQty = 1
@@ -814,7 +816,7 @@ BEGIN
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_DefaultLocation
 				, intItemUOMId = @ColdGrains_BushelUOM
-				, intLotId = @LotNumber_0006
+				, intLotId = @Lot_0006
 				, dtmDate = 'January 1, 2014'
 				, dblQty = 250
 				, dblUOMQty = 1
@@ -835,7 +837,7 @@ BEGIN
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_DefaultLocation
 				, intItemUOMId = @HotGrains_BushelUOM
-				, intLotId = @LotNumber_0007
+				, intLotId = @Lot_0007
 				, dtmDate = 'January 1, 2014'
 				, dblQty = 300
 				, dblUOMQty = 1
@@ -852,5 +854,11 @@ BEGIN
 				, intConcurrencyId = 1
 				, intCostingMethod = @AVERAGECOST
 				, ysnIsUnposted = 0
+	END 
+
+	-- Mark all items as lot-tracked
+	BEGIN
+		UPDATE dbo.tblICItem 
+		SET strLotTracking = 'Yes - Manual'
 	END 
 END

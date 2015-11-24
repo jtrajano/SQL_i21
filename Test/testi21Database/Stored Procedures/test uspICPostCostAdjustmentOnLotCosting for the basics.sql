@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnAverageCosting for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLotCosting for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -8,7 +8,7 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOCostAdjustmentLog', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotCostAdjustmentLog', @Identity = 1;
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @WRITE_OFF_SOLD AS INT = -1
@@ -135,8 +135,8 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1	
 		)
 
-		CREATE TABLE ExpectedInventoryFIFOCostAdjustmentLog (
-			[intInventoryFIFOId] INT NOT NULL 
+		CREATE TABLE ExpectedInventoryLotCostAdjustmentLog (
+			[intInventoryLotId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -227,8 +227,8 @@ BEGIN
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
-		-- Assert the expected data for tblICInventoryFIFOCostAdjustmentLog is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOCostAdjustmentLog', 'tblICInventoryFIFOCostAdjustmentLog'
+		-- Assert the expected data for tblICInventoryLotCostAdjustmentLog is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryLotCostAdjustmentLog', 'tblICInventoryLotCostAdjustmentLog'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -238,6 +238,6 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryFIFOCostAdjustmentLog
+	IF OBJECT_ID('ExpectedInventoryLotCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.ExpectedInventoryLotCostAdjustmentLog
 END

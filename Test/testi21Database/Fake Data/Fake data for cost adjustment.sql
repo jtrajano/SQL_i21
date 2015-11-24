@@ -188,9 +188,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransferDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;			
-
-	EXEC tSQLt.ApplyConstraint 'dbo.tblICLot', 'UN_tblICLot';	
-
+		
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
 	INSERT	[dbo].[tblSMStartingNumber] (

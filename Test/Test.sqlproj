@@ -929,6 +929,8 @@
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting 20 KG BAG to LB.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting 20 KG BAG to 50 LB BAG.sql" />
     <Build Include="testi21Database\Fake Data\Fake transactions for Lot costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLotCosting for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnLotCosting, Receive Stocks, Cost Adjust.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

@@ -10,13 +10,11 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(18,6)
 	,@dblNewCost AS NUMERIC(38,20)
-	,@intCostUOMId AS INT	
-	,@intWeightUOMId AS INT
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
 	,@intSourceTransactionId AS INT
-	,@intSourceTransactionDetailId AS INT
+	,@intSourceTransactionDetailId AS INT 
 	,@strSourceTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
@@ -123,24 +121,18 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 		,@CostAdjustmentValue AS NUMERIC(38,20)
 
 DECLARE @LoopTransactionTypeId AS INT 
-		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId	
-	
+		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId		
 		,@intLotId AS INT 
+		
+DECLARE @dblRemainingQty AS NUMERIC(18,6)
+		,@AdjustedQty AS NUMERIC(18,6) 
+		,@AdjustableQty AS NUMERIC(18,6)
 
 -- Exit immediately if item is a non-lot type. 
 IF dbo.fnGetItemLotType(@intItemId) = 0 
 BEGIN 
 	GOTO Post_Exit;
 END 
-
------------------------------------------------------------------------------------------------------------------------------
--- 1. Get the cost bucket and original cost. 
------------------------------------------------------------------------------------------------------------------------------
-
------------------------------------------------------------------------------------------------------------------------------
--- Validation
------------------------------------------------------------------------------------------------------------------------------
-
 
 -- Get the number of Lots to process. 
 DECLARE @LotWithOldCost AS INT = 0 
@@ -154,14 +146,23 @@ WHERE	tblICInventoryLot.intItemId = @intItemId
 		AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
 		AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
 
--- Pick a lot that is not using the new cost. 
-WHILE ISNULL(@LotWithOldCost, 0) > 0 
+
+-- Initialize the Remaining Qty 
+SET @dblRemainingQty = ISNULL(@dblQty, 0) 
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Start loop for the lot numbers. 
+-----------------------------------------------------------------------------------------------------------------------------
+WHILE ISNULL(@LotWithOldCost, 0) > 0 AND @dblRemainingQty > 0 
 BEGIN 
 	SET @CostBucketId = NULL 
 
-	-- Pick a lot.
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- 1. Get the cost bucket and original cost. 
+	-----------------------------------------------------------------------------------------------------------------------------
 	BEGIN 
-		SELECT	@CostBucketId = intInventoryLotId
+		SELECT	TOP 1
+				@CostBucketId = intInventoryLotId
 				,@CostBucketCost = dblCost			
 				,@CostBucketStockInQty = dblStockIn
 				,@CostBucketStockOutQty = dblStockOut
@@ -172,449 +173,469 @@ BEGIN
 		FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
 					ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
 		WHERE	tblICInventoryLot.intItemId = @intItemId
+				AND tblICInventoryLot.intItemUOMId = @intItemUOMId
 				AND tblICInventoryLot.intItemLocationId = @intItemLocationId
 				AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
 				AND tblICInventoryLot.intTransactionDetailId = @intSourceTransactionDetailId
 				AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
 				AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
 				AND tblICInventoryLot.intLotId > ISNULL(@intLotId, 0) 
+				AND tblICInventoryLot.dblCost <> @dblNewCost
 	END 
 
-	-- Convert the new cost to match the UOM used in the Lot cost bucket.  
-	IF @CostBucketUOMQty IS NOT NULL 
+	-- Validate the cost bucket
 	BEGIN 
-		SET @dblNewCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, @CostBucketUOMQty, @dblNewCost) 
-	END 
+		IF @CostBucketId IS NULL
+		BEGIN 
+			DECLARE @strItemNo AS NVARCHAR(50)				
 
-	-- Check if new cost is different from the lot cost. If different, then break out of the loop. 
-	-- The system has found what it needs to process. 
-	IF	@CostBucketUOMQty IS NOT NULL  
-		AND ISNULL(@dblNewCost, 0) <> ISNULL(@CostBucketCost, 0)
-	BEGIN 
-		BREAK;
+			SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
+			FROM	dbo.tblICItem 
+			WHERE	intItemId = @intItemId
+
+			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item {Item No}.'
+			RAISERROR(80066, 11, 1, @strItemNo)  
+			RETURN -1 
+		END
 	END 
 
 	-- Reduce the counter. 
 	SET @LotWithOldCost -= 1		
-END 
 
--- Validate the cost bucket
-BEGIN 
-	IF @CostBucketId IS NULL
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- 3. Compute the cost difference. 
+	-- 4. Update the cost bucket with the new cost. 
+	-- 5. Create the 'Inventory Transaction' as 'Cost Adjustment' type. 
+	-----------------------------------------------------------------------------------------------------------------------------
 	BEGIN 
-		DECLARE @strItemNo AS NVARCHAR(50)				
-
-		SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
-		FROM	dbo.tblICItem 
-		WHERE	intItemId = @intItemId
-
-		-- 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item {Item No}.'
-		RAISERROR(80066, 11, 1, @strItemNo)  
-		RETURN -1 
-	END
-END 
-
------------------------------------------------------------------------------------------------------------------------------
--- 3. Compute the cost difference. 
--- 4. Update the cost bucket with the new cost. 
--- 5. Create the 'Inventory Transaction' as 'Cost Adjustment' type. 
------------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	-- Get the original cost. 
-	BEGIN 
-		-- Get the original cost from the Lot cost adjustment log table. 
-		SELECT	@OriginalCost = dblCost
-		FROM	dbo.tblICInventoryLotCostAdjustmentLog
-		WHERE	intInventoryLotId = @CostBucketId
-				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-		
-		-- If none found, the original cost is the cost bucket cost. 
-		SET @OriginalCost = ISNULL(@OriginalCost, @CostBucketCost) 
-	END 
-
-	-- Compute the new transaction value. 
-	SELECT	@NewTransactionValue = @dblQty * @dblNewCost
-
-	-- Compute the original transaction value. 
-	SELECT	@OriginalTransactionValue = @dblQty * @OriginalCost
-
-	-- Compute the new cost. 
-	SELECT @dblNewCalculatedCost =	@CostBucketCost 
-									+ ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
-
-	-- Compute value to adjust the item valuation. 
-	SELECT @CostAdjustmentValue = @dblQty * (@dblNewCost - @OriginalCost)
-
-	-- Determine the transaction type to use. 
-	SELECT @CostAdjustmentTransactionType =		
-			CASE	WHEN @intTransactionTypeId NOT IN (
-							@INV_TRANS_TYPE_Revalue_WIP
-							, @INV_TRANS_TYPE_Revalue_Produced
-							, @INV_TRANS_TYPE_Revalue_Transfer
-							, @INV_TRANS_TYPE_Revalue_Build_Assembly
-					) THEN 
-						@INV_TRANS_TYPE_Cost_Adjustment
-					ELSE 
-						@intTransactionTypeId
-			END
-
-	-- Create the 'Cost Adjustment'
-	EXEC [dbo].[uspICPostInventoryTransaction]
-		@intItemId								= @intItemId
-		,@intItemLocationId						= @intItemLocationId
-		,@intItemUOMId							= @intItemUOMId
-		,@intSubLocationId						= @intSubLocationId
-		,@intStorageLocationId					= @intStorageLocationId
-		,@dtmDate								= @dtmDate
-		,@dblQty								= 0
-		,@dblUOMQty								= 0
-		,@dblCost								= 0
-		,@dblValue								= @CostAdjustmentValue
-		,@dblSalesPrice							= 0
-		,@intCurrencyId							= @intCurrencyId 
-		,@dblExchangeRate						= @dblExchangeRate
-		,@intTransactionId						= @intTransactionId
-		,@intTransactionDetailId				= @intTransactionDetailId
-		,@strTransactionId						= @strTransactionId
-		,@strBatchId							= @strBatchId
-		,@intTransactionTypeId					= @CostAdjustmentTransactionType -- @INV_TRANS_TYPE_Cost_Adjustment
-		,@intLotId								= @intLotId 
-		,@intRelatedInventoryTransactionId		= NULL 
-		,@intRelatedTransactionId				= @CostBucketIntTransactionId 
-		,@strRelatedTransactionId				= @CostBucketStrTransactionId
-		,@strTransactionForm					= @strTransactionForm
-		,@intUserId								= @intUserId
-		,@intCostingMethod						= @AVERAGECOST
-		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-
-	-- Log original cost to tblICInventoryLotCostAdjustmentLog
-	IF NOT EXISTS (
-			SELECT	TOP 1 1 
+		-- Get the original cost. 
+		BEGIN 
+			-- Get the original cost from the Lot cost adjustment log table. 
+			SELECT	@OriginalCost = dblCost
 			FROM	dbo.tblICInventoryLotCostAdjustmentLog
 			WHERE	intInventoryLotId = @CostBucketId
 					AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-	)
-	BEGIN 
-		INSERT INTO tblICInventoryLotCostAdjustmentLog (
-				[intInventoryLotId]
-				,[intInventoryTransactionId]
-				,[intInventoryCostAdjustmentTypeId]
-				,[dblQty]
-				,[dblCost]
-				,[dtmCreated]
-				,[intCreatedUserId]		
-		)
-		SELECT	[intInventoryLotId]				= @CostBucketId
-				,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
-				,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
-				,[dblQty]							= @CostBucketStockInQty
-				,[dblCost]							= @CostBucketCost
-				,[dtmCreated]						= GETDATE()
-				,[intCreatedUserId]					= @intUserId
-	END 
-
-	-- Log a new cost. 
-	BEGIN 
-		INSERT INTO tblICInventoryLotCostAdjustmentLog (
-				[intInventoryLotId]
-				,[intInventoryTransactionId]
-				,[intInventoryCostAdjustmentTypeId]
-				,[dblQty]
-				,[dblCost]
-				,[dtmCreated]
-				,[intCreatedUserId]		
-		)
-		SELECT	[intInventoryLotId]				= @CostBucketId
-				,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
-				,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_New_Cost
-				,[dblQty]							= @dblQty
-				,[dblCost]							= @dblNewCost
-				,[dtmCreated]						= GETDATE()
-				,[intCreatedUserId]					= @intUserId
-	END 
-			
-	-- Calculate the new cost
-	UPDATE	CostBucket
-	SET		dblCost = @dblNewCalculatedCost
-	FROM	tblICInventoryLot CostBucket
-	WHERE	CostBucket.intInventoryLotId = @CostBucketId
-			AND CostBucket.dblStockIn > 0 
-			AND ISNULL(ysnIsUnposted, 0) = 0 
-END 
-
------------------------------------------------------------------------------------------------------------------------------
--- Begin loop for sold or consumed stocks
------------------------------------------------------------------------------------------------------------------------------
-IF @dblNewCalculatedCost IS NOT NULL 
-BEGIN 
-	-- Get the Lot Out records. 
-	DECLARE @LotOutId AS INT 
-			,@LotOutInventoryLotId AS INT 
-			,@LotOutInventoryTransactionId AS INT 
-			,@LotOutRevalueLotId AS INT 
-			,@LotOutQty AS NUMERIC(18, 6)
-			,@LotCostAdjustQty AS NUMERIC(18, 6)
-
-			,@StockQtyAvailableToRevalue AS NUMERIC(18, 6) = @dblQty
-			,@StockQtyToRevalue AS NUMERIC(18, 6) = @dblQty
-
-	-----------------------------------------------------------------------------------------------------------------------------
-	-- Create the cursor
-	-- Make sure the following options are used: 
-	-- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
-	-- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
-	-----------------------------------------------------------------------------------------------------------------------------
-	DECLARE loopLotOut CURSOR LOCAL FAST_FORWARD
-	FOR 
-	SELECT  intId
-			,intInventoryLotId
-			,intInventoryTransactionId
-			,intRevalueLotId
-			,dblQty
-			,dblCostAdjustQty
-	FROM	dbo.tblICInventoryLotOut LotOut
-	WHERE	LotOut.intInventoryLotId = @CostBucketId
-			AND ISNULL(LotOut.dblCostAdjustQty, 0) < LotOut.dblQty -- If stocks can have a cost adjustment; [Cost Adj Qty] is less than [Lot Out Qty]
-
-	OPEN loopLotOut;
-
-	-- Initial fetch attempt
-	FETCH NEXT FROM loopLotOut INTO 
-			@LotOutId
-			,@LotOutInventoryLotId 
-			,@LotOutInventoryTransactionId 
-			,@LotOutRevalueLotId 
-			,@LotOutQty 
-			,@LotCostAdjustQty
-	;
-	-----------------------------------------------------------------------------------------------------------------------------
-	-- Start of the loop
-	-----------------------------------------------------------------------------------------------------------------------------
-	WHILE @@FETCH_STATUS = 0
-	BEGIN 
 		
-		-- Initialize the variables
-		SELECT	@InvTranId						= NULL 
-				,@InvTranSubLocationId			= NULL
-				,@InvTranStorageLocationId		= NULL
-				,@InvTranQty					= NULL
-				,@InvTranUOMQty					= NULL
-				,@InvTranCost					= NULL
-				,@InvTranValue					= NULL
-				,@InvTranCurrencyId				= NULL
-				,@InvTranExchangeRate			= NULL
-				,@InvTranIntTransactionId		= NULL
-				,@InvTranStringTransactionId	= NULL
-				,@InvTranTypeId					= NULL 
-				,@InvTranBatchId				= NULL 
+			-- If none found, the original cost is the cost bucket cost. 
+			SET @OriginalCost = ISNULL(@OriginalCost, @CostBucketCost) 
+		END 
 
-		-- Get the Stock Out data from the Inventory Transaction
-		SELECT	@InvTranId						= InvTran.intInventoryTransactionId
-				,@InvTranSubLocationId			= InvTran.intSubLocationId
-				,@InvTranStorageLocationId		= InvTran.intStorageLocationId
-				,@InvTranQty					= InvTran.dblQty 
-				,@InvTranUOMQty					= InvTran.dblUOMQty
-				,@InvTranCost					= InvTran.dblCost
-				,@InvTranValue					= InvTran.dblValue 
-				,@InvTranCurrencyId				= InvTran.intCurrencyId
-				,@InvTranExchangeRate			= InvTran.dblExchangeRate
-				,@InvTranIntTransactionId		= InvTran.intTransactionId
-				,@InvTranStringTransactionId	= InvTran.strTransactionId
-				,@InvTranTypeId					= InvTran.intTransactionTypeId
-				,@InvTranBatchId				= InvTran.strBatchId
-		FROM	dbo.tblICInventoryTransaction InvTran
-		WHERE	InvTran.intInventoryTransactionId = @LotOutInventoryTransactionId
-
-		-- Calculate the available 'out' stocks that the system can revalue. 
-		SET @StockQtyAvailableToRevalue = ISNULL(@LotOutQty, 0) - ISNULL(@LotCostAdjustQty, 0)
-		
-		-- If there are available out stocks, then revalue it.  
-		IF	 @StockQtyAvailableToRevalue > 0 
-			AND @StockQtyToRevalue > 0
-			AND @InvTranId IS NOT NULL 
+		-- Compute the stock Qty available for cost adjustment. 
 		BEGIN 
-			-- Calculate the revalue amount for the inventory transaction. 
-			SELECT @InvTranValue =	-1 	
-									* CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
-											@StockQtyToRevalue
-										ELSE 
-											ISNULL(@StockQtyAvailableToRevalue, 0)
-									END 																								
-									* (@dblNewCost - @InvTranCost) 
+			SET @AdjustedQty = NULL 
 
-			----------------------------------------------------------
-			-- 7. If stock was sold, then do the "Revalue Sold". 
-			----------------------------------------------------------
-			IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
-			BEGIN 
-				EXEC [dbo].[uspICPostInventoryTransaction]
-					@intItemId								= @intItemId
-					,@intItemLocationId						= @intItemLocationId
-					,@intItemUOMId							= @intItemUOMId
-					,@intSubLocationId						= @InvTranSubLocationId 
-					,@intStorageLocationId					= @InvTranStorageLocationId 
-					,@dtmDate								= @dtmDate
-					,@dblQty								= 0
-					,@dblUOMQty								= 0
-					,@dblCost								= 0
-					,@dblValue								= @InvTranValue
-					,@dblSalesPrice							= 0
-					,@intCurrencyId							= @InvTranCurrencyId
-					,@dblExchangeRate						= @InvTranExchangeRate
-					,@intTransactionId						= @intTransactionId
-					,@intTransactionDetailId				= @intTransactionDetailId
-					,@strTransactionId						= @strTransactionId
-					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
-					,@intLotId								= @intLotId 
-					,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
-					,@intRelatedTransactionId				= @InvTranIntTransactionId 
-					,@strRelatedTransactionId				= @InvTranStringTransactionId 
-					,@strTransactionForm					= @strTransactionForm
-					,@intUserId								= @intUserId
-					,@intCostingMethod						= @AVERAGECOST
-					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-			END 	
+			SELECT	@AdjustedQty = SUM(dblQty) 
+			FROM	dbo.tblICInventoryLotCostAdjustmentLog
+			WHERE	intInventoryLotId = @CostBucketId
+					AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 
-			---------------------------------------------------------------
-			-- 8. If stock was consumed in a production or transfer
-			---------------------------------------------------------------
-			ELSE IF @InvTranTypeId IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
-			BEGIN 
-				SELECT	@CostAdjustmentTransactionType 
-							= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
-									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_WIP
-									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
-							END
-						,@LoopTransactionTypeId
-							= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
-									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_Produced
-									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
-							END
+			-- Determine the stock Qty it can process. 
+			SET @AdjustableQty = @CostBucketStockInQty - ISNULL(@AdjustedQty, 0) 
 
-				EXEC [dbo].[uspICPostInventoryTransaction]
-					@intItemId								= @intItemId
-					,@intItemLocationId						= @intItemLocationId
-					,@intItemUOMId							= @intItemUOMId
-					,@intSubLocationId						= @InvTranSubLocationId 
-					,@intStorageLocationId					= @InvTranStorageLocationId 
-					,@dtmDate								= @dtmDate
-					,@dblQty								= 0
-					,@dblUOMQty								= 0
-					,@dblCost								= 0
-					,@dblValue								= @InvTranValue
-					,@dblSalesPrice							= 0
-					,@intCurrencyId							= @InvTranCurrencyId
-					,@dblExchangeRate						= @InvTranExchangeRate
-					,@intTransactionId						= @intTransactionId
-					,@intTransactionDetailId				= @intTransactionDetailId
-					,@strTransactionId						= @strTransactionId
-					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @CostAdjustmentTransactionType
-					,@intLotId								= @intLotId 
-					,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
-					,@intRelatedTransactionId				= @InvTranIntTransactionId 
-					,@strRelatedTransactionId				= @InvTranStringTransactionId 
-					,@strTransactionForm					= @strTransactionForm
-					,@intUserId								= @intUserId
-					,@intCostingMethod						= @AVERAGECOST
-					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-					
-				----------------------------------------------------------------------------------------------------
-				-- 9. Get the 'produced/transferred item'. Insert it in a temporary table for later processing. 
-				----------------------------------------------------------------------------------------------------
-				INSERT INTO #tmpRevalueProducedItems (
-						[intItemId] 
-						,[intItemLocationId] 
-						,[intItemUOMId] 
-						,[dtmDate] 
-						,[dblQty] 
-						,[dblUOMQty] 
-						,[dblNewCost] 
-						,[intCurrencyId] 
-						,[dblExchangeRate] 
-						,[intTransactionId] 
-						,[intTransactionDetailId] 
-						,[strTransactionId] 
-						,[intTransactionTypeId] 
-						,[intLotId] 
-						,[intSubLocationId] 
-						,[intStorageLocationId] 
-						,[ysnIsStorage] 
-						,[strActualCostId] 
-						,[intSourceTransactionId] 
-						,[intSourceTransactionDetailId] 
-						,[strSourceTransactionId] 				
-				)
-				SELECT 
-						[intItemId]						= InvTran.intItemId
-						,[intItemLocationId]			= InvTran.intItemLocationId
-						,[intItemUOMId]					= InvTran.intItemUOMId
-						,[dtmDate]						= @dtmDate
-						,[dblQty]						= InvTran.dblQty
-						,[dblUOMQty]					= InvTran.dblUOMQty
-						,[dblNewCost]					= ((InvTran.dblQty * InvTran.dblCost) + (-1 * @InvTranValue)) / InvTran.dblQty
-						,[intCurrencyId]				= InvTran.intCurrencyId
-						,[dblExchangeRate]				= InvTran.dblExchangeRate
-						,[intTransactionId]				= @intTransactionId
-						,[intTransactionDetailId]		= @intTransactionDetailId
-						,[strTransactionId]				= @strTransactionId
-						,[intTransactionTypeId]			= @LoopTransactionTypeId -- @intTransactionTypeId
-						,[intLotId]						= InvTran.intLotId
-						,[intSubLocationId]				= InvTran.intSubLocationId
-						,[intStorageLocationId]			= InvTran.intStorageLocationId
-						,[ysnIsStorage]					= NULL 
-						,[strActualCostId]				= NULL 
-						,[intSourceTransactionId]		= InvTran.intTransactionId
-						,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
-						,[strSourceTransactionId]		= InvTran.strTransactionId						
-				FROM	dbo.tblICInventoryTransaction InvTran
-				WHERE	InvTran.strBatchId = @InvTranBatchId
-						AND InvTran.intTransactionId = @InvTranIntTransactionId
-						AND InvTran.strTransactionId = @InvTranStringTransactionId
-						AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
-						AND ISNULL(InvTran.dblQty, 0) > 0 
-						AND InvTran.intTransactionTypeId IN (
-							@INV_TRANS_TYPE_Produce
-							, @INV_TRANS_TYPE_Build_Assembly
-							, @INV_TRANS_Inventory_Transfer
-						)
-			END 
+			-- Initialize the Qty
+			SET @dblQty = 
+				CASE	WHEN @dblRemainingQty >= @AdjustableQty THEN 
+							@AdjustableQty 
+						ELSE 
+							@dblRemainingQty
+				END 
 
-			-- Compute the remaining Revalued Qty. 
-			SET @StockQtyToRevalue = @StockQtyToRevalue - @StockQtyAvailableToRevalue
+			-- Calculate the remaining Qty
+			SET @dblRemainingQty = 
+				CASE	WHEN @dblRemainingQty >= @AdjustableQty THEN 
+							@dblRemainingQty - @AdjustableQty 
+						ELSE 
+							0 
+				END 
+		END 
 
-			-- Update the dblCostAdjustQty field in the Lot Out table. 
-			UPDATE	LotOut
-			SET		dblCostAdjustQty =	ISNULL(LotOut.dblCostAdjustQty, 0) + 
-										CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
-												@StockQtyToRevalue
-											ELSE 
-												ISNULL(@StockQtyAvailableToRevalue, 0)
-										END 	
-			FROM	dbo.tblICInventoryLotOut LotOut
-			WHERE	intId = @LotOutId
-		END 				
+		-- Compute the new transaction value. 
+		SELECT	@NewTransactionValue = @dblQty * @dblNewCost
 
-		-- Attempt to fetch the next row from cursor. 
+		-- Compute the original transaction value. 
+		SELECT	@OriginalTransactionValue = @dblQty * @OriginalCost
+
+		-- Compute the new cost. 
+		SELECT @dblNewCalculatedCost =	@CostBucketCost 
+										+ ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
+
+		-- Compute value to adjust the item valuation. 
+		SELECT @CostAdjustmentValue = @dblQty * (@dblNewCost - @OriginalCost)
+
+		-- Determine the transaction type to use. 
+		SELECT @CostAdjustmentTransactionType =		
+				CASE	WHEN @intTransactionTypeId NOT IN (
+								@INV_TRANS_TYPE_Revalue_WIP
+								, @INV_TRANS_TYPE_Revalue_Produced
+								, @INV_TRANS_TYPE_Revalue_Transfer
+								, @INV_TRANS_TYPE_Revalue_Build_Assembly
+						) THEN 
+							@INV_TRANS_TYPE_Cost_Adjustment
+						ELSE 
+							@intTransactionTypeId
+				END
+
+		-- Create the 'Cost Adjustment'
+		EXEC [dbo].[uspICPostInventoryTransaction]
+			@intItemId								= @intItemId
+			,@intItemLocationId						= @intItemLocationId
+			,@intItemUOMId							= @intItemUOMId
+			,@intSubLocationId						= @intSubLocationId
+			,@intStorageLocationId					= @intStorageLocationId
+			,@dtmDate								= @dtmDate
+			,@dblQty								= 0
+			,@dblUOMQty								= 0
+			,@dblCost								= 0
+			,@dblValue								= @CostAdjustmentValue
+			,@dblSalesPrice							= 0
+			,@intCurrencyId							= @intCurrencyId 
+			,@dblExchangeRate						= @dblExchangeRate
+			,@intTransactionId						= @intTransactionId
+			,@intTransactionDetailId				= @intTransactionDetailId
+			,@strTransactionId						= @strTransactionId
+			,@strBatchId							= @strBatchId
+			,@intTransactionTypeId					= @CostAdjustmentTransactionType -- @INV_TRANS_TYPE_Cost_Adjustment
+			,@intLotId								= @intLotId 
+			,@intRelatedInventoryTransactionId		= NULL 
+			,@intRelatedTransactionId				= @CostBucketIntTransactionId 
+			,@strRelatedTransactionId				= @CostBucketStrTransactionId
+			,@strTransactionForm					= @strTransactionForm
+			,@intUserId								= @intUserId
+			,@intCostingMethod						= @LOTCOST
+			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+
+		-- Log original cost to tblICInventoryLotCostAdjustmentLog
+		IF NOT EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryLotCostAdjustmentLog
+				WHERE	intInventoryLotId = @CostBucketId
+						AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+		)
+		BEGIN 
+			INSERT INTO tblICInventoryLotCostAdjustmentLog (
+					[intInventoryLotId]
+					,[intInventoryTransactionId]
+					,[intInventoryCostAdjustmentTypeId]
+					,[dblQty]
+					,[dblCost]
+					,[dtmCreated]
+					,[intCreatedUserId]		
+			)
+			SELECT	[intInventoryLotId]					= @CostBucketId
+					,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
+					,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
+					,[dblQty]							= @CostBucketStockInQty
+					,[dblCost]							= @CostBucketCost
+					,[dtmCreated]						= GETDATE()
+					,[intCreatedUserId]					= @intUserId
+		END 
+
+		-- Log a new cost. 
+		BEGIN 
+			INSERT INTO tblICInventoryLotCostAdjustmentLog (
+					[intInventoryLotId]
+					,[intInventoryTransactionId]
+					,[intInventoryCostAdjustmentTypeId]
+					,[dblQty]
+					,[dblCost]
+					,[dtmCreated]
+					,[intCreatedUserId]		
+			)
+			SELECT	[intInventoryLotId]					= @CostBucketId
+					,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
+					,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_New_Cost
+					,[dblQty]							= @dblQty
+					,[dblCost]							= @dblNewCost
+					,[dtmCreated]						= GETDATE()
+					,[intCreatedUserId]					= @intUserId
+		END 
+			
+		-- Calculate the new cost
+		UPDATE	CostBucket
+		SET		dblCost = @dblNewCalculatedCost
+		FROM	tblICInventoryLot CostBucket
+		WHERE	CostBucket.intInventoryLotId = @CostBucketId
+				AND CostBucket.dblStockIn > 0 
+				AND ISNULL(ysnIsUnposted, 0) = 0 
+	END 
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- Begin loop for sold or consumed stocks
+	-----------------------------------------------------------------------------------------------------------------------------
+	IF @dblNewCalculatedCost IS NOT NULL 
+	BEGIN 
+		-- Get the Lot Out records. 
+		DECLARE @LotOutId AS INT 
+				,@LotOutInventoryLotId AS INT 
+				,@LotOutInventoryTransactionId AS INT 
+				,@LotOutRevalueLotId AS INT 
+				,@LotOutQty AS NUMERIC(18, 6)
+				,@LotCostAdjustQty AS NUMERIC(18, 6)
+
+				,@StockQtyAvailableToRevalue AS NUMERIC(18, 6) = @dblQty
+				,@StockQtyToRevalue AS NUMERIC(18, 6) = @dblQty
+
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- Create the cursor
+		-- Make sure the following options are used: 
+		-- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
+		-- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
+		-----------------------------------------------------------------------------------------------------------------------------
+		DECLARE loopLotOut CURSOR LOCAL FAST_FORWARD
+		FOR 
+		SELECT  intId
+				,intInventoryLotId
+				,intInventoryTransactionId
+				,intRevalueLotId
+				,dblQty
+				,dblCostAdjustQty
+		FROM	dbo.tblICInventoryLotOut LotOut
+		WHERE	LotOut.intInventoryLotId = @CostBucketId
+				AND ISNULL(LotOut.dblCostAdjustQty, 0) < LotOut.dblQty -- If stocks can have a cost adjustment; [Cost Adj Qty] is less than [Lot Out Qty]
+
+		OPEN loopLotOut;
+
+		-- Initial fetch attempt
 		FETCH NEXT FROM loopLotOut INTO 
 				@LotOutId
 				,@LotOutInventoryLotId 
 				,@LotOutInventoryTransactionId 
 				,@LotOutRevalueLotId 
-				,@LotOutQty
+				,@LotOutQty 
 				,@LotCostAdjustQty
-		; 
+		;
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- Start of the loop for sold/produced items. 
+		-----------------------------------------------------------------------------------------------------------------------------
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 
+		
+			-- Initialize the variables
+			SELECT	@InvTranId						= NULL 
+					,@InvTranSubLocationId			= NULL
+					,@InvTranStorageLocationId		= NULL
+					,@InvTranQty					= NULL
+					,@InvTranUOMQty					= NULL
+					,@InvTranCost					= NULL
+					,@InvTranValue					= NULL
+					,@InvTranCurrencyId				= NULL
+					,@InvTranExchangeRate			= NULL
+					,@InvTranIntTransactionId		= NULL
+					,@InvTranStringTransactionId	= NULL
+					,@InvTranTypeId					= NULL 
+					,@InvTranBatchId				= NULL 
+
+			-- Get the Stock Out data from the Inventory Transaction
+			SELECT	@InvTranId						= InvTran.intInventoryTransactionId
+					,@InvTranSubLocationId			= InvTran.intSubLocationId
+					,@InvTranStorageLocationId		= InvTran.intStorageLocationId
+					,@InvTranQty					= InvTran.dblQty 
+					,@InvTranUOMQty					= InvTran.dblUOMQty
+					,@InvTranCost					= InvTran.dblCost
+					,@InvTranValue					= InvTran.dblValue 
+					,@InvTranCurrencyId				= InvTran.intCurrencyId
+					,@InvTranExchangeRate			= InvTran.dblExchangeRate
+					,@InvTranIntTransactionId		= InvTran.intTransactionId
+					,@InvTranStringTransactionId	= InvTran.strTransactionId
+					,@InvTranTypeId					= InvTran.intTransactionTypeId
+					,@InvTranBatchId				= InvTran.strBatchId
+			FROM	dbo.tblICInventoryTransaction InvTran
+			WHERE	InvTran.intInventoryTransactionId = @LotOutInventoryTransactionId
+
+			-- Calculate the available 'out' stocks that the system can revalue. 
+			SET @StockQtyAvailableToRevalue = ISNULL(@LotOutQty, 0) - ISNULL(@LotCostAdjustQty, 0)
+		
+			-- If there are available out stocks, then revalue it.  
+			IF	 @StockQtyAvailableToRevalue > 0 
+				AND @StockQtyToRevalue > 0
+				AND @InvTranId IS NOT NULL 
+			BEGIN 
+				-- Calculate the revalue amount for the inventory transaction. 
+				SELECT @InvTranValue =	-1 	
+										* CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
+												@StockQtyToRevalue
+											ELSE 
+												ISNULL(@StockQtyAvailableToRevalue, 0)
+										END 																								
+										* (@dblNewCost - @InvTranCost) 
+
+				----------------------------------------------------------
+				-- 7. If stock was sold, then do the "Revalue Sold". 
+				----------------------------------------------------------
+				IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
+				BEGIN 
+					EXEC [dbo].[uspICPostInventoryTransaction]
+						@intItemId								= @intItemId
+						,@intItemLocationId						= @intItemLocationId
+						,@intItemUOMId							= @intItemUOMId
+						,@intSubLocationId						= @InvTranSubLocationId 
+						,@intStorageLocationId					= @InvTranStorageLocationId 
+						,@dtmDate								= @dtmDate
+						,@dblQty								= 0
+						,@dblUOMQty								= 0
+						,@dblCost								= 0
+						,@dblValue								= @InvTranValue
+						,@dblSalesPrice							= 0
+						,@intCurrencyId							= @InvTranCurrencyId
+						,@dblExchangeRate						= @InvTranExchangeRate
+						,@intTransactionId						= @intTransactionId
+						,@intTransactionDetailId				= @intTransactionDetailId
+						,@strTransactionId						= @strTransactionId
+						,@strBatchId							= @strBatchId
+						,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
+						,@intLotId								= @intLotId 
+						,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
+						,@intRelatedTransactionId				= @InvTranIntTransactionId 
+						,@strRelatedTransactionId				= @InvTranStringTransactionId 
+						,@strTransactionForm					= @strTransactionForm
+						,@intUserId								= @intUserId
+						,@intCostingMethod						= @LOTCOST
+						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+				END 	
+
+				---------------------------------------------------------------
+				-- 8. If stock was consumed in a production or transfer
+				---------------------------------------------------------------
+				ELSE IF @InvTranTypeId IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
+				BEGIN 
+					SELECT	@CostAdjustmentTransactionType 
+								= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_WIP
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
+								END
+							,@LoopTransactionTypeId
+								= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_Produced
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
+								END
+
+					EXEC [dbo].[uspICPostInventoryTransaction]
+						@intItemId								= @intItemId
+						,@intItemLocationId						= @intItemLocationId
+						,@intItemUOMId							= @intItemUOMId
+						,@intSubLocationId						= @InvTranSubLocationId 
+						,@intStorageLocationId					= @InvTranStorageLocationId 
+						,@dtmDate								= @dtmDate
+						,@dblQty								= 0
+						,@dblUOMQty								= 0
+						,@dblCost								= 0
+						,@dblValue								= @InvTranValue
+						,@dblSalesPrice							= 0
+						,@intCurrencyId							= @InvTranCurrencyId
+						,@dblExchangeRate						= @InvTranExchangeRate
+						,@intTransactionId						= @intTransactionId
+						,@intTransactionDetailId				= @intTransactionDetailId
+						,@strTransactionId						= @strTransactionId
+						,@strBatchId							= @strBatchId
+						,@intTransactionTypeId					= @CostAdjustmentTransactionType
+						,@intLotId								= @intLotId 
+						,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
+						,@intRelatedTransactionId				= @InvTranIntTransactionId 
+						,@strRelatedTransactionId				= @InvTranStringTransactionId 
+						,@strTransactionForm					= @strTransactionForm
+						,@intUserId								= @intUserId
+						,@intCostingMethod						= @LOTCOST
+						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+					
+					----------------------------------------------------------------------------------------------------
+					-- 9. Get the 'produced/transferred item'. Insert it in a temporary table for later processing. 
+					----------------------------------------------------------------------------------------------------
+					INSERT INTO #tmpRevalueProducedItems (
+							[intItemId] 
+							,[intItemLocationId] 
+							,[intItemUOMId] 
+							,[dtmDate] 
+							,[dblQty] 
+							,[dblUOMQty] 
+							,[dblNewCost] 
+							,[intCurrencyId] 
+							,[dblExchangeRate] 
+							,[intTransactionId] 
+							,[intTransactionDetailId] 
+							,[strTransactionId] 
+							,[intTransactionTypeId] 
+							,[intLotId] 
+							,[intSubLocationId] 
+							,[intStorageLocationId] 
+							,[ysnIsStorage] 
+							,[strActualCostId] 
+							,[intSourceTransactionId] 
+							,[intSourceTransactionDetailId] 
+							,[strSourceTransactionId] 				
+					)
+					SELECT 
+							[intItemId]						= InvTran.intItemId
+							,[intItemLocationId]			= InvTran.intItemLocationId
+							,[intItemUOMId]					= InvTran.intItemUOMId
+							,[dtmDate]						= @dtmDate
+							,[dblQty]						= InvTran.dblQty
+							,[dblUOMQty]					= InvTran.dblUOMQty
+							,[dblNewCost]					= ((InvTran.dblQty * InvTran.dblCost) + (-1 * @InvTranValue)) / InvTran.dblQty
+							,[intCurrencyId]				= InvTran.intCurrencyId
+							,[dblExchangeRate]				= InvTran.dblExchangeRate
+							,[intTransactionId]				= @intTransactionId
+							,[intTransactionDetailId]		= @intTransactionDetailId
+							,[strTransactionId]				= @strTransactionId
+							,[intTransactionTypeId]			= @LoopTransactionTypeId -- @intTransactionTypeId
+							,[intLotId]						= InvTran.intLotId
+							,[intSubLocationId]				= InvTran.intSubLocationId
+							,[intStorageLocationId]			= InvTran.intStorageLocationId
+							,[ysnIsStorage]					= NULL 
+							,[strActualCostId]				= NULL 
+							,[intSourceTransactionId]		= InvTran.intTransactionId
+							,[intSourceTransactionDetailId]	= InvTran.intTransactionDetailId
+							,[strSourceTransactionId]		= InvTran.strTransactionId						
+					FROM	dbo.tblICInventoryTransaction InvTran
+					WHERE	InvTran.strBatchId = @InvTranBatchId
+							AND InvTran.intTransactionId = @InvTranIntTransactionId
+							AND InvTran.strTransactionId = @InvTranStringTransactionId
+							AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
+							AND ISNULL(InvTran.dblQty, 0) > 0 
+							AND InvTran.intTransactionTypeId IN (
+								@INV_TRANS_TYPE_Produce
+								, @INV_TRANS_TYPE_Build_Assembly
+								, @INV_TRANS_Inventory_Transfer
+							)
+				END 
+
+				-- Compute the remaining Revalued Qty. 
+				SET @StockQtyToRevalue = @StockQtyToRevalue - @StockQtyAvailableToRevalue
+
+				-- Update the dblCostAdjustQty field in the Lot Out table. 
+				UPDATE	LotOut
+				SET		dblCostAdjustQty =	ISNULL(LotOut.dblCostAdjustQty, 0) + 
+											CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
+													@StockQtyToRevalue
+												ELSE 
+													ISNULL(@StockQtyAvailableToRevalue, 0)
+											END 	
+				FROM	dbo.tblICInventoryLotOut LotOut
+				WHERE	intId = @LotOutId
+			END 				
+
+			-- Attempt to fetch the next row from cursor. 
+			FETCH NEXT FROM loopLotOut INTO 
+					@LotOutId
+					,@LotOutInventoryLotId 
+					,@LotOutInventoryTransactionId 
+					,@LotOutRevalueLotId 
+					,@LotOutQty
+					,@LotCostAdjustQty
+			; 
+		END;
 	END;
-END;
 
-CLOSE loopLotOut;
-DEALLOCATE loopLotOut;
-
------------------------------------------------------------------------------------------------------------------------------
--- End loop for sold stocks
------------------------------------------------------------------------------------------------------------------------------
+	CLOSE loopLotOut;
+	DEALLOCATE loopLotOut;
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- End loop for sold stocks
+	-----------------------------------------------------------------------------------------------------------------------------
 	
+END
+-----------------------------------------------------------------------------------------------------------------------------
+-- End loop for the lot numbers. 
+-----------------------------------------------------------------------------------------------------------------------------
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- 6. Update the average cost 
 -----------------------------------------------------------------------------------------------------------------------------
