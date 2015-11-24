@@ -1,6 +1,7 @@
 ﻿CREATE TABLE dbo.tblMFItemDemand (
 	intItemDemandId INT identity(1, 1) CONSTRAINT PK_tblMFItemDemand_intItemDemandId PRIMARY KEY
 	,intItemId INT NOT NULL
+	,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,intLocationId INT NOT NULL
 	,strWarehouseName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strMaint NVARCHAR(50) COLLATE Latin1_General_CI_AS
