@@ -7,7 +7,7 @@
 	,@QtyShipped			NUMERIC(18,6)
 	,@TaxGroupId			INT
 	,@CompanyLocationId		INT
-	,@ShipToLocationId		INT	
+	,@CustomerLocationId		INT	
 	,@IncludeExemptedCodes	BIT
 )
 RETURNS NUMERIC(18,6)
@@ -18,7 +18,7 @@ BEGIN
 	SELECT
 		@LineItemTotal = SUM([dblAdjustedTax])
 	FROM
-		[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @CompanyLocationId, @ShipToLocationId, @IncludeExemptedCodes)
+		[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @CompanyLocationId, @CustomerLocationId, @IncludeExemptedCodes)
 		
 	RETURN @LineItemTotal		
 END

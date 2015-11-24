@@ -1,9 +1,9 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupIdForCustomer]
 (
-	 @CustomerId		INT
-	,@CompanyLocationId	INT
-	,@ItemId			INT
-	,@ShipToLocationId	INT
+	 @CustomerId			INT
+	,@CompanyLocationId		INT
+	,@ItemId				INT
+	,@CustomerLocationId	INT
 )
 RETURNS INT
 AS
@@ -71,7 +71,7 @@ BEGIN
 			@CustomerSpecialTax
 		WHERE
 			[intEntityVendorId] = @VendorId
-			AND [intEntityCustomerLocationId] = @ShipToLocationId 
+			AND [intEntityCustomerLocationId] = @CustomerLocationId 
 			AND [intItemId] = @ItemId 
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
@@ -84,7 +84,7 @@ BEGIN
 			@CustomerSpecialTax
 		WHERE
 			[intEntityVendorId] = @VendorId
-			AND [intEntityCustomerLocationId] = @ShipToLocationId 
+			AND [intEntityCustomerLocationId] = @CustomerLocationId 
 			AND [intCategoryId] = @ItemCategoryId
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
@@ -97,7 +97,7 @@ BEGIN
 			@CustomerSpecialTax
 		WHERE
 			[intEntityVendorId] = @VendorId
-			AND [intEntityCustomerLocationId] = @ShipToLocationId 			
+			AND [intEntityCustomerLocationId] = @CustomerLocationId 			
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
 			RETURN @TaxGroupId;
@@ -161,6 +161,7 @@ BEGIN
 																																
 	END
 	
+	--Customer Location
 	SELECT TOP 1
 		@TaxGroupId = EL.[intTaxGroupId]
 	FROM
@@ -168,9 +169,23 @@ BEGIN
 	INNER JOIN
 		tblEntityLocation EL
 			ON C.[intEntityCustomerId] = EL.[intEntityId] 
-			AND EL.[ysnDefaultLocation] = 1
 	WHERE
-		[intEntityCustomerId] = @CustomerId 
+		C.[intEntityCustomerId] = @CustomerId
+		AND EL.[intEntityLocationId] = @CustomerLocationId
+
+	IF ISNULL(@TaxGroupId,0) <> 0
+		RETURN @TaxGroupId;	
+
+	--Company Location
+	SELECT TOP 1
+		@TaxGroupId = [intTaxGroupId]
+	FROM
+		tblSMCompanyLocation
+	WHERE
+		intCompanyLocationId = @CompanyLocationId
+	
+	IF ISNULL(@TaxGroupId,0) <> 0
+		RETURN @TaxGroupId;
 					
-	RETURN @TaxGroupId
+	RETURN NULL
 END
