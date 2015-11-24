@@ -133,28 +133,47 @@ BEGIN
 
 		DECLARE @UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
+
+		DECLARE @Lot_0001 AS INT = 1
+				,@Lot_0002 AS INT = 2
+				,@Lot_0003 AS INT = 3
+				,@Lot_0004 AS INT = 4
+				,@Lot_0005 AS INT = 5
+				,@Lot_0006 AS INT = 6
+				,@Lot_0007 AS INT = 7
+
+		DECLARE @LotNumber_0001 AS NVARCHAR(50) = 'LOT-0001'
+				,@LotNumber_0002 AS NVARCHAR(50) = 'LOT-0002'
+				,@LotNumber_0003 AS NVARCHAR(50) = 'LOT-0003'
+				,@LotNumber_0004 AS NVARCHAR(50) = 'LOT-0004'
+				,@LotNumber_0005 AS NVARCHAR(50) = 'LOT-0005'
+				,@LotNumber_0006 AS NVARCHAR(50) = 'LOT-0006'
+				,@LotNumber_0007 AS NVARCHAR(50) = 'LOT-0007'
 	END 
 	
 	DECLARE @AVERAGECOST AS INT = 1
-		,@FIFO AS INT = 2
-		,@LIFO AS INT = 3
-		,@LOTCOST AS INT = 4 	
-		,@ACTUALCOST AS INT = 5	
+			,@FIFO AS INT = 2
+			,@LIFO AS INT = 3
+			,@LOTCOST AS INT = 4 	
+			,@ACTUALCOST AS INT = 5	
 
 	EXEC [testi21Database].[Fake COA used for fake inventory items];
+	EXEC [testi21Database].[Fake open fiscal year and accounting periods]; 
 
 	IF @intCostingMethod = @LIFO
 	BEGIN 
 		EXEC [testi21Database].[Fake transactions for LIFO costing]; 
 	END 
+	ELSE IF @intCostingMethod = @LOTCOST
+	BEGIN 
+		EXEC [testi21Database].[Fake transactions for Lot costing]
+	END
 	ELSE 
 	BEGIN 
-		EXEC [testi21Database].[Fake transactions for item costing]; 
+		EXEC [testi21Database].[Fake transactions for FIFO or Ave costing]; 
 	END 
 	
-	
-	EXEC [testi21Database].[Fake open fiscal year and accounting periods]; 
-	-- IMPORTANT NOTE: Below will add the Inventory Receipt transactions in relation to the fake data in [Fake transactions for item costing]
+	-- IMPORTANT NOTE: Below will add the Inventory Receipt transactions in relation to the fake data in [Fake transactions for FIFO or Ave costing]
 		
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;	
@@ -318,6 +337,133 @@ BEGIN
 				,intSort				= 1
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+
+		IF @intCostingMethod = @LOTCOST
+		BEGIN
+			INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				[intInventoryReceiptItemId]
+				,[intLotId]
+				,[strLotNumber]
+				,[strLotAlias]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[intItemUnitMeasureId]
+				,[dblQuantity]
+				,[dblGrossWeight]
+				,[dblTareWeight]
+				,[dblCost]
+				,[intUnitPallet]
+				,[dblStatedGrossPerUnit]
+				,[dblStatedTarePerUnit]
+				,[strContainerNo]
+				,[intEntityVendorId]
+				,[intVendorLocationId]
+				,[strMarkings]
+				,[intOriginId]
+				,[intGradeId]
+				,[intSeasonCropYear]
+				,[strVendorLotId]
+				,[dtmManufacturedDate]
+				,[strRemarks]
+				,[strCondition]
+				,[dtmCertified]
+				,[dtmExpiryDate]
+				,[intSort]
+				,[intConcurrencyId]
+			)
+			SELECT	
+				[intInventoryReceiptItemId]	= 1
+				,[intLotId]					= @Lot_0001
+				,[strLotNumber]				= @LotNumber_0001
+				,[strLotAlias]				= 'LOT ALIAS FOR 0001'
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[intItemUnitMeasureId]		= @WetGrains_DefaultLocation 
+				,[dblQuantity]				= 30 
+				,[dblGrossWeight]			= 0 
+				,[dblTareWeight]			= 0
+				,[dblCost]					= 22.00 
+				,[intUnitPallet]			= NULL 
+				,[dblStatedGrossPerUnit]	= NULL 
+				,[dblStatedTarePerUnit]		= NULL 
+				,[strContainerNo]			= NULL 
+				,[intEntityVendorId]		= NULL 
+				,[intVendorLocationId]		= NULL 
+				,[strMarkings]				= 'Markings for 0001' 
+				,[intOriginId]				= NULL 
+				,[intGradeId]				= NULL 
+				,[intSeasonCropYear]		= NULL 
+				,[strVendorLotId]			= NULL 
+				,[dtmManufacturedDate]		= GETDATE() 
+				,[strRemarks]				= 'Remarks for 0001' 
+				,[strCondition]				= 'Condition for 0001'
+				,[dtmCertified]				= GETDATE()
+				,[dtmExpiryDate]			= GETDATE()
+				,[intSort]					= NULL 
+				,[intConcurrencyId]			= 1
+			UNION ALL
+			SELECT	
+				[intInventoryReceiptItemId]	= 1
+				,[intLotId]					= @Lot_0002
+				,[strLotNumber]				= @LotNumber_0002
+				,[strLotAlias]				= 'LOT ALIAS FOR 0002'
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[intItemUnitMeasureId]		= @WetGrains_DefaultLocation 
+				,[dblQuantity]				= 30 
+				,[dblGrossWeight]			= 0 
+				,[dblTareWeight]			= 0
+				,[dblCost]					= 22.00 
+				,[intUnitPallet]			= NULL 
+				,[dblStatedGrossPerUnit]	= NULL 
+				,[dblStatedTarePerUnit]		= NULL 
+				,[strContainerNo]			= NULL 
+				,[intEntityVendorId]		= NULL 
+				,[intVendorLocationId]		= NULL 
+				,[strMarkings]				= 'Markings for 0002' 
+				,[intOriginId]				= NULL 
+				,[intGradeId]				= NULL 
+				,[intSeasonCropYear]		= NULL 
+				,[strVendorLotId]			= NULL 
+				,[dtmManufacturedDate]		= GETDATE() 
+				,[strRemarks]				= 'Remarks for 0002' 
+				,[strCondition]				= 'Condition for 0002'
+				,[dtmCertified]				= GETDATE()
+				,[dtmExpiryDate]			= GETDATE()
+				,[intSort]					= NULL 
+				,[intConcurrencyId]			= 1
+			UNION ALL
+			SELECT	
+				[intInventoryReceiptItemId]	= 1
+				,[intLotId]					= @Lot_0003
+				,[strLotNumber]				= @LotNumber_0003
+				,[strLotAlias]				= 'LOT ALIAS FOR 0003'
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[intItemUnitMeasureId]		= @WetGrains_DefaultLocation 
+				,[dblQuantity]				= 40 
+				,[dblGrossWeight]			= 0 
+				,[dblTareWeight]			= 0
+				,[dblCost]					= 22.00 
+				,[intUnitPallet]			= NULL 
+				,[dblStatedGrossPerUnit]	= NULL 
+				,[dblStatedTarePerUnit]		= NULL 
+				,[strContainerNo]			= NULL 
+				,[intEntityVendorId]		= NULL 
+				,[intVendorLocationId]		= NULL 
+				,[strMarkings]				= 'Markings for 0003' 
+				,[intOriginId]				= NULL 
+				,[intGradeId]				= NULL 
+				,[intSeasonCropYear]		= NULL 
+				,[strVendorLotId]			= NULL 
+				,[dtmManufacturedDate]		= GETDATE() 
+				,[strRemarks]				= 'Remarks for 0003' 
+				,[strCondition]				= 'Condition for 0003'
+				,[dtmCertified]				= GETDATE()
+				,[dtmExpiryDate]			= GETDATE()
+				,[intSort]					= NULL 
+				,[intConcurrencyId]			= 1
+		END 
 	END				
 
 	--------------------------------------------------------
@@ -391,6 +537,71 @@ BEGIN
 				,intSort				= 1
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+
+		IF @intCostingMethod = @LOTCOST
+		BEGIN
+			INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				[intInventoryReceiptItemId]
+				,[intLotId]
+				,[strLotNumber]
+				,[strLotAlias]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[intItemUnitMeasureId]
+				,[dblQuantity]
+				,[dblGrossWeight]
+				,[dblTareWeight]
+				,[dblCost]
+				,[intUnitPallet]
+				,[dblStatedGrossPerUnit]
+				,[dblStatedTarePerUnit]
+				,[strContainerNo]
+				,[intEntityVendorId]
+				,[intVendorLocationId]
+				,[strMarkings]
+				,[intOriginId]
+				,[intGradeId]
+				,[intSeasonCropYear]
+				,[strVendorLotId]
+				,[dtmManufacturedDate]
+				,[strRemarks]
+				,[strCondition]
+				,[dtmCertified]
+				,[dtmExpiryDate]
+				,[intSort]
+				,[intConcurrencyId]
+			)
+			SELECT	
+				[intInventoryReceiptItemId]	= 2
+				,[intLotId]					= @Lot_0004
+				,[strLotNumber]				= @LotNumber_0004
+				,[strLotAlias]				= 'LOT ALIAS FOR 0004'
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[intItemUnitMeasureId]		= @StickyGrains_DefaultLocation 
+				,[dblQuantity]				= 150
+				,[dblGrossWeight]			= 0 
+				,[dblTareWeight]			= 0
+				,[dblCost]					= 33.00 
+				,[intUnitPallet]			= NULL 
+				,[dblStatedGrossPerUnit]	= NULL 
+				,[dblStatedTarePerUnit]		= NULL 
+				,[strContainerNo]			= NULL 
+				,[intEntityVendorId]		= NULL 
+				,[intVendorLocationId]		= NULL 
+				,[strMarkings]				= 'Markings for 0004' 
+				,[intOriginId]				= NULL 
+				,[intGradeId]				= NULL 
+				,[intSeasonCropYear]		= NULL 
+				,[strVendorLotId]			= NULL 
+				,[dtmManufacturedDate]		= GETDATE() 
+				,[strRemarks]				= 'Remarks for 0004' 
+				,[strCondition]				= 'Condition for 0004'
+				,[dtmCertified]				= GETDATE()
+				,[dtmExpiryDate]			= GETDATE()
+				,[intSort]					= NULL 
+				,[intConcurrencyId]			= 1
+		END 
 	END
 
 	--------------------------------------------------------
@@ -464,6 +675,71 @@ BEGIN
 				,intSort				= 1
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+
+		IF @intCostingMethod = @LOTCOST
+		BEGIN
+			INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				[intInventoryReceiptItemId]
+				,[intLotId]
+				,[strLotNumber]
+				,[strLotAlias]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[intItemUnitMeasureId]
+				,[dblQuantity]
+				,[dblGrossWeight]
+				,[dblTareWeight]
+				,[dblCost]
+				,[intUnitPallet]
+				,[dblStatedGrossPerUnit]
+				,[dblStatedTarePerUnit]
+				,[strContainerNo]
+				,[intEntityVendorId]
+				,[intVendorLocationId]
+				,[strMarkings]
+				,[intOriginId]
+				,[intGradeId]
+				,[intSeasonCropYear]
+				,[strVendorLotId]
+				,[dtmManufacturedDate]
+				,[strRemarks]
+				,[strCondition]
+				,[dtmCertified]
+				,[dtmExpiryDate]
+				,[intSort]
+				,[intConcurrencyId]
+			)
+			SELECT	
+				[intInventoryReceiptItemId]	= 3
+				,[intLotId]					= @Lot_0005
+				,[strLotNumber]				= @LotNumber_0005
+				,[strLotAlias]				= 'LOT ALIAS FOR 0005'
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[intItemUnitMeasureId]		= @PremiumGrains_DefaultLocation 
+				,[dblQuantity]				= 200
+				,[dblGrossWeight]			= 0 
+				,[dblTareWeight]			= 0
+				,[dblCost]					= 44.00 
+				,[intUnitPallet]			= NULL 
+				,[dblStatedGrossPerUnit]	= NULL 
+				,[dblStatedTarePerUnit]		= NULL 
+				,[strContainerNo]			= NULL 
+				,[intEntityVendorId]		= NULL 
+				,[intVendorLocationId]		= NULL 
+				,[strMarkings]				= 'Markings for 0005' 
+				,[intOriginId]				= NULL 
+				,[intGradeId]				= NULL 
+				,[intSeasonCropYear]		= NULL 
+				,[strVendorLotId]			= NULL 
+				,[dtmManufacturedDate]		= GETDATE() 
+				,[strRemarks]				= 'Remarks for 0005' 
+				,[strCondition]				= 'Condition for 0005'
+				,[dtmCertified]				= GETDATE()
+				,[dtmExpiryDate]			= GETDATE()
+				,[intSort]					= NULL 
+				,[intConcurrencyId]			= 1
+		END 
 	END
 
 	--------------------------------------------------------
@@ -537,6 +813,71 @@ BEGIN
 				,intSort				= 1
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+
+		IF @intCostingMethod = @LOTCOST
+		BEGIN
+			INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				[intInventoryReceiptItemId]
+				,[intLotId]
+				,[strLotNumber]
+				,[strLotAlias]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[intItemUnitMeasureId]
+				,[dblQuantity]
+				,[dblGrossWeight]
+				,[dblTareWeight]
+				,[dblCost]
+				,[intUnitPallet]
+				,[dblStatedGrossPerUnit]
+				,[dblStatedTarePerUnit]
+				,[strContainerNo]
+				,[intEntityVendorId]
+				,[intVendorLocationId]
+				,[strMarkings]
+				,[intOriginId]
+				,[intGradeId]
+				,[intSeasonCropYear]
+				,[strVendorLotId]
+				,[dtmManufacturedDate]
+				,[strRemarks]
+				,[strCondition]
+				,[dtmCertified]
+				,[dtmExpiryDate]
+				,[intSort]
+				,[intConcurrencyId]
+			)
+			SELECT	
+				[intInventoryReceiptItemId]	= 4
+				,[intLotId]					= @Lot_0006
+				,[strLotNumber]				= @LotNumber_0006
+				,[strLotAlias]				= 'LOT ALIAS FOR 0006'
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[intItemUnitMeasureId]		= @ColdGrains_DefaultLocation 
+				,[dblQuantity]				= 250
+				,[dblGrossWeight]			= 0 
+				,[dblTareWeight]			= 0
+				,[dblCost]					= 55.00 
+				,[intUnitPallet]			= NULL 
+				,[dblStatedGrossPerUnit]	= NULL 
+				,[dblStatedTarePerUnit]		= NULL 
+				,[strContainerNo]			= NULL 
+				,[intEntityVendorId]		= NULL 
+				,[intVendorLocationId]		= NULL 
+				,[strMarkings]				= 'Markings for 0006' 
+				,[intOriginId]				= NULL 
+				,[intGradeId]				= NULL 
+				,[intSeasonCropYear]		= NULL 
+				,[strVendorLotId]			= NULL 
+				,[dtmManufacturedDate]		= GETDATE() 
+				,[strRemarks]				= 'Remarks for 0006' 
+				,[strCondition]				= 'Condition for 0006'
+				,[dtmCertified]				= GETDATE()
+				,[dtmExpiryDate]			= GETDATE()
+				,[intSort]					= NULL 
+				,[intConcurrencyId]			= 1
+		END
 	END
 
 	--------------------------------------------------------
@@ -610,6 +951,70 @@ BEGIN
 				,intSort				= 1
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own
-	END
-	
+
+		IF @intCostingMethod = @LOTCOST
+		BEGIN
+			INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				[intInventoryReceiptItemId]
+				,[intLotId]
+				,[strLotNumber]
+				,[strLotAlias]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[intItemUnitMeasureId]
+				,[dblQuantity]
+				,[dblGrossWeight]
+				,[dblTareWeight]
+				,[dblCost]
+				,[intUnitPallet]
+				,[dblStatedGrossPerUnit]
+				,[dblStatedTarePerUnit]
+				,[strContainerNo]
+				,[intEntityVendorId]
+				,[intVendorLocationId]
+				,[strMarkings]
+				,[intOriginId]
+				,[intGradeId]
+				,[intSeasonCropYear]
+				,[strVendorLotId]
+				,[dtmManufacturedDate]
+				,[strRemarks]
+				,[strCondition]
+				,[dtmCertified]
+				,[dtmExpiryDate]
+				,[intSort]
+				,[intConcurrencyId]
+			)
+			SELECT	
+				[intInventoryReceiptItemId]	= 5
+				,[intLotId]					= @Lot_0007
+				,[strLotNumber]				= @LotNumber_0007
+				,[strLotAlias]				= 'LOT ALIAS FOR 0007'
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[intItemUnitMeasureId]		= @HotGrains_DefaultLocation 
+				,[dblQuantity]				= 300
+				,[dblGrossWeight]			= 0 
+				,[dblTareWeight]			= 0
+				,[dblCost]					= 66.00 
+				,[intUnitPallet]			= NULL 
+				,[dblStatedGrossPerUnit]	= NULL 
+				,[dblStatedTarePerUnit]		= NULL 
+				,[strContainerNo]			= NULL 
+				,[intEntityVendorId]		= NULL 
+				,[intVendorLocationId]		= NULL 
+				,[strMarkings]				= 'Markings for 0007' 
+				,[intOriginId]				= NULL 
+				,[intGradeId]				= NULL 
+				,[intSeasonCropYear]		= NULL 
+				,[strVendorLotId]			= NULL 
+				,[dtmManufacturedDate]		= GETDATE() 
+				,[strRemarks]				= 'Remarks for 0007' 
+				,[strCondition]				= 'Condition for 0007'
+				,[dtmCertified]				= GETDATE()
+				,[dtmExpiryDate]			= GETDATE()
+				,[intSort]					= NULL 
+				,[intConcurrencyId]			= 1
+		END
+	END	
 END 

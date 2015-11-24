@@ -568,7 +568,7 @@
     <Build Include="testi21Database\Fake Data\Fake posted transactions using FIFO, scenario 4.sql" />
     <Build Include="testi21Database\Fake Data\Fake posted transactions using LIFO, scenario 3.sql" />
     <Build Include="testi21Database\Fake Data\Fake posted transactions using LIFO, scenario 4.sql" />
-    <Build Include="testi21Database\Fake Data\Fake transactions for item costing.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for FIFO or Ave costing.sql" />
     <Build Include="testi21Database\Fake Data\Fake transactions for lot items and costing.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddSalesOrderToInventoryShipment for errors thrown by a null transaction id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddSalesOrderToInventoryShipment for errors thrown by uspSMGetStartingNumber.sql" />
@@ -928,6 +928,7 @@
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting 50 LB BAG to 20 KG BAG.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting 20 KG BAG to LB.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting 20 KG BAG to 50 LB BAG.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for Lot costing.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[Fake transactions for item costing]
+﻿CREATE PROCEDURE [testi21Database].[Fake transactions for FIFO or Ave costing]
 AS
 BEGIN	
 	-- Fake inventory items. 

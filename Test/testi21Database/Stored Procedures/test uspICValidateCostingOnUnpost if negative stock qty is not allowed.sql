@@ -57,7 +57,7 @@ BEGIN
 				,intInventoryTransactionId = 3
 
 		-- Use the simple item mock data
-		EXEC testi21Database.[Fake transactions for item costing]
+		EXEC testi21Database.[Fake transactions for FIFO or Ave costing]
 	END 
 	
 	-- Test case 1: 
