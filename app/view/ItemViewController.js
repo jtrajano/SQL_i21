@@ -1799,11 +1799,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     });
                     search.close();
-                    win.setLoading('Saving...');
-                    win.context.data.saveRecord({ callbackFn: function(batch, eOpts){
-                        win.setLoading(false);
-                        return;
-                    } });
+                    win.context.data.saveRecord();
                 },
                 openallclick: function() {
                     search.close();
