@@ -59,5 +59,44 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public async Task<SearchResult> GetAreaLengthUOM(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Area" || p.strUnitType == "Length")
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> GetQuantityVolumeWeightPackedUOM(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Quantity" || p.strUnitType == "Volume" || p.strUnitType == "Weight" || p.strUnitType == "Packed")
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> GetTimeUOM(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICUnitMeasure>().Where(p => p.strUnitType == "Time")
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

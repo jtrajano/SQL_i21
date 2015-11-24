@@ -46,7 +46,38 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
             }
         },
         unitMeasure: {
-            type: 'icbuffereduom'
+            type: 'icbuffereduom',
+            proxy: {
+                type: 'rest',
+                api: {
+                    read: '{getReadUOMApi}'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        }
+    },
+
+    formulas: {
+        getReadUOMApi: function(get) {
+            switch(get('current.strUnitType')){
+                case 'Area':
+                case 'Length':
+                    return '../Inventory/api/UnitMeasure/GetAreaLengthUOMs';
+                    break;
+                case 'Quantity':
+                case 'Volume':
+                case 'Weight':
+                case 'Packed':
+                    return '../Inventory/api/UnitMeasure/GetQuantityVolumeWeightPackedUOMs';
+                    break;
+                case 'Time':
+                    return '../Inventory/api/UnitMeasure/GetTimeUOMs';
+                    break;
+            };
         }
     }
 

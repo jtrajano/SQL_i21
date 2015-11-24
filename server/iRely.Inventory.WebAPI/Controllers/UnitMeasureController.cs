@@ -28,5 +28,22 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetPackedUOMs(param));
         }
 
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetAreaLengthUOMs(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAreaLengthUOM(param));
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetQuantityVolumeWeightPackedUOMs(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetQuantityVolumeWeightPackedUOM(param));
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetTimeUOMs(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetTimeUOM(param));
+        }
     }
 }
