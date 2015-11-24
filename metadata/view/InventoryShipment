@@ -210,6 +210,26 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "icon": null,
+                                "itemId": "btnPrintBOL",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Print BOL",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "name": "MyButton70",
+                            "designerId": "433a5a57-44f8-4a19-9781-3822f2737a53"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
                                 "itemId": "btnShip",
                                 "layout|flex": null,
                                 "tabIndex": -1,

@@ -120,33 +120,7 @@
   <metadata name="sqlDataSource1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="customSqlQuery1.Sql" xml:space="preserve">
-    <value>SELECT Shipment.intInventoryShipmentId, Shipment.strShipmentNumber,
-       strShipFromAddress = ShipmentItem.strShipFromLocation,
-       strShipToAddress = ShipmentItem.strShipToLocation,
-       Shipment.strBOLNumber, ShipmentItemSource.strOrderNumber,
-       strCustomerPO = '', Shipment.dtmShipDate, ShipVia.strShipVia,
-       Shipment.strDeliveryInstruction, FreightTerm.strFreightTerm,
-       ShipmentItem.strItemNo, ShipmentItem.strItemDescription,
-       Lot.strLotNumber, Lot.strLotAlias, Lot.dblWeight,
-       Lot.strWeightUOM, WarehouseInstruction.intWarehouseInstructionHeaderId FROM vyuICGetInventoryShipmentItem
-       ShipmentItem LEFT JOIN tblICInventoryShipmentItemLot
-       ShipmentItemLot ON
-       ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-       LEFT JOIN vyuICGetLot Lot ON
-       Lot.intLotId = ShipmentItemLot.intLotId LEFT JOIN
-       tblICInventoryShipment Shipment ON
-       Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-       LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON
-       ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-       LEFT JOIN tblSMShipVia ShipVia ON
-       ShipVia.intEntityShipViaId = Shipment.intShipViaId LEFT JOIN
-       tblSMFreightTerms FreightTerm ON
-       FreightTerm.intFreightTermId = Shipment.intFreightTermId
-	   LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
-</value>
-  </data>
   <data name="sqlDataSource1.ResultSchemaSerializable" xml:space="preserve">
-    <value>PERhdGFTZXQgTmFtZT0ic3FsRGF0YVNvdXJjZTEiPjxWaWV3IE5hbWU9IkN1c3RvbVNxbFF1ZXJ5Ij48RmllbGQgTmFtZT0iaW50SW52ZW50b3J5U2hpcG1lbnRJZCIgVHlwZT0iSW50MzIiIC8+PEZpZWxkIE5hbWU9InN0clNoaXBtZW50TnVtYmVyIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0clNoaXBGcm9tQWRkcmVzcyIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJTaGlwVG9BZGRyZXNzIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckJPTE51bWJlciIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJPcmRlck51bWJlciIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJDdXN0b21lclBPIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9ImR0bVNoaXBEYXRlIiBUeXBlPSJEYXRlVGltZSIgLz48RmllbGQgTmFtZT0ic3RyU2hpcFZpYSIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJEZWxpdmVyeUluc3RydWN0aW9uIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckZyZWlnaHRUZXJtIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckl0ZW1ObyIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJJdGVtRGVzY3JpcHRpb24iIFR5cGU9IlN0cmluZyIgLz48RmllbGQgTmFtZT0ic3RyTG90TnVtYmVyIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckxvdEFsaWFzIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9ImRibFdlaWdodCIgVHlwZT0iRGVjaW1hbCIgLz48RmllbGQgTmFtZT0ic3RyV2VpZ2h0VU9NIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9ImludFdhcmVob3VzZUluc3RydWN0aW9uSGVhZGVySWQiIFR5cGU9IkludDMyIiAvPjwvVmlldz48L0RhdGFTZXQ+</value>
+    <value>PERhdGFTZXQgTmFtZT0ic3FsRGF0YVNvdXJjZTEiPjxWaWV3IE5hbWU9InVzcExHR2V0V2FyZWhvdXNlSW5zdHJ1Y3Rpb25SZXBvcnQiPjxGaWVsZCBOYW1lPSJpbnRXYXJlaG91c2VJbnN0cnVjdGlvbkRldGFpbElkIiBUeXBlPSJJbnQzMiIgLz48RmllbGQgTmFtZT0iaW50Q29uY3VycmVuY3lJZCIgVHlwZT0iSW50MzIiIC8+PEZpZWxkIE5hbWU9ImludFdhcmVob3VzZUluc3RydWN0aW9uSGVhZGVySWQiIFR5cGU9IkludDMyIiAvPjxGaWVsZCBOYW1lPSJzdHJDYXRlZ29yeSIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJBY3Rpdml0eSIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJpbnRUeXBlIiBUeXBlPSJJbnQzMiIgLz48RmllbGQgTmFtZT0iZGJsVW5pdFJhdGUiIFR5cGU9IkRlY2ltYWwiIC8+PEZpZWxkIE5hbWU9ImludENvbW1vZGl0eVVuaXRNZWFzdXJlSWQiIFR5cGU9IkludDMyIiAvPjxGaWVsZCBOYW1lPSJkYmxRdWFudGl0eSIgVHlwZT0iRGVjaW1hbCIgLz48RmllbGQgTmFtZT0iZGJsQ2FsY3VsYXRlZEFtb3VudCIgVHlwZT0iRGVjaW1hbCIgLz48RmllbGQgTmFtZT0iZGJsQWN0dWFsQW1vdW50IiBUeXBlPSJEZWNpbWFsIiAvPjxGaWVsZCBOYW1lPSJ5c25DaGFyZ2VDdXN0b21lciIgVHlwZT0iQm9vbGVhbiIgLz48RmllbGQgTmFtZT0iZGJsQmlsbEFtb3VudCIgVHlwZT0iRGVjaW1hbCIgLz48RmllbGQgTmFtZT0ieXNuUHJpbnQiIFR5cGU9IkJvb2xlYW4iIC8+PEZpZWxkIE5hbWU9ImludFNvcnQiIFR5cGU9IkludDMyIiAvPjxGaWVsZCBOYW1lPSJkdG1DcmVhdGVkRGF0ZSIgVHlwZT0iRGF0ZVRpbWUiIC8+PEZpZWxkIE5hbWU9ImludFVzZXJTZWN1cml0eUlkIiBUeXBlPSJJbnQzMiIgLz48RmllbGQgTmFtZT0ic3RyQ29tbWVudHMiIFR5cGU9IlN0cmluZyIgLz48RmllbGQgTmFtZT0iaW50SXRlbUlkIiBUeXBlPSJJbnQzMiIgLz48L1ZpZXc+PC9EYXRhU2V0Pg==</value>
   </data>
 </root>

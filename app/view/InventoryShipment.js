@@ -114,6 +114,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     {
                                         xtype: 'button',
                                         tabIndex: -1,
+                                        itemId: 'btnPrintBOL',
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Print BOL'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
                                         itemId: 'btnShip',
                                         ui: 'i21-button-toolbar-small',
                                         text: 'Post'

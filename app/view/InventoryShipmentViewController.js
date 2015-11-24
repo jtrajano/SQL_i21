@@ -1642,6 +1642,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             });
     },
 
+    onPrintBOLClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var vm = win.viewModel;
+        var current = vm.data.current;
+
+        var filters = [{
+                Name: 'strShipmentNumber',
+                Type: 'string',
+                Condition: 'EQUAL TO',
+                From: current.get('strShipmentNumber'),
+                Operator: 'AND'
+            }];
+
+        iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+            selectedReport: 'BillOfLading',
+            selectedGroup: 'Inventory',
+            selectedParameters: filters
+        });
+    },
+
     onPickLotsClick: function(button, e, eOpts) {
         var grid = button.up('grid');
         var shipmentWin = button.up('window');
@@ -1790,6 +1810,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnWarehouseInstruction": {
                 click: this.onWarehouseInstructionClick
+            },
+            "#btnPrintBOL": {
+                click: this.onPrintBOLClick
             }
         })
     }
