@@ -132,7 +132,9 @@ SELECT
 	,[ysnResetDetails]						= 0
 	,[ysnPost]								= @Post
 	
-	,[intInvoiceDetailId]					= NULL
+	,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+												FROM tblARInvoiceDetail 
+												WHERE intInvoiceId = cfTrans.intInvoiceId)
 	,[intItemId]							= cfSiteItem.intARItemId
 	,[ysnInventory]							= 1
 	,[strItemDescription]					= cfSiteItem.strDescription 
