@@ -2985,10 +2985,11 @@
     <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Query to debug Stock UOM Quantities.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
-        <Build Include="dbo\Tables\tblCTEventNotificationLog.sql" />
+    <Build Include="dbo\Tables\tblCTEventNotificationLog.sql" />
     <Build Include="dbo\Functions\fnCTGetEventRecipientEmail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetEventMailContent.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
+    <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
