@@ -31,7 +31,7 @@ SELECT SO.intSalesOrderId
 	 , strOrderedByName = EOB.strName
 	 , SO.dtmDueDate
 	 , FT.strFreightTerm
-	 , strSplitName = ES.strDescription
+	 , strSplitName = CASE WHEN ISNULL(ES.strDescription, '') <> '' THEN ES.strDescription ELSE ES.strSplitNumber END
 	 , strSOHeaderComment = SO.strComments
 	 , strSOFooterComment = [dbo].fnARGetFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer')
 	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
