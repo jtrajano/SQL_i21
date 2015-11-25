@@ -818,6 +818,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
+        var cepCharges = grdCharges.getPlugin('cepCharges');
+        if (cepCharges) {
+            cepCharges.on({
+                validateedit: me.onEditCharge,
+                scope: me
+            });
+        }
+
         var colTax = grdInventoryReceipt.columns[10];
         if (colTax) {
             colTax.summaryRenderer = function (val, params, data) {
@@ -1967,6 +1975,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
 
             context.record.set('dblNetWeight', gross - tare);
+        }
+    },
+
+    onEditCharge: function (editor, context, eOpts) {
+        if (context.field === 'dblAmount') {
+            var amount = i21.ModuleMgr.Inventory.roundDecimalFormat(context.value, 2);
+            context.record.set('dblAmount', amount);
+            return false;
         }
     },
 
