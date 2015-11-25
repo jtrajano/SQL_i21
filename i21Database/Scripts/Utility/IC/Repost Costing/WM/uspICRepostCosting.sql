@@ -1,4 +1,4 @@
-﻿-- use irely98 
+﻿-- USE i21Demo01 
 
 IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspICRepostCosting' AND type = 'P')
 	DROP PROCEDURE [dbo].[uspICRepostCosting]
@@ -571,7 +571,7 @@ DEALLOCATE loopItems;
 -- Create the AUTO-Negative if costing method is average costing
 ---------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @ItemsForAutoNegative AS UnpostItemsTableType
+	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
 			,@intInventoryTransactionId AS INT 
 
 	-- Get the qualified items for auto-negative. 
@@ -579,19 +579,40 @@ BEGIN
 			intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,intLotId
+			,dtmDate
 			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+			,intLotId
 			,intSubLocationId
 			,intStorageLocationId
+			,strActualCostId
 	)
-	SELECT 
-			intItemId
+	SELECT  intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,intLotId
+			,dtmDate
 			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+			,intLotId
 			,intSubLocationId
 			,intStorageLocationId
+			,strActualCostId
 	FROM	@ItemsToPost
 	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
 			AND dblQty > 0 
