@@ -139,6 +139,10 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "UOM must be unique per Item.";
                 }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemMotorFuelTax'"))
+                {
+                    msg = "Motor Fuel Taxes must be unique per Item.";
+                }
             }
 
             return new BusinessResult<tblICItem>()
