@@ -1578,6 +1578,31 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colLotAlias',
+                                                                                width: 100,
+                                                                                dataIndex: 'string',
+                                                                                text: 'Lot Alias',
+                                                                                editor: {
+                                                                                    xtype: 'textfield',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intLotId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Lot Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strLotNumber',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Lot Number',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'txtLotAlias'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
                                                                                 itemId: 'colLotUOM',
                                                                                 modelValidation: true,
                                                                                 width: 75,

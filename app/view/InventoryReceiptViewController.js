@@ -469,6 +469,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotId: {
                     dataIndex: 'strLotNumber'
                 },
+                colLotAlias: {
+                    dataIndex: 'strLotAlias'
+                },
                 colLotUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
