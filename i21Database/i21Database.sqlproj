@@ -2981,6 +2981,7 @@
     <Build Include="dbo\Tables\tblMFItemDemand.sql" />
     <Build Include="dbo\Views\vyuCTEventMatrixDetailView.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
