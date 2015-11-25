@@ -15,7 +15,6 @@ Ext.define('Inventory.model.CountGroup', {
         { name: 'strCountGroup', type: 'string' },
         { name: 'intCountsPerYear', type: 'int', allowNull: true },
         { name: 'ysnIncludeOnHand', type: 'boolean' },
-        { name: 'intInventoryType', type: 'int', allowNull: true },
         { name: 'ysnScannedCountEntry', type: 'boolean' },
         { name: 'ysnCountByLots', type: 'boolean' },
         { name: 'ysnCountByPallets', type: 'boolean' },

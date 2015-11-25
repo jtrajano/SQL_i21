@@ -15,7 +15,6 @@ namespace iRely.Inventory.Model
         public string strCountGroup { get; set; }
         public int? intCountsPerYear { get; set; }
         public bool? ysnIncludeOnHand { get; set; }
-        public int? intInventoryType { get; set; }
         public bool? ysnScannedCountEntry { get; set; }
         public bool? ysnCountByLots { get; set; }
         public bool? ysnCountByPallets { get; set; }

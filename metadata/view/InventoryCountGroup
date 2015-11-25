@@ -10,13 +10,13 @@
         "defaultFocus": null,
         "designer|userAlias": "inventorycountgroup",
         "designer|userClassName": "InventoryCountGroup",
-        "height": 388,
+        "height": 350,
         "hidden": false,
         "icon": null,
         "layout": "fit",
         "maxHeight": null,
         "maximizable": null,
-        "minHeight": null,
+        "minHeight": 350,
         "minWidth": null,
         "minimizable": null,
         "reference": null,
@@ -335,59 +335,6 @@
                                             "designerId": "39b24628-0392-4fb9-9a86-1e8628950428"
                                         },
                                         {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "columns": [
-                                                    "[",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'intInventoryType',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strInventoryType',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Inventory Type',",
-                                                    "\t\tflex: 1",
-                                                    "\t}",
-                                                    "]"
-                                                ],
-                                                "designer|createAlias": "gridcombobox",
-                                                "designer|displayName": null,
-                                                "displayField": "strInventoryType",
-                                                "enforceMaxLength": null,
-                                                "fieldLabel": "Inventory Type",
-                                                "itemId": "cboInventoryType",
-                                                "labelPad": null,
-                                                "labelSeparator": null,
-                                                "labelWidth": 125,
-                                                "layout|flex": null,
-                                                "margin": null,
-                                                "maxLength": null,
-                                                "name": null,
-                                                "tabIndex": null,
-                                                "valueField": "intInventoryType",
-                                                "width": null
-                                            },
-                                            "name": "MyComboBox66",
-                                            "configAlternates": {
-                                                "columns": "array"
-                                            },
-                                            "designerId": "f15ca56f-943c-457d-9bf0-d21f76b34d32",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "columns",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
                                             "type": "Ext.form.field.Checkbox",
                                             "reference": {
                                                 "name": "items",
@@ -494,7 +441,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging12",
                     "designerId": "5f645857-eb50-4702-8a6e-970a15d31272",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -21,10 +21,6 @@ Ext.define('Inventory.view.InventoryCountGroupViewController', {
             txtCountGroup: '{current.strCountGroup}',
             txtCountsPerYear: '{current.intCountsPerYear}',
             chkIncludeOnHand: '{current.ysnIncludeOnHand}',
-            cboInventoryType: {
-                value: '{current.intInventoryType}',
-                store: '{inventoryTypes}'
-            },
             chkScannedCountEntry: '{current.ysnScannedCountEntry}',
             chkCountByLots: '{current.ysnCountByLots}',
             chkCountByPallets: '{current.ysnCountByPallets}',

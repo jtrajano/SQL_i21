@@ -24,12 +24,12 @@ Ext.define('Inventory.view.InventoryCountGroup', {
         'Ext.tab.Tab',
         'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
-        'Ext.form.field.ComboBox',
         'Ext.toolbar.Paging'
     ],
 
-    height: 388,
+    height: 350,
     hidden: false,
+    minHeight: 350,
     width: 466,
     layout: 'fit',
     collapsible: true,
@@ -154,27 +154,6 @@ Ext.define('Inventory.view.InventoryCountGroup', {
                                             itemId: 'chkIncludeOnHand',
                                             fieldLabel: 'Include On Hand',
                                             labelWidth: 125
-                                        },
-                                        {
-                                            xtype: 'gridcombobox',
-                                            columns: [
-                                                {
-                                                    dataIndex: 'intInventoryType',
-                                                    dataType: 'numeric',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'strInventoryType',
-                                                    dataType: 'string',
-                                                    text: 'Inventory Type',
-                                                    flex: 1
-                                                }
-                                            ],
-                                            itemId: 'cboInventoryType',
-                                            fieldLabel: 'Inventory Type',
-                                            labelWidth: 125,
-                                            displayField: 'strInventoryType',
-                                            valueField: 'intInventoryType'
                                         },
                                         {
                                             xtype: 'checkboxfield',

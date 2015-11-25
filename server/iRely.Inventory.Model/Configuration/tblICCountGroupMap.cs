@@ -16,7 +16,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCountGroup).HasColumnName("strCountGroup");
             this.Property(t => t.intCountsPerYear).HasColumnName("intCountsPerYear");
             this.Property(t => t.ysnIncludeOnHand).HasColumnName("ysnIncludeOnHand");
-            this.Property(t => t.intInventoryType).HasColumnName("intInventoryType");
             this.Property(t => t.ysnScannedCountEntry).HasColumnName("ysnScannedCountEntry");
             this.Property(t => t.ysnCountByLots).HasColumnName("ysnCountByLots");
             this.Property(t => t.ysnCountByPallets).HasColumnName("ysnCountByPallets");
