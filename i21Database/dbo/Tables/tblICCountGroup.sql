@@ -16,7 +16,6 @@ Type the overview for the table here.
 		[strCountGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intCountsPerYear] INT NOT NULL DEFAULT ((1)),
 		[ysnIncludeOnHand] BIT NOT NULL DEFAULT ((0)),
-		[intInventoryType] INT NOT NULL DEFAULT ((1)),
 		[ysnScannedCountEntry] BIT NOT NULL DEFAULT ((0)),
 		[ysnCountByLots] BIT NOT NULL DEFAULT ((0)),
 		[ysnCountByPallets] BIT NOT NULL DEFAULT ((0)),
