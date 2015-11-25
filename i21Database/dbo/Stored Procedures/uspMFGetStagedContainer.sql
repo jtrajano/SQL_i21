@@ -8,14 +8,14 @@ BEGIN
 		--,@intBlendProductionStagingLocationId INT
 		--,
 		@intSanitizationStagingUnitId int
-		,@intDefaultBlendProductionLocationId int
+		,@intBlendProductionStagingUnitId int
 
 	--SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
 	--	,@strBlendProductionStagingLocation = strBlendProductionStagingLocation
 	--FROM dbo.tblMFCompanyPreference
 
 	Select @intSanitizationStagingUnitId=intSanitizationStagingUnitId,
-		@intDefaultBlendProductionLocationId=intDefaultBlendProductionLocationId
+		@intBlendProductionStagingUnitId=intBlendProductionStagingUnitId
 	From tblSMCompanyLocation
 	Where intCompanyLocationId=@intLocationId
 
@@ -65,7 +65,7 @@ BEGIN
 	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = C.intStorageLocationId
 		AND SL.intStorageLocationId IN (
 			@intSanitizationStagingUnitId
-			,@intDefaultBlendProductionLocationId
+			,@intBlendProductionStagingUnitId
 			)
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = S.intLotId
