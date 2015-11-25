@@ -76,7 +76,7 @@ SELECT
 											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
-										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
+										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
@@ -162,7 +162,7 @@ SELECT
 											ELSE ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
-										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
+										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
@@ -248,7 +248,7 @@ SELECT
 											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
-										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
+										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END                                        
 									ELSE 0 END,
@@ -335,7 +335,7 @@ SELECT
 											ELSE ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
-										CASE WHEN (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)) OR (A.dblAmountDue < A.dblTotal) --VALIDATE USED PREPAID
+										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
 									ELSE 0 END,
