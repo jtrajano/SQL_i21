@@ -2980,6 +2980,22 @@
     <Build Include="dbo\Stored Procedures\uspMFCalculateDemandRatio.sql" />
     <Build Include="dbo\Tables\tblMFItemDemand.sql" />
     <Build Include="dbo\Views\vyuCTEventMatrixDetailView.sql" />
+    <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
+    <Build Include="dbo\Views\vyuARCustomerInquiry.sql" />
+    <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
+    <None Include="Scripts\Utility\IC\Query tools\Query to debug Stock UOM Quantities.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
+    <Build Include="dbo\Views\vyuTMItemUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMLocationUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMRouteUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMDriverUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMClockUsedBySite.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetTemplateNumber.sql" />
+    <Build Include="dbo\Tables\tblCTEventNotificationLog.sql" />
+    <Build Include="dbo\Functions\fnCTGetEventRecipientEmail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetEventMailContent.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
