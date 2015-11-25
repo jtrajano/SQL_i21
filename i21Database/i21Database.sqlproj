@@ -2992,6 +2992,7 @@
     <Build Include="dbo\Views\vyuTMRouteUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMDriverUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMClockUsedBySite.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetTemplateNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
