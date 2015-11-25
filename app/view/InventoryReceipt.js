@@ -381,8 +381,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         items: [
                                                             {
                                                                 xtype: 'container',
-                                                                flex: 1,
-                                                                margin: '0 5 0 0',
+                                                                flex: 1.1,
+                                                                margin: '0 10 0 0',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
@@ -427,8 +427,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'container',
-                                                                flex: 1,
-                                                                margin: '0 5 0 0',
+                                                                flex: 0.9,
+                                                                margin: '0 10 0 0',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
@@ -437,8 +437,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtBillOfLadingNumber',
-                                                                        fieldLabel: 'Bill of Lading No',
-                                                                        labelWidth: 95
+                                                                        fieldLabel: 'BOL No',
+                                                                        labelWidth: 65
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -465,7 +465,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'cboShipFrom',
                                                                         width: 200,
                                                                         fieldLabel: 'Ship From',
-                                                                        labelWidth: 95,
+                                                                        labelWidth: 65,
                                                                         displayField: 'strLocationName',
                                                                         valueField: 'intEntityLocationId'
                                                                     },
@@ -494,7 +494,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'cboShipVia',
                                                                         width: 200,
                                                                         fieldLabel: 'Ship Via',
-                                                                        labelWidth: 95,
+                                                                        labelWidth: 65,
                                                                         displayField: 'strShipVia',
                                                                         valueField: 'intEntityShipViaId'
                                                                     }
