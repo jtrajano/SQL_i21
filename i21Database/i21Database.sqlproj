@@ -2990,6 +2990,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetEventMailContent.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
