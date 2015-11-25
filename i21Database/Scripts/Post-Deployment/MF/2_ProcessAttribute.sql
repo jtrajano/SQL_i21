@@ -512,24 +512,19 @@ BEGIN
 		,'Select convert(varchar,intControlPointId) as ValueMember,strControlPointName as DisplayMember from tblQMControlPoint Order by intControlPointId'
 END
 GO
-IF NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFAttribute
-		WHERE intAttributeId = 25
-		)
+IF EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 25 and strAttributeName='Is Parent Lot'
+        )
 BEGIN
-	INSERT INTO tblMFAttribute (
-		intAttributeId
-		,strAttributeName
-		,intAttributeDataTypeId
-		,intAttributeTypeId
-		,strSQL
-		)
-	SELECT 25
-		,'Is Parent Lot'
-		,5
-		,1
-		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+	DELETE
+	FROM dbo.tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = 25
+
+	DELETE
+	FROM dbo.tblMFAttribute
+	WHERE intAttributeId = 25
 END
 GO
 IF NOT EXISTS (
