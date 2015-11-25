@@ -505,12 +505,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             };
         },
-        readOnlyWeightDropdown: function (get) {
-            if (get('grdInventoryReceipt.selection.strLotTracking') === 'No') {
-                return true;
-            }
-            else return false;
-        },
         readOnlyOrderNumberDropdown: function (get) {
             var receiptType = get('current.strReceiptType');
             switch (receiptType) {
