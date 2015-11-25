@@ -20,6 +20,31 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+        
+        public override async Task<BusinessResult<tblICStorageMeasurementReading>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            var msg = result.Exception.Message;
+
+            if (result.HasError)
+            {
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICStorageMeasurementReadingConversion'"))
+                {
+                    msg = "Storage Reading Measurement Conversions must be unique.";
+                }
+            }
+
+            return new BusinessResult<tblICStorageMeasurementReading>()
+            {
+                success = !result.HasError,
+                message = new MessageResult()
+                {
+                    statusText = msg,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            };
+        }
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
