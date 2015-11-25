@@ -43,21 +43,20 @@ BEGIN
 			,D.dblMaxEarned
 			,D.dblMaxCarryover FROM 
 		tblPRTypeTimeOff M 
-		RIGHT JOIN tblPRTypeTimeOffDetail D 
+		RIGHT JOIN (SELECT * FROM tblPRTypeTimeOffDetail 
+					WHERE intTypeTimeOffId = @intTypeTimeOffId 
+					  AND dblYearsOfService <= @intYearsOfService) D 
 			ON M.intTypeTimeOffId = D.intTypeTimeOffId
 		LEFT JOIN tblPREmployeeTimeOff E
 			ON D.intTypeTimeOffId = E.intTypeTimeOffId
-				AND E.intEntityEmployeeId = @intEmployeeId
-				AND D.intTypeTimeOffId = @intTypeTimeOffId
-				AND D.dblYearsOfService <= @intYearsOfService
+		WHERE E.intEntityEmployeeId = @intEmployeeId
 		ORDER BY D.dblYearsOfService DESC
 		) T
+		WHERE tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
+			AND tblPREmployeeTimeOff.intTypeTimeOffId = @intTypeTimeOffId
 
 		DELETE FROM #tmpEmployees WHERE intEntityEmployeeId = @intEmployeeId
 	END
-
-	--Step 2: Update each Employee Time Off Hours
-	--TO DO
 
 END
 GO
