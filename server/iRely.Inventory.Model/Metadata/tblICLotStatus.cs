@@ -15,7 +15,7 @@ namespace iRely.Inventory.Model
         public string strSecondaryStatus { get; set; }
         public string strDescription { get; set; }
         public string strPrimaryStatus { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> OldLotStatusAdjustmentDetails { get; set; }
