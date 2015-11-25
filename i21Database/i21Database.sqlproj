@@ -2987,6 +2987,11 @@
     <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Query to debug Stock UOM Quantities.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
+    <Build Include="dbo\Views\vyuTMItemUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMLocationUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMRouteUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMDriverUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMClockUsedBySite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
