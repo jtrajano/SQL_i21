@@ -4,12 +4,13 @@ AS
 SET NOCOUNT ON;
 
 	Select 'Produce' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
-	t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
-	MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,'L' AS strType
+	t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
+	MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,'L' AS strType,t.intAttributeTypeId,t.intImageTypeId
 	FROM (  
 	Select DISTINCT 'Produce' AS strTransactionName,l.intLotId,l.strLotNumber,l.strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
-	mt.strCategoryCode,wi.dblQuantity,um.strUnitMeasure AS strUOM,
-	wi.dtmCreated AS dtmTransactionDate,l.intParentLotId
+	mt.intCategoryId,mt.strCategoryCode,wi.dblQuantity,um.strUnitMeasure AS strUOM,
+	wi.dtmCreated AS dtmTransactionDate,l.intParentLotId,ps.intAttributeTypeId,
+	Case When ps.intAttributeTypeId = 3  THEN 6 Else 4 End AS intImageTypeId
 	from tblMFWorkOrder w 
 	Join tblMFWorkOrderProducedLot wi on w.intWorkOrderId=wi.intWorkOrderId
 	Join tblICLot l on wi.intLotId=l.intLotId
@@ -19,4 +20,5 @@ SET NOCOUNT ON;
 	Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Where wi.intWorkOrderId=@intWorkOrderId) t
-	group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
+	group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
+	t.strLotAlias,t.intParentLotId,t.intAttributeTypeId,t.intImageTypeId
