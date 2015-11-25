@@ -29,12 +29,15 @@ Declare @tblTemp AS table
 	intItemId int,
 	strItemNo nvarchar(50),
 	strItemDesc nvarchar(200),
+	intCategoryId int,
 	strCategoryCode nvarchar(50),
 	intParentLotId int,
 	strProcessName nvarchar(50),
 	strType nvarchar(1),
 	strVendor nvarchar(50),
-	strCustomer nvarchar(50)
+	strCustomer nvarchar(50),
+	intAttributeTypeId int Default 0,
+	intImageTypeId int Default 0
 )
 
 Declare @tblData AS table
@@ -51,12 +54,15 @@ Declare @tblData AS table
 	intItemId int,
 	strItemNo nvarchar(50),
 	strItemDesc nvarchar(200),
+	intCategoryId int,
 	strCategoryCode nvarchar(50),
 	intParentLotId int,
 	strProcessName nvarchar(50),
 	strType nvarchar(1),
 	strVendor nvarchar(50),
-	strCustomer nvarchar(50)
+	strCustomer nvarchar(50),
+	intAttributeTypeId int Default 0,
+	intImageTypeId int Default 0
 )
 
 Declare @tblNodeData AS table
@@ -73,12 +79,15 @@ Declare @tblNodeData AS table
 	intItemId int,
 	strItemNo nvarchar(50),
 	strItemDesc nvarchar(200),
+	intCategoryId int,
 	strCategoryCode nvarchar(50),
 	intParentLotId int,
 	strProcessName nvarchar(50),
 	strType nvarchar(1),
 	strVendor nvarchar(50),
-	strCustomer nvarchar(50)
+	strCustomer nvarchar(50),
+	intAttributeTypeId int Default 0,
+	intImageTypeId int Default 0
 )
 
 Declare @tblLinkData AS table
@@ -92,15 +101,15 @@ Declare @tblLinkData AS table
 If @intDirectionId=1
 Begin
 	--Receipt
-	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
 	Exec uspMFGetTraceabilityLotReceiptDetail @intLotId
 
 	Update @tblNodeData Set intRecordId=1,intParentId=0
 
 	--Lot Detail
-	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId)
+	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
 	Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId
 
 	Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
@@ -108,9 +117,9 @@ Begin
 	--Counter Data for the while loop
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData
 
-	Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+	Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
-	Select TOP 1 intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+	Select TOP 1 intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Order By intRecordId Desc
 
 	Set @intRowCount=1
@@ -127,19 +136,19 @@ Begin
 
 				-- From Lot to WorkOrders
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType)
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
 					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId
 
 				-- WorkOrder Output details
 				If @strType='W'  			
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
 					Exec uspMFGetTraceabilityWorkOrderOutputDetail @intId
 			
 				-- Lot Ship
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 					Exec uspMFGetTraceabilityLotShipDetail @intId
 
@@ -150,18 +159,18 @@ Begin
 
 		DELETE FROM @tblTemp      
 
-		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType)
-		Select (@intMaxRecordCount + ROW_NUMBER() OVER (ORDER BY intLotId ASC)) AS intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		SUM(dblQuantity),strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType 
-		From @tblData Group By intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType
+		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId)
+		Select (@intMaxRecordCount + ROW_NUMBER() OVER (ORDER BY intLotId ASC)) AS intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		SUM(dblQuantity),strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId 
+		From @tblData Group By intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId
 
 		--Node Date
-		Insert Into @tblNodeData(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType)
-		Select intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType 
+		Insert Into @tblNodeData(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId)
+		Select intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId 
 		From @tblTemp
 
 		DELETE FROM @tblData
@@ -173,32 +182,21 @@ Begin
 		SELECT @intRowCount = COUNT(1) FROM @tblTemp      
 	END
 
-	--Insert Into @tblLinkData(intFromRecordId,intToRecordId,strTransactionName)
-	--Select intParentId,intRecordId,strTransactionName From @tblNodeData
-
-	--Select intRecordId AS [key],*,
-	--Case When strType='L' Then 
-	--	Case When strTransactionName='Receipt' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Receipt.png' 
-	--	When strTransactionName='Ship' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Ship.png' 
-	--	Else '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'FG.png' End
-	--When strType='W' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'WIP.png' End AS strImage 
-	--From @tblNodeData
-
 End
 
 --Reverse
 If @intDirectionId=2
 Begin
 	--Ship
-	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 	Exec uspMFGetTraceabilityLotShipDetail @intLotId
 
 	Update @tblNodeData Set intRecordId=1,intParentId=0
 
 	--Lot Detail
-	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId)
+	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
 	Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId
 
 	Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
@@ -206,9 +204,9 @@ Begin
 	--Counter Data for the while loop
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData
 
-	Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+	Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
-	Select TOP 1 intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+	Select TOP 1 intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Order By intRecordId Desc
 
 	Set @intRowCount=1
@@ -225,19 +223,19 @@ Begin
 
 				-- From Lot to WorkOrders
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType)
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
 					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId
 
 				-- WorkOrder Output details
 				If @strType='W'  			
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
 					Exec uspMFGetTraceabilityWorkOrderInputDetail @intId
 			
 				-- Lot Receipt
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
 					Exec uspMFGetTraceabilityLotReceiptDetail @intId
 
@@ -248,18 +246,18 @@ Begin
 
 		DELETE FROM @tblTemp      
 
-		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType)
-		Select (@intMaxRecordCount + ROW_NUMBER() OVER (ORDER BY intLotId ASC)) AS intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		SUM(dblQuantity),strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType 
-		From @tblData Group By intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType
+		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId)
+		Select (@intMaxRecordCount + ROW_NUMBER() OVER (ORDER BY intLotId ASC)) AS intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		SUM(dblQuantity),strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId 
+		From @tblData Group By intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId
 
 		--Node Date
-		Insert Into @tblNodeData(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType)
-		Select intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,strCategoryCode,
-		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType 
+		Insert Into @tblNodeData(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId)
+		Select intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId 
 		From @tblTemp
 
 		DELETE FROM @tblData
@@ -276,15 +274,18 @@ Begin
 End
 
 	Select intRecordId AS [key],*,
-	--Case When strType='L' Then 
-	--	Case When strTransactionName='Receipt' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Receipt.png' 
-	--	When strTransactionName='Ship' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Ship.png' 
-	--	Else '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'FG.png' End
-	--When strType='W' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'WIP.png' 
-	--When strType='R' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Receipt.png'
-	--When strType='S' Then '../Manufacturing/Images/TraceabilityImages/' + strCategoryCode +'Ship.png'
-	--End AS strImage,
-	'../resources/images/graphics/i21-logo.png' AS strImage,
+	Case When strType='L' Then 
+		Case When intImageTypeId = 2 Then '../resources/images/graphics/traceability-raw-material.png' 
+			When intImageTypeId = 4 Then '../resources/images/graphics/traceability-wip-material.png' 
+			When intImageTypeId = 6 Then '../resources/images/graphics/traceability-finished-goods.png' 
+			Else '../resources/images/graphics/traceability-wip-material.png'
+		End
+	When strType='W' Then 
+		Case When intAttributeTypeId=3 Then '../resources/images/graphics/traceability-packaging.png' 
+		Else '../resources/images/graphics/traceability-wip-process.png' End
+	When strType='R' Then '../resources/images/graphics/traceability-receipt.png'
+	When strType='S' Then '../resources/images/graphics/traceability-shipment.png'
+	End AS strImage,
 	CASE When ISNULL(strProcessName,'')='' THEN  strLotNumber Else strLotNumber + CHAR(13) + '(' + strProcessName + ')' End AS strNodeText,
 	'Item No.	  : ' + ISNULL(strItemNo,'') + CHAR(13) +
 	'Item Desc.   : ' + ISNULL(strItemDesc,'') + CHAR(13) +
@@ -293,8 +294,10 @@ End
 	CASE WHEN strType='R' THEN 'Vendor     : ' + ISNULL(strVendor,'') ELSE '' END + 
 	CASE WHEN strType='S' THEN 'Customer     : ' + ISNULL(strCustomer,'') ELSE '' END
 	AS strToolTip,
-	CASE WHEN strType='L' AND strTransactionName='Receipt' THEN 5
-		 WHEN strType='L' AND strTransactionName='Produce' THEN 6
-		 ELSE 5
-	END AS intControlPointId
+	Case When strType='L' Then 
+		Case When intImageTypeId = 2 Then 5 
+			Else 6
+		End
+	Else 5 
+	End AS intControlPointId
 	From @tblNodeData

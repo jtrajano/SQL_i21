@@ -2,7 +2,7 @@
 	@intLotId int
 AS
 	Select 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
-	mt.strCategoryCode,shl.dblQuantityShipped AS dblQuantity,
+	mt.intCategoryId,mt.strCategoryCode,shl.dblQuantityShipped AS dblQuantity,
 	um.strUnitMeasure AS strUOM,
 	sh.dtmShipDate AS dtmTransactionDate,c.strName ,'S' AS strType
 	from tblICInventoryShipmentItemLot shl 

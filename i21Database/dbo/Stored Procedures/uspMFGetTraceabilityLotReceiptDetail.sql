@@ -4,7 +4,7 @@ AS
 SET NOCOUNT ON;
 
 	Select 'Receipt' AS strTransactionName,rh.intInventoryReceiptId,rh.strReceiptNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
-	mt.strCategoryCode,CASE WHEN l.intWeightUOMId is null then rm.dblQuantity Else rm.dblGrossWeight End AS dblQuantity,
+	mt.intCategoryId,mt.strCategoryCode,CASE WHEN l.intWeightUOMId is null then rm.dblQuantity Else rm.dblGrossWeight End AS dblQuantity,
 	CASE WHEN l.intWeightUOMId is null then um.strUnitMeasure Else um1.strUnitMeasure End AS strUOM,
 	rh.dtmReceiptDate AS dtmTransactionDate,l.intParentLotId,v.strName AS strVendor,'R' AS strType
 	from tblICInventoryReceiptItemLot rm  
