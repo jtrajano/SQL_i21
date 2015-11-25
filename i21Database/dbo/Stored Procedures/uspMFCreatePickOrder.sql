@@ -158,7 +158,7 @@ BEGIN TRY
 		,SUM(CL.dblIssuedQuantity)
 		,IU1.intUnitMeasureId
 		,CL.intCreatedUserId
-		,CL.dtmCreated
+		,@dtmCurrentDate
 		--,(
 		--	SELECT TOP 1 intPickPreferenceId
 		--	FROM dbo.tblWHPickPreference
@@ -200,7 +200,7 @@ BEGIN TRY
 	GROUP BY CL.intItemId
 		,IU1.intUnitMeasureId
 		,CL.intCreatedUserId
-		,CL.dtmCreated
+		--,CL.dtmCreated
 		--,(
 		--	SELECT TOP 1 intPickPreferenceId
 		--	FROM dbo.tblWHPickPreference
