@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTMarkUpDownDetail]
 (
-	[intMarkUpDownDetailId] INT NOT NULL PRIMARY KEY,
+	[intMarkUpDownDetailId] INT NOT NULL PRIMARY KEY IDENTITY,
 	[intMarkUpDownId] INT NOT NULL,
 	[intItemUOMId] INT,
 	[intCategoryId] INT,
