@@ -2984,6 +2984,7 @@
     <Build Include="dbo\Functions\fnCTGetEventRecipientEmail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetEventMailContent.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetTemplateNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
