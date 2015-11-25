@@ -2993,6 +2993,10 @@
     <Build Include="dbo\Views\vyuTMDriverUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMClockUsedBySite.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateNumber.sql" />
+    <Build Include="dbo\Tables\tblCTEventNotificationLog.sql" />
+    <Build Include="dbo\Functions\fnCTGetEventRecipientEmail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetEventMailContent.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
