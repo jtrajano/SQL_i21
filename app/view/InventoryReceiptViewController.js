@@ -1207,8 +1207,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboCostUOM') {
             current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
-
         }
+        else if (combo.itemId === 'cboStorageLocation') {
+            if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
+                current.set('intSubLocationId', records[0].get('intSubLocationId'));
+                current.set('strSubLocationName', records[0].get('strSubLocationName'));
+            }
+            var lots = current.tblICInventoryReceiptItemLots();
+
+            if (lots) {
+                Ext.Array.each(lots.data.items, function (lot) {
+                    if (!lot.dummy) {
+                        lot.set('intStorageLocationId', record.get('intStorageLocationId'));
+                        lot.set('strStorageLocation', record.get('strName'));
+                    }
+                });
+            }
+        }
+
         this.calculateGrossWeight(current);
         win.viewModel.data.currentReceiptItem = current;
         this.calculateItemTaxes();
@@ -3114,26 +3130,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onStorageLocationSelect: function (combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var record = records[0];
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepItem');
-        var current = plugin.getActiveRecord();
-        var lots = current.tblICInventoryReceiptItemLots();
-
-        if (lots) {
-            Ext.Array.each(lots.data.items, function (lot) {
-                if (!lot.dummy) {
-                    lot.set('intStorageLocationId', record.get('intStorageLocationId'));
-                    lot.set('strStorageLocation', record.get('strName'));
-                }
-            });
-        }
-    },
-
     onColumnBeforeRender: function (column) {
         "use strict";
 
@@ -3311,11 +3307,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#cboCostUOM": {
                 select: this.onReceiptItemSelect
             },
+            "#cboStorageLocation": {
+                select: this.onReceiptItemSelect
+            },
             "#cboOtherCharge": {
                 select: this.onChargeSelect
-            },
-            "#cboStorageLocation": {
-                select: this.onStorageLocationSelect
             },
             "#colLineTotal": {
                 beforerender: this.onColumnBeforeRender

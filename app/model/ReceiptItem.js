@@ -85,6 +85,20 @@ Ext.define('Inventory.model.ReceiptItem', {
                 message: 'Qty to Receive must be greater than zero(0).'
             })
         }
+        if (this.get('strLotTracking') !== 'No') {
+            if (iRely.Functions.isEmpty(this.get('intSubLocationId'))) {
+                errors.add({
+                    field: 'strSubLocationName',
+                    message: 'Sub Location must be present.'
+                })
+            }
+            if (iRely.Functions.isEmpty(this.get('intStorageLocationId'))) {
+                errors.add({
+                    field: 'strStorageLocationName',
+                    message: 'Storage Location must be present.'
+                })
+            }
+        }
         return errors;
     }
 
