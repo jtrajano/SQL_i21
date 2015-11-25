@@ -20,6 +20,7 @@
 	,@ShipToLocationId      INT
 	,@VendorLocationId		INT
 	,@PricingLevelId		INT
+	,@AllowQtyToExceed		BIT
 )
 RETURNS @returntable TABLE
 (
@@ -66,6 +67,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 				,@ContractHeaderId
 				,@ContractDetailId
 				,@OriginalQuantity
+				,@AllowQtyToExceed
 			);
 			
 			
