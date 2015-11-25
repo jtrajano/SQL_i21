@@ -100,148 +100,160 @@ BEGIN
 	WITH	(HOLDLOCK) 
 	AS		ItemStockUOM	
 	USING (
-			-------------------------------------------
-			-- Item is NOT a Lot. 
-			-------------------------------------------
+				SELECT	intItemId 
+						,intItemUOMId 
+						,intItemLocationId 
+						,intSubLocationId 
+						,intStorageLocationId 
+						,Qty = SUM(Qty) 
+				FROM (
+					-------------------------------------------
+					-- Item is NOT a Lot. 
+					-------------------------------------------
+					-- Get the Qty as it is. 
+					SELECT	intItemId = @intItemId
+							,intItemUOMId = @intItemUOMId
+							,intItemLocationId = @intItemLocationId					
+							,intSubLocationId = @intSubLocationId 
+							,intStorageLocationId = @intStorageLocationId
+							,Qty = ISNULL(@dblQty, 0) 
+					WHERE	@intLotId IS NULL 
 
-			-- Get the Qty as it is. 
-			SELECT	intItemId = @intItemId
-					,intItemUOMId = @intItemUOMId
-					,intItemLocationId = @intItemLocationId					
-					,intSubLocationId = @intSubLocationId 
-					,intStorageLocationId = @intStorageLocationId
-					,Qty = ISNULL(@dblQty, 0) 
-			WHERE	@intLotId IS NULL 
-
-			-- Convert the Qty to stock Unit. 
-			UNION ALL 
-			SELECT	intItemId = @intItemId
-					,intItemUOMId = StockUOM.intItemUOMId
-					,intItemLocationId = @intItemLocationId					
-					,intSubLocationId = @intSubLocationId 
-					,intStorageLocationId = @intStorageLocationId
-					,Qty = dbo.fnCalculateStockUnitQty(@dblQty, ItemUOM.dblUnitQty) -- Convert the qty to stock unit. 
-			FROM	(
-						SELECT	intItemId
-								,intItemUOMId 
-								,dblUnitQty									
-						FROM	dbo.tblICItemUOM 
-						WHERE	intItemId = @intItemId
-								AND intItemUOMId = @intItemUOMId
-					) ItemUOM 
-					,(
-						SELECT	intItemId
-								,intItemUOMId 
-								,dblUnitQty
-						FROM	dbo.tblICItemUOM 
-						WHERE	intItemId = @intItemId
-								AND ysnStockUnit = 1
-					) StockUOM 						
-			WHERE	@intLotId IS NULL 
-					AND @intItemUOMId <> StockUOM.intItemUOMId
+					-- Convert the Qty to stock Unit. 
+					UNION ALL 
+					SELECT	intItemId = @intItemId
+							,intItemUOMId = StockUOM.intItemUOMId
+							,intItemLocationId = @intItemLocationId					
+							,intSubLocationId = @intSubLocationId 
+							,intStorageLocationId = @intStorageLocationId
+							,Qty = dbo.fnCalculateStockUnitQty(@dblQty, ItemUOM.dblUnitQty) -- Convert the qty to stock unit. 
+					FROM	(
+								SELECT	intItemId
+										,intItemUOMId 
+										,dblUnitQty									
+								FROM	dbo.tblICItemUOM 
+								WHERE	intItemId = @intItemId
+										AND intItemUOMId = @intItemUOMId
+							) ItemUOM 
+							,(
+								SELECT	intItemId
+										,intItemUOMId 
+										,dblUnitQty
+								FROM	dbo.tblICItemUOM 
+								WHERE	intItemId = @intItemId
+										AND ysnStockUnit = 1
+							) StockUOM 						
+					WHERE	@intLotId IS NULL 
+							AND @intItemUOMId <> StockUOM.intItemUOMId
 				
-			-------------------------------------------
-			-- Item is a Lot and with Weight. 
-			-------------------------------------------
+					-------------------------------------------
+					-- Item is a Lot and with Weight. 
+					-------------------------------------------
 
-			-- Get the Pack Qty (intItemUOMId) 
-			UNION ALL 
-			SELECT	intItemId = @intItemId					
-					,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN Lot.intItemUOMId -- Stock is in weight, then get the pack UOM id. 
-											ELSE @intItemUOMId
+					-- Get the Pack Qty (intItemUOMId) 
+					UNION ALL 
+					SELECT	intItemId = @intItemId					
+							,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN Lot.intItemUOMId -- Stock is in weight, then get the pack UOM id. 
+													ELSE @intItemUOMId
+											END 
+							,intItemLocationId = @intItemLocationId
+							,intSubLocationId = @intSubLocationId 
+							,intStorageLocationId = @intStorageLocationId
+							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN @dblQty / Lot.dblWeightPerQty -- Stock is in weights, then convert it to packs. 
+											ELSE @dblQty
 									END 
-					,intItemLocationId = @intItemLocationId
-					,intSubLocationId = @intSubLocationId 
-					,intStorageLocationId = @intStorageLocationId
-					,Qty =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN @dblQty / Lot.dblWeightPerQty -- Stock is in weights, then convert it to packs. 
-									ELSE @dblQty
-							END 
-			FROM	dbo.tblICLot Lot 
-			WHERE	Lot.intLotId = @intLotId
-					AND Lot.intItemLocationId = @intItemLocationId
-					AND Lot.intWeightUOMId IS NOT NULL 
-					AND ISNULL(Lot.dblWeightPerQty, 0) <> 0			
+					FROM	dbo.tblICLot Lot 
+					WHERE	Lot.intLotId = @intLotId
+							AND Lot.intItemLocationId = @intItemLocationId
+							AND Lot.intWeightUOMId IS NOT NULL 
+							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0			
 					
-			-- Get the Weight Qty (intItemUOMId) 
-			UNION ALL 
-			SELECT	intItemId = @intItemId					
-					,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN Lot.intWeightUOMId -- Stock is in packs, then get the weight UOM id.
-											ELSE @intItemUOMId
+					-- Get the Weight Qty (intItemUOMId) 
+					UNION ALL 
+					SELECT	intItemId = @intItemId					
+							,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN Lot.intWeightUOMId -- Stock is in packs, then get the weight UOM id.
+													ELSE @intItemUOMId
+											END 
+							,intItemLocationId = @intItemLocationId
+							,intSubLocationId = @intSubLocationId 
+							,intStorageLocationId = @intStorageLocationId
+							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert packs to weight. 
+											ELSE @dblQty
 									END 
-					,intItemLocationId = @intItemLocationId
-					,intSubLocationId = @intSubLocationId 
-					,intStorageLocationId = @intStorageLocationId
-					,Qty =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert packs to weight. 
-									ELSE @dblQty
-							END 
-			FROM	dbo.tblICLot Lot 
-			WHERE	Lot.intLotId = @intLotId
-					AND Lot.intItemLocationId = @intItemLocationId
-					AND Lot.intWeightUOMId IS NOT NULL 
-					AND ISNULL(Lot.dblWeightPerQty, 0) <> 0		
-					AND Lot.intItemUOMId <> Lot.intWeightUOMId 							
+					FROM	dbo.tblICLot Lot 
+					WHERE	Lot.intLotId = @intLotId
+							AND Lot.intItemLocationId = @intItemLocationId
+							AND Lot.intWeightUOMId IS NOT NULL 
+							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0		
+							AND Lot.intItemUOMId <> Lot.intWeightUOMId 							
 
-			-- Convert weight to stock unit. 
-			UNION ALL 
-			SELECT	intItemId = @intItemId					
-					,intItemUOMId =	LotStockUOM.intItemUOMId -- Stock UOM Id
-					,intItemLocationId = @intItemLocationId
-					,intSubLocationId = @intSubLocationId 
-					,intStorageLocationId = @intStorageLocationId
-					,Qty =	dbo.fnCalculateStockUnitQty(
-								CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert the qty to weight. 
-										ELSE @dblQty -- else it is in weights. Keep using the weight qty. 
-								END 
-								,LotWeightUOM.dblUnitQty								
-							) 
+					-- Convert weight to stock unit. 
+					UNION ALL 
+					SELECT	intItemId = @intItemId					
+							,intItemUOMId =	LotStockUOM.intItemUOMId -- Stock UOM Id
+							,intItemLocationId = @intItemLocationId
+							,intSubLocationId = @intSubLocationId 
+							,intStorageLocationId = @intStorageLocationId
+							,Qty =	dbo.fnCalculateStockUnitQty(
+										CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert the qty to weight. 
+												ELSE @dblQty -- else it is in weights. Keep using the weight qty. 
+										END 
+										,LotWeightUOM.dblUnitQty								
+									) 
 
-			FROM	dbo.tblICLot Lot LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
-						ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
-					LEFT JOIN dbo.tblICItemUOM LotStockUOM 
-						ON LotStockUOM.intItemId = Lot.intItemId
-						AND LotStockUOM.ysnStockUnit = 1
-			WHERE	Lot.intLotId = @intLotId
-					AND Lot.intItemLocationId = @intItemLocationId
-					AND Lot.intWeightUOMId IS NOT NULL 
-					AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
-					AND LotWeightUOM.intItemUOMId <> LotStockUOM.intItemUOMId 
+					FROM	dbo.tblICLot Lot LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
+								ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
+								ON LotStockUOM.intItemId = Lot.intItemId
+								AND LotStockUOM.ysnStockUnit = 1
+					WHERE	Lot.intLotId = @intLotId
+							AND Lot.intItemLocationId = @intItemLocationId
+							AND Lot.intWeightUOMId IS NOT NULL 
+							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
+							AND LotWeightUOM.intItemUOMId <> LotStockUOM.intItemUOMId 
 
-			---------------------------------------------
-			-- Item is a Lot and does NOT have a Weight. 
-			---------------------------------------------
+					---------------------------------------------
+					-- Item is a Lot and does NOT have a Weight. 
+					---------------------------------------------
 
-			-- Get the Pack Qty (intItemUOMId) 
-			UNION ALL 
-			SELECT	intItemId = @intItemId
-					,intItemUOMId = @intItemUOMId
-					,intItemLocationId = @intItemLocationId					
-					,intSubLocationId = @intSubLocationId 
-					,intStorageLocationId = @intStorageLocationId
-					,Qty = ISNULL(@dblQty, 0) 
-			FROM	dbo.tblICLot Lot 
-			WHERE	Lot.intLotId = @intLotId
-					AND Lot.intItemLocationId = @intItemLocationId
-					AND Lot.intWeightUOMId IS NULL 
+					-- Get the Pack Qty (intItemUOMId) 
+					UNION ALL 
+					SELECT	intItemId = @intItemId
+							,intItemUOMId = @intItemUOMId
+							,intItemLocationId = @intItemLocationId					
+							,intSubLocationId = @intSubLocationId 
+							,intStorageLocationId = @intStorageLocationId
+							,Qty = ISNULL(@dblQty, 0) 
+					FROM	dbo.tblICLot Lot 
+					WHERE	Lot.intLotId = @intLotId
+							AND Lot.intItemLocationId = @intItemLocationId
+							AND Lot.intWeightUOMId IS NULL 
 					
-			-- If incoming Lot has a no weight, then convert the lot item UOM to stock unit Qty
-			UNION ALL 
-			SELECT	intItemId = @intItemId
-					,intItemUOMId =	LotStockUOM.intItemUOMId
-					,intItemLocationId = @intItemLocationId					
-					,intSubLocationId = @intSubLocationId 
-					,intStorageLocationId = @intStorageLocationId
-					,Qty =	dbo.fnCalculateStockUnitQty(@dblQty, LotItemUOM.dblUnitQty) 
-			FROM	dbo.tblICLot Lot LEFT JOIN dbo.tblICItemUOM LotItemUOM
-						ON Lot.intItemUOMId = LotItemUOM.intItemUOMId
-					LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
-						ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
-					LEFT JOIN dbo.tblICItemUOM LotStockUOM 
-						ON LotStockUOM.intItemId = Lot.intItemId
-						AND LotStockUOM.ysnStockUnit = 1
-			WHERE	Lot.intLotId = @intLotId
-					AND Lot.intItemLocationId = @intItemLocationId
-					AND Lot.intWeightUOMId IS NULL 
-					AND Lot.intItemUOMId <> LotStockUOM.intItemUOMId
+					-- If incoming Lot has a no weight, then convert the lot item UOM to stock unit Qty
+					UNION ALL 
+					SELECT	intItemId = @intItemId
+							,intItemUOMId =	LotStockUOM.intItemUOMId
+							,intItemLocationId = @intItemLocationId					
+							,intSubLocationId = @intSubLocationId 
+							,intStorageLocationId = @intStorageLocationId
+							,Qty =	dbo.fnCalculateStockUnitQty(@dblQty, LotItemUOM.dblUnitQty) 
+					FROM	dbo.tblICLot Lot LEFT JOIN dbo.tblICItemUOM LotItemUOM
+								ON Lot.intItemUOMId = LotItemUOM.intItemUOMId
+							LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
+								ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
+								ON LotStockUOM.intItemId = Lot.intItemId
+								AND LotStockUOM.ysnStockUnit = 1
+					WHERE	Lot.intLotId = @intLotId
+							AND Lot.intItemLocationId = @intItemLocationId
+							AND Lot.intWeightUOMId IS NULL 
+							AND Lot.intItemUOMId <> LotStockUOM.intItemUOMId				
+				) Query
+				GROUP BY intItemId 
+						,intItemUOMId 
+						,intItemLocationId 
+						,intSubLocationId 
+						,intStorageLocationId 
 
 	) AS RawStockData
 		ON ItemStockUOM.intItemId = RawStockData.intItemId

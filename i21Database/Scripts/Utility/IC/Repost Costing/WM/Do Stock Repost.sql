@@ -133,6 +133,7 @@ BEGIN
 			,@intReturnId AS INT
 			,@ysnPost AS BIT 
 			,@dblQty AS NUMERIC(18, 6)
+			,@intTransactionTypeId AS INT
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
@@ -144,13 +145,23 @@ BEGIN
 				,@intTransactionId = intTransactionId
 				,@intItemId = intItemId
 				,@dblQty = dblQty 
+				,@intTransactionTypeId = intTransactionTypeId
 		FROM	#tmpICInventoryTransaction
 		ORDER BY dtmDate ASC 
 		-- ORDER BY intInventoryTransactionId ASC 
 
 		-- Detect if the transaction is posted or not. 
 		BEGIN 
-			SET @ysnPost = NULL 
+			SET @ysnPost = 1 
+
+			SELECT	@strTransactionId = 
+						CASE	WHEN RTRIM(LTRIM(ISNULL(@strTransactionId, ''))) <> '' THEN 
+									@strTransactionId 
+								ELSE 
+									ICType.strName + '-' + CAST(@intTransactionId AS NVARCHAR(10))  
+						END
+			FROM	dbo.tblICInventoryTransactionType ICType
+			WHERE	intTransactionTypeId = @intTransactionTypeId
 
 			SELECT	@ysnPost = 0 
 			FROM	#tmpICPostedTransactions
@@ -186,6 +197,8 @@ BEGIN
 
 			IF @strTransactionForm IN ('Consume', 'Produce') 
 			BEGIN 
+				PRINT 'Processing Consume'
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -237,6 +250,8 @@ BEGIN
 
 				DELETE FROM @ItemsToPost
 
+				PRINT 'Processing Produce'
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -264,8 +279,13 @@ BEGIN
 						,dblQty  
 						,dblUOMQty  
 						,dblCost = ISNULL(
-								(SELECT SUM( -1 * dblQty * dblCost ) FROM dbo.tblICInventoryTransaction WHERE strTransactionId = @strTransactionId AND strBatchId = @strBatchId) 
-								/ dblQty
+								(
+									SELECT	SUM(-1 * dblQty * dblCost )
+									FROM	dbo.tblICInventoryTransaction 
+									WHERE	strBatchId = @strBatchId
+											AND intTransactionTypeId = 8 
+								)									 
+								/ #tmpICInventoryTransaction.dblQty
 								, 0
 							)
 						,dblSalesPrice  
