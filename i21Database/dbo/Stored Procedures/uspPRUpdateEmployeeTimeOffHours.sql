@@ -76,7 +76,7 @@ BEGIN
 													AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
 											WHERE P.ysnPosted = 1
 												  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
-												  AND P.dtmDateTo > dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
+												  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
 												  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
 							WHEN (strPeriod = 'Day') THEN 
 								DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
@@ -88,7 +88,7 @@ BEGIN
 								DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
 							WHEN (strPeriod = 'Year') THEN
 								DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-							ELSE 0 
+							ELSE 0
 						END * dblRate * dblRateFactor
 
 	--Update Each Employee Hours
@@ -130,4 +130,3 @@ BEGIN
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployees')) DROP TABLE #tmpEmployees
 END
 GO
-
