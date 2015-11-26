@@ -80,7 +80,7 @@ IF ISNULL(@ysnPost, 0) = 0
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN
 		-- DELETE Results 2 DAYS OLDER	
-		DELETE tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE())
+		DELETE FROM tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE())
 		
 		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
 			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intEntityId,@strJournalType
@@ -130,7 +130,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
 																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
 		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId);
-			
+		
+		DELETE FROM @GLEntries
 		INSERT INTO @GLEntries (
 			 [strTransactionId]
 			,[intTransactionId]
@@ -225,7 +226,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
+		DELETE FROM tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 		
 		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
@@ -411,7 +412,7 @@ SELECT A.intJournalId FROM @tmpValidJournals A
 
 IF EXISTS (SELECT 1 FROM @tmpReverseJournals)
 BEGIN
-	DELETE @tmpValidJournals
+	DELETE FROM @tmpValidJournals
 
 	WHILE EXISTS(SELECT 1 FROM @tmpReverseJournals)
 	BEGIN
@@ -522,7 +523,7 @@ BEGIN
 			FROM [dbo].tblGLJournalDetail A
 			WHERE A.intJournalId = @intJournalId
 							
-		DELETE @tmpReverseJournals WHERE intJournalId = @intJournalId
+		DELETE FROM @tmpReverseJournals WHERE intJournalId = @intJournalId
 	END 	
 	
 	GOTO Post_Transaction;
