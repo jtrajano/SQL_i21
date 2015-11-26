@@ -36,7 +36,7 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_InboundShipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
--- Allocate by 'cost
+-- Allocate by cost by 'Cost' on cost methods using 'Per Unit' and 'Percentage' 
 BEGIN
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
 	MERGE	
@@ -118,6 +118,101 @@ BEGIN
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
 			,ROUND (	Source_Query.dblTotalOtherCharge
+				* Source_Query.dblOpenReceive 
+				* Source_Query.dblUnitCost
+				/ Source_Query.dblTotalCost 
+				, 2
+			)
+			,Source_Query.ysnAccrue
+			,Source_Query.ysnInventoryCost
+		)
+	;
+END 
+
+-- Allocate by cost by 'Cost' on cost methods using 'Amount' 
+BEGIN
+	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
+	MERGE	
+	INTO	dbo.tblICInventoryReceiptItemAllocatedCharge 
+	WITH	(HOLDLOCK) 
+	AS		ReceiptItemAllocatedCharge
+	USING (
+		SELECT	CalculatedCharges.*
+				,ReceiptItem.intInventoryReceiptItemId
+				,ReceiptItem.dblOpenReceive
+				,ReceiptItem.dblUnitCost
+				,TotalCostOfItemsPerContract.dblTotalCost 
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+					AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
+					AND ReceiptItem.intOrderId IS NOT NULL 
+					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				INNER JOIN (
+					SELECT	dblFixedAmount = SUM(dblAmount)
+							,ysnAccrue
+							,intContractId
+							,intEntityVendorId
+							,ysnInventoryCost
+							,intInventoryReceiptId
+							,intInventoryReceiptChargeId
+					FROM	dbo.tblICInventoryReceiptCharge CalculatedCharge 					
+					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
+							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
+							AND CalculatedCharge.strCostMethod = @COST_METHOD_Amount
+							AND CalculatedCharge.intContractId IS NOT NULL 
+					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+				) CalculatedCharges 
+					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId
+				LEFT JOIN (
+					SELECT	dblTotalCost = SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0))
+							,ReceiptItem.intOrderId 
+					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+								AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
+					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+							AND ReceiptItem.intOrderId IS NOT NULL 
+					GROUP BY ReceiptItem.intOrderId 
+				) TotalCostOfItemsPerContract 
+					ON TotalCostOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
+	) AS Source_Query  
+		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
+		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
+		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
+		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
+
+	-- Add the other charge to an existing allocation. 
+	WHEN MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
+		UPDATE 
+		SET		dblAmount = ROUND (
+								ISNULL(dblAmount, 0) 
+								+ (
+									Source_Query.dblFixedAmount
+									* Source_Query.dblOpenReceive 
+									* Source_Query.dblUnitCost
+									/ Source_Query.dblTotalCost 
+								)
+								, 2
+							)
+
+	-- Create a new allocation record for the item. 
+	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
+		INSERT (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
+			,[intInventoryReceiptItemId]
+			,[intEntityVendorId]
+			,[dblAmount]
+			,[ysnAccrue]
+			,[ysnInventoryCost]
+		)
+		VALUES (
+			Source_Query.intInventoryReceiptId
+			,Source_Query.intInventoryReceiptChargeId
+			,Source_Query.intInventoryReceiptItemId
+			,Source_Query.intEntityVendorId
+			,ROUND (	
+				Source_Query.dblFixedAmount
 				* Source_Query.dblOpenReceive 
 				* Source_Query.dblUnitCost
 				/ Source_Query.dblTotalCost 
