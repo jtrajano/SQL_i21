@@ -102,33 +102,8 @@ BEGIN
 		DECLARE @intInventoryReceiptId AS INT = 10
 	END 
 
-	-- Setup the expected data
-	BEGIN 
-		INSERT INTO expected (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		)
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 3
-			,[intInventoryReceiptItemId]	= 25
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
-		UNION ALL
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 3
-			,[intInventoryReceiptItemId]	= 26
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
-	END 
-	
+	-- No data is expected on tblICInventoryReceiptChargePerItem
+
 	-- Act
 	BEGIN 		
 		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]

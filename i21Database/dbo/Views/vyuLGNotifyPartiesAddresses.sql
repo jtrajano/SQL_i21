@@ -1,17 +1,18 @@
 CREATE VIEW vyuLGNotifyPartiesAddresses
 AS
-	SELECT	intEntityId, 
-			intEntityLocationId, 
-			strLocationName,
-			strAddress, 
-			strCity, 
-			strCountry, 
-			strState, 
-			strZipCode, 
-			strPhone, 
-			strFax,
-			'Entity'			AS			strType
-	FROM	tblEntityLocation
+	SELECT	ENLOC.intEntityId, 
+			ENLOC.intEntityLocationId, 
+			ENLOC.strLocationName,
+			ENLOC.strAddress, 
+			ENLOC.strCity, 
+			ENLOC.strCountry, 
+			ENLOC.strState, 
+			ENLOC.strZipCode, 
+			ENLOC.strPhone, 
+			ENLOC.strFax,
+			ENTYPE.strType
+	FROM	tblEntityLocation ENLOC
+	JOIN	tblEntityType ENTYPE ON ENTYPE.intEntityId = ENLOC.intEntityId  
 
 	UNION ALL
 

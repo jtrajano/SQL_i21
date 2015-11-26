@@ -270,7 +270,8 @@ BEGIN TRY
 					,[strUserName]
 					,[intTransactionTypeId]
 					,[intEntityId]
-					,[intCompanyLocationId]					
+					,[intCompanyLocationId]
+					,[strTransferTicket]					
 					)
 				VALUES (
 					1
@@ -289,6 +290,7 @@ BEGIN TRY
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
+					,@TransferTicketNumber
 					)
 
 				--New Ticket		
@@ -436,7 +438,8 @@ BEGIN TRY
 					,[strUserName]
 					,[intTransactionTypeId]
 					,[intEntityId]
-					,[intCompanyLocationId]		
+					,[intCompanyLocationId]
+					,[strTransferTicket]		
 					)
 				VALUES (
 					1
@@ -455,6 +458,7 @@ BEGIN TRY
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
+					,@TransferTicketNumber
 					)			
 
 				--New Ticket
@@ -600,7 +604,8 @@ BEGIN TRY
 					,[strUserName]
 					,[intTransactionTypeId]
 					,[intEntityId]
-					,[intCompanyLocationId]	
+					,[intCompanyLocationId]
+					,[strTransferTicket]	
 					)
 				VALUES (
 					1
@@ -619,6 +624,7 @@ BEGIN TRY
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
+					,@TransferTicketNumber
 					)
 
 				--New Ticket
@@ -766,6 +772,7 @@ BEGIN TRY
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]	
+					,[strTransferTicket]
 					)
 				VALUES (
 					1
@@ -784,6 +791,7 @@ BEGIN TRY
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
+					,@TransferTicketNumber
 					)
 
 				--New Ticket
@@ -931,6 +939,7 @@ BEGIN TRY
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]	
+					,[strTransferTicket]
 					)
 				VALUES (
 					1
@@ -949,6 +958,7 @@ BEGIN TRY
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
+					,@TransferTicketNumber
 					)
 
 				--New Ticket
@@ -1095,6 +1105,7 @@ BEGIN TRY
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]
+					,[strTransferTicket]
 					)
 				VALUES (
 					1
@@ -1113,6 +1124,7 @@ BEGIN TRY
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
+					,@TransferTicketNumber
 					)
 
 				--New Ticket
@@ -1262,6 +1274,7 @@ BEGIN TRY
 					,[intTransactionTypeId]
 					,[intEntityId]
 					,[intCompanyLocationId]	
+					,[strTransferTicket]
 					)
 				VALUES (
 					1
@@ -1280,6 +1293,7 @@ BEGIN TRY
 					,3
 					,@ActionCustomer
 					,@ActionCompanyLocationId
+					,@TransferTicketNumber
 					)
 
 				--New Ticket

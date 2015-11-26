@@ -170,48 +170,48 @@ BEGIN
 			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 END 
 
--- Calculate the cost method for "Amount" or Fixed Amount. 
-BEGIN 
-	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId] 
-			,[intInventoryReceiptItemId] 
-			,[intChargeId] 
-			,[intEntityVendorId] 
-			,[dblCalculatedAmount] 
-			,[intContractId]
-			,[strAllocateCostBy]
-			,[ysnAccrue]
-			,[ysnPrice]
-			,[ysnInventoryCost]
-	)
-	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
-			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
-			,[intChargeId]					= Charge.intChargeId
-			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			= ROUND(Charge.dblRate, 2)
-			,[intContractId]				= Charge.intContractId
-			,[strAllocateCostBy]			= Charge.strAllocateCostBy
-			,[ysnAccrue]					= Charge.ysnAccrue
-			,[ysnPrice]						= Charge.ysnPrice
-			,[ysnInventoryCost]				= Charge.ysnInventoryCost
-	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
-				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
-			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId				
-	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
-			AND Charge.strCostMethod = @COST_METHOD_AMOUNT
-			AND (
-				Charge.intContractId IS NULL 
-				OR (
-					Charge.intContractId IS NOT NULL 
-					AND ReceiptItem.intOrderId = Charge.intContractId
-				)	
-			)
-			AND Item.intOnCostTypeId IS NULL 
-			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-END 
+---- Calculate the cost method for "Amount" or Fixed Amount. 
+--BEGIN 
+--	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
+--			[intInventoryReceiptId]
+--			,[intInventoryReceiptChargeId] 
+--			,[intInventoryReceiptItemId] 
+--			,[intChargeId] 
+--			,[intEntityVendorId] 
+--			,[dblCalculatedAmount] 
+--			,[intContractId]
+--			,[strAllocateCostBy]
+--			,[ysnAccrue]
+--			,[ysnPrice]
+--			,[ysnInventoryCost]
+--	)
+--	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
+--			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
+--			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
+--			,[intChargeId]					= Charge.intChargeId
+--			,[intEntityVendorId]			= Charge.intEntityVendorId
+--			,[dblCalculatedAmount]			= ROUND(Charge.dblRate, 2)
+--			,[intContractId]				= Charge.intContractId
+--			,[strAllocateCostBy]			= Charge.strAllocateCostBy
+--			,[ysnAccrue]					= Charge.ysnAccrue
+--			,[ysnPrice]						= Charge.ysnPrice
+--			,[ysnInventoryCost]				= Charge.ysnInventoryCost
+--	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+--				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+--			INNER JOIN dbo.tblICItem Item 
+--				ON Item.intItemId = Charge.intChargeId				
+--	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+--			AND Charge.strCostMethod = @COST_METHOD_AMOUNT
+--			AND (
+--				Charge.intContractId IS NULL 
+--				OR (
+--					Charge.intContractId IS NOT NULL 
+--					AND ReceiptItem.intOrderId = Charge.intContractId
+--				)	
+--			)
+--			AND Item.intOnCostTypeId IS NULL 
+--			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+--END 
 
 -- Update the Other Charge amounts
 BEGIN 
@@ -229,6 +229,7 @@ BEGIN
 				ON CalculatedCharges.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
 	WHERE	Charge.intInventoryReceiptId = @intInventoryReceiptId
 			AND Item.intOnCostTypeId IS NULL
+			AND Charge.strCostMethod <> @COST_METHOD_AMOUNT
 END 
 
 -- Exit point
