@@ -2997,6 +2997,7 @@
     <Build Include="dbo\Functions\fnCTGetEventRecipientEmail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetEventMailContent.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\17_Notification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
