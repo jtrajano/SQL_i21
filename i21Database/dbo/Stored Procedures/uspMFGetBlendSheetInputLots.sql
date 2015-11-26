@@ -78,7 +78,7 @@ Begin
 	Left Join tblMFRecipeItem ri on wi.intRecipeItemId=ri.intRecipeItemId
 	Where wi.intWorkOrderId=@intWorkOrderId
 
-	Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strVendorLocation,''),wi.strRemarks=l.strNotes
+	Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strGarden,''),wi.strRemarks=l.strNotes
 	From #tblWorkOrderInputParent wi Join tblICLot l on wi.intLotId=l.intParentLotId
 
 	Select * from #tblWorkOrderInputParent
