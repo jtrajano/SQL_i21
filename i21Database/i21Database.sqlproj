@@ -3037,6 +3037,7 @@
     <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuAPItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
