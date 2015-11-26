@@ -18,11 +18,8 @@ BEGIN
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1  
 	)
 	BEGIN
-		EXEC ('DROP VIEW [dbo].[vyuTMLocationUsedBySite] ')
-
-
 		EXEC ('
-				CREATE VIEW [dbo].[vyuTMLocationUsedBySite]  
+				CREATE VIEW [dbo].[vyuTMItemUsedBySite]  
 				AS 
 				SELECT DISTINCT
 					strItemNo = A.vwitm_no
@@ -38,9 +35,6 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		EXEC ('DROP VIEW [dbo].[vyuTMItemUsedBySite]')
-
-
 		EXEC ('
 			CREATE VIEW [dbo].[vyuTMItemUsedBySite]  
 			AS 
