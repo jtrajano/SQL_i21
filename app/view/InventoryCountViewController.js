@@ -133,8 +133,18 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             grdPhysicalCount: {
                 colItem: {
                     dataIndex: 'strItemNo',
-                    drillDownText: 'View Item',
-                    drillDownClick: 'onViewItemNo'
+                    editor: {
+                        store: '{itemStock}',
+                        origValueField: 'intItemId',
+                        origUpdateField: 'intItemId',
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
                 },
                 colDescription: {
                     dataIndex: 'strItemDescription',
@@ -147,14 +157,83 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     drillDownClick: 'onViewCategory'
                 },
                 colSubLocation: {
-                    dataIndex: 'strSubLocationName'
+                    dataIndex: 'strSubLocationName',
+                    editor: {
+                        store: '{orderNumbers}',
+                        origValueField: 'intSubLocationId',
+                        origUpdateField: 'intSubLocationId',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdPhysicalCount.selection.intItemId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intLocationId',
+                            value: '{current.intLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'dblOnHand',
+                            value: '0',
+                            conjunction: 'and',
+                            condition: 'gt'
+                        },{
+                            column: 'ysnStockUnit',
+                            value: true,
+                            conjunction: 'and',
+                            condition: 'eq'
+                        }]
+                    }
                 },
                 colStorageLocation: {
-                    dataIndex: 'strStorageLocationName'
+                    dataIndex: 'strStorageLocationName',
+                    editor: {
+                        store: '{orderNumbers}',
+                        origValueField: 'intStorageLocationId',
+                        origUpdateField: 'intStorageLocationId',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdPhysicalCount.selection.intItemId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intLocationId',
+                            value: '{current.intFromLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intSubLocationId',
+                            value: '{grdPhysicalCount.selection.intSubLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'dblOnHand',
+                            value: '0',
+                            conjunction: 'and',
+                            condition: 'gt'
+                        }]
+                    }
                 },
                 colLotNo: {
                     dataIndex: 'strLotNumber',
-                    hidden: '{!current.ysnCountByLots}'
+                    hidden: '{!current.ysnCountByLots}',
+                    editor: {
+                        store: '{compactItem}',
+                        origValueField: 'intLotId',
+                        origUpdateField: 'intLotId',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdPhysicalCount.selection.intItemId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intLocationId',
+                            value: '{current.intLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intSubLocationId',
+                            value: '{grdPhysicalCount.selection.intSubLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intStorageLocationId',
+                            value: '{grdPhysicalCount.selection.intStorageLocationId}',
+                            conjunction: 'and'
+                        }]
+                    }
                 },
                 colLotAlias: {
                     dataIndex: 'strLotAlias',
@@ -200,7 +279,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdPhysicalCount'),
                         deleteButton : win.down('#btnRemove'),
-                        position: 'none'
+                        createRecord : me.createLineItemRecord
                     })
                 }
             ]
@@ -244,6 +323,17 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         record.set('intStatus', 1);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
+
+        action(record);
+    },
+
+    createLineItemRecord: function(config, action) {
+        var record = Ext.create('Inventory.model.InventoryCountDetail');
+        var strCountLine = 'test';
+
+        record.set('strCountLine', strCountLine);
+        record.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
+        record.set('strUserName', iRely.config.Security.UserName);
 
         action(record);
     },
@@ -612,6 +702,37 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         i21.ModuleMgr.Inventory.showScreen(categoryId, 'CategoryId');
     },
 
+    onInventoryCountDetailSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepPhysicalCount');
+        var current = plugin.getActiveRecord();
+
+        if (current) {
+            switch (combo.itemId) {
+                case 'cboItem':
+                    current.set('strItemDescription', records[0].get('strDescription'));
+                    current.set('intCategoryId', records[0].get('intCategoryId'));
+                    current.set('strCategory', records[0].get('strCategoryCode'));
+                    break;
+                case 'cboSubLocation':
+                    current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
+                    current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+                    current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    break;
+                case 'cboStorageLocation':
+                    current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    break;
+                case 'cboLot':
+                    current.set('strLotAlias', records[0].get('strLotAlias'));
+                    current.set('dblSystemCount', records[0].get('dblOnHand'));
+                    break;
+            };
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboUOM": {
@@ -637,6 +758,18 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#btnRecap": {
                 click: this.onPostClick
+            },
+            "#cboItem": {
+                select: this.onInventoryCountDetailSelect
+            },
+            "#cboSubLocation": {
+                select: this.onInventoryCountDetailSelect
+            },
+            "#cboStorageLocation": {
+                select: this.onInventoryCountDetailSelect
+            },
+            "#cboLot": {
+                select: this.onInventoryCountDetailSelect
             }
         });
     }

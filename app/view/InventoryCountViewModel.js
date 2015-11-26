@@ -10,6 +10,9 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.ItemStockSummary',
         'Inventory.store.ItemStockSummaryByLot',
+        'Inventory.store.BufferedItemStockView',
+        'Inventory.store.BufferedItemStockUOMView',
+        'Inventory.store.BufferedLot',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered'
     ],
@@ -70,6 +73,18 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
         itemListByLot: {
             type: 'icitemstocksummarybylot'
+        },
+        itemStock: {
+            type: 'icbuffereditemstockview'
+        },
+        fromSubLocation: {
+            type: 'icbuffereditemstockuomview'
+        },
+        fromStorageLocation: {
+            type: 'icbuffereditemstockuomview'
+        },
+        lot: {
+            type: 'icbufferedlot'
         }
     },
 

@@ -35,12 +35,10 @@ Ext.define('Inventory.model.InventoryCount', {
         { name: 'ysnPosted', type: 'boolean' },
         { name: 'dtmPosted', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intEntityId', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int', allowNull: true },
+        { name: 'intSort', type: 'int', allowNull: true }
     ],
 
     validators: [
-        { type: 'presence', field: 'intLocationId' },
-        { type: 'presence', field: 'dtmAdjustmentDate' },
-        { type: 'presence', field: 'intAdjustmentType' }
+        { type: 'presence', field: 'intLocationId' }
     ]
 });
