@@ -17,11 +17,7 @@ BEGIN
 		A.intCustomerID
 		, rtrim(ltrim(B.vwcus_last_name)) as agcus_last_name
 		, rtrim(ltrim(B.vwcus_first_name)) as agcus_first_name
-		,(Case WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = ''''  THEN
-			RTRIM(B.vwcus_last_name)
-			ELSE
-			RTRIM(B.vwcus_last_name) + '', '' + RTRIM(B.vwcus_first_name)
-		 END) as CustomerName
+		, CustomerName = (CASE WHEN B.vwcus_co_per_ind_cp = ''C'' THEN    RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_first_name) + RTRIM(B.vwcus_mid_init) + RTRIM(B.vwcus_name_suffix)   ELSE    CASE WHEN B.vwcus_first_name IS NULL OR RTRIM(B.vwcus_first_name) = ''''  THEN     RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_name_suffix)    ELSE     RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_name_suffix) + '', '' + RTRIM(B.vwcus_first_name) + RTRIM(B.vwcus_mid_init)END END) COLLATE Latin1_General_CI_AS
 		, B.vwcus_phone as agcus_phone
 		, B.vwcus_key as agcus_key
 		, B.vwcus_tax_state as agcus_tax_state

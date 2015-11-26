@@ -3066,6 +3066,7 @@
     <Build Include="dbo\Stored Procedures\uspSMAddTransactionForBatchPosting.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
     <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
+    <Build Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
