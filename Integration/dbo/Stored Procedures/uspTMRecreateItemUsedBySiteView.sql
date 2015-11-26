@@ -20,7 +20,7 @@ BEGIN
 	BEGIN
 
 		EXEC ('
-				CREATE VIEW [dbo].[vyuTMLocationUsedBySite]  
+				CREATE VIEW [dbo].[vyuTMItemUsedBySite]  
 				AS 
 				SELECT DISTINCT
 					strItemNo = A.vwitm_no
