@@ -1,137 +1,174 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCompleteBlendSheet] 
-(
-	@strXml NVARCHAR(MAX)
-)
+﻿CREATE PROCEDURE [dbo].[uspMFCompleteBlendSheet] (@strXml NVARCHAR(MAX))
 AS
 BEGIN TRY
 	DECLARE @idoc INT
 		,@strErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
-		,@intItemId int
+		,@intItemId INT
 		,@dblQtyToProduce NUMERIC(18, 6)
 		,@intItemUOMId INT
 		,@dblIssuedQuantity NUMERIC(18, 6)
 		,@intItemIssuedUOMId INT
 		,@dblWeightPerUnit NUMERIC(18, 6)
 		,@intUserId INT
-		,@strRetBatchId nVarchar(40)
-		,@intStatusId int
-		,@strWONo nvarchar(50)
-		,@strProduceXml nvarchar(Max)
-		,@intManufacturingProcessId int
-		,@intLocationId int
-		,@intSubLocationId int
-		,@intStorageLocationId int
-		,@strOutputLotNumber nvarchar(50)
-		,@intAttributeId int
-		,@ysnIsNegativeQuantityAllowed bit
-		,@strIsNegativeQuantityAllowed nvarchar(50)
-		,@dtmCurrentDate datetime=GetDate()
-		,@intLotStatusId int
-		,@strVesselNo nvarchar(50)
+		,@strRetBatchId NVARCHAR(40)
+		,@intStatusId INT
+		,@strWONo NVARCHAR(50)
+		,@strProduceXml NVARCHAR(Max)
+		,@intManufacturingProcessId INT
+		,@intLocationId INT
+		,@intSubLocationId INT
+		,@intStorageLocationId INT
+		,@strOutputLotNumber NVARCHAR(50)
+		,@intAttributeId INT
+		,@ysnIsNegativeQuantityAllowed BIT
+		,@strIsNegativeQuantityAllowed NVARCHAR(50)
+		,@dtmCurrentDate DATETIME = GetDate()
+		,@intLotStatusId INT
+		,@strVesselNo NVARCHAR(50)
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
+	EXEC sp_xml_preparedocument @idoc OUTPUT
+		,@strXml
 
-	SELECT	 @intWorkOrderId = intWorkOrderId
-			,@intItemId=intItemId
-			,@dblQtyToProduce = dblQtyToProduce
-			,@intItemUOMId = intItemUOMId
-			,@dblIssuedQuantity = dblIssuedQuantity
-			,@intItemIssuedUOMId = intItemIssuedUOMId
-			,@dblWeightPerUnit = dblWeightPerUnit
-			,@intUserId = intUserId
-			,@intLocationId = intLocationId
-			,@intStorageLocationId = intStorageLocationId
-			,@strVesselNo = strVesselNo
+	SELECT @intWorkOrderId = intWorkOrderId
+		,@intItemId = intItemId
+		,@dblQtyToProduce = dblQtyToProduce
+		,@intItemUOMId = intItemUOMId
+		,@dblIssuedQuantity = dblIssuedQuantity
+		,@intItemIssuedUOMId = intItemIssuedUOMId
+		,@dblWeightPerUnit = dblWeightPerUnit
+		,@intUserId = intUserId
+		,@intLocationId = intLocationId
+		,@intStorageLocationId = intStorageLocationId
+		,@strVesselNo = strVesselNo
 	FROM OPENXML(@idoc, 'root', 2) WITH (
-			 intWorkOrderId INT
-			,intItemId int
+			intWorkOrderId INT
+			,intItemId INT
 			,dblQtyToProduce NUMERIC(18, 6)
 			,intItemUOMId INT
 			,dblIssuedQuantity NUMERIC(18, 6)
 			,intItemIssuedUOMId INT
 			,dblWeightPerUnit NUMERIC(18, 6)
 			,intUserId INT
-			,intLocationId int
-			,intStorageLocationId int
-			,strVesselNo nvarchar(50)
+			,intLocationId INT
+			,intStorageLocationId INT
+			,strVesselNo NVARCHAR(50)
 			)
 
-	Select @intStatusId=intStatusId,@strWONo=strWorkOrderNo,@intManufacturingProcessId=ISNULL(intManufacturingProcessId,0) 
-		From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
-	
-	If @intManufacturingProcessId=0
-			Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId
+	SELECT @intStatusId = intStatusId
+		,@strWONo = strWorkOrderNo
+		,@intManufacturingProcessId = ISNULL(intManufacturingProcessId, 0)
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
-	if(@intStatusId<>12)
-		Begin
-			Set @strErrMsg='Blend Sheet ' + @strWONo + ' is either not staged or already produced. Please reload the blend sheet.'
-			RaisError(@strErrMsg,16,1)
-		End
+	IF @intManufacturingProcessId = 0
+		SELECT TOP 1 @intManufacturingProcessId = intManufacturingProcessId
+		FROM tblMFWorkOrderRecipe
+		WHERE intWorkOrderId = @intWorkOrderId
 
-	Select @intSubLocationId = intSubLocationId From tblICStorageLocation Where intStorageLocationId=@intStorageLocationId
+	IF (@intStatusId <> 12)
+	BEGIN
+		SET @strErrMsg = 'Blend Sheet ' + @strWONo + ' is either not staged or already produced. Please reload the blend sheet.'
 
-	Select @intLotStatusId=strAttributeValue
-	From tblMFManufacturingProcessAttribute pa join tblMFAttribute at on pa.intAttributeId=at.intAttributeId 
-	Where pa.intManufacturingProcessId=@intManufacturingProcessId and pa.intLocationId=@intLocationId and at.strAttributeName='Produce Lot Status'
-	if @intLotStatusId=0 OR @intLotStatusId is null
-			Set @intLotStatusId=1
+		RAISERROR (
+				@strErrMsg
+				,16
+				,1
+				)
+	END
 
-	If @dblIssuedQuantity=0
-	Begin
-		Set @dblIssuedQuantity=@dblQtyToProduce
-		Set @intItemIssuedUOMId=@intItemUOMId
-		Set @dblWeightPerUnit=1
-	End
+	SELECT @intSubLocationId = intSubLocationId
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intStorageLocationId
 
-	Begin Transaction
+	SELECT @intLotStatusId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
+		AND pa.intLocationId = @intLocationId
+		AND at.strAttributeName = 'Produce Lot Status'
 
-	Exec uspMFUpdateBlendProductionDetail @strXml=@strXml
+	IF @intLotStatusId = 0
+		OR @intLotStatusId IS NULL
+		SET @intLotStatusId = 1
 
-	Set @strProduceXml='<root>'
-	Set @strProduceXml=@strProduceXml + '<intWorkOrderId>' + convert(varchar,@intWorkOrderId) + '</intWorkOrderId>'
-	Set @strProduceXml=@strProduceXml + '<intManufacturingProcessId>' + convert(varchar,@intManufacturingProcessId) + '</intManufacturingProcessId>'
-	Set @strProduceXml=@strProduceXml + '<intStatusId>' + convert(varchar,12) + '</intStatusId>'
-	Set @strProduceXml=@strProduceXml + '<intItemId>' + convert(varchar,@intItemId) + '</intItemId>'
-	Set @strProduceXml=@strProduceXml + '<dblProduceQty>' + convert(varchar,@dblQtyToProduce) + '</dblProduceQty>'
-	Set @strProduceXml=@strProduceXml + '<intProduceUnitMeasureId>' + convert(varchar,@intItemUOMId) + '</intProduceUnitMeasureId>'
+	IF @dblIssuedQuantity = 0
+	BEGIN
+		SET @dblIssuedQuantity = @dblQtyToProduce
+		SET @intItemIssuedUOMId = @intItemUOMId
+		SET @dblWeightPerUnit = 1
+	END
 
+	BEGIN TRANSACTION
+
+	EXEC uspMFUpdateBlendProductionDetail @strXml = @strXml
+
+	SET @strProduceXml = '<root>'
+	SET @strProduceXml = @strProduceXml + '<intWorkOrderId>' + convert(VARCHAR, @intWorkOrderId) + '</intWorkOrderId>'
+	SET @strProduceXml = @strProduceXml + '<intManufacturingProcessId>' + convert(VARCHAR, @intManufacturingProcessId) + '</intManufacturingProcessId>'
+	SET @strProduceXml = @strProduceXml + '<intStatusId>' + convert(VARCHAR, 12) + '</intStatusId>'
+	SET @strProduceXml = @strProduceXml + '<intItemId>' + convert(VARCHAR, @intItemId) + '</intItemId>'
+	SET @strProduceXml = @strProduceXml + '<dblProduceQty>' + convert(VARCHAR, @dblQtyToProduce) + '</dblProduceQty>'
+	SET @strProduceXml = @strProduceXml + '<intProduceUnitMeasureId>' + convert(VARCHAR, @intItemUOMId) + '</intProduceUnitMeasureId>'
 	--If @dblIssuedQuantity>0
 	--Begin
-		Set @strProduceXml=@strProduceXml + '<dblPhysicalCount>' + convert(varchar,@dblIssuedQuantity) + '</dblPhysicalCount>'
-		Set @strProduceXml=@strProduceXml + '<intPhysicalItemUOMId>' + convert(varchar,@intItemIssuedUOMId) + '</intPhysicalItemUOMId>'
-		Set @strProduceXml=@strProduceXml + '<dblUnitQty>' + convert(varchar,@dblWeightPerUnit) + '</dblUnitQty>'
+	SET @strProduceXml = @strProduceXml + '<dblPhysicalCount>' + convert(VARCHAR, @dblIssuedQuantity) + '</dblPhysicalCount>'
+	SET @strProduceXml = @strProduceXml + '<intPhysicalItemUOMId>' + convert(VARCHAR, @intItemIssuedUOMId) + '</intPhysicalItemUOMId>'
+	SET @strProduceXml = @strProduceXml + '<dblUnitQty>' + convert(VARCHAR, @dblWeightPerUnit) + '</dblUnitQty>'
 	--End
-
-	Set @strProduceXml=@strProduceXml + '<strVesselNo>' + convert(varchar,@strVesselNo) + '</strVesselNo>'
-	Set @strProduceXml=@strProduceXml + '<intUserId>' + convert(varchar,@intUserId) + '</intUserId>'
+	SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, @strVesselNo) + '</strVesselNo>'
+	SET @strProduceXml = @strProduceXml + '<intUserId>' + convert(VARCHAR, @intUserId) + '</intUserId>'
 	--Set @strProduceXml=@strProduceXml + '<strOutputLotNumber>' + convert(varchar,'') + '</strOutputLotNumber>'
-	Set @strProduceXml=@strProduceXml + '<intLocationId>' + convert(varchar,@intLocationId) + '</intLocationId>'
-	Set @strProduceXml=@strProduceXml + '<intSubLocationId>' + convert(varchar,@intSubLocationId) + '</intSubLocationId>'
-	Set @strProduceXml=@strProduceXml + '<intStorageLocationId>' + convert(varchar,@intStorageLocationId) + '</intStorageLocationId>'
+	SET @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
+	SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, @intSubLocationId) + '</intSubLocationId>'
+	SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
 	--Set @strProduceXml=@strProduceXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
-	Set @strProduceXml=@strProduceXml + '<intProductionTypeId>' + convert(varchar,2) + '</intProductionTypeId>'
-	Set @strProduceXml=@strProduceXml + '<strLotAlias>' + convert(varchar,@strWONo) + '</strLotAlias>'
-	Set @strProduceXml=@strProduceXml + '<strVendorLotNo>' + convert(varchar,@strVesselNo) + '</strVendorLotNo>'
-	Set @strProduceXml=@strProduceXml + '<intLotStatusId>' + convert(varchar,@intLotStatusId) + '</intLotStatusId>'
-	Set @strProduceXml=@strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
-	Set @strProduceXml=@strProduceXml + '</root>'
+	SET @strProduceXml = @strProduceXml + '<intProductionTypeId>' + convert(VARCHAR, 2) + '</intProductionTypeId>'
+	SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, @strWONo) + '</strLotAlias>'
+	SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
+	SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
+	SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
+	SET @strProduceXml = @strProduceXml + '</root>'
 
-	Exec uspMFCompleteWorkOrder @strXML=@strProduceXml,@strOutputLotNumber=@strOutputLotNumber OUT
+	EXEC uspMFCompleteWorkOrder @strXML = @strProduceXml
+		,@strOutputLotNumber = @strOutputLotNumber OUT
 
-	Update tblMFWorkOrder Set intStatusId=13,dtmActualProductionEndDate=@dtmCurrentDate,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDate 
-	Where intWorkOrderId=@intWorkOrderId
+	UPDATE tblMFWorkOrder
+	SET intStatusId = 13
+		,dtmActualProductionEndDate = @dtmCurrentDate
+		,intLastModifiedUserId = @intUserId
+		,dtmLastModified = @dtmCurrentDate
+	WHERE intWorkOrderId = @intWorkOrderId
 
-	Commit Transaction
+	DECLARE @intBatchId INT
+
+	SELECT @intBatchId = intBatchId
+	FROM tblMFWorkOrderProducedLot
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE tblMFWorkOrderConsumedLot
+	SET intBatchId = @intBatchId
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
 
 BEGIN CATCH
- 
- IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
- SET @strErrMsg = ERROR_MESSAGE()  
- IF @idoc <> 0 EXEC sp_xml_removedocument @idoc  
- RAISERROR(@strErrMsg, 16, 1, 'WITH NOWAIT')  
+	IF XACT_STATE() != 0
+		AND @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
 
+	SET @strErrMsg = ERROR_MESSAGE()
+
+	IF @idoc <> 0
+		EXEC sp_xml_removedocument @idoc
+
+	RAISERROR (
+			@strErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH
