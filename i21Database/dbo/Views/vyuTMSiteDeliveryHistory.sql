@@ -30,7 +30,7 @@ AS
 		,strSiteDeliveryTermID = R.strTerm
 		,ysnSiteTaxable = A.ysnTaxable
 		,dblSitePriceAdjustment = A.dblPriceAdjustment
-		,strSiteTax = S.strTaxGroupMaster
+		,strSiteTax = S.strTaxGroup
 		,strSiteRecurringPONumber = A.strRecurringPONumber
 		,strSiteClassFillOption = A.strClassFillOption
 		,ysnSitePrintARBalance = A.ysnPrintARBalance
@@ -138,8 +138,8 @@ AS
 		ON A.intClockID = Q.intClockID	
 	LEFT JOIN tblSMTerm R
 		ON A.intDeliveryTermID = R.intTermID
-	LEFT JOIN tblSMTaxGroupMaster S
-		ON A.intTaxStateID = S.intTaxGroupMasterId
+	LEFT JOIN tblSMTaxGroup S
+		ON A.intTaxStateID = S.intTaxGroupId
 	LEFT JOIN tblICItem T
 		ON A.intProduct = T.intItemId 
 	LEFT JOIN tblTMFillMethod U
