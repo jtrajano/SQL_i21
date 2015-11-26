@@ -114,6 +114,7 @@ BEGIN TRY
 	Set @strProduceXml=@strProduceXml + '<strLotAlias>' + convert(varchar,@strWONo) + '</strLotAlias>'
 	Set @strProduceXml=@strProduceXml + '<strVendorLotNo>' + convert(varchar,@strVesselNo) + '</strVendorLotNo>'
 	Set @strProduceXml=@strProduceXml + '<intLotStatusId>' + convert(varchar,@intLotStatusId) + '</intLotStatusId>'
+	Set @strProduceXml=@strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
 	Set @strProduceXml=@strProduceXml + '</root>'
 
 	Exec uspMFCompleteWorkOrder @strXML=@strProduceXml,@strOutputLotNumber=@strOutputLotNumber OUT
