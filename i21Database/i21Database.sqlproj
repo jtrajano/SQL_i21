@@ -3060,6 +3060,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuAPItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
