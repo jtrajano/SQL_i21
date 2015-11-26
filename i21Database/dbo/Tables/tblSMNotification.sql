@@ -1,9 +1,11 @@
 ﻿CREATE TABLE [dbo].[tblSMNotification] (
     [intNotificationId] INT              IDENTITY (1, 1) NOT NULL,	
+	[intCommentId]      INT              NULL,
     [strTitle]			NVARCHAR(255)	 COLLATE Latin1_General_CI_AS NULL, 
     [strMessage]        NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [strRoute]			NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
-	[strAction]         NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
+	[strAction]         NVARCHAR(255)    COLLATE Latin1_General_CI_AS NULL,
+	[strType]           NVARCHAR(255)    COLLATE Latin1_General_CI_AS NULL,
     [dtmLastUpdated]    DATETIME         NULL,
 	[ysnClosable]		BIT				 NULL,
 	[ysnSent]			BIT				 DEFAULT ((0)) NULL,	
