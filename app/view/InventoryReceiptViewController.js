@@ -1228,8 +1228,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (lots) {
                 Ext.Array.each(lots.data.items, function (lot) {
                     if (!lot.dummy) {
-                        lot.set('intStorageLocationId', record.get('intStorageLocationId'));
-                        lot.set('strStorageLocation', record.get('strName'));
+                        lot.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+                        lot.set('strStorageLocation', records[0].get('strName'));
                     }
                 });
             }
