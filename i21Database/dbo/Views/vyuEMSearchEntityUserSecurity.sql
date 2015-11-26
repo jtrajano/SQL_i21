@@ -10,7 +10,8 @@ SELECT
         e.strCity,  
         e.strState,  
         e.strZipCode,
-        ysnActive = ~c.ysnDisabled
+        ysnActive = ~c.ysnDisabled,
+		c.strUserName
     FROM         
             tblEntity a
         join tblEntityType b
