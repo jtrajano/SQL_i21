@@ -595,7 +595,7 @@ BEGIN TRY
 		SELECT	
 		 PL.intParentLotId AS intWorkOrderInputLotId
 		,PL.intParentLotId AS intLotId
-		,PL.strParentLotNumber
+		,PL.strParentLotNumber AS strLotNumber
 		,I.strItemNo
 		,I.strDescription
 		,BS.dblQuantity
