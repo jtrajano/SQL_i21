@@ -14,7 +14,6 @@ Type the overview for the table here.
 	(
 		[intInventoryReceiptItemTaxId] INT NOT NULL IDENTITY, 
 		[intInventoryReceiptItemId] INT NOT NULL, 
-		[intTaxGroupMasterId] INT NULL,
 		[intTaxGroupId] INT NULL,
 		[intTaxCodeId] INT NULL,
 		[intTaxClassId] INT NULL,	
@@ -35,7 +34,6 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId]),
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblSMTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES [tblSMTaxClass]([intTaxClassId]),
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]),
-		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblSMTaxGroupMaster] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblGLAccount] FOREIGN KEY ([intTaxAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 	)
 
