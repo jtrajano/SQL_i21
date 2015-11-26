@@ -153,7 +153,6 @@ WHERE	PODetail.intPurchaseId = @PurchaseOrderId
 
 INSERT INTO dbo.tblICInventoryReceiptItemTax (
 		[intInventoryReceiptItemId]
-		,[intTaxGroupMasterId]
 		,[intTaxGroupId]
 		,[intTaxCodeId]
 		,[intTaxClassId]
@@ -172,7 +171,6 @@ INSERT INTO dbo.tblICInventoryReceiptItemTax (
 )
 SELECT 
 		[intInventoryReceiptItemId]		= ReceiptItem.intInventoryReceiptItemId
-		,[intTaxGroupMasterId]			= PODetailTax.intTaxGroupMasterId
 		,[intTaxGroupId]				= PODetailTax.intTaxGroupId
 		,[intTaxCodeId]					= PODetailTax.intTaxCodeId
 		,[intTaxClassId]				= PODetailTax.intTaxClassId
