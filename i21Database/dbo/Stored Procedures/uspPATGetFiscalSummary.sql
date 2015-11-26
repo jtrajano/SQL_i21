@@ -92,8 +92,11 @@ SELECT DISTINCT CV.intFiscalYear,
 		   intNonVoting,
 		   intProducers,
 		   intOthers
-	   FROM #tempTable
+	   FROM #temptable
    GROUP BY intFiscalYear, intVoting, intNonVoting, intProducers, intOthers
+
+
+   DROP TABLE #temptable
 
 	-- ==================================================================
 	-- End Transaction
