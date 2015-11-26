@@ -524,7 +524,6 @@ BEGIN
 				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
 				INSERT INTO dbo.tblICInventoryReceiptItemTax (
 					[intInventoryReceiptItemId]
-					,[intTaxGroupMasterId]
 					,[intTaxGroupId]
 					,[intTaxCodeId]
 					,[intTaxClassId]
@@ -542,7 +541,6 @@ BEGIN
 					,[intConcurrencyId]				
 				)
 				SELECT 	[intInventoryReceiptItemId]		= @InventoryReceiptItemId
-						,NULL
 						,[intTaxGroupId]				= [intTaxGroupId]
 						,[intTaxCodeId]					= [intTaxCodeId]
 						,[intTaxClassId]				= [intTaxClassId]
