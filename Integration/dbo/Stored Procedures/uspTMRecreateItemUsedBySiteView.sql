@@ -18,6 +18,8 @@ BEGIN
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1  
 	)
 	BEGIN
+		EXEC ('DROP VIEW [dbo].[vyuTMLocationUsedBySite] ')
+
 
 		EXEC ('
 				CREATE VIEW [dbo].[vyuTMLocationUsedBySite]  
@@ -26,7 +28,7 @@ BEGIN
 					strItemNo = A.vwitm_no
 					,intItemId = A.A4GLIdentity
 					,strDescription = A.vwitm_desc
-					intConcurrencyId = 0
+					,intConcurrencyId = 0
 				FROM vwitmmst A
 				INNER JOIN tblTMSite B
 					ON A.A4GLIdentity = B.intProduct
@@ -36,6 +38,9 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		EXEC ('DROP VIEW [dbo].[vyuTMItemUsedBySite]')
+
+
 		EXEC ('
 			CREATE VIEW [dbo].[vyuTMItemUsedBySite]  
 			AS 
