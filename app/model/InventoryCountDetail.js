@@ -74,9 +74,5 @@ Ext.define('Inventory.model.InventoryCountDetail', {
             },
             depends: ['dblPhysicalCount', 'dblSystemCount']},
         { name: 'strUserName', type: 'string' }
-    ],
-
-    validators: [
-        { type: 'presence', field: 'strItemNo' }
     ]
 });
