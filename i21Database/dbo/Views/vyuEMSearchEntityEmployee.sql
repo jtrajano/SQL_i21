@@ -11,7 +11,8 @@ SELECT
 		e.strState,  
 		e.strZipCode,
 		c.ysnActive,
-		a.strTitle
+		a.strTitle,
+		c.strPayPeriod
 	FROM 		
 			tblEntity a
 		join tblEntityType b
