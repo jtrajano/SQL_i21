@@ -61,6 +61,7 @@ BEGIN
 			,@strLotAlias
 			,@strVendorLotNo
 			,@strParentLotNumber
+			,@strVesselNo
 	End
 	Else
 	Begin
