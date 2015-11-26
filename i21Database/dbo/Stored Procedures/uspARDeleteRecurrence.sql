@@ -24,7 +24,7 @@ FROM
 	[tblSMRecurringTransaction]
 WHERE
 		[intTransactionId] = @TransactionId
-	AND [strTransactionType] = @TransactionType
+	AND [strTransactionType] = CASE WHEN @TransactionType = 'Order' THEN 'Sales Order' ELSE @TransactionType END
 	AND [strTransactionNumber] = @TransactionNumber
 	
 	
