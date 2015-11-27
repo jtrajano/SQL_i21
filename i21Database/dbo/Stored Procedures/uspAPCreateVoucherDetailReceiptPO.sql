@@ -122,7 +122,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--CREATE TAXES FOR FULL BILLING OF QUANTITY ONLY
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
-		[intTaxGroupMasterId]	, 
+		--[intTaxGroupMasterId]	, 
 		[intTaxGroupId]			, 
 		[intTaxCodeId]			, 
 		[intTaxClassId]			, 
@@ -138,7 +138,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT
 		[intBillDetailId]		=	B.intBillDetailId, 
-		[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
+		--[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
 		[intTaxGroupId]			=	A.intTaxGroupId, 
 		[intTaxCodeId]			=	A.intTaxCodeId, 
 		[intTaxClassId]			=	A.intTaxClassId, 
