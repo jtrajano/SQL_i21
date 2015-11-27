@@ -35,7 +35,8 @@ DECLARE @tblFinalDetail TABLE (
 	)
 	
 	DECLARE @#tempSummary TABLE (
-							intRowNum INT,
+							intRowNum INT,							
+							dblFuturePrice NUMERIC(24, 10),
 							intContractDetailId INT,
 							strContractOrInventoryType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 							strContractSeq NVARCHAR(50) COLLATE Latin1_General_CI_AS,
@@ -73,7 +74,6 @@ DECLARE @tblFinalDetail TABLE (
 							dblResultBasis NUMERIC(24, 10),
 							dblMarketFuturesResult NUMERIC(24, 10),
 							dblResultCash NUMERIC(24, 10)
-							
 						)
 
 INSERT INTO @#tempSummary 
