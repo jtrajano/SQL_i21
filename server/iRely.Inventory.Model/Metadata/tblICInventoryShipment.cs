@@ -533,7 +533,7 @@ namespace iRely.Inventory.Model
                 if (vyuICGetInventoryShipmentItem != null)
                     return vyuICGetInventoryShipmentItem.intCommodityId;
                 else
-                    return null;
+                    return _commodityId;
             }
             set
             {
