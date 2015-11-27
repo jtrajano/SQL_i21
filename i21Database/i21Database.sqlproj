@@ -2999,6 +2999,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\17_Notification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
