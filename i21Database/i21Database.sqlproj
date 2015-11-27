@@ -2999,6 +2999,13 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHTransferKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetDefaultKitStagingLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHStagePickForKitting.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetLotGhostStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHValidateWarehouseReleaseLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetLotIdByLotNo.sql" />
+    <Build Include="dbo\Tables\tblWHPickForKitting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
