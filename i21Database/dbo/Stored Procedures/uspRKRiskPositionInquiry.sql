@@ -41,7 +41,7 @@ INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfC
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,ROUND(dblNoOfContract,@intDecimal) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity FROM(  
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
@@ -62,7 +62,7 @@ SELECT * FROM(
    AND cv.intCommodityId=@intCommodityId AND intCompanyLocationId= @intCompanyLocationId AND cv.intFutureMarketId=@intFutureMarketId   
       
   UNION    
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)
  end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -85,7 +85,7 @@ SELECT * FROM(
 UNION   
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Basis risk' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -103,7 +103,7 @@ SELECT * FROM(
      AND cv.intCommodityId=@intCommodityId AND intCompanyLocationId= @intCompanyLocationId AND cv.intFutureMarketId=@intFutureMarketId   
      AND dtmFutureMonthsDate <= @dtmFutureMonthsDate        
   UNION    
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,-(isnull(dblBalance,0)/@dblContractSize) as dblNoOfLot,   
@@ -124,7 +124,7 @@ SELECT * FROM(
 UNION   
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -142,7 +142,7 @@ SELECT * FROM(
      AND cv.intCommodityId=@intCommodityId AND intCompanyLocationId= @intCompanyLocationId AND cv.intFutureMarketId=@intFutureMarketId   
      AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
   UNION    
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)
  end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -164,7 +164,7 @@ SELECT * FROM(
 UNION   
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -184,7 +184,7 @@ SELECT * FROM(
      AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
   UNION    
     
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,-(isnull(dblBalance,0)/@dblContractSize) as dblNoOfLot,   
@@ -203,7 +203,7 @@ SELECT * FROM(
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
@@ -221,7 +221,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,  
   -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -240,7 +240,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
   
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
@@ -258,7 +258,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,  
   -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -278,7 +278,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
   
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,    
+  SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,    
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -298,7 +298,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
   -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0))*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -321,7 +321,7 @@ UNION
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo, TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
 (  
-SELECT DISTINCT '4.TERMINAL POSITION (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
+SELECT DISTINCT '4.Terminal position (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
    strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -341,7 +341,7 @@ SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,
   dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,(dblNoOfContract))*@dblContractSize as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
 (  
-SELECT DISTINCT '5.TERMINAL POSITION (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+SELECT DISTINCT '5.Terminal position (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
   strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -361,7 +361,7 @@ UNION
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract*dblDelta as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
 (  
-SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
    strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -384,7 +384,7 @@ SELECT DISTINCT '7.F&O' as Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' a
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo, TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
    (  
-   SELECT DISTINCT '4.TERMINAL POSITION (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
+   SELECT DISTINCT '4.Terminal position (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
       strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
      ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
      case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -400,7 +400,7 @@ SELECT DISTINCT '7.F&O' as Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' a
    SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract*dblDelta as dblNoOfContract,  
    strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
    (  
-   SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+   SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
       strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
      ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
      case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -424,7 +424,7 @@ SELECT DISTINCT '8.Total F&O(b. in '+ @strUnitMeasure +' )' as Selection,'F&O' a
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT 'FUTURE TERMINAL POSITION (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT 'Future terminal position (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -440,7 +440,7 @@ SELECT DISTINCT '8.Total F&O(b. in '+ @strUnitMeasure +' )' as Selection,'F&O' a
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract*dblDelta)) as dblNoOfContract,  
     strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
   (  
-  SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -458,10 +458,10 @@ SELECT DISTINCT '8.Total F&O(b. in '+ @strUnitMeasure +' )' as Selection,'F&O' a
   )t  
 ) t   
 UNION  
-SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' else '9.NET MARKET RISK' end as Selection,'NET MARKET RISK' as PriceStatus,strFutureMonth,case when @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
+SELECT DISTINCT case when @strRiskView='Processor' then '9.Outright coverage' else '9.Net market risk' end as Selection,'Net market risk' as PriceStatus,strFutureMonth,case when @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo, TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity FROM (  
     
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)
  end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -482,7 +482,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
     
   UNION   
     
-    SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+    SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,-(isnull(dblBalance,0)/@dblContractSize) as dblNoOfLot,   
@@ -504,7 +504,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract))*@dblContractSize as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT '3.TERMINAL POSITION (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT '3.Terminal position (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -521,7 +521,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
     strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
     dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
     Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -543,7 +543,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
  strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
  (  
- SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
+ SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
    strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
    -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0))*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
    Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -568,7 +568,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT 'FUTURE TERMINAL POSITION (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT 'Future terminal position (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -584,7 +584,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract*dblDelta)) as dblNoOfContract,  
     strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
   (  
-  SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -606,8 +606,8 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   
 UNION  
   
-SELECT DISTINCT case when @strRiskView='Processor' then 'FUTURES REQUIRED' else 'SWITCH POSITION' end as Selection,case when @strRiskView='Processor' then 'Futures Required' else 'Switch Position' end as PriceStatus,strFutureMonth,case when @strRiskView='
-Processor' then 'Futures Required' else 'Switch Position' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
+SELECT DISTINCT case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth,case when @strRiskView='
+Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from (  
   SELECT cv.strFutureMonth,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)/@dblContractSize as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,  
@@ -641,7 +641,7 @@ Processor' then 'Futures Required' else 'Switch Position' end as strAccountNumbe
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity FROM  
   (  
-  SELECT DISTINCT 'FUTURE TERMINAL POSITION (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT 'Future terminal position (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -663,7 +663,7 @@ INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfC
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,ROUND(dblNoOfContract,@intDecimal) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity FROM(  
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,   
@@ -680,7 +680,7 @@ SELECT * FROM(
    AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
    AND cv.intCommodityId=@intCommodityId AND cv.intFutureMarketId=@intFutureMarketId   
   UNION    
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)
  end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -701,7 +701,7 @@ SELECT * FROM(
 UNION   
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -719,7 +719,7 @@ SELECT * FROM(
      AND cv.intCommodityId=@intCommodityId  AND cv.intFutureMarketId=@intFutureMarketId   
      AND dtmFutureMonthsDate <= @dtmFutureMonthsDate        
   UNION    
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,-(isnull(dblBalance,0)/@dblContractSize) as dblNoOfLot,   
@@ -740,7 +740,7 @@ SELECT * FROM(
 UNION   
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,   
@@ -757,7 +757,7 @@ SELECT * FROM(
      AND cv.intCommodityId=@intCommodityId  AND cv.intFutureMarketId=@intFutureMarketId   
      AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
   UNION    
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)
  end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -779,7 +779,7 @@ SELECT * FROM(
 UNION   
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -799,7 +799,7 @@ SELECT * FROM(
      AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
   UNION    
     
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -821,7 +821,7 @@ SELECT * FROM(
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
@@ -839,7 +839,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. Unfixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,  
   -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -858,7 +858,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
@@ -876,7 +876,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '2.SPECIALITIES & LOW GRADES' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '2.Specialities & Low grades' as Selection,'a. fixed' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+pl.strDescription +'(Delta='+convert(nvarchar,left(pl.dblDeltaPercent,4))+'%)' as strAccountNumber,  
   -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -896,7 +896,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
   
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -916,7 +916,7 @@ AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 )T1  
 UNION  
 SELECT * FROM(  
-  SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
   -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0))*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -940,7 +940,7 @@ UNION
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo, TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
 (  
-SELECT DISTINCT '4.TERMINAL POSITION (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
+SELECT DISTINCT '4.Terminal position (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
    strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -958,7 +958,7 @@ SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,
   dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intUOMId,(dblNoOfContract))*@dblContractSize as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
 (  
-SELECT DISTINCT '5.TERMINAL POSITION (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+SELECT DISTINCT '5.Terminal position (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
   strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -977,7 +977,7 @@ UNION
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract*dblDelta as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
 (  
-SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
    strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1000,7 +1000,7 @@ SELECT DISTINCT '7.F&O' as Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' a
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo, TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
    (  
-   SELECT DISTINCT '4.TERMINAL POSITION (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
+   SELECT DISTINCT '4.Terminal position (a. in lots )' as Selection,'Broker Account' as PriceStatus,  
       strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
      ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
      case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1016,7 +1016,7 @@ SELECT DISTINCT '7.F&O' as Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' a
    SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract*dblDelta as dblNoOfContract,  
    strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
    (  
-   SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+   SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
       strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
      ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
      case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1040,7 +1040,7 @@ SELECT DISTINCT '8.Total F&O(b. in '+ @strUnitMeasure +' )' as Selection,'F&O' a
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT 'FUTURE TERMINAL POSITION (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT 'Future terminal position (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1056,7 +1056,7 @@ SELECT DISTINCT '8.Total F&O(b. in '+ @strUnitMeasure +' )' as Selection,'F&O' a
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract*dblDelta)) as dblNoOfContract,  
     strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
   (  
-  SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1074,10 +1074,10 @@ SELECT DISTINCT '8.Total F&O(b. in '+ @strUnitMeasure +' )' as Selection,'F&O' a
   )t  
 ) t   
 UNION  
-SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' else '9.NET MARKET RISK' end as Selection,'NET MARKET RISK' as PriceStatus,strFutureMonth,case when @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
+SELECT DISTINCT case when @strRiskView='Processor' then '9.Outright coverage' else '9.Net market risk' end as Selection,'Net market risk' as PriceStatus,strFutureMonth,case when @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo, TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity FROM (  
     
-  SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)
  end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -1097,7 +1097,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
     
   UNION   
     
-    SELECT DISTINCT case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
+    SELECT DISTINCT case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,-(isnull(dblBalance,0)/@dblContractSize) as dblNoOfLot,   
@@ -1119,7 +1119,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract))*@dblContractSize as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT '3.TERMINAL POSITION (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT '3.Terminal position (b. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1136,7 +1136,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
     strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
     dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
     Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -1158,7 +1158,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
  strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
  (  
- SELECT DISTINCT '3.TOTAL SPECIALITY DELTA FIXED' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
+ SELECT DISTINCT '3.Total speciality delta fixed' as Selection,'a. Delta %' as PriceStatus,cv.strFutureMonth,  
    strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
    -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0))*isnull(dblDeltaPercent,0)/100 as dblNoOfContract,  
    Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
@@ -1183,7 +1183,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT 'FUTURE TERMINAL POSITION (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT 'Future terminal position (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1199,7 +1199,7 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract*dblDelta)) as dblNoOfContract,  
     strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity*dblDelta from  
   (  
-  SELECT DISTINCT '6.DELTA OPTIONS' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT '6.Delta options' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1221,8 +1221,8 @@ SELECT DISTINCT case when @strRiskView='Processor' then '9.OUTRIGHT COVERAGE' el
   
 UNION  
   
-SELECT DISTINCT case when @strRiskView='Processor' then 'FUTURES REQUIRED' else 'SWITCH POSITION' end as Selection,case when @strRiskView='Processor' then 'Futures Required' else 'Switch Position' end as PriceStatus,strFutureMonth,case when @strRiskView='
-Processor' then 'Futures Required' else 'Switch Position' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
+SELECT DISTINCT case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth,case when @strRiskView='
+Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,(dblNoOfContract) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from (  
   SELECT cv.strFutureMonth,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)/@dblContractSize as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,strContractType as TranType, strEntityName  as CustVendor,isnull(dblBalance,0)/@dblContractSize as dblNoOfLot,   
@@ -1256,7 +1256,7 @@ Processor' then 'Futures Required' else 'Switch Position' end as strAccountNumbe
   SELECT strFutureMonth,dbo.fnRKConvertQuantityToTargetUOM(@intFutureMarketId,@intUOMId,(dblNoOfContract)) as dblNoOfContract,  
   strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity from  
   (  
-  SELECT DISTINCT 'FUTURE TERMINAL POSITION (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
+  SELECT DISTINCT 'Future terminal position (2. in '+ @strUnitMeasure +' )' as Selection,'Broker Account' as PriceStatus,  
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfContract,  
   ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
   case when ft.strBuySell='Buy' then (ft.intNoOfContract) else -(ft.intNoOfContract) end as dblNoOfLot,   
@@ -1271,28 +1271,28 @@ Processor' then 'Futures Required' else 'Switch Position' end as strAccountNumbe
 ) t ) T  
   
 END  
---- switch position update ------- start --------  
+--- Switch position update ------- start --------  
 declare @TotPrevious decimal(24,10)  
 declare @RowNumber int  
-SELECT @TotPrevious= sum(dblNoOfContract)/@dblContractSize FROM @List where Selection=case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end   
+SELECT @TotPrevious= sum(dblNoOfContract)/@dblContractSize FROM @List where Selection=case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end   
    AND strFutureMonth='Previous' and PriceStatus='a. Unpriced - (Balance to be Priced)'  
   
-SELECT TOP 1 @RowNumber=intRowNumber FROM @List  WHERE PriceStatus=case when @strRiskView='Processor' then 'Futures Required' else 'Switch Position' end  
+SELECT TOP 1 @RowNumber=intRowNumber FROM @List  WHERE PriceStatus=case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end  
 ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END ASC  
 UPDATE @List set dblNoOfContract= dblNoOfContract+isnull(@TotPrevious,0) where intRowNumber=@RowNumber  
---- switch position update ------- end --------  
---- Net Market Risk ------- start --------  
+--- Switch position update ------- end --------  
+--- Net market risk ------- start --------  
 declare @TotPreviousRisk decimal(24,10)  
 declare @RowNumberRisk int  
-SELECT @TotPreviousRisk= sum(dblNoOfContract) FROM @List where Selection=case when @strRiskView='Processor' then '1.PHYSICAL POSITION / DIFFERENTIAL COVER' else '1.PHYSICAL POSITION / BASIS RISK' end   
+SELECT @TotPreviousRisk= sum(dblNoOfContract) FROM @List where Selection=case when @strRiskView='Processor' then '1.Physical position / Differential cover' else '1.Physical position / Basis risk' end   
    AND strFutureMonth='Previous' and PriceStatus='b. Priced / Outright - (Outright position)'  
   
-SELECT TOP 1 @RowNumberRisk=intRowNumber FROM @List  WHERE PriceStatus='NET MARKET RISK'  
+SELECT TOP 1 @RowNumberRisk=intRowNumber FROM @List  WHERE PriceStatus='Net market risk'  
 ORDER BY CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END ASC  
 UPDATE @List set dblNoOfContract= dblNoOfContract+isnull(@TotPrevious,0) where intRowNumber=@RowNumberRisk  
---- Net Market Risk ------- end --------  
+--- Net market risk ------- end --------  
   
 SELECT intRowNumber,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
-    CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity FROM @List    
+    CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity  FROM @List    
     WHERE dblQuantity <> 0  
  ORDER BY Selection, CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END ASC
