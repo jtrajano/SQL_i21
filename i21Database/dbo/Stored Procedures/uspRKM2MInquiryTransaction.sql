@@ -31,43 +31,43 @@ SELECT *,
 		  
 		 isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) dblMarketPrice,
 	 	  CASE WHEN intContractTypeId = 1 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) < 0
-		      THEN (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice)*dblOpenQty
+		      THEN (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice)*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 1 and ((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice)) >= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0) - dblAdjustedContractPrice) <= 0
-		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dblOpenQty
+		      THEN abs((isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0))- (dblAdjustedContractPrice))*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 2 and (isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)-dblAdjustedContractPrice) > 0
-		      THEN -(isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)- dblAdjustedContractPrice)*dblOpenQty
+		      THEN -(isnull(dblFuturesClosingPrice,0)+isnull(dblMarketBasis,0)- dblAdjustedContractPrice)*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		   end dblResult,
 		 case WHEN intPricingTypeId = 6  then 0 else 
  	      CASE WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
-		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 1 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
-		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) < 0
-		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		   	  THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else -((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 2 and ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) >= 0
-		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dblOpenQty
+		      THEN case when @ysnIncludeBasisDifferentialsInResults = 1 then abs((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) else ((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0)) end *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		     end end dblResultBasis,
 		     
-		 CASE WHEN intContractTypeId = 1 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) < 0)
-		      THEN (dblFuturesClosingPrice - dblFutures) *dblOpenQty
-		      WHEN intContractTypeId = 1 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) >= 0)
-		      THEN abs(dblFuturesClosingPrice - dblFutures) *dblOpenQty
-		      WHEN intContractTypeId = 2 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) <= 0)
-		      THEN abs(dblFuturesClosingPrice - dblFutures) *dblOpenQty
-		      WHEN intContractTypeId = 2 and (((dblFuturesClosingPrice - dblFutures) *dblOpenQty) > 0)
-		      THEN -(dblFuturesClosingPrice - dblFutures) *dblOpenQty
+		 CASE WHEN intContractTypeId = 1 and (((dblFuturesClosingPrice - dblFutures) ) < 0)
+		      THEN (dblFuturesClosingPrice - dblFutures) *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
+		      WHEN intContractTypeId = 1 and (((dblFuturesClosingPrice - dblFutures) ) >= 0)
+		      THEN abs(dblFuturesClosingPrice - dblFutures) *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
+		      WHEN intContractTypeId = 2 and (((dblFuturesClosingPrice - dblFutures) ) <= 0)
+		      THEN abs(dblFuturesClosingPrice - dblFutures) *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
+		      WHEN intContractTypeId = 2 and (((dblFuturesClosingPrice - dblFutures) ) > 0)
+		      THEN -(dblFuturesClosingPrice - dblFutures) *dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		   end dblMarketFuturesResult,	
 		       
 		      CASE WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) < 0
-		      THEN (isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
+		      THEN (isnull(dblMarketBasis,0)-isnull(dblCash,0))*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 1 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) >= 0
-		      THEN abs(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
+		      THEN abs(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 2 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) <= 0
-		      THEN abs(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
+		      THEN abs(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		      WHEN intContractTypeId = 2 and ((isnull(dblMarketBasis,0)-isnull(dblCash,0))) > 0
-		      THEN -(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dblOpenQty
+		      THEN -(isnull(dblMarketBasis,0)-isnull(dblCash,0))*dbo.fnCTConvertQuantityToTargetCommodityUOM(intQuantityUOMId,intPriceUOMId,dblOpenQty)
 		    end dblResultCash1
 		   ,isnull(dblContractBasis,0)+isnull(dblFutures,0) dblContractPrice 
 FROM (
