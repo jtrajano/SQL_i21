@@ -464,8 +464,8 @@ BEGIN TRY
 			RETURN
 		END
 
-		SELECT @dblUpperToleranceQuantity = dblCalculatedUpperTolerance * @dblRequiredQuantity / R.dblQuantity
-			,@dblLowerToleranceQuantity = dblCalculatedLowerTolerance * @dblRequiredQuantity / R.dblQuantity
+		SELECT @dblUpperToleranceQuantity = Case When dblCalculatedUpperTolerance=0 then @dblRequiredQuantity Else dblCalculatedUpperTolerance * @dblRequiredQuantity / R.dblQuantity end
+			,@dblLowerToleranceQuantity = Case When dblCalculatedLowerTolerance=0 then @dblRequiredQuantity else dblCalculatedLowerTolerance * @dblRequiredQuantity / R.dblQuantity end
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId and R.intWorkOrderId=RI.intWorkOrderId 
 		WHERE R.intItemId = @intProductId
