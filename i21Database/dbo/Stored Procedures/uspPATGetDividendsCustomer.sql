@@ -14,7 +14,9 @@ BEGIN
 			   SC.intDividendsPerShare,
 			   dblDividendAmount = CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> null 
 										THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END
+										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN 
+																							DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE 
+																							@dblProcessingDays END)) END
 		  FROM tblPATStockClassification SC
 	INNER JOIN tblPATCustomerStock CS
 			ON CS.intStockId = SC.intStockId
@@ -28,3 +30,5 @@ BEGIN
 END
 
 GO
+
+

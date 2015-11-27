@@ -17,22 +17,29 @@ BEGIN
 				   TC.strTaxCode,
 				   dtmLastActivityDate = GETDATE(),
 				   dblDividendAmount = SUM(CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-										THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END),
+												THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
+													 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
+													 (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE @dblProcessingDays END)) END),
 
 				   dblLessFWT = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-									 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-											(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END) < @dblMinimumDividend 
-									 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-									 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-											(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END * @FWT) END),
+													THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
+														 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
+														 (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE @dblProcessingDays END))  END) < @dblMinimumDividend 
+										 THEN 0 ELSE 
+											  (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
+													THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
+														 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
+														 (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE @dblProcessingDays END)) END 
+														 * (@FWT / 100)) END),
 
 				   dblCheckAmount = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-										 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-											  (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END) < @dblMinimumDividend 
-										 THEN 0 ELSE (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-										 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-											  (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo))) END - CS.dblCheckAmount) END)
+														THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
+															 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
+															 (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE @dblProcessingDays END)) END) < @dblMinimumDividend 
+										 THEN 0 ELSE 
+												  (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
+														THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
+															 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE @dblProcessingDays END) END - ISNULL(CS.dblCheckAmount,0)) END)
 
 			 FROM tblPATStockClassification SC
 	   INNER JOIN tblPATCustomerStock CS
@@ -47,3 +54,5 @@ BEGIN
 			   GROUP BY CS.intCustomerPatronId,ENT.strName, ARC.strStockStatus, TC.strTaxCode
 END
 GO
+
+

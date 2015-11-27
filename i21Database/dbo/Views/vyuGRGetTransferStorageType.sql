@@ -5,5 +5,7 @@ SELECT DISTINCT a.intStorageScheduleTypeId
  ,b.intCurrencyID  
 FROM tblGRStorageType a  
 JOIN tblGRStorageScheduleRule b ON b.intStorageType = a.intStorageScheduleTypeId  
-WHERE a.ysnActive=1 AND CONVERT(NVARCHAR, GETDATE(), 106) BETWEEN ISNULL(CONVERT(NVARCHAR, b.dtmEffectiveDate, 106), CONVERT(NVARCHAR, GETDATE(), 106))  
-  AND ISNULL(CONVERT(NVARCHAR, b.dtmTerminationDate, 106), CONVERT(NVARCHAR, GETDATE(), 106))
+WHERE a.ysnActive=1 
+AND dbo.fnRemoveTimeOnDate(GETDATE())
+BETWEEN ISNULL(dbo.fnRemoveTimeOnDate(b.dtmEffectiveDate), dbo.fnRemoveTimeOnDate(GETDATE()))  
+AND ISNULL(dbo.fnRemoveTimeOnDate(b.dtmTerminationDate), dbo.fnRemoveTimeOnDate(GETDATE()))

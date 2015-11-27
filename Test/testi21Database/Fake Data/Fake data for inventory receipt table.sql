@@ -1461,10 +1461,10 @@ BEGIN
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= 25.00
+			,[dblRate]				= 0
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
-			,[dblAmount]			= NULL 
+			,[dblAmount]			= 25.00
 			,[strAllocateCostBy]	= 'Unit'
 			,[ysnAccrue] 			= 0 -- 'None'
 	END
@@ -1472,7 +1472,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXX11
 	-- It has MANUAL lot items on it. 
-	-- It has Other charges. Cost method is Amount. 
+	-- It has Other charges. Cost Method is 'Per Unit'. 
 	-- There is a surcharge on Other Charges
 	--------------------------------------------------------
 	BEGIN
@@ -1610,8 +1610,8 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= @INVENTORY_COST_No
-			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= 25.00
+			,[strCostMethod]		= @COST_METHOD_PER_Unit
+			,[dblRate]				= 2.0
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
 			,[dblAmount]			= NULL 
@@ -1636,7 +1636,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXX12
 	-- It has MANUAL lot items on it. 
-	-- It has Other charges. Cost type is using Percentage.
+	-- It has Other charges. Cost Method is using 'Per Unit'.
 	-- There is a surcharge on Other Charges
 	-- Now, there is a surcharge on surcharge
 	--------------------------------------------------------
@@ -1775,8 +1775,8 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= 25.00
+			,[strCostMethod]		= @COST_METHOD_PER_Unit
+			,[dblRate]				= 2.0
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
 			,[dblAmount]			= NULL 
@@ -1814,7 +1814,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXX13
 	-- It has MANUAL lot items on it. 
-	-- It has Other charges. Cost types are Amount and Percentage.
+	-- It has Other charges. Cost types are Per Unit and Percentage.
 	-- There is a surcharge on Other Charges
 	-- There is a surcharge on surcharge
 	-- There is another surcharge on "surcharge on surcharge"
@@ -1954,8 +1954,8 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= @INVENTORY_COST_No
-			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= 25.00
+			,[strCostMethod]		= @COST_METHOD_PER_Unit
+			,[dblRate]				= 2.0
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
 			,[dblAmount]			= NULL 

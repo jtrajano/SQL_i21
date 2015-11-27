@@ -306,5 +306,7 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateItemUsedBySiteView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLocationUsedBySiteView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDriverUsedBySiteView.sql" />
+    <None Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
+    <None Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
   </ItemGroup>
 </Project>
