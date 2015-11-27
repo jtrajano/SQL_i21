@@ -552,8 +552,7 @@ GO
 
 GO
 UPDATE tblQMCompanyPreference
-SET ysnIsSamplePrintEnable = 0
-WHERE ysnIsSamplePrintEnable IS NULL
+SET ysnIsSamplePrintEnable = 1
 GO
 
 GO
