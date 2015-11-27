@@ -1461,10 +1461,10 @@ BEGIN
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= 25.00
+			,[dblRate]				= 0
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
-			,[dblAmount]			= NULL 
+			,[dblAmount]			= 25.00
 			,[strAllocateCostBy]	= 'Unit'
 			,[ysnAccrue] 			= 0 -- 'None'
 	END
