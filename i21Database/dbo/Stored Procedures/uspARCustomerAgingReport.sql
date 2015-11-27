@@ -157,7 +157,11 @@ ELSE
 INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson
 
-SELECT * FROM @temp_aging_table'
+SELECT blbCompanyLogo		= [dbo].fnSMGetCompanyLogo(''Header'')
+     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+     , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
+     , * 
+FROM @temp_aging_table'
 
 IF ISNULL(@filter,'') != ''
 BEGIN

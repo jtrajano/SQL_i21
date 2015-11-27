@@ -38,6 +38,9 @@ SELECT A.strCustomerName
 	 , strTerm				= (SELECT TOP 1 strTerm FROM vyuARCustomer C INNER JOIN tblSMTerm T ON C.intTermsId = T.intTermID WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , strContact			= (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
 								FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1 WHERE C.intEntityCustomerId = A.intEntityCustomerId)	 
+	 , blbCompanyLogo		= [dbo].fnSMGetCompanyLogo('Header')
+     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+     , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
 FROM
 (SELECT I.dtmDate AS dtmDate
 	  , I.strInvoiceNumber
