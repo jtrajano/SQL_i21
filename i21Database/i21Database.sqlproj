@@ -3010,6 +3010,17 @@
     <Build Include="dbo\Views\vyuCTContStsAllocationSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutPumpTotals.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutPaymentOptions.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutCustomerCharges.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutCustomerPayments.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutSalesTaxTotals.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutDeposits.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftComments.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutRegisterCorrections.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateImportFileHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
