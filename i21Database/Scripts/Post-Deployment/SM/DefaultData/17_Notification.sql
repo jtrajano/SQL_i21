@@ -38,20 +38,23 @@ GO
 		strType,
 		intCommentId,
 		ysnSent,
+		ysnRead,
 		intConcurrencyId
 	)
 	SELECT 
 		A.intEntityId,
 		B.intEntityId,
-		A.strScreen,
+		dbo.fnSMAddSpaceToTitleCase(SUBSTRING(A.strScreen,  CHARINDEX('.view', A.strScreen, 0) + 6, LEN(A.strScreen) - (CHARINDEX('.view', A.strScreen, 0) + 5)), 1),
 		'watch',
 		'comment',
 		A.intCommentId,
 		0,
+		1,
 		1
 	FROM tblSMComment A INNER JOIN tblSMCommentWatcher B 
 		ON A.strScreen = B.strScreen AND A.strRecordNo = B.strRecordNo
-	WHERE A.intCommentId NOT IN(SELECT ISNULL(C.intCommentId,0) FROM tblSMNotification C)
+	WHERE CHARINDEX('.view', A.strScreen, 0) <> 0 
+		AND A.intCommentId NOT IN(SELECT ISNULL(C.intCommentId,0) FROM tblSMNotification C)
 
 GO
 	PRINT N'END NOTIFICATION'
