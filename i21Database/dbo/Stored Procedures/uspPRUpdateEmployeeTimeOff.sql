@@ -5,7 +5,7 @@ AS
 BEGIN
 
 	--Get Employees with specified Time Off
-	SELECT E.intEntityEmployeeId, DATEDIFF(YEAR, ISNULL(E.dtmOriginalDateHired, GETDATE()), GETDATE()) intYearsOfService
+	SELECT E.intEntityEmployeeId, DATEDIFF(YEAR, ISNULL(E.dtmDateHired, GETDATE()), GETDATE()) intYearsOfService
 	INTO #tmpEmployees
 	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
 	ON E.intEntityEmployeeId = T.intEntityEmployeeId

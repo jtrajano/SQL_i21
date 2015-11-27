@@ -8,10 +8,10 @@ BEGIN
 
 	--Get Employees with specified Time Off
 	SELECT E.intEntityEmployeeId
-		  ,dtmLastAward = CASE WHEN (ISNULL(T.dtmEligible, E.dtmOriginalDateHired) > ISNULL(T.dtmLastAward, E.dtmOriginalDateHired)) THEN 
-								ISNULL(T.dtmEligible, E.dtmOriginalDateHired)
+		  ,dtmLastAward = CASE WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
+								ISNULL(T.dtmEligible, E.dtmDateHired)
 							ELSE
-								ISNULL(T.dtmLastAward, E.dtmOriginalDateHired)
+								ISNULL(T.dtmLastAward, E.dtmDateHired)
 						  END
 		  ,dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN
 								CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE)
@@ -30,7 +30,7 @@ BEGIN
 							 WHEN (strAwardPeriod = 'End of Year') THEN
 								DATEADD(YY, DATEDIFF(YY,0,getdate()) + 1, -1)
 							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
-								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmOriginalDateHired), E.dtmOriginalDateHired)
+								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmDateHired), E.dtmDateHired)
 							 ELSE NULL 
 						END
 		,dblAccruedHours = 0
