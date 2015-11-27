@@ -4,7 +4,7 @@
 )
 RETURNS @returntable TABLE
 (
-	[intTaxGroupMasterId] INT NOT NULL, 
+	--[intTaxGroupMasterId] INT NOT NULL, 
     [intTaxGroupId] INT NOT NULL, 
     [intTaxCodeId] INT NOT NULL, 
     [intTaxClassId] INT NOT NULL, 
@@ -23,7 +23,7 @@ AS
 BEGIN
 	INSERT @returntable
 	SELECT
-		[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
+		--[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
 		[intTaxGroupId]			=	A.intTaxGroupId, 
 		[intTaxCodeId]			=	A.intTaxCodeId, 
 		[intTaxClassId]			=	A.intTaxClassId, 

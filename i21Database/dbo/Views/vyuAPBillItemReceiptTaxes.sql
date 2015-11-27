@@ -8,7 +8,7 @@ FROM (
 SELECT
 	[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
 	[intPurchaseDetailId]		=	NULL,
-	[intTaxGroupMasterId]		=	A.intTaxGroupMasterId, 
+	--[intTaxGroupMasterId]		=	A.intTaxGroupMasterId, 
 	[intTaxGroupId]				=	A.intTaxGroupId, 
 	[intTaxCodeId]				=	A.intTaxCodeId, 
 	[intTaxClassId]				=	A.intTaxClassId, 
@@ -30,7 +30,7 @@ UNION ALL
 SELECT
 	[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
 	[intPurchaseDetailId]		=	B.intLineNo,
-	[intTaxGroupMasterId]		=	A.intTaxGroupMasterId, 
+	--[intTaxGroupMasterId]		=	A.intTaxGroupMasterId, 
 	[intTaxGroupId]				=	A.intTaxGroupId, 
 	[intTaxCodeId]				=	A.intTaxCodeId, 
 	[intTaxClassId]				=	A.intTaxClassId, 
@@ -52,7 +52,7 @@ UNION ALL
 SELECT
 	[intInventoryReceiptItemId]	=	NULL,
 	[intPurchaseDetailId]		=	B.intPurchaseDetailId,
-	[intTaxGroupMasterId]		=	A.intTaxGroupMasterId, 
+	--[intTaxGroupMasterId]		=	A.intTaxGroupMasterId, 
 	[intTaxGroupId]				=	A.intTaxGroupId, 
 	[intTaxCodeId]				=	A.intTaxCodeId, 
 	[intTaxClassId]				=	A.intTaxClassId, 
