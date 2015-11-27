@@ -8,11 +8,11 @@ AS
 			UP.strValue
 	FROM	(
 				SELECT	CD.intContractDetailId,
-						CAST(CD.dblQuantity AS NVARCHAR(100)) collate Latin1_General_CI_AS Quantity,
-						CAST(LTRIM(CD.dblBasis) + ' ' + CY.strCurrency + ' Per ' + PM.strUnitMeasure AS NVARCHAR(100) ) collate Latin1_General_CI_AS [Differential],
+						CAST(CAST(CD.dblQuantity AS NUMERIC(18,2)) AS NVARCHAR(100)) collate Latin1_General_CI_AS Quantity,
+						CAST(LTRIM(CAST(CD.dblBasis AS NUMERIC(18,2)))  + ' ' + CY.strCurrency + ' Per ' + PM.strUnitMeasure AS NVARCHAR(100) ) collate Latin1_General_CI_AS [Differential],
 						CAST(LTRIM(PF.intLotsFixed) + '/' + LTRIM(PF.intTotalLots - PF.intLotsFixed) AS NVARCHAR(100)) collate Latin1_General_CI_AS AS [Fixed/Unfixed],
 						CAST(LTRIM(PF.intLotsHedged) + '/' + LTRIM(PF.intTotalLots - PF.intLotsHedged) AS NVARCHAR(100)) collate Latin1_General_CI_AS AS [Hedge/Not Hedge],
-						CAST(LTRIM(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' Per ' + FM.strUnitMeasure AS NVARCHAR(100)) collate Latin1_General_CI_AS [Final Price]
+						CAST(LTRIM(CAST(PF.dblFinalPrice AS NUMERIC(18,2)))  + ' ' + CY.strCurrency + ' Per ' + FM.strUnitMeasure AS NVARCHAR(100)) collate Latin1_General_CI_AS [Final Price]
 				FROM	tblCTContractDetail			CD LEFT
 				JOIN	tblCTPriceFixation			PF	ON	PF.intContractDetailId			=		CD.intContractDetailId	LEFT
 				JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=		CD.intCurrencyId		LEFT
