@@ -2992,6 +2992,14 @@
     <Build Include="dbo\Stored Procedures\uspWHValidateWarehouseReleaseLot.sql" />
     <Build Include="dbo\Stored Procedures\uspWHGetLotIdByLotNo.sql" />
     <Build Include="dbo\Tables\tblWHPickForKitting.sql" />
+    <Build Include="dbo\Views\vyuCTContStsContainer.sql" />
+    <Build Include="dbo\Views\vyuCTContStsPricingAndHedging.sql" />
+    <Build Include="dbo\Views\vyuCTContStsGoodsShipped.sql" />
+    <Build Include="dbo\Views\vyuCTContStsInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuCTContStsReceiptSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsAllocationSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
