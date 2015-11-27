@@ -82,7 +82,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
@@ -92,7 +92,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
