@@ -1636,7 +1636,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 intShipmentId: current.data.intInventoryShipmentId,
                 strReferenceNumber: current.data.strReferenceNumber,
                 intSourceType: 2,
-                intCommodityId: commodity.get('intComodityId'),
+                intCommodityId: commodity.get('intCommodityId'),
                 intCompanyLocationId: current.data.intShipFromLocationId,
                 intCompanyLocationSubLocationId: subLocation.get('intSubLocationId')
             });
