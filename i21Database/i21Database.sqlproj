@@ -3001,6 +3001,7 @@
     <Build Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\17_Notification.sql" />
     <Build Include="dbo\Functions\fnSMAddSpaceToTitleCase.sql" />
+    <Build Include="dbo\Tables\tblSMMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
