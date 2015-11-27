@@ -472,6 +472,7 @@ BEGIN TRY
 			AND R.ysnActive = 1
 			AND intRecipeItemTypeId = 2
 			AND RI.intItemId = @intItemId
+			AND R.intWorkOrderId = @intWorkOrderId
 
 		IF @ysnIgnoreTolerance = 0
 			AND @dblQuantity > @dblUpperToleranceQuantity
