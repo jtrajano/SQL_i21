@@ -21,6 +21,7 @@ SELECT
 	isnull(d.strTimezone,'') strTimezone,
 	isnull(b.strWebsite,'') strWebsite,
 	isnull(d.strPhone,'') strPhone,
+	isnull(d.strName,'') strContactName,
 	isnull(b.strEntityNo,'') strEntityNo,
 	isnull(e.strAddress,'') strAddress,
 	isnull(e.strCity,'') strCity,
