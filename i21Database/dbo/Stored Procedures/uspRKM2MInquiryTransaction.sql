@@ -149,7 +149,8 @@ else isnull(dblCosts,0)+(isnull(dblContractBasis,0) + ISNULL(dblFutures,0)) end 
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
 				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8))  END else isnull(temp.strPeriodTo,'') end
 			),0) AS dblMarketBasis1,											
-		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
+		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,
+		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
 
 			(case when ISNULL((SELECT TOP 1 dblNewValue from tblCTSequenceUsageHistory uh 
@@ -293,6 +294,7 @@ SELECT *,
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
 				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8))  END else isnull(temp.strPeriodTo,'') end
 			),0) AS dblMarketBasis1,											
+			    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice,
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
 			SUM(ri.dblOpenReceive) OVER (PARTITION BY cd.intContractDetailId) dblOpenQty,dblRate,
@@ -444,6 +446,7 @@ case when intPricingTypeId<>6 then 0 else  isnull(dblFuturesClosingPrice,0)+isnu
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
 				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),cd.dtmEndDate,106),8))  END else isnull(temp.strPeriodTo,'') end
 			),0) AS dblMarketBasis1,											
+			dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice,
 		    dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice,					  
 			convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
 
@@ -504,6 +507,7 @@ FROM
 			null AS avgLot,
 			null AS intTotLot,
 			null AS dblMarketBasis1	,
+			null AS dblFuturePrice,
 			null as dblFuturesClosingPrice,					  
 			null as intContractTypeId ,
 			0 as intConcurrencyId ,
@@ -529,7 +533,7 @@ IF (@strRateType='Exchange')
 BEGIN
 SELECT Convert(int,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,intContractDetailId,strContractOrInventoryType,
 	strContractSeq,strEntityName,intEntityId,strFutMarketName,
-	intFutureMarketId,intFutureMonthId,strFutureMonth,
+	intFutureMarketId,intFutureMonthId,strFutureMonth,dblFuturePrice,
 	strCommodityCode,intCommodityId,strItemNo,intItemId,intOriginId,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,
 	case when isnull(intCommodityUnitMeasureId,0) = 0 then dblOpenQty else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,intQuantityUOMId,dblOpenQty)end  as dblOpenQty,
 	intPricingTypeId,strPricingType, 
@@ -552,7 +556,7 @@ FROM #temp1 ORDER BY intCommodityId
 END
 ELSE
 BEGIN
-	select Convert(int,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,intContractDetailId,strContractOrInventoryType,
+	select dblFuturePrice,Convert(int,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,intContractDetailId,strContractOrInventoryType,
 		strContractSeq,strEntityName,intEntityId,strFutMarketName,
 		intFutureMarketId,intFutureMonthId,strFutureMonth,
 		strCommodityCode,intCommodityId,strItemNo,intItemId,intOriginId,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,
