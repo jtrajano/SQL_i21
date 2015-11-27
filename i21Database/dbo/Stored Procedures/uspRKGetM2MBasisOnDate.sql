@@ -5,7 +5,7 @@ AS
 SELECT bd.intM2MBasisDetailId, c.strCommodityCode,	i.strItemNo,		ca.strDescription as strOriginDest,		fm.strFutMarketName, '' as strFutureMonth,
 		bd.strPeriodTo,		strLocationName,		strMarketZoneCode,		strCurrency,		strPricingType,
 		strContractInventory,		strContractType,strUnitMeasure,
-		bd.intCommodityId,		bd.intItemId,		bd.intOriginId,		bd.intFutureMarketId,		bd.intFutureMonthId,
+		bd.intCommodityId,		bd.intItemId, bd.strOriginDest,		bd.intFutureMarketId,		bd.intFutureMonthId,
 		bd.intCompanyLocationId,		bd.intMarketZoneId,		bd.intCurrencyId,	bd.intPricingTypeId,		bd.strContractInventory,
 		bd.intContractTypeId,		bd.dblCashOrFuture,		bd.dblBasisOrDiscount,		bd.intUnitMeasureId	,0 as intConcurrencyId	
 FROM
