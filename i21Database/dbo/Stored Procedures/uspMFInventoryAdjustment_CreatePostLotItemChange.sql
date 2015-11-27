@@ -45,6 +45,9 @@ DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@strAdjustmentNo AS NVARCHAR(40)
 		,@intEntityId AS INT 
 		,@intItemId AS INT
+		,@intOldItemId AS INT
+		,@strOldItemType NVARCHAR(MAX)
+		,@strNewItemType NVARCHAR(MAX)
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- VALIDATIONS
@@ -77,6 +80,19 @@ BEGIN
 	RAISERROR(80021, 11, 1); 
 	GOTO _Exit;
 END 
+
+SELECT @intOldItemId = i.intItemId FROM tblICLot l
+JOIN tblICItem i ON i.intItemId = l.intItemId
+WHERE l.intLotId = @intLotId
+
+SELECT @strOldItemType = strType FROM tblICItem WHERE intItemId = @intOldItemId
+SELECT @strNewItemType = strType FROM tblICItem WHERE intItemId = @intNewItemId
+
+IF @strOldItemType <> @strNewItemType
+BEGIN
+	RAISERROR('Item type should be same for both new and old item.', 11, 1);
+	GOTO _Exit;
+END
 
 -- Find the Lot Id
 BEGIN 
