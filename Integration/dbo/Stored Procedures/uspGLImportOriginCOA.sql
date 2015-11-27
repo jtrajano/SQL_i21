@@ -122,19 +122,14 @@ BEGIN
 				IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
 				BEGIN
 					
-					DECLARE @tbl TABLE (glact_acct1_8 INT)
-					;WITH cte (glact_acct1_8_new,glact_acct9_16 , cnt) as (
-						SELECT glact_acct1_8_new,glact_acct9_16 , count(*)  FROM [tblGLOriginAccounts] GROUP BY glact_acct1_8_new,glact_acct9_16 HAVING  count(*) > 1
-					)
-					INSERT into @tbl
-					SELECT a.glact_acct1_8 from cte b inner join [tblGLOriginAccounts] a on a.glact_acct1_8_new = b.glact_acct1_8_new
-					WHERE a.glact_acct1_8_new <> a.glact_acct1_8
-					IF EXISTS(SELECT TOP 1 1 FROM @tbl)
+					
+					IF EXISTS(SELECT Top 1 1 FROM tblGLOriginAccounts where replicate(''0'',@primarylen-len( glact_acct1_8)) = glact_acct1_8)
 					BEGIN
 						SET @result = ''invalid-2,'' + cast(  @primarylen as varchar)
 						COMMIT TRANSACTION
 						RETURN
 					END
+					UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8))
 				END
 				DECLARE	@Length		INT
 						,@query		VARCHAR(500)	
