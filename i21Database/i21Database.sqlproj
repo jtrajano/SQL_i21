@@ -3000,6 +3000,11 @@
     <Build Include="dbo\Views\vyuCTContStsAllocationSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
+    <Build Include="dbo\Tables\tblTFTransactions.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
