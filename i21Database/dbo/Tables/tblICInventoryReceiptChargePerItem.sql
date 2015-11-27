@@ -3,7 +3,7 @@
 	[intInventoryReceiptChargePerItemId] INT NOT NULL IDENTITY, 
 	[intInventoryReceiptId] INT NOT NULL,
     [intInventoryReceiptChargeId] INT NOT NULL, 
-	[intInventoryReceiptItemId] INT NOT NULL, 
+	[intInventoryReceiptItemId] INT NULL, -- Change this to nullable. Fixed amount is not applied to an item. 
 	[intChargeId] INT NOT NULL, 
 	[intEntityVendorId] INT NULL, 
 	[intContractId] INT NULL, 

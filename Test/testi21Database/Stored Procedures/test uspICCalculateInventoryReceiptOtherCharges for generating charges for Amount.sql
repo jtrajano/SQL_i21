@@ -81,7 +81,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
@@ -92,7 +92,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
@@ -102,7 +102,24 @@ BEGIN
 		DECLARE @intInventoryReceiptId AS INT = 10
 	END 
 
-	-- No data is expected on tblICInventoryReceiptChargePerItem
+	-- Setup the expected data
+	BEGIN 
+		INSERT INTO expected (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
+			,[intInventoryReceiptItemId]
+			,[intChargeId]
+			,[intEntityVendorId]
+			,[dblCalculatedAmount]
+		)
+		SELECT 
+			[intInventoryReceiptId]			= @intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= 3
+			,[intInventoryReceiptItemId]	= NULL 
+			,[intChargeId]					= @OtherCharges
+			,[intEntityVendorId]			= NULL 
+			,[dblCalculatedAmount]			= 25.00
+	END 
 
 	-- Act
 	BEGIN 		
