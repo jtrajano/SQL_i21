@@ -1633,7 +1633,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         iRely.Functions.openScreen('Logistics.view.WarehouseInstructions',
             {
                 action: 'new',
-                intShipmentId: current.data.intInventoryShipmentId,
+                intInventoryShipmentId: current.data.intInventoryShipmentId,
                 strReferenceNumber: current.data.strReferenceNumber,
                 intSourceType: 2,
                 intCommodityId: commodity.get('intCommodityId'),
