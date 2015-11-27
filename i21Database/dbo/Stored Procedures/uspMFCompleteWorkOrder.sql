@@ -65,6 +65,7 @@ BEGIN TRY
 		,@strYieldAdjustmentAllowed nvarchar(50)
 		,@strComment nvarchar(MAX)
 		,@strParentLotNumber nvarchar(50)
+		,@ysnIgnoreTolerance bit
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -113,6 +114,7 @@ BEGIN TRY
 		,@intLotStatusId=intLotStatusId
 		,@strComment=strComment
 		,@strParentLotNumber=strParentLotNumber
+		,@ysnIgnoreTolerance=ysnIgnoreTolerance
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -150,7 +152,11 @@ BEGIN TRY
 			,intLotStatusId int
 			,strComment nvarchar(MAX)
 			,strParentLotNumber nvarchar(50)
+			,ysnIgnoreTolerance bit
 			)
+
+	IF @ysnIgnoreTolerance IS NULL
+	SELECT @ysnIgnoreTolerance=1
 
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Yield Adjustment Allowed'
 
@@ -478,7 +484,7 @@ BEGIN TRY
 			,@intLotTransactionTypeId = 3
 			,@ysnCreateNewLot = 1
 			,@ysnFGProduction = 0
-			,@ysnIgnoreTolerance = 1
+			,@ysnIgnoreTolerance = @ysnIgnoreTolerance
 			,@intMachineId =@intMachineId
 			,@ysnLotAlias =@ysnLotAlias
 			,@strLotAlias =@strLotAlias

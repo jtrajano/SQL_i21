@@ -135,7 +135,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 27
 			,[intChargeId]					= @OtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 -- It is a fixed amount. 
+			,[dblCalculatedAmount]			= 10 * 2.0
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -143,7 +143,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 28
 			,[intChargeId]					= @OtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 -- It is a fixed amount. 
+			,[dblCalculatedAmount]			= 20 * 2.0
 		UNION ALL 
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -151,7 +151,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 27
 			,[intChargeId]					= @SurchargeOtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 -- 2% of $25.00
+			,[dblCalculatedAmount]			= (10 * 2.0)* 0.02 -- 2% of (10 * 2.0)
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -159,7 +159,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 28
 			,[intChargeId]					= @SurchargeOtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 -- 2% of $25.00
+			,[dblCalculatedAmount]			= (20 * 2.0) * 0.02 -- 2% of (20 * 2.0)
 	END 
 
 	-- Assert

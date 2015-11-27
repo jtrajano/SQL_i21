@@ -45,7 +45,8 @@ AS
 			i.strType strItemType,         
           
 			ic.strCategoryCode strItemCategory,         
-			c.strCustomerNumber strVendor,        
+			ic.intCategoryId,
+			e.strName strVendor,
           
 			ls.strPrimaryStatus,         
 			ls.strSecondaryStatus,        
@@ -78,4 +79,4 @@ AS
 	LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 	LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId
 	LEFT JOIN tblARCustomer c1 ON c1. intEntityCustomerId = ito.intOwnerId
-	LEFT JOIN tblARCustomer c ON c.intEntityCustomerId = l.intEntityVendorId
+	LEFT JOIN tblEntity e ON e.intEntityId = l.intEntityVendorId

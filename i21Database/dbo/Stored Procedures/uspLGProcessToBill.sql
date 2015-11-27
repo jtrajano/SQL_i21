@@ -36,9 +36,10 @@ BEGIN TRY
 				Item.intItemId,
 				intAccountId = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'),
 				dblQtyReceived = 1,
-				dblCost = Cast((Sum(WHD.dblActualAmount) / Sum(Receipt.dblNet)) * Receipt.dblNet as numeric(18, 0))
+				dblCost = (Sum(WHD.dblActualAmount) * Receipt.dblNet / dblSumNet.dblSum)
 
 		FROM tblICInventoryReceiptItem Receipt
+			LEFT JOIN (SELECT SUM(dblNet) dblSum, intInventoryReceiptId FROM tblICInventoryReceiptItem GROUP BY intInventoryReceiptId) dblSumNet ON dblSumNet.intInventoryReceiptId = Receipt.intInventoryReceiptId
 		   LEFT JOIN tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = Receipt.intSourceId
 		   LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = SCQ.intContractDetailId
 		   LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = CTDetail.intContractHeaderId
@@ -48,8 +49,8 @@ BEGIN TRY
 		   LEFT JOIN tblICItem Item ON Item.intItemId = WHD.intItemId
 		   LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = Item.intItemId and ItemLoc.intLocationId = WH.intCompanyLocationId
 		   WHERE WH.intWarehouseInstructionHeaderId = @intWarehouseInstructionHeaderId
-		   GROUP BY CTHeader.intContractHeaderId, CTDetail.intContractDetailId, Item.intItemId, ItemLoc.intItemLocationId, Receipt.dblNet
-
+		   GROUP BY CTHeader.intContractHeaderId, CTDetail.intContractDetailId, Item.intItemId, ItemLoc.intItemLocationId, Receipt.dblNet, dblSumNet.dblSum
+		   
     select @total = count(*) from @voucherDetailNonInvContract;
     IF (@total = 0)
 	BEGIN

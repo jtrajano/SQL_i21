@@ -44,7 +44,7 @@ RETURN (
 		SELECT	strTransactionId
 				,strText = FORMATMESSAGE(50005)
 				,intErrorCode = 50005
-		FROM	(SELECT DISTINCT strTransactionId, dtmDate, strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') !='AA') GLEntries
+		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') !='AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 		WHERE	dbo.isOpenAccountingDate(dtmDate) = 0
 
 		UNION ALL 
@@ -60,7 +60,7 @@ RETURN (
 		SELECT	strTransactionId
 				,strText = FORMATMESSAGE(51189,strModuleName)
 				,intErrorCode = 51189
-		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate) GLEntries
+		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') !='AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 		WHERE	dbo.isOpenAccountingDateByModule(dtmDate,strModuleName) = 0
 
 	) AS Query		

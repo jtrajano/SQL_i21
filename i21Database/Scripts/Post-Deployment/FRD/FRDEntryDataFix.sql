@@ -364,3 +364,12 @@ UPDATE tblFRRowDesignCalculation SET intRefNoCalc = (SELECT TOP 1 intRefNo FROM 
 									    ,intRowId = (SELECT TOP 1 intRowId FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)
 							WHERE intRowDetailRefNo IN (SELECT intRowDetailId FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo) 
 							   AND intRefNoCalc NOT IN (SELECT intRefNo FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)
+
+
+--=====================================================================================================================================
+-- 	ROW: HIDDEN OPTION
+---------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE tblFRRowDesign SET ysnHidden = 0 WHERE strRowType <> 'Hidden' AND ysnHidden IS NULL
+UPDATE tblFRRowDesign SET ysnHidden = 1 WHERE strRowType = 'Hidden' AND ysnHidden IS NULL
+UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Hidden'
