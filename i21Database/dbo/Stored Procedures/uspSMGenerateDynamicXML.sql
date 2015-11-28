@@ -164,18 +164,18 @@ BEGIN
 			SET @strParentTag = REPLACE(@strParentTag, '-', '')
 						
 			-- ===========> Form attributes format <================
-			IF EXISTS(SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId)
+			IF EXISTS(SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1)
 			BEGIN
 				DECLARE @intMinTagPosition Int, @intMaxTagPosition Int, @strTagTable nvarchar(100), @strTagColumnName nvarchar(200)
-				SELECT @intMinTagPosition = MIN(intSequence), @intMaxTagPosition = MAX(intSequence) FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+				SELECT @intMinTagPosition = MIN(intSequence), @intMaxTagPosition = MAX(intSequence) FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1
 
 				SET @strTagAttribute = ''
 				WHILE (@intMinTagPosition <= @intMaxTagPosition)
 				BEGIN
-					SELECT @strTagTable = strTable, @strTagColumnName = strColumnName FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition
+					SELECT @strTagTable = strTable, @strTagColumnName = strColumnName FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition AND ysnActive = 1
 					IF (ISNULL(@strTagTable, '') = '' AND ISNULL(@strTagColumnName, '') = '')
 					BEGIN
-						SET @strTagAttribute =  (SELECT @strTagAttribute + ' ''''' + strDefaultValue + ''''' [' + strTagAttribute + '],' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition)
+						SET @strTagAttribute =  (SELECT @strTagAttribute + ' ''''' + strDefaultValue + ''''' [' + strTagAttribute + '],' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition AND ysnActive = 1)
 					END
 					ELSE
 					BEGIN
@@ -185,7 +185,7 @@ BEGIN
 							WHEN  (SELECT LTRIM(RTRIM(strWhereTable)) FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = strTable) 
 								THEN ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = strTable) 
 							ELSE ' ' END
-						+ ' ) as [' + strTagAttribute + '] ,' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition)
+						+ ' ) as [' + strTagAttribute + '] ,' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition AND ysnActive = 1)
 					END
 					
 					SET @intMinTagPosition = @intMinTagPosition + 1
@@ -467,13 +467,13 @@ BEGIN
 	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId, @intLevel = intLevel, @strParentTag = strXMLTag FROM dbo.tblSMImportFileColumnDetail 
 		Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1  AND ysnActive = 1
 		
-	IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId)
+	IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1)
 	BEGIN
-		SELECT @intMinTagPosition = MIN(intSequence), @intMaxTagPosition = MAX(intSequence) FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+		SELECT @intMinTagPosition = MIN(intSequence), @intMaxTagPosition = MAX(intSequence) FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND ysnActive = 1
 		SET @strTagAttribute = ''
 		WHILE (@intMinTagPosition <= @intMaxTagPosition)
 		BEGIN
-			SET @strTagAttribute =  (SELECT @strTagAttribute + ' ' + strTagAttribute + '="' + strDefaultValue + '"  ' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition)
+			SET @strTagAttribute =  (SELECT @strTagAttribute + ' ' + strTagAttribute + '="' + strDefaultValue + '"  ' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition AND ysnActive = 1)
 			
 			SET @intMinTagPosition = @intMinTagPosition + 1
 		END
