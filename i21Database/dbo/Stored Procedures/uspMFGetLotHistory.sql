@@ -10,7 +10,7 @@ BEGIN
 				i.strDescription AS strDescription, 
 				clsl.strSubLocationName AS strSubLocation, 
 				sl.strName AS strStorageLocation, 
-				ilt.strTransactionForm AS strTransaction, 
+				itt.strName AS strTransaction, 
 				l.dblQty AS dblQuantity, 
 				ilt.dblQty AS dblTransactionQty, 
 				um.strUnitMeasure AS strUOM, 
@@ -37,7 +37,7 @@ BEGIN
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ilt.intItemUOMId
-		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedUserId
+		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
 		WHERE l.intLotId = @intLotId
 		
 		UNION
@@ -48,7 +48,9 @@ BEGIN
 				i.strDescription AS strDescription, 
 				clsl.strSubLocationName AS strSubLocation, 
 				sl.strName AS strStorageLocation, 
-				'' AS strTransaction, 
+				CASE WHEN iad.intLotStatusId <> iad.intNewLotStatusId THEN 'Inventory Adjustment - Lot Status Change'
+					 WHEN iad.dtmExpiryDate <> iad.dtmNewExpiryDate THEN 'Inventory Adjustment - Expiry Date Change'
+					 ELSE '' END  AS strTransaction, 
 				l.dblQty AS dblQuantity, 
 				ISNULL(dblNewQuantity - dblQuantity, 0) AS dblTransactionQty, 
 				um.strUnitMeasure AS strUOM, 
@@ -67,7 +69,7 @@ BEGIN
 				'' AS strNewVendorLotNo, 
 				'' AS strOldVendorLotNo, 
 				'' AS strNotes, 
-				'' AS strUser
+				us.strUserName AS strUser
 		FROM tblICInventoryAdjustment ia
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 		LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
@@ -80,7 +82,8 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intStorageLocationId
 		LEFT JOIN tblICLotStatus ls ON ls.intLotStatusId = iad.intLotStatusId
 		LEFT JOIN tblICLotStatus ls1 ON ls1.intLotStatusId = iad.intNewLotStatusId
+		LEFT JOIN tblSMUserSecurity us ON us.intEntityUserSecurityId = ia.intEntityId
 		WHERE l.intLotId = @intLotId
 		) lotHistorytbl
-	ORDER BY dtmDateTime
+	ORDER BY dtmDateTime DESC
 END
