@@ -51,9 +51,9 @@ BEGIN TRY
 		,S.strSampleNumber
 		,CONVERT(NVARCHAR, S.dtmSampleReceivedDate, 107) AS dtmSampleReceivedDate
 		,CASE 
-			WHEN C.strCategoryCode = 'C'
+			WHEN S.intProductTypeId = 11
 				THEN ISNULL(L.strLotNumber,'')
-			ELSE ''
+			ELSE ISNULL(L1.strLotNumber, '')
 			END AS strLotNumber
 		,ISNULL(PL.strParentLotNumber,'') AS strParentLotNumber
 		,ST.strDescription AS strSampleTypeDescription
@@ -71,10 +71,10 @@ BEGIN TRY
 	JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 	JOIN tblICItem I ON S.intItemId = I.intItemId
 	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
-	LEFT JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
-		AND TR.intProductTypeId = 11
-	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = TR.intProductValueId
+	--LEFT JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
+	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = S.intProductValueId AND S.intProductTypeId = 11
 	LEFT JOIN tblICLot L ON PL.intParentLotId = L.intParentLotId
+	LEFT JOIN tblICLot L1 ON L1.intLotId = S.intProductValueId AND S.intProductTypeId = 6
 	LEFT JOIN tblMFWorkOrderInputParentLot WPL ON WPL.intParentLotId = PL.intParentLotId
 	LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId

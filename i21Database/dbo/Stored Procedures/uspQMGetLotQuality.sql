@@ -47,12 +47,14 @@ BEGIN TRY
   ,strItemNo  
   ,strDescription  
   ,intLotId  
-  ,strLotNumber  
-  ,strLotAlias  
+  ,strLotNumber
+  ,strLotStatus
+  ,strLotAlias
+  ,strSampleNumber
+  ,strSampleStatus
   ,dblLotQty  
   ,strUnitMeasure
   ,dtmDateCreated
-  ,strSampleNumber
   ,intSampleId
   ,' + @str + 
 		'FROM (  
@@ -63,21 +65,25 @@ BEGIN TRY
    ,I.strDescription  
    ,L.intLotId
    ,L.strLotNumber
+   ,LS.strSecondaryStatus AS strLotStatus
    ,L.strLotAlias
+   ,S.strSampleNumber
+   ,SS.strSecondaryStatus AS strSampleStatus
    ,ISNULL(L.dblWeight,L.dblQty) AS dblLotQty
    ,U.strUnitMeasure
    ,L.dtmDateCreated
-   ,S.strSampleNumber  
    ,S.intSampleId  
    ,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
    ,TR.strPropertyValue  
   FROM dbo.tblQMTestResult AS TR
   JOIN dbo.tblICLot AS L ON L.intLotId = TR.intProductValueId AND TR.intProductTypeId = 6  
+  JOIN dbo.tblICLotStatus AS LS ON LS.intLotStatusId = L.intLotStatusId  
   JOIN dbo.tblICItem AS I ON I.intItemId = L.intItemId  
   JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
   JOIN dbo.tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
   JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
   JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
+  JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
   JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
   JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
   ) t  
