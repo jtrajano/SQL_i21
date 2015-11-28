@@ -3401,12 +3401,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lot Quali
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.LotQuality' WHERE strMenuName = 'Lot Quality View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality Exception View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Quality Exception View', N'Quality', @QualityParentMenuId, N'Quality Exception View', N'Activity', N'Screen', N'Quality.view.QualityException', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Quality View', N'Quality', @QualityParentMenuId, N'Quality View', N'Activity', N'Screen', N'Quality.view.QualityException', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.QualityException' WHERE strMenuName = 'Quality Exception View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.QualityException' WHERE strMenuName = 'Quality View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality Exception View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
+	DELETE tblSMMasterMenu WHERE strMenuName = 'Quality Exception View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 /* WAREHOUSE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse' AND strModuleName = 'Warehouse' AND intParentMenuID = 0)

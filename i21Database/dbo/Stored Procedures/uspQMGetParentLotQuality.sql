@@ -48,12 +48,14 @@ BEGIN TRY
   ,strItemNo  
   ,strDescription  
   ,intLotId  
-  ,strLotNumber  
-  ,strLotAlias  
+  ,strLotNumber
+  ,strLotStatus
+  ,strLotAlias
+  ,strSampleNumber
+  ,strSampleStatus
   ,dblLotQty  
   ,strUnitMeasure
   ,dtmDateCreated
-  ,strSampleNumber
   ,intSampleId
   ,' + @str + 
 		'FROM (  
@@ -64,22 +66,26 @@ BEGIN TRY
    ,I.strDescription  
    ,PL.intParentLotId AS intLotId
    ,PL.strParentLotNumber AS strLotNumber
+   ,LS.strSecondaryStatus AS strLotStatus
    ,L.strLotAlias
+   ,S.strSampleNumber
+   ,SS.strSecondaryStatus AS strSampleStatus
    ,ISNULL(SUM(L.dblWeight),SUM(L.dblQty)) AS dblLotQty
    ,U.strUnitMeasure
    ,MIN(L.dtmDateCreated) AS dtmDateCreated
-   ,S.strSampleNumber  
    ,S.intSampleId  
    ,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
    ,TR.strPropertyValue  
   FROM dbo.tblQMTestResult AS TR
   JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = TR.intProductValueId AND TR.intProductTypeId = 11 
   JOIN dbo.tblICLot AS L ON L.intParentLotId = PL.intParentLotId 
+  JOIN dbo.tblICLotStatus AS LS ON LS.intLotStatusId = PL.intLotStatusId  
   JOIN dbo.tblICItem AS I ON I.intItemId = L.intItemId  
   JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
   JOIN dbo.tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
   JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
   JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
+  JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
   JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
   JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
   GROUP BY
@@ -89,9 +95,11 @@ BEGIN TRY
    ,I.strDescription
    ,PL.intParentLotId
    ,PL.strParentLotNumber
+   ,LS.strSecondaryStatus
    ,L.strLotAlias
-   ,U.strUnitMeasure
    ,S.strSampleNumber
+   ,SS.strSecondaryStatus
+   ,U.strUnitMeasure
    ,S.intSampleId
    ,P.strPropertyName + '' - '' + T.strTestName
    ,TR.strPropertyValue
