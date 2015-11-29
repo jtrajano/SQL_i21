@@ -145,13 +145,10 @@ BEGIN
 			INNER JOIN tblGLOriginAccounts B ON A.glact_acct1_8 = B.glact_acct1_8
 			WHERE A.glact_acct9_16 = B.glact_acct9_16
 			and C.inti21Id = @Id_update		
-			
-
-			
 			DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update
 
-			
-
 		END
+		UPDATE A SET A4GLIdentity = B.A4GLIdentity from  tblGLOriginAccounts A INNER JOIN glactmst B
+					ON A.glact_acct1_8 = B.glact_acct1_8 AND A.glact_acct9_16 = B.glact_acct9_16
 	')
 END 
