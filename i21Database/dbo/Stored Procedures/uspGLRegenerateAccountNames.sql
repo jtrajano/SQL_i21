@@ -20,7 +20,7 @@ BEGIN
 		, 1, 2, '' ) AS strDescription
     FROM tblGLAccount A1  
 	GROUP BY intAccountId)
-	UPDATE A SET A.strDescription = CTE.strDescription 
+	UPDATE A SET A.strDescription = ISNULL(CTE.strDescription ,'')
 	 FROM tblGLAccount A INNER JOIN CTE ON A.intAccountId = CTE.intAccountId
 	 INNER JOIN tblGLAccountSegmentMapping M ON A.intAccountId = M.intAccountId
 	 INNER JOIN tblGLAccountSegment S ON M.intAccountSegmentId = S.intAccountSegmentId
