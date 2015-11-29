@@ -75,7 +75,6 @@ BEGIN
 
 				DECLARE @primarylen INT
 				SELECT @primarylen  = max(len(glact_acct1_8))from glactmst 
-				DELETE FROM [tblGLOriginAccounts]
 					INSERT INTO [dbo].[tblGLOriginAccounts]
 						   ([glact_acct1_8]
 						   ,[glact_acct9_16]
@@ -112,24 +111,26 @@ BEGIN
 						   ,[glact_user_fld_2]
 						   ,[glact_user_id]
 						   ,[glact_user_rev_dt]
-						   ,0
+						   ,[glact_acct1_8]
 						   ,A4GLIdentity
 							FROM glactmst
 						WHERE A4GLIdentity NOT IN (SELECT A4GLIdentity FROM [tblGLOriginAccounts])
-				UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8))
+				
 
 				
 				IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
 				BEGIN
 					
 					
-					IF EXISTS(SELECT Top 1 1 FROM tblGLOriginAccounts where replicate(''0'',@primarylen-len( glact_acct1_8)) = glact_acct1_8)
+					IF EXISTS(
+						SELECT TOP 1 1 FROM tblGLOriginAccounts 
+						where replicate(''0'',@primarylen-len( cast(cast(glact_acct1_8_new as int) as varchar(30)))) + cast(cast(glact_acct1_8_new as int) as varchar(30)) = 
+						glact_acct1_8 and len( cast(cast(glact_acct1_8_new as int) as varchar(30))) < @primarylen)
 					BEGIN
 						SET @result = ''invalid-2,'' + cast(  @primarylen as varchar)
 						COMMIT TRANSACTION
 						RETURN
 					END
-					UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8))
 				END
 				DECLARE	@Length		INT
 						,@query		VARCHAR(500)	
