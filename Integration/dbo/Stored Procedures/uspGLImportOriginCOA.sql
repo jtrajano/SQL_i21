@@ -30,7 +30,13 @@ BEGIN
 		BEGIN
 			RAISERROR (''Origin account table (glactmst) is empty'',11,1);
 		END
-		ELSE
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID)
+		BEGIN
+			RAISERROR(''Functional Currency is not setup properly. Please set it in Company Configuration Screen'', 16, 1);
+		END
+
+		
 		IF (EXISTS(SELECT SegmentCode FROM (SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type) tblX group by SegmentCode HAVING COUNT(*) > 1) and @ysnOverride = 0)
 		BEGIN
 			SET @result = ''invalid-1''
