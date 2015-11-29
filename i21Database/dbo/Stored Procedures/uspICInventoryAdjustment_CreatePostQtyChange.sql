@@ -60,7 +60,7 @@ BEGIN
 END 
 
 -- Check the lot number if it is lot-tracked. Validate the lot number. 
-IF dbo.fnGetItemLotType(@intItemId) = 1
+IF dbo.fnGetItemLotType(@intItemId) IN (1, 2)
 BEGIN 
 	-- Find the Lot Id
 	BEGIN 
