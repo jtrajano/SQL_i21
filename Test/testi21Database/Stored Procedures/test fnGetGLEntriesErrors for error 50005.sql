@@ -117,8 +117,8 @@ BEGIN
 		-- Insert the expected data 
 		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period to match the transaction date.', 50005)
 		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period to match the transaction date.', 50005)
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period for this module to match the transaction date.', 51189)
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period for this module to match the transaction date.', 51189)
+		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189)
+		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189)
 
 
 		-- Call the fake data for GL Account 
