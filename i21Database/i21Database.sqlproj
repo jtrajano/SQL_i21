@@ -3021,6 +3021,18 @@
     <Build Include="dbo\Tables\tblSTCheckoutShiftComments.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutRegisterCorrections.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateImportFileHeader.sql" />
+    <Build Include="dbo\Views\vyuCTContStsContainer.sql" />
+    <Build Include="dbo\Views\vyuCTContStsPricingAndHedging.sql" />
+    <Build Include="dbo\Views\vyuCTContStsGoodsShipped.sql" />
+    <Build Include="dbo\Views\vyuCTContStsInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuCTContStsReceiptSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsAllocationSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\17_Notification.sql" />
+    <Build Include="dbo\Functions\fnSMAddSpaceToTitleCase.sql" />
+    <Build Include="dbo\Tables\tblSMMessage.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

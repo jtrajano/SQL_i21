@@ -2764,6 +2764,14 @@ ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Store.view.MarkUpDown' , ysnVisible = 1
 	WHERE strMenuName = 'Mark Up/Down' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible]
+	, [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Checkout', N'Store', @StoreParentMenuId, N'Checkout', N'Activity', N'Screen', N'Store.view.CheckoutHeader', N'small-menu-activity', 1
+	, 0				, 0				, 1		, 0			, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Store.view.CheckoutHeader' , ysnVisible = 1
+	WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
 
 /* RISK MANAGEMENT */
