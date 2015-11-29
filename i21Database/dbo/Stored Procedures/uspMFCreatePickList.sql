@@ -167,11 +167,13 @@ Begin
 	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
 	Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
 
-	Select tpl.*,cl.dblQuantity AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,(cl.dblQuantity / tpl.dblWeightPerUnit) AS dblAvailableUnit,tpl.strIssuedUOM AS strAvailableUnitUOM,
+	Select tpl.*,cl.dblQuantity AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,(cl.dblQuantity / tpl.dblWeightPerUnit) AS dblAvailableUnit,um.strUnitMeasure AS strAvailableUnitUOM,
 	tpl.dblIssuedQuantity AS dblPickQuantity,tpl.intItemIssuedUOMId AS intPickUOMId,tpl.strIssuedUOM AS strPickUOM,
 	l.intParentLotId,pl.strParentLotNumber
 	From @tblPickedLots tpl Join @tblChildLot cl on tpl.intLotId=cl.intLotId 
 	Join tblICLot l on tpl.intLotId=l.intLotId
+	Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
 	Left Join @tblReservedQty rq on tpl.intLotId = rq.intLotId
 

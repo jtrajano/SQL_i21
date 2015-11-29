@@ -13,7 +13,7 @@ w.dtmCreated,w.intCreatedUserId,w.dtmLastModified,w.intLastModifiedUserId,w.dtmE
 w.dblBinSize,w.intBlendRequirementId,
 w.ysnKittingEnabled,w.strComment,w.intLocationId,w.intStorageLocationId,
 br.strDemandNo,ISNULL(ws.strBackColorName,'') AS strBackColorName,us.strUserName,w.intExecutionOrder,
-ws.strName AS strStatus,sl.strName AS strStorageLocation,mc.strCellName
+ws.strName AS strStatus,sl.strName AS strStorageLocation,mc.strCellName,i.strLotTracking
 From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId
 Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId

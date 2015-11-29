@@ -40,6 +40,9 @@ BEGIN TRY
 	Declare @intDayOfYear INT
 	Declare @dtmDate DATETIME
 	Declare @dtmDueDate DATETIME
+	DECLARE @dblOriginalRequiredQty NUMERIC(18,6)
+	DECLARE @dblPartialQuantity NUMERIC(18,6)
+	DECLARE @intPartialQuantityStorageLocationId INT
 
 	DECLARE @intSequenceNo INT,
 			@intSequenceCount INT=1,
@@ -64,6 +67,11 @@ BEGIN TRY
 	From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 	and at.strAttributeName='Recipe Item Validity By Due Date'
+
+	Select @intPartialQuantityStorageLocationId=ISNULL(pa.strAttributeValue ,0)
+	From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+	and at.strAttributeName='Partial Quantity Storage Location'
 
 	If @ysnRecipeItemValidityByDueDate=0
 		Set @dtmDate=Convert(date,GetDate())
@@ -215,6 +223,8 @@ BEGIN TRY
 						End
 						SET @dblRequiredQty=(@dblRequiredQty+(@dblRequiredQty * ISNULL(@dblPercentageIncrease,0)/100)) 
 					End
+
+					SET @dblOriginalRequiredQty=@dblRequiredQty
 
 					IF OBJECT_ID('tempdb..#tblLot') IS NOT NULL  
 					DROP TABLE #tblLot  
@@ -518,7 +528,34 @@ BEGIN TRY
 			
 					CLOSE Cursor_FetchItem                        
 					DEALLOCATE Cursor_FetchItem
-					
+			
+					--Hand Add Item added from Hand Add Storage Location
+						IF @intIssuedUOMTypeId = 2 AND ISNULL(@intPartialQuantityStorageLocationId ,0)>0 --'BAG' 
+							Begin
+								SET @dblPartialQuantity=0
+								SET @dblPartialQuantity = ISNULL((@dblOriginalRequiredQty % @dblWeightPerQty),0)
+								
+								If @ysnEnableParentLot=0 AND @dblPartialQuantity > 0
+										INSERT INTO #tblBlendSheetLot(intParentLotId,intItemId,dblQuantity,intItemUOMId,
+										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId,dblWeightPerQty) 
+										Select TOP 1 
+										L.intLotId,  
+										L.intItemId,
+										CASE WHEN L.dblWeight > @dblPartialQuantity THEN @dblPartialQuantity
+										ELSE L.dblWeight
+										END AS dblQuantity,       
+										L.intWeightUOMId AS intItemUOMId,
+										CASE WHEN L.dblWeight > @dblPartialQuantity THEN @dblPartialQuantity
+										ELSE L.dblWeight
+										END AS dblIssuedQuantity,
+										L.intWeightUOMId AS intItemIssuedUOMId,
+										@intRecipeItemId AS intRecipeItemId,
+										@intPartialQuantityStorageLocationId AS intStorageLocationId,
+										L.dblWeightPerQty										  
+										from tblICLot L
+										WHERE L.intItemId=@intRawItemId And L.intStorageLocationId=@intPartialQuantityStorageLocationId AND L.dblWeight > 0
+							End
+														
 				SELECT @intMinRowNo=MIN(intRowNo) FROM @tblInputItem WHERE intRowNo>@intMinRowNo
 		END --While Loop End For Per Recipe Item
 	   
@@ -592,6 +629,60 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 		WHERE BS.dblQuantity > 0
 	Else
+	If @ysnShowAvailableLotsByStorageLocation=1
+		SELECT	
+		 PL.intParentLotId AS intWorkOrderInputLotId
+		,PL.intParentLotId AS intLotId
+		,PL.strParentLotNumber AS strLotNumber
+		,I.strItemNo
+		,I.strDescription
+		,BS.dblQuantity
+		,BS.intItemUOMId
+		,UM1.strUnitMeasure AS strUOM
+		,BS.dblIssuedQuantity
+		,BS.intItemIssuedUOMId
+		,UM2.strUnitMeasure AS strIssuedUOM
+		,BS.intItemId
+		,BS.intRecipeItemId
+		,0.0 AS dblUnitCost -- Review
+		--,(
+		--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(18,6))) AS PropertyValue
+		--	FROM dbo.QM_TestResult AS TR
+		--	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
+		--	WHERE ProductObjectKey = PL.MainLotKey
+		--		AND TR.ProductTypeKey = 16
+		--		AND P.PropertyName IN (
+		--			SELECT V.SettingValue
+		--			FROM dbo.iMake_AppSettingValue AS V
+		--			INNER JOIN dbo.iMake_AppSetting AS S ON V.SettingKey = S.SettingKey
+		--				AND S.SettingName = '' Average Density ''
+		--			)
+		--		AND PropertyValue IS NOT NULL
+		--		AND PropertyValue <> ''''
+		--		AND isnumeric(tr.PropertyValue) = 1
+		--	ORDER BY TR.LastUpdateOn DESC
+		--	) AS 'Density' --To Review
+		,CAST(0 AS decimal) AS dblDensity
+		,(BS.dblQuantity / @intEstNoOfSheets) AS dblRequiredQtyPerSheet
+		,BS.dblWeightPerQty AS dblWeightPerUnit
+		,ISNULL(I.dblRiskScore,0) AS dblRiskScore
+		,BS.intStorageLocationId
+		,SL.strName AS strStorageLocationName
+		,CL.strLocationName
+		,@intLocationId AS intLocationId
+		,CAST(1 AS BIT) ysnParentLot
+		,'Added' AS strRowState
+		FROM #tblBlendSheetLotFinal BS
+		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId	--AND PL.dblWeight > 0
+		INNER JOIN tblICItem I ON I.intItemId = PL.intItemId
+		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
+		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId=UM1.intUnitMeasureId
+		INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.intItemIssuedUOMId
+		INNER JOIN tblICUnitMeasure UM2 ON IU2.intUnitMeasureId=UM2.intUnitMeasureId
+		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
+		WHERE BS.dblQuantity > 0
+		Else
 		SELECT	
 		 PL.intParentLotId AS intWorkOrderInputLotId
 		,PL.intParentLotId AS intLotId
@@ -640,8 +731,7 @@ BEGIN TRY
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId=UM1.intUnitMeasureId
 		INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.intItemIssuedUOMId
 		INNER JOIN tblICUnitMeasure UM2 ON IU2.intUnitMeasureId=UM2.intUnitMeasureId
-		INNER JOIN tblICStorageLocation SL ON CASE When @ysnShowAvailableLotsByStorageLocation=1 Then SL.intStorageLocationId Else 0 End = BS.intStorageLocationId
-		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = @intLocationId
 		WHERE BS.dblQuantity > 0
 
 END TRY                          

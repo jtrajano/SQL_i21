@@ -3033,6 +3033,7 @@
     <Build Include="dbo\Functions\fnSMAddSpaceToTitleCase.sql" />
     <Build Include="dbo\Tables\tblSMMessage.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
