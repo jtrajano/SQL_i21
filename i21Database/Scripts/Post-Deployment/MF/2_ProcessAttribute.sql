@@ -886,3 +886,25 @@ BEGIN
         ,'Select convert(varchar,intLotStatusId) as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus Where intLotStatusId in (1,2,3)'
 END
 GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 43
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 43
+        ,'Partial Quantity Storage Location'
+        ,5
+        ,2
+        ,0
+        ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName AS DisplayMember from tblICStorageLocation'
+END
+GO

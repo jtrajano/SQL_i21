@@ -75,20 +75,27 @@ BEGIN TRY
 
 	Exec uspMFUpdateBlendProductionDetail @strXml=@strXml
 
-	Set @strConsumeXml='<root>'
-	Set @strConsumeXml=@strConsumeXml + '<intWorkOrderId>' + convert(varchar,@intWorkOrderId) + '</intWorkOrderId>'
-	Set @strConsumeXml=@strConsumeXml + '<intManufacturingProcessId>' + convert(varchar,@intManufacturingProcessId) + '</intManufacturingProcessId>'
-	Set @strConsumeXml=@strConsumeXml + '<intStatusId>' + convert(varchar,10) + '</intStatusId>'
-	Set @strConsumeXml=@strConsumeXml + '<intUserId>' + convert(varchar,@intUserId) + '</intUserId>'
-	Set @strConsumeXml=@strConsumeXml + '<intLocationId>' + convert(varchar,@intLocationId) + '</intLocationId>'
-	Set @strConsumeXml=@strConsumeXml + '<ysnNegativeQtyAllowed>' + convert(varchar,@ysnIsNegativeQuantityAllowed) + '</ysnNegativeQtyAllowed>'
-	--Set @strConsumeXml=@strConsumeXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
-	Set @strConsumeXml=@strConsumeXml + '<intProductionTypeId>' + convert(varchar,1) + '</intProductionTypeId>'
-	Set @strConsumeXml=@strConsumeXml + '</root>'
+	If (Select strLotTracking From tblICItem Where intItemId=@intItemId)='No' 
+	Begin
+		Exec [uspMFPostConsumption] 1,1,@intWorkOrderId,@intUserId,NULL,@strRetBatchId OUT
+	End
+	Else
+	Begin
+		Set @strConsumeXml='<root>'
+		Set @strConsumeXml=@strConsumeXml + '<intWorkOrderId>' + convert(varchar,@intWorkOrderId) + '</intWorkOrderId>'
+		Set @strConsumeXml=@strConsumeXml + '<intManufacturingProcessId>' + convert(varchar,@intManufacturingProcessId) + '</intManufacturingProcessId>'
+		Set @strConsumeXml=@strConsumeXml + '<intStatusId>' + convert(varchar,10) + '</intStatusId>'
+		Set @strConsumeXml=@strConsumeXml + '<intUserId>' + convert(varchar,@intUserId) + '</intUserId>'
+		Set @strConsumeXml=@strConsumeXml + '<intLocationId>' + convert(varchar,@intLocationId) + '</intLocationId>'
+		Set @strConsumeXml=@strConsumeXml + '<ysnNegativeQtyAllowed>' + convert(varchar,@ysnIsNegativeQuantityAllowed) + '</ysnNegativeQtyAllowed>'
+		--Set @strConsumeXml=@strConsumeXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
+		Set @strConsumeXml=@strConsumeXml + '<intProductionTypeId>' + convert(varchar,1) + '</intProductionTypeId>'
+		Set @strConsumeXml=@strConsumeXml + '</root>'
 
-	Exec uspMFCompleteWorkOrder @strXML=@strConsumeXml,@strOutputLotNumber=@strOutputLotNumber OUT
+		Exec uspMFCompleteWorkOrder @strXML=@strConsumeXml,@strOutputLotNumber=@strOutputLotNumber OUT
 
-	Exec [uspMFDeleteLotReservation] @intWorkOrderId=@intWorkOrderId
+		Exec [uspMFDeleteLotReservation] @intWorkOrderId=@intWorkOrderId
+	End
 
 	Update tblMFWorkOrder Set intStatusId=12,dtmCompletedDate=@dtmCurrentDate,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDate 
 	Where intWorkOrderId=@intWorkOrderId
