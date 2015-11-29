@@ -10,9 +10,10 @@ BEGIN
 	SELECT	@strStatus	=	STUFF(															
 								   (
 										SELECT	DISTINCT												
-										',' + LTRIM(BD.intBillId)
-										FROM tblAPBillDetail BD
-										WHERE BD.intContractHeaderId=CH.intContractHeaderId
+												', ' +	LTRIM(BL.intBillId)
+										FROM	tblAPBillDetail BD
+										JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
+										WHERE BD.intContractHeaderId=CH.intContractHeaderId AND BL.intTransactionType = 2
 										FOR XML PATH('')
 								   )											
 									,1,2, ''
@@ -20,5 +21,5 @@ BEGIN
 	FROM tblCTContractHeader CH
 	WHERE intContractHeaderId = @intContractHeaderId
 
-	RETURN @strStatus;	
+	RETURN REPLACE(@strStatus,' ','');	
 END
