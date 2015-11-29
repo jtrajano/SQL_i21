@@ -32,6 +32,7 @@
     [ysnTransactionLog] BIT NULL, 
     [dblTotalToDeposit] DECIMAL(18, 6) NULL, 
     [dblTotalDeposits] DECIMAL(18, 6) NULL, 
+    [dblTotalPaidOuts] DECIMAL(18, 6) NULL, 
     [dblEnteredPaidOuts] DECIMAL(18, 6) NULL, 
     [dblCustomerCharges] DECIMAL(18, 6) NULL, 
     [dblCustomerPayments] DECIMAL(18, 6) NULL, 

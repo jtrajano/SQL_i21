@@ -4571,4 +4571,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCategoryId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5b2eb1f4-28d2-4ebb-8bd0-b2ba3d486e0d" ChangeDateTime="11/29/2015 10:56:47">
+    <Property Name="ElementName" Value="[dbo].[tblSTCheckoutImportSapphireData].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTCheckoutImportSapphireData]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSapphireDataId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1a3e69cd-df00-4cf7-8357-f469c257d09c" ChangeDateTime="11/29/2015 10:57:52">
+    <Property Name="ElementName" Value="[dbo].[tblSTCheckoutImportSapphireData].[dtPollDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTCheckoutImportSapphireData]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmPollDate" />
+  </Operation>
 </Operations>
