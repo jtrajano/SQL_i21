@@ -22,8 +22,7 @@ BEGIN
 			SELECT TOP 1 @intCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
 		IF ISNULL(@intCurrencyId, 0)= 0
 		BEGIN
-			RAISERROR(''Functional Currency is not setup properly'', 16, 1);
-			RETURN
+			RAISERROR(''Functional Currency is not setup properly. Please set it in Company Configuration Screen'', 16, 1);
 		END
 
 		-- +++++ INSERT ACCOUNT Id +++++ --
