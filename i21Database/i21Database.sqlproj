@@ -2980,6 +2980,31 @@
     <Build Include="dbo\Stored Procedures\uspMFCalculateDemandRatio.sql" />
     <Build Include="dbo\Tables\tblMFItemDemand.sql" />
     <Build Include="dbo\Views\vyuCTEventMatrixDetailView.sql" />
+    <Build Include="dbo\Tables\tblCTEventNotificationLog.sql" />
+    <Build Include="dbo\Functions\fnCTGetEventRecipientEmail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetEventMailContent.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateEventNotificationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetTemplateNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHTransferKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetDefaultKitStagingLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHStagePickForKitting.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetLotGhostStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHValidateWarehouseReleaseLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGetLotIdByLotNo.sql" />
+    <Build Include="dbo\Tables\tblWHPickForKitting.sql" />
+    <Build Include="dbo\Views\vyuCTContStsContainer.sql" />
+    <Build Include="dbo\Views\vyuCTContStsPricingAndHedging.sql" />
+    <Build Include="dbo\Views\vyuCTContStsGoodsShipped.sql" />
+    <Build Include="dbo\Views\vyuCTContStsInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuCTContStsReceiptSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsAllocationSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
+    <Build Include="dbo\Tables\tblTFTransactions.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

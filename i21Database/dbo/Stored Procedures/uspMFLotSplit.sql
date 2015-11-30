@@ -5,6 +5,7 @@
  @intSplitStorageLocationId INT,  
  @dblSplitQty NUMERIC(16,8),  
  @intUserId INT,
+ @strSplitLotNumber NVARCHAR(100)=NULL OUTPUT,
  @strNote NVARCHAR(1024) = NULL,
  @intInventoryAdjustmentId int=NULL OUTPUT
 
@@ -74,6 +75,9 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	
+	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
+	SELECT @strSplitLotNumber AS strSplitLotNumber
 													 
 END TRY  
   

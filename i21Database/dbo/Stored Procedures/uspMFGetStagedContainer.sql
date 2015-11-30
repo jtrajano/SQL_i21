@@ -1,34 +1,31 @@
 ﻿CREATE PROCEDURE [dbo].uspMFGetStagedContainer (@intLocationId INT)
 AS
 BEGIN
-	DECLARE 
+	DECLARE
 		--@strSanitizationStagingLocation NVARCHAR(50)
 		--,@strBlendProductionStagingLocation NVARCHAR(50)
 		--,@intStagingLocationId INT
 		--,@intBlendProductionStagingLocationId INT
 		--,
-		@intSanitizationStagingUnitId int
-		,@intDefaultBlendProductionLocationId int
+		@intSanitizationStagingUnitId INT
+		,@intBlendProductionStagingUnitId INT
 
 	--SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
 	--	,@strBlendProductionStagingLocation = strBlendProductionStagingLocation
 	--FROM dbo.tblMFCompanyPreference
-
-	Select @intSanitizationStagingUnitId=intSanitizationStagingUnitId,
-		@intDefaultBlendProductionLocationId=intDefaultBlendProductionLocationId
-	From tblSMCompanyLocation
-	Where intCompanyLocationId=@intLocationId
+	SELECT @intSanitizationStagingUnitId = intSanitizationStagingUnitId
+		,@intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = @intLocationId
 
 	--SELECT @intStagingLocationId = intStorageLocationId
 	--FROM tblICStorageLocation
 	--WHERE intLocationId = @intLocationId
 	--	AND strName = @strSanitizationStagingLocation
-
 	--SELECT @intBlendProductionStagingLocationId = intStorageLocationId
 	--FROM tblICStorageLocation
 	--WHERE intLocationId = @intLocationId
 	--	AND strName = @strBlendProductionStagingLocation
-
 	SELECT L.intLotId
 		,L.strLotNumber
 		,L.strLotAlias
@@ -42,14 +39,20 @@ BEGIN
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
-		,UM.intUnitMeasureId 
+		,UM.intUnitMeasureId
 		,UM.strUnitMeasure
-		,S.dtmProductionDate
+		,(
+			CASE 
+				WHEN S.dtmProductionDate = '1990-01-01 00:00:00.000'
+					THEN S.dtmReceiveDate 
+				ELSE S.dtmProductionDate
+				END
+			) AS dtmProductionDate
 		,S.strLotCode
 		,S.dtmExpiryDate
 		,SS.intSKUStatusId
 		,SS.strSKUStatus
-		,E.intEntityId 
+		,E.intEntityId
 		,E.strName strOwnerName
 		,OH.intOrderHeaderId
 		,OH.strBOLNo AS strReturnNo
@@ -65,7 +68,7 @@ BEGIN
 	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = C.intStorageLocationId
 		AND SL.intStorageLocationId IN (
 			@intSanitizationStagingUnitId
-			,@intDefaultBlendProductionLocationId
+			,@intBlendProductionStagingUnitId
 			)
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = S.intLotId
@@ -73,10 +76,11 @@ BEGIN
 	LEFT OUTER JOIN dbo.tblEntity E ON E.intEntityId = S.intOwnerId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
 	LEFT JOIN dbo.tblWHContainerInboundOrder CI ON CI.intContainerId = C.intContainerId
-	LEFT JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId AND OH.intOrderStatusId NOT IN (
-		3
-		,10
-		)
+	LEFT JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId
+		AND OH.intOrderStatusId NOT IN (
+			3
+			,10
+			)
 	LEFT JOIN dbo.tblWHOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 	GROUP BY L.intLotId
 		,L.strLotNumber
@@ -91,14 +95,15 @@ BEGIN
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
-		,UM.intUnitMeasureId 
+		,UM.intUnitMeasureId
 		,UM.strUnitMeasure
 		,S.dtmProductionDate
+		,S.dtmReceiveDate 
 		,S.strLotCode
 		,S.dtmExpiryDate
 		,SS.intSKUStatusId
 		,SS.strSKUStatus
-		,E.intEntityId 
+		,E.intEntityId
 		,E.strName
 		,OH.intOrderHeaderId
 		,OH.strBOLNo
@@ -120,14 +125,20 @@ BEGIN
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
-		,UM.intUnitMeasureId 
+		,UM.intUnitMeasureId
 		,UM.strUnitMeasure
-		,S.dtmProductionDate
+		,(
+			CASE 
+				WHEN S.dtmProductionDate = '1990-01-01 00:00:00.000'
+					THEN S.dtmReceiveDate 
+				ELSE S.dtmProductionDate
+				END
+			) AS dtmProductionDate
 		,S.strLotCode
 		,S.dtmExpiryDate
 		,SS.intSKUStatusId
 		,SS.strSKUStatus
-		,E.intEntityId 
+		,E.intEntityId
 		,E.strName strOwnerName
 		,OH.intOrderHeaderId
 		,OH.strBOLNo AS strReturnNo
@@ -147,10 +158,11 @@ BEGIN
 	LEFT OUTER JOIN dbo.tblEntity E ON E.intEntityId = S.intOwnerId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
 	JOIN dbo.tblWHContainerInboundOrder CI ON CI.intContainerId = C.intContainerId
-	JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId AND OH.intOrderStatusId NOT IN (
-		3
-		,10
-		)
+	JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId
+		AND OH.intOrderStatusId NOT IN (
+			3
+			,10
+			)
 	JOIN dbo.tblWHOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 	GROUP BY L.intLotId
 		,L.strLotNumber
@@ -165,14 +177,15 @@ BEGIN
 		,I.strItemNo
 		,I.strDescription
 		,S.dblQty
-		,UM.intUnitMeasureId 
+		,UM.intUnitMeasureId
 		,UM.strUnitMeasure
 		,S.dtmProductionDate
+		,S.dtmReceiveDate 
 		,S.strLotCode
 		,S.dtmExpiryDate
 		,SS.intSKUStatusId
 		,SS.strSKUStatus
-		,E.intEntityId 
+		,E.intEntityId
 		,E.strName
 		,OH.intOrderHeaderId
 		,OH.strBOLNo

@@ -1,73 +1,81 @@
 ﻿CREATE PROCEDURE uspMFGetLotHistory 
-	@intLotId INT
+		@intLotId INT
 AS
 BEGIN
 	SELECT *
 	FROM (
-		SELECT	ilt.dtmDate AS dtmDateTime, 
-				l.strLotNumber AS strLotNo, 
-				i.strItemNo AS strItem, 
-				i.strDescription AS strDescription, 
-				clsl.strSubLocationName AS strSubLocation, 
-				sl.strName AS strStorageLocation, 
-				ilt.strTransactionForm AS strTransaction, 
-				l.dblQty AS dblQuantity, 
-				ilt.dblQty AS dblTransactionQty, 
-				um.strUnitMeasure AS strUOM, 
-				'' AS strRelatedLotId, 
-				'' AS strPreviousItem, 
-				'' AS strSourceSubLocation, 
-				'' AS strSourceStorageLocation, 
-				'' AS strNewStatus, 
-				'' AS strOldStatus, 
-				'' AS strNewLotAlias, 
-				'' AS strOldLotAlias, 
-				'' AS dtmNewExpiryDate, 
-				'' AS dtmOldExpiryDate, 
-				'' AS strNewVendorNo, 
-				'' AS strOldVendorNo, 
-				'' AS strNewVendorLotNo, 
-				'' AS strOldVendorLotNo, 
-				'' AS strNotes, 
-				us.strUserName AS strUser
+		SELECT ilt.dtmCreated AS dtmDateTime, 
+			   l.strLotNumber AS strLotNo, 
+			   i.strItemNo AS strItem, 
+			   i.strDescription AS strDescription, 
+			   clsl.strSubLocationName AS strSubLocation, 
+			   sl.strName AS strStorageLocation, 
+			   itt.strName AS strTransaction, 
+			   iad.dblWeight AS dblQuantity, 
+			   ilt.dblQty AS dblTransactionQty, 
+			   um.strUnitMeasure AS strUOM, 
+			   iad.strNewLotNumber AS strRelatedLotId, 
+			   '' AS strPreviousItem, 
+			   '' AS strSourceSubLocation, 
+			   NULL AS strSourceStorageLocation, 
+			   NULL AS strNewStatus, 
+			   NULL AS strOldStatus, 
+			   NULL AS strNewLotAlias, 
+			   NULL AS strOldLotAlias, 
+			   iad.dtmNewExpiryDate AS dtmNewExpiryDate, 
+			   iad.dtmExpiryDate AS dtmOldExpiryDate, 
+			   '' AS strNewVendorNo, 
+			   '' AS strOldVendorNo, 
+			   '' AS strNewVendorLotNo, 
+			   '' AS strOldVendorLotNo, 
+			   '' AS strNotes, 
+			   us.strUserName AS strUser
 		FROM tblICLot l
-		LEFT JOIN tblICInventoryLotTransaction ilt ON ilt.intLotId = l.intLotId
+		LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
+		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
 		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
+		LEFT JOIN tblICItemUOM iu ON iu.intItemUOMId = iad.intItemUOMId
+		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intItemUOMId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
-		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ilt.intItemUOMId
-		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedUserId
+		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
 		WHERE l.intLotId = @intLotId
 		
-		UNION
+		UNION ALL
 		
-		SELECT	ia.dtmAdjustmentDate, 
-				l.strLotNumber AS strLotNo, 
-				i.strItemNo AS strItemNo, 
-				i.strDescription AS strDescription, 
-				clsl.strSubLocationName AS strSubLocation, 
-				sl.strName AS strStorageLocation, 
-				'' AS strTransaction, 
-				l.dblQty AS dblQuantity, 
-				ISNULL(dblNewQuantity - dblQuantity, 0) AS dblTransactionQty, 
-				um.strUnitMeasure AS strUOM, 
-				iad.strNewLotNumber AS strRelatedLotId, 
-				i1.strItemNo AS strPreviousItem, 
-				clsl1.strSubLocationName AS strSourceSubLocation, 
-				sl1.strName AS strSourceStorageLocation,
-				ls1.strSecondaryStatus AS strNewStatus, 
-				ls.strSecondaryStatus AS strOldStatus, 
-				'' AS strNewLotAlias, 
-				'' AS strOldLotAlias, 
-				iad.dtmNewExpiryDate AS dtmNewExpiryDate, 
-				iad.dtmExpiryDate AS dtmOldExpiryDate, 
-				'' AS strNewVendorNo, 
-				'' AS strOldVendorNo, 
-				'' AS strNewVendorLotNo, 
-				'' AS strOldVendorLotNo, 
-				'' AS strNotes, 
-				'' AS strUser
+		SELECT ia.dtmPostedDate, 
+			   l.strLotNumber AS strLotNo, 
+			   i.strItemNo AS strItemNo, 
+			   i.strDescription AS strDescription, 
+			   clsl.strSubLocationName AS strSubLocation, 
+			   sl.strName AS strStorageLocation, 
+			   CASE 
+				WHEN iad.intLotStatusId <> iad.intNewLotStatusId
+					THEN 'Inventory Adjustment - Lot Status Change'
+				WHEN iad.dtmExpiryDate <> iad.dtmNewExpiryDate
+					THEN 'Inventory Adjustment - Expiry Date Change'
+				ELSE ''
+				END AS strTransaction, 
+			   iad.dblWeight AS dblQuantity, 
+			   ISNULL(dblNewQuantity - dblQuantity, 0) AS dblTransactionQty, 
+			   um.strUnitMeasure AS strUOM, 
+			   iad.strNewLotNumber AS strRelatedLotId, 
+			   i1.strItemNo AS strPreviousItem, 
+			   clsl1.strSubLocationName AS strSourceSubLocation, 
+			   sl1.strName AS strSourceStorageLocation, 
+			   ls1.strSecondaryStatus AS strNewStatus, 
+			   ls.strSecondaryStatus AS strOldStatus, 
+			   '' AS strNewLotAlias, 
+			   '' AS strOldLotAlias, 
+			   iad.dtmNewExpiryDate AS dtmNewExpiryDate, 
+			   iad.dtmExpiryDate AS dtmOldExpiryDate, 
+			   '' AS strNewVendorNo, 
+			   '' AS strOldVendorNo, 
+			   '' AS strNewVendorLotNo, 
+			   '' AS strOldVendorLotNo, 
+			   '' AS strNotes, 
+			   us.strUserName AS strUser
 		FROM tblICInventoryAdjustment ia
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 		LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
@@ -80,7 +88,18 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intStorageLocationId
 		LEFT JOIN tblICLotStatus ls ON ls.intLotStatusId = iad.intLotStatusId
 		LEFT JOIN tblICLotStatus ls1 ON ls1.intLotStatusId = iad.intNewLotStatusId
+		LEFT JOIN tblSMUserSecurity us ON us.intEntityUserSecurityId = ia.intEntityId
 		WHERE l.intLotId = @intLotId
+			AND (
+				(
+					iad.dtmNewExpiryDate IS NOT NULL
+					AND iad.dtmExpiryDate IS NOT NULL
+					)
+				OR (
+					iad.intLotStatusId IS NOT NULL
+					AND iad.intNewLotStatusId IS NOT NULL
+					)
+				)
 		) lotHistorytbl
 	ORDER BY dtmDateTime
 END
