@@ -3035,6 +3035,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
