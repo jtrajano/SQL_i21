@@ -59,30 +59,30 @@ BEGIN TRY
 		,ST.strDescription AS strSampleTypeDescription
 		,C.strCategoryCode
 		,@intSampleId AS intSampleId
-		,ISNULL(W.strERPOrderNo,'') AS BPCSshopOrder#
-		,CASE 
-		WHEN S.strRefNo <> ''
-			THEN ISNULL(PD.intLineNo, 1)
-		ELSE PD.intLineNo
-		END AS BPCSLineNumber
-		,ISNULL(P.strReference, S.strRefNo) AS BPCSPoNumber
-		,ST.strDescription + ', #: ' + S.strSampleNumber AS strSampleTypeDescandNumber
+		--,ISNULL(W.strERPOrderNo,'') AS BPCSshopOrder# -- Need to change logic based on MPTC
+		--,CASE 
+		--WHEN S.strRefNo <> ''
+		--	THEN ISNULL(PD.intLineNo, 1)
+		--ELSE PD.intLineNo
+		--END AS BPCSLineNumber
+		--,ISNULL(P.strReference, S.strRefNo) AS BPCSPoNumber
+		,ISNULL(S.strRefNo,'') AS BPCSPoNumber
+		,ST.strDescription + ', ' + S.strSampleNumber AS strSampleTypeDescandNumber
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 	JOIN tblICItem I ON S.intItemId = I.intItemId
 	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
-	--LEFT JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = S.intProductValueId AND S.intProductTypeId = 11
 	LEFT JOIN tblICLot L ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblICLot L1 ON L1.intLotId = S.intProductValueId AND S.intProductTypeId = 6
-	LEFT JOIN tblMFWorkOrderInputParentLot WPL ON WPL.intParentLotId = PL.intParentLotId
-	LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
-	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	LEFT JOIN tblPOPurchaseDetail PD ON PD.intPurchaseDetailId = RI.intLineNo
-		AND PD.intPurchaseId = RI.intOrderId
-	LEFT JOIN tblPOPurchase P ON P.intPurchaseId = PD.intPurchaseId
+	--LEFT JOIN tblMFWorkOrderInputParentLot WPL ON WPL.intParentLotId = PL.intParentLotId
+	--LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+	--LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+	--LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	--LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	--LEFT JOIN tblPOPurchaseDetail PD ON PD.intPurchaseDetailId = RI.intLineNo
+	--	AND PD.intPurchaseId = RI.intOrderId
+	--LEFT JOIN tblPOPurchase P ON P.intPurchaseId = PD.intPurchaseId
 	WHERE S.intSampleId = @intSampleId
 END TRY
 
