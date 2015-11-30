@@ -3030,8 +3030,8 @@
     <Build Include="dbo\Views\vyuCTContStsInvoiceSummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsVendorInvoice.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\17_Notification.sql" />
-    <Build Include="dbo\Functions\fnSMAddSpaceToTitleCase.sql" />
-    <Build Include="dbo\Tables\tblSMMessage.sql" />
+    <None Include="dbo\Functions\fnSMAddSpaceToTitleCase.sql" />
+    <None Include="dbo\Tables\tblSMMessage.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
   </ItemGroup>
