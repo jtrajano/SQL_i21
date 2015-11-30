@@ -83,10 +83,20 @@ GO
 	SELECT @AccountsReceivableReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Analysis Reports' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
-GO
 
+
+GO
 	/* UPDATE Audit Log Icon from small-menu-maintenance to small-gear */
 	UPDATE tblSMAuditLog 
 	SET strJsonData = REPLACE(strJsonData, 'small-menu-maintenance', 'small-gear') 
 	WHERE strJsonData LIKE '%small-menu-maintenance%'
+GO
+	/* DELETE Sales Analysis Reports MENU'S DUPLICATE */
+	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Sales Analysis Reports' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Sales Analysis Reports') > 1)
+	BEGIN
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Analysis Reports' AND strModuleName = 'Accounts Receivable' AND intMenuID NOT IN
+		(
+			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales Analysis Reports' AND strModuleName = 'Accounts Receivable'
+		)
+	END
 GO
