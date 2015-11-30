@@ -80,7 +80,7 @@ IF(@CFPriceOut IS NOT NULL)
 	IF(@CFPricingOut = 'Inventory - Standard Pricing')
 
 		BEGIN 
-			IF (@CFOriginalPrice IS NOT NULL OR @CFOriginalPrice > 0)
+			IF (@CFOriginalPrice IS NOT NULL AND @CFOriginalPrice > 0)
 				BEGIN 
 					SET @CFStandardPrice = @CFOriginalPrice  
 					SET @CFPricingOut = 'Import File Price'
