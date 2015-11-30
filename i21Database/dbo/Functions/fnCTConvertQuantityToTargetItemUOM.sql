@@ -43,7 +43,7 @@ BEGIN
 		CASE	WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
 					@dblQty
 				ELSE 
-					CASE	WHEN @dblUnitQtyTo <> 0 THEN (@dblQty * @dblUnitQtyFrom) / @dblUnitQtyTo							
+					CASE	WHEN @dblUnitQtyTo <> 0 THEN CAST((@dblQty * @dblUnitQtyFrom) AS  NUMERIC(18,6)) / CAST(@dblUnitQtyTo AS NUMERIC(18,6))							
 							ELSE NULL 
 					END
 		END 
