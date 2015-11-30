@@ -3034,6 +3034,7 @@
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
     <Build Include="uspPATPostRefund.sql" />
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
