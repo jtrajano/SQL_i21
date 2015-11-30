@@ -48,6 +48,14 @@ DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@intOldItemId AS INT
 		,@strOldItemType NVARCHAR(MAX)
 		,@strNewItemType NVARCHAR(MAX)
+		,@intOldLotItemUOMId INT
+		,@intNewLotItemUOMId INT
+		,@intOldUnitMeasureId INT
+		,@intNewUnitMeasureId INT
+		,@strParentLotNumber NVARCHAR(100) = NULL
+		,@dtmExpiryDate DATETIME
+		,@intLotStatusId INT
+
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- VALIDATIONS
@@ -132,16 +140,41 @@ SELECT	@intEntityId = intUserRoleID
 FROM	dbo.tblSMUserSecurity
 WHERE	intEntityUserSecurityId = @intUserId
 
+
+------------------------------------------------------------------------------------------------------------------------------------
+-- Update Lot Item UOM
+------------------------------------------------------------------------------------------------------------------------------------
+SELECT @intOldLotItemUOMId = intItemUOMId, @dtmExpiryDate = dtmExpiryDate, @intLotStatusId = intLotStatusId FROM tblICLot WHERE intLotId = @intLotId
+SELECT @intOldUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intOldLotItemUOMId
+SELECT @intNewUnitMeasureId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldUnitMeasureId
+
+IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldUnitMeasureId)
+BEGIN
+	RAISERROR('Same unit measure is not configured for the new item.',11,1)
+	GOTO _Exit;
+END
+
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Update Lot Item
 ------------------------------------------------------------------------------------------------------------------------------------
 
 
 UPDATE tblICLot
-SET intItemId = @intNewItemId
+SET intItemId = @intNewItemId, 
+	intItemUOMId = @intNewUnitMeasureId
 WHERE intLotId = @intLotId
 	AND intLocationId = @intLocationId
 	AND intSubLocationId = @intSubLocationId
+------------------------------------------------------------------------------------------------------------------------------------
+-- Create Parent Lot
+------------------------------------------------------------------------------------------------------------------------------------
+EXEC dbo.uspMFCreateUpdateParentLotNumber   @strParentLotNumber=@strParentLotNumber,
+											@strParentLotAlias='',
+											@intItemId=@intNewItemId,
+											@dtmExpiryDate=@dtmExpiryDate,
+											@intLotStatusId=@intLotStatusId,
+											@intEntityUserSecurityId =@intUserId,
+											@intLotId=@intLotId
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the header record
