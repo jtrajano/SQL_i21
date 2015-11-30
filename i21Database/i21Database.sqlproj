@@ -3035,6 +3035,7 @@
     <Build Include="uspPATPostRefund.sql" />
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
