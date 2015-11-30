@@ -54,6 +54,22 @@ GO
 	--EXEC uspSMUpdateUserRoleMenus @UserId
 
 GO
+	-- Add Help Desk role menus if not existing
+	DECLARE @helpDesk INT
+
+	SELECT TOP 1 @helpDesk = intUserRoleID FROM tblSMUserRole WHERE strName = 'Help Desk'
+
+	EXEC uspSMUpdateUserRoleMenus @helpDesk
+
+	UPDATE tblSMUserRoleMenu
+	SET ysnVisible = 1
+	FROM tblSMUserRoleMenu RoleMenu
+	INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
+	WHERE strMenuName IN ('Help Desk', 'Create Ticket', 'Tickets', 'Project Lists', 'Reminder Lists') 
+	AND strModuleName = 'Help Desk'
+	AND intUserRoleId = @helpDesk
+
+GO
 	-- UPDATE ORIGIN MENUS SORT ORDER
 	EXEC uspSMSortOriginMenus
 GO
@@ -228,4 +244,9 @@ GO
 	SELECT journal.intJournalId, journal.strJournalId, 'General Journal', journal.strDescription, 'Monthly', journal.dtmDate, DATEADD(MM, 1, journal.dtmDate), 0, DAY(journal.dtmDate), DATEADD(MM, 1, journal.dtmDate), DATEADD(MM, 1, journal.dtmDate), 0, 1, journal.intEntityId, 1
 	FROM tblGLJournal journal
 	WHERE journal.strTransactionType = 'Recurring' AND journal.dtmDate IS NOT NULL AND intJournalId NOT IN (SELECT intTransactionId FROM tblSMRecurringTransaction WHERE strTransactionType = 'General Journal')
+GO
+	-- Assign Role Type if null
+	UPDATE tblSMUserRole 
+	SET strRoleType = CASE UserRole.ysnAdmin WHEN 1 THEN 'Administrator' ELSE 'User' END 
+	FROM tblSMUserRole UserRole WHERE UserRole.strRoleType IS NULL
 GO

@@ -14,5 +14,8 @@ GO
 	ALTER TABLE tblSMUserSecurity CHECK CONSTRAINT FK_UserSecurity_UserRole
 	ALTER TABLE tblSMUserSecurityCompanyLocationRolePermission CHECK CONSTRAINT FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMUserRole
 GO
+	PRINT N'INSERT DEFAULT CONTACT ROLE'
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMUserRole WHERE strName = 'Help Desk') INSERT [dbo].[tblSMUserRole] ([strName], [strDescription], [strRoleType], [ysnAdmin]) VALUES (N'Help Desk', N'Default contract role.', 'Contact', 0)
+GO
 	PRINT N'END INSERT DEFAULT USER ROLE'
 GO
