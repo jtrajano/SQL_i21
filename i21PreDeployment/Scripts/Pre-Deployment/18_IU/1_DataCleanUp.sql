@@ -1,2 +1,3 @@
-﻿EXEC('DELETE FROM tblSMConnectedUser where intEntityId = 0')
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMCONNECTEDUSER')
+	EXEC('DELETE FROM tblSMConnectedUser where intEntityId = 0')
 GO
