@@ -3010,6 +3010,7 @@
     <Build Include="dbo\Tables\tblTRLoadReceipt.sql" />
     <Build Include="dbo\Views\vyuTRLoadHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
