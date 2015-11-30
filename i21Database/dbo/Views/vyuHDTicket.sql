@@ -33,6 +33,7 @@ AS
 		,proj.strProjectName
 		,tic.dtmDueDate
 		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101)
+		,tic.intTicketProductId
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
