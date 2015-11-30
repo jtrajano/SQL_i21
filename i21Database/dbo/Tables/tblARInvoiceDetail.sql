@@ -95,7 +95,7 @@ CREATE TRIGGER [dbo].[trgUpdateOrderStatus]
 				IF ISNULL(@orderDetailId, 0) > 0
 					BEGIN
 						SELECT TOP 1 @orderId = intSalesOrderId FROM tblSOSalesOrderDetail WHERE intSalesOrderDetailId = @orderDetailId
-						EXEC uspSOUpdateOrderShipmentStatus @orderId
+						EXEC uspSOUpdateOrderShipmentStatus @orderId, 0 , 1
 					END				
 
 				DELETE FROM @deleted WHERE intInvoiceDetailId = @invoiceDetailId

@@ -10,12 +10,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-
-IF @ForDelete = 1
-	BEGIN
-		EXEC dbo.[uspARUpdateSOStatusFromInvoice] @InvoiceId
-	END
-
+EXEC dbo.[uspARUpdateSOStatusFromInvoice] @InvoiceId, @ForDelete
 EXEC dbo.[uspARUpdateCommitted] @InvoiceId, @ForDelete, @UserId
 EXEC dbo.[uspARUpdateContractOnInvoice] @InvoiceId, @ForDelete, @UserId
 EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @InvoiceId, @ForDelete, @UserId
