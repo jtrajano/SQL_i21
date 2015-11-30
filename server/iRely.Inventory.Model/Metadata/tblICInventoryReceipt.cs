@@ -1194,7 +1194,6 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryReceiptItemTaxId { get; set; }
         public int intInventoryReceiptItemId { get; set; }
-        public int? intTaxGroupMasterId { get; set; }
         public int? intTaxGroupId { get; set; }
         public int? intTaxCodeId { get; set; }
         public int? intTaxClassId { get; set; }
@@ -1221,7 +1220,6 @@ namespace iRely.Inventory.Model
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
-        public int? intTaxGroupMasterId { get; set; }
         public int? intTaxGroupId { get; set; }
         public int? intTaxCodeId { get; set; }
         public int? intTaxClassId { get; set; }

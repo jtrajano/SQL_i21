@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsed79c301047599fbf64b2703f494a1a546bf735059251de893fb1b069c067366))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsc3fc194ffe8a96d8ce95741c6fd5e23caeedb35509bc8d9f6a48dc7cb331b46d))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsed79c301047599fbf64b2703f494a1a546bf735059251de893fb1b069c067366 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsc3fc194ffe8a96d8ce95741c6fd5e23caeedb35509bc8d9f6a48dc7cb331b46d : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "ed79c301047599fbf64b2703f494a1a546bf735059251de893fb1b069c067366"; }
+            get { return "c3fc194ffe8a96d8ce95741c6fd5e23caeedb35509bc8d9f6a48dc7cb331b46d"; }
         }
 
         /// <summary>
@@ -3802,12 +3802,11 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemTax
-        [CodeFirstDatabaseSchema.tblICInventoryReceiptItemTax](T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemTax_intTaxGroupMasterId, T1.tblICInventoryReceiptItemTax_intTaxGroupId, T1.tblICInventoryReceiptItemTax_intTaxCodeId, T1.tblICInventoryReceiptItemTax_intTaxClassId, T1.tblICInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.tblICInventoryReceiptItemTax_strCalculationMethod, T1.tblICInventoryReceiptItemTax_dblRate, T1.tblICInventoryReceiptItemTax_dblTax, T1.tblICInventoryReceiptItemTax_dblAdjustedTax, T1.tblICInventoryReceiptItemTax_intTaxAccountId, T1.tblICInventoryReceiptItemTax_ysnTaxAdjusted, T1.tblICInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.tblICInventoryReceiptItemTax_ysnCheckoffTax, T1.tblICInventoryReceiptItemTax_strTaxCode, T1.tblICInventoryReceiptItemTax_intSort, T1.tblICInventoryReceiptItemTax_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryReceiptItemTax](T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemTax_intTaxGroupId, T1.tblICInventoryReceiptItemTax_intTaxCodeId, T1.tblICInventoryReceiptItemTax_intTaxClassId, T1.tblICInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.tblICInventoryReceiptItemTax_strCalculationMethod, T1.tblICInventoryReceiptItemTax_dblRate, T1.tblICInventoryReceiptItemTax_dblTax, T1.tblICInventoryReceiptItemTax_dblAdjustedTax, T1.tblICInventoryReceiptItemTax_intTaxAccountId, T1.tblICInventoryReceiptItemTax_ysnTaxAdjusted, T1.tblICInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.tblICInventoryReceiptItemTax_ysnCheckoffTax, T1.tblICInventoryReceiptItemTax_strTaxCode, T1.tblICInventoryReceiptItemTax_intSort, T1.tblICInventoryReceiptItemTax_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemTaxId AS tblICInventoryReceiptItemTax_intInventoryReceiptItemTaxId, 
             T.intInventoryReceiptItemId AS tblICInventoryReceiptItemTax_intInventoryReceiptItemId, 
-            T.intTaxGroupMasterId AS tblICInventoryReceiptItemTax_intTaxGroupMasterId, 
             T.intTaxGroupId AS tblICInventoryReceiptItemTax_intTaxGroupId, 
             T.intTaxCodeId AS tblICInventoryReceiptItemTax_intTaxCodeId, 
             T.intTaxClassId AS tblICInventoryReceiptItemTax_intTaxClassId, 
@@ -7130,12 +7129,11 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemTaxes
-        [iRely.Inventory.Model.tblICInventoryReceiptItemTax](T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemTax_intTaxGroupMasterId, T1.tblICInventoryReceiptItemTax_intTaxGroupId, T1.tblICInventoryReceiptItemTax_intTaxCodeId, T1.tblICInventoryReceiptItemTax_intTaxClassId, T1.tblICInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.tblICInventoryReceiptItemTax_strCalculationMethod, T1.tblICInventoryReceiptItemTax_dblRate, T1.tblICInventoryReceiptItemTax_dblTax, T1.tblICInventoryReceiptItemTax_dblAdjustedTax, T1.tblICInventoryReceiptItemTax_intTaxAccountId, T1.tblICInventoryReceiptItemTax_ysnTaxAdjusted, T1.tblICInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.tblICInventoryReceiptItemTax_ysnCheckoffTax, T1.tblICInventoryReceiptItemTax_strTaxCode, T1.tblICInventoryReceiptItemTax_intSort, T1.tblICInventoryReceiptItemTax_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryReceiptItemTax](T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.tblICInventoryReceiptItemTax_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemTax_intTaxGroupId, T1.tblICInventoryReceiptItemTax_intTaxCodeId, T1.tblICInventoryReceiptItemTax_intTaxClassId, T1.tblICInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.tblICInventoryReceiptItemTax_strCalculationMethod, T1.tblICInventoryReceiptItemTax_dblRate, T1.tblICInventoryReceiptItemTax_dblTax, T1.tblICInventoryReceiptItemTax_dblAdjustedTax, T1.tblICInventoryReceiptItemTax_intTaxAccountId, T1.tblICInventoryReceiptItemTax_ysnTaxAdjusted, T1.tblICInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.tblICInventoryReceiptItemTax_ysnCheckoffTax, T1.tblICInventoryReceiptItemTax_strTaxCode, T1.tblICInventoryReceiptItemTax_intSort, T1.tblICInventoryReceiptItemTax_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemTaxId AS tblICInventoryReceiptItemTax_intInventoryReceiptItemTaxId, 
             T.intInventoryReceiptItemId AS tblICInventoryReceiptItemTax_intInventoryReceiptItemId, 
-            T.intTaxGroupMasterId AS tblICInventoryReceiptItemTax_intTaxGroupMasterId, 
             T.intTaxGroupId AS tblICInventoryReceiptItemTax_intTaxGroupId, 
             T.intTaxCodeId AS tblICInventoryReceiptItemTax_intTaxCodeId, 
             T.intTaxClassId AS tblICInventoryReceiptItemTax_intTaxClassId, 
@@ -10737,7 +10735,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptItemTax
-        [CodeFirstDatabaseSchema.vyuICGetInventoryReceiptItemTax](T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptId, T1.vyuICGetInventoryReceiptItemTax_intItemId, T1.vyuICGetInventoryReceiptItemTax_strItemNo, T1.vyuICGetInventoryReceiptItemTax_strItemDescription, T1.vyuICGetInventoryReceiptItemTax_intTaxGroupMasterId, T1.vyuICGetInventoryReceiptItemTax_intTaxGroupId, T1.vyuICGetInventoryReceiptItemTax_intTaxCodeId, T1.vyuICGetInventoryReceiptItemTax_intTaxClassId, T1.vyuICGetInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.vyuICGetInventoryReceiptItemTax_strCalculationMethod, T1.vyuICGetInventoryReceiptItemTax_dblRate, T1.vyuICGetInventoryReceiptItemTax_dblTax, T1.vyuICGetInventoryReceiptItemTax_dblAdjustedTax, T1.vyuICGetInventoryReceiptItemTax_intTaxAccountId, T1.vyuICGetInventoryReceiptItemTax_ysnTaxAdjusted, T1.vyuICGetInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.vyuICGetInventoryReceiptItemTax_ysnCheckoffTax, T1.vyuICGetInventoryReceiptItemTax_strTaxCode, T1.vyuICGetInventoryReceiptItemTax_intSort)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryReceiptItemTax](T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptId, T1.vyuICGetInventoryReceiptItemTax_intItemId, T1.vyuICGetInventoryReceiptItemTax_strItemNo, T1.vyuICGetInventoryReceiptItemTax_strItemDescription, T1.vyuICGetInventoryReceiptItemTax_intTaxGroupId, T1.vyuICGetInventoryReceiptItemTax_intTaxCodeId, T1.vyuICGetInventoryReceiptItemTax_intTaxClassId, T1.vyuICGetInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.vyuICGetInventoryReceiptItemTax_strCalculationMethod, T1.vyuICGetInventoryReceiptItemTax_dblRate, T1.vyuICGetInventoryReceiptItemTax_dblTax, T1.vyuICGetInventoryReceiptItemTax_dblAdjustedTax, T1.vyuICGetInventoryReceiptItemTax_intTaxAccountId, T1.vyuICGetInventoryReceiptItemTax_ysnTaxAdjusted, T1.vyuICGetInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.vyuICGetInventoryReceiptItemTax_ysnCheckoffTax, T1.vyuICGetInventoryReceiptItemTax_strTaxCode, T1.vyuICGetInventoryReceiptItemTax_intSort)
     FROM (
         SELECT 
             T.intInventoryReceiptItemTaxId AS vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemTaxId, 
@@ -10746,7 +10744,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intItemId AS vyuICGetInventoryReceiptItemTax_intItemId, 
             T.strItemNo AS vyuICGetInventoryReceiptItemTax_strItemNo, 
             T.strItemDescription AS vyuICGetInventoryReceiptItemTax_strItemDescription, 
-            T.intTaxGroupMasterId AS vyuICGetInventoryReceiptItemTax_intTaxGroupMasterId, 
             T.intTaxGroupId AS vyuICGetInventoryReceiptItemTax_intTaxGroupId, 
             T.intTaxCodeId AS vyuICGetInventoryReceiptItemTax_intTaxCodeId, 
             T.intTaxClassId AS vyuICGetInventoryReceiptItemTax_intTaxClassId, 
@@ -10774,7 +10771,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptItemTaxes
-        [iRely.Inventory.Model.vyuICGetInventoryReceiptItemTax](T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptId, T1.vyuICGetInventoryReceiptItemTax_intItemId, T1.vyuICGetInventoryReceiptItemTax_strItemNo, T1.vyuICGetInventoryReceiptItemTax_strItemDescription, T1.vyuICGetInventoryReceiptItemTax_intTaxGroupMasterId, T1.vyuICGetInventoryReceiptItemTax_intTaxGroupId, T1.vyuICGetInventoryReceiptItemTax_intTaxCodeId, T1.vyuICGetInventoryReceiptItemTax_intTaxClassId, T1.vyuICGetInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.vyuICGetInventoryReceiptItemTax_strCalculationMethod, T1.vyuICGetInventoryReceiptItemTax_dblRate, T1.vyuICGetInventoryReceiptItemTax_dblTax, T1.vyuICGetInventoryReceiptItemTax_dblAdjustedTax, T1.vyuICGetInventoryReceiptItemTax_intTaxAccountId, T1.vyuICGetInventoryReceiptItemTax_ysnTaxAdjusted, T1.vyuICGetInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.vyuICGetInventoryReceiptItemTax_ysnCheckoffTax, T1.vyuICGetInventoryReceiptItemTax_strTaxCode, T1.vyuICGetInventoryReceiptItemTax_intSort)
+        [iRely.Inventory.Model.vyuICGetInventoryReceiptItemTax](T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemTaxId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptItemTax_intInventoryReceiptId, T1.vyuICGetInventoryReceiptItemTax_intItemId, T1.vyuICGetInventoryReceiptItemTax_strItemNo, T1.vyuICGetInventoryReceiptItemTax_strItemDescription, T1.vyuICGetInventoryReceiptItemTax_intTaxGroupId, T1.vyuICGetInventoryReceiptItemTax_intTaxCodeId, T1.vyuICGetInventoryReceiptItemTax_intTaxClassId, T1.vyuICGetInventoryReceiptItemTax_strTaxableByOtherTaxes, T1.vyuICGetInventoryReceiptItemTax_strCalculationMethod, T1.vyuICGetInventoryReceiptItemTax_dblRate, T1.vyuICGetInventoryReceiptItemTax_dblTax, T1.vyuICGetInventoryReceiptItemTax_dblAdjustedTax, T1.vyuICGetInventoryReceiptItemTax_intTaxAccountId, T1.vyuICGetInventoryReceiptItemTax_ysnTaxAdjusted, T1.vyuICGetInventoryReceiptItemTax_ysnSeparateOnInvoice, T1.vyuICGetInventoryReceiptItemTax_ysnCheckoffTax, T1.vyuICGetInventoryReceiptItemTax_strTaxCode, T1.vyuICGetInventoryReceiptItemTax_intSort)
     FROM (
         SELECT 
             T.intInventoryReceiptItemTaxId AS vyuICGetInventoryReceiptItemTax_intInventoryReceiptItemTaxId, 
@@ -10783,7 +10780,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intItemId AS vyuICGetInventoryReceiptItemTax_intItemId, 
             T.strItemNo AS vyuICGetInventoryReceiptItemTax_strItemNo, 
             T.strItemDescription AS vyuICGetInventoryReceiptItemTax_strItemDescription, 
-            T.intTaxGroupMasterId AS vyuICGetInventoryReceiptItemTax_intTaxGroupMasterId, 
             T.intTaxGroupId AS vyuICGetInventoryReceiptItemTax_intTaxGroupId, 
             T.intTaxCodeId AS vyuICGetInventoryReceiptItemTax_intTaxCodeId, 
             T.intTaxClassId AS vyuICGetInventoryReceiptItemTax_intTaxClassId, 
