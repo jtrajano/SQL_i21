@@ -403,7 +403,6 @@ namespace iRely.Inventory.Model
             this.ToTable("tblICInventoryReceiptItemTax");
             this.Property(t => t.intInventoryReceiptItemTaxId).HasColumnName("intInventoryReceiptItemTaxId");
             this.Property(t => t.intInventoryReceiptItemId).HasColumnName("intInventoryReceiptItemId");
-            this.Property(t => t.intTaxGroupMasterId).HasColumnName("intTaxGroupMasterId");
             this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
             this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
             this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
@@ -436,7 +435,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
-            this.Property(t => t.intTaxGroupMasterId).HasColumnName("intTaxGroupMasterId");
             this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
             this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
             this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
