@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Receive Stocks]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLotCosting. Receive Stocks. Cost Adjust. Unpost Receive Stocks]
 AS
 BEGIN
 	-- Create the fake data
@@ -140,9 +140,28 @@ BEGIN
 		DECLARE @UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
 
+		DECLARE @Lot_0001 AS INT = 1
+				,@Lot_0002 AS INT = 2
+				,@Lot_0003 AS INT = 3
+				,@Lot_0004 AS INT = 4
+				,@Lot_0005 AS INT = 5
+				,@Lot_0006 AS INT = 6
+				,@Lot_0007 AS INT = 7
+
+				,@Lot_0001_TRANSFERRED AS INT = 8
+				
+
+		DECLARE @LotNumber_0001 AS NVARCHAR(50) = 'LOT-0001'
+				,@LotNumber_0002 AS NVARCHAR(50) = 'LOT-0002'
+				,@LotNumber_0003 AS NVARCHAR(50) = 'LOT-0003'
+				,@LotNumber_0004 AS NVARCHAR(50) = 'LOT-0004'
+				,@LotNumber_0005 AS NVARCHAR(50) = 'LOT-0005'
+				,@LotNumber_0006 AS NVARCHAR(50) = 'LOT-0006'
+				,@LotNumber_0007 AS NVARCHAR(50) = 'LOT-0007'
+
 		-- Create the fake data
 		EXEC [testi21Database].[Fake data for cost adjustment]
-			@LIFO
+			@LOTCOST
 	END 
 
 	-- Arrange 
@@ -161,10 +180,31 @@ BEGIN
 		-- Declare the variables to check the average cost. 
 		DECLARE @dblAverageCost_Expected AS NUMERIC(38,20)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(38,20)
+		
+		-- Declare the variables used in uspICPostCostAdjustmentOnLotCosting
+		DECLARE @dtmDate AS DATETIME						= 'January 10, 2014'
+				,@intItemId AS INT							= @WetGrains
+				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
+				,@intSubLocationId AS INT					= NULL 
+				,@intStorageLocationId AS INT				= NULL 
+				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
+				,@dblQty AS NUMERIC(18,6)					= 40
+				,@dblNewCost AS NUMERIC(38,20)				= 37.261
+				,@intTransactionId AS INT					= 1
+				,@intTransactionDetailId AS INT				= 1
+				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
+				,@intSourceTransactionId AS INT				= 1
+				,@intSourceTransactionDetailId AS INT		= 1
+				,@strSourceTransactionId AS NVARCHAR(20)	= 'PURCHASE-100000'
+				,@strBatchId AS NVARCHAR(20)				= 'BATCH-10291'
+				,@intTransactionTypeId AS INT				= @CostAdjustmentType
+				,@intCurrencyId AS INT						= 1 
+				,@dblExchangeRate AS NUMERIC(38,20)			= 1
+				,@intUserId AS INT							= 1 
 
 		CREATE TABLE expected (
-			[intInventoryTransactionId] INT NOT NULL
-			,[intItemId] INT NOT NULL
+			--[intInventoryTransactionId] INT NOT NULL
+			[intItemId] INT NOT NULL
 			,[intItemLocationId] INT NOT NULL
 			,[intItemUOMId] INT NULL
 			,[intSubLocationId] INT NULL
@@ -192,8 +232,8 @@ BEGIN
 		)
 
 		CREATE TABLE actual (
-			[intInventoryTransactionId] INT NOT NULL
-			,[intItemId] INT NOT NULL
+			--[intInventoryTransactionId] INT NOT NULL
+			[intItemId] INT NOT NULL
 			,[intItemLocationId] INT NOT NULL
 			,[intItemUOMId] INT NULL
 			,[intSubLocationId] INT NULL
@@ -220,8 +260,8 @@ BEGIN
 			,[intCostingMethod] INT NULL
 		)
 
-		CREATE TABLE expectedInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE expectedInventoryLotCostAdjustmentLog (
+			[intInventoryLotId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -230,8 +270,8 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
 
-		CREATE TABLE actualInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE actualInventoryLotCostAdjustmentLog (
+			[intInventoryLotId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -239,168 +279,27 @@ BEGIN
 			,[intCreatedUserId] INT NULL 
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
+	END 
 
-	END 	
 
 	-- Arrange the costing method
 	BEGIN 
 		UPDATE dbo.tblICItemLocation
-		SET intCostingMethod = @LIFO
+		SET intCostingMethod = @LOTCOST
 
 		UPDATE dbo.tblICInventoryTransaction
-		SET intCostingMethod = @LIFO
-	END 	
+		SET intCostingMethod = @LOTCOST
+	END 
 
-	-- Act 1: Create an Inventory transfer and post it. 
-	-- Move stock to a new sub location. 
+	-- Assert
 	BEGIN 
-		DECLARE	@TRANSFER_TYPE_LOCATION_TO_LOCATION AS NVARCHAR(50) = 'Location to Location'
-				,@TRANSFER_TYPE_STORAGE_TO_STORAGE AS NVARCHAR(50) = 'Storage to Storage'
-				,@STATUS_OPEN AS INT = 1
-				,@STATUS_PARTIAL AS INT = 2
-				,@STATUS_CLOSED AS INT = 3
-				,@STATUS_SHORT_CLOSED AS INT = 4
+		EXEC tSQLt.ExpectException @ExpectedMessage = 'Unable to unpost because WET GRAINS has a cost adjustment from BILL-10001.'
+	END 
 
-		DECLARE @Ship_Via_Truck AS NVARCHAR(50) = 'Truck'
-				,@Ship_Via_Truck_Id AS INT = 1
-				,@intInventoryTransferId AS INT 
-
-		SET @intInventoryTransferId = 1
-		SET IDENTITY_INSERT tblICInventoryTransfer ON 
-		INSERT INTO dbo.tblICInventoryTransfer (
-				intInventoryTransferId
-				,strTransferNo
-				,dtmTransferDate
-				,strTransferType
-				,intTransferredById
-				,strDescription
-				,intFromLocationId
-				,intToLocationId
-				,ysnShipmentRequired
-				,intStatusId
-				,intShipViaId
-				,intFreightUOMId
-				,ysnPosted
-				,intCreatedUserId
-				,intEntityId
-				,intSort
-				,intConcurrencyId
-		)
-		SELECT 	intInventoryTransferId	= @intInventoryTransferId
-				,strTransferNo			= 'INVTRN-1'
-				,dtmTransferDate		= 'February 2, 2014'
-				,strTransferType		= @TRANSFER_TYPE_STORAGE_TO_STORAGE
-				,intTransferredById		= 10
-				,strDescription			= 'Transfer stock around.'
-				,intFromLocationId		= @Default_Location
-				,intToLocationId		= @Default_Location
-				,ysnShipmentRequired	= 0
-				,intStatusId			= @STATUS_OPEN
-				,intShipViaId			= @Ship_Via_Truck_Id
-				,intFreightUOMId		= NULL 
-				,ysnPosted				= 0
-				,intCreatedUserId		= 1
-				,intEntityId			= 10
-				,intSort				= 1
-				,intConcurrencyId		= 1
-		SET IDENTITY_INSERT tblICInventoryTransfer OFF
-
-		INSERT INTO dbo.tblICInventoryTransferDetail (
-				intInventoryTransferId
-				,intItemId
-				,intLotId
-				,intFromSubLocationId
-				,intToSubLocationId
-				,intFromStorageLocationId
-				,intToStorageLocationId
-				,dblQuantity
-				,intItemUOMId
-				,intItemWeightUOMId
-				,dblGrossWeight
-				,dblTareWeight
-				,intNewLotId
-				,strNewLotId
-				,dblCost
-				,intTaxCodeId
-				,dblFreightRate
-				,dblFreightAmount
-				,intSort
-				,intConcurrencyId		
-		)
-		SELECT 
-				intInventoryTransferId		= @intInventoryTransferId
-				,intItemId					= @WetGrains
-				,intLotId					= NULL 
-				,intFromSubLocationId		= NULL 
-				,intToSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation 
-				,intFromStorageLocationId	= NULL
-				,intToStorageLocationId		= NULL 
-				,dblQuantity				= 17
-				,intItemUOMId				= @WetGrains_BushelUOM
-				,intItemWeightUOMId			= NULL 
-				,dblGrossWeight				= NULL
-				,dblTareWeight				= NULL
-				,intNewLotId				= NULL
-				,strNewLotId				= NULL
-				,dblCost					= NULL
-				,intTaxCodeId				= NULL
-				,dblFreightRate				= NULL
-				,dblFreightAmount			= NULL
-				,intSort					= NULL
-				,intConcurrencyId			= NULL
-
-		EXEC dbo.uspICPostInventoryTransfer
-			@ysnPost = 1
-			,@ysnRecap = 0
-			,@strTransactionId = 'INVTRN-1'
-			,@intUserId = 1
-			,@intEntityId = 1
-	END 	
-
-	-- Act 2: Post the Cost Adjustment. 
+	-- Act 1: Cost Adjustment
 	BEGIN 
-		-- Declare the variables used in uspICPostCostAdjustmentOnLIFOCosting
-		DECLARE @dtmDate AS DATETIME						= 'February 10, 2014'
-				,@intItemId AS INT							= @WetGrains
-				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
-				,@intSubLocationId AS INT					= NULL 
-				,@intStorageLocationId AS INT				= NULL 
-				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
-				,@dblQty AS NUMERIC(18,6)					= 40
-				,@dblNewCost AS NUMERIC(38,20)				= 37.261
-				,@intTransactionId AS INT					= 1
-				,@intTransactionDetailId AS INT				= 1
-				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
-				,@intSourceTransactionId AS INT				= 1
-				,@intSourceTransactionDetailId AS INT		= 1
-				,@strSourceTransactionId AS NVARCHAR(20)	= 'PURCHASE-100000'
-				,@strBatchId AS NVARCHAR(20)				= 'BATCH-10293'
-				,@intTransactionTypeId AS INT				= @CostAdjustmentType
-				,@intCurrencyId AS INT						= 1 
-				,@dblExchangeRate AS NUMERIC(38,20)			= 1
-				,@intUserId AS INT							= 1 
-
-		DECLARE @ItemsToAdjust AS ItemCostAdjustmentTableType
-		INSERT INTO @ItemsToAdjust  (
-			dtmDate
-			,intItemId
-			,intItemLocationId
-			,intSubLocationId
-			,intStorageLocationId
-			,intItemUOMId
-			,dblQty
-			,dblNewCost
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intSourceTransactionId
-			,intSourceTransactionDetailId
-			,strSourceTransactionId
-			,intTransactionTypeId
-			,intCurrencyId
-			,dblExchangeRate
-		)
-		SELECT	
+		-- Do the cost adjustment 
+		EXEC dbo.uspICPostCostAdjustmentOnLotCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -415,31 +314,22 @@ BEGIN
 			,@intSourceTransactionId
 			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
+			,@strBatchId
 			,@intTransactionTypeId
 			,@intCurrencyId
 			,@dblExchangeRate
-
-		EXEC dbo.uspICPostCostAdjustment
-			@ItemsToAdjust
-			,@strBatchId
 			,@intUserId
-	END 
-
-	-- Assert
+	END
+	
+	-- Act 2: Unpost Inventory Receipt 
 	BEGIN 
-		EXEC tSQLt.ExpectException 
-			@ExpectedMessage = 'Unable to unpost because WET GRAINS has a cost adjustment from BILL-10001.'		
-	END 
-
-	-- Act 3: Unpost Receive Stocks
-	BEGIN 
-		EXEC dbo.uspICPostInventoryReceipt
-			@ysnPost = 0  
-			,@ysnRecap = 0  
+		EXEC dbo.[uspICUnpostCosting] 
+			@intTransactionId = 1
 			,@strTransactionId = 'PURCHASE-100000'
-			,@intUserId  = 1
-			,@intEntityId = 1
-	END		
+			,@strBatchId = 'BATCH-10292' 
+			,@intUserId = 1
+			,@ysnRecap = 0 
+	END 
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 
@@ -448,9 +338,9 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('actualInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.actualInventoryLIFOCostAdjustmentLog
-
-	IF OBJECT_ID('expectedInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.expectedInventoryLIFOCostAdjustmentLog
+	IF OBJECT_ID('expectedInventoryLotCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.expectedInventoryLotCostAdjustmentLog
+		
+	IF OBJECT_ID('actualInventoryLotCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.actualInventoryLotCostAdjustmentLog
 END

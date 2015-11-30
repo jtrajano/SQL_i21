@@ -45,6 +45,7 @@ BEGIN
 			,@CostAdjQty AS NUMERIC(18,6)
 			,@CostAdjNewCost AS NUMERIC(38,20)
 			,@CostBucketId AS INT 
+			,@CostAdjLogId AS INT 
 
 			,@CostBucketCost AS NUMERIC(38,20)
 			,@OriginalCost AS NUMERIC(38,20)
@@ -61,10 +62,11 @@ BEGIN
 			,CostAdjLog.dblQty
 			,CostAdjLog.dblCost
 			,CostAdjLog.intInventoryLIFOId
+			,CostAdjLog.intId
 	FROM	#tmpInvCostAdjustmentToReverse InvReverse INNER JOIN dbo.tblICInventoryLIFOCostAdjustmentLog CostAdjLog
 				ON InvReverse.intInventoryTransactionId = CostAdjLog.intInventoryTransactionId
 	WHERE	CostAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost
-			AND InvReverse.intCostingMethod IN (@LIFO, @AVERAGECOST)
+			AND InvReverse.intCostingMethod IN (@LIFO)
 
 	OPEN loopLIFOCostBucket;
 
@@ -75,6 +77,7 @@ BEGIN
 			,@CostAdjQty 
 			,@CostAdjNewCost 
 			,@CostBucketId 
+			,@CostAdjLogId
 	;
 
 	-----------------------
@@ -111,6 +114,11 @@ BEGIN
 		FROM	tblICInventoryLIFO CostBucket
 		WHERE	CostBucket.intInventoryLIFOId = @CostBucketId
 
+		-- Mark the cost adjustment as unposted
+		UPDATE dbo.tblICInventoryLIFOCostAdjustmentLog
+		SET ysnIsUnposted = 1
+		WHERE intId = @CostAdjLogId
+
 		-- Attempt to fetch the next row from cursor. 
 		FETCH NEXT FROM loopLIFOCostBucket INTO 
 			@CostBucketIntTransactionId
@@ -118,6 +126,7 @@ BEGIN
 			,@CostAdjQty 
 			,@CostAdjNewCost 
 			,@CostBucketId
+			,@CostAdjLogId
 		;
 	END 
 

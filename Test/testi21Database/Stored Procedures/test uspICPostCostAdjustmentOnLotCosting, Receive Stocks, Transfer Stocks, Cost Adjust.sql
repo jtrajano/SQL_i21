@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Receive Stocks]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLotCosting, Receive Stocks, Transfer Stocks, Cost Adjust]
 AS
 BEGIN
 	-- Create the fake data
@@ -140,9 +140,28 @@ BEGIN
 		DECLARE @UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
 
+		DECLARE @Lot_0001 AS INT = 1
+				,@Lot_0002 AS INT = 2
+				,@Lot_0003 AS INT = 3
+				,@Lot_0004 AS INT = 4
+				,@Lot_0005 AS INT = 5
+				,@Lot_0006 AS INT = 6
+				,@Lot_0007 AS INT = 7
+
+				,@Lot_0001_TRANSFERRED AS INT = 8
+				
+
+		DECLARE @LotNumber_0001 AS NVARCHAR(50) = 'LOT-0001'
+				,@LotNumber_0002 AS NVARCHAR(50) = 'LOT-0002'
+				,@LotNumber_0003 AS NVARCHAR(50) = 'LOT-0003'
+				,@LotNumber_0004 AS NVARCHAR(50) = 'LOT-0004'
+				,@LotNumber_0005 AS NVARCHAR(50) = 'LOT-0005'
+				,@LotNumber_0006 AS NVARCHAR(50) = 'LOT-0006'
+				,@LotNumber_0007 AS NVARCHAR(50) = 'LOT-0007'
+
 		-- Create the fake data
 		EXEC [testi21Database].[Fake data for cost adjustment]
-			@LIFO
+			@LOTCOST
 	END 
 
 	-- Arrange 
@@ -220,8 +239,8 @@ BEGIN
 			,[intCostingMethod] INT NULL
 		)
 
-		CREATE TABLE expectedInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE expectedInventoryLotCostAdjustmentLog (
+			[intInventoryLotId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -230,8 +249,8 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
 
-		CREATE TABLE actualInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE actualInventoryLotCostAdjustmentLog (
+			[intInventoryLotId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -239,17 +258,16 @@ BEGIN
 			,[intCreatedUserId] INT NULL 
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
-
 	END 	
 
 	-- Arrange the costing method
 	BEGIN 
 		UPDATE dbo.tblICItemLocation
-		SET intCostingMethod = @LIFO
+		SET intCostingMethod = @LOTCOST
 
 		UPDATE dbo.tblICInventoryTransaction
-		SET intCostingMethod = @LIFO
-	END 	
+		SET intCostingMethod = @LOTCOST
+	END 
 
 	-- Act 1: Create an Inventory transfer and post it. 
 	-- Move stock to a new sub location. 
@@ -330,7 +348,7 @@ BEGIN
 		SELECT 
 				intInventoryTransferId		= @intInventoryTransferId
 				,intItemId					= @WetGrains
-				,intLotId					= NULL 
+				,intLotId					= @Lot_0001
 				,intFromSubLocationId		= NULL 
 				,intToSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation 
 				,intFromStorageLocationId	= NULL
@@ -359,7 +377,7 @@ BEGIN
 
 	-- Act 2: Post the Cost Adjustment. 
 	BEGIN 
-		-- Declare the variables used in uspICPostCostAdjustmentOnLIFOCosting
+		-- Declare the variables used in uspICPostCostAdjustmentOnLotCosting
 		DECLARE @dtmDate AS DATETIME						= 'February 10, 2014'
 				,@intItemId AS INT							= @WetGrains
 				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
@@ -419,27 +437,356 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 
+		-- Get the g/l entries
+
 		EXEC dbo.uspICPostCostAdjustment
 			@ItemsToAdjust
 			,@strBatchId
 			,@intUserId
 	END 
-
-	-- Assert
+	
+	-- Get the actual data 
 	BEGIN 
-		EXEC tSQLt.ExpectException 
-			@ExpectedMessage = 'Unable to unpost because WET GRAINS has a cost adjustment from BILL-10001.'		
+		INSERT INTO actual (
+				[intInventoryTransactionId]
+				,[intItemId]
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[dtmDate]
+				,[dblQty]
+				,[dblCost]
+				,[dblValue]
+				,[dblSalesPrice]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intTransactionId]
+				,[intTransactionDetailId]
+				,[strTransactionId]
+				,[strBatchId]
+				,[intTransactionTypeId]
+				,[intLotId]
+				,[intCostingMethod]
+				,[ysnIsUnposted]
+		)
+		SELECT	[intInventoryTransactionId]
+				,[intItemId]
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[dtmDate]
+				,[dblQty]
+				,[dblCost]
+				,[dblValue]
+				,[dblSalesPrice]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intTransactionId]
+				,[intTransactionDetailId]
+				,[strTransactionId]
+				,[strBatchId]
+				,[intTransactionTypeId]
+				,[intLotId]
+				,[intCostingMethod]
+				,[ysnIsUnposted]
+		FROM	tblICInventoryTransaction
+		WHERE	intItemId = @intItemId
+				AND intItemLocationId = @intItemLocationId
+
+		INSERT INTO actualInventoryLotCostAdjustmentLog (
+				[intInventoryLotId]
+				,[intInventoryCostAdjustmentTypeId]
+				,[dblQty] 
+				,[dblCost]
+		)
+		SELECT [intInventoryLotId]
+				,[intInventoryCostAdjustmentTypeId]
+				,[dblQty] 
+				,[dblCost]
+		FROM	dbo.tblICInventoryLotCostAdjustmentLog
+	END
+
+	-- Setup the expected data. 
+	BEGIN 
+		INSERT INTO expected (
+				[intInventoryTransactionId]
+				,[intItemId]
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[dtmDate]
+				,[dblQty]
+				,[dblCost]
+				,[dblValue]
+				,[dblSalesPrice]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intTransactionId]
+				,[intTransactionDetailId]
+				,[strTransactionId]
+				,[strBatchId]
+				,[intTransactionTypeId]
+				,[intLotId]
+				,[intCostingMethod] 
+				,[ysnIsUnposted]
+		)
+		-- Inventory Receipt 
+		SELECT	[intInventoryTransactionId] = 1
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[dtmDate]					= 'January 1, 2014'
+				,[dblQty]					= 30
+				,[dblCost]					= 22.00
+				,[dblValue]					= 0 
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= 1
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'PURCHASE-100000'
+				,[strBatchId]				= 'BATCH-100000'
+				,[intTransactionTypeId]		= @PurchaseType
+				,[intLotId]					= @Lot_0001 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+		UNION ALL
+		SELECT	[intInventoryTransactionId] = 2
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[dtmDate]					= 'January 1, 2014'
+				,[dblQty]					= 30
+				,[dblCost]					= 22.00
+				,[dblValue]					= 0 
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= 1
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'PURCHASE-100000'
+				,[strBatchId]				= 'BATCH-100000'
+				,[intTransactionTypeId]		= @PurchaseType
+				,[intLotId]					= @Lot_0002 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+		UNION ALL
+		SELECT	[intInventoryTransactionId] = 3
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[dtmDate]					= 'January 1, 2014'
+				,[dblQty]					= 40
+				,[dblCost]					= 22.00
+				,[dblValue]					= 0 
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= 1
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'PURCHASE-100000'
+				,[strBatchId]				= 'BATCH-100000'
+				,[intTransactionTypeId]		= @PurchaseType
+				,[intLotId]					= @Lot_0003 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+		-- Inventory Transfer transactions
+		UNION ALL 
+		SELECT	[intInventoryTransactionId] = 8
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 				
+				,[dtmDate]					= 'February 2, 2014'
+				,[dblQty]					= -17
+				,[dblCost]					= 22.00
+				,[dblValue]					= 0
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= NULL
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'INVTRN-1'
+				,[strBatchId]				= 'BATCH-100001'
+				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Transfer')
+				,[intLotId]					= @Lot_0001 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+		UNION ALL 
+		SELECT	[intInventoryTransactionId] = 9
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= @Raw_Materials_SubLocation_DefaultLocation
+				,[intStorageLocationId]		= NULL  
+				,[dtmDate]					= 'February 2, 2014'
+				,[dblQty]					= 17
+				,[dblCost]					= 22.00
+				,[dblValue]					= 0
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= NULL
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'INVTRN-1'
+				,[strBatchId]				= 'BATCH-100001'
+				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Transfer')
+				,[intLotId]					= @Lot_0001_TRANSFERRED 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+
+		-- Cost Adustment transactions 
+		UNION ALL 
+		SELECT	[intInventoryTransactionId] = 10
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[dtmDate]					= 'February 10, 2014'
+				,[dblQty]					= 0
+				,[dblCost]					= 0
+				,[dblValue]					= 30 * (37.261 - 22.00)
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= 1
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'BILL-10001'
+				,[strBatchId]				= 'BATCH-10293'
+				,[intTransactionTypeId]		= @CostAdjustmentType
+				,[intLotId]					= @Lot_0001 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+		UNION ALL 
+		SELECT	[intInventoryTransactionId] = 11
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL 
+				,[dtmDate]					= 'February 10, 2014'
+				,[dblQty]					= 0
+				,[dblCost]					= 0
+				,[dblValue]					= -17 * (37.261 - 22.00)
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'BILL-10001'
+				,[strBatchId]				= 'BATCH-10293'
+				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Revalue Transfer')
+				,[intLotId]					= @Lot_0001 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+		UNION ALL 
+		SELECT	[intInventoryTransactionId] = 12
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= NULL 
+				,[intStorageLocationId]		= NULL  
+				,[dtmDate]					= 'February 10, 2014'
+				,[dblQty]					= 0
+				,[dblCost]					= 0
+				,[dblValue]					= 10 * (37.261 - 22.00)
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= 1 
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'BILL-10001'
+				,[strBatchId]				= 'BATCH-10293'
+				,[intTransactionTypeId]		= @CostAdjustmentType
+				,[intLotId]					= @Lot_0002 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+		UNION ALL 
+		SELECT	[intInventoryTransactionId] = 13
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[intSubLocationId]			= @Raw_Materials_SubLocation_DefaultLocation 
+				,[intStorageLocationId]		= NULL 
+				,[dtmDate]					= 'February 10, 2014'
+				,[dblQty]					= 0
+				,[dblCost]					= 0
+				,[dblValue]					= 17 * (37.261 - 22.00)
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'BILL-10001'
+				,[strBatchId]				= 'BATCH-10293'
+				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Revalue Transfer')
+				,[intLotId]					= @Lot_0001_TRANSFERRED 
+				,[intCostingMethod]			= @LOTCOST
+				,[ysnIsUnposted]			= 0
+
+		INSERT INTO expectedInventoryLotCostAdjustmentLog (
+				[intInventoryLotId]
+				,[intInventoryCostAdjustmentTypeId]
+				,[dblQty] 
+				,[dblCost]
+		)
+		SELECT 			
+				[intInventoryLotId] = 1
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
+				,[dblQty] = 30
+				,[dblCost] = 22.00
+		UNION ALL 
+		SELECT 			
+				[intInventoryLotId] = 2
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
+				,[dblQty] = 30
+				,[dblCost] = 22.00
+		-- Log for New Cost: 
+		UNION ALL 
+		SELECT 			
+				[intInventoryLotId] = 1
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_New_Cost
+				,[dblQty] = 30.00
+				,[dblCost] = 37.261
+		UNION ALL 
+		SELECT 			
+				[intInventoryLotId] = 2
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_New_Cost
+				,[dblQty] = 10.00
+				,[dblCost] = 37.261
+		UNION ALL 
+		SELECT 			
+				[intInventoryLotId] = 8
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_New_Cost
+				,[dblQty] = 17.00
+				,[dblCost] = 37.261
+		UNION ALL 
+		SELECT 			
+				[intInventoryLotId] = 8
+				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
+				,[dblQty] = 17.00
+				,[dblCost] = 22.00
 	END 
-
-	-- Act 3: Unpost Receive Stocks
-	BEGIN 
-		EXEC dbo.uspICPostInventoryReceipt
-			@ysnPost = 0  
-			,@ysnRecap = 0  
-			,@strTransactionId = 'PURCHASE-100000'
-			,@intUserId  = 1
-			,@intEntityId = 1
-	END		
+	
+	-- Assert
+	BEGIN
+		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		
+		-- Assert the expected data for tblICInventoryLotCostAdjustmentLog is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryLotCostAdjustmentLog', 'actualInventoryLotCostAdjustmentLog'
+	END 
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 
@@ -448,9 +795,9 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('actualInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.actualInventoryLIFOCostAdjustmentLog
-
-	IF OBJECT_ID('expectedInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.expectedInventoryLIFOCostAdjustmentLog
+	IF OBJECT_ID('expectedInventoryLotCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.expectedInventoryLotCostAdjustmentLog
+		
+	IF OBJECT_ID('actualInventoryLotCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.actualInventoryLotCostAdjustmentLog
 END

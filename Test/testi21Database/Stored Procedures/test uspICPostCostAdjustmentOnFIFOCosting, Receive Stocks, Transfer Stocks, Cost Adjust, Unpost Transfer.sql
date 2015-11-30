@@ -791,6 +791,9 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryFIFOCostAdjustmentLog
+	IF OBJECT_ID('actualInventoryFIFOCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.actualInventoryFIFOCostAdjustmentLog
+
+	IF OBJECT_ID('expectedInventoryFIFOCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.expectedInventoryFIFOCostAdjustmentLog
 END

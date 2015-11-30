@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLIFOCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Receive Stocks]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLotCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Receive Stocks]
 AS
 BEGIN
 	-- Create the fake data
@@ -138,11 +138,30 @@ BEGIN
 		DECLARE @SurchargeOnSurchargeOnSurcharge_PoundUOM AS INT = 52
 
 		DECLARE @UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
-				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
+				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'		
+		
+		DECLARE @Lot_0001 AS INT = 1
+				,@Lot_0002 AS INT = 2
+				,@Lot_0003 AS INT = 3
+				,@Lot_0004 AS INT = 4
+				,@Lot_0005 AS INT = 5
+				,@Lot_0006 AS INT = 6
+				,@Lot_0007 AS INT = 7
+
+				,@Lot_0001_TRANSFERRED AS INT = 8
+				
+
+		DECLARE @LotNumber_0001 AS NVARCHAR(50) = 'LOT-0001'
+				,@LotNumber_0002 AS NVARCHAR(50) = 'LOT-0002'
+				,@LotNumber_0003 AS NVARCHAR(50) = 'LOT-0003'
+				,@LotNumber_0004 AS NVARCHAR(50) = 'LOT-0004'
+				,@LotNumber_0005 AS NVARCHAR(50) = 'LOT-0005'
+				,@LotNumber_0006 AS NVARCHAR(50) = 'LOT-0006'
+				,@LotNumber_0007 AS NVARCHAR(50) = 'LOT-0007'
 
 		-- Create the fake data
 		EXEC [testi21Database].[Fake data for cost adjustment]
-			@LIFO
+			@LOTCOST
 	END 
 
 	-- Arrange 
@@ -153,6 +172,8 @@ BEGIN
 				,@SalesType AS INT = 5
 				,@CostAdjustmentType AS INT = 22
 				,@BillType AS INT = 23
+
+				,@RevalueTransfer AS INT = 26
 
 		-- Declare the cost types
 		DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
@@ -220,8 +241,8 @@ BEGIN
 			,[intCostingMethod] INT NULL
 		)
 
-		CREATE TABLE expectedInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE expectedInventoryLotCostAdjustmentLog (
+			[intInventoryLotId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -230,8 +251,8 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
 
-		CREATE TABLE actualInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE actualInventoryLotCostAdjustmentLog (
+			[intInventoryLotId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -245,10 +266,10 @@ BEGIN
 	-- Arrange the costing method
 	BEGIN 
 		UPDATE dbo.tblICItemLocation
-		SET intCostingMethod = @LIFO
+		SET intCostingMethod = @LOTCOST
 
 		UPDATE dbo.tblICInventoryTransaction
-		SET intCostingMethod = @LIFO
+		SET intCostingMethod = @LOTCOST
 	END 	
 
 	-- Act 1: Create an Inventory transfer and post it. 
@@ -330,7 +351,7 @@ BEGIN
 		SELECT 
 				intInventoryTransferId		= @intInventoryTransferId
 				,intItemId					= @WetGrains
-				,intLotId					= NULL 
+				,intLotId					= @Lot_0001 
 				,intFromSubLocationId		= NULL 
 				,intToSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation 
 				,intFromStorageLocationId	= NULL
@@ -359,7 +380,7 @@ BEGIN
 
 	-- Act 2: Post the Cost Adjustment. 
 	BEGIN 
-		-- Declare the variables used in uspICPostCostAdjustmentOnLIFOCosting
+		-- Declare the variables used in uspICPostCostAdjustmentOnLotCosting
 		DECLARE @dtmDate AS DATETIME						= 'February 10, 2014'
 				,@intItemId AS INT							= @WetGrains
 				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
@@ -448,9 +469,9 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('actualInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.actualInventoryLIFOCostAdjustmentLog
-
-	IF OBJECT_ID('expectedInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.expectedInventoryLIFOCostAdjustmentLog
+	IF OBJECT_ID('expectedInventoryLotCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.expectedInventoryLotCostAdjustmentLog
+		
+	IF OBJECT_ID('actualInventoryLotCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.actualInventoryLotCostAdjustmentLog
 END

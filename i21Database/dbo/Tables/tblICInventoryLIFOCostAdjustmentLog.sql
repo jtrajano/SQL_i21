@@ -18,6 +18,7 @@
 		[intInventoryCostAdjustmentTypeId] INT NOT NULL, 
 		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0,
+		[ysnIsUnposted] BIT DEFAULT 0,
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 

@@ -1,8 +1,8 @@
 ﻿
 /*
-	This sp reverses the cost adjustment to the FIFO or Average Costing cost bucket. 
+	This sp reverses the cost adjustment to the Lot cost bucket. 
 */
-CREATE PROCEDURE [dbo].[uspICUnpostCostAdjustmentOnFIFO]
+CREATE PROCEDURE [dbo].[uspICUnpostCostAdjustmentOnLot]
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -55,23 +55,23 @@ BEGIN
 			,@CostBucketStockInQty AS NUMERIC(18,6)
 				
 
-	DECLARE loopFIFOCostBucket CURSOR LOCAL FAST_FORWARD
+	DECLARE loopLotCostBucket CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT  intTransactionId
 			,strTransactionId
 			,CostAdjLog.dblQty
 			,CostAdjLog.dblCost
-			,CostAdjLog.intInventoryFIFOId
+			,CostAdjLog.intInventoryLotId
 			,CostAdjLog.intId
-	FROM	#tmpInvCostAdjustmentToReverse InvReverse INNER JOIN dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjLog
+	FROM	#tmpInvCostAdjustmentToReverse InvReverse INNER JOIN dbo.tblICInventoryLotCostAdjustmentLog CostAdjLog
 				ON InvReverse.intInventoryTransactionId = CostAdjLog.intInventoryTransactionId
 	WHERE	CostAdjLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost
-			AND InvReverse.intCostingMethod IN (@FIFO, @AVERAGECOST)
+			AND InvReverse.intCostingMethod IN (@LOTCOST)
 
-	OPEN loopFIFOCostBucket;
+	OPEN loopLotCostBucket;
 
 	-- Initial fetch attempt
-	FETCH NEXT FROM loopFIFOCostBucket INTO 
+	FETCH NEXT FROM loopLotCostBucket INTO 
 			@CostBucketIntTransactionId
 			,@CostBucketStrTransactionId 
 			,@CostAdjQty 
@@ -79,7 +79,6 @@ BEGIN
 			,@CostBucketId 
 			,@CostAdjLogId
 	;
-
 	-----------------------
 	-- Start of the loop
 	-----------------------
@@ -88,15 +87,15 @@ BEGIN
 		-- Get the original cost
 		SELECT TOP 1 
 				@OriginalCost = dblCost
-		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
-		WHERE	intInventoryFIFOId = @CostBucketId
+		FROM	dbo.tblICInventoryLotCostAdjustmentLog
+		WHERE	intInventoryLotId = @CostBucketId
 				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
 
 		-- Get the cost at cost bucket. 
 		SELECT	@CostBucketCost = dblCost
 				,@CostBucketStockInQty = dblStockIn
-		FROM	dbo.tblICInventoryFIFO
-		WHERE	intInventoryFIFOId = @CostBucketId
+		FROM	dbo.tblICInventoryLot
+		WHERE	intInventoryLotId = @CostBucketId
 
 		-- Compute the new transaction value. 
 		SELECT	@NewTransactionValue = @CostAdjQty * @CostAdjNewCost
@@ -111,16 +110,16 @@ BEGIN
 		-- Calculate the new cost
 		UPDATE	CostBucket
 		SET		dblCost = @dblNewCalculatedCost
-		FROM	tblICInventoryFIFO CostBucket
-		WHERE	CostBucket.intInventoryFIFOId = @CostBucketId
-		
+		FROM	tblICInventoryLot CostBucket
+		WHERE	CostBucket.intInventoryLotId = @CostBucketId
+
 		-- Mark the cost adjustment as unposted
-		UPDATE dbo.tblICInventoryFIFOCostAdjustmentLog
+		UPDATE dbo.tblICInventoryLotCostAdjustmentLog
 		SET ysnIsUnposted = 1
 		WHERE intId = @CostAdjLogId
 
 		-- Attempt to fetch the next row from cursor. 
-		FETCH NEXT FROM loopFIFOCostBucket INTO 
+		FETCH NEXT FROM loopLotCostBucket INTO 
 			@CostBucketIntTransactionId
 			,@CostBucketStrTransactionId 
 			,@CostAdjQty 
@@ -130,8 +129,8 @@ BEGIN
 		;
 	END 
 
-	CLOSE loopFIFOCostBucket;
-	DEALLOCATE loopFIFOCostBucket;
+	CLOSE loopLotCostBucket;
+	DEALLOCATE loopLotCostBucket;
 END 
 
 -----------------------
