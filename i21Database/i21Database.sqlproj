@@ -3004,7 +3004,11 @@
     <Build Include="dbo\Tables\tblTFTransactions.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
-
+    <Build Include="dbo\Tables\tblTRLoadDistributionDetail.sql" />
+    <Build Include="dbo\Tables\tblTRLoadDistributionHeader.sql" />
+    <Build Include="dbo\Tables\tblTRLoadHeader.sql" />
+    <Build Include="dbo\Tables\tblTRLoadReceipt.sql" />
+    <Build Include="dbo\Views\vyuTRLoadHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
