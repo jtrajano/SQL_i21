@@ -3033,6 +3033,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
     <Build Include="uspPATPostRefund.sql" />
+    <Build Include="dbo\Views\vyuPATTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
