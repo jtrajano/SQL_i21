@@ -214,7 +214,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 dataIndex: 'strVendorId',
                                                                 dataType: 'string',
                                                                 text: 'Vendor No',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                defaultSort: true
                                                             },
                                                             {
                                                                 dataIndex: 'strName',
