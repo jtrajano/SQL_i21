@@ -22,36 +22,36 @@ BEGIN
 					THEN ' BETWEEN ' + @from + ' AND ' + @to
 				WHEN 'String'
 					THEN
-						CASE @condition
-						WHEN 'Like' THEN ' LIKE ''%' + @from + '%'''
-						WHEN 'Not Like' THEN ' NOT LIKE ''%' + @from + '%'''
-						WHEN 'Between' THEN ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
-						WHEN 'Starts With' THEN ' LIKE ''' + @from + '%'''
-						WHEN 'Ends With' THEN ' LIKE ''%' + @from + '%'''
-						WHEN 'Equal To' THEN ' = ''' + @from + ''''
-						WHEN 'Not Equal To' THEN ' != ''' + @from + ''''
-						WHEN 'Greater Than' THEN ' > ''' + @from + ''''
-						WHEN 'In' THEN ' IN (''' + @from + ''')' END
+						CASE UPPER(@condition)
+						WHEN UPPER('Like') THEN ' LIKE ''%' + @from + '%'''
+						WHEN UPPER('Not Like') THEN ' NOT LIKE ''%' + @from + '%'''
+						WHEN UPPER('Between') THEN ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
+						WHEN UPPER('Starts With') THEN ' LIKE ''' + @from + '%'''
+						WHEN UPPER('Ends With') THEN ' LIKE ''%' + @from + '%'''
+						WHEN UPPER('Equal To') THEN ' = ''' + @from + ''''
+						WHEN UPPER('Not Equal To') THEN ' != ''' + @from + ''''
+						WHEN UPPER('Greater Than') THEN ' > ''' + @from + ''''
+						WHEN UPPER('In') THEN ' IN (''' + @from + ''')' END
 				WHEN 'Decimal' 
 						THEN 
-							CASE @condition
-							WHEN 'BETWEEN' THEN ' BETWEEN ' + @from + ' AND ' + @to
-							WHEN 'Equal To' THEN ' = ' + @from
-							WHEN 'Not Equal To' THEN ' != ' + @from
-							WHEN 'Greater Than' THEN ' > ' + @from
-							WHEN 'Greater Than Or Eqal' THEN ' >= ' + @from
-							WHEN 'Less Than' THEN ' < ' + @from
-							WHEN 'Less Than Or Equal' THEN ' <= ' + @from END
+							CASE UPPER(@condition)
+							WHEN UPPER('BETWEEN') THEN ' BETWEEN ' + @from + ' AND ' + @to
+							WHEN UPPER('Equal To') THEN ' = ' + @from
+							WHEN UPPER('Not Equal To') THEN ' != ' + @from
+							WHEN UPPER('Greater Than') THEN ' > ' + @from
+							WHEN UPPER('Greater Than Or Equal') THEN ' >= ' + @from
+							WHEN UPPER('Less Than') THEN ' < ' + @from
+							WHEN UPPER('Less Than Or Equal') THEN ' <= ' + @from END
 				WHEN 'Integer'
 						THEN 
-							CASE @condition
-							WHEN 'BETWEEN' THEN ' BETWEEN ' + @from + ' AND ' + @to
-							WHEN 'Equal To' THEN ' = ' + @from
-							WHEN 'Not Equal To' THEN ' != ' + @from
-							WHEN 'Greater Than' THEN ' > ' + @from
-							WHEN 'Greater Than Or Eqal' THEN ' >= ' + @from
-							WHEN 'Less Than' THEN ' < ' + @from
-							WHEN 'Less Than Or Equal' THEN ' <= ' + @from END
+							CASE UPPER(@condition)
+							WHEN UPPER('BETWEEN') THEN ' BETWEEN ' + @from + ' AND ' + @to
+							WHEN UPPER('Equal To') THEN ' = ' + @from
+							WHEN UPPER('Not Equal To') THEN ' != ' + @from
+							WHEN UPPER('Greater Than') THEN ' > ' + @from
+							WHEN UPPER('Greater Than Or Equal') THEN ' >= ' + @from
+							WHEN UPPER('Less Than') THEN ' < ' + @from
+							WHEN UPPER('Less Than Or Equal') THEN ' <= ' + @from END
 				WHEN 'Bool'
 					THEN ' = ' + (CASE WHEN @from = 1 THEN 'TRUE' ELSE 'FALSE' END)
 				END
