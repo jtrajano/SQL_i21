@@ -106,9 +106,15 @@ SELECT TOP 10
 		,strInvoice = BILL.strVendorOrderNumber
 		,dtmDate = BILL.dtmBillDate
 		,strComment = SUBSTRING(BILL.strComment,1,25)
-		,dblAmount = BILL.dblTotal
+		,dblAmount = CASE WHEN BILL.intTransactionType = 3
+					THEN BILL.dblTotal * -1
+					ELSE BILL.dblTotal
+					END
 		,dblDiscount = PYMTDetail.dblDiscount
-		,dblNet = PYMTDetail.dblPayment
+		,dblNet = CASE WHEN BILL.intTransactionType = 3
+					THEN PYMTDetail.dblPayment * -1
+					ELSE PYMTDetail.dblPayment
+					END
 FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 			ON F.strTransactionId = PYMT.strPaymentRecordNum
 		INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
