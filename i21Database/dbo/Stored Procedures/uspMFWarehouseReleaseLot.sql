@@ -211,7 +211,7 @@ BEGIN TRY
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
-	WHERE strAttributeName = 'Is Warehouse Release Mandatory'
+	WHERE strAttributeName = 'Create SKU/Container on Warehouse Release'
 
 	SELECT @strAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
