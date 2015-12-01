@@ -12,15 +12,22 @@ GO
             AND parent_object_id = OBJECT_ID(N'[dbo].[tblHDGroupUserConfig]')
 	)
 	BEGIN
-		Update
-			a set
-			a.intUserSecurityEntityId = b.intEntityUserSecurityId
-			,a.intUserSecurityId = b.intEntityUserSecurityId
-		from
-			tblHDGroupUserConfig a, tblSMUserSecurity b
-		where
-			a.intUserSecurityId = b.intUserSecurityIdOld
-			and b.intUserSecurityIdOld is not null
+
+		IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='tblHDGroupUserConfig')
+		BEGIN
+			IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='tblSMUserSecurity')
+			BEGIN
+				Update
+					a set
+					a.intUserSecurityEntityId = b.intEntityUserSecurityId
+					,a.intUserSecurityId = b.intEntityUserSecurityId
+				from
+					tblHDGroupUserConfig a, tblSMUserSecurity b
+				where
+					a.intUserSecurityId = b.intUserSecurityIdOld
+					and b.intUserSecurityIdOld is not null
+			END
+		END
 	END
 
 GO
