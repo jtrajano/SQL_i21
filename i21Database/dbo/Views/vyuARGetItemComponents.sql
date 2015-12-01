@@ -2,34 +2,42 @@
 AS
 SELECT R.intRecipeId
 	 , R.intItemId
-     , RI.intItemId AS intComponentItemId	 
+     , RI.intItemId				AS intComponentItemId	 
 	 , I.strItemNo
 	 , I.strDescription	 
-	 , RI.intUOMId AS intItemUnitMeasureId
-	 , UOM.strUnitMeasure
+	 , RI.intUOMId				AS intItemUnitMeasureId
+	 , UM.strUnitMeasure		AS strUnitMeasure
 	 , RI.dblQuantity
-	 , dblPrice = ISNULL(dbo.fnARGetItemPrice(RI.intItemId, R.intCustomerId, R.intLocationId, RI.intUOMId, NULL, RI.dblQuantity, NULL, NULL, NULL, NULL, RI.dblQuantity, 0, NULL, NULL, NULL, NULL, NULL), 0)
-	 , strItemType = (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = RI.intItemId)
-	 , strType = 'Finished Good'
-FROM tblICItem I 
+	 , RI.dblQuantity			AS dblNewQuantity
+	 , I.dblAvailable			AS dblAvailableQuantity
+	 , RI.dblQuantity * I.dblSalePrice			AS dblPrice
+	 , RI.dblQuantity * I.dblSalePrice			AS dblNewPrice
+	 , I.strType				AS strItemType
+	 , 'Finished Good'			AS strType
+	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+FROM vyuICGetItemStock I 
 INNER JOIN (tblMFRecipe R INNER JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId) ON I.intItemId = RI.intItemId
-INNER JOIN vyuARItemUOM UOM ON RI.intUOMId = UOM.intItemUOMId
+INNER JOIN tblICUnitMeasure UM ON RI.intUOMId = UM.intUnitMeasureId
   AND R.ysnActive = 1
-  AND RI.intRecipeItemTypeId = 1  
+  AND RI.intRecipeItemTypeId = 1          
 
 UNION ALL
 
-SELECT intRecipeId = NULL
-	 , I.intItemId
-     , IB.intBundleItemId AS intComponentItemId	 
+SELECT intRecipeId			= NULL
+	 , IB.intItemId
+     , intComponentItemId	= IB.intBundleItemId
 	 , I.strItemNo
 	 , IB.strDescription	 
 	 , IB.intItemUnitMeasureId
 	 , UOM.strUnitMeasure
 	 , IB.dblQuantity
-	 , dblPrice = 0 -- Removed Price field from Bundle Components
-	 , strItemType = 'Inventory'
-	 , strType = 'Bundle'
+	 , dblNewQuantity		= IB.dblQuantity
+	 , dblAvailableQuantity = 0.000000
+	 , dblPrice				= 0
+	 , dblNewPrice			= 0
+	 , strItemType			= 'Inventory'
+	 , strType				= 'Bundle'
+	 , ysnAllowNegativeStock = CONVERT(BIT, 0)
 FROM tblICItemBundle IB
-INNER JOIN tblICItem I ON IB.intItemId = I.intItemId
-INNER JOIN vyuARItemUOM UOM ON IB.intItemUnitMeasureId = UOM.intItemUOMId
+INNER JOIN vyuICGetItemStock I ON IB.intBundleItemId = I.intItemId
+INNER JOIN tblICUnitMeasure UOM ON IB.intItemUnitMeasureId = UOM.intUnitMeasureId
