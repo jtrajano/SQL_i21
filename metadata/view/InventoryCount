@@ -645,7 +645,7 @@
                                             "designerId": "73079748-187b-49db-ad91-19db84c667d5",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Number",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
@@ -657,15 +657,13 @@
                                                         "designer|createAlias": null,
                                                         "emptyText": "Created on Save",
                                                         "fieldLabel": "Count No",
-                                                        "hideTrigger": true,
                                                         "itemId": "txtCountNumber",
                                                         "layout|flex": 1,
                                                         "margin": null,
-                                                        "minValue": null,
                                                         "name": null,
                                                         "readOnly": true
                                                     },
-                                                    "name": "MyNumberField54",
+                                                    "name": "MyTextField9",
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
