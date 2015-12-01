@@ -5,4 +5,5 @@ SELECT Distinct
  ,E.strName
 FROM tblGRCustomerStorage CS
 JOIN tblEntity E ON E.intEntityId = CS.intEntityId
-Where CS.dblOpenBalance >0 AND ISNULL(CS.strStorageType,'') <> 'ITR'  
+JOIN tblEntityType ET ON ET.intEntityId=E.intEntityId 
+Where CS.dblOpenBalance >0 AND ET.strType='Vendor' AND ISNULL(CS.strStorageType,'') <> 'ITR'  
