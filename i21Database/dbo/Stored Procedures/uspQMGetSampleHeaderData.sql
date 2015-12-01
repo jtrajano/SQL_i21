@@ -81,29 +81,32 @@ BEGIN
 		,I.strDescription
 		,(
 			CASE 
-				WHEN L.intWeightUOMId IS NOT NULL
-					THEN L.dblWeight
+				WHEN IU.intItemUOMId = L.intWeightUOMId
+					THEN ISNULL(L.dblWeight, L.dblQty)
 				ELSE L.dblQty
 				END
 			) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
+	JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND IU.ysnStockUnit = 1
 	WHERE L.intLotId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 11 -- Parent Lot  
 BEGIN
-	DECLARE @dblRepresentingQty NUMERIC(18,6)
+	DECLARE @dblRepresentingQty NUMERIC(18, 6)
 	DECLARE @intRepresentingUOMId INT
 
-	SELECT @dblRepresentingQty = (CASE 
-				WHEN MAX(L.intWeightUOMId) IS NOT NULL
-					THEN SUM(L.dblWeight)
-				ELSE SUM(L.dblQty)
-				END),
-				@intRepresentingUOMId = ISNULL(MAX(L.intWeightUOMId), MAX(L.intItemUOMId))
+	SELECT @dblRepresentingQty = SUM(CASE 
+				WHEN IU.intItemUOMId = L.intWeightUOMId
+					THEN ISNULL(L.dblWeight, L.dblQty)
+				ELSE L.dblQty
+				END)
+		,@intRepresentingUOMId = MAX(IU.intUnitMeasureId)
 	FROM tblICLot L
+	JOIN tblICItemUOM IU ON IU.intItemId = L.intItemId
+		AND IU.ysnStockUnit = 1
 	WHERE L.intParentLotId = @intProductValueId
 
 	SELECT @intProductTypeId AS intProductTypeId
@@ -113,9 +116,8 @@ BEGIN
 		,PL.intItemId
 		,I.strDescription
 		,@dblRepresentingQty AS dblRepresentingQty
-		,IU.intUnitMeasureId AS intRepresentingUOMId
+		,@intRepresentingUOMId AS intRepresentingUOMId
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = @intRepresentingUOMId
 	WHERE PL.intParentLotId = @intProductValueId
 END
