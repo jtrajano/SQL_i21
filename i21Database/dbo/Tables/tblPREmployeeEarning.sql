@@ -4,6 +4,7 @@
     [intTypeEarningId]			INT             NOT NULL,
     [strCalculationType]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]					NUMERIC (18, 6) DEFAULT ((0)) NULL,
+	[dblRateAmount]				NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [dblDefaultHours]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
 	[dblHoursToProcess]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [intAccountId]				INT             NULL,
@@ -173,3 +174,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
     @level2name = N'intEmployeeAccrueTimeOffId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Rate Amount',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'dblRateAmount'
