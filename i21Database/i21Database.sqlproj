@@ -3040,6 +3040,12 @@
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
+    <Build Include="dbo\Tables\tblTFTransactions.sql" />
+    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
+    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
