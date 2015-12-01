@@ -3048,6 +3048,7 @@
     <Build Include="dbo\Tables\tblTFTransactions.sql" />
     <Build Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <Build Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
