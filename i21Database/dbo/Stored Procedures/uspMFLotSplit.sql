@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [uspMFLotSplit]
  @intLotId INT,       
- @strNewLotNumber NVARCHAR(100),    
  @intSplitSubLocationId INT,  
  @intSplitStorageLocationId INT,  
  @dblSplitQty NUMERIC(16,8),  
  @intUserId INT,
  @strSplitLotNumber NVARCHAR(100)=NULL OUTPUT,
+ @strNewLotNumber NVARCHAR(100) = NULL,    
  @strNote NVARCHAR(1024) = NULL,
  @intInventoryAdjustmentId int=NULL OUTPUT
 
@@ -32,6 +32,7 @@ BEGIN TRY
 	DECLARE @intNewStorageLocationId INT	
 	DECLARE @intNewItemUOMId INT
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
+	DECLARE @strLotTracking NVARCHAR(50)
 	
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
@@ -50,10 +51,21 @@ BEGIN TRY
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	--IF ISNULL(@strLotNumber,'') = ''
-	--BEGIN
-	--	RAISERROR(51192,11,1)
-	--END
+	SELECT @strLotTracking = strLotTracking
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
+
+	IF (@strNewLotNumber = '' OR @strNewLotNumber IS NULL) 
+	BEGIN 
+		IF (@strLotTracking = 'Yes - Serial Number')
+		BEGIN
+			EXEC dbo.uspSMGetStartingNumber 24, @strNewLotNumber OUTPUT
+		END
+		ELSE 
+		BEGIN
+			RAISERROR('Lot tracking for the item is set as manual. Please supply the split lot number.',11,1)
+		END
+	END
 							 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
