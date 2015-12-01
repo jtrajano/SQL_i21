@@ -103,11 +103,11 @@ BEGIN
 			,[intBankStatementImportId]	= 1
 			,[intBankFileAuditId]		= NULL
 			,[strSourceSystem]			= 'PR'
-			,[intEntityId]				= @intUserId
-			,[intCreatedUserId]			= @intUserId
+			,[intEntityId]				= PC.intCreatedUserId
+			,[intCreatedUserId]			= PC.intCreatedUserId
 			,[intCompanyLocationId]		= NULL
 			,[dtmCreated]				= GETDATE()
-			,[intLastModifiedUserId]	= @intUserId
+			,[intLastModifiedUserId]	= PC.intLastModifiedUserId
 			,[dtmLastModified]			= GETDATE()
 			,[intConcurrencyId]			= 1
 		FROM tblPRPaycheck PC LEFT JOIN tblCMBankAccount BA 

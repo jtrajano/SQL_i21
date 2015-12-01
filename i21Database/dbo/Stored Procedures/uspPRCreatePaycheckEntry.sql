@@ -6,6 +6,7 @@
 	,@intPayGroupId			INT = NULL
 	,@strDepartmentIds		NVARCHAR(MAX) = ''
 	,@ysnUseStandardHours	BIT = 1
+	,@intUserId				INT = NULL
 	,@intPaycheckId			INT = NULL OUTPUT
 AS
 BEGIN
@@ -65,7 +66,10 @@ INSERT INTO [dbo].[tblPRPaycheck]
 	,[ysnPrinted]
 	,[ysnVoid]
 	,[ysnDirectDeposit]
+	,[intCreatedUserId]
 	,[dtmCreated]
+	,[intLastModifiedUserId]
+	,[dtmLastModified]
 	,[intConcurrencyId])
 SELECT
 	@strPaycheckId
@@ -88,6 +92,9 @@ SELECT
 	,0
 	,0
 	,CASE WHEN EXISTS (SELECT TOP 1 1 FROM tblEntityEFTInformation WHERE ysnActive = 1 AND intEntityId = tblPREmployee.[intEntityEmployeeId]) THEN 1 ELSE 0 END
+	,@intUserId
+	,GETDATE()
+	,@intUserId
 	,GETDATE()
 	,1
 FROM [dbo].[tblPREmployee]
