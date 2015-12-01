@@ -3067,6 +3067,7 @@
     <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
     <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
