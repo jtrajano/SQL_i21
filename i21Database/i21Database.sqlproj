@@ -3038,6 +3038,7 @@
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
