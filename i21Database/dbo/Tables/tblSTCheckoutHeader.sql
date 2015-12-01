@@ -37,6 +37,7 @@
     [dblCustomerCharges] DECIMAL(18, 6) NULL, 
     [dblCustomerPayments] DECIMAL(18, 6) NULL, 
     [dblCashOverShort] DECIMAL(18, 6) NULL,
+    [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC), 
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]), 
     CONSTRAINT [AK_tblSTCheckoutHeader_intStoreId_dtmCheckoutDate_intShiftNo_strCheckoutType] UNIQUE ([intStoreId], [dtmCheckoutDate], [intShiftNo], [strCheckoutType]), 	

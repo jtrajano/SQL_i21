@@ -133,7 +133,9 @@ BEGIN
            ,[ysnActive]
            ,[intConcurrencyId])
      SELECT 
-			(Select top 1 intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE strXMLTag = CD.strXMLTag AND intImportFileHeaderId = @NewImportFileHeaderId order by intImportFileColumnDetailId desc) [intImportFileColumnDetailId]
+			(Select top 1 intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail 
+			WHERE strXMLTag = CD.strXMLTag AND intLevel = CD.intLevel  AND intImportFileHeaderId = @NewImportFileHeaderId 
+			order by intImportFileColumnDetailId desc) [intImportFileColumnDetailId]
 		  ,X1.[intSequence]
 		  ,X1.[strTagAttribute]
 		  ,X1.[strTable]
