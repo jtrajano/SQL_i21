@@ -3050,6 +3050,8 @@
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
+    <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
