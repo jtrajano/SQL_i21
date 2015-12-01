@@ -8,7 +8,7 @@ A.intCustomerID
 , CustomerName = Ent.strName
 , agcus_phone = (CASE WHEN CHARINDEX('x', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX('x',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END)
 , agcus_key = ISNULL(Ent.strEntityNo,'')
-, agcus_tax_state = ''
+, agcus_tax_state =  ISNULL(K.strTaxGroup,'')
 , agcus_ar_per1 = ISNULL(CI.dbl10Days,0.0) 
 , agcus_cred_limit = Cus.dblCreditLimit
 , agcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
@@ -158,6 +158,7 @@ LEFT JOIN (
 		,AAA.strDescription
 		,strCategoryCode = ISNULL(CCC.strCategoryCode,'')
 		,AAA.intItemId
+		,BBB.intLocationId
 	FROM tblICItem AAA
 	INNER JOIN tblICItemLocation BBB
 		ON AAA.intItemId = BBB.intItemId
@@ -165,6 +166,7 @@ LEFT JOIN (
 		ON AAA.intCategoryId = CCC.intCategoryId
 ) G 
 	ON C.intProduct = G.intItemId
+	AND C.intLocationId = G.intLocationId
 LEFT JOIN tblTMClock H 
 	ON H.intClockID = C.intClockID
 Left Join tblTMFillGroup I 
@@ -186,6 +188,8 @@ LEFT JOIN (
 	ON J.intEntityId = C.intDriverID
 LEFT JOIN tblTMHoldReason HR 
 	ON C.intHoldReasonID = HR.intHoldReasonID
+LEFT JOIN tblSMTaxGroup K
+	ON C.intTaxStateID = K.intTaxGroupId
 WHERE Cus.ysnActive = 1 and C.ysnActive = 1
 
 
