@@ -20,7 +20,10 @@
 	[ysnPrinted] [bit] NOT NULL,
 	[ysnVoid] [bit] NOT NULL,
 	[ysnDirectDeposit] [bit] NOT NULL DEFAULT ((0)),
+	[intCreatedUserId] INT NULL,
 	[dtmCreated] [datetime] NOT NULL,
+	[intLastModifiedUserId] INT NULL,
+	[dtmLastModified] [datetime] NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY],
  CONSTRAINT [FK_tblPRPaycheck_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]),
@@ -281,3 +284,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheck',
     @level2type = N'COLUMN',
     @level2name = N'ysnDirectDeposit'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Created User',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheck',
+    @level2type = N'COLUMN',
+    @level2name = N'intCreatedUserId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Last Modified User',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheck',
+    @level2type = N'COLUMN',
+    @level2name = N'intLastModifiedUserId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Date Last Modified',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheck',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmLastModified'
