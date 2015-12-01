@@ -1,4 +1,8 @@
-﻿DECLARE @intTaxAuthorityId INT
+﻿GO
+PRINT 'START TF RC'
+GO
+
+DECLARE @intTaxAuthorityId INT
 DECLARE @MasterPk	INT
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'
@@ -4738,3 +4742,6 @@ INSERT INTO [tblTFScheduleFieldTemplate] ([intReportingComponentDetailId],[strCo
 		--END
 	END
 END
+GO
+PRINT 'END TF RC'
+GO

@@ -3046,8 +3046,8 @@
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
     <Build Include="dbo\Tables\tblTFTransactions.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
