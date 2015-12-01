@@ -255,6 +255,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\015_UpdateEntityTariffType.sql
 :r .\EM\016_MoveCustomerAccountStatusToNewTable.sql
 :r .\EM\017_MoveSplitCategoryToNewTable.sql
+:r .\EM\018_UpdateRoleId_ForEntityCredential.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
