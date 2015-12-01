@@ -184,7 +184,7 @@ Begin
 	End
 End
 
-If @intAttributeTypeId=3 --Packaging
+If @intAttributeTypeId>=3 --Packaging
 Begin
 
 	--Get Work Order No

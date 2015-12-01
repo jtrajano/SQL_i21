@@ -167,6 +167,8 @@
     <Folder Include="Scripts\Utility\IC\Repost Costing" />
     <Folder Include="Scripts\Utility\IC\Repost Costing\WM" />
     <Folder Include="Scripts\Utility\IC\Query tools" />
+    <Folder Include="Scripts\Post-Deployment\TF" />
+    <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3033,6 +3035,20 @@
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
     <Build Include="uspPATPostRefund.sql" />
+    <Build Include="dbo\Views\vyuPATTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuAPItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
+    <Build Include="dbo\Tables\tblTFScheduleFormField.sql" />
+    <Build Include="dbo\Tables\tblTFTransactions.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3108,6 +3124,7 @@
     <None Include="Scripts\Post-Deployment\ST\4_FileFieldMapping_PricebookMixMatch.sql" />
     <None Include="Scripts\Post-Deployment\ST\5_FileFieldMapping_PricebookSendSapphire.sql" />
     <None Include="Scripts\Post-Deployment\EM\017_MoveSplitCategoryToNewTable.sql" />
+    <None Include="Scripts\Post-Deployment\EM\018_UpdateRoleId_ForEntityCredential.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

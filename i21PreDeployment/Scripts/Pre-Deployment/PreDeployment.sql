@@ -114,6 +114,7 @@
 :r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM04.sql -- this should always be under entity security schema change 
 :r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM05.sql -- this should always be under entity security schema change 
 :r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM06.sql -- this should always be under entity security schema change 
+:r .\16_HD\HDGroupUserConfigDataEntryFix.sql -- this will update the security id at tblHDGroupUserConfig table (one time update)
 :r .\12_EM\12_EntityEmployeeSchemaUpdate.sql
 :r .\12_EM\12_UpdateCustomerFreightNullLocation.sql
 :r .\12_EM\15_DropSMUserSecurityTrigger.sql
@@ -131,3 +132,6 @@
 
 --TR
 :r .\17_TR\01_Drop_Column.sql
+
+--IU
+:r .\18_IU\1_DataCleanUp.sql

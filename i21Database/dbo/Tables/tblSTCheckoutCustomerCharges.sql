@@ -11,6 +11,7 @@
     [intProduct] INT NULL, 
     [dblUnitPrice] DECIMAL(18, 6) NULL, 
     [dblGallons] DECIMAL(18, 6) NULL, 
+    [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutCustomerCharges_intCustChargeId] PRIMARY KEY ([intCustChargeId]), 
 	CONSTRAINT [FK_tblSTCheckoutCustomerCharges_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]), 
     CONSTRAINT [FK_tblSTCheckoutCustomerCharges_tblEntity] FOREIGN KEY ([intCustomerId]) REFERENCES [tblEntity]([intEntityId]), 

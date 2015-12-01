@@ -108,7 +108,7 @@ Set @dblBlenderSize=@dblDensity * @dblBlenderCapacity
 	m.strName AS strMachine,
 	mc.strCellName AS strManufacturingCell,
 	br.strDemandNo,
-	br.dtmDueDate,
+	w.dtmExpectedDate AS dtmDueDate ,
 	w.dblQuantity,
 	um.strUnitMeasure AS strUOM,
 	w.strWorkOrderNo AS strBlendSheetNo
@@ -120,27 +120,7 @@ Set @dblBlenderSize=@dblDensity * @dblBlenderCapacity
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = w.intItemUOMId
 	JOIN tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	WHERE w.intItemId=@intItemId AND w.intStatusId <> 13
-	ORDER BY br.dtmDueDate
-
- --Lots At Staging
-  SELECT DISTINCT pl.intParentLotId AS intLotId 
-				 ,pl.strParentLotNumber  AS strLotNo    
-				 ,pl.strParentLotAlias AS strLotAlias
-				 ,sub.strSubLocationName AS strSubLocation
-			     ,sum(l.dblWeight)  dblQuantity
-				 ,um.strUnitMeasure AS strUOM
-				 ,sl.strName AS strStorageLocation
- FROM tblICLot l      
- JOIN tblICItem i ON i.intItemId=l.intItemId AND l.intLocationId=@intLocationId
- JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intWeightUOMId
- JOIN tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
- JOIN tblICStorageLocation sl On sl.intStorageLocationId = l.intStorageLocationId
- JOIN tblICStorageUnitType sut ON sut.intStorageUnitTypeId = sl.intStorageUnitTypeId
- JOIN tblSMCompanyLocationSubLocation sub ON sub.intCompanyLocationSubLocationId=l.intSubLocationId
- JOIN tblICParentLot pl ON pl.intParentLotId=l.intParentLotId
- WHERE sut.strInternalCode='PROD_STAGING' AND l.intItemId=@intItemId AND ISNULL(l.dblWeight,0) <> 0      
- group by pl.intParentLotId,pl.strParentLotNumber,pl.strParentLotAlias,sub.strSubLocationName,um.strUnitMeasure,sl.strName
- Order by pl.strParentLotNumber
+	ORDER BY w.dtmExpectedDate
 
   --Lots At Storage
   SELECT DISTINCT pl.intParentLotId AS intLotId 
@@ -162,6 +142,26 @@ Set @dblBlenderSize=@dblDensity * @dblBlenderCapacity
  group by pl.intParentLotId,pl.strParentLotNumber,pl.strParentLotAlias,sub.strSubLocationName,um.strUnitMeasure,sl.strName
  Order by pl.strParentLotNumber
 
+ --Lots At Staging
+  SELECT DISTINCT pl.intParentLotId AS intLotId 
+				 ,pl.strParentLotNumber  AS strLotNo    
+				 ,pl.strParentLotAlias AS strLotAlias
+				 ,sub.strSubLocationName AS strSubLocation
+			     ,sum(l.dblWeight)  dblQuantity
+				 ,um.strUnitMeasure AS strUOM
+				 ,sl.strName AS strStorageLocation
+ FROM tblICLot l      
+ JOIN tblICItem i ON i.intItemId=l.intItemId AND l.intLocationId=@intLocationId
+ JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intWeightUOMId
+ JOIN tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+ JOIN tblICStorageLocation sl On sl.intStorageLocationId = l.intStorageLocationId
+ JOIN tblICStorageUnitType sut ON sut.intStorageUnitTypeId = sl.intStorageUnitTypeId
+ JOIN tblSMCompanyLocationSubLocation sub ON sub.intCompanyLocationSubLocationId=l.intSubLocationId
+ JOIN tblICParentLot pl ON pl.intParentLotId=l.intParentLotId
+ WHERE sut.strInternalCode='PROD_STAGING' AND l.intItemId=@intItemId AND ISNULL(l.dblWeight,0) <> 0      
+ group by pl.intParentLotId,pl.strParentLotNumber,pl.strParentLotAlias,sub.strSubLocationName,um.strUnitMeasure,sl.strName
+ Order by pl.strParentLotNumber
+ 
  END TRY  
   
 BEGIN CATCH  

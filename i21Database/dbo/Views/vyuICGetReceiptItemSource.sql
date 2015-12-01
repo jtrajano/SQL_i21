@@ -101,7 +101,10 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
-						THEN ISNULL(ContractView.dblDetailQuantity, 0)
+						THEN (
+							CASE WHEN ContractView.ysnLoad = 1 THEN ISNULL(ContractView.intNoOfLoad, 0)
+								ELSE ISNULL(ContractView.dblDetailQuantity, 0) END
+						)
 					WHEN Receipt.intSourceType = 1 -- Scale
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
@@ -126,7 +129,10 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
-						THEN ISNULL(ContractView.dblDetailQuantity, 0) - ISNULL(ContractView.dblBalance, 0)
+						THEN (
+							CASE WHEN ContractView.ysnLoad = 1 THEN ISNULL(ContractView.intNoOfLoad, 0) - ISNULL(ContractView.dblBalance, 0)
+								ELSE ISNULL(ContractView.dblDetailQuantity, 0) - ISNULL(ContractView.dblBalance, 0) END
+						)
 					WHEN Receipt.intSourceType = 1 -- Scale
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment

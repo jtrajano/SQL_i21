@@ -53,8 +53,8 @@ DECLARE	 @Price		NUMERIC(18,6)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 		AND intContractHeaderId = @ContractHeaderId
 		AND intContractDetailId = @ContractDetailId
-		AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty > 0) OR ysnUnlimitedQuantity = 1  OR ISNULL(@AllowQtyToExceed,0) = 1)
-		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1  OR ISNULL(@AllowQtyToExceed,0) = 1)
+		AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty > 0) OR ysnUnlimitedQuantity = 1)
+		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
 		AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 	ORDER BY
 		 dtmStartDate
@@ -92,8 +92,8 @@ DECLARE	 @Price		NUMERIC(18,6)
 		AND intItemId = @ItemId
 		AND (((dblAvailableQty) >= @Quantity) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
-		AND (((dblAvailableQty) > 0) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
-		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
+		AND (((dblAvailableQty) > 0) OR ysnUnlimitedQuantity = 1)
+		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
 		AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 	ORDER BY
 		 dtmStartDate
