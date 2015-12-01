@@ -3038,6 +3038,8 @@
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
