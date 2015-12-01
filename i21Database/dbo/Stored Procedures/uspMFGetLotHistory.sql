@@ -2,7 +2,32 @@
 		@intLotId INT
 AS
 BEGIN
-	SELECT *
+	SELECT dtmDateTime 
+		   ,strLotNo 
+		   ,strItem 
+		   ,strDescription 
+		   ,strSubLocation 
+		   ,strStorageLocation 
+		   ,strTransaction 
+		   ,(SELECT SUM(a.dblQty) FROM tblICInventoryTransaction a WHERE intLotId = @intLotId AND  a.dtmCreated <= lotHistorytbl.dtmDateTime ) dblQuantity
+		   ,dblTransactionQty 
+		   ,strUOM 
+		   ,strRelatedLotId 
+		   ,strPreviousItem 
+		   ,strSourceSubLocation 
+		   ,strSourceStorageLocation 
+		   ,strNewStatus 
+		   ,strOldStatus 
+		   ,strNewLotAlias 
+		   ,strOldLotAlias 
+		   ,dtmNewExpiryDate 
+		   ,dtmOldExpiryDate 
+		   ,strNewVendorNo 
+		   ,strOldVendorNo 
+		   ,strNewVendorLotNo 
+		   ,strOldVendorLotNo 
+		   ,strNotes 
+		   ,strUser
 	FROM (
 		SELECT ilt.dtmCreated AS dtmDateTime, 
 			   l.strLotNumber AS strLotNo, 
