@@ -943,6 +943,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Cost Adjust.sql" />
     <Build Include="testi21Database\Fake Data\Fake transactions for Actual costing.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Cost Adjust, Unpost Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Ship Stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Receive Stocks.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

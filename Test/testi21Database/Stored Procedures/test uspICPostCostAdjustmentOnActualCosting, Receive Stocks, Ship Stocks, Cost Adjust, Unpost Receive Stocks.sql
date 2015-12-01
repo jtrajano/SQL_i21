@@ -1,15 +1,8 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnLIFOCosting. Receive Stocks. Cost Adjust. Unpost Receive Stocks]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Receive Stocks]
 AS
 BEGIN
 	-- Create the fake data
 	BEGIN 
-		-- Create the CONSTANT variables for the costing methods
-		DECLARE @AVERAGECOST AS INT = 1
-				,@FIFO AS INT = 2
-				,@LIFO AS INT = 3
-				,@LOTCOST AS INT = 4 	
-				,@ACTUALCOST AS INT = 5	
-
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
@@ -132,6 +125,20 @@ BEGIN
 		DECLARE @Corn_BushelUOM AS INT = 43,			@Corn_PoundUOM AS INT = 44,				@Corn_KgUOM AS INT = 45, 
 				@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
 
+		-- Create the CONSTANT variables for the costing methods
+		DECLARE @AVERAGECOST AS INT = 1
+				,@FIFO AS INT = 2
+				,@LIFO AS INT = 3
+				,@LOTCOST AS INT = 4 	
+				,@ACTUALCOST AS INT = 5	
+
+		-- Declare the variables for the transaction types
+		DECLARE @RevalueSold AS INT = 3
+				,@PurchaseType AS INT = 4
+				,@SalesType AS INT = 5
+				,@CostAdjustmentType AS INT = 22
+				,@BillType AS INT = 23
+
 		DECLARE @OtherCharges_PoundUOM AS INT = 49
 		DECLARE @SurchargeOtherCharges_PoundUOM AS INT = 50
 		DECLARE @SurchargeOnSurcharge_PoundUOM AS INT = 51
@@ -141,19 +148,12 @@ BEGIN
 				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
 
 		-- Create the fake data
-		EXEC [testi21Database].[Fake data for cost adjustment]
-			@LIFO
+		EXEC [testi21Database].[Fake data for cost adjustment] 
+			@intCostingMethod = @ACTUALCOST
 	END 
 
 	-- Arrange 
 	BEGIN 
-
-		-- Declare the variables for the transaction types
-		DECLARE @PurchaseType AS INT = 4
-				,@SalesType AS INT = 5
-				,@CostAdjustmentType AS INT = 22
-				,@BillType AS INT = 23
-
 		-- Declare the cost types
 		DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 				,@COST_ADJ_TYPE_New_Cost AS INT = 2
@@ -161,31 +161,10 @@ BEGIN
 		-- Declare the variables to check the average cost. 
 		DECLARE @dblAverageCost_Expected AS NUMERIC(38,20)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(38,20)
-		
-		-- Declare the variables used in uspICPostCostAdjustmentOnLIFOCosting
-		DECLARE @dtmDate AS DATETIME						= 'January 10, 2014'
-				,@intItemId AS INT							= @WetGrains
-				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
-				,@intSubLocationId AS INT					= NULL 
-				,@intStorageLocationId AS INT				= NULL 
-				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
-				,@dblQty AS NUMERIC(18,6)					= 40
-				,@dblNewCost AS NUMERIC(38,20)				= 37.261
-				,@intTransactionId AS INT					= 1
-				,@intTransactionDetailId AS INT				= 1
-				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
-				,@intSourceTransactionId AS INT				= 1
-				,@intSourceTransactionDetailId AS INT		= 1
-				,@strSourceTransactionId AS NVARCHAR(20)	= 'PURCHASE-100000'
-				,@strBatchId AS NVARCHAR(20)				= 'BATCH-10291'
-				,@intTransactionTypeId AS INT				= @CostAdjustmentType
-				,@intCurrencyId AS INT						= 1 
-				,@dblExchangeRate AS NUMERIC(38,20)			= 1
-				,@intUserId AS INT							= 1 
 
 		CREATE TABLE expected (
-			--[intInventoryTransactionId] INT NOT NULL
-			[intItemId] INT NOT NULL
+			[intInventoryTransactionId] INT NOT NULL
+			,[intItemId] INT NOT NULL
 			,[intItemLocationId] INT NOT NULL
 			,[intItemUOMId] INT NULL
 			,[intSubLocationId] INT NULL
@@ -213,8 +192,8 @@ BEGIN
 		)
 
 		CREATE TABLE actual (
-			--[intInventoryTransactionId] INT NOT NULL
-			[intItemId] INT NOT NULL
+			[intInventoryTransactionId] INT NOT NULL
+			,[intItemId] INT NOT NULL
 			,[intItemLocationId] INT NOT NULL
 			,[intItemUOMId] INT NULL
 			,[intSubLocationId] INT NULL
@@ -241,8 +220,8 @@ BEGIN
 			,[intCostingMethod] INT NULL
 		)
 
-		CREATE TABLE expectedInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE expectedInventoryActualCostAdjustmentLog (
+			[intInventoryActualCostId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -251,8 +230,8 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
 
-		CREATE TABLE actualInventoryLIFOCostAdjustmentLog (
-			[intInventoryLIFOId] INT NOT NULL 
+		CREATE TABLE actualInventoryActualCostAdjustmentLog (
+			[intInventoryActualCostId] INT NOT NULL 
 			,[intInventoryCostAdjustmentTypeId] INT NOT NULL 
 			,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0
 			,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0
@@ -261,25 +240,116 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
 	END 
-
+	
 	-- Arrange the costing method
 	BEGIN 
 		UPDATE dbo.tblICItemLocation
-		SET intCostingMethod = @LIFO
+		SET intCostingMethod = @ACTUALCOST
 
 		UPDATE dbo.tblICInventoryTransaction
-		SET intCostingMethod = @LIFO
+		SET intCostingMethod = @ACTUALCOST
 	END 
-
-	-- Assert
+	
+	-- Act 1: Do a Direct Shipment
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedMessage = 'Unable to unpost because WET GRAINS has a cost adjustment from BILL-10001.'
-	END 
+		DECLARE @ItemsForPost AS ItemCostingTableType  
+				,@INVENTORY_SHIPMENT_TYPE AS INT = 5 
+				,@ShipmentId AS INT = 10001
 
-	-- Act 1: Post Cost Adjustment 	
+		INSERT INTO @ItemsForPost (  
+			intItemId  
+			,intItemLocationId 
+			,intItemUOMId  
+			,dtmDate  
+			,dblQty  
+			,dblUOMQty  
+			,dblCost  
+			,dblSalesPrice  
+			,intCurrencyId  
+			,dblExchangeRate  
+			,intTransactionId  
+			,intTransactionDetailId
+			,strTransactionId  
+			,intTransactionTypeId  
+			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
+			,strActualCostId
+		) 
+		SELECT 
+			intItemId				= @WetGrains 
+			,intItemLocationId		= @WetGrains_DefaultLocation
+			,intItemUOMId			= @WetGrains_BushelUOM
+			,dtmDate				= 'January 10, 2014'
+			,dblQty					= -17
+			,dblUOMQty				= @BushelUnitQty
+			,dblCost				= 22.00
+			,dblSalesPrice			= 0 
+			,intCurrencyId			= 1 
+			,dblExchangeRate		= 1
+			,intTransactionId		= @ShipmentId
+			,intTransactionDetailId = 1
+			,strTransactionId		= 'SI-10001'
+			,intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE 
+			,intLotId				= NULL 
+			,intSubLocationId		= NULL 
+			,intStorageLocationId	= NULL 
+			,strActualCostId		= 'PURCHASE-100000'
+
+		EXEC	dbo.uspICPostCosting  
+				@ItemsForPost  
+				,'BATCH-10292'  
+				,'Cost of Goods'
+				,1
+	END 	
+
+	-- Act 2: Post the Cost Adjustment. 
 	BEGIN 
-		-- Do the cost adjustment 
-		EXEC dbo.uspICPostCostAdjustmentOnLIFOCosting
+
+		-- Declare the variables used in uspICPostCostAdjustmentOnActualCosting
+		DECLARE @dtmDate AS DATETIME						= 'February 10, 2014'
+				,@intItemId AS INT							= @WetGrains
+				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
+				,@intSubLocationId AS INT					= NULL 
+				,@intStorageLocationId AS INT				= NULL 
+				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
+				,@dblQty AS NUMERIC(18,6)					= 40
+				,@dblNewCost AS NUMERIC(38,20)				= 37.261
+				,@intTransactionId AS INT					= 1
+				,@intTransactionDetailId AS INT				= 1
+				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
+				,@intSourceTransactionId AS INT				= 1
+				,@intSourceTransactionDetailId AS INT		= 1
+				,@strSourceTransactionId AS NVARCHAR(20)	= 'PURCHASE-100000'
+				,@strBatchId AS NVARCHAR(20)				= 'BATCH-10293'
+				,@intTransactionTypeId AS INT				= @CostAdjustmentType
+				,@intCurrencyId AS INT						= 1 
+				,@dblExchangeRate AS NUMERIC(38,20)			= 1
+				,@intUserId AS INT							= 1 
+				,@strActualCostId AS NVARCHAR(50)			= 'PURCHASE-100000'
+
+		DECLARE @ItemsToAdjust AS ItemCostAdjustmentTableType
+		INSERT INTO @ItemsToAdjust  (
+			dtmDate
+			,intItemId
+			,intItemLocationId
+			,intSubLocationId
+			,intStorageLocationId
+			,intItemUOMId
+			,dblQty
+			,dblNewCost
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intSourceTransactionId
+			,intSourceTransactionDetailId
+			,strSourceTransactionId
+			,intTransactionTypeId
+			,intCurrencyId
+			,dblExchangeRate
+			,strActualCostId
+		)
+		SELECT	
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -294,33 +364,42 @@ BEGIN
 			,@intSourceTransactionId
 			,@intSourceTransactionDetailId
 			,@strSourceTransactionId
-			,@strBatchId
 			,@intTransactionTypeId
 			,@intCurrencyId
 			,@dblExchangeRate
+			,@strActualCostId
+
+		EXEC dbo.uspICPostCostAdjustment
+			@ItemsToAdjust
+			,@strBatchId
 			,@intUserId
-	END
+	END 
+
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectException @ExpectedMessage = 'Unable to unpost because WET GRAINS has a cost adjustment from BILL-10001.'
+	END 
 	
-	-- Act 2: Unpost Receive Stocks
-	BEGIN 		
-		
-		EXEC dbo.[uspICUnpostCosting] 
+	-- Act 3: Unpost Receive Stocks. 
+	BEGIN 
+		EXEC dbo.uspICUnpostCosting
 			@intTransactionId = 1
 			,@strTransactionId = 'PURCHASE-100000'
 			,@strBatchId = 'BATCH-10292' 
 			,@intUserId = 1
 			,@ysnRecap = 0 
 	END 
-	
+
+	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('actualInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.actualInventoryLIFOCostAdjustmentLog
+	IF OBJECT_ID('actualInventoryActualCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.actualInventoryActualCostAdjustmentLog
 
-	IF OBJECT_ID('expectedInventoryLIFOCostAdjustmentLog') IS NOT NULL 
-		DROP TABLE dbo.expectedInventoryLIFOCostAdjustmentLog
+	IF OBJECT_ID('expectedInventoryActualCostAdjustmentLog') IS NOT NULL 
+		DROP TABLE dbo.expectedInventoryActualCostAdjustmentLog
 END

@@ -192,6 +192,11 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransferDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;			
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipment', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItem', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItemLot', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentCharge', @Identity = 1;	
+
 		
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
