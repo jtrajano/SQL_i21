@@ -3050,6 +3050,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
