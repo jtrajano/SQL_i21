@@ -168,6 +168,10 @@ BEGIN
 	BEGIN 
 		EXEC [testi21Database].[Fake transactions for Lot costing]
 	END
+	ELSE IF @intCostingMethod = @ACTUALCOST
+	BEGIN 
+		EXEC [testi21Database].[Fake transactions for Actual costing]
+	END 
 	ELSE 
 	BEGIN 
 		EXEC [testi21Database].[Fake transactions for FIFO or Ave costing]; 

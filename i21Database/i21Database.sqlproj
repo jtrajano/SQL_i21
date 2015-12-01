@@ -2404,6 +2404,9 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnActualCosting.sql" />
+    <Build Include="dbo\Tables\tblICInventoryActualCostAdjustmentLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnActualCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -82,7 +82,7 @@ DECLARE @intId AS INT
 		,@intTransactionTypeId AS INT 
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS NUMERIC(38,20)
-		--,@intLotId AS INT 
+		,@strActualCostId NVARCHAR(50)
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionTypeName AS NVARCHAR(200) 
@@ -184,9 +184,9 @@ SELECT  intId
 		,intSourceTransactionDetailId
 		,strSourceTransactionId
 		,intTransactionTypeId
-		-- ,intLotId 
 		,intCurrencyId
 		,dblExchangeRate
+		,strActualCostId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -209,9 +209,9 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intSourceTransactionDetailId
 	,@strSourceTransactionId
 	,@intTransactionTypeId
-	--,@intLotId
 	,@intCurrencyId
 	,@dblExchangeRate
+	,@strActualCostId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -337,6 +337,34 @@ BEGIN
 		IF @returnValue < 0 RETURN -1;
 	END
 
+	-- Actual Costing
+	IF (ISNULL(@strActualCostId, '') <> '')
+	BEGIN 
+		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnActualCosting
+			@dtmDate
+			,@intItemId
+			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@intItemUOMId
+			,@dblQty			
+			,@dblNewCost 
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@intSourceTransactionId
+			,@intSourceTransactionDetailId
+			,@strSourceTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intCurrencyId
+			,@dblExchangeRate			
+			,@intUserId
+			,@strActualCostId
+
+		IF @returnValue < 0 RETURN -1;
+	END
+
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItemsToAdjust INTO 
 		@intId
@@ -355,9 +383,9 @@ BEGIN
 		,@intSourceTransactionDetailId
 		,@strSourceTransactionId
 		,@intTransactionTypeId
-		--,@intLotId
 		,@intCurrencyId
 		,@dblExchangeRate
+		,@strActualCostId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -389,7 +417,7 @@ BEGIN
 			,intTransactionDetailId
 			,strTransactionId
 			,intTransactionTypeId
-			-- ,intLotId 
+			,strActualCostId
 	FROM	@Internal_ItemsToAdjust
 
 	OPEN loopItemsToAdjustForAutoNegative;
@@ -408,7 +436,7 @@ BEGIN
 		,@intTransactionDetailId
 		,@strTransactionId
 		,@intTransactionTypeId
-		-- ,@intLotId
+		,@strActualCostId
 	;
 
 	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
@@ -426,7 +454,7 @@ BEGIN
 		-- Perform the Auto-Negative on Items using the Average Costing
 		--------------------------------------------------------------------------------
 		-- Average Cost
-		IF (@CostingMethod = @AVERAGECOST)
+		IF (@CostingMethod = @AVERAGECOST) AND ISNULL(@strActualCostId, '') = ''
 		BEGIN 
 			SELECT	@AutoNegativeAmount = 
 						(Stock.dblUnitOnHand * ItemPricing.dblAverageCost) 
@@ -485,7 +513,7 @@ BEGIN
 			,@intTransactionDetailId
 			,@strTransactionId
 			,@intTransactionTypeId
-			--,@intLotId
+			,@strActualCostId
 		;
 	END 
 

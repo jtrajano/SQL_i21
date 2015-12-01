@@ -142,6 +142,9 @@ BEGIN
 
 		-- Unpost the cost buckets for Lot Costing 
 		EXEC dbo.uspICUnpostCostAdjustmentOnLot 
+
+		-- Unpost the cost buckets for Actual Costing
+		EXEC dbo.uspICUnpostCostAdjustmentOnActualCost
 	END 
 	
 	-------------------------------------------------
