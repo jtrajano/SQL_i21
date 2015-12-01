@@ -167,6 +167,8 @@
     <Folder Include="Scripts\Utility\IC\Repost Costing" />
     <Folder Include="Scripts\Utility\IC\Repost Costing\WM" />
     <Folder Include="Scripts\Utility\IC\Query tools" />
+    <Folder Include="Scripts\Post-Deployment\TF" />
+    <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
