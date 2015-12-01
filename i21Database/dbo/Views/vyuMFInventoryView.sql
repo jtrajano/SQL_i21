@@ -63,7 +63,9 @@ AS
 		    '' AS strCurrency,    
 		    '' AS strCostUOM,    
 		    0 AS intContainerId,    
-		    '' AS strContainerNo    
+		    '' AS strContainerNo,
+			re.dblQty dblReservedQty, 
+			rum.strUnitMeasure strReservedQtyUOM    
 	FROM tblICLot l
 	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 	LEFT JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -80,3 +82,6 @@ AS
 	LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId
 	LEFT JOIN tblARCustomer c1 ON c1. intEntityCustomerId = ito.intOwnerId
 	LEFT JOIN tblEntity e ON e.intEntityId = l.intEntityVendorId
+	LEFT JOIN tblICStockReservation re ON re.intLotId=l.intLotId
+	LEFT JOIN tblICItemUOM ru  ON ru.intItemUOMId = re.intItemUOMId
+	LEFT JOIN tblICUnitMeasure rum ON um.intUnitMeasureId = ru.intUnitMeasureId
