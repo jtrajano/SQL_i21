@@ -166,6 +166,8 @@
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Utility\IC\Repost Costing" />
     <Folder Include="Scripts\Utility\IC\Repost Costing\WM" />
+    <Folder Include="Scripts\Post-Deployment\TF" />
+    <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3011,6 +3013,8 @@
     <Build Include="dbo\Views\vyuTRLoadHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponents.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
