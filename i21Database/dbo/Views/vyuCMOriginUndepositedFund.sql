@@ -14,6 +14,7 @@ intGLAccountId = (SELECT intAccountId FROM tblARPayment WHERE  intPaymentId = tb
 strAccountDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intAccountId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId)),
 dblAmount,
 strName, 
+intEntityCustomerId = (SELECT intEntityCustomerId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId),
 dtmDate
 FROM tblCMUndepositedFund
 
