@@ -84,4 +84,4 @@ AS
 	LEFT JOIN tblEntity e ON e.intEntityId = l.intEntityVendorId
 	LEFT JOIN tblICStockReservation re ON re.intLotId=l.intLotId
 	LEFT JOIN tblICItemUOM ru  ON ru.intItemUOMId = re.intItemUOMId
-	LEFT JOIN tblICUnitMeasure rum ON um.intUnitMeasureId = ru.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure rum ON rum.intUnitMeasureId = ru.intUnitMeasureId
