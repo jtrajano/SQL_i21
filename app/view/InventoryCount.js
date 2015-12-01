@@ -25,10 +25,10 @@ Ext.define('Inventory.view.InventoryCount', {
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
-        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.column.Check',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
@@ -341,14 +341,13 @@ Ext.define('Inventory.view.InventoryCount', {
                                             },
                                             items: [
                                                 {
-                                                    xtype: 'numberfield',
+                                                    xtype: 'textfield',
                                                     flex: 1,
                                                     itemId: 'txtCountNumber',
                                                     fieldLabel: 'Count No',
                                                     readOnly: true,
                                                     blankText: 'Created on Save',
-                                                    emptyText: 'Created on Save',
-                                                    hideTrigger: true
+                                                    emptyText: 'Created on Save'
                                                 },
                                                 {
                                                     xtype: 'gridcombobox',
