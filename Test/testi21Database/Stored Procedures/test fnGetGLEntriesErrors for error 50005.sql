@@ -55,6 +55,8 @@ BEGIN
 			,dblDebit
 			,dblCredit
 			,strModuleName 
+			,strCode 
+			,strTransactionType 
 		)
 		SELECT 
 			dtmDate = GETDATE()
@@ -67,7 +69,8 @@ BEGIN
 			,dblDebit = 3
 			,dblCredit = 0
 			,strModuleName = 'Inventory'
-
+			,strCode = 'IC'
+			,strTransactionType = 'Inventory Receipt'
 		UNION ALL 
 		SELECT 
 			dtmDate = GETDATE()
@@ -80,7 +83,8 @@ BEGIN
 			,dblDebit = NULL 
 			,dblCredit = 3
 			,strModuleName = 'Inventory'
-
+			,strCode = 'IC'
+			,strTransactionType = 'Inventory Receipt'
 		UNION ALL 
 		SELECT 
 			dtmDate = GETDATE()
@@ -93,7 +97,8 @@ BEGIN
 			,dblDebit = 9
 			,dblCredit = 0
 			,strModuleName = 'Inventory'
-
+			,strCode = 'IC'
+			,strTransactionType = 'Inventory Receipt'
 		UNION ALL 
 		SELECT 
 			dtmDate = GETDATE()
@@ -106,10 +111,15 @@ BEGIN
 			,dblDebit = NULL 
 			,dblCredit = 9
 			,strModuleName = 'Inventory'
+			,strCode = 'IC'
+			,strTransactionType = 'Inventory Receipt'
 
 		-- Insert the expected data 
 		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period to match the transaction date.', 50005)
 		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period to match the transaction date.', 50005)
+		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189)
+		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189)
+
 
 		-- Call the fake data for GL Account 
 		EXEC testi21Database.[Fake COA used for fake inventory items];

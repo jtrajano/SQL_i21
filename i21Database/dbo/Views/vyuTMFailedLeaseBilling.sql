@@ -36,7 +36,7 @@ SELECT
                 THEN
                     ''
                 ELSE
-                    I.strTaxGroupMaster
+                    I.strTaxGroup
                 END)
 	,strSiteLocale1 = ''
 	,strSiteLocale2 = ''
@@ -59,8 +59,8 @@ INNER JOIN tblEntity F
 	ON E.intCustomerNumber = F.intEntityId		
 LEFT JOIN tblTMLeaseCode G
 	ON C.intLeaseCodeId = G.intLeaseCodeId
-LEFT JOIN tblSMTaxGroupMaster I
-	ON D.intTaxStateID = I.intTaxGroupMasterId
+LEFT JOIN tblSMTaxGroup I
+	ON D.intTaxStateID = I.intTaxGroupId
 LEFT JOIN tblEntity J
 	ON C.intBillToCustomerId = J.intEntityId
 LEFT JOIN tblSMCompanyLocation K

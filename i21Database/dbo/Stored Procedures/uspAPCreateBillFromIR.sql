@@ -257,7 +257,7 @@ BEGIN
 
 		INSERT INTO tblAPBillDetailTax(
 			[intBillDetailId]		, 
-			[intTaxGroupMasterId]	, 
+			--[intTaxGroupMasterId]	, 
 			[intTaxGroupId]			, 
 			[intTaxCodeId]			, 
 			[intTaxClassId]			, 
@@ -273,7 +273,7 @@ BEGIN
 		)
 		SELECT
 			[intBillDetailId]		=	@intBillDetailId, 
-			[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
+			--[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
 			[intTaxGroupId]			=	A.intTaxGroupId, 
 			[intTaxCodeId]			=	A.intTaxCodeId, 
 			[intTaxClassId]			=	A.intTaxClassId, 

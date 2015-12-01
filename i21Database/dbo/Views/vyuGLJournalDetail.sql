@@ -49,6 +49,7 @@ A.intJournalId
 ,B.dblCreditForeign
 ,B.dblCreditReport
 ,C.strAccountId
+,C.intAccountId
 from tblGLJournal A
 inner join tblGLJournalDetail B
 on A.intJournalId = B.intJournalId

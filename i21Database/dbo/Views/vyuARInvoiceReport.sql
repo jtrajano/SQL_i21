@@ -39,7 +39,7 @@ SELECT INV.intInvoiceId
 	 , strInvoiceFooterComment = [dbo].fnARGetFooterComment(INV.intCompanyLocationId, INV.intEntityCustomerId, 'Invoice Footer')
 	 , dblInvoiceSubtotal = ISNULL(INV.dblInvoiceSubtotal, 0)
 	 , dblShipping = ISNULL(INV.dblShipping, 0)
-	 , dblTax = ISNULL(INV.dblTax, 0)
+	 , dblTax = ISNULL(ID.dblTotalTax, 0)
 	 , dblInvoiceTotal = ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue = ISNULL(INV.dblAmountDue, 0)
 	 , I.strItemNo
@@ -50,14 +50,14 @@ SELECT INV.intInvoiceId
 	 , dblQtyShipped = ISNULL(ID.dblQtyShipped, 0)
 	 , dblQtyOrdered = ISNULL(ID.dblQtyOrdered, 0)
 	 , dblDiscount = ISNULL(ID.dblDiscount, 0) / 100
-	 , dblTotalTax = ISNULL(ID.dblTotalTax, 0)
+	 , dblTotalTax = ISNULL(INV.dblTax, 0)
 	 , dblPrice = ISNULL(ID.dblPrice, 0)
 	 , dblItemPrice = ISNULL(ID.dblTotal, 0)	 
 	 , strPaid = CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , strPosted = CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
 	 , IDT.intTaxCodeId
 	 , strTaxCode = SMT.strTaxCode
-	 , dblTaxDetail = IDT.dblTax
+	 , dblTaxDetail = IDT.dblAdjustedTax
 	 , INV.strTransactionType
 	 , intDetailCount = (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = INV.intInvoiceId)
 	 , ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = INV.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + INV.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END

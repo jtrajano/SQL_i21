@@ -49,7 +49,7 @@ DECLARE @intWorkOrderId int
 			,intLotId = pld.intStageLotId
 			,intSubLocationId = l.intSubLocationId
 			,intStorageLocationId = l.intStorageLocationId
-			,dblQty = pld.dblPickQuantity * (CASE WHEN ISNULL(l.dblWeightPerQty,0) = 0 THEN 1 ELSE l.dblWeightPerQty END)
+			,dblQty = CASE WHEN pld.intItemUOMId=pld.intItemIssuedUOMId THEN  pld.dblPickQuantity ELSE pld.dblPickQuantity * (CASE WHEN ISNULL(l.dblWeightPerQty,0) = 0 THEN 1 ELSE l.dblWeightPerQty END) END
 			,intTransactionId = pld.intPickListId
 			,strTransactionId = pl.strPickListNo
 			,intTransactionTypeId = @intInventoryTransactionType

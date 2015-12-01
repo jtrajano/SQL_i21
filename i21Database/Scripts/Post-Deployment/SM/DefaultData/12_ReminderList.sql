@@ -39,15 +39,15 @@ GO
            [intSort]            =        2
 	UNION ALL
 	SELECT [strReminder]        =        N'Process',
-		   [strType]        	=        N'Bill',
+		   [strType]        	=        N'Voucher',
            [strMessage]			=        N'{0} {1} {2} {3}',
            [strQuery]  			=        N'SELECT intRecurringId ' +
-										  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bill'' ' +
+										  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Voucher'' ' +
 										  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
 										  'AND intEntityId = {0} ' +
 										  'UNION ' +
 										  'SELECT intRecurringId ' +
-										  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bill'' ' +
+										  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Voucher'' ' +
 										  'AND ysnActive = 1 ' +
 										  'AND intEntityId = {0} ' +
 										  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
@@ -93,7 +93,7 @@ GO
            [intSort]            =        5
 	UNION ALL
 	SELECT [strReminder]        =        N'Approve',
-		   [strType]        	=        N'Bill',
+		   [strType]        	=        N'Voucher',
            [strMessage]			=        N'{0} {1} {2} {3}',
            [strQuery]  			=        N'SELECT * FROM vyuAPBillForApproval WHERE intEntityApproverId = {0} AND ysnApproved = 0',
            [strNamespace]       =        N'AccountsPayable.view.VendorExpenseApproval', 

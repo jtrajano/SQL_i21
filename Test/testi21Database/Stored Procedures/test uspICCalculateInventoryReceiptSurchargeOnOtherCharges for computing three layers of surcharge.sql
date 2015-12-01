@@ -87,7 +87,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
@@ -98,7 +98,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
@@ -150,7 +150,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 31
 			,[intChargeId]					= @OtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 -- It is a fixed amount. 
+			,[dblCalculatedAmount]			= (10 * 2.0) -- Charge 1
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -158,7 +158,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 32
 			,[intChargeId]					= @OtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 -- It is a fixed amount. 
+			,[dblCalculatedAmount]			= (20 * 2.0) -- Charge 1
 		UNION ALL 
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -166,7 +166,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 31
 			,[intChargeId]					= @SurchargeOtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 -- 2% of $25.00
+			,[dblCalculatedAmount]			= (10 * 2.0) * 0.02 -- 2% of Charge 1
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -174,7 +174,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 32
 			,[intChargeId]					= @SurchargeOtherCharges
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 -- 2% of $25.00
+			,[dblCalculatedAmount]			= (20 * 2.0) * 0.02 -- 2% of Charge 2
 		UNION ALL 
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -182,7 +182,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 31
 			,[intChargeId]					= @SurchargeOnSurcharge
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 * 0.1 -- 10 % of (2% of $25.00)
+			,[dblCalculatedAmount]			= ((10 * 2.0) * 0.02) * 0.1 -- 10 % of (2% of Charge 1)
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -190,7 +190,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 32
 			,[intChargeId]					= @SurchargeOnSurcharge
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 * 0.1 -- 10 % of (2% of $25.00)
+			,[dblCalculatedAmount]			= ((20 * 2.0) * 0.02) * 0.1 -- 10 % of (2% of Charge 2)
 		UNION ALL 
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -198,7 +198,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 31
 			,[intChargeId]					= @SurchargeOnSurchargeOnSurcharge
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 * 0.1 * 0.3 -- 30 % of (10 % of (2% of $25.00))
+			,[dblCalculatedAmount]			= (((10 * 2.0) * 0.02) * 0.1 ) * 0.3 -- 30 % of (10 % of (2% of Charge 1))
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
@@ -206,7 +206,7 @@ BEGIN
 			,[intInventoryReceiptItemId]	= 32
 			,[intChargeId]					= @SurchargeOnSurchargeOnSurcharge
 			,[intEntityVendorId]			= 1 
-			,[dblCalculatedAmount]			= 25.00 * 0.02 * 0.1 * 0.3 -- 30 % of (10 % of (2% of $25.00))
+			,[dblCalculatedAmount]			= (((20 * 2.0) * 0.02) * 0.1 ) * 0.3 -- 30 % of (10 % of (2% of Charge 2))
 	END 
 
 	-- Assert

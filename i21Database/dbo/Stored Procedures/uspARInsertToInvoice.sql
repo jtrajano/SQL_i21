@@ -9,7 +9,9 @@ AS
 BEGIN
 
 	DECLARE @customerId             INT,
+			@locationId				INT,
 			@DateOnly				DATETIME,
+			@comment				NVARCHAR(MAX),
 			@dblSalesOrderSubtotal	NUMERIC(18, 6),			
 			@dblTax					NUMERIC(18, 6),
 			@dblSalesOrderTotal		NUMERIC(18, 6),
@@ -43,8 +45,12 @@ BEGIN
 	FROM @OrderDetails
 
 	--GET EXISTING RECURRING INVOICE RECORD OF CUSTOMER
-	SELECT @customerId = intEntityCustomerId FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+	SELECT @customerId = intEntityCustomerId
+	     , @locationId = intCompanyLocationId
+	FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
+	EXEC dbo.[uspARGetDefaultComment] @locationId, @customerId, 'Invoice', 'Software', @comment
+
 	IF EXISTS(SELECT NULL FROM tblARInvoice WHERE intEntityCustomerId = @customerId AND ysnTemplate = 1 AND strType = 'Software')
 		BEGIN
 			--UPDATE EXISTING RECURRING INVOICE
@@ -348,7 +354,7 @@ BEGIN
 		,[strBillToZipCode]
 		,[strBillToCountry]
 		,0
-		,''
+		,@comment
 		,''
 	FROM
 	tblSOSalesOrder

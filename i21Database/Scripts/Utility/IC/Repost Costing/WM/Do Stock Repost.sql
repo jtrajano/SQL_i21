@@ -1,4 +1,4 @@
-﻿-- USE irely98
+﻿-- USE i21Demo01
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Open the fiscal year periods
@@ -57,8 +57,8 @@ BEGIN
 	SELECT * 
 	INTO	#tmpICInventoryTransaction
 	FROM	tblICInventoryTransaction
-	WHERE	-- ISNULL(ysnIsUnposted, 0) = 0
-			ISNULL(dblQty, 0) <> 0
+	WHERE	ISNULL(ysnIsUnposted, 0) = 0
+			AND ISNULL(dblQty, 0) <> 0
 END
 
 BEGIN 
@@ -113,6 +113,7 @@ BEGIN
 			,@intReturnId AS INT
 			,@ysnPost AS BIT 
 			,@dblQty AS NUMERIC(18, 6)
+			,@intTransactionTypeId AS INT
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
@@ -124,13 +125,23 @@ BEGIN
 				,@intTransactionId = intTransactionId
 				,@intItemId = intItemId
 				,@dblQty = dblQty 
+				,@intTransactionTypeId = intTransactionTypeId
 		FROM	#tmpICInventoryTransaction
 		-- ORDER BY dtmDate ASC 
 		ORDER BY intInventoryTransactionId ASC 
 
 		-- Detect if the transaction is posted or not. 
 		BEGIN 
-			SET @ysnPost = NULL 
+			SET @ysnPost = 1 
+
+			SELECT	@strTransactionId = 
+						CASE	WHEN RTRIM(LTRIM(ISNULL(@strTransactionId, ''))) <> '' THEN 
+									@strTransactionId 
+								ELSE 
+									ICType.strName + '-' + CAST(@intTransactionId AS NVARCHAR(10))  
+						END
+			FROM	dbo.tblICInventoryTransactionType ICType
+			WHERE	intTransactionTypeId = @intTransactionTypeId
 
 			SELECT	@ysnPost = 0 
 			FROM	#tmpICPostedTransactions
@@ -372,6 +383,12 @@ BEGIN
 					,[strTransactionForm]
 					,[strModuleName]
 					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
 			)			
 			EXEC @intReturnId = dbo.uspICCreateGLEntries
 				@strBatchId
@@ -433,8 +450,7 @@ BEGIN
 				@intTransactionId = @intTransactionId 
 				,@strTransactionId = @strTransactionId 
 				,@strBatchId = @strBatchId 
-				,@intUserId = @intUserId 
-				,@ysnRecap = 0 
+				,@intEntityUserSecurityId = @intUserId 
 		END 		
 
 		-- Book the G/L Entries
@@ -467,7 +483,7 @@ BEGIN
 				INSERT INTO #tmpICPostedTransactions (
 					strTransactionId 
 				)
-				SELECT @strTransactionId
+				SELECT	@strTransactionId
 			END 
 
 			IF ISNULL(@ysnPost, 1) = 0 
@@ -517,6 +533,9 @@ COMMIT TRANSACTION
 SELECT '#tmpStockDiscrepancies', * FROM #tmpStockDiscrepancies
 
 STOP_QUERY: 
+
+
+
 GO
 
 ------------------------------------------------------------------------------------------------------------------------------------

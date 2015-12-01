@@ -10,6 +10,7 @@
 			AR.strStockStatus,
 			TC.strTaxCode,
 			CE.dtmLastActivityDate,
+			CE.strEquityType,
 			CE.dblEquity,
 			CE.intConcurrencyId 
 	   FROM tblPATCustomerEquity CE

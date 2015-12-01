@@ -19,7 +19,7 @@
 	[ysnTaxExempt] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPOPurchaseDetailTax_intPurchaseDetailTaxId] PRIMARY KEY CLUSTERED ([intPurchaseDetailTaxId] ASC),
 	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblPOPurchaseDetail_intPurchaseDetailId] FOREIGN KEY ([intPurchaseDetailId]) REFERENCES [dbo].[tblPOPurchaseDetail] ([intPurchaseDetailId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),
+	--CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),
 	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxCode_intTaxCodeId] FOREIGN KEY ([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
 	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxClass_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES [dbo].[tblSMTaxClass] ([intTaxClassId]),

@@ -81,7 +81,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
@@ -92,7 +92,7 @@ BEGIN
 		(
 			[intInventoryReceiptId] INT NOT NULL,
 			[intInventoryReceiptChargeId] INT NOT NULL, 
-			[intInventoryReceiptItemId] INT NOT NULL, 
+			[intInventoryReceiptItemId] INT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
@@ -115,20 +115,12 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= 3
-			,[intInventoryReceiptItemId]	= 25
+			,[intInventoryReceiptItemId]	= NULL 
 			,[intChargeId]					= @OtherCharges
 			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
-		UNION ALL
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 3
-			,[intInventoryReceiptItemId]	= 26
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
+			,[dblCalculatedAmount]			= 25.00
 	END 
-	
+
 	-- Act
 	BEGIN 		
 		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]

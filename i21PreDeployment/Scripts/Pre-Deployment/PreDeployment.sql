@@ -132,3 +132,6 @@
 
 --TR
 :r .\17_TR\01_Drop_Column.sql
+
+--IU
+:r .\18_IU\1_DataCleanUp.sql

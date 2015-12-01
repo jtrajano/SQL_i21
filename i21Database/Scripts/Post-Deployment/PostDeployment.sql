@@ -30,6 +30,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\14_CompanyPreference.sql
 :r .\SM\DefaultData\15_Module.sql
 :r .\SM\DefaultData\16_PaymentMethod.sql
+:r .\SM\DefaultData\17_Notification.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
@@ -88,6 +89,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\DataSource\OpenCallEntries.sql
 :r .\TM\Reports\DataSource\EfficiencyReport.sql
 :r .\TM\Reports\Layout\EfficiencyReport.sql
+:r .\TM\Reports\Layout\WorkOrder.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"

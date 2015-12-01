@@ -3,7 +3,7 @@
 	[intWorkOrderConsumedLotId] INT NOT NULL IDENTITY(1,1), 
     [intWorkOrderId] INT NOT NULL, 
 	intItemId int null,
-    [intLotId] INT NOT NULL, 
+    [intLotId] INT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
     [intItemUOMId] INT NOT NULL, 
     [dblIssuedQuantity] NUMERIC(18, 6) NULL, 
@@ -14,6 +14,7 @@
     [intSequenceNo] INT NULL,
 	[intBatchId] INT NULL,
 	intShiftId INT,
+	intSubLocationId INT,
 	intStorageLocationId INT,
 	intMachineId INT,
 	ysnConsumptionReversed BIT,
@@ -34,6 +35,7 @@
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItemUOM_intIssuedItemUOMId] FOREIGN KEY ([intItemIssuedUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	 CONSTRAINT FK_tblMFWorkOrderConsumedLot_tblMFShift_intShiftId FOREIGN KEY (intShiftId) REFERENCES dbo.tblMFShift (intShiftId),
+	 CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	 CONSTRAINT FK_tblMFWorkOrderConsumedLot_tblICStorageLocation_intStorageLocationId FOREIGN KEY (intStorageLocationId) REFERENCES dbo.tblICStorageLocation (intStorageLocationId),
 	 CONSTRAINT FK_tblMFWorkOrderConsumedLot_tblMFMachine_intMachineId FOREIGN KEY (intMachineId) REFERENCES dbo.tblMFMachine (intMachineId)
 )

@@ -104,7 +104,7 @@ BEGIN
 				,[intTransactionId] = @intTransactionId
 				,[strTransactionType] = 'TRANSACTION TYPE'
 				,[strTransactionForm] = 'TRANSACTION FORM'
-				,[strModuleName] = 'MODULE NAME'
+				,[strModuleName] = 'Inventory'
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[dtmDate] = @date
@@ -130,7 +130,7 @@ BEGIN
 				,[intTransactionId] = @intTransactionId
 				,[strTransactionType] = 'TRANSACTION TYPE'
 				,[strTransactionForm] = 'TRANSACTION FORM'
-				,[strModuleName] = 'MODULE NAME'
+				,[strModuleName] = 'Inventory'
 				,[intConcurrencyId] = 1
 
 		INSERT INTO expected_tblGLDetail (
@@ -183,7 +183,7 @@ BEGIN
 				,[intTransactionId] = @intTransactionId
 				,[strTransactionType] = 'TRANSACTION TYPE'
 				,[strTransactionForm] = 'TRANSACTION FORM'
-				,[strModuleName] = 'MODULE NAME'
+				,[strModuleName] = 'Inventory'
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[dtmDate] = dbo.fnRemoveTimeOnDate(@date)
@@ -209,7 +209,7 @@ BEGIN
 				,[intTransactionId] = @intTransactionId
 				,[strTransactionType] = 'TRANSACTION TYPE'
 				,[strTransactionForm] = 'TRANSACTION FORM'
-				,[strModuleName] = 'MODULE NAME'
+				,[strModuleName] = 'Inventory'
 				,[intConcurrencyId] = 1
 
 			INSERT INTO expected_tblGLSummary (

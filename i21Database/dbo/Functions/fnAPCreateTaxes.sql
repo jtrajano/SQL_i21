@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPCreateTaxes]
 (
-	@taxMasterId INT,
+	--@taxMasterId INT,
 	@country NVARCHAR(100) = NULL,
 	@state NVARCHAR(100) = NULL,
 	@county NVARCHAR(100) = NULL,
@@ -9,7 +9,7 @@
 )
 RETURNS @returntable TABLE
 (
-	[intTaxGroupMasterId] INT NOT NULL, 
+	--[intTaxGroupMasterId] INT NOT NULL, 
     [intTaxGroupId] INT NOT NULL, 
     [intTaxCodeId] INT NOT NULL, 
     [intTaxClassId] INT NOT NULL, 
@@ -35,9 +35,9 @@ BEGIN
 		INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
 		INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 		INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-		INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
-	WHERE 
-		TGM.[intTaxGroupMasterId] = @taxMasterId
+		--INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+	/*WHERE 
+		TGM.[intTaxGroupMasterId] = @taxMasterId*/
 
 	IF (SELECT COUNT(1) FROM @TaxGroups) > 1
 				BEGIN
@@ -51,10 +51,10 @@ BEGIN
 								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
 								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+								--INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
-								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
+								--TGM.[intTaxGroupMasterId] = @taxMasterId
+								 LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
 						)				
 				END
 				
@@ -71,10 +71,10 @@ BEGIN
 								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
 								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+								--INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
-								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
+								--TGM.[intTaxGroupMasterId] = @taxMasterId
+								LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
 								AND LOWER(dbo.fnTrim(TC.[strState])) = LOWER(dbo.fnTrim(@state))
 						)				
 				END
@@ -92,10 +92,10 @@ BEGIN
 								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
 								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+								--INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
-								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
+								--TGM.[intTaxGroupMasterId] = @taxMasterId
+								LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
 								AND LOWER(dbo.fnTrim(TC.[strState])) = LOWER(dbo.fnTrim(@state))
 								AND LOWER(dbo.fnTrim(TC.[strCounty])) = LOWER(dbo.fnTrim(@county))
 						)				
@@ -114,10 +114,10 @@ BEGIN
 								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
 								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+								--INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
-								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
+								--TGM.[intTaxGroupMasterId] = @taxMasterId
+								LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
 								AND LOWER(dbo.fnTrim(TC.[strState])) = LOWER(dbo.fnTrim(@state))
 								AND LOWER(dbo.fnTrim(TC.[strCounty])) = LOWER(dbo.fnTrim(@county))
 								AND LOWER(dbo.fnTrim(TC.[strCity])) = LOWER(dbo.fnTrim(@city))
@@ -126,8 +126,8 @@ BEGIN
 
 	INSERT @returntable
 	SELECT
-		TGM.[intTaxGroupMasterId] 
-		,TG.[intTaxGroupId] 
+		--TGM.[intTaxGroupMasterId] 
+		TG.[intTaxGroupId] 
 		,TC.[intTaxCodeId]
 		,TC.[intTaxClassId]				
 		,TC.[strTaxableByOtherTaxes]
@@ -144,7 +144,7 @@ BEGIN
 		,0.00 AS [dblTax]
 		,0.00 AS [dblAdjustedTax]	
 		,0			
-		,TGM.[ysnSeparateOnInvoice] 
+		,0
 		,TC.[ysnCheckoffTax]
 	FROM
 		tblSMTaxCode TC
@@ -157,9 +157,9 @@ BEGIN
 	INNER JOIN
 		tblSMTaxGroupMasterGroup TGTM
 			ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-	INNER JOIN
+	/*INNER JOIN
 		tblSMTaxGroupMaster TGM
-			ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId] 
+			ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId] */
 	INNER JOIN
 		(
 			SELECT DISTINCT TOP 1  [intTaxGroupId] FROM @TaxGroups ORDER BY [intTaxGroupId]
@@ -167,8 +167,8 @@ BEGIN
 		FG
 			ON TG.[intTaxGroupId] = FG.[intTaxGroupId]
 	WHERE
-		TGM.[intTaxGroupMasterId] = @taxMasterId
-		AND ((TC.[intPurchaseTaxAccountId] IS NOT NULL
+		--TGM.[intTaxGroupMasterId] = @taxMasterId
+		 ((TC.[intPurchaseTaxAccountId] IS NOT NULL
 			AND TC.[intPurchaseTaxAccountId] <> 0))
 
 	RETURN

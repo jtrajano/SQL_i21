@@ -11,7 +11,7 @@ BEGIN
 	DECLARE @city NVARCHAR(100) = NULL;
 	DECLARE @transactionDate DATETIME;
 	DECLARE @taxes TABLE(
-		[intTaxGroupMasterId] INT NOT NULL, 
+		--[intTaxGroupMasterId] INT NOT NULL, 
 		[intTaxGroupId] INT NOT NULL, 
 		[intTaxCodeId] INT NOT NULL, 
 		[intTaxClassId] INT NOT NULL, 
@@ -48,13 +48,13 @@ BEGIN
 	BEGIN
 
 		INSERT INTO @taxes
-		SELECT * FROM dbo.fnAPCreateTaxes(@purchaseTaxMasterId, @country, @state, @county, @city, @transactionDate);
+		SELECT * FROM dbo.fnAPCreateTaxes(/*@purchaseTaxMasterId,*/ @country, @state, @county, @city, @transactionDate);
 
 		IF(@@ROWCOUNT > 0)
 		BEGIN
 			INSERT INTO tblAPBillDetailTax(
 				[intBillDetailId]		, 
-				[intTaxGroupMasterId]	, 
+				--[intTaxGroupMasterId]	, 
 				[intTaxGroupId]			, 
 				[intTaxCodeId]			, 
 				[intTaxClassId]			, 
@@ -70,7 +70,7 @@ BEGIN
 			)
 			SELECT
 				[intBillDetailId]		=	@intBillDetailId, 
-				[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
+				--[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
 				[intTaxGroupId]			=	A.intTaxGroupId, 
 				[intTaxCodeId]			=	A.intTaxCodeId, 
 				[intTaxClassId]			=	A.intTaxClassId, 

@@ -30,7 +30,13 @@ BEGIN
 		BEGIN
 			RAISERROR (''Origin account table (glactmst) is empty'',11,1);
 		END
-		ELSE
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID)
+		BEGIN
+			RAISERROR(''Functional Currency is not setup properly. Please set it in Company Configuration Screen'', 16, 1);
+		END
+
+		
 		IF (EXISTS(SELECT SegmentCode FROM (SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type) tblX group by SegmentCode HAVING COUNT(*) > 1) and @ysnOverride = 0)
 		BEGIN
 			SET @result = ''invalid-1''
@@ -75,7 +81,6 @@ BEGIN
 
 				DECLARE @primarylen INT
 				SELECT @primarylen  = max(len(glact_acct1_8))from glactmst 
-				DELETE FROM [tblGLOriginAccounts]
 					INSERT INTO [dbo].[tblGLOriginAccounts]
 						   ([glact_acct1_8]
 						   ,[glact_acct9_16]
@@ -112,24 +117,21 @@ BEGIN
 						   ,[glact_user_fld_2]
 						   ,[glact_user_id]
 						   ,[glact_user_rev_dt]
-						   ,0
+						   ,[glact_acct1_8]
 						   ,A4GLIdentity
 							FROM glactmst
 						WHERE A4GLIdentity NOT IN (SELECT A4GLIdentity FROM [tblGLOriginAccounts])
-				UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8))
+				
 
 				
 				IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
 				BEGIN
 					
-					DECLARE @tbl TABLE (glact_acct1_8 INT)
-					;WITH cte (glact_acct1_8_new,glact_acct9_16 , cnt) as (
-						SELECT glact_acct1_8_new,glact_acct9_16 , count(*)  FROM [tblGLOriginAccounts] GROUP BY glact_acct1_8_new,glact_acct9_16 HAVING  count(*) > 1
-					)
-					INSERT into @tbl
-					SELECT a.glact_acct1_8 from cte b inner join [tblGLOriginAccounts] a on a.glact_acct1_8_new = b.glact_acct1_8_new
-					WHERE a.glact_acct1_8_new <> a.glact_acct1_8
-					IF EXISTS(SELECT TOP 1 1 FROM @tbl)
+					
+					IF EXISTS(
+						SELECT TOP 1 1 FROM tblGLOriginAccounts 
+						where replicate(''0'',@primarylen-len( cast(cast(glact_acct1_8_new as int) as varchar(30)))) + cast(cast(glact_acct1_8_new as int) as varchar(30)) = 
+						glact_acct1_8 and len( cast(cast(glact_acct1_8_new as int) as varchar(30))) < @primarylen)
 					BEGIN
 						SET @result = ''invalid-2,'' + cast(  @primarylen as varchar)
 						COMMIT TRANSACTION

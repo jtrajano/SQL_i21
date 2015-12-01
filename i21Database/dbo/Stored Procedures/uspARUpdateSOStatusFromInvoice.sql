@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateSOStatusFromInvoice]
-	@intInvoiceId INT = 0
+	@intInvoiceId INT = 0,
+	@ForDelete	  BIT = 0
 AS
 BEGIN	
 	DECLARE @OrderToUpdate TABLE (intSalesOrderId INT);
@@ -17,7 +18,7 @@ BEGIN
 					
 		SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @OrderToUpdate ORDER BY intSalesOrderId
 
-		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 0, @ForDelete
 			
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId
 	END 

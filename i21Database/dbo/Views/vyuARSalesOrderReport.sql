@@ -36,7 +36,7 @@ SELECT SO.intSalesOrderId
 	 , strSOFooterComment = [dbo].fnARGetFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer')
 	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping = ISNULL(SO.dblShipping, 0)
-	 , dblTax = ISNULL(SO.dblTax, 0)
+	 , dblTax = ISNULL(SD.dblTotalTax, 0)
 	 , dblSalesOrderTotal = ISNULL(SO.dblSalesOrderTotal, 0)
 	 , I.strItemNo
 	 , SD.intSalesOrderDetailId
@@ -46,12 +46,12 @@ SELECT SO.intSalesOrderId
 	 , dblQtyShipped = ISNULL(SD.dblQtyShipped, 0)
 	 , dblQtyOrdered = ISNULL(SD.dblQtyOrdered, 0)
 	 , dblDiscount = ISNULL(SD.dblDiscount, 0) / 100
-	 , dblTotalTax = ISNULL(SD.dblTotalTax, 0)
+	 , dblTotalTax = ISNULL(SO.dblTax, 0)
 	 , dblPrice = ISNULL(SD.dblPrice, 0)
 	 , dblItemPrice = ISNULL(SD.dblTotal, 0)
 	 , SDT.intTaxCodeId
 	 , strTaxCode = SMT.strTaxCode
-	 , dblTaxDetail = SDT.dblTax
+	 , dblTaxDetail = SDT.dblAdjustedTax
 	 , SO.strTransactionType
 	 , intDetailCount = (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
 	 , ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + SO.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END

@@ -266,10 +266,10 @@ BEGIN
 			LEFT JOIN tblEntityLocation B
 				ON A.intEntityId = B.intEntityId
 					AND B.ysnDefaultLocation = 1
-			INNER JOIN tblEntityToContact D
+			LEFT JOIN tblEntityToContact D
 				ON A.intEntityId = D.intEntityId
 					AND D.ysnDefaultContact = 1
-			INNER JOIN tblEntity E
+			LEFT JOIN tblEntity E
 				ON D.intEntityContactId = E.intEntityId
 			INNER JOIN tblEntityType C
 				ON A.intEntityId = C.intEntityId

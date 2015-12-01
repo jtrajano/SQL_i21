@@ -10,7 +10,7 @@ BEGIN
 	-- Begin Transaction
 	-- ==================================================================
 
-		 SELECT intCustomerId = EC.intCorporateCustomerId,
+		 SELECT intCustomerId = CV.intCustomerPatronId,
 				strCustomerName = ENT.strName,
 				ysnEligibleRefund = (CASE WHEN AC.strStockStatus = @strStockStatus THEN 1 ELSE 0 END),
 				AC.strStockStatus,
@@ -29,23 +29,22 @@ BEGIN
 				RRD.dblRate,
 				dblVolume = CASE WHEN RRD.intPatronageCategoryId = CV.intPatronageCategoryId THEN ISNULL(CV.dblVolume,0) ELSE 0 END,
 				dblRefundAmountL2 = (RRD.dblRate * (CASE WHEN PC.intPatronageCategoryId = CV.intPatronageCategoryId THEN ISNULL(CV.dblVolume,0) ELSE 0 END))
-		   FROM tblPATEstateCorporation EC
+		   FROM tblPATCustomerVolume CV
+	 INNER JOIN tblPATRefundRateDetail RRD
+			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
      INNER JOIN tblPATRefundRate RR
-             ON RR.intRefundTypeId = EC.intRefundTypeId
+             ON RR.intRefundTypeId = RRD.intRefundTypeId
 	 INNER JOIN tblARCustomer AC
-			 ON AC.intEntityCustomerId = EC.intCorporateCustomerId
+			 ON AC.intEntityCustomerId = CV.intCustomerPatronId
 	  LEFT JOIN tblSMTaxCode TC
 			 ON TC.intTaxCodeId = AC.intTaxCodeId
 	 INNER JOIN tblEntity ENT
-			 ON ENT.intEntityId = EC.intCorporateCustomerId
-	 INNER JOIN tblPATRefundRateDetail RRD
-			 ON RRD.intRefundTypeId = RR.intRefundTypeId
+			 ON ENT.intEntityId = CV.intCustomerPatronId
+
 	 INNER JOIN tblPATPatronageCategory PC
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-	  LEFT JOIN tblPATCustomerVolume CV
-			 ON CV.intCustomerPatronId = EC.intCorporateCustomerId
 		  WHERE CV.intFiscalYear = @intFiscalYearId 
-	   GROUP BY EC.intCorporateCustomerId, 
+	   GROUP BY CV.intCustomerPatronId, 
 				ENT.strName, 
 				AC.strStockStatus, 
 				RR.strRefundType, 
@@ -68,5 +67,3 @@ BEGIN
 END
 
 GO
-
-

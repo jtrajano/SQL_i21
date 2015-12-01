@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCompleteBlendSheet] (@strXml NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].[uspMFCompleteBlendSheet] (@strXml NVARCHAR(MAX),@intLotId int=0 OUT,@strLotNumber nvarchar(50)='' OUT)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -26,6 +26,8 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME = GetDate()
 		,@intLotStatusId INT
 		,@strVesselNo NVARCHAR(50)
+		,@intRetLotId INT
+		,@strLotTracking nvarchar(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -99,39 +101,69 @@ BEGIN TRY
 		SET @dblWeightPerUnit = 1
 	END
 
+	Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
+
 	BEGIN TRANSACTION
 
-	EXEC uspMFUpdateBlendProductionDetail @strXml = @strXml
+	If @strLotTracking='No' 
+	Begin
+			Select @strRetBatchId=strBatchId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
-	SET @strProduceXml = '<root>'
-	SET @strProduceXml = @strProduceXml + '<intWorkOrderId>' + convert(VARCHAR, @intWorkOrderId) + '</intWorkOrderId>'
-	SET @strProduceXml = @strProduceXml + '<intManufacturingProcessId>' + convert(VARCHAR, @intManufacturingProcessId) + '</intManufacturingProcessId>'
-	SET @strProduceXml = @strProduceXml + '<intStatusId>' + convert(VARCHAR, 12) + '</intStatusId>'
-	SET @strProduceXml = @strProduceXml + '<intItemId>' + convert(VARCHAR, @intItemId) + '</intItemId>'
-	SET @strProduceXml = @strProduceXml + '<dblProduceQty>' + convert(VARCHAR, @dblQtyToProduce) + '</dblProduceQty>'
-	SET @strProduceXml = @strProduceXml + '<intProduceUnitMeasureId>' + convert(VARCHAR, @intItemUOMId) + '</intProduceUnitMeasureId>'
-	--If @dblIssuedQuantity>0
-	--Begin
-	SET @strProduceXml = @strProduceXml + '<dblPhysicalCount>' + convert(VARCHAR, @dblIssuedQuantity) + '</dblPhysicalCount>'
-	SET @strProduceXml = @strProduceXml + '<intPhysicalItemUOMId>' + convert(VARCHAR, @intItemIssuedUOMId) + '</intPhysicalItemUOMId>'
-	SET @strProduceXml = @strProduceXml + '<dblUnitQty>' + convert(VARCHAR, @dblWeightPerUnit) + '</dblUnitQty>'
-	--End
-	SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, @strVesselNo) + '</strVesselNo>'
-	SET @strProduceXml = @strProduceXml + '<intUserId>' + convert(VARCHAR, @intUserId) + '</intUserId>'
-	--Set @strProduceXml=@strProduceXml + '<strOutputLotNumber>' + convert(varchar,'') + '</strOutputLotNumber>'
-	SET @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
-	SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, @intSubLocationId) + '</intSubLocationId>'
-	SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
-	--Set @strProduceXml=@strProduceXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
-	SET @strProduceXml = @strProduceXml + '<intProductionTypeId>' + convert(VARCHAR, 2) + '</intProductionTypeId>'
-	SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, @strWONo) + '</strLotAlias>'
-	SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
-	SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
-	SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
-	SET @strProduceXml = @strProduceXml + '</root>'
+			EXEC uspMFPostProduction 1
+			,0
+			,@intWorkOrderId
+			,@intItemId
+			,@intUserId
+			,NULL
+			,@intStorageLocationId
+			,@dblQtyToProduce
+			,@intItemUOMId
+			,@dblWeightPerUnit
+			,@dblIssuedQuantity
+			,@intItemIssuedUOMId
+			,@strRetBatchId
+			,''
+			,0
+			,@intRetLotId OUT
+			,''
+			,''
+			,''
+			,''
+	End
+	Else
+	Begin
+		EXEC uspMFUpdateBlendProductionDetail @strXml = @strXml
 
-	EXEC uspMFCompleteWorkOrder @strXML = @strProduceXml
-		,@strOutputLotNumber = @strOutputLotNumber OUT
+		SET @strProduceXml = '<root>'
+		SET @strProduceXml = @strProduceXml + '<intWorkOrderId>' + convert(VARCHAR, @intWorkOrderId) + '</intWorkOrderId>'
+		SET @strProduceXml = @strProduceXml + '<intManufacturingProcessId>' + convert(VARCHAR, @intManufacturingProcessId) + '</intManufacturingProcessId>'
+		SET @strProduceXml = @strProduceXml + '<intStatusId>' + convert(VARCHAR, 12) + '</intStatusId>'
+		SET @strProduceXml = @strProduceXml + '<intItemId>' + convert(VARCHAR, @intItemId) + '</intItemId>'
+		SET @strProduceXml = @strProduceXml + '<dblProduceQty>' + convert(VARCHAR, @dblQtyToProduce) + '</dblProduceQty>'
+		SET @strProduceXml = @strProduceXml + '<intProduceUnitMeasureId>' + convert(VARCHAR, @intItemUOMId) + '</intProduceUnitMeasureId>'
+		--If @dblIssuedQuantity>0
+		--Begin
+		SET @strProduceXml = @strProduceXml + '<dblPhysicalCount>' + convert(VARCHAR, @dblIssuedQuantity) + '</dblPhysicalCount>'
+		SET @strProduceXml = @strProduceXml + '<intPhysicalItemUOMId>' + convert(VARCHAR, @intItemIssuedUOMId) + '</intPhysicalItemUOMId>'
+		SET @strProduceXml = @strProduceXml + '<dblUnitQty>' + convert(VARCHAR, @dblWeightPerUnit) + '</dblUnitQty>'
+		--End
+		SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, @strVesselNo) + '</strVesselNo>'
+		SET @strProduceXml = @strProduceXml + '<intUserId>' + convert(VARCHAR, @intUserId) + '</intUserId>'
+		--Set @strProduceXml=@strProduceXml + '<strOutputLotNumber>' + convert(varchar,'') + '</strOutputLotNumber>'
+		SET @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
+		SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, @intSubLocationId) + '</intSubLocationId>'
+		SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
+		--Set @strProduceXml=@strProduceXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
+		SET @strProduceXml = @strProduceXml + '<intProductionTypeId>' + convert(VARCHAR, 2) + '</intProductionTypeId>'
+		SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, @strWONo) + '</strLotAlias>'
+		SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
+		SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
+		SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
+		SET @strProduceXml = @strProduceXml + '</root>'
+
+		EXEC uspMFCompleteWorkOrder @strXML = @strProduceXml
+			,@strOutputLotNumber = @strOutputLotNumber OUT
+	End
 
 	UPDATE tblMFWorkOrder
 	SET intStatusId = 13
@@ -149,6 +181,17 @@ BEGIN TRY
 	UPDATE tblMFWorkOrderConsumedLot
 	SET intBatchId = @intBatchId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	If @strLotTracking<>'No'
+	Begin
+		Select TOP 1 @intLotId=ISNULL(intLotId,0) From tblMFWorkOrderProducedLot Where intWorkOrderId=@intWorkOrderId
+		Set @strLotNumber=ISNULL(@strOutputLotNumber,'')
+	End
+	Else
+	Begin
+		Set @intLotId=0
+		Set @strLotNumber=''
+	End
 
 	COMMIT TRANSACTION
 

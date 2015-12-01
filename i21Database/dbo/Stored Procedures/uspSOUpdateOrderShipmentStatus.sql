@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOUpdateOrderShipmentStatus]
 	@SalesOrderId			INT,
-	@ysnOpenStatus			BIT = 0
+	@ysnOpenStatus			BIT = 0,
+	@ForDelete				BIT = 0
 AS
 BEGIN
 
@@ -73,7 +74,7 @@ IF @IsOpen <> 0
 UPDATE
 	tblSOSalesOrderDetail
 SET
-	dblQtyShipped = SHP.[dblQuantity]
+	dblQtyShipped = SHP.[dblQuantity] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END)
 FROM
 	(
 		SELECT
@@ -98,7 +99,7 @@ WHERE
 UPDATE
 	tblSOSalesOrderDetail
 SET
-	dblQtyShipped = SHP.[dblQuantity]
+	dblQtyShipped = SHP.[dblQuantity] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END)
 FROM
 	(
 		SELECT

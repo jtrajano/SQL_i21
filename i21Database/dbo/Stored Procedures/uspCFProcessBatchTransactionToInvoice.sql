@@ -140,7 +140,9 @@ FROM [fnCFSplitString](@TransactionId,',')
 					,[ysnPost]								= @Post
 					,[ysnRecap]								= @Recap
 	
-					,[intInvoiceDetailId]					= NULL
+					,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
+																FROM tblARInvoiceDetail 
+																WHERE intInvoiceId = cfTrans.intInvoiceId)
 					,[intItemId]							= cfSiteItem.intARItemId
 					,[ysnInventory]							= 1
 					,[strItemDescription]					= cfSiteItem.strDescription 

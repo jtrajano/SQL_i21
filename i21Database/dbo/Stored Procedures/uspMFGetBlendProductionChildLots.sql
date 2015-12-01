@@ -7,10 +7,14 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @intLocationId INT
+DECLARE @intItemId INT
+Declare @strLotTracking nvarchar(50)
 
-SELECT @intLocationId = intLocationId
+SELECT @intLocationId = intLocationId, @intItemId=intItemId
 FROM tblMFWorkOrder
 WHERE intWorkOrderId = @intWorkOrderId
+
+Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 DECLARE @tblReservedQty TABLE (
 	intLotId INT
@@ -81,6 +85,51 @@ LEFT JOIN dbo.tblWHSKU S ON S.intContainerId = C.intContainerId
 WHERE WC.intWorkOrderId = @intWorkOrderId
 GROUP BY WC.intLotId
 
+If @strLotTracking = 'No'
+SELECT wcl.intWorkOrderConsumedLotId
+	,wcl.intWorkOrderId
+	,0 AS intLotId
+	,'' strLotNumber
+	,i.intItemId
+	,i.strItemNo
+	,i.strDescription
+	,wcl.dblQuantity
+	,wcl.intItemUOMId
+	,um.strUnitMeasure AS strUOM
+	,wcl.dblIssuedQuantity
+	,wcl.intItemIssuedUOMId
+	,iu2.strUnitMeasure AS strIssuedUOM
+	,sl.strName AS strStorageLocationName
+	,i.dblRiskScore
+	,ISNULL(wcl.ysnStaged, 0) AS ysnStaged
+	,(Select TOP 1 ISNULL(sd.dblAvailableQty,0.0) 
+		From vyuMFGetItemStockDetail sd 
+		Where sd.intItemId=wcl.intItemId 
+		AND sd.intLocationId=@intLocationId 
+		AND ISNULL(sd.intSubLocationId,0)=ISNULL(wcl.intSubLocationId,0) 
+		AND ISNULL(sd.intStorageLocationId,0)=ISNULL(wcl.intStorageLocationId,0)
+		AND sd.ysnStockUnit = 1) AS dblAvailableQty
+	,0.0 AS dblWeightPerUnit
+	,wcl.intRecipeItemId
+	,0 AS intParentLotId
+	,'' strParentLotNumber
+	,0.0 AS dblStagedQty
+	,CSL.strSubLocationName
+	,CL.strLocationName
+FROM tblMFWorkOrderConsumedLot wcl
+JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
+JOIN tblICItem i ON wcl.intItemId = i.intItemId
+JOIN tblICCategory C ON C.intCategoryId = i.intCategoryId
+JOIN tblICItemUOM iu ON wcl.intItemUOMId = iu.intItemUOMId
+JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+JOIN tblICItemUOM iu1 ON wcl.intItemIssuedUOMId = iu1.intItemUOMId
+JOIN tblICUnitMeasure iu2 ON iu1.intUnitMeasureId = iu2.intUnitMeasureId
+LEFT JOIN tblICStorageLocation sl ON wcl.intStorageLocationId = sl.intStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation CSL ON wcl.intSubLocationId=CSL.intCompanyLocationSubLocationId
+JOIN tblSMCompanyLocation CL ON W.intLocationId=CL.intCompanyLocationId
+--LEFT JOIN @tblReservedQty rq ON l.intLotId = rq.intLotId
+WHERE wcl.intWorkOrderId = @intWorkOrderId
+Else
 SELECT wcl.intWorkOrderConsumedLotId
 	,wcl.intWorkOrderId
 	,l.intLotId

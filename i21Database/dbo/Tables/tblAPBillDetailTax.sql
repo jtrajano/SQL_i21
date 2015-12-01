@@ -19,7 +19,7 @@
     [ysnTaxExempt] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblAPBillDetailTax_intBillDetailTaxId] PRIMARY KEY CLUSTERED ([intBillDetailTaxId] ASC),
 	CONSTRAINT [FK_tblAPBillDetailTax_tblAPBillDetail_intBillDetailId] FOREIGN KEY ([intBillDetailId]) REFERENCES [dbo].[tblAPBillDetail] ([intBillDetailId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),
+	--CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),
 	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxCode_intTaxCodeId] FOREIGN KEY ([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
 	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxClass_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES [dbo].[tblSMTaxClass] ([intTaxClassId]),

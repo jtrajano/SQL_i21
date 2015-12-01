@@ -44,23 +44,21 @@ SELECT DISTINCT CV.intFiscalYear,
 								 ON ARR.intEntityCustomerId = CVV.intCustomerPatronId
 							  WHERE ARR.strStockStatus = 'Other')
 		   INTO #temptable		   
-		   FROM tblPATEstateCorporation EC
+		    FROM tblPATCustomerVolume CV
+     INNER JOIN tblPATRefundRateDetail RRD
+			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
      INNER JOIN tblPATRefundRate RR
-             ON RR.intRefundTypeId = EC.intRefundTypeId
+             ON RR.intRefundTypeId = RRD.intRefundTypeId
 	 INNER JOIN tblARCustomer AC
-			 ON AC.intEntityCustomerId = EC.intCorporateCustomerId
+			 ON AC.intEntityCustomerId = CV.intCustomerPatronId
 	  LEFT JOIN tblSMTaxCode TC
 			 ON TC.intTaxCodeId = AC.intTaxCodeId
 	 INNER JOIN tblEntity ENT
-			 ON ENT.intEntityId = EC.intCorporateCustomerId
-	 INNER JOIN tblPATRefundRateDetail RRD
-			 ON RRD.intRefundTypeId = RR.intRefundTypeId
+			 ON ENT.intEntityId = CV.intCustomerPatronId
 	 INNER JOIN tblPATPatronageCategory PC
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-	  LEFT JOIN tblPATCustomerVolume CV
-			 ON CV.intCustomerPatronId = EC.intCorporateCustomerId
 		  WHERE CV.intFiscalYear = @intFiscalYearId 
-	   GROUP BY EC.intCorporateCustomerId, 
+	   GROUP BY CV.intCustomerPatronId, 
 				ENT.strName, 
 				AC.strStockStatus, 
 				RR.strRefundType, 
@@ -92,8 +90,12 @@ SELECT DISTINCT CV.intFiscalYear,
 		   intNonVoting,
 		   intProducers,
 		   intOthers
-	   FROM #tempTable
+	   FROM #temptable
    GROUP BY intFiscalYear, intVoting, intNonVoting, intProducers, intOthers
+
+
+   DROP TABLE #temptable
+
 
 	-- ==================================================================
 	-- End Transaction

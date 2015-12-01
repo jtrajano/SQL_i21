@@ -168,6 +168,7 @@
     <Folder Include="Scripts\Utility\IC\Repost Costing\WM" />
     <Folder Include="Scripts\Post-Deployment\TF" />
     <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
+    <Folder Include="Scripts\Utility\IC\Query tools" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1313,8 +1314,6 @@
     <Build Include="dbo\Tables\tblCFAccount.sql" />
     <Build Include="dbo\Tables\tblLGGenerateLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroupMaster.sql" />
-    <Build Include="dbo\Tables\tblSMTaxGroupMaster.sql" />
-    <Build Include="dbo\Tables\tblSMTaxGroupMasterGroup.sql" />
     <Build Include="dbo\Views\vyuEMEntityContact.sql" />
     <Build Include="dbo\Views\vyuCFCustomerEntity.sql" />
     <Build Include="dbo\Tables\tblRKMatchFuturesPSHeader.sql" />
@@ -1735,7 +1734,6 @@
     <Build Include="dbo\Views\vyuEMEntityTransaction.sql" />
     <Build Include="dbo\Tables\tblFRArchive.sql" />
     <Build Include="dbo\Tables\tblCFTransactionTax.sql" />
-    <Build Include="dbo\Views\vyuCFTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspLGShipmentUpdatePurchaseContractReceivedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionCertificateReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReport.sql" />
@@ -3015,6 +3013,32 @@
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponents.sql" />
+    <Build Include="dbo\Views\vyuARCustomerInquiry.sql" />
+    <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
+    <None Include="Scripts\Utility\IC\Query tools\Query to debug Stock UOM Quantities.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
+    <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutPumpTotals.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutPaymentOptions.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutCustomerCharges.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutCustomerPayments.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutSalesTaxTotals.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutDeposits.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftComments.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutRegisterCorrections.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateImportFileHeader.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\17_Notification.sql" />
+    <Build Include="dbo\Functions\fnSMAddSpaceToTitleCase.sql" />
+    <Build Include="dbo\Tables\tblSMMessage.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -106,7 +106,7 @@ BEGIN
 			,[intGradeId]
 			,[intDetailId]
 	)
-	SELECT	[intLotId]					= NULL 
+	SELECT	[intLotId]					= NewLot.intLotId 
 			,[intItemId]				= Detail.intItemId
 			,[intItemLocationId]		= ItemLocation.intItemLocationId
 			,[intItemUOMId]				= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
@@ -167,6 +167,12 @@ BEGIN
 				ON SourceLot.intLotId = Detail.intLotId
 			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
+			LEFT JOIN dbo.tblICLot NewLot
+				ON NewLot.strLotNumber = Detail.strNewLotNumber
+				AND NewLot.intItemId = Detail.intItemId
+				AND NewLot.intItemLocationId = ItemLocation.intItemLocationId
+				AND ISNULL(NewLot.intSubLocationId, 0) = ISNULL(Detail.intNewSubLocationId, 0)
+				AND ISNULL(NewLot.intStorageLocationId, 0) = ISNULL(Detail.intNewStorageLocationId, 0)				
 			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId

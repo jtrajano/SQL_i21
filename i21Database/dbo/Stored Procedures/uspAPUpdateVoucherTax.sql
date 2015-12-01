@@ -30,7 +30,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--CREATE TAXES FOR ITEM WHICH DON'T HAVE TAXES
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
-		[intTaxGroupMasterId]	, 
+		--[intTaxGroupMasterId]	, 
 		[intTaxGroupId]			, 
 		[intTaxCodeId]			, 
 		[intTaxClassId]			, 
@@ -46,7 +46,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT 
 		[intBillDetailId]		=	B.intBillDetailId, 
-		[intTaxGroupMasterId]	=	NULL, 
+		--[intTaxGroupMasterId]	=	NULL, 
 		[intTaxGroupId]			=	Taxes.intTaxGroupId, 
 		[intTaxCodeId]			=	Taxes.intTaxCodeId, 
 		[intTaxClassId]			=	Taxes.intTaxClassId, 
@@ -74,7 +74,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--GET TAXES FOR THOSE FROM INVENTORY RECEIPT
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
-		[intTaxGroupMasterId]	, 
+		--[intTaxGroupMasterId]	, 
 		[intTaxGroupId]			, 
 		[intTaxCodeId]			, 
 		[intTaxClassId]			, 
@@ -90,7 +90,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT 
 		[intBillDetailId]		=	B.intBillDetailId			,
-		[intTaxGroupMasterId]	=	D.intTaxGroupMasterId		,
+		--[intTaxGroupMasterId]	=	D.intTaxGroupMasterId		,
 		[intTaxGroupId]			=	D.[intTaxGroupId]			,		
 		[intTaxCodeId]			=	D.[intTaxCodeId]			,
 		[intTaxClassId]			=	D.[intTaxClassId]			,

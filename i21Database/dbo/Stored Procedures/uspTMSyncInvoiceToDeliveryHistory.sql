@@ -815,10 +815,17 @@ BEGIN
 											THEN @dblNewBurnRate
 											ELSE dblBurnRate 
 										END)
-						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
-						,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+						
+						
 						,dtmLastReadingUpdate = @dtmInvoiceDate
 					WHERE intSiteID = @intSiteId
+
+					--Update Next Delivery Degree Day and degree day Between
+					UPDATE tblTMSite
+						SET	intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
+					WHERE intSiteID = @intSiteId
+
 				
 			
 					----Update Next Julian Calendar Date of the site
