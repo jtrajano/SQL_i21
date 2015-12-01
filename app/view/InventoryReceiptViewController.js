@@ -3175,10 +3175,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var masterRecord = win.viewModel.data.current;
             var cboVendor = win.down('#cboVendor');
 
-
             if (checked === true) {
-                current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
-                current.set('strVendorId', cboVendor.getRawValue());
+                if (iRely.Functions.isEmpty(current.get('strVendorId'))) {
+                    current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
+                    current.set('strVendorId', cboVendor.getRawValue());
+                }
             }
             else {
                 current.set('intEntityVendorId', null);
