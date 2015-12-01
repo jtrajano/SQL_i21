@@ -9,7 +9,8 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	PRIMARY KEY CLUSTERED (	[intGroupUserConfigId] ASC),
 	CONSTRAINT [UNQ_tblHDGroupUserConfig] UNIQUE ([intTicketGroupId],[intUserSecurityId]),
-    CONSTRAINT [FK_GroupUserConfig_TicketGroup] FOREIGN KEY ([intTicketGroupId]) REFERENCES [dbo].[tblHDTicketGroup] ([intTicketGroupId]) on delete cascade
+    CONSTRAINT [FK_GroupUserConfig_TicketGroup] FOREIGN KEY ([intTicketGroupId]) REFERENCES [dbo].[tblHDTicketGroup] ([intTicketGroupId]) on delete cascade,
+    CONSTRAINT [FK_tblHDGroupUserConfig_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityUserSecurityId])
 )
 
 GO
