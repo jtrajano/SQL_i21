@@ -49,10 +49,12 @@ AS
 			l.strLotAlias,
 			sl.strName AS strStorageLocationName,
 			i.strItemNo,
-			pld.dblPickQuantity,
+			dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
 			um.strUnitMeasure AS strPickUOM,
 			l.strGarden,
-			@intWorkOrderCount AS intWorkOrderCount
+			@intWorkOrderCount AS intWorkOrderCount,
+			p.strParentLotNumber,
+			pl.strPickListNo
 	FROM tblMFPickList pl  
 	JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 	JOIN tblMFWorkOrder w on w.intPickListId=pl.intPickListId
@@ -62,5 +64,6 @@ AS
 	JOIN tblICStorageLocation sl on sl.intStorageLocationId=pld.intStorageLocationId
 	Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Join tblICParentLot p on l.intParentLotId=p.intParentLotId
 	WHERE pl.intPickListId=@intPickListId
 	ORDER BY i.strItemNo,l.strLotAlias,l.strLotNumber
