@@ -295,11 +295,23 @@ BEGIN TRY
 		EXEC dbo.uspSMGetStartingNumber 59
 			,@strWorkOrderNo OUTPUT
 
+		--SELECT @intManufacturingCellId = intManufacturingCellId
+		--FROM dbo.tblMFRecipe
+		--WHERE intItemId = @intItemId
+		--	AND intLocationId = @intLocationId
+		--	AND ysnActive = 1
+
+		DECLARE @intItemFactoryId int
+		SELECT @intItemFactoryId = intItemFactoryId
+		FROM tblICItemFactory
+		WHERE intItemId = @intItemId AND intFactoryId = @intLocationId
+
 		SELECT @intManufacturingCellId = intManufacturingCellId
-		FROM dbo.tblMFRecipe
-		WHERE intItemId = @intItemId
-			AND intLocationId = @intLocationId
-			AND ysnActive = 1
+		FROM tblICItemFactoryManufacturingCell 
+		WHERE intItemFactoryId = @intItemFactoryId AND ysnDefault =1
+
+		IF @intSubLocationId IS NULL
+		SELECT @intSubLocationId=intSubLocationId FROM tblMFManufacturingCell WHERE intManufacturingCellId=@intManufacturingCellId
 
 		SELECT @intItemUOMId = @intProduceUnitMeasureId
 
