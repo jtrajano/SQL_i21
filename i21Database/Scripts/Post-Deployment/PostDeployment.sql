@@ -197,6 +197,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\PatchFor_1510_to_1520.sql
 :r .\GL\InventoryCategoryFix.sql
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
+:r .\IC\PopulateTransDetailIdOnCostBuckets.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
