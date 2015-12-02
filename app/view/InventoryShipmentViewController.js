@@ -1625,7 +1625,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
         });
 
-        if (!commodity) {
+        if (!subLocation) {
             iRely.Functions.showErrorDialog('Atleast one(1) line item must have a Sub Location specified.');
             return;
         }

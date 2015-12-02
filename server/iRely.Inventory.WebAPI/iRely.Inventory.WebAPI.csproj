@@ -526,7 +526,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="Reports\BillOfLading.resx">
       <DependentUpon>BillOfLading.cs</DependentUpon>
       <SubType>Designer</SubType>
