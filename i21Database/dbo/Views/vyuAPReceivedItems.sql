@@ -41,7 +41,7 @@ FROM
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
-		,[intScaleTicketNumber]		=	NULL
+		,[strScaleTicketNumber]		=	NULL
 		,[intShipmentContractQtyId]	=	NULL
 		,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
 		,[intWeightUOMId]			=	tblReceived.intWeightUOMId
@@ -146,7 +146,7 @@ FROM
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
-	,[intScaleTicketNumber]		=	NULL
+	,[strScaleTicketNumber]		=	NULL
 	,[intShipmentContractQtyId]	=	NULL
 	,[intUnitMeasureId]			=	NULL
 	,[intWeightUOMId]			=	NULL
@@ -199,7 +199,7 @@ FROM
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
-	,[intScaleTicketNumber]		=	G.strTicketNumber
+	,[strScaleTicketNumber]		=	G.strTicketNumber
 	,[intShipmentContractQtyId]	=	NULL
   	,[intUnitMeasureId]			=	B.intUnitMeasureId
 	,[intWeightUOMId]			=	B.intWeightUOMId
@@ -260,7 +260,7 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	NULL
 		,[intScaleTicketId]							=	NULL
-		,[intScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	NULL
@@ -307,7 +307,7 @@ FROM
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[intScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	NULL
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
 		,[intUnitMeasureId]							=	NULL
 		,[intWeightUOMId]							=	NULL
