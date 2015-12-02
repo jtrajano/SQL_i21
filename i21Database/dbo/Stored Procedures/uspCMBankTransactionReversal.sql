@@ -114,7 +114,7 @@ ELSE
 		SELECT
 			F.strTransactionId + 'V', 19, intBankAccountId, intCurrencyId, dblExchangeRate, @dtmReversalDate, strPayee, intPayeeId, strAddress, 
 			strZipCode, strCity, strState, strCountry, dblAmount, strAmountInWords, 'Void Transaction for ' + F.strTransactionId, 'Voided-' + strReferenceNo, @dtmReversalDate, ysnCheckToBePrinted,
-			0, 0, strLink, 0, @dtmReversalDate, intBankStatementImportId, intBankFileAuditId, strSourceSystem, intEntityId, 
+			1, 0, strLink, 0, @dtmReversalDate, intBankStatementImportId, intBankFileAuditId, strSourceSystem, intEntityId, 
 			@intUserId, intCompanyLocationId, getdate(), @intUserId
 		FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 					ON F.strTransactionId = TMP.strTransactionId
