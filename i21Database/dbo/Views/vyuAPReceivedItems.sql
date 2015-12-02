@@ -85,6 +85,7 @@ FROM
 				LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty
 			AND B.intPurchaseDetailId = B1.intLineNo
+			AND A1.strReceiptType = 'Purchase Order'
 			GROUP BY
 				A1.strReceiptNumber
 				,A1.strBillOfLading
