@@ -634,13 +634,13 @@ BEGIN
 		IF ISNULL(@intUnitMeasureId,'') <> ''
 		BEGIN
 		SELECT intSeqId,strType, @StrUnitMeasure as strUnitMeasure, 
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+				Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal)) dblTotal
 		FROM #temp 
 
 		END
 		ELSE
 		BEGIN
-			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,dblTotal  FROM #temp
+			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,Convert(decimal(24,10),dblTotal)  FROM #temp
 		END
 END
 ELSE 
@@ -648,12 +648,12 @@ BEGIN
 		IF ISNULL(@intUnitMeasureId,'') <> ''
 		BEGIN
 		SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,  
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+				Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal)) dblTotal
 		FROM #temp1 
 
 		END
 		ELSE
 		BEGIN
-			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,dblTotal FROM #temp1
+			SELECT intSeqId,strType,@StrUnitMeasure as strUnitMeasure,Convert(decimal(24,10),dblTotal) FROM #temp1
 		END
 END
