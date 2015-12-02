@@ -2551,7 +2551,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Bundle Tab Methods and Event Handlers">
 
-    onBundleUOMSelect: function(combo, records, eOpts) {
+    onBundleSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -2561,6 +2561,9 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colBundleUOM'){
             current.set('dblUnit', records[0].get('dblUnitQty'));
+        }
+        else if (combo.column.itemId === 'colBundleItem'){
+            current.set('strDescription', records[0].get('strDescription'));
         }
 
     },
@@ -2947,7 +2950,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 select: this.onSpecialPricingSelect
             },
             "#cboBundleUOM": {
-                select: this.onBundleUOMSelect
+                select: this.onBundleSelect
             },
             "#cboAssemblyItem": {
                 select: this.onAssemblySelect
@@ -3026,6 +3029,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboProductCode": {
                 select: this.onMotorFuelTaxSelect
+            },
+            "#cboBundleItem": {
+                select: this.onBundleSelect
             }
         });
     }

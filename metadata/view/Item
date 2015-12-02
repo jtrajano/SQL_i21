@@ -11863,7 +11863,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
+                                                "flex": 2,
                                                 "itemId": "colBundleItem",
                                                 "text": "Item"
                                             },
@@ -11935,9 +11935,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "flex": 1,
                                                 "itemId": "colBundleQuantity",
-                                                "text": "Quantity",
-                                                "width": 65
+                                                "text": "Quantity"
                                             },
                                             "name": "MyNumberColumn15",
                                             "designerId": "a3053336-71af-4e72-b20d-92b3e6448157",
@@ -11957,22 +11957,6 @@
                                                     "designerId": "6c10e658-ecf5-47a1-8b1b-2094eab327e8"
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "itemId": "colBundleStock",
-                                                "text": "Stock",
-                                                "width": 60
-                                            },
-                                            "name": "MyNumberColumn17",
-                                            "designerId": "0a849a67-d3a3-43eb-a569-6b300290b9be"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -12011,10 +11995,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": null,
+                                                "flex": 1,
                                                 "itemId": "colBundleUOM",
-                                                "text": "Unit Measure",
-                                                "width": 82
+                                                "text": "Unit Measure"
                                             },
                                             "name": "MyColumn53",
                                             "designerId": "da58f71c-4257-4369-992f-9451493e8578",
@@ -12090,6 +12073,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "flex": 1,
                                                 "itemId": "colBundleUnit",
                                                 "text": "Unit",
                                                 "width": null
@@ -13693,7 +13677,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging13",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
