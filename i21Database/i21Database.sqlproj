@@ -3051,6 +3051,7 @@
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
