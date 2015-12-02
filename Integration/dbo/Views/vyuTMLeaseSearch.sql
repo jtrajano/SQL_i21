@@ -50,6 +50,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '
 												FROM tblTMLeaseMinimumUse 
 												WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
 												ORDER BY tblTMLeaseMinimumUse.dblSiteCapacity ASC)
+			,dtmLastLeaseBillingDate = A.dtmLastLeaseBillingDate
 		FROM tblTMLease A
 		INNER JOIN tblTMDevice C
 			ON A.intLeaseId = C.intLeaseId
