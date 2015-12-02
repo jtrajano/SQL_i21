@@ -3,6 +3,7 @@ AS
 SELECT 
 adj3.strLocationName, 
 adj1.strUpcCode,
+adj1.intItemUOMId,
 adj5.strDescription,
 adj4.dblSalePrice,
 adj2.intFamilyId,
