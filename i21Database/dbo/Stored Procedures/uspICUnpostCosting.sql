@@ -107,7 +107,7 @@ BEGIN
 			,intItemLocationId
 			,intItemUOMId
 			,intLotId
-			,SUM(ISNULL(dblQty, 0) * -1)				
+			,SUM(ISNULL(dblQty, 0))				
 			,intSubLocationId
 			,intStorageLocationId
 	FROM	@ItemsToUnpost
