@@ -142,21 +142,34 @@ SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 if isnull(@intUnitMeasureId,'')<> ''
 BEGIN
 SELECT @strUnitMeasure=strUnitMeasure FROM tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
-select OpenPurchasesQty,OpenSalQty,t.intCommodityId,strCommodityCode,@strUnitMeasure as strUnitMeasure,t.intUnitMeasureId,
-		isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblBasisExposure),0) dblBasisExposure,
-		isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblCompanyTitled),0) dblCompanyTitled,
-		isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblCaseExposure),0) dblCaseExposure,
-		isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblAvailForSale),0) dblAvailForSale,
-		isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblInHouse),0) dblInHouse,
-		isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenPurQty),0) OpenPurQty,
-		isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenSalQty),0) OpenSalQty
+select Convert(decimal(24,10),(OpenPurchasesQty)) OpenPurchasesQty
+,Convert(decimal(24,10),(OpenSalQty)) OpenSalQty
+,t.intCommodityId
+,strCommodityCode
+,@strUnitMeasure as strUnitMeasure
+,t.intUnitMeasureId,
+		Convert(decimal(24,10),(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblBasisExposure),0))) dblBasisExposure,
+		Convert(decimal(24,10),(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblCompanyTitled),0))) dblCompanyTitled,
+		Convert(decimal(24,10),(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblCaseExposure),0))) dblCaseExposure,
+		Convert(decimal(24,10),(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblAvailForSale),0))) dblAvailForSale,
+		Convert(decimal(24,10),(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblInHouse),0))) dblInHouse,
+		Convert(decimal(24,10),(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenPurQty),0))) OpenPurQty,
+		Convert(decimal(24,10),(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenSalQty),0))) OpenSalQty
 from #temp t
 JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 END
 ELSE
 BEGIN
-select OpenPurchasesQty,OpenSalQty,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
-		dblBasisExposure,dblCompanyTitled,dblCaseExposure,dblAvailForSale,dblInHouse,OpenPurQty,OpenSalQty
+select  Convert(decimal(24,10),(OpenPurchasesQty)) OpenPurchasesQty
+		,Convert(decimal(24,10),(OpenSalQty)) OpenSalQty
+		,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
+		 Convert(decimal(24,10),(dblBasisExposure)) dblBasisExposure
+		 ,Convert(decimal(24,10),(dblCompanyTitled)) dblCompanyTitled
+		 ,Convert(decimal(24,10),(dblCaseExposure)) dblCaseExposure
+		,Convert(decimal(24,10),(dblAvailForSale)) dblAvailForSale,
+		 Convert(decimal(24,10),(dblInHouse)) dblInHouse,
+		 Convert(decimal(24,10),(OpenPurQty)) OpenPurQty
+		,Convert(decimal(24,10),(OpenSalQty)) OpenSalQty
 FROM #temp
 END
