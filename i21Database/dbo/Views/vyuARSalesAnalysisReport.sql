@@ -23,7 +23,7 @@ SELECT strRecordNumber
 							ELSE ISNULL(A.dblQtyOrdered, 0)
 						END
 	 , dblMarginPercentage = CASE WHEN ISNULL(ICP.dblStandardCost, 0) > 0 THEN ((ISNULL(A.dblPrice, 0) - ISNULL(ICP.dblStandardCost, 0)) / ISNULL(ICP.dblStandardCost, 0)) * 100 ELSE 100 END
-	 , ISNULL(A.dblPrice, 0)		  AS dblPrice
+	 , ISNULL(A.dblPrice, 0)		  AS dblPrice 
 	 , ISNULL(A.dblTax, 0)			  AS dblTax
 	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
 	 , ISNULL(A.dblTotal, 0)		  AS dblTotal
@@ -57,10 +57,7 @@ FROM
 	  , ID.strItemDescription
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
-	  , dblPrice = CASE WHEN ISNULL(dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped), 0) > 0
-					    THEN ID.dblPrice / dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped)
-						ELSE dblPrice
-					END
+	  , dblPrice
 	  , ID.dblTotalTax				  AS dblTax
 	  , ID.dblTotal					  AS dblLineTotal
 	  , I.dblInvoiceTotal			  AS dblTotal
@@ -87,10 +84,7 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SOD.strItemDescription
 	 , SOD.dblQtyOrdered
 	 , SOD.dblQtyShipped
-	 , dblPrice = CASE WHEN ISNULL(dbo.fnICConvertUOMtoStockUnit(SOD.intItemId, SOD.intItemUOMId, SOD.dblQtyOrdered), 0) > 0 
-					   THEN SOD.dblPrice / dbo.fnICConvertUOMtoStockUnit(SOD.intItemId, SOD.intItemUOMId, SOD.dblQtyOrdered)
-					   ELSE dblPrice
-				  END
+	 , dblPrice
 	 , SOD.dblTotalTax				  AS dblTax
 	 , SOD.dblTotal					  AS dblLineTotal
 	 , SO.dblSalesOrderTotal		  AS dblTotal 
