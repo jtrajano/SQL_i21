@@ -194,14 +194,7 @@ intEmployeeEarningId = CASE WHEN (intEmployeeEarningLinkId IS NULL)
 								(SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
 								 WHERE intTypeEarningId = E.intEmployeeEarningLinkId AND [intEntityEmployeeId] = @intEmployee) 
 							END
-,dblAmount = CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime'))
-					THEN dblAmount * ISNULL((SELECT TOP 1 B.dblAmount FROM tblPREmployeeEarning B 
-										 WHERE B.intTypeEarningId = E.intEmployeeEarningLinkId AND E.[intEntityEmployeeId] = @intEmployee),
-										 ISNULL((SELECT TOP 1 C.dblAmount FROM tblPRTypeEarning C 
-										  WHERE C.intTypeEarningId = E.intEmployeeEarningLinkId AND E.[intEntityEmployeeId] = @intEmployee), 0))
-				  ELSE
-						dblAmount
-				  END
+,dblAmount = dblRateAmount
 ,strCalculationType
 ,intEmployeeEarningOriginalId = E.intEmployeeEarningId
 ,strW2Code
@@ -442,6 +435,17 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			/* Reset Hours to Process to Default */
 			UPDATE tblPREmployeeEarning SET dblHoursToProcess = dblDefaultHours WHERE intEntityEmployeeId = @intEmployee 
 		END
+
+	/* Reset Rate Amount to Default */
+	UPDATE tblPREmployeeEarning 
+	SET dblRateAmount = CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime')) THEN 
+						dblAmount * ISNULL((SELECT dblAmount FROM tblPREmployeeEarning X 
+											WHERE X.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId 
+											  AND X.intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId), 0)
+						ELSE
+							dblAmount
+						END
+	WHERE intEntityEmployeeId = @intEmployee
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpDepartments')) DROP TABLE #tmpDepartments
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpEarnings')) DROP TABLE #tmpEarnings
