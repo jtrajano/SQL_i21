@@ -33,7 +33,7 @@ BEGIN
 			
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID)
 		BEGIN
-			RAISERROR(''Functional Currency is not setup properly. Please set it in Company Configuration Screen'', 16, 1);
+			RAISERROR(''Functional Currency is not setup properly. Please set it up in Company Configuration Screen.'', 16, 1);
 		END
 
 		
