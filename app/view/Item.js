@@ -5441,7 +5441,7 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colBundleItem',
                                                         dataIndex: 'string',
                                                         text: 'Item',
-                                                        flex: 1,
+                                                        flex: 2,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -5478,21 +5478,14 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colBundleQuantity',
-                                                        width: 65,
                                                         align: 'right',
                                                         text: 'Quantity',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colBundleStock',
-                                                        width: 60,
-                                                        align: 'right',
-                                                        text: 'Stock'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -5507,9 +5500,9 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colBundleUOM',
-                                                        width: 82,
                                                         dataIndex: 'string',
                                                         text: 'Unit Measure',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -5553,7 +5546,8 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colBundleUnit',
                                                         align: 'right',
-                                                        text: 'Unit'
+                                                        text: 'Unit',
+                                                        flex: 1
                                                     }
                                                 ],
                                                 viewConfig: {
