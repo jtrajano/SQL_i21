@@ -81,7 +81,7 @@ BEGIN
 		[dtmDateDeleted]		,
 		[dtmDateCreated]		
 	)
-	SELECT * FROM dbo.fnAPCreateBillData(@vendorId, @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)
+	SELECT * FROM dbo.fnAPCreateBillData(@vendorId, @userId, 8, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)
 
 	SET @billId = SCOPE_IDENTITY();
 
