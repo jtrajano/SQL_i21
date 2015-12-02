@@ -2,11 +2,11 @@
 	@intRefundTypeId INT = NULL
 AS
 BEGIN
-				SELECT RRD.intPatronageCategoryId,
+				SELECT DISTINCT RRD.intPatronageCategoryId,
 					   PC.strCategoryCode,
 					   RRD.dblRate,
-					   CV.dblVolume,
-					   dblRefundAmount = ISNULL((RRD.dblRate * CV.dblVolume),0)
+					   SUM(CV.dblVolume) AS dblVolume,
+					   dblRefundAmount = SUM(ISNULL((RRD.dblRate * CV.dblVolume),0))
 				  FROM tblPATRefundRate RR
 			INNER JOIN tblPATRefundRateDetail RRD
 					ON RRD.intRefundTypeId = RR.intRefundTypeId
@@ -15,6 +15,6 @@ BEGIN
 			INNER JOIN tblPATCustomerVolume CV
 					ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId
 			     WHERE RR.intRefundTypeId = @intRefundTypeId 
+				 GROUP BY RRD.intPatronageCategoryId, PC.strCategoryCode, RRD.dblRate
 END
-
 GO
