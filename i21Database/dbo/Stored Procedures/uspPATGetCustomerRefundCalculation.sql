@@ -10,7 +10,7 @@ BEGIN
 	-- Begin Transaction
 	-- ==================================================================
 
-		 SELECT intCustomerId = CV.intCustomerPatronId,
+		 SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 				strCustomerName = ENT.strName,
 				ysnEligibleRefund = (CASE WHEN AC.strStockStatus = @strStockStatus THEN 1 ELSE 0 END),
 				AC.strStockStatus,
@@ -23,12 +23,7 @@ BEGIN
 				dtmLastActivityDate = CV.dtmLastActivityDate,
 				dblRefundAmount = SUM(RRD.dblRate),
 				dblCashRefund = (SUM(RRD.dblRate) * (RR.dblCashPayout/100)),
-				dblEquityRefund = (SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))),
-				PC.intPatronageCategoryId,
-				PC.strCategoryCode,
-				RRD.dblRate,
-				dblVolume = CASE WHEN RRD.intPatronageCategoryId = CV.intPatronageCategoryId THEN ISNULL(CV.dblVolume,0) ELSE 0 END,
-				dblRefundAmountL2 = (RRD.dblRate * (CASE WHEN PC.intPatronageCategoryId = CV.intPatronageCategoryId THEN ISNULL(CV.dblVolume,0) ELSE 0 END))
+				dblEquityRefund = (SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100)))
 		   FROM tblPATCustomerVolume CV
 	 INNER JOIN tblPATRefundRateDetail RRD
 			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
