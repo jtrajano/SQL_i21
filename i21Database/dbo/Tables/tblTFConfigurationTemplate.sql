@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFConfigurationTemplate] (
     [intConfigurationTemplateId] INT            IDENTITY (1, 1) NOT NULL,
+	[intTaxAuthorityId]     INT            NOT NULL,
     [strConfigurationName]       NVARCHAR (250) COLLATE Latin1_General_CI_AS NOT NULL,
     [intConfigurationTypeId]     INT            NOT NULL,
     [strValue]                   NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NOT NULL,
