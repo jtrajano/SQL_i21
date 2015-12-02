@@ -2408,6 +2408,7 @@
     <Build Include="dbo\Tables\tblICInventoryActualCostAdjustmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnActualCost.sql" />
     <None Include="Scripts\Post-Deployment\IC\PopulateTransDetailIdOnCostBuckets.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

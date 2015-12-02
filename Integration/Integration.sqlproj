@@ -291,6 +291,7 @@
     <Build Include="dbo\Tables\tblAPImportBillError.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPTRXMST.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql" />
+    <None Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
     <None Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
     <None Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
   </ItemGroup>

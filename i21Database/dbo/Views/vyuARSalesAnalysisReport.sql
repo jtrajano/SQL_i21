@@ -16,14 +16,14 @@ SELECT strRecordNumber
 	 , A.strType
 	 , ISNULL(A.dblQtyOrdered, 0)	  AS dblQtyOrdered
 	 , ISNULL(A.dblQtyShipped, 0)     AS dblQtyShipped
-	 , ISNULL(ICP.dblStandardCost, 0) AS dblCost	 
-	 , dblMargin = (ISNULL(A.dblPrice, 0) - ISNULL(ICP.dblStandardCost, 0)) * 
+	 , ISNULL(A.dblStandardCost, 0)	  AS dblCost	 
+	 , dblMargin = (ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
 						CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
 							THEN ISNULL(A.dblQtyShipped, 0) 
 							ELSE ISNULL(A.dblQtyOrdered, 0)
 						END
-	 , dblMarginPercentage = CASE WHEN ISNULL(ICP.dblStandardCost, 0) > 0 THEN ((ISNULL(A.dblPrice, 0) - ISNULL(ICP.dblStandardCost, 0)) / ISNULL(ICP.dblStandardCost, 0)) * 100 ELSE 100 END
-	 , ISNULL(A.dblPrice, 0)		  AS dblPrice
+	 , dblMarginPercentage = CASE WHEN ISNULL(A.dblStandardCost, 0) > 0 THEN ((ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) / ISNULL(A.dblStandardCost, 0)) * 100 ELSE 100 END
+	 , ISNULL(A.dblPrice, 0)		  AS dblPrice 
 	 , ISNULL(A.dblTax, 0)			  AS dblTax
 	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
 	 , ISNULL(A.dblTotal, 0)		  AS dblTotal
@@ -57,10 +57,8 @@ FROM
 	  , ID.strItemDescription
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
-	  , dblPrice = CASE WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, ID.intItemUOMId, SU.intUnitMeasureId, ID.dblQtyShipped), 0) > 0
-					    THEN ID.dblPrice / dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, ID.intItemUOMId, SU.intUnitMeasureId, ID.dblQtyShipped)
-						ELSE dblPrice
-					END
+	  , dblStandardCost				  = CASE WHEN I.intDistributionHeaderId IS NULL THEN ISNULL(ICP.dblStandardCost, 0) ELSE ISNULL(TR.dblUnitCost, 0) END
+	  , dblPrice
 	  , ID.dblTotalTax				  AS dblTax
 	  , ID.dblTotal					  AS dblLineTotal
 	  , I.dblInvoiceTotal			  AS dblTotal
@@ -68,6 +66,11 @@ FROM
 	  , I.strShipToLocationName
 FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 LEFT JOIN tblICItemUOM SU ON ID.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
+LEFT JOIN (tblICItemLocation ICL 
+		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON I.intCompanyLocationId = ICL.intLocationId AND ID.intItemId = ICL.intItemId AND ID.intItemId = ICP.intItemId	
+LEFT JOIN (tblTRTransportLoad TL 
+		INNER JOIN tblTRTransportReceipt TR ON TL.intTransportLoadId = TR.intTransportLoadId) ON I.strInvoiceOriginId = TL.strTransaction AND ID.intItemId = TR.intItemId AND I.intCompanyLocationId = TR.intCompanyLocationId
+
 WHERE I.ysnPosted = 1 
   AND I.strTransactionType IN ('Invoice', 'Credit Memo')
 
@@ -87,10 +90,8 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SOD.strItemDescription
 	 , SOD.dblQtyOrdered
 	 , SOD.dblQtyShipped
-	 , dblPrice = CASE WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(SOD.intItemId, SOD.intItemUOMId, SU.intUnitMeasureId, SOD.dblQtyOrdered), 0) > 0 
-					   THEN SOD.dblPrice / dbo.fnCTConvertQuantityToTargetItemUOM(SOD.intItemId, SOD.intItemUOMId, SU.intUnitMeasureId, SOD.dblQtyOrdered)
-					   ELSE dblPrice
-				  END
+	 , dblStandardCost				  = ICP.dblStandardCost
+	 , dblPrice
 	 , SOD.dblTotalTax				  AS dblTax
 	 , SOD.dblTotal					  AS dblLineTotal
 	 , SO.dblSalesOrderTotal		  AS dblTotal 
@@ -98,6 +99,9 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.strShipToLocationName
 FROM tblSOSalesOrder SO INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 LEFT JOIN tblICItemUOM SU ON SOD.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
+LEFT JOIN (tblICItemLocation ICL 
+		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
+
 WHERE SO.ysnProcessed = 1) AS A
 	INNER JOIN tblGLAccount GA ON A.intAccountId = GA.intAccountId
 	INNER JOIN tblSMCompanyLocation L ON A.intCompanyLocationId = L.intCompanyLocationId
@@ -110,7 +114,4 @@ WHERE SO.ysnProcessed = 1) AS A
 		LEFT JOIN tblICCommodity ICC ON IC.intCommodityId = ICC.intCommodityId
 		LEFT JOIN tblICCategory CAT ON IC.intCategoryId = CAT.intCategoryId		
 		LEFT JOIN tblICBrand ICB ON IC.intBrandId = ICB.intBrandId) ON A.intItemId = IC.intItemId
-	LEFT JOIN vyuARItemUOM UOM ON A.intItemUOMId = UOM.intItemUOMId	
-	LEFT JOIN (tblICItemLocation ICL 
-		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON A.intCompanyLocationId = ICL.intLocationId AND A.intItemId = ICL.intItemId AND A.intItemId = ICP.intItemId
-	
+	LEFT JOIN vyuARItemUOM UOM ON A.intItemUOMId = UOM.intItemUOMId		
