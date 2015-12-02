@@ -63,13 +63,17 @@ DECLARE @tblFinalDetail TABLE (
 							dblCash NUMERIC(24, 10), 
 							dblCosts NUMERIC(24, 10),
 							dblMarketBasis NUMERIC(24, 10), 
-							dblFuturesClosingPrice NUMERIC(24, 10), 
-							dblContractPrice NUMERIC(24, 10),
+							dblFuturesClosingPrice NUMERIC(24, 10), 							
 							intContractTypeId INT,
 							intConcurrencyId INT,
 							dblAdjustedContractPrice NUMERIC(24, 10),
 							dblCashPrice NUMERIC(24, 10), 
 							dblMarketPrice NUMERIC(24, 10),
+							dblResultCash1 NUMERIC(24, 10),
+							dblResult1 NUMERIC(24, 10),
+							dblResultBasis1 NUMERIC(24, 10),
+							dblMarketFuturesResult1 NUMERIC(24, 10),
+							dblContractPrice NUMERIC(24, 10),							
 							dblResult NUMERIC(24, 10),
 							dblResultBasis NUMERIC(24, 10),
 							dblMarketFuturesResult NUMERIC(24, 10),
@@ -162,8 +166,7 @@ BEGIN
 		WHERE s.intCommodityId = @intCommodityId1
 		GROUP BY intCommodityId
 			,strCommodityCode
-			,strContractOrInventoryType
-		
+			,strContractOrInventoryType		
 		INSERT INTO @tblFinalDetail (
 		strSummary
 		,intCommodityId
