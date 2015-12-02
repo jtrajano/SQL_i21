@@ -41,7 +41,7 @@ FROM
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
-		,[intScaleTicketNumber]		=	NULL
+		,[strScaleTicketNumber]		=	NULL
 		,[intShipmentContractQtyId]	=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
@@ -122,7 +122,7 @@ FROM
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
-	,[intScaleTicketNumber]		=	NULL
+	,[strScaleTicketNumber]		=	NULL
 	,[intShipmentContractQtyId]	=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
@@ -168,7 +168,7 @@ FROM
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
-	,[intScaleTicketNumber]		=	G.strTicketNumber
+	,[strScaleTicketNumber]		=	G.strTicketNumber
 	,[intShipmentContractQtyId]	=	NULL
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -218,7 +218,7 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	NULL
 		,[intScaleTicketId]							=	NULL
-		,[intScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
 		,[intShipmentContractQtyId]					=	NULL
 	FROM [vyuAPChargesForBilling] A
@@ -258,7 +258,7 @@ FROM
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[intScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	NULL
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
