@@ -92,8 +92,8 @@ SELECT  @strSalesperson = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
 
-SELECT	@strAsOfDateFrom = ISNULL([from], '')
-       ,@strAsOfDateTo = ISNULL([to], '')
+SELECT	@strAsOfDateFrom = CASE WHEN UPPER([condition]) = UPPER('As Of') THEN '01/01/1900' ELSE ISNULL([from], '') END
+       ,@strAsOfDateTo	 = CASE WHEN UPPER([condition]) = UPPER('As Of') THEN ISNULL([from], '') ELSE ISNULL([to], '') END
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 

@@ -107,8 +107,14 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
-SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
-	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
+SELECT  @dtmDateFrom = CASE WHEN UPPER([condition]) = UPPER('As Of')
+						 THEN CAST(-53690 AS DATETIME)
+						 ELSE CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME) 
+					   END
+	   ,@dtmDateTo   = CASE WHEN UPPER([condition]) = UPPER('As Of')
+						 THEN CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE GETDATE() END AS DATETIME)
+						 ELSE CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
+					   END
        ,@condition	 = [condition]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
@@ -127,7 +133,7 @@ ELSE
 SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
-IF @condition = 'As Of'
+IF UPPER(@condition) = UPPER('As Of')
 	BEGIN		
 		SET @innerQuery = 'AND I.dtmDate <= '+ @strDateTo +''
 	END
