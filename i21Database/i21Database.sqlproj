@@ -3047,6 +3047,7 @@
     <Build Include="dbo\Tables\tblTFTransactions.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_Frequency.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
