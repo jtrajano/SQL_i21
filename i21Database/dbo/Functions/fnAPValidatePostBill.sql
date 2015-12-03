@@ -158,6 +158,19 @@ BEGIN
 			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
+			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND (C.dblBillQty + B.dblQtyReceived) > C.dblOpenReceive
+
 		--VALIDATION FOR MISCELLANEOUS ITEM
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
