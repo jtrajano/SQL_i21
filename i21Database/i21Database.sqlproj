@@ -3048,6 +3048,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_Frequency.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />

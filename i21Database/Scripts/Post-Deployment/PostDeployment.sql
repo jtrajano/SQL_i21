@@ -268,11 +268,14 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\_TaxAuthority.sql
+:r .\TF\DefaultData\_Frequency.sql
 :r .\TF\DefaultData\_ReportingComponent.sql
 :r .\TF\DefaultData\_ProductCode.sql
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
+
+
 
 -- Common
 :r .\Common\ErrorMessages.sql 
