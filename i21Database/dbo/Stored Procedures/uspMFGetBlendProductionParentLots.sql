@@ -9,6 +9,8 @@ SET ANSI_WARNINGS OFF
 
 Declare @ysnEnableParentLot bit=0
 Declare @dblWOQty Numeric(18,6)
+Declare @intItemId int
+Declare @strLotTracking nvarchar(50)
 
 Declare @tblItemQty table
 (
@@ -32,9 +34,10 @@ Declare @tblItemConfirmQty table
 
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
 
-Select @dblWOQty = dblQuantity From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+Select @dblWOQty = dblQuantity,@intItemId=intItemId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
-If @ysnEnableParentLot=0
+If @ysnEnableParentLot=0 OR @strLotTracking = 'No'
 Begin
 	Insert into @tblItemConfirmQty(intItemId,dblQuantity)
 	Select i.intItemId,sum(wcl.dblQuantity) AS dblQuantity
