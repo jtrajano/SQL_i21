@@ -3057,6 +3057,9 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ProductCode.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
+    <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
