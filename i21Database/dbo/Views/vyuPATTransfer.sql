@@ -14,9 +14,10 @@
 			PTD.strToCertificateNo,
 			PTD.strToStockName,
 			PTD.dblQuantityTransferred,
+			FY.strFiscalYear,
 			PT.intConcurrencyId
 		FROM tblPATTransfer PT
 INNER JOIN tblPATTransferDetail PTD
 		ON PT.intTransferId = PTD.intTransferId
-
-
+ LEFT JOIN tblGLFiscalYear FY
+		ON FY.intFiscalYearId = PTD.intFiscalYearId
