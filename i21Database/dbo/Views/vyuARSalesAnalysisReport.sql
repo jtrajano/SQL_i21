@@ -57,7 +57,7 @@ FROM
 	  , ID.strItemDescription
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
-	  , dblStandardCost				  = CASE WHEN I.intDistributionHeaderId IS NULL THEN ISNULL(ICP.dblStandardCost, 0) ELSE ISNULL(TR.dblUnitCost, 0) END
+	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 THEN ICIT.dblCost ELSE ICIT1.dblCost END) --CASE WHEN I.intDistributionHeaderId IS NULL THEN ISNULL(ICP.dblStandardCost, 0) ELSE ISNULL(TR.dblUnitCost, 0) END
 	  , dblPrice
 	  , ID.dblTotalTax				  AS dblTax
 	  , ID.dblTotal					  AS dblLineTotal
@@ -65,11 +65,42 @@ FROM
 	  , I.strBillToLocationName
 	  , I.strShipToLocationName
 FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-LEFT JOIN tblICItemUOM SU ON ID.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
-LEFT JOIN (tblICItemLocation ICL 
-		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON I.intCompanyLocationId = ICL.intLocationId AND ID.intItemId = ICL.intItemId AND ID.intItemId = ICP.intItemId	
-LEFT JOIN (tblTRTransportLoad TL 
-		INNER JOIN tblTRTransportReceipt TR ON TL.intTransportLoadId = TR.intTransportLoadId) ON I.strInvoiceOriginId = TL.strTransaction AND ID.intItemId = TR.intItemId AND I.intCompanyLocationId = TR.intCompanyLocationId
+--LEFT JOIN tblICItemUOM SU ON ID.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
+LEFT OUTER JOIN 
+	tblICInventoryTransaction ICIT 
+		ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+		AND I.intInvoiceId = ICIT.intTransactionId 
+		AND I.strInvoiceNumber = ICIT.strTransactionId 
+		AND ID.intItemId = ICIT.intItemId 
+		AND ID.intItemUOMId = ICIT.intItemUOMId
+LEFT OUTER JOIN
+	(
+		SELECT
+			 ICIT.dblCost
+			,ICISI.intInventoryShipmentItemId
+			,ICISI.intItemId
+			,ICISI.intItemUOMId
+		FROM 
+			tblICInventoryShipmentItem ICISI
+		INNER JOIN
+			tblICInventoryShipment ICIS
+				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+		INNER JOIN
+			tblICInventoryTransaction ICIT
+				ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+				AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+				AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+				AND ICISI.intItemId = ICIT.intItemId 
+				AND ICISI.intItemUOMId = ICIT.intItemUOMId
+	) ICIT1
+		ON  ID.intInventoryShipmentItemId = ICIT1.intInventoryShipmentItemId 
+		AND ID.intItemId = ICIT1.intItemId 
+		AND ID.intItemUOMId = ICIT1.intItemUOMId
+
+--LEFT JOIN (tblICItemLocation ICL 
+--		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON I.intCompanyLocationId = ICL.intLocationId AND ID.intItemId = ICL.intItemId AND ID.intItemId = ICP.intItemId	
+--LEFT JOIN (tblTRTransportLoad TL 
+--		INNER JOIN tblTRTransportReceipt TR ON TL.intTransportLoadId = TR.intTransportLoadId) ON I.strInvoiceOriginId = TL.strTransaction AND ID.intItemId = TR.intItemId AND I.intCompanyLocationId = TR.intCompanyLocationId
 
 WHERE I.ysnPosted = 1 
   AND I.strTransactionType IN ('Invoice', 'Credit Memo')
