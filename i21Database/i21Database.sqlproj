@@ -3061,6 +3061,7 @@
     <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
     <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
