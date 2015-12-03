@@ -100,3 +100,9 @@ GO
 		)
 	END
 GO
+
+	/* Update Search command in Master Menu to replace colon to ?searchCommand*/
+	update tblSMMasterMenu
+	set strCommand = REPLACE(strCommand, ':', '?searchCommand=')
+	where strCommand like '%:%'
+GO
