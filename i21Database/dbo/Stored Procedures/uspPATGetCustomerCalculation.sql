@@ -56,7 +56,7 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   dblCashRefund = Total.dblCashRefund,
 			   dbLessFWT = Total.dbLessFWT ,
 			   dblLessServiceFee = Total.dblLessServiceFee,
-			   dblCheckAmount =  Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee,
+			   dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee END,
 			   dblTotalVolume = Total.dblVolume,
 			   dblTotalRefund = Total.dblTotalRefund
 		   FROM tblPATCustomerVolume CV

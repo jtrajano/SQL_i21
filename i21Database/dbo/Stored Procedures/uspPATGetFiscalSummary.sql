@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetFiscalSummary] 
-	@intFiscalYearId INT = NULL,
-	@strStockStatus CHAR(1) = NULL,
-	@dblMinimumRefund NUMERIC(18,6) = NULL,
-	@dblCashCutoffAmount NUMERIC(18,6) = NULL,
-	@FWT NUMERIC(18,6) = NULL,
-	@LessService NUMERIC(18,6) = NULL
+	@intFiscalYearId INT = 10,
+	@strStockStatus CHAR(1) = 'A',
+	@dblMinimumRefund NUMERIC(18,6) = 10,
+	@dblCashCutoffAmount NUMERIC(18,6) = 10,
+	@FWT NUMERIC(18,6) = 5,
+	@LessService NUMERIC(18,6) = 25
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -42,14 +42,14 @@ BEGIN
 END
 
 SELECT DISTINCT CV.intFiscalYear,
-				dblVolume =  (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(CV.dblVolume),0) ELSE 0 END),
-				dblRefundAmount = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
-				dblNonRefundAmount = (CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
-				dblCashRefund = (SUM(RRD.dblRate) * (RR.dblCashPayout/100)),
-				dbLessFWT =	((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @FWT),
-				dblLessServiceFee = ((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @LessService),
-				dblCheckAmount =  (SUM(RRD.dblRate) * (RR.dblCashPayout/100)) - ((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @FWT) - ((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @LessService),
-				dblEquityRefund = (SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))),
+				dblVolume =  Total.dblVolume,
+				dblRefundAmount = Total.dblRefundAmount,
+				dblNonRefundAmount = Total.dblNonRefundAmount,
+				dblCashRefund = Total.dblCashRefund,
+				dbLessFWT =	Total.dbLessFWT,
+				dblLessServiceFee = Total.dblLessServiceFee,
+				dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee END,
+				dblEquityRefund = Total.dblEquityRefund,
 				intVoting = (SELECT ISNULL(Count(*),0) 
 							   FROM tblPATCustomerVolume CVV
 					     INNER JOIN tblARCustomer ARR
@@ -84,6 +84,35 @@ SELECT DISTINCT CV.intFiscalYear,
 			 ON ENT.intEntityId = CV.intCustomerPatronId
 	 INNER JOIN tblPATPatronageCategory PC
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
+			  CROSS APPLY (
+	 SELECT DISTINCT B.intFiscalYear AS intFiscalYear,
+				    (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(B.dblVolume),0) ELSE 0 END) AS dblVolume,
+					(CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END) AS dblRefundAmount,
+					(CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END) AS dblNonRefundAmount,
+					(SUM(RRD.dblRate) * (RR.dblCashPayout/100)) AS dblCashRefund,
+					((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @FWT) AS dbLessFWT,
+					@LessService AS dblLessServiceFee,
+					(SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))) AS dblEquityRefund
+			   FROM tblPATCustomerVolume B
+		 INNER JOIN tblPATRefundRateDetail RRD
+				 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
+		 INNER JOIN tblPATRefundRate RR
+				 ON RR.intRefundTypeId = RRD.intRefundTypeId
+		 INNER JOIN tblARCustomer AC
+				 ON AC.intEntityCustomerId = CV.intCustomerPatronId
+		  LEFT JOIN tblSMTaxCode TC
+				 ON TC.intTaxCodeId = AC.intTaxCodeId
+		 INNER JOIN tblEntity ENT
+				 ON ENT.intEntityId = CV.intCustomerPatronId
+		 INNER JOIN tblPATPatronageCategory PC
+				 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
+			   WHERE B.intFiscalYear = CV.intFiscalYear
+		   GROUP BY PC.strPurchaseSale,
+					RR.dblCashPayout,
+					AC.ysnSubjectToFWT,
+					B.intFiscalYear,
+					AC.strStockStatus
+	 ) Total
 		  WHERE CV.intFiscalYear = @intFiscalYearId 
 	   GROUP BY CV.intCustomerPatronId, 
 				ENT.strName, 
@@ -101,7 +130,15 @@ SELECT DISTINCT CV.intFiscalYear,
 				TC.strTaxCode, 
 				CV.dtmLastActivityDate,
 				PC.strPurchaseSale,
-				CV.intFiscalYear 
+				CV.intFiscalYear,
+				Total.dblVolume,
+				Total.dblRefundAmount,
+				Total.dblNonRefundAmount,
+				Total.dblCashRefund,
+				Total.dbLessFWT,
+				Total.dblLessServiceFee,
+				Total.dblEquityRefund
+
 
 
 	SELECT intFiscalYear,
