@@ -58,6 +58,13 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetItemStockUOMSummary")]
+        public async Task<HttpResponseMessage> GetItemStockUOMSummary(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockUOMSummary(param));
+        }
+
+        [HttpGet]
         [ActionName("GetAssemblyItems")]
         public async Task<HttpResponseMessage> GetAssemblyItems(GetParameter param)
         {

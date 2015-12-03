@@ -272,6 +272,24 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
+        /// Get Item Stock UOM Summary
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemStockUOMSummary(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOMSummary>()
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intKey").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
         /// Get Assembly Items
         /// </summary>
         /// <param name="param"></param>
