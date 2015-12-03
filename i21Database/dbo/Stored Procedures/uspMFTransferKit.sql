@@ -31,6 +31,8 @@ Declare @ysnBlendSheetRequired bit
 Declare @intBlendItemId int
 Declare @dblWeightPerUnit numeric(18,6)
 Declare @dblMoveQty numeric(18,6)
+Declare @intItemUOMId int
+Declare @intItemIssuedUOMId int
  
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess Where intAttributeTypeId=2
 
@@ -124,7 +126,7 @@ Begin
 	--Get the parent Lots for the workorder
 	Delete From @tblParentLot
 	Insert Into @tblParentLot(intWorkOrderId,intParentLotId,dblReqQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select DISTINCT wi.intWorkOrderId,wi.intParentLotId,wi.dblQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
+	Select DISTINCT wi.intWorkOrderId,wi.intParentLotId,wi.dblIssuedQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
 	From tblMFWorkOrderInputParentLot wi 
 	Join tblMFPickListDetail pld on wi.intParentLotId=pld.intParentLotId
 	Where wi.intWorkOrderId=@intWorkOrderId And pld.intPickListId=@intPickListId
@@ -135,13 +137,14 @@ Begin
 
 	While(@intMinParentLot is not null) --Loop Parent Lots
 	Begin
-	Select @intParentLotId=intParentLotId,@dblReqQty=CASE WHEN intItemUOMId=intItemIssuedUOMId THEN dblReqQty ELSE dblReqQty * dblWeightPerUnit  End 
+	Select @intParentLotId=intParentLotId,@dblReqQty=CASE WHEN intItemUOMId=intItemIssuedUOMId THEN dblReqQty ELSE dblReqQty * dblWeightPerUnit  End,
+	@intItemUOMId=intItemUOMId,@intItemIssuedUOMId=intItemIssuedUOMId 
 	From @tblParentLot Where intRowNo=@intMinParentLot
 
 	--Get the child Lots for the Parent Lot
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,l.dblWeight,pld.intItemUOMId,pld.intItemIssuedUOMId,
+	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,l.dblWeight,@intItemUOMId,@intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
 	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId AND pld.intParentLotId=@intParentLotId AND l.intStorageLocationId=@intKitStagingLocationId
@@ -184,7 +187,8 @@ Begin
 			
 				Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
 				dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-				Select @intWorkOrderId,@intNewLotId,@intItemId,@dblReqQty,intItemUOMId,@dblMoveQty,intItemIssuedUOMId,null,
+				Select @intWorkOrderId,@intNewLotId,@intItemId,@dblReqQty,intItemUOMId,
+				CASE WHEN intItemUOMId=intItemIssuedUOMId THEN @dblReqQty ELSE @dblMoveQty End,intItemIssuedUOMId,null,
 				@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
 				From @tblChildLot where intRowNo = @intMinChildLot
 
@@ -214,7 +218,8 @@ Begin
 
 			Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
 			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-			Select @intWorkOrderId,@intNewLotId,@intItemId,@dblAvailableQty,intItemUOMId,@dblMoveQty,intItemIssuedUOMId,null,
+			Select @intWorkOrderId,@intNewLotId,@intItemId,@dblAvailableQty,intItemUOMId,
+			CASE WHEN intItemUOMId=intItemIssuedUOMId THEN @dblReqQty ELSE @dblMoveQty End,intItemIssuedUOMId,null,
 			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
 			From @tblChildLot where intRowNo = @intMinChildLot
 
