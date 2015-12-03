@@ -13,6 +13,7 @@ DROP TABLE  #tempLotHistory
 			   l.strLotNumber AS strLotNo, 
 			   i.strItemNo AS strItem, 
 			   i.strDescription AS strDescription, 
+			   c.strCategoryCode,
 			   clsl.strSubLocationName AS strSubLocation, 
 			   sl.strName AS strStorageLocation, 
 			   itt.strName AS strTransaction, 
@@ -42,6 +43,7 @@ DROP TABLE  #tempLotHistory
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
 		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 		LEFT JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit=1
+		LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
 		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
@@ -54,6 +56,7 @@ DROP TABLE  #tempLotHistory
 			   l.strLotNumber AS strLotNo, 
 			   i.strItemNo AS strItemNo, 
 			   i.strDescription AS strDescription, 
+			   c.strCategoryCode,
 			   clsl.strSubLocationName AS strSubLocation, 
 			   sl.strName AS strStorageLocation, 
 			   CASE 
@@ -88,6 +91,7 @@ DROP TABLE  #tempLotHistory
 		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 		LEFT JOIN tblICItemUOM ium ON ium.intItemId = i.intItemId AND ium.ysnStockUnit=1
 		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+		LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
