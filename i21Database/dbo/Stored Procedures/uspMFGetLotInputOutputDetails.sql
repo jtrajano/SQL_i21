@@ -15,14 +15,14 @@ BEGIN
 		   wo.strWorkOrderNo, 
 		   i.strItemNo, 
 		   i.strDescription AS strItemDescription, 
-		   wopl.dblQuantity, 
+		   l.dblQty AS dblQuantity, 
 		   um.strUnitMeasure, 
 		   wopl.dtmCreated AS dtmTimeLogged, 
 		   us.strUserName
 	FROM tblMFWorkOrderProducedLot wopl
 	JOIN tblMFWorkOrder wo ON wo.intWorkOrderId = wopl.intWorkOrderId
 	JOIN tblICItem i ON i.intItemId = wopl.intItemId
-	JOIN tblICItemUOM iu ON iu.intItemUOMId = wopl.intItemUOMId
+	JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND ysnStockUnit = 1
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = wopl.intCreatedUserId
 	JOIN tblICLot l ON l.intLotId = wopl.intLotId

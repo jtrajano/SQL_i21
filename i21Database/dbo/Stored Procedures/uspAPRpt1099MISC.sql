@@ -97,8 +97,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (
 	[fieldname] nvarchar(50)
 	, [condition] nvarchar(20)
-	, [from] nvarchar(50)
-	, [to] nvarchar(50)
+	, [from] nvarchar(200)
+	, [to] nvarchar(200)
 	, [join] nvarchar(10)
 	, [datatype] nvarchar(50)
 )
@@ -146,10 +146,14 @@ WHERE 1 = (CASE WHEN @vendorFromParam IS NOT NULL THEN
 				(CASE WHEN A.strVendorId BETWEEN @vendorFromParam AND @vendorToParam THEN 1 ELSE 0 END)
 			ELSE 1 END)
 AND A.intYear = @yearParam
-AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
-			WHEN History.ysnPrinted IS NULL THEN 1
-			WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
-			ELSE 0 END)
+AND 1 = (
+		CASE WHEN  ISNULL(@correctedParam,0) = 1 THEN 1 
+				ELSE 
+					(CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
+						WHEN History.ysnPrinted IS NULL THEN 1
+						WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
+					ELSE 0 END)
+		END)
 
 
 

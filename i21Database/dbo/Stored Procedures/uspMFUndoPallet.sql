@@ -141,7 +141,7 @@ BEGIN TRY
 		,@intUserId
 		,0
 
-	--EXEC dbo.uspGLBookEntries @GLEntries,0
+	EXEC dbo.uspGLBookEntries @GLEntries,0
 
 	UPDATE dbo.tblMFWorkOrderProducedLot
 	SET ysnProductionReversed = 1

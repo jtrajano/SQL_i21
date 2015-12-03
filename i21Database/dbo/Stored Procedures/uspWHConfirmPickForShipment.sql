@@ -47,11 +47,10 @@ BEGIN TRY
 		WHERE s.strShipmentNumber = @strShipmentNo
 			AND intItemId = @intLotItemId
 
-		EXEC uspICCreateInventoryShipmentItemLot @intInventoryShipmentItemId = @intShipmentItemId, 
-												 @intLotId = @intLotId, 
-												 @dblShipQty = @dblLotQty, 
-												 @dblGrossWgt = @dblLotWeight, 
-												 @dblTareWgt = 0
+		INSERT INTO tblICInventoryShipmentItemLot(intInventoryShipmentItemId, intLotId, dblQuantityShipped, dblGrossWeight, dblTareWeight)
+		VALUES (@intShipmentItemId, @intLotId, @dblLotQty, 0, 0)
+	
+		DELETE FROM tblWHPickForShipment WHERE id = @intMinId
 												 
 		SELECT @intMinId = MIN(id)
 		FROM tblWHPickForShipment WHERE id > @intMinId
