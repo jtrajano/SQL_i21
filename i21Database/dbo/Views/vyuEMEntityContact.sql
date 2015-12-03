@@ -3,7 +3,7 @@
 
 SELECT       
 	B.intEntityId,     
-	B.imgPhoto, 
+	strEntityName = B.strName,
 	D.intEntityId intEntityContactId,   
 	D.strName,   
 	D.strEmail,   
@@ -26,7 +26,8 @@ SELECT
 	F.ShippingLine,  
 	F.Trucker ,
 	D.strContactType,
-	D.strEmailDistributionOption
+	D.strEmailDistributionOption,
+	B.imgPhoto	
 FROM dbo.tblEntity AS B 			
 	INNER JOIN dbo.tblEntityToContact AS C 
 			ON B.[intEntityId] = C.[intEntityId] 
