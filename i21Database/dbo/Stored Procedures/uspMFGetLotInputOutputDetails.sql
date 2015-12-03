@@ -15,7 +15,7 @@ BEGIN
 		   wo.strWorkOrderNo, 
 		   i.strItemNo, 
 		   i.strDescription AS strItemDescription, 
-		   l.dblQty AS dblQuantity, 
+		   Case When iu.intItemUOMId = wopl.intItemUOMId  Then wopl.dblQuantity Else wopl.dblPhysicalCount  End AS dblQuantity, 
 		   um.strUnitMeasure, 
 		   wopl.dtmCreated AS dtmTimeLogged, 
 		   us.strUserName
