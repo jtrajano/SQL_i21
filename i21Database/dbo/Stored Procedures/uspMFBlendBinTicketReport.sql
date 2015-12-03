@@ -39,9 +39,9 @@ AS
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intLotId'
 
-Select l.strLotNumber,i.strItemNo,i.strDescription,dbo.fnRemoveTrailingZeroes(wpl.dblQuantity) AS dblQuantity,
-CASE WHEN wpl.dblWeightPerUnit=1 THEN '' ELSE dbo.fnRemoveTrailingZeroes(wpl.dblPhysicalCount) END AS dblPhysicalCount,
-CASE WHEN wpl.dblWeightPerUnit=1 THEN '' ELSE dbo.fnRemoveTrailingZeroes(wpl.dblWeightPerUnit) END AS dblWeightPerUnit, 
+Select l.strLotNumber,i.strItemNo,i.strDescription,ROUND(dbo.fnRemoveTrailingZeroes(wpl.dblQuantity),3) AS dblQuantity,
+ROUND(CASE WHEN wpl.dblWeightPerUnit=1 THEN null ELSE dbo.fnRemoveTrailingZeroes(wpl.dblPhysicalCount) END,3) AS dblPhysicalCount,
+ROUND(CASE WHEN wpl.dblWeightPerUnit=1 THEN null ELSE dbo.fnRemoveTrailingZeroes(wpl.dblWeightPerUnit) END,3) AS dblWeightPerUnit, 
 w.strWorkOrderNo,w.strSalesOrderNo,wpl.strVesselNo,wpl.dtmCreated
 From tblMFWorkOrderProducedLot wpl 
 Join tblMFWorkOrder w on wpl.intWorkOrderId=w.intWorkOrderId

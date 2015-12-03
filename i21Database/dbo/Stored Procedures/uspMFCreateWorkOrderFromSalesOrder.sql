@@ -42,6 +42,7 @@ Declare @intNoOfSheetCounter int=0
 Declare @intNoOfSheetOrig int
 Declare @strWorkOrderNoOrig nVarchar(50)
 Declare @ysnRequireCustomerApproval bit
+Declare @strLotTracking nvarchar(50)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -80,19 +81,25 @@ If @intAttributeTypeId=2 --Blending
 Begin
 
 	Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
+	Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 	Select @ysnRequireCustomerApproval=ysnRequireCustomerApproval 
 	From tblICItem Where intItemId=@intItemId
 
-	If @ysnBlendSheetRequired=1
-		Set @intWorkOrderStatusId=2 --Not Released
+	if @strLotTracking='No'
+		Set @intWorkOrderStatusId=9 --Released
 	Else
-		Begin
-			If @ysnRequireCustomerApproval = 1
-				Set @intWorkOrderStatusId=5 --Hold
-			Else
-				Set @intWorkOrderStatusId=9 --Released
-		End
+	Begin
+		If @ysnBlendSheetRequired=1
+			Set @intWorkOrderStatusId=2 --Not Released
+		Else
+			Begin
+				If @ysnRequireCustomerApproval = 1
+					Set @intWorkOrderStatusId=5 --Hold
+				Else
+					Set @intWorkOrderStatusId=9 --Released
+			End
+	End
 
 	--Get Demand No
 	EXEC dbo.uspSMGetStartingNumber 46
@@ -116,10 +123,18 @@ Begin
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 	and at.strAttributeName='Enable Kitting'
 
-	If @ysnKittingEnabled=1
-		Set @intKitStatusId=6
-	Else
+	if @strLotTracking='No'
+	Begin
 		Set @intKitStatusId=null
+		Set @ysnKittingEnabled=0
+	End
+	Else
+	Begin
+		If @ysnKittingEnabled=1
+			Set @intKitStatusId=6
+		Else
+			Set @intKitStatusId=null
+	End
 
 	Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
 	And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
