@@ -9,16 +9,46 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-    -- ==================================================================
-	-- Begin Transaction
-	-- ==================================================================
+-- =======================================================================================================
+-- Begin Transaction
+-- =======================================================================================================
+
+-- =======================================================================================================
+-- Get Stock Status
+-- =======================================================================================================
+
+CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
+
+
+
+IF(@strStockStatus = 'A')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+	INSERT INTO #statusTable VALUES ('Non-Voting');
+	INSERT INTO #statusTable VALUES ('Producer');
+	INSERT INTO #statusTable VALUES ('Other');
+END
+ELSE IF(@strStockStatus = 'S')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+	INSERT INTO #statusTable VALUES ('Non-Voting');
+END
+ELSE IF(@strStockStatus = 'V')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+END
+
+
 
 SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   strCustomerName = ENT.strName,
 			   AC.strStockStatus,
 			   dtmLastActivityDate = CV.dtmLastActivityDate,
 			   TC.strTaxCode,
-			   ysnEligibleRefund = (CASE WHEN AC.strStockStatus = @strStockStatus THEN 1 ELSE 0 END),
+			   ysnEligibleRefund = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND Total.dblRefundAmount < @dblMinimumRefund  THEN 1 ELSE 0 END),
 			   dblTotalPurchases = Total.dblTotalPurchases,
 			   dblTotalSales = Total.dblTotalSales,
 			   dblRefundAmount = Total.dblRefundAmount,
@@ -26,7 +56,7 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   dblCashRefund = Total.dblCashRefund,
 			   dbLessFWT = Total.dbLessFWT ,
 			   dblLessServiceFee = Total.dblLessServiceFee,
-			   dblCheckAmount =  Total.dblCheckAmount,
+			   dblCheckAmount =  Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee,
 			   dblTotalVolume = Total.dblVolume,
 			   dblTotalRefund = Total.dblTotalRefund
 		   FROM tblPATCustomerVolume CV
@@ -50,8 +80,7 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 					(SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))) AS dblEquityRefund,
 					(SUM(RRD.dblRate) * (RR.dblCashPayout/100)) AS dblCashRefund,
 					((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @FWT) AS dbLessFWT,
-					((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @LessService) AS dblLessServiceFee,
-					(SUM(RRD.dblRate) * (RR.dblCashPayout/100)) - ((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @FWT) - ((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @LessService) AS dblCheckAmount,
+					@LessService AS dblLessServiceFee,
 					SUM(dblVolume) AS dblVolume,
 					SUM(RRD.dblRate) AS dblTotalRefund
 			   FROM tblPATCustomerVolume B
@@ -95,11 +124,12 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 				Total.dblCashRefund,
 				Total.dbLessFWT,
 				Total.dblLessServiceFee,
-				Total.dblCheckAmount,
 				Total.dblVolume,
 				Total.dblTotalRefund,
 				AC.ysnSubjectToFWT
+	   
 
+	   DROP TABLE #statusTable
 	-- ==================================================================
 	-- End Transaction
 	-- ==================================================================

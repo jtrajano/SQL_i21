@@ -6,13 +6,43 @@ BEGIN
 
 	SET NOCOUNT ON;
 
-	-- ==================================================================
-	-- Begin Transaction
-	-- ==================================================================
+-- =======================================================================================================
+-- Begin Transaction
+-- =======================================================================================================
+
+-- =======================================================================================================
+-- Get Stock Status
+-- =======================================================================================================
+
+CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
+
+
+
+IF(@strStockStatus = 'A')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+	INSERT INTO #statusTable VALUES ('Non-Voting');
+	INSERT INTO #statusTable VALUES ('Producer');
+	INSERT INTO #statusTable VALUES ('Other');
+END
+ELSE IF(@strStockStatus = 'S')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+	INSERT INTO #statusTable VALUES ('Non-Voting');
+END
+ELSE IF(@strStockStatus = 'V')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+END
+
+DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM tblPATCompanyPreference)
 
 		 SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 				strCustomerName = ENT.strName,
-				ysnEligibleRefund = (CASE WHEN AC.strStockStatus = @strStockStatus THEN 1 ELSE 0 END),
+				ysnEligibleRefund = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND SUM(RRD.dblRate) < @dblMinimumRefund THEN 1 ELSE 0 END),
 				AC.strStockStatus,
 				PC.strPurchaseSale,
 				TC.strTaxCode,
@@ -55,7 +85,7 @@ BEGIN
 				TC.strTaxCode, 
 				CV.dtmLastActivityDate,
 				PC.strPurchaseSale
-
+	DROP TABLE #statusTable
 	-- ==================================================================
 	-- End Transaction
 	-- ==================================================================

@@ -9,15 +9,42 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	-- ==================================================================
-	-- Begin Transaction
-	-- ==================================================================
-		
-	  
+-- =======================================================================================================
+-- Begin Transaction
+-- =======================================================================================================
+
+-- =======================================================================================================
+-- Get Stock Status
+-- =======================================================================================================
+
+CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
+
+
+
+IF(@strStockStatus = 'A')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+	INSERT INTO #statusTable VALUES ('Non-Voting');
+	INSERT INTO #statusTable VALUES ('Producer');
+	INSERT INTO #statusTable VALUES ('Other');
+END
+ELSE IF(@strStockStatus = 'S')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+	INSERT INTO #statusTable VALUES ('Non-Voting');
+END
+ELSE IF(@strStockStatus = 'V')
+BEGIN
+	DELETE FROM #statusTable
+	INSERT INTO #statusTable VALUES ('Voting');
+END
+
 SELECT DISTINCT CV.intFiscalYear,
-				dblVolume =  (CASE WHEN @strStockStatus = AC.strStockStatus THEN ISNULL(SUM(CV.dblVolume),0) ELSE 0 END),
-				dblRefundAmount = (CASE WHEN @strStockStatus = AC.strStockStatus THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
-				dblNonRefundAmount = (CASE WHEN @strStockStatus <> AC.strStockStatus THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
+				dblVolume =  (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(CV.dblVolume),0) ELSE 0 END),
+				dblRefundAmount = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
+				dblNonRefundAmount = (CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END),
 				dblCashRefund = (SUM(RRD.dblRate) * (RR.dblCashPayout/100)),
 				dbLessFWT =	((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @FWT),
 				dblLessServiceFee = ((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @LessService),
@@ -95,7 +122,7 @@ SELECT DISTINCT CV.intFiscalYear,
 
 
    DROP TABLE #temptable
-
+   DROP TABLE #statusTable
 
 	-- ==================================================================
 	-- End Transaction
