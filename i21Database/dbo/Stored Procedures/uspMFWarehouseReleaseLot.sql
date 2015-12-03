@@ -232,9 +232,14 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
-	UPDATE tblICLot
-	SET intLotStatusId = 1
-	WHERE intLotId = @intLotId
+	--UPDATE tblICLot
+	--SET intLotStatusId = 1
+	--WHERE intLotId = @intLotId
+
+	EXEC uspMFSetLotStatus @intLotId =@intLotId,       
+						 @intNewLotStatusId =1,  
+						 @intUserId =@intUserId ,
+						 @strNotes=''
 
 	IF @strAttributeValue = 'True'
 	BEGIN
