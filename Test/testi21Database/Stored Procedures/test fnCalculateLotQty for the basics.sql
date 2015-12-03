@@ -6,7 +6,7 @@ BEGIN
 			,@intCostingItemUOMId AS INT 
 			,@dblLotQty AS NUMERIC(18,6)
 			,@dblLotWeight AS NUMERIC(18,6)
-			,@dblCostingQty AS NUMERIC(18,6)
+			,@dblCostingQty AS NUMERIC(38, 20)
 			,@dblLotWeightPerQty AS NUMERIC(38,20)
 			,@expected AS NUMERIC(18,6) 
 			,@result AS NUMERIC(18,6)

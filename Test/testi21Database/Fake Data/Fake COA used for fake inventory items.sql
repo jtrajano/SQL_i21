@@ -21,6 +21,8 @@ BEGIN
 				,@OtherChargeExpense_Default AS INT = 10000
 				,@OtherChargeIncome_Default AS INT = 11000
 				,@OtherChargeAsset_Default AS INT = 12000
+				,@CostAdjustment_Default AS INT = 13000
+				,@RevalueWIP_Default AS INT = 14000
 
 				,@Inventory_NewHaven AS INT = 1001
 				,@CostOfGoods_NewHaven AS INT = 2001
@@ -34,6 +36,8 @@ BEGIN
 				,@OtherChargeExpense_NewHaven AS INT = 10001
 				,@OtherChargeIncome_NewHaven AS INT = 11001
 				,@OtherChargeAsset_NewHaven AS INT = 12001
+				,@CostAdjustment_NewHaven AS INT = 13001
+				,@RevalueWIP_NewHaven AS INT = 14001
 
 				,@Inventory_BetterHaven AS INT = 1002
 				,@CostOfGoods_BetterHaven AS INT = 2002
@@ -47,6 +51,8 @@ BEGIN
 				,@OtherChargeExpense_BetterHaven AS INT = 10002
 				,@OtherChargeIncome_BetterHaven AS INT = 11002
 				,@OtherChargeAsset_BetterHaven AS INT = 12002
+				,@CostAdjustment_BetterHaven AS INT = 13002
+				,@RevalueWIP_BetterHaven AS INT = 14002
 
 		-- Constant Variables
 		DECLARE @GROUP_Asset AS INT = 1
@@ -127,9 +133,12 @@ BEGIN
 		DECLARE @SEGMENT_ID_OtherChargeIncome AS INT = 11
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_OtherChargeIncome, '40500', 'OTHER CHARGE INCOME', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		--DECLARE @SEGMENT_ID_OtherChargeAsset AS INT = 12
-		--INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_OtherChargeAsset, '50500', 'OTHER CHARGE (ASSET)', @ACCOUNT_STRUCTURE_ID_Primary)
+		DECLARE @SEGMENT_ID_CostAdjustment AS INT = 12
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_CostAdjustment, '22100', 'COST ADJUSTMENT', @ACCOUNT_STRUCTURE_ID_Primary)
 
+		DECLARE @SEGMENT_ID_RevalueWIP AS INT = 13
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_RevalueWIP, '13040', 'REVALUE WIP', @ACCOUNT_STRUCTURE_ID_Primary)
+		
 		-- Location Segments 				
 		DECLARE @SEGMENT_ID_DefaultLocation AS INT = 100
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_DefaultLocation, '1000', 'DEFAULT', @ACCOUNT_STRUCTURE_ID_Location)
@@ -139,7 +148,7 @@ BEGIN
 
 		DECLARE @SEGMENT_ID_BetterHavenLocation AS INT = 102
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_BetterHavenLocation, '1002', 'BETTER HAVEN', @ACCOUNT_STRUCTURE_ID_Location)
-
+		
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for GL Account
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -155,6 +164,8 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeExpense_Default, 'OTHER CHARGE EXPENSE-DEFAULT', '30500-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeIncome_Default, 'OTHER CHARGE INCOME-DEFAULT', '40500-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeAsset_Default, 'OTHER CHARGE (ASSET)-DEFAULT', '50500-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostAdjustment_Default, 'COST ADJUSTMENT-DEFAULT', '22100-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueWIP_Default, 'REVALUE WIP-DEFAULT', '13040-1000');
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_NewHaven, 'INVENTORY WHEAT-NEW HAVEN', '12040-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_NewHaven, 'COST OF GOODS WHEAT-NEW HAVEN', '20100-1001');
@@ -167,7 +178,9 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_NewHaven, 'INVENTORY ADJUSTMENT-NEW HAVEN', '20500-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeExpense_NewHaven, 'OTHER CHARGE EXPENSE-NEW HAVEN', '30500-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeIncome_NewHaven, 'OTHER CHARGE INCOME-NEW HAVEN', '40500-1001');
-		--INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeAsset_NewHaven, 'OTHER CHARGE (ASSET)-NEW HAVEN', '50500-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostAdjustment_NewHaven, 'COST ADJUSTMENT-NEW HAVEN', '22100-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueWIP_NewHaven, 'REVALUE WIP-NEW HAVEN', '13040-1001');
+
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_BetterHaven, 'INVENTORY WHEAT-BETTER HAVEN', '12040-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_BetterHaven, 'COST OF GOODS WHEAT-BETTER HAVEN', '20100-1002');
@@ -178,9 +191,10 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_BetterHaven, 'INVENTORY IN TRANSIT-BETTER HAVEN', '12050-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_BetterHaven, 'ACCOUNT RECEIVABLE-BETTER HAVEN', '10650-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_BetterHaven, 'INVENTORY ADJUSTMENT-BETTER HAVEN', '20500-1002');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeExpense_BetterHaven, 'OTHER CHARGE EXPENSE-NEW HAVEN', '30500-1002');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeIncome_BetterHaven, 'OTHER CHARGE INCOME-NEW HAVEN', '40500-1002');
-		--INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeAsset_BetterHaven, 'OTHER CHARGE (ASSET)-NEW HAVEN', '50500-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeExpense_BetterHaven, 'OTHER CHARGE EXPENSE-BETTER HAVEN', '30500-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeIncome_BetterHaven, 'OTHER CHARGE INCOME-BETTER HAVEN', '40500-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostAdjustment_NewHaven, 'COST ADJUSTMENT-BETTER HAVEN', '22100-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueWIP_NewHaven, 'REVALUE WIP-BETTER HAVEN', '13040-1002');
 
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for Segment Mapping
@@ -230,9 +244,13 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_Default, @SEGMENT_ID_OtherChargeIncome);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_Default, @SEGMENT_ID_DefaultLocation);
 
-			---- OTHER CHARGE ASSET
-			--INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_Default, @SEGMENT_ID_OtherChargeAsset);
-			--INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_Default, @SEGMENT_ID_DefaultLocation);
+			-- COST ADJUSTMENT
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostAdjustment_Default, @SEGMENT_ID_CostAdjustment);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostAdjustment_Default, @SEGMENT_ID_DefaultLocation);
+
+			-- REVALUE WIP
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueWIP_Default, @SEGMENT_ID_RevalueWIP);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueWIP_Default, @SEGMENT_ID_DefaultLocation);
 
 		END 
 
@@ -282,9 +300,13 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_NewHaven, @SEGMENT_ID_OtherChargeIncome);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
-			---- OTHER CHARGE ASSET
-			--INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_NewHaven, @SEGMENT_ID_OtherChargeAsset);
-			--INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_NewHaven, @SEGMENT_ID_NewHavenLocation);
+			-- COST ADJUSTMENT
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostAdjustment_NewHaven, @SEGMENT_ID_CostAdjustment);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostAdjustment_NewHaven, @SEGMENT_ID_DefaultLocation);
+
+			-- REVALUE WIP
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueWIP_NewHaven, @SEGMENT_ID_RevalueWIP);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueWIP_NewHaven, @SEGMENT_ID_DefaultLocation);
 
 		END 
 
@@ -334,9 +356,13 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_BetterHaven, @SEGMENT_ID_OtherChargeIncome);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_BetterHaven, @SEGMENT_ID_NewHavenLocation);
 
-			---- OTHER CHARGE ASSET
-			--INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_BetterHaven, @SEGMENT_ID_OtherChargeAsset);
-			--INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_BetterHaven, @SEGMENT_ID_NewHavenLocation);
+			-- COST ADJUSTMENT
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostAdjustment_BetterHaven, @SEGMENT_ID_CostAdjustment);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostAdjustment_BetterHaven, @SEGMENT_ID_DefaultLocation);
+
+			-- REVALUE WIP
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueWIP_BetterHaven, @SEGMENT_ID_RevalueWIP);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueWIP_BetterHaven, @SEGMENT_ID_DefaultLocation);
 
 		END
 END

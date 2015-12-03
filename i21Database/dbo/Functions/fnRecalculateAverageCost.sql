@@ -9,7 +9,7 @@ AS
 BEGIN
 	DECLARE @dblTotalQty AS NUMERIC(18, 6)
 			,@dblTotalInventoryValue AS NUMERIC(38, 20) 
-	
+	 
 	SELECT	@dblTotalQty = SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)) 
 			,@dblTotalInventoryValue = SUM(
 					dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)

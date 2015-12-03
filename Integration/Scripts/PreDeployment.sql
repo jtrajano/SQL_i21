@@ -153,8 +153,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateSiteCustomerView.sql"
-
-
+:r "..\dbo\Views\vyuTMDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspTMDeliveryFillReport.sql"
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"

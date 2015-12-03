@@ -303,5 +303,7 @@
     <None Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateSiteCustomerView.sql" />
     <None Include="dbo\Views\vyuGLglhstmstDifference.sql" />
+    <None Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
+    <None Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
   </ItemGroup>
 </Project>

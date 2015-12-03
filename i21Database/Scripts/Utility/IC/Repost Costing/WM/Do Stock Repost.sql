@@ -1,8 +1,28 @@
-﻿-- USE i21Demo01
+
+-- USE irely98
 
 ------------------------------------------------------------------------------------------------------------------------------------
--- Open the fiscal year periods
+-- READ ME 
 ------------------------------------------------------------------------------------------------------------------------------------
+/*
+	This stored procedure will re-post all inventory transactions. It will impact the following: 
+
+	1. Stock Quantities from all costing tables like costing buckets. 
+	2. Recalculate the average cost. 
+	3. It will have an impact to the last cost and standard cost. 
+	4. It will delete the old inventory-transaction related records including g/l entries. 
+	5. It will re-populate the inventory-transaction records. It will create a new set of g/l entries. 
+	6. During the repopulate process, it will use the same transaction date and batch ids. 
+
+	Pre-requisites:
+	1. uspICRepostCosting
+	2. uspICDetectBadOnHand
+
+	Make sure to back-up your database before running this process. 
+
+*/
+
+-- Open the fiscal year periods
 SELECT	* 
 INTO	tblGLFiscalYearPeriodOriginal
 FROM	tblGLFiscalYearPeriod
@@ -57,8 +77,8 @@ BEGIN
 	SELECT * 
 	INTO	#tmpICInventoryTransaction
 	FROM	tblICInventoryTransaction
-	WHERE	ISNULL(ysnIsUnposted, 0) = 0
-			AND ISNULL(dblQty, 0) <> 0
+	WHERE	ISNULL(dblQty, 0) <> 0
+			AND ISNULL(ysnIsUnposted, 0) = 0 -- This where clause will exclude all the unposted transactions. 
 END
 
 BEGIN 
@@ -127,8 +147,8 @@ BEGIN
 				,@dblQty = dblQty 
 				,@intTransactionTypeId = intTransactionTypeId
 		FROM	#tmpICInventoryTransaction
-		-- ORDER BY dtmDate ASC 
-		ORDER BY intInventoryTransactionId ASC 
+		ORDER BY dtmDate ASC 
+		-- ORDER BY intInventoryTransactionId ASC 
 
 		-- Detect if the transaction is posted or not. 
 		BEGIN 
@@ -177,6 +197,8 @@ BEGIN
 
 			IF @strTransactionForm IN ('Consume', 'Produce') 
 			BEGIN 
+				PRINT 'Processing Consume'
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -228,6 +250,8 @@ BEGIN
 
 				DELETE FROM @ItemsToPost
 
+				PRINT 'Processing Produce'
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -255,8 +279,13 @@ BEGIN
 						,dblQty  
 						,dblUOMQty  
 						,dblCost = ISNULL(
-								(SELECT SUM( -1 * dblQty * dblCost ) FROM dbo.tblICInventoryTransaction WHERE strTransactionId = @strTransactionId AND strBatchId = @strBatchId) 
-								/ dblQty
+								(
+									SELECT	SUM(-1 * dblQty * dblCost )
+									FROM	dbo.tblICInventoryTransaction 
+									WHERE	strBatchId = @strBatchId
+											AND intTransactionTypeId = 8 
+								)									 
+								/ #tmpICInventoryTransaction.dblQty
 								, 0
 							)
 						,dblSalesPrice  
@@ -451,14 +480,13 @@ BEGIN
 				,@strTransactionId = @strTransactionId 
 				,@strBatchId = @strBatchId 
 				,@intEntityUserSecurityId = @intUserId 
+				,@ysnRecap = 0 
 		END 		
 
 		-- Book the G/L Entries
 		BEGIN 
 			BEGIN TRY
-
 				EXEC dbo.uspGLBookEntries @GLEntries, 1 
-
 			END TRY
 			BEGIN CATCH
 				PRINT 'Error in posting the g/l entries.'
@@ -533,14 +561,9 @@ COMMIT TRANSACTION
 SELECT '#tmpStockDiscrepancies', * FROM #tmpStockDiscrepancies
 
 STOP_QUERY: 
-
-
-
 GO
 
-------------------------------------------------------------------------------------------------------------------------------------
 -- Re-close the fiscal year periods
-------------------------------------------------------------------------------------------------------------------------------------
 UPDATE FYPeriod
 SET ysnOpen = FYPeriodOriginal.ysnOpen
 FROM	tblGLFiscalYearPeriod FYPeriod INNER JOIN tblGLFiscalYearPeriodOriginal FYPeriodOriginal

@@ -9,10 +9,11 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLIFOStorage
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(38, 20)
 	,@intEntityUserSecurityId AS INT
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT 
+	,@intTransactionDetailId AS INT 
 	,@NewLIFOStorageId AS INT OUTPUT 
 AS
 
@@ -36,6 +37,7 @@ INSERT dbo.tblICInventoryLIFOStorage (
 	,[dblCost]		
 	,[strTransactionId]
 	,[intTransactionId]
+	,[intTransactionDetailId]
 	,[dtmCreated]
 	,[intCreatedEntityId]
 	,[intConcurrencyId]
@@ -50,6 +52,7 @@ VALUES (
 	,@dblCost
 	,@strTransactionId
 	,@intTransactionId
+	,@intTransactionDetailId
 	,GETDATE()
 	,@intEntityUserSecurityId
 	,1

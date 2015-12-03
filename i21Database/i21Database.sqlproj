@@ -2462,7 +2462,6 @@
     <Build Include="dbo\Stored Procedures\uspCTGetTableDataInXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitSequence.sql" />
     <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOnStorageQty.sql" />
@@ -2482,14 +2481,15 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
-    <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
-    <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFOCostAdjustmentLog.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFORevalueOutStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustment.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostAdjustmentTableType.sql" />
+    <Build Include="dbo\Tables\tblICInventoryCostAdjustmentType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\15_InventoryCostAdjustmentTypes.sql" />
+    <Build Include="dbo\Functions\fnCalculateAverageCostAfterCostAdj.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustment.sql" />
     <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
@@ -2589,12 +2589,15 @@
     <Build Include="dbo\Views\vyuARInvoiceAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFApproveBlendSheets.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetOnHoldBlendSheets.sql" />
+    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
+    <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRecalcAveCostOnCostAdjustment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFOCostAdjustmentLog.sql" />
     <Build Include="dbo\Views\vyuGRGetVendors.sql" />
     <Build Include="dbo\Views\vyuGRGetSettleItem.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckIfOriginVendor.sql" />
     <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
-    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
     <Build Include="dbo\Views\vyuTRTansportLoad.sql" />
     <Build Include="dbo\Functions\fnARGetContractPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerPricingDetails.sql" />
@@ -2603,6 +2606,7 @@
     <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPriceId.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAuditLog.sql" />
     <Build Include="dbo\Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnCostAdjustment.sql" />
     <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCalendarDetailException.sql" />
     <Build Include="dbo\Tables\tblPATRefund.sql" />
@@ -2882,6 +2886,12 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Delete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_LoadPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetQuotePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnFIFOCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLIFOCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLotCosting.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotCostAdjustmentLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLIFO.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultDecimal.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostAutoNegative.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
@@ -3057,6 +3067,15 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ProductCode.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnActualCosting.sql" />
+    <Build Include="dbo\Tables\tblICInventoryActualCostAdjustmentLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnActualCost.sql" />
+    <None Include="Scripts\Post-Deployment\IC\PopulateTransDetailIdOnCostBuckets.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3133,6 +3152,10 @@
     <None Include="Scripts\Post-Deployment\ST\5_FileFieldMapping_PricebookSendSapphire.sql" />
     <None Include="Scripts\Post-Deployment\EM\017_MoveSplitCategoryToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\EM\018_UpdateRoleId_ForEntityCredential.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

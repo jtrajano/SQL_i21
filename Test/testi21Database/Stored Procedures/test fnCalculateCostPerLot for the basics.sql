@@ -5,7 +5,7 @@ BEGIN
 	DECLARE	@intItemUOMId AS INT
 			,@intWeightUOMId AS INT
 			,@intLotUOMId AS INT
-			,@dblCostPerItemUOMId AS NUMERIC(18,6)
+			,@dblCostPerItemUOMId AS NUMERIC(38, 20)
 
 	DECLARE @result AS FLOAT
 	DECLARE @expected AS FLOAT

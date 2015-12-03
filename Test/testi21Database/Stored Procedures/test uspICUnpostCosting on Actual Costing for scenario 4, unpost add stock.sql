@@ -26,7 +26,7 @@ BEGIN
 	DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-0000003'
 	DECLARE @intTransactionId AS INT = 1
 	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvRcpt-00001'
-	DECLARE @intUserId AS INT = 1
+	DECLARE @intEntityUserSecurityId AS INT = 1
 	DECLARE @GLDetail AS dbo.RecapTableType
 		
 	DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
@@ -76,7 +76,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblQty NUMERIC(18,6)
 		,dblUOMQty NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38,20)
 		,dblValue NUMERIC(18,6)
 		,dblSalesPrice NUMERIC(18,6)
 		,intTransactionId INT
@@ -97,7 +97,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblQty NUMERIC(18,6)
 		,dblUOMQty NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38, 20)
 		,dblValue NUMERIC(18,6)
 		,dblSalesPrice NUMERIC(18,6)
 		,intTransactionId INT
@@ -133,7 +133,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38, 20)
 		,strTransactionId NVARCHAR(40)
 		,intTransactionId INT
 		,strActualCostId NVARCHAR(50)
@@ -147,7 +147,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38, 20)
 		,strTransactionId NVARCHAR(40)
 		,intTransactionId INT		
 		,strActualCostId NVARCHAR(50)
@@ -502,7 +502,7 @@ BEGIN
 		@intTransactionId
 		,@strTransactionId
 		,@strBatchId
-		,@intUserId
+		,@intEntityUserSecurityId
 END 
 
 -- Assert

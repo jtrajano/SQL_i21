@@ -12,7 +12,7 @@
 	
 	@strBatchId - The generated batch id from the calling code. This is the same batch id this SP will use when posting the financials of an item. 
 
-	@intUserId - The user who is initiating the post. 
+	@intEntityUserSecurityId - The user who is initiating the post. 
 */
 CREATE PROCEDURE [dbo].[uspICPostStorage]
 	@ItemsStorage AS ItemCostingTableType READONLY
@@ -34,7 +34,7 @@ DECLARE @intId AS INT
 		,@dtmDate AS DATETIME
 		,@dblQty AS NUMERIC(18, 6) 
 		,@dblUOMQty AS NUMERIC(18, 6)
-		,@dblCost AS NUMERIC(18, 6)
+		,@dblCost AS NUMERIC(38, 20)
 		,@dblSalesPrice AS NUMERIC(18, 6)
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS DECIMAL (38, 20) 

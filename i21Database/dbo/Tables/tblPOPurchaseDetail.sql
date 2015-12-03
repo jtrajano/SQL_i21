@@ -16,7 +16,7 @@
     [dblVolume] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblWeight] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-    [dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+    [dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 	[dblTotal] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 	[dblTax] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [strMiscDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 

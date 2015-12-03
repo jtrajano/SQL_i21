@@ -24,8 +24,9 @@ END
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
-DECLARE @WRITE_OFF_SOLD AS INT = 2
-DECLARE @REVALUE_SOLD AS INT = 3
+		,@WRITE_OFF_SOLD AS INT = 2
+		,@REVALUE_SOLD AS INT = 3
+		,@INVENTORY_COST_ADJUSTMENT AS INT = 22;
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -33,6 +34,27 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LIFO AS INT = 3
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5
+
+-- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
+DECLARE @strItemNo AS NVARCHAR(50)
+		,@strRelatedTransactionId AS NVARCHAR(50)
+
+SELECT TOP 1 
+		@strItemNo = Item.strItemNo
+		,@strRelatedTransactionId = InvTrans.strTransactionId
+FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
+			ON InvTrans.intItemId = Item.intItemId
+WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
+		AND InvTrans.strRelatedTransactionId = @strTransactionId
+		AND InvTrans.intTransactionTypeId = @INVENTORY_COST_ADJUSTMENT
+		AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
+
+IF @strRelatedTransactionId IS NOT NULL 
+BEGIN 
+	-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
+	RAISERROR(80063, 11, 1, @strItemNo, @strRelatedTransactionId)  
+	RETURN -1;
+END 
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 

@@ -3,9 +3,9 @@ AS
 BEGIN
 	-- Arrange
 	DECLARE @dblQty AS NUMERIC(18,6) = 100 -- say 100 50kg bags. 
-	DECLARE @dblCost AS NUMERIC(18,6) = 20 -- say each bag is $20. 
+	DECLARE @dblCost AS NUMERIC(38, 20) = 20.00 -- say each bag is $20. 
 	DECLARE @dblWeight AS NUMERIC(18,6) = 3000 -- instead of 5,000 kgs (100 x 50), the actual weight is 3000 kgs. 
-	DECLARE @expected AS NUMERIC(18,6) = @dblQty * @dblCost / @dblWeight 
+	DECLARE @expected AS NUMERIC(18, 6) = 100 * 20.00 / 3000 -- @dblQty * @dblCost / @dblWeight 
 	DECLARE @result AS NUMERIC(18,6)
 
 	-- Act

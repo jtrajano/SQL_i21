@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
 	@ReceiptEntries ReceiptStagingTable READONLY
 	,@OtherCharges ReceiptOtherChargesTableType READONLY 
-	,@intUserId AS INT	
+	,@intEntityUserSecurityId AS INT	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -10,7 +10,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intEntityId AS INT
 DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
 DECLARE @ReceiptNumber AS NVARCHAR(50);
 
@@ -19,11 +18,6 @@ DECLARE @InventoryReceiptId AS INT
 		,@strSourceScreenName AS NVARCHAR(50)
 		,@strReceiptNumber AS NVARCHAR(50)
 		
--- Get the entity id
-SELECT	@intEntityId = intEntityUserSecurityId
-FROM	dbo.tblSMUserSecurity 
-WHERE	intEntityUserSecurityId = @intUserId
-
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
@@ -193,7 +187,7 @@ BEGIN
 				,strBillOfLading		= IntegrationData.strBillOfLadding
 				,intShipViaId			= IntegrationData.intShipViaId
 				,intShipFromId			= IntegrationData.intShipFromId
-				,intReceiverId			= @intUserId 
+				,intReceiverId			= @intEntityUserSecurityId 
 				,intCurrencyId			= IntegrationData.intCurrencyId
 				,strVessel				= NULL
 				,intFreightTermId		= NULL
@@ -210,8 +204,8 @@ BEGIN
 				,dtmReceiveTime			= NULL 
 				,dblActualTempReading	= NULL 
 				,intConcurrencyId		= 1
-				,intEntityId			= (SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
-				,intCreatedUserId		= @intUserId
+				,intEntityId			= @intEntityUserSecurityId 
+				,intCreatedUserId		= NULL 
 				,ysnPosted				= 0
 				,strActualCostId		= IntegrationData.strActualCostId
 
@@ -262,7 +256,7 @@ BEGIN
 				/*strBillOfLading*/				,IntegrationData.strBillOfLadding
 				/*intShipViaId*/				,IntegrationData.intShipViaId
 				/*intShipFromId*/				,IntegrationData.intShipFromId
-				/*intReceiverId*/				,@intUserId 
+				/*intReceiverId*/				,@intEntityUserSecurityId 
 				/*intCurrencyId*/				,IntegrationData.intCurrencyId
 				/*strVessel*/					,NULL
 				/*intFreightTermId*/			,NULL
@@ -279,8 +273,8 @@ BEGIN
 				/*dtmReceiveTime*/				,NULL 
 				/*dblActualTempReading*/		,NULL 
 				/*intConcurrencyId*/			,1
-				/*intEntityId*/					,(SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
-				/*intCreatedUserId*/			,@intUserId
+				/*intEntityId*/					,@intEntityUserSecurityId 
+				/*intCreatedUserId*/			,NULL 
 				/*ysnPosted*/					,0
 				/*strActualCostId*/				,IntegrationData.strActualCostId
 			)
@@ -710,7 +704,7 @@ BEGIN
 			EXEC	dbo.uspSMAuditLog 
 					@keyValue = @InventoryReceiptId							-- Primary Key Value of the Inventory Receipt. 
 					,@screenName = 'Inventory.view.InventoryReceipt'        -- Screen Namespace
-					,@entityId = @intEntityId                               -- Entity Id.
+					,@entityId = @intEntityUserSecurityId                   -- Entity Id.
 					,@actionType = 'Processed'                              -- Action Type
 					,@changeDescription = @strDescription					-- Description
 					,@fromValue = @strSourceId                              -- Previous Value
