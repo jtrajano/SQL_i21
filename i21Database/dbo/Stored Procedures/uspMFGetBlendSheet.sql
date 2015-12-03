@@ -8,7 +8,7 @@ a.dblBinSize,a.intBlendRequirementId,a.ysnUseTemplate,
 a.ysnKittingEnabled,a.strComment,a.intLocationId, 
 Case When (e.dblQuantity - ISNULL(e.dblIssuedQty ,0)) <=0 Then a.dblQuantity Else (e.dblQuantity - ISNULL(e.dblIssuedQty ,0)) End AS dblBalancedQtyToProduce
 From tblMFWorkOrder a Join tblICItem b on a.intItemId=b.intItemId
-Join tblICItemUOM c on b.intItemId=c.intItemId
+Join tblICItemUOM c on a.intItemUOMId=c.intItemUOMId
 Join tblICUnitMeasure d on c.intUnitMeasureId=d.intUnitMeasureId
 Join tblMFBlendRequirement e on a.intBlendRequirementId=e.intBlendRequirementId
 Where a.intWorkOrderId=@intWorkOrderId

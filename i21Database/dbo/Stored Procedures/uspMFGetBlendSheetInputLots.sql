@@ -84,11 +84,11 @@ Begin
 	pl.strParentLotNumber AS strLotNumber,i.intItemId,i.strItemNo,i.strDescription,um.strUnitMeasure AS strUOM,
 	um1.strUnitMeasure AS strIssuedUOM,wi.intRecipeItemId,CAST(0 AS numeric(18,6)) AS dblUnitCost,
 	ISNULL(pl.strParentLotAlias,'') AS strLotAlias,
-	'' AS strGarden,wi.intLocationId,
+	Convert(nvarchar(max),'') AS strGarden,wi.intLocationId,
 	cl.strLocationName AS strLocationName,
 	sbl.strSubLocationName,
 	sl.strName AS strStorageLocationName,
-	'' AS strRemarks,
+	Convert(nvarchar(max),'') AS strRemarks,
 	i.dblRiskScore,
 	ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 	CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
@@ -109,8 +109,16 @@ Begin
 	Left Join tblMFRecipeItem ri on wi.intRecipeItemId=ri.intRecipeItemId
 	Where wi.intWorkOrderId=@intWorkOrderId
 
-	Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strGarden,''),wi.strRemarks=l.strNotes
-	From #tblWorkOrderInputParent wi Join tblICLot l on wi.intLotId=l.intParentLotId
+	--Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strGarden,''),wi.strRemarks=l.strNotes
+	--From #tblWorkOrderInputParent wi Join tblICLot l on wi.intLotId=l.intParentLotId
+
+	Update wi Set wi.dblUnitCost=t.dblLastCost,wi.strGarden=ISNULL(t.strGarden,''),wi.strRemarks=ISNULL(t.strNotes,'')
+	FROM #tblWorkOrderInputParent wi
+	OUTER APPLY (
+    SELECT TOP 1 l.dblLastCost,l.strGarden,l.strNotes
+    FROM tblICLot l
+    WHERE l.intParentLotId = wi.intLotId
+    ORDER BY l.intLotId DESC) t
 
 	Select * from #tblWorkOrderInputParent
 End
