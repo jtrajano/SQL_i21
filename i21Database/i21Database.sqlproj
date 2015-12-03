@@ -3060,6 +3060,7 @@
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
     <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
