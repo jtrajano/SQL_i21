@@ -42,7 +42,7 @@
     [intDiscountSchedule] INT NULL, 
     [strDiscountLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [dtmDeferDate] DATETIME NULL, 
-    [strContractNumber] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
+    [strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intContractSequence] INT NULL, 
     [strContractLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [dblUnitPrice] DECIMAL(9, 5) NULL, 
