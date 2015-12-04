@@ -296,6 +296,13 @@ BEGIN
 					SET @dblTransferCost = 0
 					SET @strPriceMethod = 'Standard Pricing'
 		END
+		IF (@strPriceMethod = 'Import File Price')
+		BEGIN
+					SET @intContractId = null
+					SET @strPrcPriceBasis = null
+					SET @dblTransferCost = 0
+					SET @strPriceMethod = 'Import File Price'
+		END
 		ELSE IF (@strPriceMethod = 'Special Pricing')
 		BEGIN
 					SET @intContractId = null
@@ -360,8 +367,10 @@ BEGIN
 		FROM tblSMCompanyLocation 
 		WHERE intCompanyLocationId = @intARItemLocationId
 
-		SELECT @intTaxGroupId = [dbo].[fnGetTaxGroupForLocation]
-		(@intTaxMasterId, @strCountry, @strCounty, @strCity, @strState)
+		--SELECT @intTaxGroupId = [dbo].[fnGetTaxGroupForLocation]
+		--(@intTaxMasterId, @strCountry, @strCounty, @strCity, @strState)
+		
+		SELECT @intTaxGroupId = @intTaxMasterId
 
 		INSERT INTO @tblTaxTable
 		SELECT
