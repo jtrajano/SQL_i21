@@ -149,8 +149,14 @@ BEGIN
 		-- Declare the variables for the transaction types
 		DECLARE @PurchaseType AS INT = 4
 				,@SalesType AS INT = 5
-				,@CostAdjustmentType AS INT = 22
-				,@BillType AS INT = 23
+				,@CostAdjustmentType AS INT 
+				,@BillType AS INT 
+
+		SELECT	@CostAdjustmentType = intTransactionTypeId
+		FROM dbo.tblICInventoryTransactionType WHERE strName = 'Cost Adjustment'
+
+		SELECT	@BillType = intTransactionTypeId
+		FROM dbo.tblICInventoryTransactionType WHERE strName = 'Bill'
 
 		-- Declare the cost types
 		DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
