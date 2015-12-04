@@ -3063,6 +3063,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummary.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql" />
+    <Build Include="dbo\Tables\tblSMPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
