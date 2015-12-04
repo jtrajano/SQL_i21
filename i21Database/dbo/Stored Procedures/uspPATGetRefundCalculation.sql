@@ -50,7 +50,7 @@ SELECT DISTINCT RR.intRefundTypeId,
 				dblRefundAmount = Total.dblRefundAmount ,
 				dblNonRefundAmount = Total.dblNonRefundAmount,
 				dblCashRefund = Total.dblCashRefund,
-				dblEquityRefund = Total.dblEquityRefund
+				dblEquityRefund = Total.dblRefundAmount - Total.dblCashRefund
 		   FROM tblPATCustomerVolume CV
      INNER JOIN tblPATRefundRateDetail RRD
 			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
@@ -67,10 +67,9 @@ SELECT DISTINCT RR.intRefundTypeId,
 	CROSS APPLY (
 				SELECT DISTINCT B.intCustomerPatronId AS intCustomerId,
 					   (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN SUM(dblVolume) ELSE 0 END) AS dblVolume,
-					   (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END) AS dblRefundAmount,
+					   (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate) * SUM(dblVolume),0) ELSE 0 END) AS dblRefundAmount,
 					   (CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END) AS dblNonRefundAmount,
-					   ISNULL((SUM(RRD.dblRate) * (RR.dblCashPayout/100)),0) AS dblCashRefund,
-					   ISNULL((SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))), 0) AS dblEquityRefund
+					   (SUM(RRD.dblRate) * SUM(dblVolume) * (SUM(RR.dblCashPayout)/100)) AS dblCashRefund
 				  FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
 					ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
@@ -108,8 +107,7 @@ SELECT DISTINCT RR.intRefundTypeId,
 				Total.dblVolume,
 				Total.dblRefundAmount,
 				Total.dblNonRefundAmount,
-				Total.dblCashRefund,
-				Total.dblEquityRefund
+				Total.dblCashRefund
 
 	-- ==================================================================
 	-- End Transaction
