@@ -8,7 +8,6 @@
     [strContactName]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strContactPhone]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strContactEmail]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-	[strFilingFolder]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]       INT            CONSTRAINT [DF_tblTFPreference_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblTFPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
 );
