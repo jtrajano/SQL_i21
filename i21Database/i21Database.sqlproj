@@ -3059,6 +3059,7 @@
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
