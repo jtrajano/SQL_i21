@@ -221,6 +221,7 @@ EXEC sp_executesql @query
 
 SELECT STATEMENTREPORT.strReferenceNumber
       ,STATEMENTREPORT.strTransactionType
+	  ,STATEMENTREPORT.intEntityCustomerId
 	  ,STATEMENTREPORT.dtmDueDate
 	  ,STATEMENTREPORT.dtmDate
 	  ,STATEMENTREPORT.intDaysDue
