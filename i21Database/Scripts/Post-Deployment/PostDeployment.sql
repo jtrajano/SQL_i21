@@ -266,6 +266,17 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
 :r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
 
+-- Motor Fuel Tax
+:r .\TF\DefaultData\_TaxAuthority.sql
+:r .\TF\DefaultData\_Frequency.sql
+:r .\TF\DefaultData\_ReportingComponent.sql
+:r .\TF\DefaultData\_ProductCode.sql
+:r .\TF\DefaultData\_TerminalControlNumber.sql
+:r .\TF\DefaultData\_ConfigurationType.sql
+:r .\TF\DefaultData\_ConfigurationTemplate.sql
+
+
+
 -- Common
 :r .\Common\ErrorMessages.sql 
 
