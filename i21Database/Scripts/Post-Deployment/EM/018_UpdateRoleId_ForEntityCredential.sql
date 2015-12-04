@@ -21,7 +21,7 @@ BEGIN
 			declare @hid int
 			select @hid = intUserRoleID 
 				from tblSMUserRole 
-					where strName = ''Help Desk'' and strDescription = ''Default contract role.'' and strRoleType = ''Contact'' and ysnAdmin = 0
+					where strName = ''Help Desk'' and strDescription = ''Default contact role.'' and strRoleType = ''Contact'' and ysnAdmin = 0
 
 			update tblEntityCredential set intEntityRoleId = @hid 	
 				where intEntityId in (select intEntityContactId from tblEntityToContact where ysnPortalAccess = 1)
