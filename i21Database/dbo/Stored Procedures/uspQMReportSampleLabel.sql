@@ -49,7 +49,7 @@ BEGIN TRY
 	SELECT TOP 1 I.strItemNo
 		,I.strDescription
 		,S.strSampleNumber
-		,CONVERT(NVARCHAR, S.dtmSampleReceivedDate, 107) AS dtmSampleReceivedDate
+		,S.dtmSampleReceivedDate
 		,CASE 
 			WHEN S.intProductTypeId = 11
 				THEN ISNULL(L.strLotNumber,'')
