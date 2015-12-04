@@ -3061,6 +3061,9 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
+    <Build Include="dbo\Tables\tblSMForBatchPosting.sql" />
+    <Build Include="dbo\Views\vyuSMForBatchPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddTransactionForBatchPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
