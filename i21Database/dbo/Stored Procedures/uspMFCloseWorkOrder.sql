@@ -131,7 +131,7 @@ BEGIN TRY
 	SELECT @RecordKey = MIN(RecordKey)
 	FROM @Lot
 
-	WHILE @RecordKey IS NOT NULL
+	WHILE @RecordKey IS NOT NULL AND @strAttributeValue='True'
 	BEGIN
 		SELECT @intLotId = intLotId,@strLotNumber=strLotNumber
 		FROM @Lot
@@ -170,6 +170,12 @@ BEGIN TRY
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
 			)
 		EXEC dbo.uspICUnpostCosting @intLotId
 			,@strLotNumber
