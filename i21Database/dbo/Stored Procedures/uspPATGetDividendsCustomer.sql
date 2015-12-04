@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspPATGetDividendsCustomer]
+﻿
+CREATE PROCEDURE [dbo].[uspPATGetDividendsCustomer]
 	@intCustomerId INT = NULL,
 	@dblProcessingDays NUMERIC(18,6) = NULL,
 	@ysnProrateDividend BIT = NULL,
@@ -12,11 +13,12 @@ BEGIN
 			   SC.dblParValue,
 			   CS.dblSharesNo,
 			   SC.intDividendsPerShare,
-			   dblDividendAmount = CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> null 
-										THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-										(((CS.dblSharesNo * SC.intDividendsPerShare)/365) * (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN 
-																							DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE 
-																							@dblProcessingDays END)) END
+			   dblDividendAmount = CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL THEN 
+										((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays ELSE
+										((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
+										CASE WHEN CS.dtmIssueDate > @dtmCutoffDate 
+											THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) 
+											ELSE @dblProcessingDays END END
 		  FROM tblPATStockClassification SC
 	INNER JOIN tblPATCustomerStock CS
 			ON CS.intStockId = SC.intStockId
@@ -29,6 +31,5 @@ BEGIN
 		 WHERE CS.intCustomerPatronId = @intCustomerId
 END
 
+
 GO
-
-

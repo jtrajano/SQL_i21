@@ -16,48 +16,12 @@ BEGIN
 				   ARC.strStockStatus,
 				   TC.strTaxCode,
 				   dtmLastActivityDate = GETDATE(),
-				   dblDividendAmount = SUM(CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-												THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) 
-												ELSE
-													 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
-													 (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate 
-														   THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) 
-														   ELSE @dblProcessingDays END)) 
-												END),
-
-				   dblLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 
-									 THEN 0 
-									 ELSE
-										SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-														    THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) 
-															ELSE (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
-																   (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate 
-																	THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) 
-																	ELSE @dblProcessingDays 
-																	END))  
-															END) < @dblMinimumDividend 
-										 THEN 0 
-										 ELSE 
-												(CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-												 THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) 
-												 ELSE (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
-													  (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate 
-													        THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) 
-															ELSE @dblProcessingDays 
-														END)) 
-												  END * (@FWT / 100)) 
-										 END) 
-									 END,
-
-				   dblCheckAmount = SUM(CASE WHEN (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-														THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-															 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * 
-															 (CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE @dblProcessingDays END)) END) < @dblMinimumDividend 
-										 THEN 0 ELSE 
-												  (CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL 
-														THEN (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays) ELSE
-															 (((CS.dblSharesNo * SC.intDividendsPerShare)/365) * CASE WHEN CS.dtmIssueDate > @dtmCutoffDate THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) ELSE @dblProcessingDays END) END - ISNULL(CS.dblCheckAmount,0)) END)
-
+				   dblDividendAmount = Total.dblDividendAmount,
+				   dblLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 
+									 ELSE (CASE WHEN Total.dblDividendAmount < @dblMinimumDividend THEN 0 
+												ELSE Total.dblDividendAmount * (@FWT / 100) END) END,
+				   dblCheckAmount = CASE WHEN Total.dblDividendAmount < @dblMinimumDividend THEN 0
+										 ELSE Total.dblDividendAmount - ISNULL(CS.dblCheckAmount,0) END
 			 FROM tblPATStockClassification SC
 	   INNER JOIN tblPATCustomerStock CS
 			   ON CS.intStockId = SC.intStockId
@@ -67,7 +31,39 @@ BEGIN
 			   ON ARC.intEntityCustomerId = ENT.intEntityId
 		LEFT JOIN tblSMTaxCode TC
 			   ON TC.intTaxCodeId = ARC.intTaxCodeId
-
-			   GROUP BY CS.intCustomerPatronId,ENT.strName, ARC.strStockStatus, TC.strTaxCode, CS.dblSharesNo, SC.intDividendsPerShare, CS.dtmIssueDate, ARC.ysnSubjectToFWT
+	  CROSS APPLY (
+	  	 
+				  SELECT DISTINCT intCustomerId = B.intCustomerPatronId,
+								  dblDividendAmount = SUM(CASE WHEN @ysnProrateDividend <> 0 AND @dtmCutoffDate <> NULL THEN 
+												  ((B.dblSharesNo * SC.intDividendsPerShare)/365) * @dblProcessingDays ELSE
+												  ((B.dblSharesNo * SC.intDividendsPerShare)/365) * 
+												  CASE WHEN B.dtmIssueDate > @dtmCutoffDate 
+													 THEN DATEDIFF(day, B.dtmIssueDate, @dtmProcessingDateTo) 
+													 ELSE @dblProcessingDays END END)
+							 FROM tblPATStockClassification SC
+					   INNER JOIN tblPATCustomerStock B
+							   ON B.intStockId = SC.intStockId
+					   INNER JOIN tblEntity ENT
+							   ON ENT.intEntityId = B.intCustomerPatronId
+					   INNER JOIN tblARCustomer ARC
+							   ON ARC.intEntityCustomerId = ENT.intEntityId
+						LEFT JOIN tblSMTaxCode TC
+							   ON TC.intTaxCodeId = ARC.intTaxCodeId
+							WHERE B.intCustomerPatronId = CS.intCustomerPatronId
+						 GROUP BY B.intCustomerPatronId
+			) Total
+		    WHERE CS.strActivityStatus <> 'Retired'
+         GROUP BY CS.intCustomerPatronId,
+				  ENT.strName, 
+				  ARC.strStockStatus, 
+				  TC.strTaxCode, 
+				  CS.dblSharesNo, 
+				  SC.intDividendsPerShare, 
+				  CS.dtmIssueDate, 
+				  ARC.ysnSubjectToFWT,
+				  Total.dblDividendAmount,
+				  CS.dblCheckAmount
 END
+
+
 GO
