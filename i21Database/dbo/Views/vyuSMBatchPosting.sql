@@ -5,13 +5,14 @@ BatchPosting.strTransactionType		AS	strTransactionType,
 intJournalId						AS	intTransactionId, 
 strJournalId						AS	strTransactionId, 
 BatchPosting.intEntityId			AS	intEntityId, 
-ISNULL(dblAmount, 0.0)				AS	dblAmount,
-strVendorInvoiceNumber				AS	strVendorInvoiceNumber,
+ISNULL(BatchPosting.dblAmount, 0.0)	AS	dblAmount,
+BatchPosting.strVendorInvoiceNumber	AS	strVendorInvoiceNumber,
+BatchPosting.intEntityVendorId		AS  intEntityVendorId,
 ISNULL(Entity.strName, '')			AS	strVendorName,
 UserSecurity.strUserName			AS	strUserName,
 BatchPosting.strDescription			AS	strDescription,
 BatchPosting.dtmDate				AS	dtmDate,
-CONVERT(NVARCHAR(100),Fiscal.guid)	AS  strFiscalUniqueId
+CONVERT(NVARCHAR(100),ISNULL(Fiscal.guid, ForBatchPosting.strBatchId))	AS  strFiscalUniqueId
 FROM 
 (
 	SELECT Journal.strJournalType as strTransactionType, Journal.intJournalId, Journal.strJournalId, Total.dblDebit as dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, Journal.intEntityId, Journal.dtmDate, Journal.strDescription
@@ -33,4 +34,5 @@ FROM
 LEFT JOIN tblEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
 INNER JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
 LEFT JOIN tblGLForBatchPosting Fiscal on BatchPosting.intJournalId = Fiscal.intTransactionId
+LEFT JOIN tblSMForBatchPosting ForBatchPosting on BatchPosting.intJournalId = ForBatchPosting.intTransactionId
 GO
