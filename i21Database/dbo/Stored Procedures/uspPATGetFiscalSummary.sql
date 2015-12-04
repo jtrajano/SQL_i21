@@ -49,7 +49,7 @@ SELECT DISTINCT CV.intFiscalYear,
 				dbLessFWT =	Total.dbLessFWT,
 				dblLessServiceFee = Total.dblLessServiceFee,
 				dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee END,
-				dblEquityRefund = Total.dblEquityRefund,
+				dblEquityRefund = Total.dblRefundAmount - Total.dblCashRefund,
 				intVoting = (SELECT ISNULL(Count(*),0) 
 							   FROM tblPATCustomerVolume CVV
 					     INNER JOIN tblARCustomer ARR
@@ -87,12 +87,11 @@ SELECT DISTINCT CV.intFiscalYear,
 			  CROSS APPLY (
 	 SELECT DISTINCT B.intFiscalYear AS intFiscalYear,
 				    (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(B.dblVolume),0) ELSE 0 END) AS dblVolume,
-					(CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END) AS dblRefundAmount,
-					(CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END) AS dblNonRefundAmount,
-					(SUM(RRD.dblRate) * (RR.dblCashPayout/100)) AS dblCashRefund,
-					((SUM(RRD.dblRate) * (RR.dblCashPayout/100)) * @FWT) AS dbLessFWT,
-					@LessService AS dblLessServiceFee,
-					(SUM(RRD.dblRate) - (SUM(RRD.dblRate) * (RR.dblCashPayout/100))) AS dblEquityRefund
+					(CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate) * SUM(dblVolume),0) ELSE 0 END) AS dblRefundAmount,
+					(CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate) * SUM(dblVolume),0) ELSE 0 END) AS dblNonRefundAmount,
+					((SUM(RRD.dblRate) * SUM(dblVolume)) * (RR.dblCashPayout/100)) AS dblCashRefund,
+					(((SUM(RRD.dblRate) * SUM(dblVolume)) * (RR.dblCashPayout/100)) * (@FWT/100)) AS dbLessFWT,
+					@LessService AS dblLessServiceFee
 			   FROM tblPATCustomerVolume B
 		 INNER JOIN tblPATRefundRateDetail RRD
 				 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
@@ -136,8 +135,7 @@ SELECT DISTINCT CV.intFiscalYear,
 				Total.dblNonRefundAmount,
 				Total.dblCashRefund,
 				Total.dbLessFWT,
-				Total.dblLessServiceFee,
-				Total.dblEquityRefund
+				Total.dblLessServiceFee
 
 
 

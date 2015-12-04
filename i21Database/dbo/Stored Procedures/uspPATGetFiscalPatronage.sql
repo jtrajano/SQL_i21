@@ -5,7 +5,7 @@ BEGIN
 				SELECT DISTINCT RRD.intPatronageCategoryId,
 					   PC.strCategoryCode,
 					   RRD.dblRate,
-					   SUM(CV.dblVolume),
+					   dblVolume = SUM(CV.dblVolume),
 					   dblRefundAmount = SUM(ISNULL((RRD.dblRate * CV.dblVolume),0))
 				  FROM tblPATRefundRate RR
 			INNER JOIN tblPATRefundRateDetail RRD
