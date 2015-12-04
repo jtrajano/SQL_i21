@@ -28,6 +28,7 @@
 	[strScheduleName] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intProductCodeId] [int] NULL,
 	[strProductCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strType] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxClass] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDate] [datetime] NULL,
