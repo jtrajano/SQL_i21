@@ -145,7 +145,7 @@ BEGIN
 			SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
 									dblMaxEarned
 								 ELSE
-									(dblHoursEarned + dblAccruedHours)
+									(dblHoursEarned + T.dblEarnedHours)
 								END
 				,dblHoursAccrued = dblHoursAccrued - T.dblEarnedHours
 				,dtmLastAward = T.dtmNextAward
