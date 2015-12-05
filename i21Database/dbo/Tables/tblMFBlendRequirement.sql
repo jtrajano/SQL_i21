@@ -8,7 +8,7 @@
     [dtmDueDate] DATETIME NOT NULL, 
 	[intLocationId] INT NOT NULL,
 	[intStatusId] INT NOT NULL CONSTRAINT [DF_tblMFBlendRequirement_intStatusId] DEFAULT 1, 
-    [dblIssuedQty] NUMERIC(18, 6) NULL, 
+    [dblIssuedQty] NUMERIC(18, 6) NULL DEFAULT 0, 
     [intManufacturingCellId] INT NULL, 
     [dblBlenderSize] NUMERIC(18, 6) NULL, 
     [dblEstNoOfBlendSheet] NUMERIC(18, 6) NULL, 
