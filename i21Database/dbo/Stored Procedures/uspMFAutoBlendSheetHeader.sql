@@ -48,7 +48,7 @@ AS
 	SELECT 0 AS intWorkOrderId,'' AS strWorkOrderNo,i.intItemId,i.strItemNo,@dblQtyToProduce AS dblQuantity,@dblQtyToProduce AS dblPlannedQuantity,iu.intItemUOMId,
 	um.strUnitMeasure AS strUOM,2 AS intStatusId,br.intManufacturingCellId,br.intMachineId,br.dtmDueDate AS dtmExpectedDate,
 	br.dblBlenderSize AS dblBinSize,br.intBlendRequirementId,CAST(0 AS BIT) AS ysnUseTemplate,CAST(0 AS BIT) AS ysnKittingEnabled,br.strDemandNo AS strComment,
-	br.intLocationId,Cast(0 AS decimal) AS dblBalancedQtyToProduce,ip.dblStandardCost
+	br.intLocationId,Cast(0 AS decimal) AS dblBalancedQtyToProduce,ip.dblStandardCost,CAST(ISNULL(Ceiling(br.dblEstNoOfBlendSheet),1) AS decimal) AS dblEstNoOfBlendSheet
 	FROM tblMFBlendRequirement br JOIN tblICItem i ON br.intItemId=i.intItemId 
 	Join tblICItemUOM iu on i.intItemId=iu.intItemId and br.intUOMId=iu.intUnitMeasureId 
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
