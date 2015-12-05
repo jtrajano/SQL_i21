@@ -101,8 +101,9 @@ BEGIN TRY
 	WHERE intMachineId=@intMachineId
 	IF @intIssuedUOMTypeId= 0
 	BEGIN  
-		SET @strErrMsg='Please configure Issued UOM Type for machine ''' + @strBlenderName + '''.'
-		RAISERROR(@strErrMsg,16,1)
+		--SET @strErrMsg='Please configure Issued UOM Type for machine ''' + @strBlenderName + '''.'
+		--RAISERROR(@strErrMsg,16,1)
+		SET @intIssuedUOMTypeId=1
 	END
 		 
 	Set @intOriginalIssuedUOMTypeId=@intIssuedUOMTypeId
@@ -558,7 +559,7 @@ BEGIN TRY
 						END --AvailaQty>0 End
 				
 						SET @intStorageLocationId=NULL
-						FETCH NEXT FROM Cursor_FetchItem INTO @strLotNumber,@intRawItemId,@dblAvailableQty,@intStorageLocationId,@dblWeightPerQty
+						FETCH NEXT FROM Cursor_FetchItem INTO @intParentLotId,@intRawItemId,@dblAvailableQty,@intStorageLocationId,@dblWeightPerQty
 					END --Cursor End For Pick Lots
 					LOOP_END:		
 			
