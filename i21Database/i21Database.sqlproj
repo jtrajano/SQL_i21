@@ -3069,6 +3069,7 @@
     <Build Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Tables\tblSMPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
