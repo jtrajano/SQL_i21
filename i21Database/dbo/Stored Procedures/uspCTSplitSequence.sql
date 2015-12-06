@@ -1,9 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTSplitSequence]
-	@intContractDetailId	INT,
-	@dblQuantity			NUMERIC(18,6),
-	@intUserId				INT,
-	@intExternalId			INT,		
-	@strScreenName			NVARCHAR(100)
+	@intContractDetailId		INT,
+	@dblQuantity				NUMERIC(18,6),
+	@intUserId					INT,
+	@intExternalId				INT,		
+	@strScreenName				NVARCHAR(100),
+	@intNewContractDetailId		INT OUTPUT
 AS
 
 BEGIN TRY
@@ -12,7 +13,7 @@ SET NOCOUNT ON
 		DECLARE @intNextSequence			INT,
 				@XML						NVARCHAR(MAX),
 				@dblNewQuantity				NUMERIC(18,6),
-				@intNewContractDetailId		INT,
+				
 				@ErrMsg						NVARCHAR(MAX),
 				@intContractHeaderId		INT,
 				@dblHeaderQuantity			NUMERIC(18,6),
@@ -50,7 +51,7 @@ SET NOCOUNT ON
 				intContractSeq		=	@intNextSequence,
 				dblOriginalBasis	=	NULL
 
-		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',@XML OUTPUT							
+		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@XML,@intNewContractDetailId OUTPUT
 
 		SET @XML = NULL
@@ -65,7 +66,7 @@ SET NOCOUNT ON
 		UPDATE	#tblCTContractCost 
 		SET		intContractDetailId	=	@intNewContractDetailId
 
-		EXEC	uspCTGetTableDataInXML '#tblCTContractCost',@XML OUTPUT
+		EXEC	uspCTGetTableDataInXML '#tblCTContractCost',null,@XML OUTPUT
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractCost',@XML
 
 		SET @XML = NULL
@@ -80,7 +81,7 @@ SET NOCOUNT ON
 		UPDATE	#tblCTContractOption 
 		SET		intContractDetailId	=	@intNewContractDetailId
 
-		EXEC	uspCTGetTableDataInXML '#tblCTContractOption',@XML OUTPUT
+		EXEC	uspCTGetTableDataInXML '#tblCTContractOption',null,@XML OUTPUT
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractOption',@XML
 
 		SET @XML = NULL
@@ -95,7 +96,7 @@ SET NOCOUNT ON
 		UPDATE	#tblCTContractCertification 
 		SET		intContractDetailId	=	@intNewContractDetailId
 
-		EXEC	uspCTGetTableDataInXML '#tblCTContractCertification',@XML OUTPUT
+		EXEC	uspCTGetTableDataInXML '#tblCTContractCertification',null,@XML OUTPUT
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractCertification',@XML
 		
 		UPDATE	tblCTContractHeader

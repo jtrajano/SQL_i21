@@ -1,15 +1,21 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetTableDataInXML]
 	@TableName		NVARCHAR(MAX),
+	@Condition		NVARCHAR(MAX),
 	@XML			NVARCHAR(MAX) OUTPUT,
 	@TagName		NVARCHAR(MAX) = NULL
 AS
 BEGIN
 	
-	IF @TagName IS NULL
+	IF ISNULL(@TagName,'') = ''
     BEGIN
 		SET @TagName = REPLACE(@TableName,'#','')
     END
-    
+
+    IF ISNULL(@Condition,'') <> ''
+    BEGIN
+		SET @Condition = ' WHERE ' + @Condition + ' '
+    END
+
 	IF @TableName LIKE '#%'
 	BEGIN
 	 SELECT @TableName = object_name
@@ -23,7 +29,7 @@ BEGIN
 	SET @SQL = ' 
 	SELECT @TableData = (												
 	SELECT * 												
-	FROM '+@TableName+' '+@TagName+'												
+	FROM '+@TableName+' '+@TagName + ISNULL(@Condition,'') +'												
 	FOR XML AUTO, ELEMENTS,root('''+@TagName+'s'') 												
 	)'	
 

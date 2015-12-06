@@ -20,5 +20,5 @@ AS
 
 						dbo.fnCTGetBillIds(CH.intContractHeaderId) strBillIds
 				FROM	tblCTContractHeader CH	LEFT
-				JOIN	tblCTPriceFixation	PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				JOIN	tblCTPriceFixation	PF	ON	CH.intContractHeaderId = PF.intContractHeaderId AND CH.ysnMultiplePriceFixation = 1
 			)t
