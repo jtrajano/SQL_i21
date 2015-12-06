@@ -3067,6 +3067,7 @@
     <Build Include="dbo\Tables\tblSMForBatchPosting.sql" />
     <Build Include="dbo\Views\vyuSMForBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddTransactionForBatchPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
