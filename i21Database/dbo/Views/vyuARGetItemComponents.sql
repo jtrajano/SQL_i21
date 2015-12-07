@@ -2,22 +2,22 @@
 AS
 SELECT R.intRecipeId
 	 , R.intItemId
-     , RI.intItemId				AS intComponentItemId	 
+     , intComponentItemId		= RI.intItemId
 	 , I.strItemNo
 	 , I.strDescription	 
-	 , RI.intUOMId				AS intItemUnitMeasureId
-	 , UM.strUnitMeasure		AS strUnitMeasure
+	 , intItemUnitMeasureId		= RI.intUOMId
+	 , strUnitMeasure			= UM.strUnitMeasure
 	 , RI.dblQuantity
-	 , RI.dblQuantity			AS dblNewQuantity
-	 , I.dblAvailable			AS dblAvailableQuantity
-	 , RI.dblQuantity * I.dblSalePrice			AS dblPrice
-	 , RI.dblQuantity * I.dblSalePrice			AS dblNewPrice
-	 , I.strType				AS strItemType
-	 , 'Finished Good'			AS strType
+	 , dblNewQuantity			= RI.dblQuantity
+	 , dblAvailableQuantity		= I.dblAvailable
+	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(RI.intItemId, RI.intUOMId, RI.dblQuantity) * I.dblSalePrice
+	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(RI.intItemId, RI.intUOMId, RI.dblQuantity) * I.dblSalePrice 
+	 , strItemType				= I.strType
+	 , strType					= 'Finished Good'
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM vyuICGetItemStock I 
 INNER JOIN (tblMFRecipe R INNER JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId) ON I.intItemId = RI.intItemId
-INNER JOIN tblICUnitMeasure UM ON RI.intUOMId = UM.intUnitMeasureId
+INNER JOIN vyuARItemUOM UM ON RI.intUOMId = UM.intItemUOMId
   AND R.ysnActive = 1
   AND RI.intRecipeItemTypeId = 1          
 
@@ -40,4 +40,4 @@ SELECT intRecipeId			= NULL
 	 , ysnAllowNegativeStock = CONVERT(BIT, 0)
 FROM tblICItemBundle IB
 INNER JOIN vyuICGetItemStock I ON IB.intBundleItemId = I.intItemId
-INNER JOIN tblICUnitMeasure UOM ON IB.intItemUnitMeasureId = UOM.intUnitMeasureId
+INNER JOIN vyuARItemUOM UOM ON IB.intItemUnitMeasureId = UOM.intItemUOMId

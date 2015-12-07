@@ -18,7 +18,7 @@ SELECT R.intRecipeId
 	 , E.strEntityNo AS strCustomerNumber	 
 FROM tblMFRecipe R
 	LEFT JOIN tblICItem I ON R.intItemId = I.intItemId
-	LEFT JOIN tblICUnitMeasure UOM ON R.intUOMId = UOM.intUnitMeasureId
+	LEFT JOIN vyuARItemUOM UOM ON R.intUOMId = UOM.intItemUOMId
 	LEFT JOIN tblSMCompanyLocation L ON R.intLocationId = L.intCompanyLocationId
 	LEFT JOIN tblMFManufacturingCell MC ON R.intManufacturingCellId = MC.intManufacturingCellId
 	LEFT JOIN tblMFManufacturingProcess MP ON R.intManufacturingProcessId = MP.intManufacturingProcessId
