@@ -455,7 +455,11 @@ BEGIN
 			SET @ErrorMessage = ERROR_MESSAGE();
 		END CATCH
 	
-	IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) > 0
+	DECLARE @isValidFiscalYear BIT = 1
+	
+	SELECT @isValidFiscalYear = CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo') THEN dbo.isOpenAccountingDateByModule(@Date, 'Accounts Receivable') ELSE 1 END
+
+	IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) > 0 AND @ErrorMessage <> 'Unable to find an open fiscal year period to match the transaction date.'
 		BEGIN
 			UPDATE tblARImportLogDetail
 			SET [ysnImported]		= 0
@@ -468,13 +472,18 @@ BEGIN
 			  , [intFailedCount]	= intFailedCount + 1
 			WHERE [intImportLogId]  = @ImportLogId
 		END
-	ELSE IF(ISNULL(@NewTransactionId,0) <> 0)
+	ELSE IF(ISNULL(@NewTransactionId,0) <> 0) OR @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
 		BEGIN
 			IF @TransactionType <> 'Sales Order'
 				BEGIN
 					UPDATE tblARImportLogDetail
 					SET [ysnImported]		= 1
-					   ,[strEventResult]	= (SELECT strTransactionType + ':' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewTransactionId) + ' Imported.'
+					   ,[strEventResult]	= CASE WHEN @TransactionType IN ('Invoice', 'Credit Memo') AND @ErrorMessage = 'Unable to find an open fiscal year period to match the transaction date.'
+													THEN
+														(SELECT TOP 1 strTransactionType + ':' + strInvoiceNumber FROM tblARInvoice ORDER BY intInvoiceId DESC) + ' Imported. But unable to post due to: ' + @ErrorMessage
+													ELSE
+														(SELECT strTransactionType + ':' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewTransactionId) + ' Imported.'
+												END
 					WHERE [intImportLogDetailId] = @ImportLogDetailId
 				END
 			ELSE
