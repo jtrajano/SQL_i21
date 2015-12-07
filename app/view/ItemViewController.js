@@ -129,7 +129,10 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colDetailUnitQty: {
-                    dataIndex: 'dblUnitQty'
+                    dataIndex: 'dblUnitQty',
+                    editor: {
+                        readOnly: '{readOnlyStockUnit}'
+                    }
                 },
                 colDetailWeight: {
                     dataIndex: 'dblWeight'
