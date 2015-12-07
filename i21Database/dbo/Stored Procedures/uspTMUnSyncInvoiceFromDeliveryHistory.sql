@@ -454,7 +454,8 @@ BEGIN
 						,dblDegreeDayBetweenDelivery = A.dblSiteDegreeDayBetweenDelivery
 						,intNextDeliveryDegreeDay = A.intSiteNextDeliveryDegreeDay
 						,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
-
+						,dtmForecastedDelivery = NULL
+						,dtmRunOutDate = NULL
 					FROM(
 						SELECT TOP 1 * FROM tblTMDeliveryHistory
 						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
