@@ -231,7 +231,7 @@ BEGIN TRY
 		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
 		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
 		,[dtmShipDate]					= @ShipDate
-		,[dtmPostDate]					= @PostDate
+		,[dtmPostDate]					= CASE WHEN @PostDate IS NULL THEN CAST(@InvoiceDate AS DATE) ELSE @PostDate END
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
 		,[dblShipping]					= @ZeroDecimal
 		,[dblTax]						= @ZeroDecimal
