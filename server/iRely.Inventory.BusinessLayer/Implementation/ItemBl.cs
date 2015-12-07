@@ -241,6 +241,7 @@ namespace iRely.Inventory.BusinessLayer
                         p.strType == "Commodity" ||
                         p.strType == "Finished Good" 
                     )
+                .Where(p => p.strStatus != "Discontinued")
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
@@ -261,7 +262,8 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetItemStock>()
                 .Include(p => p.tblICItemAccounts)
-                .Include(p => p.tblICItemPricings).Filter(param, true);
+                .Include(p => p.tblICItemPricings).Filter(param, true)
+                .Where(p => p.strStatus != "Discontinued");
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
