@@ -1,6 +1,17 @@
 ﻿
 /*
-	This is the stored procedure that handles the adjust to the item's cost. 	
+	This is the stored procedure that handles the unposting of the cost adjustment. 
+	
+	Parameters: 
+	@intTransactionId - The integer value that represents the id of the transaction. Ex: tblAPBill.intBillId. 
+	
+	@strTransactionId - The string value that represents the id of the transaction. Ex: tblAPBill.strBillId
+
+	@strBatchId - The generated batch id from the calling code. This is the same batch id this SP will use when posting the financials of an item. 
+
+	@intEntityUserSecurityId - The user who is initiating the unpost. 
+
+	@intEntityUserSecurityId - A flag on whether to do a generate the recap information (@ysnRecap = 1) or not (@ysnRecap = 0). 
 */
 CREATE PROCEDURE [dbo].[uspICUnpostCostAdjustment]
 	@intTransactionId AS INT
