@@ -67,7 +67,7 @@ BEGIN
 						, [endgroup] nvarchar(50)  
 						, [datatype] nvarchar(50))  
 		
-		
+	DELETE FROM @filterTable WHERE [from] IS NULL OR RTRIM([from]) = ''
 	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] ,@strAccountIdCondition =[condition] from  @filterTable WHERE [fieldname] = 'strAccountId' 
 	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = 'Primary Account' 
 	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate' 
@@ -248,8 +248,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + ISNULL(@dtmDateTo,'') + '''= '''' THEN ''' + @dtmDateFrom + ''' ELSE ''' + @dtmDateTo + ''' END)	
-			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
+			WHERE strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
 		cte1 
@@ -267,8 +266,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + ISNULL(@dtmDateTo,'') + '''= '''' THEN ''' + @dtmDateFrom + ''' ELSE ''' + @dtmDateTo + ''' END)	
-			AND strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
+			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
 			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -287,8 +285,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE (dtmDate < ''' +  @dtmDateFrom + ''' or dtmDate > CASE WHEN ''' + ISNULL(@dtmDateTo,'') + '''= '''' THEN ''' + @dtmDateFrom + ''' ELSE ''' + @dtmDateTo + ''' END)	
-			AND [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
+			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
 			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
 			GROUP BY strAccountId
 		),
