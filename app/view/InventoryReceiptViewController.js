@@ -746,6 +746,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             grdLotTracking = win.down('#grdLotTracking'),
             grdCharges = win.down('#grdCharges');
 
+        grdInventoryReceipt.mon(grdInventoryReceipt, {
+            afterlayout: me.onGridAfterLayout
+        });
+
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
             store: store,
@@ -871,6 +875,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         return win.context;
+    },
+
+    onGridAfterLayout: function(grid) {
+        "use strict";
+
+        //TODO: Remove this when we upgrade to Ext 6 - workaround for the flying combo
+        var editor = grid.editingPlugin && grid.editingPlugin.activeEditor;
+        if (editor && editor.field instanceof Ext.form.field.Text) {
+            var plugin  = editor.editingPlugin,
+                record  = plugin.activeRecord,
+                column  = plugin.activeColumn,
+                view    = grid.view,
+                row     = view.getRow(record);
+
+            if (row && record && column && editor.getXY().toString() !== '0,0') {
+                var cell = plugin.getCell(record, column);
+                if (cell && (editor.getXY() !== cell.getXY())) {
+                    editor.realign();
+                }
+            }
+        }
     },
 
     show: function (config) {
