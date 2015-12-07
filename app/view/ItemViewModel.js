@@ -1240,6 +1240,14 @@ Ext.define('Inventory.view.ItemViewModel', {
                 return true;
             }
         },
+        readOnlyStockUnit: function(get) {
+            if (get('grdUnitOfMeasure.selection.ysnStockUnit') === false) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
         readOnlyOnBundleItems: function(get) {
             if (get('current.strType') === 'Bundle') {
                 return true;
