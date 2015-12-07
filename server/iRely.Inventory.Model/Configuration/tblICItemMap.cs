@@ -552,8 +552,44 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(18, 6);
             this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(18, 6);
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+            this.Property(t => t.dblStockUnitCost).HasColumnName("dblStockUnitCost").HasPrecision(18, 6);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
             this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
+        }
+    }
+
+    public class vyuICGetItemStockUOMSummaryMap : EntityTypeConfiguration<vyuICGetItemStockUOMSummary>
+    {
+        public vyuICGetItemStockUOMSummaryMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intKey);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemStockUOMSummary");
+            this.Property(t => t.intKey).HasColumnName("intKey");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(18, 6);
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(18, 6);
+            this.Property(t => t.dblInConsigned).HasColumnName("dblInConsigned").HasPrecision(18, 6);
+            this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(18, 6);
+            this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitReserved).HasColumnName("dblUnitReserved").HasPrecision(18, 6);
+            this.Property(t => t.dblInTransitInbound).HasColumnName("dblInTransitInbound").HasPrecision(18, 6);
+            this.Property(t => t.dblInTransitOutbound).HasColumnName("dblInTransitOutbound").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitStorage).HasColumnName("dblUnitStorage").HasPrecision(18, 6);
+            this.Property(t => t.dblConsignedPurchase).HasColumnName("dblConsignedPurchase").HasPrecision(18, 6);
+            this.Property(t => t.dblConsignedSale).HasColumnName("dblConsignedSale").HasPrecision(18, 6);
         }
     }
 

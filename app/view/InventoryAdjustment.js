@@ -611,7 +611,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
                                                         itemId: 'colQuantity',
-                                                        width: 65,
+                                                        width: 70,
                                                         align: 'right',
                                                         dataIndex: 'dblQuantity',
                                                         text: 'Quantity'
@@ -634,7 +634,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
                                                         itemId: 'colNewQuantity',
-                                                        width: 90,
+                                                        width: 95,
                                                         align: 'right',
                                                         dataIndex: 'dblNewQuantity',
                                                         tdCls: 'blue-text-column',

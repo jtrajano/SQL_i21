@@ -485,20 +485,19 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             // Populate the default data.
             current.set('intItemId', record.get('intItemId'));
             current.set('strItemDescription', record.get('strDescription'));
+            me.getStockQuantity(current, win);
 
             // Check if selected item lot-tracking = NO.
             // Non Lot items will need to use stock UOM.
             var strLotTracking = record.get('strLotTracking');
 
             if (strLotTracking == 'No'){
-                current.set('dblQuantity', record.get('dblUnitOnHand'));
                 current.set('dblCost', record.get('dblLastCost'));
                 current.set('intItemUOMId', record.get('intStockUOMId'));
                 current.set('strItemUOM', record.get('strStockUOM'));
                 current.set('dblItemUOMUnitQty', record.get('dblStockUnitQty'));
             }
             else {
-                current.set('dblQuantity', null);
                 current.set('dblCost', null);
                 current.set('intItemUOMId', null);
                 current.set('strItemUOM', null);
@@ -546,7 +545,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         else if (combo.itemId === 'cboSubLocation')
         {
             current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
-            current.set('dblQuantity', null);
+            me.getStockQuantity(current, win);
             current.set('dblCost', null);
             current.set('intItemUOMId', null);
             current.set('dblItemUOMUnitQty', null);
@@ -576,7 +575,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         else if (combo.itemId === 'cboStorageLocation')
         {
             current.set('intStorageLocationId', record.get('intStorageLocationId'));
-            current.set('dblQuantity', null);
+            me.getStockQuantity(current, win);
             current.set('dblCost', null);
             current.set('intItemUOMId', null);
             current.set('dblItemUOMUnitQty', null);
@@ -681,7 +680,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
             current.set('dblCost', newUnitCost);
-            current.set('dblQuantity', selectedOnHandQty);
+//            current.set('dblQuantity', selectedOnHandQty);
             current.set('intItemUOMId', record.get('intItemUOMId'));
             current.set('dblItemUOMUnitQty', selectedItemUOMUnitQty);
 
@@ -717,6 +716,43 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intNewStorageLocationId', record.get('intStorageLocationId'));
         }
+    },
+
+    getStockQuantity: function(record, win) {
+        var vm = win.viewModel;
+        var current = vm.data.current;
+        var locationId = current.get('intLocationId'),
+            itemId = record.get('intItemId'),
+            subLocationId = record.get('intSubLocationId'),
+            storageLocationId = record.get('intStorageLocationId');
+        var qty = 0;
+
+        Ext.Ajax.request({
+            timeout: 120000,
+            url: '../Inventory/api/Item/GetItemStockUOMSummary?ItemId=' + itemId
+                + '&LocationId=' + locationId
+                + '&SubLocationId=' + subLocationId
+                + '&StorageLocationId=' + storageLocationId,
+            method: 'get',
+            success: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                if (jsonData.success) {
+                    if (jsonData.data.length > 0){
+                        var stockRecord = jsonData.data[0];
+                        qty = stockRecord.dblOnHand;
+                    }
+                }
+                else {
+                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                }
+                record.set('dblQuantity', qty);
+            },
+            failure: function (response) {
+                var jsonData = Ext.decode(response.responseText);
+                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            }
+        });
+
     },
 
     /**
