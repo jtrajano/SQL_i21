@@ -276,11 +276,11 @@ namespace iRely.Inventory.BusinessLayer
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        public async Task<SearchResult> GetItemStockUOMSummary(GetParameter param)
+        public async Task<SearchResult> GetItemStockUOMSummary(int? ItemId, int? LocationId, int? SubLocationId, int? StorageLocationId)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOMSummary>()
-                    .Filter(param, true);
-            var data = await query.Execute(param, "intKey").ToListAsync();
+                    .Where(p=> p.intItemId == ItemId && p.intLocationId == LocationId && p.intSubLocationId == SubLocationId && p.intStorageLocationId == StorageLocationId);
+            var data = await query.ToListAsync();
 
             return new SearchResult()
             {

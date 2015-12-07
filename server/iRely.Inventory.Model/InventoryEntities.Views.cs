@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets24a8528639eefc55297b6dc9156943f998af2e036069e9307666c9792ca7f10c))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets5944f0b03123c61e0a8b63a5c97745cc09ab1212df9dab3522a59aac624209af))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets24a8528639eefc55297b6dc9156943f998af2e036069e9307666c9792ca7f10c : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets5944f0b03123c61e0a8b63a5c97745cc09ab1212df9dab3522a59aac624209af : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "24a8528639eefc55297b6dc9156943f998af2e036069e9307666c9792ca7f10c"; }
+            get { return "5944f0b03123c61e0a8b63a5c97745cc09ab1212df9dab3522a59aac624209af"; }
         }
 
         /// <summary>
@@ -10199,11 +10199,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMSummary
-        [CodeFirstDatabaseSchema.vyuICGetItemStockUOMSummary](T1.vyuICGetItemStockUOMSummary_intKey, T1.vyuICGetItemStockUOMSummary_intItemId, T1.vyuICGetItemStockUOMSummary_intItemLocationId, T1.vyuICGetItemStockUOMSummary_strLocationName, T1.vyuICGetItemStockUOMSummary_intItemUOMId, T1.vyuICGetItemStockUOMSummary_strUnitMeasure, T1.vyuICGetItemStockUOMSummary_dblUnitQty, T1.vyuICGetItemStockUOMSummary_intSubLocationId, T1.vyuICGetItemStockUOMSummary_strSubLocationName, T1.vyuICGetItemStockUOMSummary_intStorageLocationId, T1.vyuICGetItemStockUOMSummary_strStorageLocationName, T1.vyuICGetItemStockUOMSummary_dblOnHand, T1.vyuICGetItemStockUOMSummary_dblInConsigned, T1.vyuICGetItemStockUOMSummary_dblOnOrder, T1.vyuICGetItemStockUOMSummary_dblOrderCommitted, T1.vyuICGetItemStockUOMSummary_dblUnitReserved, T1.vyuICGetItemStockUOMSummary_dblInTransitInbound, T1.vyuICGetItemStockUOMSummary_dblInTransitOutbound, T1.vyuICGetItemStockUOMSummary_dblUnitStorage, T1.vyuICGetItemStockUOMSummary_dblConsignedPurchase, T1.vyuICGetItemStockUOMSummary_dblConsignedSale)
+        [CodeFirstDatabaseSchema.vyuICGetItemStockUOMSummary](T1.vyuICGetItemStockUOMSummary_intKey, T1.vyuICGetItemStockUOMSummary_intItemId, T1.vyuICGetItemStockUOMSummary_intLocationId, T1.vyuICGetItemStockUOMSummary_intItemLocationId, T1.vyuICGetItemStockUOMSummary_strLocationName, T1.vyuICGetItemStockUOMSummary_intItemUOMId, T1.vyuICGetItemStockUOMSummary_strUnitMeasure, T1.vyuICGetItemStockUOMSummary_dblUnitQty, T1.vyuICGetItemStockUOMSummary_intSubLocationId, T1.vyuICGetItemStockUOMSummary_strSubLocationName, T1.vyuICGetItemStockUOMSummary_intStorageLocationId, T1.vyuICGetItemStockUOMSummary_strStorageLocationName, T1.vyuICGetItemStockUOMSummary_dblOnHand, T1.vyuICGetItemStockUOMSummary_dblInConsigned, T1.vyuICGetItemStockUOMSummary_dblOnOrder, T1.vyuICGetItemStockUOMSummary_dblOrderCommitted, T1.vyuICGetItemStockUOMSummary_dblUnitReserved, T1.vyuICGetItemStockUOMSummary_dblInTransitInbound, T1.vyuICGetItemStockUOMSummary_dblInTransitOutbound, T1.vyuICGetItemStockUOMSummary_dblUnitStorage, T1.vyuICGetItemStockUOMSummary_dblConsignedPurchase, T1.vyuICGetItemStockUOMSummary_dblConsignedSale)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemStockUOMSummary_intKey, 
             T.intItemId AS vyuICGetItemStockUOMSummary_intItemId, 
+            T.intLocationId AS vyuICGetItemStockUOMSummary_intLocationId, 
             T.intItemLocationId AS vyuICGetItemStockUOMSummary_intItemLocationId, 
             T.strLocationName AS vyuICGetItemStockUOMSummary_strLocationName, 
             T.intItemUOMId AS vyuICGetItemStockUOMSummary_intItemUOMId, 
@@ -10236,11 +10237,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMSummaries
-        [iRely.Inventory.Model.vyuICGetItemStockUOMSummary](T1.vyuICGetItemStockUOMSummary_intKey, T1.vyuICGetItemStockUOMSummary_intItemId, T1.vyuICGetItemStockUOMSummary_intItemLocationId, T1.vyuICGetItemStockUOMSummary_strLocationName, T1.vyuICGetItemStockUOMSummary_intItemUOMId, T1.vyuICGetItemStockUOMSummary_strUnitMeasure, T1.vyuICGetItemStockUOMSummary_dblUnitQty, T1.vyuICGetItemStockUOMSummary_intSubLocationId, T1.vyuICGetItemStockUOMSummary_strSubLocationName, T1.vyuICGetItemStockUOMSummary_intStorageLocationId, T1.vyuICGetItemStockUOMSummary_strStorageLocationName, T1.vyuICGetItemStockUOMSummary_dblOnHand, T1.vyuICGetItemStockUOMSummary_dblInConsigned, T1.vyuICGetItemStockUOMSummary_dblOnOrder, T1.vyuICGetItemStockUOMSummary_dblOrderCommitted, T1.vyuICGetItemStockUOMSummary_dblUnitReserved, T1.vyuICGetItemStockUOMSummary_dblInTransitInbound, T1.vyuICGetItemStockUOMSummary_dblInTransitOutbound, T1.vyuICGetItemStockUOMSummary_dblUnitStorage, T1.vyuICGetItemStockUOMSummary_dblConsignedPurchase, T1.vyuICGetItemStockUOMSummary_dblConsignedSale)
+        [iRely.Inventory.Model.vyuICGetItemStockUOMSummary](T1.vyuICGetItemStockUOMSummary_intKey, T1.vyuICGetItemStockUOMSummary_intItemId, T1.vyuICGetItemStockUOMSummary_intLocationId, T1.vyuICGetItemStockUOMSummary_intItemLocationId, T1.vyuICGetItemStockUOMSummary_strLocationName, T1.vyuICGetItemStockUOMSummary_intItemUOMId, T1.vyuICGetItemStockUOMSummary_strUnitMeasure, T1.vyuICGetItemStockUOMSummary_dblUnitQty, T1.vyuICGetItemStockUOMSummary_intSubLocationId, T1.vyuICGetItemStockUOMSummary_strSubLocationName, T1.vyuICGetItemStockUOMSummary_intStorageLocationId, T1.vyuICGetItemStockUOMSummary_strStorageLocationName, T1.vyuICGetItemStockUOMSummary_dblOnHand, T1.vyuICGetItemStockUOMSummary_dblInConsigned, T1.vyuICGetItemStockUOMSummary_dblOnOrder, T1.vyuICGetItemStockUOMSummary_dblOrderCommitted, T1.vyuICGetItemStockUOMSummary_dblUnitReserved, T1.vyuICGetItemStockUOMSummary_dblInTransitInbound, T1.vyuICGetItemStockUOMSummary_dblInTransitOutbound, T1.vyuICGetItemStockUOMSummary_dblUnitStorage, T1.vyuICGetItemStockUOMSummary_dblConsignedPurchase, T1.vyuICGetItemStockUOMSummary_dblConsignedSale)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemStockUOMSummary_intKey, 
             T.intItemId AS vyuICGetItemStockUOMSummary_intItemId, 
+            T.intLocationId AS vyuICGetItemStockUOMSummary_intLocationId, 
             T.intItemLocationId AS vyuICGetItemStockUOMSummary_intItemLocationId, 
             T.strLocationName AS vyuICGetItemStockUOMSummary_strLocationName, 
             T.intItemUOMId AS vyuICGetItemStockUOMSummary_intItemUOMId, 

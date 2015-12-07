@@ -570,6 +570,7 @@ namespace iRely.Inventory.Model
             this.ToTable("vyuICGetItemStockUOMSummary");
             this.Property(t => t.intKey).HasColumnName("intKey");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
