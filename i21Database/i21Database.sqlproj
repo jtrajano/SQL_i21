@@ -3068,6 +3068,8 @@
     <Build Include="dbo\Views\vyuSMForBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddTransactionForBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
