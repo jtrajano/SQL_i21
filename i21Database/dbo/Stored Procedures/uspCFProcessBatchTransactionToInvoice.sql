@@ -212,6 +212,8 @@ END
 								AND iicItemLoc.intItemId = icfItem.intARItemId)
 							AS cfSiteItem
 				ON cfTrans.intSiteId = cfSiteItem.intSiteId
+				AND cfSiteItem.intARItemId = cfTrans.intARItemId
+				AND cfSiteItem.intItemId = cfTrans.intProductId
 				INNER JOIN (SELECT * 
 							FROM tblCFTransactionPrice
 							WHERE strTransactionPriceId = 'Net Price')
