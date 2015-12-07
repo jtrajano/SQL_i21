@@ -62,8 +62,8 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
                 ,[strTransferType]          = 'Location to Location'
                 ,[intSourceType]            = 1
                 ,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
-                ,[intFromLocationId]        = SC.intProcessingLocationId
-                ,[intToLocationId]          = (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
+                ,[intFromLocationId]        = (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
+                ,[intToLocationId]          = SC.intProcessingLocationId
                 ,[ysnShipmentRequired]      = 1
                 ,[intStatusId]              = 1
                 ,[intShipViaId]             = SC.intFreightCarrierId
