@@ -352,7 +352,6 @@ BEGIN
 			,@ysnRecap = 0
 			,@strTransactionId = 'INVTRN-1'
 			,@intEntityUserSecurityId = 1
-			,@intEntityId = 1
 	END 	
 
 	-- Act 2: Post the Cost Adjustment. 

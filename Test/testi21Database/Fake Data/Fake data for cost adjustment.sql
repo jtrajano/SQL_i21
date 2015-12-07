@@ -240,6 +240,15 @@ BEGIN
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 78
+			,[strTransactionType]	= N'Parent Lot Number'
+			,[strPrefix]			= N'PLOT-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+
 
 	DECLARE -- Receipt Types
 			@RECEIPT_TYPE_PurchaseContract AS NVARCHAR(50) = 'Purchase Contract'

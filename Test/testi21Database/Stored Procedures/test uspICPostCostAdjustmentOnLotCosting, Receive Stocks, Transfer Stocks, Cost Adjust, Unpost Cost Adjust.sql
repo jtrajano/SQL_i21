@@ -172,7 +172,7 @@ BEGIN
 				,@CostAdjustmentType AS INT = 24
 				,@BillType AS INT = 23
 
-				,@RevalueTransfer AS INT = 26
+				,@RevalueTransfer AS INT = 28
 
 		-- Declare the cost types
 		DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1

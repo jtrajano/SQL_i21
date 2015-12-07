@@ -33,7 +33,8 @@ DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
 		,@REVALUE_SOLD AS INT = 3
-		,@INVENTORY_COST_ADJUSTMENT AS INT = 22;
+
+		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 24;
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -102,7 +103,7 @@ BEGIN
 				ON InvTrans.intItemId = Item.intItemId
 	WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
 			AND InvTrans.strRelatedTransactionId = @strTransactionId
-			AND InvTrans.intTransactionTypeId = @INVENTORY_COST_ADJUSTMENT
+			AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
 			AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
 			AND ISNULL(@ysnRecap, 0) = 0
 

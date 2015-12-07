@@ -307,7 +307,7 @@ BEGIN
 			@intTransactionId = 1
 			,@strTransactionId = 'PURCHASE-100000'
 			,@strBatchId = 'BATCH-10294' 
-			,@intUserId = 1
+			,@intEntityUserSecurityId = 1
 			,@ysnRecap = 0 
 	END 
 

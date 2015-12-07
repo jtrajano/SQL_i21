@@ -13,7 +13,8 @@ SET ANSI_WARNINGS OFF
 DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
 		,@REVALUE_SOLD AS INT = 3
-		,@INVENTORY_COST_ADJUSTMENT AS INT = 22;
+
+		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 24;
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -32,7 +33,7 @@ FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
 			ON InvTrans.intItemId = Item.intItemId
 WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
 		AND InvTrans.strRelatedTransactionId = @strTransactionId
-		AND InvTrans.intTransactionTypeId = @INVENTORY_COST_ADJUSTMENT
+		AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
 		AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
 
 IF @strRelatedTransactionId IS NOT NULL 

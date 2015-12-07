@@ -317,6 +317,12 @@ BEGIN
 			,[strTransactionForm] NVARCHAR(255) COLLATE Latin1_General_CI_AS
 			,[strModuleName] NVARCHAR (255)   COLLATE Latin1_General_CI_AS
 			,[intConcurrencyId] INT
+			,[dblDebitForeign]			NUMERIC (18, 9) NULL
+			,[dblDebitReport]			NUMERIC (18, 9) NULL
+			,[dblCreditForeign]			NUMERIC (18, 9) NULL
+			,[dblCreditReport]			NUMERIC (18, 9) NULL
+			,[dblReportingRate]			NUMERIC (18, 9) NULL
+			,[dblForeignRate]			NUMERIC (18, 9) NULL
 		)
 
 		CREATE TABLE actualGLDetail (
@@ -345,6 +351,12 @@ BEGIN
 			,[strTransactionForm] NVARCHAR(255) COLLATE Latin1_General_CI_AS
 			,[strModuleName] NVARCHAR (255)   COLLATE Latin1_General_CI_AS
 			,[intConcurrencyId] INT
+			,[dblDebitForeign]			NUMERIC (18, 9) NULL
+			,[dblDebitReport]			NUMERIC (18, 9) NULL
+			,[dblCreditForeign]			NUMERIC (18, 9) NULL
+			,[dblCreditReport]			NUMERIC (18, 9) NULL
+			,[dblReportingRate]			NUMERIC (18, 9) NULL
+			,[dblForeignRate]			NUMERIC (18, 9) NULL
 		)
 	END 
 
@@ -428,6 +440,12 @@ BEGIN
 			,strTransactionForm
 			,strModuleName
 			,intConcurrencyId
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]	
 		)
 		EXEC dbo.uspICPostCostAdjustment
 				@ItemsToAdjust
