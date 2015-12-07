@@ -3083,6 +3083,7 @@
     <Build Include="dbo\Views\vyuPATCancel.sql" />
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostRefund.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
