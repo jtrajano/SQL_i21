@@ -113,7 +113,7 @@ BEGIN
 		,SP.intRackVendorId
 		,SP.intRackItemId
 		,SP.intRackLocationId 
-		,SP.intEntityLocationId
+		,ISNULL(SP.intEntityLocationId, SP.intRackLocationId)
 		,SP.intCustomerLocationId
 		,NULL
 		,NULL
