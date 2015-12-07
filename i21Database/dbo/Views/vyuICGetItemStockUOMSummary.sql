@@ -9,6 +9,7 @@ SELECT
 			, StockUOM.intItemUOMId) AS INT)
 	, StockUOM.intItemId
 	, StockUOM.intItemLocationId
+	, intLocationId = Location.intCompanyLocationId
 	, Location.strLocationName
 	, StockUOM.intItemUOMId
 	, UOM.strUnitMeasure
