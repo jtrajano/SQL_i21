@@ -10,7 +10,7 @@ BEGIN
 		SET @intLotId = (
 				SELECT TOP 1 intLotId
 				FROM dbo.tblICLot
-				WHERE strLotNumber = @strLotNumber
+				WHERE strLotNumber = @strLotNumber AND dblQty>0  
 				)
 
 		SELECT ISNULL(@intLotId, 0) intLotId, @strLotNumber strLotNo
@@ -21,7 +21,7 @@ BEGIN
 				SELECT TOP 1 intLotId
 				FROM dbo.tblICLot
 				WHERE strLotNumber = @strLotNumber
-					AND intStorageLocationId= @intStorageLocationId
+					AND intStorageLocationId= @intStorageLocationId AND dblQty>0  
 				)
 
 		SELECT ISNULL(@intLotId, 0) intLotId, @strLotNumber strLotNo

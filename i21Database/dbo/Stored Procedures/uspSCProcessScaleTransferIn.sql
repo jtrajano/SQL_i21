@@ -103,7 +103,7 @@ BEGIN TRY
 			,intLotId					= NULL --No LOTS from scale
 			,intSubLocationId			= SC.intSubLocationId
 			,intStorageLocationId		= SC.intStorageLocationId
-			,ysnIsStorage				= 1
+			,ysnIsStorage				= 0
 			,dblFreightRate				= SC.dblFreightRate
 			,intSourceId				= SC.intTicketId
 			,intSourceType		 		= 1 -- Source type for scale is 1 

@@ -28,4 +28,4 @@ FROM
 	left join dbo.tblEntityLocation EL on EL.intEntityLocationId = QD.intShipToLocationId and EL.intEntityId = QH.intEntityCustomerId
 	left join dbo.tblICItem IC on IC.intItemId = QD.intItemId
 	left join dbo.vyuTRSupplyPointView TR on TR.intSupplyPointId = QD.intSupplyPointId
-where QH.strQuoteStatus = 'Confirmed'
+where QH.strQuoteStatus = 'Confirmed' or QH.strQuoteStatus = 'Sent'

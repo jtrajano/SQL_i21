@@ -19,13 +19,18 @@ DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
 SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId),@UserId)
 
-SELECT DISTINCT RecordKey INTO #tmpTransactionId
-FROM [fnCFSplitString](@TransactionId,',') 
+
+SELECT DISTINCT RecordKey = intTransactionId INTO #tmpTransactionId FROM vyuCFBatchPostTransactions
+
+IF @TransactionId != 'ALL'
+BEGIN
+	DELETE FROM #tmpTransactionId WHERE RecordKey NOT IN (SELECT Record FROM [fnCFSplitString](@TransactionId,',') )
+END
 
 	WHILE (EXISTS(SELECT 1 FROM #tmpTransactionId ))
 			BEGIN
 				SELECT @intRecordKey = RecordKey FROM #tmpTransactionId
-				SELECT @strRecord = CAST(Record AS INT) FROM [fnCFSplitString](@TransactionId,',') WHERE RecordKey = @intRecordKey
+				SET @strRecord = @intRecordKey
 		
 				INSERT INTO @EntriesForInvoice(
 					 [strSourceTransaction]
@@ -203,8 +208,8 @@ FROM [fnCFSplitString](@TransactionId,',')
 							INNER JOIN tblICItem iicItem
 							ON icfItem.intARItemId = iicItem.intItemId
 							INNER JOIN tblICItemLocation iicItemLoc
-							ON iicItemLoc.intItemLocationId = icfSite.intARLocationId 
-								AND iicItemLoc.intItemId = icfItem.intItemId)
+							ON iicItemLoc.intLocationId = icfSite.intARLocationId 
+								AND iicItemLoc.intItemId = icfItem.intARItemId)
 							AS cfSiteItem
 				ON cfTrans.intSiteId = cfSiteItem.intSiteId
 				INNER JOIN (SELECT * 
@@ -310,6 +315,3 @@ FROM [fnCFSplitString](@TransactionId,',')
 		BEGIN
 			ROLLBACK TRANSACTION
 		END
-
-
-	

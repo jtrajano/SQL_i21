@@ -2,7 +2,7 @@
 (
 	[intPaymentOptionsPrimId] INT NOT NULL IDENTITY, 
 	[intCheckoutId] INT,
-    [strPaymentOption] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strPaymentOptionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intPaymentOptionId] INT NULL, 
     [strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [dblAmount] DECIMAL(18, 6) NULL, 

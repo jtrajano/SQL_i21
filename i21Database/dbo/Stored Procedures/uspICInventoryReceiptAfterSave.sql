@@ -5,11 +5,11 @@
 
 AS
 
-	--SET QUOTED_IDENTIFIER OFF  
-	--SET ANSI_NULLS ON  
-	--SET NOCOUNT ON  
-	--SET XACT_ABORT ON  
-	--SET ANSI_WARNINGS OFF  
+	SET QUOTED_IDENTIFIER OFF  
+	SET ANSI_NULLS ON  
+	SET NOCOUNT ON  
+	SET XACT_ABORT ON  
+	SET ANSI_WARNINGS OFF  
 
 BEGIN
 	
@@ -29,13 +29,27 @@ BEGIN
 
 	BEGIN TRY
 
-		SELECT @ReceiptType = (
-			CASE WHEN strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
-				WHEN strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
-				WHEN strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
-				WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
-			END) FROM tblICInventoryReceipt
-		WHERE intInventoryReceiptId = @ReceiptId
+		IF (@ForDelete = 1)
+		BEGIN
+			SELECT @ReceiptType = (
+				CASE WHEN intOrderType = 1 THEN @ReceiptType_PurchaseContract
+					WHEN intOrderType = 2 THEN @ReceiptType_PurchaseOrder
+					WHEN intOrderType = 3 THEN @ReceiptType_TransferOrder
+					WHEN intOrderType = 4 THEN @ReceiptType_Direct
+				END) FROM tblICTransactionDetailLog
+			WHERE intTransactionId = @ReceiptId
+			AND strTransactionType = 'Inventory Receipt'
+		END
+		ELSE
+		BEGIN
+			SELECT @ReceiptType = (
+				CASE WHEN strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
+					WHEN strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
+					WHEN strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
+					WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
+				END) FROM tblICInventoryReceipt
+			WHERE intInventoryReceiptId = @ReceiptId
+		END
 	
 		-- Purchase Contracts
 		IF (@ReceiptType = @ReceiptType_PurchaseContract)
@@ -213,7 +227,7 @@ BEGIN
 			BEGIN
 				SELECT	@intContractDetailId		=	intContractDetailId,
 						@intFromItemUOMId			=	intItemUOMId,
-						@dblQty						=	dblQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
+						@dblQty						=	dblQty,
 						@intInventoryReceiptItemId	=	intInventoryReceiptItemId
 				FROM	@tblToProcess 
 				WHERE	intKeyId				=	 @Id

@@ -47,6 +47,7 @@ BEGIN
 			ON ICU.intItemId = IC.intItemId
 	INNER JOIN tblPATPatronageCategory PC
 			ON PC.intPatronageCategoryId = IC.intPatronageCategoryId
+		   AND PC.strPurchaseSale = 'Purchase'
 		 WHERE AB.intBillId = @intBillId
 		   AND IC.intPatronageCategoryId IS NOT NULL
 		   AND ICU.ysnStockUnit = 1 -- Confirm with sir Ajith

@@ -2428,7 +2428,6 @@
     <Build Include="dbo\Stored Procedures\uspGLGenerateMissingOriginLocation.sql" />
     <Build Include="dbo\Tables\tblPATCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentReport.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\9_UpdateAccountSegmentWithNoMatchingCategory.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculationSite.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculationProjection.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculationItemPricing.sql" />
@@ -3059,6 +3058,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_Frequency.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemLists.sql" />
@@ -3076,6 +3076,17 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnActualCost.sql" />
     <None Include="Scripts\Post-Deployment\IC\PopulateTransDetailIdOnCostBuckets.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_CompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuAPItemUOM.sql" />
+    <Build Include="dbo\Tables\tblSMForBatchPosting.sql" />
+    <Build Include="dbo\Views\vyuSMForBatchPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddTransactionForBatchPosting.sql" />
+    <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
+    <Build Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

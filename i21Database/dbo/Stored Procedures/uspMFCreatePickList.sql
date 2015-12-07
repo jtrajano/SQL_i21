@@ -19,6 +19,8 @@ Declare @intItemUOMId int
 Declare @dblWeightPerUnit numeric(38,20)
 Declare @ysnBlendSheetRequired bit
 Declare @intBlendRequirementId int
+DECLARE @intKitStagingLocationId INT
+DECLARE @intBlendStagingLocationId INT
 
 Declare @tblWorkOrder AS table
 (
@@ -167,7 +169,7 @@ Begin
 	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
 	Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
 
-	Select tpl.*,cl.dblQuantity AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,(cl.dblQuantity / tpl.dblWeightPerUnit) AS dblAvailableUnit,um.strUnitMeasure AS strAvailableUnitUOM,
+	Select DISTINCT tpl.*,cl.dblQuantity AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,(cl.dblQuantity / tpl.dblWeightPerUnit) AS dblAvailableUnit,um.strUnitMeasure AS strAvailableUnitUOM,
 	tpl.dblIssuedQuantity AS dblPickQuantity,tpl.intItemIssuedUOMId AS intPickUOMId,tpl.strIssuedUOM AS strPickUOM,
 	l.intParentLotId,pl.strParentLotNumber
 	From @tblPickedLots tpl Join @tblChildLot cl on tpl.intLotId=cl.intLotId 
@@ -176,10 +178,18 @@ Begin
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
 	Left Join @tblReservedQty rq on tpl.intLotId = rq.intLotId
+	ORDER BY tpl.strItemNo,tpl.strStorageLocationName
 
 	return
 End
 
+
+Select @intKitStagingLocationId=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Kit Staging Location'
+
+Select @intBlendStagingLocationId=ISNULL(intBlendProductionStagingUnitId,0) From tblSMCompanyLocation Where intCompanyLocationId=@intLocationId
 
 Select @intPickListPreferenceId=pa.strAttributeValue
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
@@ -212,7 +222,8 @@ Begin
 	from tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId 
 	Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
 	Where l.intParentLotId=@intParentLotId And l.intLocationId=@intLocationId And l.dblWeight > 0 
-	And ls.strPrimaryStatus='Active' And ISNULL(sl.ysnAllowConsume,0)=1
+	And ls.strPrimaryStatus='Active' And ISNULL(sl.ysnAllowConsume,0)=1 
+	AND l.intStorageLocationId NOT IN (@intKitStagingLocationId,@intBlendStagingLocationId)
 
 	Delete From @tblReservedQty
 	Insert @tblReservedQty(intLotId,dblReservedQty)

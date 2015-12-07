@@ -169,8 +169,11 @@ BEGIN
 		[intAccountId],
 		[dblTotal],
 		[dblCost],
+		[dblNetWeight],
 		[intContractDetailId],
 		[intContractHeaderId],
+		[intCostUOMId],
+		[intWeightUOMId],
 		[intLineNo]
 	)
 	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
@@ -188,12 +191,15 @@ BEGIN
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]					=	B.dblUnitCost,
+		[dblNetWeight]				=	B.dblNet,
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
 											ELSE NULL END,
 		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
 											ELSE NULL END,
+		[intCostUOMId]				=	B.intCostUOMId,
+		[intWeightUOMId]			=	B.intWeightUOMId,
 		[intLineNo]					=	ISNULL(B.intSort,0)
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -229,8 +235,11 @@ BEGIN
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
 		[dblCost]					=	A.dblUnitCost,
+		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
 		[intContractHeaderId]		=	NULL,
+		[intCostUOMId]				=	NULL,
+		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId

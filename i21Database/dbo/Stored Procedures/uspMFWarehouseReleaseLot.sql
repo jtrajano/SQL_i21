@@ -36,6 +36,10 @@ BEGIN TRY
 		,@intStagingLocationId INT
 		,@intAttributeId INT
 		,@strAttributeValue NVARCHAR(50)
+		,@intInventoryAdjustmentId INT
+		,@intSubLocationId INT
+		,@intStorageLocationId INT
+		,@dblAdjustByQuantity NUMERIC(18, 6)
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -89,6 +93,8 @@ BEGIN TRY
 		,@intLotStatusId = intLotStatusId
 		,@dtmDateCreated = dtmDateCreated
 		,@intItemUOMId = intItemUOMId
+		,@intSubLocationId = intSubLocationId
+		,@intStorageLocationId = intStorageLocationId
 	FROM dbo.tblICLot
 	WHERE intLotId = @intLotId
 
@@ -221,6 +227,30 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+	IF @dblQty <> @dblReleaseQty
+	BEGIN
+		SELECT @dblAdjustByQuantity = @dblReleaseQty - @dblQty
+
+		EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+			-- Parameters for filtering:
+			@intItemId = @intItemId
+			,@dtmDate = @dtmCurrentDate
+			,@intLocationId = @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			-- Parameters for the new values: 
+			,@dblAdjustByQuantity = @dblAdjustByQuantity
+			,@dblNewUnitCost = NULL
+			-- Parameters used for linking or FK (foreign key) relationships
+			,@intSourceId = 1
+			,@intSourceTransactionTypeId = 8
+			,@intEntityUserSecurityId = @intUserId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+		PRINT 'Call Lot Adjust routine.'
+	END
+
 	UPDATE dbo.tblMFWorkOrderProducedLot
 	SET dblReleaseQty = @dblReleaseQty
 		,ysnReleased = 1
@@ -232,9 +262,13 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
-	UPDATE tblICLot
-	SET intLotStatusId = 1
-	WHERE intLotId = @intLotId
+	--UPDATE tblICLot
+	--SET intLotStatusId = 1
+	--WHERE intLotId = @intLotId
+	EXEC uspMFSetLotStatus @intLotId = @intLotId
+		,@intNewLotStatusId = 1
+		,@intUserId = @intUserId
+		,@strNotes = ''
 
 	IF @strAttributeValue = 'True'
 	BEGIN
@@ -246,10 +280,10 @@ BEGIN TRY
 		IF @intStagingLocationId IS NULL
 		BEGIN
 			RAISERROR (
-				90007
-				,11
-				,1
-				)
+					90007
+					,11
+					,1
+					)
 		END
 
 		SELECT @strUserName = strUserName

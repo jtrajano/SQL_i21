@@ -141,7 +141,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql
 :r .\GL\DefaultData\7_FiscalYearPeriod.sql
 :r .\GL\DefaultData\8_AccountCurrency.sql
-:r .\GL\DefaultData\9_UpdateAccountSegmentWithNoMatchingCategory.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
@@ -174,6 +173,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql
 :r .\AR\DefaultData\8_UpdateInvoiceType.sql
 :r .\AR\DefaultData\9_FixServiceChargeStartingNumber.sql
+:r .\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -268,6 +268,16 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\3_FileFieldMapping_PromotionCombo.sql
 :r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
 :r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
+
+-- Motor Fuel Tax
+:r .\TF\DefaultData\_CompanyPreference.sql
+:r .\TF\DefaultData\_TaxAuthority.sql
+:r .\TF\DefaultData\_Frequency.sql
+:r .\TF\DefaultData\_ReportingComponent.sql
+:r .\TF\DefaultData\_ProductCode.sql
+:r .\TF\DefaultData\_TerminalControlNumber.sql
+:r .\TF\DefaultData\_ConfigurationType.sql
+:r .\TF\DefaultData\_ConfigurationTemplate.sql
 
 -- Common
 :r .\Common\ErrorMessages.sql 

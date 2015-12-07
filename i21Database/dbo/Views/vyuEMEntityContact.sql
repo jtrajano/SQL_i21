@@ -2,7 +2,8 @@
 	AS 
 
 SELECT       
-	B.intEntityId,   
+	B.intEntityId,     
+	strEntityName = B.strName,
 	D.intEntityId intEntityContactId,   
 	D.strName,   
 	D.strEmail,   
@@ -10,8 +11,7 @@ SELECT
 	D.strPhone,   
 	D.strMobile,   
 	D.strTimezone,   
-	D.strTitle,   
-	D.imgPhoto,
+	D.strTitle,
 	C.ysnPortalAccess,  
 	D.ysnActive,  	
 	C.ysnDefaultContact,	
@@ -26,7 +26,8 @@ SELECT
 	F.ShippingLine,  
 	F.Trucker ,
 	D.strContactType,
-	D.strEmailDistributionOption
+	D.strEmailDistributionOption,
+	B.imgPhoto	
 FROM dbo.tblEntity AS B 			
 	INNER JOIN dbo.tblEntityToContact AS C 
 			ON B.[intEntityId] = C.[intEntityId] 

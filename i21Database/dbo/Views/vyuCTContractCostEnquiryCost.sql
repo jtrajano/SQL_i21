@@ -16,7 +16,7 @@ AS
 						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)*CD.dblCashPrice*CC.dblRate/100
 			END  * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) dblAmount,
 			CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CC.intUnitMeasureId,PU.intUnitMeasureId,CC.dblRate)
+						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,PU.intUnitMeasureId,CC.intUnitMeasureId,CC.dblRate)
 					WHEN	CC.strCostMethod = 'Amount'		THEN
 						CC.dblRate/dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblDetailQuantity)
 					WHEN	CC.strCostMethod = 'Percentage' THEN 

@@ -68,7 +68,7 @@ BEGIN
       BEGIN
          update tblTRQuoteHeader
 	     set strQuoteStatus = 'Confirmed'
-	     where intEntityCustomerId = (select top 1 intEntityCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'UnConfirmed'      
+	     where intEntityCustomerId = (select top 1 intCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'UnConfirmed'      
       END
    else
        BEGIN
@@ -76,7 +76,7 @@ BEGIN
                BEGIN
                   update tblTRQuoteHeader
                  set strQuoteStatus = 'Void'
-                 where intEntityCustomerId = (select top 1 intEntityCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'Confirmed'      
+                 where intEntityCustomerId = (select top 1 intCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'Confirmed'      
                END
             else
                 BEGIN

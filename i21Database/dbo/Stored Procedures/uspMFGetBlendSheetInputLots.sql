@@ -14,35 +14,66 @@ where r.ysnActive=1
 
 If @ysnEnableParentLot=0
 Begin
-	Select wi.intWorkOrderInputLotId,wi.intWorkOrderId,wi.intLotId,wi.dblQuantity,
-	wi.intItemUOMId,wi.dblIssuedQuantity,wi.intItemIssuedUOMId,
-	l.dblWeightPerQty AS dblWeightPerUnit,wi.intSequenceNo,wi.dtmCreated,wi.intCreatedUserId,
-	wi.dtmLastModified,wi.intLastModifiedUserId,cast(0 as bit) AS ysnParentLot,
-	l.strLotNumber,i.intItemId,i.strItemNo,i.strDescription,um.strUnitMeasure AS strUOM,
-	um1.strUnitMeasure AS strIssuedUOM,wi.intRecipeItemId,l.dblLastCost AS dblUnitCost,
-	ISNULL(l.strLotAlias,'') AS strLotAlias,
-	l.strGarden AS strGarden,l.intLocationId,
-	cl.strLocationName AS strLocationName,
-	sbl.strSubLocationName,
-	sl.strName AS strStorageLocationName,
-	l.strNotes AS strRemarks,
-	i.dblRiskScore,
-	ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
-	CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
-	CAST(ISNULL(q.Score,0) AS decimal) AS dblScore
-	From tblMFWorkOrderInputLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
-	Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
-	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Join tblICLot l on wi.intLotId=l.intLotId
-	Join tblICItem i on l.intItemId=i.intItemId
-	Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
-	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
-	Join tblSMCompanyLocation cl on cl.intCompanyLocationId=l.intLocationId
-	Left Join tblSMCompanyLocationSubLocation sbl on sbl.intCompanyLocationSubLocationId=l.intSubLocationId
-	Left Join tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
-	Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
-	Left Join tblMFRecipeItem ri on wi.intRecipeItemId=ri.intRecipeItemId
-	Where wi.intWorkOrderId=@intWorkOrderId
+	If (Select Count(1) From tblMFWorkOrderInputLot Where intWorkOrderId=@intWorkOrderId) >0
+		Select wi.intWorkOrderInputLotId,wi.intWorkOrderId,wi.intLotId,wi.dblQuantity,
+		wi.intItemUOMId,wi.dblIssuedQuantity,wi.intItemIssuedUOMId,
+		l.dblWeightPerQty AS dblWeightPerUnit,wi.intSequenceNo,wi.dtmCreated,wi.intCreatedUserId,
+		wi.dtmLastModified,wi.intLastModifiedUserId,cast(0 as bit) AS ysnParentLot,
+		l.strLotNumber,i.intItemId,i.strItemNo,i.strDescription,um.strUnitMeasure AS strUOM,
+		um1.strUnitMeasure AS strIssuedUOM,wi.intRecipeItemId,l.dblLastCost AS dblUnitCost,
+		ISNULL(l.strLotAlias,'') AS strLotAlias,
+		l.strGarden AS strGarden,l.intLocationId,
+		cl.strLocationName AS strLocationName,
+		sbl.strSubLocationName,
+		sl.strName AS strStorageLocationName,
+		l.strNotes AS strRemarks,
+		i.dblRiskScore,
+		ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
+		CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
+		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore
+		From tblMFWorkOrderInputLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
+		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Join tblICLot l on wi.intLotId=l.intLotId
+		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
+		Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+		Join tblSMCompanyLocation cl on cl.intCompanyLocationId=l.intLocationId
+		Left Join tblSMCompanyLocationSubLocation sbl on sbl.intCompanyLocationSubLocationId=l.intSubLocationId
+		Left Join tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
+		Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
+		Left Join tblMFRecipeItem ri on wi.intRecipeItemId=ri.intRecipeItemId
+		Where wi.intWorkOrderId=@intWorkOrderId
+	Else -- When blend sheet created from Sales Order , directly produced in blend production screen, then only consumed lot table will have the values, to show in blend management screen from traceability
+		Select wi.intWorkOrderConsumedLotId AS intWorkOrderInputLotId,wi.intWorkOrderId,wi.intLotId,wi.dblQuantity,
+		wi.intItemUOMId,wi.dblIssuedQuantity,wi.intItemIssuedUOMId,
+		l.dblWeightPerQty AS dblWeightPerUnit,wi.intSequenceNo,wi.dtmCreated,wi.intCreatedUserId,
+		wi.dtmLastModified,wi.intLastModifiedUserId,cast(0 as bit) AS ysnParentLot,
+		l.strLotNumber,i.intItemId,i.strItemNo,i.strDescription,um.strUnitMeasure AS strUOM,
+		um1.strUnitMeasure AS strIssuedUOM,wi.intRecipeItemId,l.dblLastCost AS dblUnitCost,
+		ISNULL(l.strLotAlias,'') AS strLotAlias,
+		l.strGarden AS strGarden,l.intLocationId,
+		cl.strLocationName AS strLocationName,
+		sbl.strSubLocationName,
+		sl.strName AS strStorageLocationName,
+		l.strNotes AS strRemarks,
+		i.dblRiskScore,
+		ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
+		CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
+		CAST(ISNULL(q.Score,0) AS decimal) AS dblScore
+		From tblMFWorkOrderConsumedLot wi Join tblMFWorkOrder w on wi.intWorkOrderId=w.intWorkOrderId
+		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Join tblICLot l on wi.intLotId=l.intLotId
+		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
+		Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+		Join tblSMCompanyLocation cl on cl.intCompanyLocationId=l.intLocationId
+		Left Join tblSMCompanyLocationSubLocation sbl on sbl.intCompanyLocationSubLocationId=l.intSubLocationId
+		Left Join tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
+		Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
+		Left Join tblMFRecipeItem ri on wi.intRecipeItemId=ri.intRecipeItemId
+		Where wi.intWorkOrderId=@intWorkOrderId
 End
 Else
 Begin
@@ -53,11 +84,11 @@ Begin
 	pl.strParentLotNumber AS strLotNumber,i.intItemId,i.strItemNo,i.strDescription,um.strUnitMeasure AS strUOM,
 	um1.strUnitMeasure AS strIssuedUOM,wi.intRecipeItemId,CAST(0 AS numeric(18,6)) AS dblUnitCost,
 	ISNULL(pl.strParentLotAlias,'') AS strLotAlias,
-	'' AS strGarden,wi.intLocationId,
+	Convert(nvarchar(max),'') AS strGarden,wi.intLocationId,
 	cl.strLocationName AS strLocationName,
 	sbl.strSubLocationName,
 	sl.strName AS strStorageLocationName,
-	'' AS strRemarks,
+	Convert(nvarchar(max),'') AS strRemarks,
 	i.dblRiskScore,
 	ri.dblQuantity/@dblRecipeQty AS dblConfigRatio,
 	CAST(ISNULL(q.Density,0) AS decimal) AS dblDensity,
@@ -78,8 +109,16 @@ Begin
 	Left Join tblMFRecipeItem ri on wi.intRecipeItemId=ri.intRecipeItemId
 	Where wi.intWorkOrderId=@intWorkOrderId
 
-	Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strGarden,''),wi.strRemarks=l.strNotes
-	From #tblWorkOrderInputParent wi Join tblICLot l on wi.intLotId=l.intParentLotId
+	--Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strGarden,''),wi.strRemarks=l.strNotes
+	--From #tblWorkOrderInputParent wi Join tblICLot l on wi.intLotId=l.intParentLotId
+
+	Update wi Set wi.dblUnitCost=t.dblLastCost,wi.strGarden=ISNULL(t.strGarden,''),wi.strRemarks=ISNULL(t.strNotes,'')
+	FROM #tblWorkOrderInputParent wi
+	OUTER APPLY (
+    SELECT TOP 1 l.dblLastCost,l.strGarden,l.strNotes
+    FROM tblICLot l
+    WHERE l.intParentLotId = wi.intLotId
+    ORDER BY l.intLotId DESC) t
 
 	Select * from #tblWorkOrderInputParent
 End

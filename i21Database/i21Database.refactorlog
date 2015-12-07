@@ -4585,4 +4585,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmPollDate" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4a1b67d0-b986-4e3d-a4af-008a42dc3a4e" ChangeDateTime="12/02/2015 10:45:22">
+    <Property Name="ElementName" Value="[dbo].[tblSTCheckoutPaymentOptions].[strPaymentOption]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTCheckoutPaymentOptions]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPaymentOptionType" />
+  </Operation>
 </Operations>
