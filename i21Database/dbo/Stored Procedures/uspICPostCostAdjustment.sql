@@ -230,7 +230,7 @@ BEGIN
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
 	-- Average Cost
-	IF (@CostingMethod = @AVERAGECOST)
+	IF (@CostingMethod = @AVERAGECOST) AND (@strActualCostId IS NULL)
 	BEGIN 
 		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnAverageCosting
 			@dtmDate
@@ -257,7 +257,7 @@ BEGIN
 	END
 
 	-- FIFO
-	IF (@CostingMethod = @FIFO)
+	IF (@CostingMethod = @FIFO) AND (@strActualCostId IS NULL)
 	BEGIN 
 		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnFIFOCosting
 			@dtmDate
@@ -284,7 +284,7 @@ BEGIN
 	END
 
 	-- LIFO
-	IF (@CostingMethod = @LIFO)
+	IF (@CostingMethod = @LIFO) AND (@strActualCostId IS NULL)
 	BEGIN 
 		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnLIFOCosting
 			@dtmDate
@@ -311,7 +311,7 @@ BEGIN
 	END
 
 	-- Lot Costing
-	IF (@CostingMethod = @LOTCOST)
+	IF (@CostingMethod = @LOTCOST) AND (@strActualCostId IS NULL)
 	BEGIN 
 		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnLotCosting
 			@dtmDate
