@@ -81,8 +81,8 @@ BEGIN
 		,@Date							= D.[dtmDate] 					
 		,@CompanyLocationId				= (SELECT TOP 1 [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strLocationName])
 		,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
-		,@TermId						= (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTerm] = D.[strTerms])
-		,@EntitySalespersonId			= (SELECT TOP 1 [intEntitySalespersonId] FROM tblARSalesperson WHERE [strSalespersonId] = D.[strSalespersonNumber])
+		,@TermId						= CASE WHEN ISNULL(D.strTerms, '') <> '' THEN (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTerm] = D.[strTerms]) ELSE 0 END
+		,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 [intEntitySalespersonId] FROM tblARSalesperson WHERE [strSalespersonId] = D.[strSalespersonNumber]) ELSE 0 END
 		,@DueDate						= D.dtmDueDate		
 		,@ShipDate						= D.dtmShipDate
 		,@PostDate						= D.[dtmPostDate] 
@@ -92,8 +92,8 @@ BEGIN
 		,@OriginId						= D.[strTransactionNumber]
 		,@PONumber						= D.[strPONumber] 
 		,@BOLNumber						= D.[strBOLNumber]		
-		,@FreightTermId					= (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = D.strFreightTerm)
-		,@ShipViaId						= (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia WHERE strShipVia = D.strShipVia)		
+		,@FreightTermId					= CASE WHEN ISNULL(D.strFreightTerm, '') <> '' THEN (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = D.strFreightTerm) ELSE 0 END
+		,@ShipViaId						= CASE WHEN ISNULL(D.strShipVia, '') <> '' THEN (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia WHERE strShipVia = D.strShipVia)	ELSE 0 END
 		,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
 		,@DiscountPercentage			= (CASE WHEN ISNULL(D.[dblDiscount], @ZeroDecimal) > 0 
 												THEN (1 - ((ABS(D.[dblTotal]) - ISNULL(D.[dblDiscount], @ZeroDecimal)) / ABS(D.[dblTotal]))) * 100
@@ -102,7 +102,7 @@ BEGIN
 		,@ItemQtyShipped				= 1.000000
 		,@ItemPrice						= ISNULL(D.[dblSubtotal], @ZeroDecimal)
 		,@ItemDescription				= D.[strComment] 
-		,@TaxGroupId					= (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.[strTaxGroup])
+		,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.[strTaxGroup]) ELSE 0 END
 		,@AmountDue						= CASE WHEN D.[strTransactionType] <> 'Sales Order' THEN ISNULL(D.[dblAmountDue], @ZeroDecimal) ELSE @ZeroDecimal END
 		,@TaxAmount						= ISNULL(D.[dblTax], @ZeroDecimal)
 		,@Total							= ISNULL(D.[dblTotal], @ZeroDecimal)
@@ -116,21 +116,50 @@ BEGIN
 	
 	IF @TransactionType <> 'Sales Order'
 		BEGIN
-			SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strInvoiceNumber + ')' FROM [tblARInvoice] WHERE RTRIM(LTRIM(ISNULL([strInvoiceOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strInvoiceOriginId],'')))) > 0
+			SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strInvoiceNumber + '). ' FROM [tblARInvoice] WHERE RTRIM(LTRIM(ISNULL([strInvoiceOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strInvoiceOriginId],'')))) > 0
 		END
 	ELSE
 		BEGIN
-			SELECT @ErrorMessage = 'Sales Order:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strSalesOrderNumber + ')' FROM [tblSOSalesOrder] WHERE RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],'')))) > 0
+			SELECT @ErrorMessage = 'Sales Order:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strSalesOrderNumber + '). ' FROM [tblSOSalesOrder] WHERE RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],'')))) > 0
 		END
 
+	IF ISNULL(@TransactionType, '') = '' OR @TransactionType NOT IN('Invoice', 'Sales Order', 'Credit Memo')
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Transaction Type provided does not exists. '
+
 	IF ISNULL(@EntityCustomerId, 0) = 0
-		SET @ErrorMessage = 'The Customer Number provided does not exists.'
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Customer Number provided does not exists. '
 
 	IF ISNULL(@CompanyLocationId, 0) = 0
-		SET @ErrorMessage = 'The Location Name provided does not exists.'
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Location Name provided does not exists. '
 	
-	IF ISNULL(@TermId, 0) = 0
-		SET @ErrorMessage = 'The Term Code provided does not exists.'
+	IF @TermId IS NULL
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
+	ELSE IF @TermId = 0
+		BEGIN
+			SELECT TOP 1 @TermId = intTermsId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+			IF ISNULL(@TermId, 0) = 0
+				SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
+		END
+	
+	IF @FreightTermId IS NULL
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Freight Term provided does not exists. '
+	ELSE IF @FreightTermId = 0
+		SELECT TOP 1 @FreightTermId = intFreightTermId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+
+	IF @ShipViaId IS NULL
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Ship Via provided does not exists. '
+	ELSE IF @ShipViaId = 0
+		SELECT TOP 1 @ShipViaId = intShipViaId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+
+	IF @EntitySalespersonId IS NULL
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Salesperson provided does not exists. '
+	ELSE IF @EntitySalespersonId = 0
+		SELECT TOP 1 @EntitySalespersonId = intSalespersonId FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId
+
+	IF @TaxGroupId IS NULL
+		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Tax Group provided does not exists. '
+	ELSE IF @TaxGroupId = 0
+		SET @TaxGroupId = NULL
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
 		BEGIN TRY
@@ -338,6 +367,7 @@ BEGIN
 						,[strType]
 						,[strOrderStatus]
 						,[intAccountId]
+						,[strBOLNumber]
 						,[strComments]
 						,[intFreightTermId]
 						,[intEntityId]
@@ -375,6 +405,7 @@ BEGIN
 						, 'Standard'
 						, 'Open'
 						, @DefaultAccountId
+						, @BOLNumber
 						, @OriginId
 						, @FreightTermId
 						, @UserEntityId

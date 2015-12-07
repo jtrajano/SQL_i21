@@ -39,6 +39,7 @@ AS
 			,@ShipToLocationId
 			,@VendorLocationId
 			,NULL
+			,NULL
 		)
 
 RETURN 0

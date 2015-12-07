@@ -9,6 +9,7 @@
 	,@ContractHeaderId		INT
 	,@ContractDetailId		INT
 	,@OriginalQuantity		NUMERIC(18,6)
+	,@AllowQtyToExceed		BIT
 )
 RETURNS @returntable TABLE
 (
@@ -48,7 +49,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		AND intCompanyLocationId = @LocationId
 		AND intItemUOMId = @ItemUOMId
 		AND intItemId = @ItemId
-		AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty >= @Quantity) OR ysnUnlimitedQuantity = 1)
+		AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty >= @Quantity) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 		AND intContractHeaderId = @ContractHeaderId
 		AND intContractDetailId = @ContractDetailId
@@ -89,7 +90,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		AND intCompanyLocationId = @LocationId
 		AND intItemUOMId = @ItemUOMId
 		AND intItemId = @ItemId
-		AND (((dblAvailableQty) >= @Quantity) OR ysnUnlimitedQuantity = 1)
+		AND (((dblAvailableQty) >= @Quantity) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 		AND (((dblAvailableQty) > 0) OR ysnUnlimitedQuantity = 1)
 		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)

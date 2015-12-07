@@ -34,14 +34,18 @@ BEGIN TRY
 			@XML						NVARCHAR(MAX),
 			@dblNewQuantity				NUMERIC(18,6),
 			@intNewContractDetailId		INT,
-			@intPFDetailNoOfLots		INT
+			@intPFDetailNoOfLots		INT,
+			@ysnSplit					BIT,
+			@intNewPriceFixationId		INT,
+			@ysnHedge					BIT
 
 	SET		@ysnMultiplePriceFixation = 0
 
 	SELECT	@intLotsUnfixed			=	ISNULL(intTotalLots,0) - ISNULL(intLotsFixed,0),
 			@intContractDetailId	=	intContractDetailId,
 			@intContractHeaderId	=	intContractHeaderId,
-			@intFinalPriceUOMId		=	intFinalPriceUOMId
+			@intFinalPriceUOMId		=	intFinalPriceUOMId,
+			@ysnSplit				=	ysnSplit
 	FROM	tblCTPriceFixation
 	WHERE	intPriceFixationId = @intPriceFixationId
 
@@ -143,23 +147,107 @@ BEGIN TRY
 				RETURN
 		END
 
-		IF ISNULL(@ysnPartialPricing,0) = 0
-		BEGIN					
-			SELECT	@dblPFDetailQuantity	=	dblQuantity,@intPFDetailNoOfLots = intNoOfLots FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
-			sELECT	@intNextSequence		=	MAX(intContractSeq) + 1 FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+		IF ISNULL(@ysnSplit,0) = 1
+		BEGIN				
+		
+			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
+			FROM	tblCTPriceFixationDetail 
+			WHERE	intPriceFixationId = @intPriceFixationId AND 
+					intPriceFixationDetailId > (
+													SELECT	MIN(intPriceFixationDetailId) 
+													FROM	tblCTPriceFixationDetail
+													WHERE	intPriceFixationId = @intPriceFixationId
+												)
+		
 
-			SELECT @dblNewQuantity = @dblQuantity - @dblPFDetailQuantity
-			IF	@dblNewQuantity > 0
+			WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
 			BEGIN
-				EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract'
-			END
+					
+					SELECT	@dblPFDetailQuantity	=	dblQuantity,
+							@intPFDetailNoOfLots	=	intNoOfLots,
+							@intFutOptTransactionId	=	intFutOptTransactionId,
+							@ysnHedge				=	ysnHedge
+					FROM	tblCTPriceFixationDetail 
+					WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+
+					SELECT	@intNextSequence		=	MAX(intContractSeq) + 1 FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+
+					SELECT @dblNewQuantity =  @dblPFDetailQuantity
+					SELECT @dblQuantity = @dblQuantity - @dblPFDetailQuantity
+
+					IF	@dblNewQuantity > 0
+					BEGIN
+						EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract', @intNewContractDetailId OUTPUT
+						EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId, @intNewPriceFixationId OUTPUT,'<root><toUpdate><ysnSplit>0</ysnSplit></toUpdate><child><tblCTSpreadArbitrage></tblCTSpreadArbitrage></child></root>' 
+						
+						UPDATE	tblCTPriceFixation 
+						SET		intContractDetailId =	@intNewContractDetailId,
+								intTotalLots		=	@intPFDetailNoOfLots,
+								intLotsFixed		=	@intPFDetailNoOfLots,
+								intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END
+						WHERE	intPriceFixationId	=	@intNewPriceFixationId
+
+						UPDATE	tblCTPriceFixationDetail 
+						SET		intPriceFixationId			=	@intNewPriceFixationId
+						WHERE	intPriceFixationDetailId	=	@intPriceFixationDetailId
+
+						UPDATE	tblRKAssignFuturesToContractSummary
+						SET		intContractDetailId		=	@intNewContractDetailId
+						WHERE	intContractDetailId		=	@intContractDetailId
+						AND		intFutOptTransactionId	=	@intFutOptTransactionId
+
+						UPDATE	tblCTContractDetail	
+						SET		dblNoOfLots				=	 @intPFDetailNoOfLots 
+						WHERE	intContractDetailId		=	 @intContractDetailId
+
+						EXEC	uspCTPriceFixationSave @intNewPriceFixationId, 'Added', @intUserId
+
+					END
+
+					SELECT	@intPriceFixationDetailId	=	MIN(intPriceFixationDetailId) 
+					FROM	tblCTPriceFixationDetail 
+					WHERE	intPriceFixationId			=	@intPriceFixationId
+					AND		intPriceFixationDetailId	>	@intPriceFixationDetailId
+				
+			END	
 
 			IF	@intLotsUnfixed > 0
 			BEGIN
-				UPDATE tblCTPriceFixation SET intTotalLots = @intPFDetailNoOfLots WHERE intPriceFixationId	= @intPriceFixationId
-				UPDATE tblCTContractDetail SET dblNoOfLots = @intPFDetailNoOfLots WHERE intContractHeaderId = @intContractHeaderId
+
+				SELECT	@intPriceFixationDetailId	=	MIN(intPriceFixationDetailId) 
+				FROM	tblCTPriceFixationDetail 
+				WHERE	intPriceFixationId			=	@intPriceFixationId
+
+				SELECT	@dblPFDetailQuantity	=	dblQuantity,
+						@intPFDetailNoOfLots	=	intNoOfLots,
+						@intFutOptTransactionId	=	intFutOptTransactionId,
+						@ysnHedge				=	ysnHedge
+				FROM	tblCTPriceFixationDetail 
+				WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+
+				UPDATE tblCTPriceFixation	
+				SET		intTotalLots	=	@intPFDetailNoOfLots,
+						intLotsFixed	=	@intPFDetailNoOfLots,
+						intLotsHedged	=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END
+				WHERE intPriceFixationId	= @intPriceFixationId
+
+				UPDATE tblCTContractDetail	SET dblNoOfLots = @intPFDetailNoOfLots WHERE intContractDetailId = @intContractDetailId
+
+				SELECT	@dblPFDetailQuantity	=	dblQuantity
+				FROM	tblCTPriceFixationDetail 
+				WHERE	intPriceFixationId = @intPriceFixationId
+
+				SELECT @dblNewQuantity = @dblQuantity - @dblPFDetailQuantity
+
+				IF	@dblNewQuantity > 0
+				BEGIN
+					EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract', @intNewContractDetailId OUTPUT
+						
+				END
+
 				SET @intLotsUnfixed = 0
 			END
+			
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTSpreadArbitrage WHERE intPriceFixationId = @intPriceFixationId)
