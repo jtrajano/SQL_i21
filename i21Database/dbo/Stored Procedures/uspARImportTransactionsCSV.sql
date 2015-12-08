@@ -75,7 +75,15 @@ BEGIN
 		,@AmountDue						NUMERIC(18,6)	= @ZeroDecimal
 		,@TaxAmount						NUMERIC(18,6)	= @ZeroDecimal
 		,@Total							NUMERIC(18,6)	= @ZeroDecimal
-			
+		,@SiteId						INT				= NULL
+		,@PerformerId					INT				= NULL
+		,@ItemId						INT				= NULL
+		,@PercentFull					NUMERIC(18,6)   = @ZeroDecimal
+		,@NewMeterReading				NUMERIC(18,6)   = @ZeroDecimal
+		,@PreviousMeterReading			NUMERIC(18,6)   = @ZeroDecimal
+		,@ConversionFactor				NUMERIC(18,6)   = @ZeroDecimal	
+		,@BillingBy						NVARCHAR(50)	= NULL
+
 	SELECT 
 		 @EntityCustomerId				= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
 		,@Date							= D.[dtmDate] 					
@@ -87,7 +95,12 @@ BEGIN
 		,@ShipDate						= D.dtmShipDate
 		,@PostDate						= D.[dtmPostDate] 
 		,@TransactionType				= D.[strTransactionType]
-		,@Type							= (CASE WHEN D.[strTransactionType] = 'Credit Memo' THEN 'Credit Memo' ELSE 'Standard' END)
+		,@Type							= (CASE WHEN D.strTransactionType = 'Credit Memo' 
+													THEN D.strTransactionType
+												WHEN D.strTransactionType = 'Tank Delivery'
+													THEN D.strTransactionType
+												ELSE 'Standard' 
+										   END)
 		,@Comment						= D.[strTransactionNumber]
 		,@OriginId						= D.[strTransactionNumber]
 		,@PONumber						= D.[strPONumber] 
@@ -106,6 +119,10 @@ BEGIN
 		,@AmountDue						= CASE WHEN D.[strTransactionType] <> 'Sales Order' THEN ISNULL(D.[dblAmountDue], @ZeroDecimal) ELSE @ZeroDecimal END
 		,@TaxAmount						= ISNULL(D.[dblTax], @ZeroDecimal)
 		,@Total							= ISNULL(D.[dblTotal], @ZeroDecimal)
+		,@SiteId						= (SELECT TOP 1 intSiteID FROM tblTMSite WHERE intSiteNumber = CONVERT(INT, D.strSiteNumber))
+		,@PerformerId					= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 [intEntitySalespersonId] FROM tblARSalesperson WHERE [strSalespersonId] = D.strPerformer) ELSE 0 END
+		,@PercentFull					= ISNULL(D.dblPercentFull, @ZeroDecimal)
+		,@NewMeterReading				= ISNULL(D.dblNewMeterReading, @ZeroDecimal)
 	FROM
 		[tblARImportLogDetail] D
 	INNER JOIN
@@ -123,7 +140,53 @@ BEGIN
 			SELECT @ErrorMessage = 'Sales Order:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strSalesOrderNumber + '). ' FROM [tblSOSalesOrder] WHERE RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],'')))) > 0
 		END
 
-	IF ISNULL(@TransactionType, '') = '' OR @TransactionType NOT IN('Invoice', 'Sales Order', 'Credit Memo')
+	IF @TransactionType = 'Tank Delivery'
+		BEGIN
+			IF @SiteId IS NULL
+				SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Site Number provided does not exists. '
+			ELSE
+				BEGIN
+					SELECT TOP 1 @BillingBy				= TMS.strBillingBy
+								,@ItemId				= TMS.intProduct 
+								,@ItemDescription		= I.strDescription
+								,@PreviousMeterReading	= CCS.dblLastMeterReading
+								,@ConversionFactor		= CCS.dblConversionFactor
+					FROM tblTMSite TMS 
+						INNER JOIN vyuARCustomerConsumptionSite CCS ON TMS.intSiteID = CCS.intSiteID
+						LEFT JOIN tblICItem I ON TMS.intProduct = I.intItemId
+					WHERE TMS.intSiteID = @SiteId
+
+					IF @BillingBy = 'Tank'
+						BEGIN
+							SET @NewMeterReading	= NULL						
+							SET @PerformerId		= NULL
+						END
+					ELSE IF @BillingBy IN ('Flow Meter', 'Virtual Meter')
+						BEGIN
+							SET @PercentFull		= NULL						
+							SET @PerformerId		= NULL
+						END
+					ELSE IF @BillingBy = 'Service'
+						BEGIN
+							SET @NewMeterReading	= NULL
+							SET @PercentFull		= NULL
+						END
+												
+				END
+		END
+	ELSE
+		BEGIN
+			SET @SiteId					= NULL				
+			SET @PerformerId			= NULL
+			SET @PercentFull			= NULL
+			SET @NewMeterReading		= NULL
+			SET @PreviousMeterReading	= NULL
+			SET @ConversionFactor		= NULL
+			SET @BillingBy				= NULL
+			SET @ItemId					= NULL
+		END
+
+	IF ISNULL(@TransactionType, '') = '' OR @TransactionType NOT IN('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery')
 		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Transaction Type provided does not exists. '
 
 	IF ISNULL(@EntityCustomerId, 0) = 0
@@ -276,7 +339,7 @@ BEGIN
 						,[ysnResetDetails]			= 1
 						,[ysnPost]					= CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END
 						,[intInvoiceDetailId]		= NULL
-						,[intItemId]				= NULL
+						,[intItemId]				= @ItemId
 						,[ysnInventory]				= 0
 						,[strItemDescription]		= @ItemDescription
 						,[intItemUOMId]				= NULL
@@ -303,15 +366,15 @@ BEGIN
 						,[intShipmentPurchaseSalesContractId]	= NULL
 						,[intTicketId]				= NULL
 						,[intTicketHoursWorkedId]	= NULL
-						,[intSiteId]				= NULL
-						,[strBillingBy]				= NULL
-						,[dblPercentFull]			= NULL
-						,[dblNewMeterReading]		= NULL
-						,[dblPreviousMeterReading]	= NULL
-						,[dblConversionFactor]		= NULL
-						,[intPerformerId]			= NULL
+						,[intSiteId]				= @SiteId
+						,[strBillingBy]				= @BillingBy
+						,[dblPercentFull]			= @PercentFull
+						,[dblNewMeterReading]		= @NewMeterReading
+						,[dblPreviousMeterReading]	= @PreviousMeterReading
+						,[dblConversionFactor]		= @ConversionFactor
+						,[intPerformerId]			= @PerformerId
 						,[ysnLeaseBilling]			= NULL
-						,[ysnVirtualMeterReading]	= NULL
+						,[ysnVirtualMeterReading]	= CASE WHEN @BillingBy = 'Virtual Meter' THEN 1 ELSE 0 END
 				
 					EXEC [dbo].[uspARProcessInvoices]
 						 @InvoiceEntries	= @EntriesForInvoice
