@@ -110,7 +110,7 @@ SELECT * INTO #temp FROM (
 	
 	SELECT 8 AS intSeqId
 		,'Cash Exposure' [strType]
-		,(isnull(invQty, 0) - isnull(ReserveQty, 0)) + (isnull(OpenPurQty, 0) - isnull(OpenSalQty, 0)) + (((isnull(FutLBalTransQty, 0) - isnull(FutMatchedQty, 0)) - (isnull(FutSBalTransQty, 0) - isnull(FutMatchedQty, 0))) * dblContractSize) AS dblTotal
+		,(isnull(invQty, 0) - isnull(ReserveQty, 0)) + (isnull(OpenPurQty, 0) - isnull(OpenSalQty, 0)) + (((isnull(FutLBalTransQty, 0) - isnull(FutMatchedQty, 0)) - (isnull(FutSBalTransQty, 0) - isnull(FutMatchedQty, 0))) * isnull(dblContractSize,0)) AS dblTotal
 	FROM (
 		SELECT (
 				SELECT sum(isnull(it1.dblUnitOnHand, 0))
@@ -723,7 +723,7 @@ SELECT * INTO #temp1 FROM (
 	
 	SELECT 8 AS intSeqId
 		,'Cash Exposure' [strType]
-		,(isnull(invQty, 0) - isnull(ReserveQty, 0)) + (isnull(OpenPurQty, 0) - isnull(OpenSalQty, 0)) + isnull((((isnull(FutLBalTransQty, 0) - isnull(FutMatchedQty, 0)) - (isnull(FutSBalTransQty, 0) - isnull(FutMatchedQty, 0))) * dblContractSize), 0) AS dblTotal	FROM (
+		,(isnull(invQty, 0) - isnull(ReserveQty, 0)) + (isnull(OpenPurQty, 0) - isnull(OpenSalQty, 0)) + isnull((((isnull(FutLBalTransQty, 0) - isnull(FutMatchedQty, 0)) - (isnull(FutSBalTransQty, 0) - isnull(FutMatchedQty, 0))) * isnull(dblContractSize,0)), 0) AS dblTotal	FROM (
 		SELECT (
 				SELECT sum(isnull(it1.dblUnitOnHand, 0))
 				FROM tblICItem i1
