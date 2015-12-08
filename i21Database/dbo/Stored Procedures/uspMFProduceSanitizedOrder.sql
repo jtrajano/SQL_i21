@@ -307,7 +307,7 @@ BEGIN TRY
 		--WHERE strName = @strSanitizationStagingLocation
 		--	AND intLocationId = @intLocationId
 
-		SELECT @intSanitizationStagingUnitId=intSanitizationStagingUnitId
+		SELECT @intStagingLocationId=intSanitizationStagingUnitId
 		FROM tblSMCompanyLocation
 		WHERE intCompanyLocationId=@intLocationId
 
