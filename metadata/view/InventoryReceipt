@@ -1489,7 +1489,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter1",
+                                                                            "name": "filter124",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -1982,6 +1982,22 @@
                                                                     "designerId": "98fb0e70-0811-4919-bb71-b6def7e9a918"
                                                                 },
                                                                 {
+                                                                    "type": "Ext.grid.column.Check",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "ysnLoad",
+                                                                        "itemId": "colLoadContract",
+                                                                        "text": "Load Contract",
+                                                                        "width": 100
+                                                                    },
+                                                                    "name": "MyCheck1",
+                                                                    "designerId": "7d35fd77-e246-45bd-b116-ef6a04c51da1"
+                                                                },
+                                                                {
                                                                     "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
@@ -1996,6 +2012,33 @@
                                                                     },
                                                                     "name": "MyColumn23",
                                                                     "designerId": "d0c56a1b-a263-4124-859c-4de773418b6f"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Number",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "align": "right",
+                                                                        "dataIndex": "dblQtyOrdered",
+                                                                        "dataType": "numeric",
+                                                                        "format": "0,000.##",
+                                                                        "hidden": true,
+                                                                        "itemId": "colAvailableQty",
+                                                                        "text": "Available",
+                                                                        "width": 75
+                                                                    },
+                                                                    "name": "MyNumberColumn17",
+                                                                    "designerId": "6b38ba8d-e289-44ca-8900-549c86ad94a4",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "dataType",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Number",
@@ -2169,6 +2212,51 @@
                                                                             },
                                                                             "name": "MyNumberField15",
                                                                             "designerId": "87ee2728-6433-4040-b5ae-83e6d3a906a7"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Number",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "align": "right",
+                                                                        "dataIndex": "dblQtyToReceive",
+                                                                        "dataType": "numeric",
+                                                                        "format": "0,000",
+                                                                        "hidden": true,
+                                                                        "itemId": "colLoadToReceive",
+                                                                        "text": "Load to Receive",
+                                                                        "width": 110
+                                                                    },
+                                                                    "name": "MyNumberColumn57",
+                                                                    "designerId": "d7b854ed-ea92-4ab5-be87-2ec136cae1fe",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "dataType",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "allowDecimals": false,
+                                                                                "decimalPrecision": 0,
+                                                                                "itemId": "txtLoadToReceive",
+                                                                                "minValue": 0
+                                                                            },
+                                                                            "name": "MyNumberField15",
+                                                                            "designerId": "46c05c3b-099d-4567-86c4-01bf9cc1f99a"
                                                                         }
                                                                     ]
                                                                 },
@@ -3052,7 +3140,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter11",
+                                                                            "name": "filter125",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4289,7 +4377,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter12",
+                                                            "name": "filter126",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5169,7 +5257,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter127",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5638,7 +5726,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter128",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6168,7 +6256,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

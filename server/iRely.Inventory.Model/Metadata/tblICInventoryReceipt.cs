@@ -208,6 +208,7 @@ namespace iRely.Inventory.Model
         public decimal? dblOrderQty { get; set; }
         public decimal? dblBillQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
+        public int intLoadReceive { get; set; }
         public int? intUnitMeasureId { get; set; }
         public int? intWeightUOMId { get; set; }
         public int? intCostUOMId { get; set; }
@@ -690,6 +691,38 @@ namespace iRely.Inventory.Model
                 _costCF = value;
             }
         }
+        private bool _loadContract;
+        [NotMapped]
+        public bool ysnLoad
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.ysnLoad ?? false;
+                else
+                    return _loadContract;
+            }
+            set
+            {
+                _loadContract = value;
+            }
+        }
+        private decimal _availableQty;
+        [NotMapped]
+        public decimal dblAvailableQty
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblAvailableQty ?? 0;
+                else
+                    return _availableQty;
+            }
+            set
+            {
+                _availableQty = value;
+            }
+        }
         
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
@@ -750,6 +783,8 @@ namespace iRely.Inventory.Model
         public string strGrade { get; set; }
         public int? intLifeTime { get; set; }
         public string strLifeTimeType { get; set; }
+        public bool? ysnLoad { get; set; }
+        public decimal? dblAvailableQty { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

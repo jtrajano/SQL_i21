@@ -387,6 +387,30 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return false;
             }
         },
+        checkShowContractOnly: function (get) {
+            if (get('current.strReceiptType') === 'Purchase Contract') {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
+        checkHideLoadContract: function (get) {
+            if (get('grdInventoryReceipt.selection.ysnLoad') !== true) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
+        checkShowLoadContractOnly: function (get) {
+            if (get('grdInventoryReceipt.selection.ysnLoad') !== true) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
         checkHideSourceNo: function (get) {
             if (get('current.intSourceType') === 0) {
                 return true;

@@ -27,13 +27,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.column.Check',
         'Ext.grid.column.Number',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.feature.Summary',
         'Ext.form.Label',
         'Ext.grid.column.Date',
-        'Ext.grid.column.Check',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Time',
         'Ext.toolbar.Paging'
@@ -1065,11 +1065,29 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Description'
                                                                             },
                                                                             {
+                                                                                xtype: 'checkcolumn',
+                                                                                itemId: 'colLoadContract',
+                                                                                width: 100,
+                                                                                dataIndex: 'ysnLoad',
+                                                                                text: 'Load Contract'
+                                                                            },
+                                                                            {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colOrderUOM',
                                                                                 width: 100,
                                                                                 dataIndex: 'strDescription',
                                                                                 text: 'Ordered UOM'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true,
+                                                                                itemId: 'colAvailableQty',
+                                                                                width: 75,
+                                                                                align: 'right',
+                                                                                dataIndex: 'dblQtyOrdered',
+                                                                                text: 'Available',
+                                                                                format: '0,000.##'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1151,6 +1169,24 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
                                                                                     itemId: 'txtQtyToReceive',
+                                                                                    minValue: 0
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true,
+                                                                                itemId: 'colLoadToReceive',
+                                                                                width: 110,
+                                                                                align: 'right',
+                                                                                dataIndex: 'dblQtyToReceive',
+                                                                                text: 'Load to Receive',
+                                                                                format: '0,000',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    itemId: 'txtLoadToReceive',
+                                                                                    allowDecimals: false,
+                                                                                    decimalPrecision: 0,
                                                                                     minValue: 0
                                                                                 }
                                                                             },
