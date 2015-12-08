@@ -3,7 +3,7 @@ AS
 SELECT
       C.strVendorId
 	, C.intEntityVendorId
-    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN C2.str1099Name IS NOT NULL THEN dbo.fnTrim(C2.str1099Name) ELSE dbo.fnTrim(C2.strName) END), '&', 'and'))      
+    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrim(C2.str1099Name) ELSE dbo.fnTrim(C2.strName) END), '&', 'and'))      
     , strAddress = REPLACE(REPLACE(dbo.fnTrim(D.strAddress), CHAR(10), ' ') , CHAR(13), ' ')         
 	, ISNULL(dbo.fnTrim(strCity), '') strCity
 	, ISNULL(dbo.fnTrim(strState), '') strState
