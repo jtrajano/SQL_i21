@@ -10,6 +10,7 @@ BEGIN
 		SELECT DISTINCT CS.intCustomerPatronId,
 			   CS.intStockId,
 			   SC.strStockName,
+			   CS.strCertificateNo,
 			   SC.dblParValue,
 			   CS.dblSharesNo,
 			   SC.intDividendsPerShare,
