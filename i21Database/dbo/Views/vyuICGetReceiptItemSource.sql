@@ -102,9 +102,10 @@ SELECT
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
 						THEN (
-							CASE WHEN ContractView.ysnLoad = 1 THEN ISNULL(ContractView.intNoOfLoad, 0)
+							CASE WHEN (ContractView.ysnLoad = 1) THEN ISNULL(ContractView.intNoOfLoad, 0)
 								ELSE ISNULL(ContractView.dblDetailQuantity, 0) END
 						)
+						 
 					WHEN Receipt.intSourceType = 1 -- Scale
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
@@ -130,7 +131,7 @@ SELECT
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
 						THEN (
-							CASE WHEN ContractView.ysnLoad = 1 THEN ISNULL(ContractView.intNoOfLoad, 0) - ISNULL(ContractView.dblBalance, 0)
+							CASE WHEN (ContractView.ysnLoad = 1) THEN ISNULL(ContractView.intLoadReceived, 0)
 								ELSE ISNULL(ContractView.dblDetailQuantity, 0) - ISNULL(ContractView.dblBalance, 0) END
 						)
 					WHEN Receipt.intSourceType = 1 -- Scale
@@ -167,6 +168,8 @@ SELECT
 				)
 			END
 		)
+	, ContractView.ysnLoad
+	, ContractView.dblAvailableQty
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN vyuCTContractDetailView ContractView
