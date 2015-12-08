@@ -32,6 +32,10 @@
     [strQuotesDecimalsShown] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strHelperUrlDomain] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strNotificationEmailUrl] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnEnableCreditCardProcessing] BIT NOT NULL, 
+	[strMerchantId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strMerchantPassword] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strPaymentServer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[intCompanySetupId] INT NOT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )

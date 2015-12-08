@@ -7,8 +7,8 @@
 		strSourceSystem, strAccountingMethod, strSMTPHost, intSMTPPort, strSMTPUserName, strSMTPPassword, strSMTPFromEmail, strSMTPFromName, ysnSMTPAuthentication,
 		strSMTPSsl, intInterfaceSystemId, strQuotingSystemBatchUserID, strQuotingSystemBatchUserPassword, strInterfaceWebServicesURL, ysnAllowForContractPricing,
 		ysnInterfaceToTargetOrders, ysnAllowUseForClosingPrices, ysnAllowUseForEndOfMonth, ysnInterfaceToScales, intSaveHistoryEveryId, strIntervalStartTime,
-		strIntervalEndTime, strIntervalUpdatesMinutes, strQuotesDecimalsShown, strHelperUrlDomain, intCompanySetupId)
-		VALUES(0, 0, 0, 'Production', 0, 'Summit', '', '', 0, '', '', '', '', 0, 'None', 0, '', '', '', 0, 0, 0, 0, 0, 0, '','', '', '', '', @companySetupId)
+		strIntervalEndTime, strIntervalUpdatesMinutes, strQuotesDecimalsShown, strHelperUrlDomain, ysnEnableCreditCardProcessing, strMerchantId, strMerchantPassword, strPaymentServer, intCompanySetupId)
+		VALUES(0, 0, 0, 'Production', 0, 'Summit', '', '', 0, '', '', '', '', 0, 'None', 0, '', '', '', 0, 0, 0, 0, 0, 0, '','', '', '', '', 0, '', '', '', @companySetupId)
 	END
 ELSE
 	BEGIN
