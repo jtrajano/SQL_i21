@@ -53,7 +53,7 @@ BEGIN TRY
 	INNER JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 	INNER JOIN dbo.tblICItemUOM iu ON iu.intItemId = l.intItemId
 	INNER JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-	WHERE iu.ysnStockUnit = 1 AND l.strLotNumber = @strLotNo 
+	WHERE iu.ysnStockUnit = 1 AND l.strLotNumber = @strLotNo AND l.dblQty>0
 	
 END TRY
 
