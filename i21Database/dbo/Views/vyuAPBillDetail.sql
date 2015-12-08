@@ -8,6 +8,7 @@ SELECT
 	G2.strName,
 	A.strVendorOrderNumber,
 	A.intBillId,
+	A.dtmDate,
 	B.intBillDetailId,
 	A.intEntityVendorId,
 	C.strItemNo,
