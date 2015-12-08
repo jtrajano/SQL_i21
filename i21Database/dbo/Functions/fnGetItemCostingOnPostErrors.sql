@@ -88,6 +88,7 @@ RETURN (
 
 		-- Check for negative stock and if negative stock is NOT allowed. 
 		-- and do not allow negative stock on items being phased-out. 
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -100,6 +101,22 @@ RETURN (
 												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 									WHERE	tblICItemLocation.intItemId = @intItemId
 											AND tblICItemLocation.intItemLocationId = @intItemLocationId
+								)
+								,ISNULL(
+									(
+										SELECT	strSubLocationName
+										FROM	dbo.tblSMCompanyLocationSubLocation
+										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
+									)
+									, '(Blank Sub Location)'
+								)
+								,ISNULL(
+									(
+										SELECT	strName
+										FROM	dbo.tblICStorageLocation
+										WHERE	intStorageLocationId = @intStorageLocationId
+									)
+									, '(Blank Storage Location)'
 								)
 							)
 				,intErrorCode = 80003
@@ -123,6 +140,7 @@ RETURN (
 
 		-- Check for negative stocks at the lot table. 
 		-- and do not allow negative stock on items being phased-out. 
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -135,6 +153,22 @@ RETURN (
 												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 									WHERE	tblICItemLocation.intItemId = @intItemId
 											AND tblICItemLocation.intItemLocationId = @intItemLocationId
+								)
+								,ISNULL(
+									(
+										SELECT	strSubLocationName
+										FROM	dbo.tblSMCompanyLocationSubLocation
+										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
+									)
+									, '(Blank Sub Location)'
+								)
+								,ISNULL(
+									(
+										SELECT	strName
+										FROM	dbo.tblICStorageLocation
+										WHERE	intStorageLocationId = @intStorageLocationId
+									)
+									, '(Blank Storage Location)'
 								)
 							)
 				,intErrorCode = 80003

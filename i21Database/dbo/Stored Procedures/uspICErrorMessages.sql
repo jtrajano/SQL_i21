@@ -30,7 +30,7 @@ EXEC sp_addmessage 80002,11,@strmessage,'us_english','False'
 
 -- was 50029
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80003) EXEC sp_dropmessage 80003, 'us_english'	
-SET @strmessage = 'Negative stock quantity is not allowed for %s'
+SET @strmessage = 'Negative stock quantity is not allowed for %s on %s, %s, and %s.'
 EXEC sp_addmessage 80003,11,@strmessage,'us_english','False'
 
 -- was 50031
