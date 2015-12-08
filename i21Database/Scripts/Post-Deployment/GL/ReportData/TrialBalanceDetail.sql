@@ -57,7 +57,7 @@ UPDATE o SET strSettings = @GLReportDrillDown
 from tblRMDefaultOption o INNER join tblRMReport r on o.intReportId = r.intReportId
 where r.intReportId = @GLReportId and o.strName ='General Ledger by Account ID Detail'
 --UPDATE THE DATASOURCE
-UPDATE d SET strQuery = @GLReportDataSource
+UPDATE d SET strQuery = @GLReportDataSource,intDataSourceType = 1
 from tblRMDatasource d join tblRMReport r on d.intReportId = r.intReportId
 where r.intReportId = @GLReportId
 
