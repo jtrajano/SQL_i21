@@ -2,6 +2,7 @@
 	@intCustomerId INT = NULL,
 	@dblProcessingDays NUMERIC(18,6) = NULL,
 	@ysnProrateDividend BIT = NULL,
+	@dtmProcessingDateFrom DATETIME = NULL,
 	@dtmProcessingDateTo DATETIME = NULL, 
 	@dtmCutoffDate DATETIME = NULL
 AS
@@ -27,7 +28,9 @@ BEGIN
 			ON ARC.intEntityCustomerId = ENT.intEntityId
 	 LEFT JOIN tblSMTaxCode TC
 			ON TC.intTaxCodeId = ARC.intTaxCodeId
-		 WHERE CS.intCustomerPatronId = @intCustomerId
-		    OR @intCustomerId = 0
+		 WHERE (CS.intCustomerPatronId = @intCustomerId
+		    OR @intCustomerId = 0)
+		   AND CS.dtmIssueDate BETWEEN @dtmProcessingDateFrom AND @dtmProcessingDateTo
+		   
 END
 GO
