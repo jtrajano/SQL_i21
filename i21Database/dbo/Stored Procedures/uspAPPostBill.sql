@@ -251,7 +251,7 @@ BEGIN
 		--UPDATE CHARGES
 		UPDATE A
 			SET A.dblAmountBilled = A.dblAmountBilled - B.dblTotal
-		FROM tblICInventoryReceiptChargePerItem A
+		FROM tblICInventoryReceiptCharge A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
@@ -308,7 +308,7 @@ BEGIN
 		--UPDATE CHARGES
 		UPDATE A
 			SET A.dblAmountBilled = A.dblAmountBilled + B.dblTotal
-		FROM tblICInventoryReceiptChargePerItem A
+		FROM tblICInventoryReceiptCharge A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 

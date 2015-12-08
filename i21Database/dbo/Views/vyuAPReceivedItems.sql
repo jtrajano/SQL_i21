@@ -227,7 +227,8 @@ FROM
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
 	UNION ALL
-	--CHARGES
+
+	--OTHER CHARGES
 	SELECT
 		[intEntityVendorId]							=	A.intEntityVendorId
 		,[dtmDate]									=	A.dtmDate
