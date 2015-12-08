@@ -8,6 +8,7 @@ GO
 IF  (((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1) OR ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1)) and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'vwitmmst') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'vwslsmst') = 1 and
+	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'vwlocmst') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'vwcusmst') = 1
 BEGIN
 	EXEC('
@@ -52,7 +53,9 @@ BEGIN
 			INNER JOIN tblTMCustomer C ON B.intCustomerID = C.intCustomerID
 			INNER JOIN tblTMClock D ON D.intClockID = B.intClockID
 			INNER JOIN tblTMRoute E ON B.intRouteId = E.intRouteId
+			INNER JOIN vwlocmst K ON B.intLocationId = K.A4GLIdentity
 			INNER JOIN vwitmmst F ON CAST(F.A4GLIdentity AS INT) = B.intProduct 
+				AND K.vwloc_loc_no = F.vwitm_loc_no
 			INNER JOIN vwslsmst G ON CAST(G.A4GLIdentity AS INT) = A.intDriverID
 			INNER JOIN vwcusmst H ON H.A4GLIdentity = C.intCustomerNumber
 			WHERE B.ysnActive  = 1
