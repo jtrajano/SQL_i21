@@ -75,7 +75,7 @@ AS
 							THEN	'Priced'
 					ELSE	''
 			END		AS strPricingStatus,
-
+			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)	AS intLoadReceived,
 			--Header Detail
 
 			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,
