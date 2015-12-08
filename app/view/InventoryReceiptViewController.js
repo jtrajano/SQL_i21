@@ -373,19 +373,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotTracking: 'strLotTracking',
+                colLoadContract: {
+                    hidden: '{checkShowContractOnly}',
+                    dataIndex: 'ysnLoad'
+                },
                 colOrderUOM: {
-                    hidden: '{checkHideOrderNo}',
+                    hidden: '{checkHideLoadContract}',
                     dataIndex: 'strOrderUOM'
                 },
                 colQtyOrdered: {
-                    hidden: '{checkHideOrderNo}',
+                    hidden: '{checkHideLoadContract}',
                     dataIndex: 'dblOrderQty'
+                },
+                colAvailableQty: {
+                    hidden: '{checkShowLoadContractOnly}',
+                    dataIndex: 'dblAvailableQty'
                 },
                 colReceived: {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'dblReceived'
                 },
                 colQtyToReceive: 'dblOpenReceive',
+                colLoadToReceive: {
+                    hidden: '{checkShowLoadContractOnly}',
+                    dataIndex: 'intLoadReceive'
+                },
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
@@ -2148,8 +2160,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (win.viewModel.data.current) {
                     if (win.viewModel.data.current.get('intSourceType') === 0) {
                         current.set('dblOrderQty', po.get('dblDetailQuantity'));
-                        current.set('dblReceived', po.get('dblDetailQuantity') - po.get('dblBalance'));
-                        current.set('dblOpenReceive', po.get('dblBalance'));
+                        current.set('ysnLoad', po.get('ysnLoad'));
+                        if (po.get('ysnLoad') === true) {
+                            current.set('dblReceived', po.get('intLoadReceived'));
+                            current.set('dblOpenReceive', po.get('dblQuantityPerLoad'));
+                            current.set('dblAvailableQty', po.get('dblAvailableQty'));
+                        }
+                        else {
+                            current.set('dblReceived', po.get('dblDetailQuantity') - po.get('dblBalance'));
+                            current.set('dblOpenReceive', po.get('dblBalance'));
+                        }
+
                         current.set('strItemDescription', po.get('strItemDescription'));
                         current.set('intItemId', po.get('intItemId'));
                         current.set('strItemNo', po.get('strItemNo'));
