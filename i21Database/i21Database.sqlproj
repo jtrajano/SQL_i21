@@ -3076,6 +3076,7 @@
     <Build Include="dbo\Views\vyuTMDriverUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMClockUsedBySite.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummary.sql" />
+    <Build Include="dbo\Views\vyuPATTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
