@@ -49,11 +49,11 @@ DECLARE @GLReportDrillDown VARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThrough
 DECLARE @GLReportDataSource VARCHAR(MAX) = 'EXEC [dbo].[uspGLGetTrialBalanceDetailReport]'
 
 --UPDATE THE DRILL DOWN
-UPDATE o SET strSettings = @GLReportDrillDown
+UPDATE o SET strSettings = @GLReportDrillDown, ysnEnable = 0, ysnShow = 0
 from tblRMOption o INNER join tblRMReport r on o.intReportId = r.intReportId
 where r.intReportId = @GLReportId and o.strName ='General Ledger by Account ID Detail'
 
-UPDATE o SET strSettings = @GLReportDrillDown
+UPDATE o SET strSettings = @GLReportDrillDown, ysnEnable = 0, ysnShow = 0
 from tblRMDefaultOption o INNER join tblRMReport r on o.intReportId = r.intReportId
 where r.intReportId = @GLReportId and o.strName ='General Ledger by Account ID Detail'
 --UPDATE THE DATASOURCE
