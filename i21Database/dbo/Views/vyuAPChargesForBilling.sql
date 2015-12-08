@@ -1,24 +1,24 @@
 ﻿CREATE VIEW [dbo].[vyuAPChargesForBilling]
 AS
 SELECT
-	 [intInventoryReceiptId]					=	A.intInventoryReceiptId
-	,[intEntityVendorId]						=	E.intEntityVendorId
-	,[dtmDate]									=	D.dtmReceiptDate
-	,[strReference]								=	D.strVendorRefNo
-	,[strSourceNumber]							=	D.strReceiptNumber
-	,[intItemId]								=	B.intChargeId
-	,[strMiscDescription]						=	C.strDescription
-	,[strItemNo]								=	C.strItemNo
-	,[strDescription]							=	C.strDescription
+	 [intInventoryReceiptId]					=	ReceiptCharge.intInventoryReceiptId
+	,[intEntityVendorId]						=	Vendor.intEntityVendorId
+	,[dtmDate]									=	Receipt.dtmReceiptDate
+	,[strReference]								=	Receipt.strVendorRefNo
+	,[strSourceNumber]							=	Receipt.strReceiptNumber
+	,[intItemId]								=	Item.intItemId
+	,[strMiscDescription]						=	Item.strDescription
+	,[strItemNo]								=	Item.strItemNo
+	,[strDescription]							=	Item.strDescription
 	,[dblOrderQty]								=	1
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	1
 	,[dblQuantityToBill]						=	1
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
-	,[intInventoryReceiptItemId]				=	B.intInventoryReceiptItemId
-	,[intInventoryReceiptChargeId]				=	B.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	B.dblCalculatedAmount
+	,[intInventoryReceiptItemId]				=	NULL 
+	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
+	,[dblUnitCost]								=	ReceiptCharge.dblAmount
 	,[dblTax]									=	0
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
@@ -39,8 +39,8 @@ SELECT
 
 													END 
 	,[strAccountId]								=	
-													CASE	WHEN ISNULL(A.ysnInventoryCost, 0) = 0 THEN 
-																H.strAccountId
+													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
+																OtherChargeExpense.strAccountId
 															ELSE 
 																(
 																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 

@@ -23,15 +23,13 @@ BEGIN
 	
 	SELECT	@strItemNo = Item.strItemNo
 			,@intItemId = Item.intItemId
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptChargePerItem ChargePerItem 
-				ON Receipt.intInventoryReceiptId = ChargePerItem.intInventoryReceiptId
-			INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
-				ON ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
+				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = ReceiptCharge.intChargeId
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId 
 			AND Receipt.ysnPosted = 1
-			AND ISNULL(ChargePerItem.dblAmountBilled, 0) > 0
+			AND ISNULL(ReceiptCharge.dblAmountBilled, 0) > 0
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
