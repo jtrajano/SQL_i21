@@ -43,7 +43,7 @@ BEGIN TRY
 	WHERE [fieldname] = 'strLotNo'
 
 	SELECT l.intItemId, 
-		   l.dblQty, 
+		   CASE WHEN iu.intItemUOMId = l.intWeightUOMId THEN l.dblWeight ELSE dblQty END dblQty, 
 		   l.strLotNumber, 
 		   l.dblWeight, 
 		   i.strItemNo, 
