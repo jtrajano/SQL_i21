@@ -1,9 +1,10 @@
-﻿CREATE PROCEDURE uspPATGetPatronageDetails 
+﻿CREATE PROCEDURE [dbo].[uspPATGetPatronageDetails] 
 	@intCustomerId INT = NULL
 AS
 BEGIN
 	SELECT CV.intPatronageCategoryId,
 		   PC.strCategoryCode,
+		   PC.strDescription,
 		   PC.strPurchaseSale,
 		   PC.strUnitAmount,
 		   CV.dblVolume,
@@ -14,4 +15,5 @@ INNER JOIN tblPATPatronageCategory PC
 	 WHERE intCustomerPatronId = @intCustomerId
 
 END
+
 GO
