@@ -37,7 +37,10 @@ BEGIN TRY
 			@intPFDetailNoOfLots		INT,
 			@ysnSplit					BIT,
 			@intNewPriceFixationId		INT,
-			@ysnHedge					BIT
+			@ysnHedge					BIT,
+			@dblFutures					NUMERIC(18,6),
+			@intTotalLots				INT,
+			@intTotalPFDetailNoOfLots	INT
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -45,9 +48,14 @@ BEGIN TRY
 			@intContractDetailId	=	intContractDetailId,
 			@intContractHeaderId	=	intContractHeaderId,
 			@intFinalPriceUOMId		=	intFinalPriceUOMId,
-			@ysnSplit				=	ysnSplit
+			@ysnSplit				=	ysnSplit,
+			@intTotalLots			=	intTotalLots
 	FROM	tblCTPriceFixation
-	WHERE	intPriceFixationId = @intPriceFixationId
+	WHERE	intPriceFixationId		=	@intPriceFixationId
+
+	SELECT	@intTotalPFDetailNoOfLots	=	SUM(intNoOfLots)
+	FROM	tblCTPriceFixationDetail
+	WHERE	intPriceFixationId		=	@intPriceFixationId
 
 	SELECT	@ysnPartialPricing = ysnPartialPricing FROM tblCTCompanyPreference
 
@@ -166,7 +174,8 @@ BEGIN TRY
 					SELECT	@dblPFDetailQuantity	=	dblQuantity,
 							@intPFDetailNoOfLots	=	intNoOfLots,
 							@intFutOptTransactionId	=	intFutOptTransactionId,
-							@ysnHedge				=	ysnHedge
+							@ysnHedge				=	ysnHedge,
+							@dblFutures				=	dblFutures
 					FROM	tblCTPriceFixationDetail 
 					WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
 
@@ -184,7 +193,9 @@ BEGIN TRY
 						SET		intContractDetailId =	@intNewContractDetailId,
 								intTotalLots		=	@intPFDetailNoOfLots,
 								intLotsFixed		=	@intPFDetailNoOfLots,
-								intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END
+								intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END,
+								dblPriceWORollArb	=	@dblFutures,
+								dblFinalPrice		=	dblFinalPrice - dblPriceWORollArb + @dblFutures
 						WHERE	intPriceFixationId	=	@intNewPriceFixationId
 
 						UPDATE	tblCTPriceFixationDetail 
@@ -198,7 +209,7 @@ BEGIN TRY
 
 						UPDATE	tblCTContractDetail	
 						SET		dblNoOfLots				=	 @intPFDetailNoOfLots 
-						WHERE	intContractDetailId		=	 @intContractDetailId
+						WHERE	intContractDetailId		=	 @intNewContractDetailId
 
 						EXEC	uspCTPriceFixationSave @intNewPriceFixationId, 'Added', @intUserId
 
@@ -218,18 +229,21 @@ BEGIN TRY
 				FROM	tblCTPriceFixationDetail 
 				WHERE	intPriceFixationId			=	@intPriceFixationId
 
-				SELECT	@dblPFDetailQuantity	=	dblQuantity,
-						@intPFDetailNoOfLots	=	intNoOfLots,
-						@intFutOptTransactionId	=	intFutOptTransactionId,
-						@ysnHedge				=	ysnHedge
+				SELECT	@dblPFDetailQuantity		=	dblQuantity,
+						@intPFDetailNoOfLots		=	intNoOfLots,
+						@intFutOptTransactionId		=	intFutOptTransactionId,
+						@ysnHedge					=	ysnHedge,
+						@dblFutures					=	dblFutures
 				FROM	tblCTPriceFixationDetail 
-				WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+				WHERE	intPriceFixationDetailId	=	@intPriceFixationDetailId
 
 				UPDATE tblCTPriceFixation	
-				SET		intTotalLots	=	@intPFDetailNoOfLots,
-						intLotsFixed	=	@intPFDetailNoOfLots,
-						intLotsHedged	=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END
-				WHERE intPriceFixationId	= @intPriceFixationId
+				SET		intTotalLots		=	@intPFDetailNoOfLots,
+						intLotsFixed		=	@intPFDetailNoOfLots,
+						intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN @intPFDetailNoOfLots ELSE NULL END,
+						dblPriceWORollArb	=	@dblFutures,
+						dblFinalPrice		=	dblFinalPrice - dblPriceWORollArb + @dblFutures
+				WHERE intPriceFixationId	=	@intPriceFixationId
 
 				UPDATE tblCTContractDetail	SET dblNoOfLots = @intPFDetailNoOfLots WHERE intContractDetailId = @intContractDetailId
 
@@ -242,7 +256,13 @@ BEGIN TRY
 				IF	@dblNewQuantity > 0
 				BEGIN
 					EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract', @intNewContractDetailId OUTPUT
-						
+					
+					UPDATE	tblCTContractDetail	
+					SET		dblNoOfLots = CASE WHEN @intTotalLots - @intTotalPFDetailNoOfLots <=0 THEN 1 ELSE  @intTotalLots - @intTotalPFDetailNoOfLots END,
+							dblFutures = null,
+							dblCashPrice = null,
+							dblTotalCost = null
+					WHERE	intContractDetailId = @intNewContractDetailId	
 				END
 
 				SET @intLotsUnfixed = 0
