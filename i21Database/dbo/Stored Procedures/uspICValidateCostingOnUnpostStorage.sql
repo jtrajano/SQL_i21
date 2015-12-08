@@ -23,6 +23,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@strLocationName AS NVARCHAR(50)
+		,@strSubLocationName AS NVARCHAR(50)
+		,@strStorageLocationName AS NVARCHAR(50)
 		,@intItemId AS INT 
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
@@ -31,9 +33,11 @@ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#Found
 CREATE TABLE #FoundErrors (
 	intItemId INT
 	,intItemLocationId INT
+	,intSubLocationId INT
+	,intStorageLocationId INT
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
-	,intTransactionTypeId INT 
+	,intTransactionTypeId INT
 )
 
 -- Cross-check each items against the function that does the validation. 
@@ -41,6 +45,8 @@ CREATE TABLE #FoundErrors (
 INSERT INTO #FoundErrors
 SELECT	Errors.intItemId
 		,Errors.intItemLocationId
+		,Item.intSubLocationId
+		,Item.intStorageLocationId
 		,Errors.strText
 		,Errors.intErrorCode
 		,Item.intTransactionTypeId
@@ -52,14 +58,27 @@ WHERE	ISNULL(@ysnRecap, 0) = 0
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
 BEGIN 
 	SELECT @strItemNo = NULL, @intItemId = NULL 
+
 	SELECT TOP 1 
 			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+			,@strLocationName = CompanyLocation.strLocationName
+			,@strSubLocationName = ISNULL(SubLocation.strSubLocationName, '(Blank Sub Location)')
+			,@strStorageLocationName = ISNULL(StorageLocation.strName, '(Blank Storage Location)')
 			,@intItemId = Item.intItemId
 	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 				ON Errors.intItemId = Item.intItemId
+			LEFT JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemLocationId = Errors.intItemLocationId
+			LEFT JOIN dbo.tblSMCompanyLocation CompanyLocation
+				ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
+			LEFT JOIN dbo.tblSMCompanyLocationSubLocation SubLocation
+				ON SubLocation.intCompanyLocationSubLocationId = Errors.intSubLocationId
+			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
+				ON StorageLocation.intStorageLocationId = Errors.intSubLocationId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR(80003, 11, 1, @strItemNo)
+	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName, @strSubLocationName, @strStorageLocationName)
+
 	RETURN -1
 END 
 

@@ -69,8 +69,8 @@ BEGIN
 	SELECT	@strItemNo = ISNULL(@strItemNo, '(Item id: ' + ISNULL(CAST(@intItemId AS NVARCHAR(10)), 'Blank') + ')')
 			,@strLocationName = ISNULL(@strLocationName, '(Item Location id: ' + ISNULL(CAST(@intItemLocationId AS NVARCHAR(10)), 'Blank') + ')')
 				
-	-- Negative stock quantity is not allowed for {Item Name} in {Location Name}.
-	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName) 
+	-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'	
+	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName, '(Blank Sub Location)', '(Blank Storage Location)') 
 	GOTO _Exit;
 END 
 
