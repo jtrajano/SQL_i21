@@ -12,6 +12,8 @@
     [intItemId] INT NULL, 
     [intItemUOMId] INT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
+	[ysnLoad] BIT NULL DEFAULT((0)),
+	[intLoadReceive] INT NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICTransactionDetailLog] PRIMARY KEY ([intTransactionDetailLogId]) 
 )
