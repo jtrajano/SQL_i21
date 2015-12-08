@@ -26,7 +26,7 @@ BEGIN
 					strItemNo = A.vwitm_no
 					,intItemId = A.A4GLIdentity
 					,strDescription = A.vwitm_desc
-					intConcurrencyId = 0
+					,intConcurrencyId = 0
 				FROM vwitmmst A
 				INNER JOIN tblTMSite B
 					ON A.A4GLIdentity = B.intProduct
