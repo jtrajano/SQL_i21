@@ -1105,6 +1105,7 @@ BEGIN
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
+						SET @CFPricingOut = 'Price Profile' 
 						RETURN 1;    
 					END
 					
@@ -1138,6 +1139,7 @@ BEGIN
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
+						SET @CFPricingOut = 'Price Profile' 
 						RETURN 1;    
 					END
 
@@ -1150,6 +1152,7 @@ BEGIN
 				IF(@CFTransferCost IS NOT NULL)
 					BEGIN
 						SET @CFPriceOut = @CFTransferCost + @Rate
+						SET @CFPricingOut = 'Price Profile' 
 						RETURN 1;    
 					END
 					
@@ -1163,6 +1166,7 @@ BEGIN
 				IF(@CFTransferCost IS NOT NULL)
 					BEGIN
 						SET @CFPriceOut = @CFTransferCost + @Rate
+						SET @CFPricingOut = 'Price Profile' 
 						RETURN 1;    
 					END
 					
@@ -1192,6 +1196,7 @@ BEGIN
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
+						SET @CFPricingOut = 'Price Profile' 
 						RETURN 1;    
 					END
 					
