@@ -8,7 +8,7 @@ BEGIN
 
 	SELECT @intCount = COUNT(*) FROM [tblSMUserRole] WHERE [strName] LIKE 'DUP: ' + (SELECT [strName] FROM [dbo].[tblSMUserRole] WHERE [intUserRoleID] = @intUserRoleId) + '%' 
 	
-	INSERT INTO tblSMUserRole([strName], [strDescription], [strMenu], [strMenuPermission], [strForm], [ysnAdmin])
+	INSERT INTO tblSMUserRole([strName], [strDescription], [strMenu], [strMenuPermission], [strForm], [strRoleType], [ysnAdmin])
 	SELECT CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strName] 
 		   ELSE 'DUP: ' + [strName] + ' (' + @intCount + ')' END,
@@ -16,6 +16,7 @@ BEGIN
 		   [strMenu], 
 		   [strMenuPermission], 
 		   [strForm], 
+		   [strRoleType],
 		   [ysnAdmin]
 	FROM [tblSMUserRole]
 	WHERE [intUserRoleID] = @intUserRoleId
