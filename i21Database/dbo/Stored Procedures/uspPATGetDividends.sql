@@ -21,7 +21,9 @@ BEGIN
 									 ELSE (CASE WHEN Total.dblDividendAmount < @dblMinimumDividend THEN 0 
 												ELSE Total.dblDividendAmount * (@FWT / 100) END) END,
 				   dblCheckAmount = CASE WHEN Total.dblDividendAmount < @dblMinimumDividend THEN 0
-										 ELSE Total.dblDividendAmount - ISNULL(CS.dblCheckAmount,0) END
+										 ELSE Total.dblDividendAmount - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 
+									 ELSE (CASE WHEN Total.dblDividendAmount < @dblMinimumDividend THEN 0 
+												ELSE Total.dblDividendAmount * (@FWT / 100) END) END) END
 			 FROM tblPATStockClassification SC
 	   INNER JOIN tblPATCustomerStock CS
 			   ON CS.intStockId = SC.intStockId
@@ -64,6 +66,7 @@ BEGIN
 				  Total.dblDividendAmount,
 				  CS.dblCheckAmount
 END
+
 
 
 GO

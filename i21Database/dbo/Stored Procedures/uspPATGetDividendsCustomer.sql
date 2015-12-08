@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspPATGetDividendsCustomer]
+﻿CREATE PROCEDURE [dbo].[uspPATGetDividendsCustomer]
 	@intCustomerId INT = NULL,
 	@dblProcessingDays NUMERIC(18,6) = NULL,
 	@ysnProrateDividend BIT = NULL,
@@ -29,7 +28,6 @@ BEGIN
 	 LEFT JOIN tblSMTaxCode TC
 			ON TC.intTaxCodeId = ARC.intTaxCodeId
 		 WHERE CS.intCustomerPatronId = @intCustomerId
+		    OR @intCustomerId = 0
 END
-
-
 GO
