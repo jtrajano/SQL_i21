@@ -535,6 +535,48 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'datetime',
                                                                     text: 'Expiry Date',
                                                                     hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Sub Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Storage Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStorageLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location Name',
+                                                                    flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboLotNumber',
