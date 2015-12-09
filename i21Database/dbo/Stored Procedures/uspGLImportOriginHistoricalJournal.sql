@@ -180,12 +180,15 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUnits = 1)
 	BEGIN
 		insert INTO #iRelyImptblGLJournalDetail
-		(intJournalId,glhst_trans_dt,intAccountId,Debit,DebitRate,CreditRate,dblUnitsInlbs,DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
+		(intJournalId,glhst_trans_dt,intAccountId,Debit,Credit,DebitUnits,CreditUnits, DebitRate,CreditRate,dblUnitsInlbs,DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
 		SELECT 
 		intJournalId,
 		glhst_trans_dt,
 		intAccountId,
 		Debit = Credit ,
+		0 AS Credit,
+		0 AS DebitUnits,
+		0 AS CreditUnits, 
 		0 AS DebitRate,	
 		0 AS CreditRate,	
 		0 AS dblUnitsInlbs,
@@ -208,11 +211,14 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	 WHERE NegativeCreditUnits = 1
 
 	 insert INTO #iRelyImptblGLJournalDetail
-		(intJournalId,glhst_trans_dt,intAccountId,DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
+		(intJournalId,glhst_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
 		SELECT 
 		intJournalId,
 		A.glhst_trans_dt,
 		intAccountId,
+		0 AS Debit,
+		0 AS Credit,
+		0 AS CreditUnits,
 		DebitUnits = CASE WHEN B.glhst_units < 0 THEN glhst_units * -1 ELSE glhst_units END,
 		0 AS DebitRate,	
 		0 AS CreditRate,
@@ -232,14 +238,10 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 		A.glhst_src_seq,    
 		gooddate,
 		A.A4GLIdentity
-	 FROM  #iRelyImptblGLJournalDetail A
-	 JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
-	 WHERE NegativeCreditUnits = 1
-	 
+		FROM  #iRelyImptblGLJournalDetail A
+		JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
+		WHERE NegativeCreditUnits = 1
 	END
-
-
-
 
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 	 
