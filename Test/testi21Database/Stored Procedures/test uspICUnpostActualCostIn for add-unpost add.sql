@@ -224,11 +224,11 @@ BEGIN
 		DROP TABLE actualActualCost
 
 	IF OBJECT_ID('expectedActualCost') IS NOT NULL 
-		DROP TABLE dbo.expectedActualCost
+		DROP TABLE expectedActualCost
 
 	IF OBJECT_ID('actualTransactionToReverse') IS NOT NULL 
 		DROP TABLE actualTransactionToReverse
 
 	IF OBJECT_ID('expectedTransactionToReverse') IS NOT NULL 
-		DROP TABLE dbo.expectedTransactionToReverse
+		DROP TABLE expectedTransactionToReverse
 END

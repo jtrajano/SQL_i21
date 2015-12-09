@@ -275,7 +275,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
-		FROM	dbo.tblICInventoryTransaction
+		FROM	tblICInventoryTransaction
 		WHERE	intTransactionId = @intTransactionId
 
 	END 
@@ -290,5 +290,5 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 END 

@@ -317,4 +317,4 @@ IF OBJECT_ID('actual') IS NOT NULL
 	DROP TABLE actual
 
 IF OBJECT_ID('expected') IS NOT NULL 
-	DROP TABLE dbo.expected
+	DROP TABLE expected

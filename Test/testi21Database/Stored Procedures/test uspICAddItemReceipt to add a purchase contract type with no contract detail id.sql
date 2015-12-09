@@ -255,7 +255,7 @@ BEGIN
 
 	-- Setup Expected data
 	BEGIN 
-		INSERT INTO dbo.expected_tblICInventoryReceiptItem(
+		INSERT INTO expected_tblICInventoryReceiptItem(
 			intLineNo
 		)
 		SELECT intLineNo = 0
@@ -286,14 +286,14 @@ BEGIN
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 
-		DROP TABLE dbo.actual
+		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 
 	IF OBJECT_ID('actual_tblICInventoryReceiptItem') IS NOT NULL 
-		DROP TABLE dbo.actual_tblICInventoryReceiptItem
+		DROP TABLE actual_tblICInventoryReceiptItem
 
 	IF OBJECT_ID('expected_tblICInventoryReceiptItem') IS NOT NULL 
-		DROP TABLE dbo.expected_tblICInventoryReceiptItem
+		DROP TABLE expected_tblICInventoryReceiptItem
 END 

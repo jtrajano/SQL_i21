@@ -1203,8 +1203,8 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 		
 	IF OBJECT_ID('ExpectedInventoryLotOut') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryLotOut
+		DROP TABLE expectedInventoryLotOut
 END

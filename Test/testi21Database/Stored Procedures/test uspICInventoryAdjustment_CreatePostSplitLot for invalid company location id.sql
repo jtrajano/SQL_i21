@@ -165,16 +165,4 @@ BEGIN
 			,@intInventoryAdjustmentId		= NULL 
 	END 	
 
-	-- Clean-up: remove the tables used in the unit test
-	IF OBJECT_ID('expected_tblICInventoryAdjustment') IS NOT NULL 
-		DROP TABLE expected_tblICInventoryAdjustment
-
-	IF OBJECT_ID('expected_tblICInventoryAdjustmentDetail') IS NOT NULL 
-		DROP TABLE dbo.expected_tblICInventoryAdjustmentDetail
-
-	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL 
-		DROP TABLE actual_tblICInventoryAdjustment
-
-	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
-		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
 END 

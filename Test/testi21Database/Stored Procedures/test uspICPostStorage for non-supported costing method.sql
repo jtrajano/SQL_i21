@@ -274,4 +274,4 @@ AS
 --	DROP TABLE actual
 
 --IF OBJECT_ID('expected') IS NOT NULL 
---	DROP TABLE dbo.expected
+--	DROP TABLE expected

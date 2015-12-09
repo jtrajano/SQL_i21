@@ -276,8 +276,8 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 		
 	IF OBJECT_ID('ExpectedInventoryLIFOOut') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryLIFOOut
+		DROP TABLE expectedInventoryLIFOOut
 END
