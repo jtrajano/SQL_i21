@@ -125,7 +125,7 @@ namespace iRely.Inventory.BusinessLayer
 
                     var userId = DefaultUserId;
                     _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", userId));
-                                        
+
                     if (result.HasError)
                     {
                         throw result.BaseException;
@@ -137,7 +137,7 @@ namespace iRely.Inventory.BusinessLayer
                     result.BaseException = ex;
                     result.Exception = new ServerException(ex);
                     result.HasError = true;
-                    transaction.Rollback();
+                    //transaction.Rollback();
                 }
             }
 
@@ -213,7 +213,7 @@ namespace iRely.Inventory.BusinessLayer
                     saveResult.BaseException = ex;
                     saveResult.Exception = new ServerException(ex);
                     saveResult.HasError = true;
-                    transaction.Rollback();
+                    //transaction.Rollback();
                 }
             }
             return saveResult;
