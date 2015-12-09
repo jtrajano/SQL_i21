@@ -3072,6 +3072,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
+    <Build Include="dbo\Views\vyuPATCancel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
