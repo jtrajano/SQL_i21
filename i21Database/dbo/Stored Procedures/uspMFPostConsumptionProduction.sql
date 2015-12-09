@@ -42,10 +42,12 @@ BEGIN
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmDate datetime
 
+	SELECT @dtmDate=GETDATE()
+
 	SELECT TOP 1 @intLocationId = W.intLocationId
 		,@intSubLocationId = SL.intSubLocationId
 		,@intStorageLocationId =  W.intStorageLocationId
-		,@dtmPlannedDate=dtmPlannedDate
+		,@dtmPlannedDate=(Case When dtmPlannedDate>@dtmDate Then @dtmDate Else dtmPlannedDate End)
 		,@strWorkOrderNo=strWorkOrderNo 
 	FROM dbo.tblMFWorkOrder W
 	JOIN dbo.tblICStorageLocation SL on W.intStorageLocationId=SL.intStorageLocationId
@@ -213,7 +215,7 @@ BEGIN
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
 
-	SELECT @dtmDate=GETDATE()
+
 
 	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber=@strParentLotNumber,
 											@strParentLotAlias='',
