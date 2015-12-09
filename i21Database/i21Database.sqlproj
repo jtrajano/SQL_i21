@@ -3078,6 +3078,7 @@
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummary.sql" />
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transaction.sql" />
+    <Build Include="dbo\Views\vyuPATCancel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
