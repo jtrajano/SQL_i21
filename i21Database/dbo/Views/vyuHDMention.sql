@@ -25,5 +25,6 @@
 		,con.imgPhoto
 	from
 		tblSMUserSecurity us
-		left outer join tblEntity con on con.intEntityId = us.[intEntityUserSecurityId]
+		left outer join vyuEMEntityContact con on con.intEntityId = us.[intEntityUserSecurityId] and con.ysnDefaultContact = 1
+		--left outer join tblEntity con on con.intEntityId = us.[intEntityUserSecurityId]
 	where us.ysnDisabled <> 1

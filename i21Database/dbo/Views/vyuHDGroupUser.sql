@@ -15,10 +15,12 @@
 			tblHDTicketGroup g
 			,tblHDGroupUserConfig gc
 			,tblSMUserSecurity u
-			,tblEntity e
+			--,tblEntity e
+			,vyuEMEntityContact e
 			,tblEntityCredential c
 		where
 			gc.intTicketGroupId = g.intTicketGroupId
 			and u.[intEntityUserSecurityId] = gc.intUserSecurityId
 			and e.intEntityId = u.[intEntityUserSecurityId]
 			and c.intEntityId = u.[intEntityUserSecurityId]
+			and e.ysnDefaultContact = 1
