@@ -475,8 +475,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to zero stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from zero to negative stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICReserveStockForInventoryShipment for calling the sub procedures.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReserveStockForInventoryShipment for calling the sub procedures.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for posted Inventory Receipt.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for posted Inventory Shipment.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 3, unpost add stock, unpost sell stock.sql" />
@@ -503,7 +507,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-sell-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for sell-add-unpost add.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for add-sell-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-unpost sell 1.sql" />
@@ -780,12 +786,16 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from positive stock to positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from positive stock to zero stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from zero to negative stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for add 1-add 2-unpost add 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for add-sell-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for sell-add-unpost add.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for sell 1-sell 2-unpost sell 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for add-sell-unpost sell.sql" />
@@ -837,12 +847,16 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOStorage to failed for negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for add-sell-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for add-unpost add.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOutFromStorage for add-sell-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOutFromStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromStorage for add-sell-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromStorage for add-unpost add.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromStorage for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromStorage for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOutFromStorage for add-sell-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOutFromStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostStorage on FIFO Costing for a successful unpost.sql" />
@@ -885,6 +899,12 @@
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
       <Name>i21Database</Name>
       <Project>{2e49b212-114b-4cfd-a343-2a2061e987bc}</Project>
+      <Private>True</Private>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ProjectReference>
+    <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">
+      <Name>tSQLt</Name>
+      <Project>{ec6666e5-b9e5-4a93-a016-5d8d65d2ee28}</Project>
       <Private>True</Private>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
     </ProjectReference>

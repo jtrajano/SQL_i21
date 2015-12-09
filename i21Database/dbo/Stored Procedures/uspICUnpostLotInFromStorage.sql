@@ -94,20 +94,6 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
---IF NOT EXISTS (
---	SELECT TOP 1 1 
---	FROM	dbo.tblICInventoryLotStorage LotBucket_In_Storage INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
---				ON LotBucket_In_Storage.intTransactionId = Reversal.intTransactionId
---				AND LotBucket_In_Storage.strTransactionId = Reversal.strTransactionId
---				AND LotBucket_In_Storage.intInventoryLotStorageId = Reversal.intInventoryCostBucketStorageId
---	WHERE	ISNULL(LotBucket_In_Storage.dblStockOut, 0) = 0	
---)
---BEGIN 
---	-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'	
---	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName, '(Blank Sub Location)', '(Blank Storage Location)') 
---	GOTO _Exit;
---END 
-
 -- Update the lot cost bucket. 
 UPDATE	LotBucket_In_Storage
 SET		dblStockOut = dblStockIn

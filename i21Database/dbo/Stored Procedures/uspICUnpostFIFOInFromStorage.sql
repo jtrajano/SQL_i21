@@ -86,20 +86,6 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
---IF NOT EXISTS (
---	SELECT TOP 1 1 
---	FROM	dbo.tblICInventoryFIFOStorage fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
---				ON fifoBucket.intTransactionId = Reversal.intTransactionId
---				AND fifoBucket.strTransactionId = Reversal.strTransactionId
---				AND fifoBucket.intInventoryFIFOStorageId = Reversal.intInventoryCostBucketStorageId
---	WHERE	ISNULL(fifoBucket.dblStockOut, 0) = 0
---)
---BEGIN 
---	-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'	
---	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName, '(Blank Sub Location)', '(Blank Storage Location)') 
---	GOTO _Exit;
---END 
-
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 -- Mark the record as unposted too. 
 UPDATE	fifoBucket

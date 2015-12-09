@@ -29,10 +29,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
-		,@strLocationName AS NVARCHAR(50)
-		,@strSubLocationName AS NVARCHAR(50)
-		,@strStorageLocationName AS NVARCHAR(50)
 		,@intItemLocationId AS INT 
+		,@strLocationName AS NVARCHAR(MAX)		
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -82,23 +80,17 @@ BEGIN
 
 	SELECT TOP 1 
 			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
-			,@strLocationName = CompanyLocation.strLocationName
-			,@strSubLocationName = ISNULL(SubLocation.strSubLocationName, '(Blank Sub Location)')
-			,@strStorageLocationName = ISNULL(StorageLocation.strName, '(Blank Storage Location)')
-			,@intItemId = Item.intItemId
+			,@strLocationName = 
+				dbo.fnFormatMsg80003 (
+					Errors.intItemLocationId
+					,Errors.intSubLocationId
+					,Errors.intStorageLocationId
+				)			
 	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 				ON Errors.intItemId = Item.intItemId
-			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemLocationId = Errors.intItemLocationId
-			LEFT JOIN dbo.tblSMCompanyLocation CompanyLocation
-				ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
-			LEFT JOIN dbo.tblSMCompanyLocationSubLocation SubLocation
-				ON SubLocation.intCompanyLocationSubLocationId = Errors.intSubLocationId
-			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
-				ON StorageLocation.intStorageLocationId = Errors.intSubLocationId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName, @strSubLocationName, @strStorageLocationName)
+	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
 

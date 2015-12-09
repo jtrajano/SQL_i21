@@ -54,23 +54,21 @@ WHERE	Lot_Storage.intItemId = @intItemId
 
 IF @intInventoryLotStorageId IS NULL 
 BEGIN 
-	DECLARE @strLocationName AS NVARCHAR(50)
+	DECLARE @strLocationName AS NVARCHAR(MAX)
 
 	SELECT @strItemNo = strItemNo
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
-
-	SELECT	@strLocationName = CompanyLocation.strLocationName
-	FROM	dbo.tblICItemLocation ItemLocation INNER JOIN dbo.tblSMCompanyLocation CompanyLocation
-				ON ItemLocation.intLocationId = CompanyLocation.intCompanyLocationId
-	WHERE	ItemLocation.intItemId = @intItemId
-			AND ItemLocation.intItemLocationId = @intItemLocationId
-
+			
 	SELECT	@strItemNo = ISNULL(@strItemNo, '(Item id: ' + ISNULL(CAST(@intItemId AS NVARCHAR(10)), 'Blank') + ')')
-			,@strLocationName = ISNULL(@strLocationName, '(Item Location id: ' + ISNULL(CAST(@intItemLocationId AS NVARCHAR(10)), 'Blank') + ')')
-				
+			,@strLocationName = dbo.fnFormatMsg80003 (
+					@intItemLocationId
+					,NULL -- @intSubLocationId
+					,NULL -- @intStorageLocationId
+			)
+						
 	-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'	
-	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName, '(Blank Sub Location)', '(Blank Storage Location)') 
+	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName) 
 	GOTO _Exit;
 END 
 

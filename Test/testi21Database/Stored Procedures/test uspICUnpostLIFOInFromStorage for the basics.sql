@@ -84,8 +84,8 @@ BEGIN
 
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedLIFO', 'actualLIFO';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
+		EXEC tSQLt.AssertEqualsTable 'expectedLIFO', 'actualLIFO'
+		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse'
 	END
 
 	-- Clean-up: remove the tables used in the unit test
