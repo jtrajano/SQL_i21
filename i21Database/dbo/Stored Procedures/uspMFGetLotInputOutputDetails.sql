@@ -2,9 +2,9 @@
 	@intLotId INT
 AS
 BEGIN
-	DECLARE @intBatchId INT
+	DECLARE @intBatchId INT,@intWorkOrderId int
 
-	SELECT @intBatchId = wopl.intBatchId
+	SELECT @intBatchId = wopl.intBatchId,@intWorkOrderId=intWorkOrderId
 	FROM tblMFWorkOrderProducedLot wopl
 	WHERE wopl.intLotId = @intLotId
 
@@ -48,5 +48,5 @@ BEGIN
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = wocl.intCreatedUserId
 	JOIN tblICLot l ON l.intLotId = wocl.intLotId
-	WHERE wocl.intBatchId = @intBatchId
+	WHERE IsNULL(wocl.intBatchId,@intBatchId) = @intBatchId AND wocl.intWorkOrderId=@intWorkOrderId
 END
