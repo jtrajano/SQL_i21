@@ -119,14 +119,14 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 
-		CREATE TABLE ExpectedInventoryFIFOOut (
+		CREATE TABLE expectedInventoryFIFOOut (
 			intId INT IDENTITY 
 			,intInventoryFIFOId INT 
 			,intInventoryTransactionId INT
 			,dblQty NUMERIC(18,6)
 		)
 
-		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
+		-- 1. expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
 			SET @intItemLocationId = @NewHaven
@@ -745,7 +745,7 @@ BEGIN
 					AND intItemLocationId = @intItemLocationId
 
 			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			INSERT INTO expectedInventoryFIFOOut (
 				intInventoryTransactionId 
 				,intInventoryFIFOId
 				,dblQty
@@ -967,7 +967,7 @@ BEGIN
 					,intConcurrencyId = 1
 
 			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			INSERT INTO expectedInventoryFIFOOut (
 				intInventoryTransactionId 
 				,intInventoryFIFOId
 				,dblQty
@@ -1179,7 +1179,7 @@ BEGIN
 					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
-			-- 1st Expected: The normal purchase record. 
+			-- 1st expected: The normal purchase record. 
 			SELECT	[intInventoryTransactionId] = 9
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
@@ -1202,7 +1202,7 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
-			-- 2ND Expected: Write-Off Sold
+			-- 2ND expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 10
 					,[intItemId] = @intItemId
@@ -1226,7 +1226,7 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
-			-- 3RD Expected: Revalue Sold
+			-- 3RD expected: Revalue Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 11
 					,[intItemId] = @intItemId
@@ -1250,7 +1250,7 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1					
-			-- 4TH Expected: Write-Off Sold
+			-- 4TH expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 12
 					,[intItemId] = @intItemId
@@ -1274,7 +1274,7 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
-			-- 5TH Expected: Revalue Sold 
+			-- 5TH expected: Revalue Sold 
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 13
 					,[intItemId] = @intItemId
@@ -1300,7 +1300,7 @@ BEGIN
 					,[intConcurrencyId]	= 1
 
 			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			INSERT INTO expectedInventoryFIFOOut (
 				intInventoryTransactionId 
 				,intInventoryFIFOId
 				,dblQty
@@ -1396,7 +1396,7 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -1406,6 +1406,6 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
+	IF OBJECT_ID('expectedInventoryFIFOOut') IS NOT NULL 
 		DROP TABLE expectedInventoryFIFOOut
 END

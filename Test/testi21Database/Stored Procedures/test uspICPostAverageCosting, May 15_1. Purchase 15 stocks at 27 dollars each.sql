@@ -70,7 +70,7 @@ BEGIN
 			,@intEntityUserSecurityId AS INT
 
 		-- Declare the variables to check the average cost. 
-		DECLARE @dblAverageCost_Expected AS NUMERIC(18,6)
+		DECLARE @dblAverageCost_expected AS NUMERIC(18,6)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(18,6)
 
 		CREATE TABLE expected (
@@ -123,14 +123,14 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
 		
-		CREATE TABLE ExpectedInventoryFIFOOut (
+		CREATE TABLE expectedInventoryFIFOOut (
 			intId INT IDENTITY 
 			,intInventoryFIFOId INT 
 			,intInventoryTransactionId INT
 			,dblQty NUMERIC(18,6)
 		)
 
-		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
+		-- 1. expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
 			SET @intItemLocationId = @NewHaven
@@ -149,7 +149,7 @@ BEGIN
 			SET @intTransactionTypeId = @PurchaseTransactionType
 			SET @intEntityUserSecurityId = 1
 
-			SET @dblAverageCost_Expected = @dblCost
+			SET @dblAverageCost_expected = @dblCost
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -300,7 +300,7 @@ BEGIN
 			SET @intTransactionTypeId = @PurchaseTransactionType
 			SET @intEntityUserSecurityId = 2
 
-			SET @dblAverageCost_Expected = 20.50
+			SET @dblAverageCost_expected = 20.50
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -451,7 +451,7 @@ BEGIN
 			SET @intTransactionTypeId = @PurchaseTransactionType
 			SET @intEntityUserSecurityId = 3
 
-			SET @dblAverageCost_Expected = 20.916667
+			SET @dblAverageCost_expected = 20.916667
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -602,7 +602,7 @@ BEGIN
 			SET @intTransactionTypeId = @SalesTransactionType
 			SET @intEntityUserSecurityId = 3
 
-			SET @dblAverageCost_Expected = 20.916667
+			SET @dblAverageCost_expected = 20.916667
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -637,7 +637,7 @@ BEGIN
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = @dblAverageCost_Expected
+					,[dblCost] = @dblAverageCost_expected
 					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
@@ -683,7 +683,7 @@ BEGIN
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = @dblAverageCost_Expected
+					,[dblCost] = @dblAverageCost_expected
 					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
@@ -706,7 +706,7 @@ BEGIN
 
 			-- Update expected data in tblICItemPricing
 			UPDATE	tblICItemPricing
-			SET		dblAverageCost = @dblAverageCost_Expected					
+			SET		dblAverageCost = @dblAverageCost_expected					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -720,7 +720,7 @@ BEGIN
 					AND intItemLocationId = @intItemLocationId							
 					
 			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			INSERT INTO expectedInventoryFIFOOut (
 				intInventoryTransactionId 
 				,intInventoryFIFOId
 				,dblQty
@@ -767,7 +767,7 @@ BEGIN
 			SET @intTransactionTypeId = @SalesTransactionType
 			SET @intEntityUserSecurityId = 3
 
-			SET @dblAverageCost_Expected = 20.916667
+			SET @dblAverageCost_expected = 20.916667
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -802,7 +802,7 @@ BEGIN
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = @dblAverageCost_Expected
+					,[dblCost] = @dblAverageCost_expected
 					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
@@ -848,7 +848,7 @@ BEGIN
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = @dblAverageCost_Expected
+					,[dblCost] = @dblAverageCost_expected
 					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
@@ -871,7 +871,7 @@ BEGIN
 
 			-- Update expected data in tblICItemPricing
 			UPDATE	tblICItemPricing
-			SET		dblAverageCost = @dblAverageCost_Expected					
+			SET		dblAverageCost = @dblAverageCost_expected					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -907,7 +907,7 @@ BEGIN
 					,intConcurrencyId = 2
 
 			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			INSERT INTO expectedInventoryFIFOOut (
 				intInventoryTransactionId 
 				,intInventoryFIFOId
 				,dblQty
@@ -946,7 +946,7 @@ BEGIN
 			SET @intTransactionTypeId = @SalesTransactionType
 			SET @intEntityUserSecurityId = 3
 
-			SET @dblAverageCost_Expected = 20.916667
+			SET @dblAverageCost_expected = 20.916667
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -981,7 +981,7 @@ BEGIN
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = @dblAverageCost_Expected
+					,[dblCost] = @dblAverageCost_expected
 					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
@@ -1027,7 +1027,7 @@ BEGIN
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = @dblAverageCost_Expected
+					,[dblCost] = @dblAverageCost_expected
 					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
@@ -1050,7 +1050,7 @@ BEGIN
 
 			-- Update expected data in tblICItemPricing
 			UPDATE	tblICItemPricing
-			SET		dblAverageCost = @dblAverageCost_Expected					
+			SET		dblAverageCost = @dblAverageCost_expected					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -1097,7 +1097,7 @@ BEGIN
 			SET @intTransactionTypeId = @PurchaseTransactionType
 			SET @intEntityUserSecurityId = 3
 
-			SET @dblAverageCost_Expected = @dblCost
+			SET @dblAverageCost_expected = @dblCost
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -1123,7 +1123,7 @@ BEGIN
 					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
-			-- 1st Expected: The normal purchase record. 
+			-- 1st expected: The normal purchase record. 
 			SELECT	[intInventoryTransactionId] = 7
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
@@ -1147,7 +1147,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 2nd Expected: Write-Off Sold 
+			-- 2nd expected: Write-Off Sold 
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 8
 					,[intItemId] = @intItemId
@@ -1172,7 +1172,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 3rd Expected: Revalue Sold 
+			-- 3rd expected: Revalue Sold 
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 9
 					,[intItemId] = @intItemId
@@ -1197,7 +1197,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 4th Expected: The Auto Negative
+			-- 4th expected: The Auto Negative
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]
@@ -1232,7 +1232,7 @@ BEGIN
 					,[dblQty] = 0
 					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
-					,[dblValue] = (-15 * @dblCost) - (SELECT CAST( SUM(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) AS NUMERIC(18,6)) FROM expected WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId) -- Expected value is 28.750025
+					,[dblValue] = (-15 * @dblCost) - (SELECT CAST( SUM(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) AS NUMERIC(18,6)) FROM expected WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId) -- expected value is 28.750025
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1291,7 +1291,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 2nd Expected: Write-Off Sold
+			-- 2nd expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
@@ -1315,7 +1315,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 3rd Expected: Revalue Sold
+			-- 3rd expected: Revalue Sold
 			UNION ALL 
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
@@ -1339,7 +1339,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 4th Expected: The Auto Negative
+			-- 4th expected: The Auto Negative
 			INSERT INTO tblICInventoryTransaction (
 					[intItemId]
 					,[intItemLocationId]
@@ -1372,7 +1372,7 @@ BEGIN
 					,[dblQty] = 0
 					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
-					,[dblValue] = (-15 * @dblCost) - (SELECT CAST( SUM(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) AS NUMERIC(18,6)) FROM tblICInventoryTransaction WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId) -- Expected value is 28.750025
+					,[dblValue] = (-15 * @dblCost) - (SELECT CAST( SUM(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) AS NUMERIC(18,6)) FROM tblICInventoryTransaction WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId) -- expected value is 28.750025
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1394,7 +1394,7 @@ BEGIN
 
 			-- Update expected data in tblICItemPricing
 			UPDATE	tblICItemPricing
-			SET		dblAverageCost = @dblAverageCost_Expected					
+			SET		dblAverageCost = @dblAverageCost_expected					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -1438,7 +1438,7 @@ BEGIN
 					,intConcurrencyId = 1							
 					
 			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			INSERT INTO expectedInventoryFIFOOut (
 				intInventoryTransactionId 
 				,intInventoryFIFOId
 				,dblQty
@@ -1485,7 +1485,7 @@ BEGIN
 			SET @intTransactionTypeId = @PurchaseTransactionType
 			SET @intEntityUserSecurityId = 3
 
-			SET @dblAverageCost_Expected = @dblCost
+			SET @dblAverageCost_expected = @dblCost
 
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -1511,7 +1511,7 @@ BEGIN
 					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
-			-- 1st Expected: The normal purchase record. 
+			-- 1st expected: The normal purchase record. 
 			SELECT	[intInventoryTransactionId] = 11
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
@@ -1535,7 +1535,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 2nd Expected: Write-Off Sold
+			-- 2nd expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 12
 					,[intItemId] = @intItemId
@@ -1560,7 +1560,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 3rd Expected: Revalue Sold
+			-- 3rd expected: Revalue Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 13
 					,[intItemId] = @intItemId
@@ -1585,11 +1585,11 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 4th Expected: None, no Auto Negative record expected. 
+			-- 4th expected: None, no Auto Negative record expected. 
 			-- Record not expected for auto-negative since the stock is zero (zero x $27 is still zero). 			
 					
 			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			INSERT INTO expectedInventoryFIFOOut (
 				intInventoryTransactionId 
 				,intInventoryFIFOId
 				,dblQty
@@ -1677,7 +1677,7 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -1687,6 +1687,6 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
+	IF OBJECT_ID('expectedInventoryFIFOOut') IS NOT NULL 
 		DROP TABLE expectedInventoryFIFOOut
 END

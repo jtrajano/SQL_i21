@@ -5,7 +5,7 @@ BEGIN
 	DECLARE	@dblQty AS NUMERIC(18,6) = 100
 			,@dblTotalWeight AS NUMERIC(38,20) = 250
 
-			,@expected AS NUMERIC(18,6) = 2.5
+			,@Expected AS NUMERIC(18,6) = 2.5
 			,@result AS NUMERIC(18,6) 
 	
 	-- Act
@@ -15,5 +15,5 @@ BEGIN
 	);
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

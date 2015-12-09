@@ -3,7 +3,7 @@ AS
 BEGIN
 	-- Arrange
 	DECLARE @result AS BIT
-	DECLARE @expected AS BIT = 1
+	DECLARE @Expected AS BIT = 1
 
 	-- Fake the inventory transaction table 
 	EXEC tSQLt.FakeTable 'dbo.tblGLFiscalYearPeriod', @Identity = 1;
@@ -16,5 +16,5 @@ BEGIN
 
 	-- Assert 
 	-- Result must be 1 because there is a record with an open period
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

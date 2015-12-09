@@ -48,7 +48,7 @@ BEGIN
 		DECLARE @SalesTransactionType AS INT = 2;
 
 		-- Declare the variables to check the average cost. 
-		DECLARE @dblAverageCost_Expected AS NUMERIC(18,6)
+		DECLARE @dblAverageCost_expected AS NUMERIC(18,6)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(18,6)
 		
 		-- Declare the variables used in uspICPostAverageCosting
@@ -119,7 +119,7 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
 
-		CREATE TABLE ExpectedInventoryFIFOOut (
+		CREATE TABLE expectedInventoryFIFOOut (
 			intId INT IDENTITY 
 			,intInventoryFIFOId INT 
 			,intInventoryTransactionId INT
@@ -204,7 +204,7 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -214,6 +214,6 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
+	IF OBJECT_ID('expectedInventoryFIFOOut') IS NOT NULL 
 		DROP TABLE expectedInventoryFIFOOut
 END

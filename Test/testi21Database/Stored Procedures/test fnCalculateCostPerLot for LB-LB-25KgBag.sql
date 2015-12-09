@@ -16,7 +16,7 @@ BEGIN
 			,@dblCostPerItemUOMId AS NUMERIC(18,6) = 13.35
 
 	DECLARE @result AS FLOAT
-	DECLARE @expected AS FLOAT = 735.79192500000000000000
+	DECLARE @Expected AS FLOAT = 735.79192500000000000000
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostPerLot(
@@ -28,5 +28,5 @@ BEGIN
 	
 	-- Assert 
 	-- Result is the samve value of the current average cost. In this case, it is NULL. 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

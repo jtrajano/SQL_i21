@@ -50,12 +50,12 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.AssertObjectExists 'uspTRReceived_SpyProcedureLog'
 		
-		DECLARE @expectedCount AS INT = 1 
+		DECLARE @ExpectedCount AS INT = 1 
 				,@actualCount AS INT
 
 		SELECT @actualCount = COUNT(*) FROM uspTRReceived_SpyProcedureLog
 
-		EXEC tSQLt.AssertEquals @expectedCount, @actualCount
+		EXEC tSQLt.AssertEquals @ExpectedCount, @actualCount
 	END 
 
 
