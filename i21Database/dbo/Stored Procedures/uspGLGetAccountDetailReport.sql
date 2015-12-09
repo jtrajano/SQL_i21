@@ -239,6 +239,8 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'dblCredit,','0 as dblCredit,')
 	SELECT @cols1 = REPLACE (@cols1,'dblCreditUnit,','0 as dblCreditUnit,')
 	SELECT @cols1 = REPLACE (@cols1,'dblTotal,','0 as dblTotal,')
+	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
+	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
 
 	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
 	BEGIN
