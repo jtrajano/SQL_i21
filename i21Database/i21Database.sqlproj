@@ -406,7 +406,9 @@
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -3079,6 +3081,7 @@
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transaction.sql" />
     <Build Include="dbo\Views\vyuPATCancel.sql" />
+    <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

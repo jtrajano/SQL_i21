@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and reserved qty.sql]
+﻿CREATE PROCEDURE testi21Database.[test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and reserved qty]
 AS 
 BEGIN
 	-- Arrange
@@ -89,7 +89,7 @@ BEGIN
 		-- Negative stock is not allowed 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80003, 'WET GRAINS')
+				,strText = FORMATMESSAGE(80003, 'WET GRAINS', 'DEFAULT')
 				,intErrorCode = 80003	
 				
 		DECLARE @SubLocation AS INT 
