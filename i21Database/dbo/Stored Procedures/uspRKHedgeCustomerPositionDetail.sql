@@ -23,8 +23,8 @@ SELECT * INTO #temp FROM (
 				isnull(dblOpenReceive,0) dblOpenReceive
 				FROM tblICInventoryReceipt r
 				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Purchase Contract')
-				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 1
-				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
+			    INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
 				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 				WHERE ch.intCommodityId = @intCommodityId and ch.intEntityId=@intVendorCustomerId 
 				AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
@@ -72,15 +72,17 @@ UNION
 
 SELECT 3 AS intSeqId
 	,'Purchase Gross Dollars' [strType]
-	,SUM(dblOpenReceive) AS dblTotal
+	,SUM(dblQtyReceived) AS dblTotal
 	FROM (
-		SELECT isnull(dblOpenReceive,0)*dblUnitCost  dblOpenReceive
-		FROM tblICInventoryReceipt r
-		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Purchase Contract')
-		INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 1
-		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-		WHERE ch.intCommodityId = @intCommodityId and ch.intEntityId=@intVendorCustomerId 
-		AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
+		select sum(dblQtyReceived) dblQtyReceived from(
+			SELECT  isnull(dblUnitCost,0)*isnull(dblOpenReceive,0) AS dblQtyReceived
+				FROM tblICInventoryReceipt r
+				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Purchase Contract')
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
+			    INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
+				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
+				WHERE ch.intCommodityId  = @intCommodityId and ch.intEntityId=@intVendorCustomerId 
+				AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end)t
 		
 		UNION
 		
@@ -133,7 +135,7 @@ SELECT 5 AS intSeqId
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
-			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intPricingTypeId = 1
+			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 			WHERE intSourceType = 1
 				AND strReceiptType IN ('Purchase Contract')	AND ch.intCommodityId = @intCommodityId	and r.intEntityVendorId=@intVendorCustomerId
@@ -164,23 +166,28 @@ SELECT 5 AS intSeqId
 UNION
 SELECT 6 AS intSeqId
 		,'Net Purchase Payable' [strType]
-		,SUM(dblBalance) AS dblTotal
-	FROM (
-		SELECT isnull(SUM(dblOrderQty), 0) - isnull(sum(dblBillQty), 0) AS dblBalance
-		FROM (
-			SELECT DISTINCT (dblOrderQty*dblUnitCost) dblOrderQty,
-			(Select (bd.dblQtyReceived*bd.dblCost) FROM tblAPBillDetail bd 
+		,sum(dblBalance) dblTotal FROM (
+		SELECT sum(dblUnitCost)-sum(dblQtyReceived) dblBalance from(
+		SELECT DISTINCT ri.intInventoryReceiptItemId
+			,cl.strLocationName
+			,st.strTicketNumber
+			,st.dtmTicketDateTime
+			,strCustomerReference
+			,'SPT' strDistributionOption
+			,dblOrderQty*dblUnitCost AS dblUnitCost
+			,isnull((Select (bd.dblQtyReceived*bd.dblCost) FROM tblAPBillDetail bd 
 				INNER JOIN tblAPBill b on b.intBillId=bd.intBillId
-				where  bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1 ) dblBillQty
+				where  bd.intInventoryReceiptItemId=ri.intInventoryReceiptItemId and ysnPosted=1 ),0) AS dblQtyReceived
+			,st.intCommodityId
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
-			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intPricingTypeId = 1
+			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
+			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 			WHERE intSourceType = 1
-				AND strReceiptType IN ('Purchase Contract')	AND ch.intCommodityId = @intCommodityId	 and r.intEntityVendorId=@intVendorCustomerId
-				AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
-			) t
+				AND strReceiptType IN ('Purchase Contract')	AND ch.intCommodityId = @intCommodityId	and r.intEntityVendorId=@intVendorCustomerId
+				AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end)t
 	
 		UNION
 		
