@@ -3,6 +3,7 @@
 AS
 BEGIN
 				SELECT DISTINCT RRD.intPatronageCategoryId,
+					   PC.strDescription,
 					   PC.strCategoryCode,
 					   RRD.dblRate,
 					   dblVolume = SUM(CV.dblVolume),
@@ -15,6 +16,6 @@ BEGIN
 			INNER JOIN tblPATCustomerVolume CV
 					ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId
 			     WHERE CV.intFiscalYear = @intFiscalYearId
-			  GROUP BY RRD.intPatronageCategoryId, PC.strCategoryCode, RRD.dblRate
+			  GROUP BY RRD.intPatronageCategoryId, PC.strCategoryCode, PC.strDescription, RRD.dblRate
 END
 GO
