@@ -116,7 +116,7 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
 		
-		CREATE TABLE ExpectedInventoryLotOut (
+		CREATE TABLE expectedInventoryLotOut (
 			intId INT
 			,intInventoryLotId INT 
 			,intInventoryTransactionId INT
@@ -272,7 +272,7 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryLotOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryLotOut', 'tblICInventoryLotOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryLotOut', 'tblICInventoryLotOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -282,6 +282,6 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE expected
 		
-	IF OBJECT_ID('ExpectedInventoryLotOut') IS NOT NULL 
+	IF OBJECT_ID('expectedInventoryLotOut') IS NOT NULL 
 		DROP TABLE expectedInventoryLotOut
 END

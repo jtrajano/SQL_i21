@@ -12,11 +12,11 @@ BEGIN
 	DECLARE @dblQty AS NUMERIC(18,6) = 1
 
 	DECLARE @result AS NUMERIC(38,20)
-	DECLARE @expected AS NUMERIC(38,20) = 132.277465 --@dblQty * 60.00 / 0.453592 
+	DECLARE @Expected AS NUMERIC(38,20) = 132.277465 --@dblQty * 60.00 / 0.453592 
 
 	-- Act
 	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@60KG_BAG, @LBS, @dblQty)
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

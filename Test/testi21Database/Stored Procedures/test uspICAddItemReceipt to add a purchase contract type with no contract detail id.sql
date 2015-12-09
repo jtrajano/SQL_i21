@@ -253,7 +253,7 @@ BEGIN
 
 	END 
 
-	-- Setup Expected data
+	-- Setup expected data
 	BEGIN 
 		INSERT INTO expected_tblICInventoryReceiptItem(
 			intLineNo

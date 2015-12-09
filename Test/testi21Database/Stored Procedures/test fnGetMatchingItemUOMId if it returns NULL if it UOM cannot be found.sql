@@ -47,11 +47,11 @@ BEGIN
 	
 	-- Arrange
 	DECLARE @result AS INT 
-			,@expected AS INT = NULL
+			,@Expected AS INT = NULL
 
 	-- Act
 	SELECT @result = dbo.fnGetMatchingItemUOMId(@WetGrains, @Corn_10LbBagUOM);
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

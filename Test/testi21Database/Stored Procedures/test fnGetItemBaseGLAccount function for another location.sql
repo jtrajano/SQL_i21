@@ -42,7 +42,7 @@ BEGIN
 
 
 		DECLARE @actual AS INT;
-		DECLARE @expected AS INT;
+		DECLARE @Expected AS INT;
 
 		-- GL Account types used in inventory costing
 		DECLARE @InventoryDescription AS NVARCHAR(50) = 'Inventory';
@@ -84,8 +84,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@ColdGrains, 14, @InventoryDescription);
 
 		-- Assert
-		SET @expected = @Inventory_BetterHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @Inventory_BetterHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 	END
 
 	-- Must return account id 40100-1002 (COST OF GOODS WHEAT-BETTER HAVEN GRAINS)
@@ -93,8 +93,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@ColdGrains, 14, @CostOfGoodsDescription);
 
 		-- Assert
-		SET @expected = @CostOfGoods_BetterHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @CostOfGoods_BetterHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 	END
 
 	-- Must return account id 50110-1002 (AP CLEARING WHEAT-BETTER HAVEN GRAINS)
@@ -102,7 +102,7 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@ColdGrains, 14, @PurchasesDescription);
 
 		-- Assert
-		SET @expected = @APClearing_BetterHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @APClearing_BetterHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 	END
 END

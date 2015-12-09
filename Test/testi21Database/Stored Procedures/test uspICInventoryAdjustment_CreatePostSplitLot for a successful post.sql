@@ -178,8 +178,8 @@ BEGIN
 	
 	-- Assert 
 	BEGIN 
-		DECLARE @expected_InventoryAdjustment_Id AS INT = 14
-				,@expected_InventoryAdjustment AS NVARCHAR(50) = 'ADJ-1001'
+		DECLARE @Expected_InventoryAdjustment_Id AS INT = 14
+				,@Expected_InventoryAdjustment AS NVARCHAR(50) = 'ADJ-1001'
 
 		-- Setup the expected data (HEADER)
 		INSERT INTO expected_tblICInventoryAdjustment (
@@ -197,11 +197,11 @@ BEGIN
 				,dtmUnpostedDate				
 		)
 		SELECT
-				intInventoryAdjustmentId	= @expected_InventoryAdjustment_Id	
+				intInventoryAdjustmentId	= @Expected_InventoryAdjustment_Id	
 				,intLocationId				= @Default_Location
 				,dtmAdjustmentDate			= '01/30/2014' 		
 				,intAdjustmentType			= @ADJUSTMENT_TYPE_SplitLot
-				,strAdjustmentNo			= @expected_InventoryAdjustment
+				,strAdjustmentNo			= @Expected_InventoryAdjustment
 				,strDescription				= ''
 				,intSort					= 1
 				,ysnPosted					= 1
@@ -236,7 +236,7 @@ BEGIN
 		)
 		SELECT 
 				intInventoryAdjustmentDetailId	= 13
-				,intInventoryAdjustmentId		= @expected_InventoryAdjustment_Id
+				,intInventoryAdjustmentId		= @Expected_InventoryAdjustment_Id
 				,intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId			= @StorageSilo_RM_DL
 				,intItemId						= @ManualLotGrains

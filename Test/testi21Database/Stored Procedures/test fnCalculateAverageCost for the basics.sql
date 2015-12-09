@@ -7,12 +7,12 @@ BEGIN
 	DECLARE @OnHandQty AS FLOAT 
 	DECLARE @CurrentAverageCost AS FLOAT 
 	DECLARE @result AS NUMERIC(18,6)
-	DECLARE @expected AS NUMERIC(18,6)
+	DECLARE @Expected AS NUMERIC(18,6)
 
 	-- Act
 	SELECT @result = dbo.fnCalculateAverageCost(@Qty, @NewCost, @OnHandQty, @CurrentAverageCost);
 
 	-- Assert 
 	-- Result is the samve value of the current average cost. In this case, it is NULL. 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END
