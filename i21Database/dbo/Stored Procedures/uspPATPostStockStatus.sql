@@ -19,6 +19,10 @@ BEGIN
 				   SET strStockStatus = 'Voting'
 				 WHERE intEntityCustomerId IN (SELECT intCustomerId FROM #tempStatus)
 
+				UPDATE tblPATCustomerStock
+				   SET strStockStatus = 'Voting'
+				 WHERE intCustomerPatronId IN (SELECT intCustomerId FROM #tempStatus)
+
 				UPDATE tblPATChangeStatus
 				   SET ysnPosted = 1
 				 WHERE intUpdateId = @intUpdateId
@@ -35,8 +39,12 @@ BEGIN
 				WHILE (@@FETCH_STATUS <> -1)
 				BEGIN
 					UPDATE tblARCustomer
-						SET strStockStatus = @strCurrentStatus
-						WHERE intEntityCustomerId = @intCustomerId
+					   SET strStockStatus = @strCurrentStatus
+					 WHERE intEntityCustomerId = @intCustomerId
+
+					UPDATE tblPATCustomerStock
+					   SET strStockStatus = @strCurrentStatus
+					 WHERE intCustomerPatronId = @intCustomerId
 
 					FETCH NEXT FROM stockCursor into @intCustomerId, @strCurrentStatus
 				END
@@ -50,5 +58,4 @@ BEGIN
 
 			DROP TABLE #tempStatus
 END
-
 GO
