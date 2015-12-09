@@ -162,5 +162,5 @@ BEGIN
 		DROP TABLE expected
 
 	IF OBJECT_ID('actual') IS NOT NULL 
-		DROP TABLE dbo.actual
+		DROP TABLE actual
 END 

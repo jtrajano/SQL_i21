@@ -314,17 +314,17 @@ BEGIN
 		DROP TABLE expected_tblICInventoryAdjustment
 
 	IF OBJECT_ID('expected_tblICInventoryAdjustmentDetail') IS NOT NULL 
-		DROP TABLE dbo.expected_tblICInventoryAdjustmentDetail
+		DROP TABLE expected_tblICInventoryAdjustmentDetail
 
 	IF OBJECT_ID('expected_tblICLot') IS NOT NULL 
-		DROP TABLE dbo.expected_tblICLot
+		DROP TABLE expected_tblICLot
 
 	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL 
 		DROP TABLE actual_tblICInventoryAdjustment
 
 	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
-		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
+		DROP TABLE actual_tblICInventoryAdjustmentDetail
 
 	IF OBJECT_ID('actual_tblICLot') IS NOT NULL 
-		DROP TABLE dbo.actual_tblICLot
+		DROP TABLE actual_tblICLot
 END 

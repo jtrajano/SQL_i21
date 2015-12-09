@@ -152,5 +152,5 @@ BEGIN
 		DROP TABLE expected_tblGLDetail
 
 	IF OBJECT_ID('expected_tblGLSummary') IS NOT NULL 
-		DROP TABLE dbo.expected_tblGLSummary
+		DROP TABLE expected_tblGLSummary
 END

@@ -255,5 +255,5 @@ BEGIN
 		DROP TABLE expected_tblGLDetail
 
 	IF OBJECT_ID('actual_tblGLDetail') IS NOT NULL 
-		DROP TABLE dbo.actual_tblGLDetail
+		DROP TABLE actual_tblGLDetail
 END 
