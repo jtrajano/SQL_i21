@@ -3059,6 +3059,7 @@
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
+    <Build Include="dbo\Tables\tblGRStorageScheduleLocationUse.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
