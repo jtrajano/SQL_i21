@@ -110,7 +110,7 @@ namespace iRely.Inventory.BusinessLayer
                     result.BaseException = ex;
                     result.Exception = new ServerException(ex);
                     result.HasError = true;
-                    transaction.Rollback();
+                    //transaction.Rollback();
                 }
             }
 
