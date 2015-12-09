@@ -621,6 +621,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strLotStatus', record.get('strLotStatus'));
             current.set('intLotStatusId', record.get('intLotStatusId'));
             current.set('dtmExpiryDate', record.get('dtmExpiryDate'));
+            current.set('intSubLocationId', record.get('intSubLocationId'));
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
+            current.set('strSubLocation', record.get('strSubLocationName'));
+            current.set('strStorageLocation', record.get('strStorageLocationName'));
             current.set('dblLineTotal', 0.00);
 
             // Clear the values for the following fields:
