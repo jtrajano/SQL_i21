@@ -3077,6 +3077,7 @@
     <Build Include="dbo\Views\vyuTMClockUsedBySite.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummary.sql" />
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
