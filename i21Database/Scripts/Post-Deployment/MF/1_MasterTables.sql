@@ -1422,3 +1422,40 @@ GO
 		FROM tblSMCompanyLocation
 	END
 GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFShiftActivityStatus WHERE intShiftActivityStatusId = 1)
+BEGIN
+    INSERT INTO tblMFShiftActivityStatus(intShiftActivityStatusId,strStatus)
+    VALUES(1,'Not Started')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFShiftActivityStatus WHERE intShiftActivityStatusId = 2)
+BEGIN
+    INSERT INTO tblMFShiftActivityStatus(intShiftActivityStatusId,strStatus)
+    VALUES(2,'Started')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFShiftActivityStatus WHERE intShiftActivityStatusId = 3)
+BEGIN
+    INSERT INTO tblMFShiftActivityStatus(intShiftActivityStatusId,strStatus)
+    VALUES(3,'Completed')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFWastageType WHERE intWastageTypeId = 1)
+BEGIN
+    INSERT INTO tblMFWastageType(intWastageTypeId,strWastageTypeName)
+    VALUES(1,'ReClaim')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFWastageType WHERE intWastageTypeId = 2)
+BEGIN
+    INSERT INTO tblMFWastageType(intWastageTypeId,strWastageTypeName)
+    VALUES(2,'Waste')
+END
+GO
