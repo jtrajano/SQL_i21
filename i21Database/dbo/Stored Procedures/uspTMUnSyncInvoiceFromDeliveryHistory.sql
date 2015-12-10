@@ -491,7 +491,8 @@ BEGIN
 
 					-- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
-					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+					-- No calculation for forecast since this is the start/setup state of site 
+					---EXEC uspTMUpdateForecastedValuesBySite @intSiteId
 				END
 			END
 		END
