@@ -64,7 +64,7 @@ BEGIN
 	--Customer Special Tax
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialTax))
 	BEGIN
-		-- 1.Customer > Vendor No. > Vendor Location > Item No.
+		-- 1.Customer > Vendor No. > Customer Location > Item No.
 		SELECT TOP 1
 			@TaxGroupId = [intTaxGroupId]
 		FROM
@@ -77,7 +77,7 @@ BEGIN
 		IF ISNULL(@TaxGroupId,0) <> 0
 			RETURN @TaxGroupId;
 		
-		-- 2.Customer > Vendor No. > Vendor Location > Item Category	
+		-- 2.Customer > Vendor No. > Customer Location > Item Category	
 		SELECT TOP 1
 			@TaxGroupId = [intTaxGroupId]
 		FROM
@@ -157,7 +157,18 @@ BEGIN
 			[intCategoryId] = @ItemCategoryId			
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;									
+			RETURN @TaxGroupId;		
+			
+		-- 9.Customer > Customer Location
+		SELECT TOP 1
+			@TaxGroupId = [intTaxGroupId]
+		FROM
+			@CustomerSpecialTax
+		WHERE
+			[intEntityCustomerLocationId] = @CustomerLocationId 			
+			
+		IF ISNULL(@TaxGroupId,0) <> 0
+			RETURN @TaxGroupId;											
 																																
 	END
 	

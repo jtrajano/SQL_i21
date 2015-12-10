@@ -156,7 +156,18 @@ BEGIN
 			[intCategoryId] = @ItemCategoryId			
 			
 		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;									
+			RETURN @TaxGroupId;		
+			
+		-- 9.Vendor > Vendor Location
+		SELECT TOP 1
+			@TaxGroupId = [intTaxGroupId]
+		FROM
+			@VendorSpecialTax
+		WHERE
+			[intEntityVendorLocationId] = @VendorLocationId 			
+			
+		IF ISNULL(@TaxGroupId,0) <> 0
+			RETURN @TaxGroupId;							
 																																
 	END
 
