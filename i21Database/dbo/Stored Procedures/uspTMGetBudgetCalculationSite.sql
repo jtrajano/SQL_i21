@@ -132,7 +132,7 @@ BEGIN
 									WHEN @ysnIncludeCredits = 0 AND @ysnIncludeInvoices = 1
 										THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance) / @intNumberOfMonthsInBudget),0) 
 									WHEN @ysnIncludeCredits = 1 AND @ysnIncludeInvoices = 1
-										THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance + dblUnappliedCredits) / @intNumberOfMonthsInBudget),0)
+										THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance - dblUnappliedCredits) / @intNumberOfMonthsInBudget),0)
 								END)
 	INTO #tmpStage3
 	FROM #tmpStage1
