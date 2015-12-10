@@ -1,11 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostRefund] 
-	@intRefundId INT = 0,
+	@intRefundId INT = NULL,
 	@ysnPosted BIT = NULL,
-	@successfulCount INT = 0 OUTPUT,
+	@successfulCount INT = 0 OUTPUT ,
 	@invalidCount INT = 0 OUTPUT,
-	@success BIT = 0 OUTPUT,
-	@userId	 INT
-
+	@success BIT = 0 OUTPUT 
 AS
 BEGIN
 
@@ -16,12 +14,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Start the transaction 
-BEGIN TRANSACTION
-IF @userId IS NULL
-BEGIN
-	RAISERROR('User is required', 16, 1);
-END
 
 ----=====================================================================================================================================
 ---- 	DECLARE TEMPORARY TABLES
@@ -69,7 +61,7 @@ INNER JOIN tblPATRefundCategory PRCA
 		ON PRCA.intRefundCustomerId = PRC.intRefundCustomerId
 
 SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	
-COMMIT TRANSACTION --COMMIT inserted transaction
+--COMMIT TRANSACTION --COMMIT inserted transaction
 
 IF(@totalRecords = 0)  
 BEGIN
@@ -94,8 +86,6 @@ BEGIN TRANSACTION
 --END
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
-
-
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER EQUITY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -112,13 +102,15 @@ USING #tmpRefundData AS B
 		THEN UPDATE SET EQ.dblEquity = CASE WHEN B.ysnPosted = 1 THEN 
 												(EQ.dblEquity + (CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
 																	(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																B.dblRefundAmount - (B.dblRefundAmount * (25/100)) END)) 
+																B.dblRefundAmount - (B.dblRefundAmount * .25) END)) 
 									   ELSE (EQ.dblEquity - (CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
 																	(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																B.dblRefundAmount - (B.dblRefundAmount * (25/100)) END)) END
+																B.dblRefundAmount - (B.dblRefundAmount * .25) END)) END
 	WHEN NOT MATCHED BY TARGET
 		THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dtmLastActivityDate, intConcurrencyId)
-			VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, B.dblVolume, GETDATE(), 1);
+			VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
+																	(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
+																B.dblRefundAmount - (B.dblRefundAmount * .25) END, GETDATE(), 1);
 
 END TRY
 BEGIN CATCH
@@ -128,41 +120,6 @@ GOTO Post_Rollback
 END CATCH
 
 ---------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
---=====================================================================================================================================
--- 	REDUCE VOLUME TABLE
----------------------------------------------------------------------------------------------------------------------------------------
-
-BEGIN TRY
-
-
-IF(ISNULL(@ysnPosted,0) = 1) 
-BEGIN
-	UPDATE tblPATCustomerVolume 
-	   SET dblVolume = CV.dblVolume - RD.dblVolume
-	  FROM tblPATCustomerVolume CV
-INNER JOIN #tmpRefundData RD
-		ON RD.intCustomerId = CV.intCustomerPatronId
-END
-ELSE
-BEGIN
-UPDATE tblPATCustomerVolume 
-	   SET dblVolume = CV.dblVolume + RD.dblVolume
-	  FROM tblPATCustomerVolume CV
-INNER JOIN #tmpRefundData RD
-		ON RD.intCustomerId = CV.intCustomerPatronId
-END
-	
-END TRY
-BEGIN CATCH
-SET @error = ERROR_MESSAGE()
-RAISERROR(@error, 16, 1);
-GOTO Post_Rollback
-END CATCH
-
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -192,7 +149,10 @@ Post_Cleanup:
 	--INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundPostData')) DROP TABLE #tmpRefundPostData
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
+
+
 GO

@@ -6,7 +6,7 @@ BEGIN
 SELECT DISTINCT RR.intRefundTypeId,
 				CE.strEquityType, 
 				RR.strRefundType,
-				dblEquity = SUM(CE.dblEquity),
+				CE.dblEquity,
 			    RR.intConcurrencyId
 		   FROM tblPATRefundRate RR
 	 INNER JOIN tblPATRefundRateDetail RRD
@@ -16,9 +16,8 @@ SELECT DISTINCT RR.intRefundTypeId,
 	 INNER JOIN tblPATCustomerEquity CE
 			 ON CE.intRefundTypeId = RR.intRefundTypeId
 		  WHERE RR.intRefundTypeId = @intRefundTypeId
-	   GROUP BY RR.intRefundTypeId, CE.strEquityType, RR.strRefundType, RR.intConcurrencyId
+	   GROUP BY RR.intRefundTypeId, CE.strEquityType, RR.strRefundType, RR.intConcurrencyId, CE.dblEquity
 
 
 END
-
 GO
