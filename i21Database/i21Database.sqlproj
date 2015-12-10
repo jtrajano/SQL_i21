@@ -3060,6 +3060,15 @@
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
     <Build Include="dbo\Tables\tblGRStorageScheduleLocationUse.sql" />
+    <Build Include="dbo\Tables\tblMFReasonCodeDetail.sql" />
+    <Build Include="dbo\Tables\tblMFBinType.sql" />
+    <Build Include="dbo\Tables\tblMFReasonCode.sql" />
+    <Build Include="dbo\Tables\tblMFWastage.sql" />
+    <Build Include="dbo\Tables\tblMFShiftActivity.sql" />
+    <Build Include="dbo\Tables\tblMFDowntime.sql" />
+    <Build Include="dbo\Tables\tblMFShiftActivityMachines.sql" />
+    <Build Include="dbo\Tables\tblMFWastageType.sql" />
+    <Build Include="dbo\Tables\tblMFShiftActivityStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
