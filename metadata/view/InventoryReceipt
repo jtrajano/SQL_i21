@@ -1489,7 +1489,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter124",
+                                                                            "name": "filter11",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3140,7 +3140,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter125",
+                                                                            "name": "filter12",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3804,7 +3804,7 @@
                                                                     "designerId": "88478352-00af-41f7-85d4-d041f9134c58",
                                                                     "cn": [
                                                                         {
-                                                                            "type": "Ext.form.field.Text",
+                                                                            "type": "Ext.form.field.ComboBox",
                                                                             "reference": {
                                                                                 "name": "editor",
                                                                                 "type": "object"
@@ -3813,24 +3813,32 @@
                                                                             "userConfig": {
                                                                                 "columns": [
                                                                                     "[",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'intLotId',",
-                                                                                    "\t\tdataType: 'numeric',",
-                                                                                    "\t\ttext: 'Lot Id',",
-                                                                                    "\t\thidden: true",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strLotNumber',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Lot Number',",
-                                                                                    "\t\tflex: 1",
-                                                                                    "\t}",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strParentLotNumber',",
+                                                                                    "dataType: 'string',",
+                                                                                    "text: 'Parent Lot Number',",
+                                                                                    "flex: 1",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intItemId',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "text: 'Item Id',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intParentLotId',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "text: 'Parent Lot Id',",
+                                                                                    "hidden: true",
+                                                                                    "}",
                                                                                     "]"
                                                                                 ],
-                                                                                "designer|createAlias": null,
-                                                                                "itemId": "cboLotParent"
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strParentLotNumber",
+                                                                                "itemId": "cboLotParent",
+                                                                                "valueField": "strParentLotNumber"
                                                                             },
-                                                                            "name": "MyTextField7",
+                                                                            "name": "MyComboBox11",
                                                                             "configAlternates": {
                                                                                 "columns": "array"
                                                                             },
@@ -4377,7 +4385,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter126",
+                                                            "name": "filter13",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5257,7 +5265,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter14",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5726,7 +5734,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter15",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6256,7 +6264,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

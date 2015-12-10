@@ -545,17 +545,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotWeightUOM: 'strWeightUOM',
                 colLotPhyVsStated: 'dblPhyVsStated',
                 colLotParentLotId: {
-                    dataIndex: 'strParentLotNumber'
-                    //editor: {
-                    //    store: '{parentLots}',
-                    //    defaultFilters: [
-                    //        {
-                    //            column: 'intItemId',
-                    //            value: '{grdInventoryReceipt.selection.intItemId}',
-                    //            conjunction: 'and'
-                    //        }
-                    //    ]
-                    //}
+                    dataIndex: 'strParentLotNumber',
+                    editor: {
+                        store: '{parentLots}',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryReceipt.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
                 },
                 colLotContainerNo: 'strContainerNo',
                 colLotVendorLocation: {
@@ -910,6 +910,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    setupAdditionalBinding: function(win){
+        var column, editor;
+
+        column = win.down('#colLotParentLotId');
+        if (column) {
+            editor = column.getEditor();
+        }
+        if (editor) {
+            editor.forceSelection = false;
+        }
+    },
+
     show: function (config) {
         "use strict";
 
@@ -936,6 +948,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     filters: config.filters
                 });
             }
+
+            me.setupAdditionalBinding(win);
         }
     },
 

@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-              : base(iRely.Common.Security.GetCompanyName())
+               : base(iRely.Common.Security.GetCompanyName())
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
@@ -74,6 +74,8 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public DbSet<tblICLineOfBusiness> tblICLineOfBusinesss { get; set; }
         public DbSet<tblICLot> tblICLots { get; set; }
+        public DbSet<tblICParentLot> tblICParentLots { get; set; }
+
         public DbSet<tblICLotStatus> tblICLotStatuss { get; set; }
         public DbSet<tblICManufacturer> tblICManufacturers { get; set; }
         public DbSet<tblICMaterialNMFC> tblICMaterialNMFCs { get; set; }
@@ -138,7 +140,7 @@ namespace iRely.Inventory.Model
 
         public DbSet<tblICStorageMeasurementReading> tblICStorageMeasurementReadings { get; set; }
         public DbSet<tblICStorageMeasurementReadingConversion> tblICStorageMeasurementReadingConversions { get; set; }
-        public DbSet<vyuICGetStorageMeasurementReadingConversion> vyuICGetStorageMeasurementReadingConversions { get; set; }
+        public DbSet<vyuICGetStorageMeasurementReadingConversion> vyuICGetStorageMeasurementReadingConversions { get; set; }        
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -210,6 +212,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureConversionMap());
             modelBuilder.Configurations.Add(new tblICLotMap());
+            modelBuilder.Configurations.Add(new tblICParentLotMap());
 
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityClassVariant>(p => p.Requires("strType").HasValue("Class"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityGrade>(p => p.Requires("strType").HasValue("Grade"));
@@ -324,7 +327,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryCountDetailMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryCountMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryCountDetailMap());
-            modelBuilder.Configurations.Add(new vyuICGetCountSheetMap());	
+            modelBuilder.Configurations.Add(new vyuICGetCountSheetMap());            
         }
     }
 }
