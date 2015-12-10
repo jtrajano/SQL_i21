@@ -20,9 +20,9 @@ BEGIN
 		tblSMTaxCodeRate
 	WHERE 
 		[intTaxCodeId] = @TaxCodeId 
-		AND CAST([dtmEffectiveDate]  AS DATE) <= CAST(@TransactionDate AS DATE) 
+		AND CAST(@TransactionDate AS DATE) >= CAST([dtmEffectiveDate]  AS DATE)
 	ORDER BY 
-		 [dtmEffectiveDate] ASC
+		 [dtmEffectiveDate] DESC
 		,[numRate] DESC					
 		
 	RETURN
