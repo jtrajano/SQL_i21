@@ -12,6 +12,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedPackedUOM',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedParentLot',
         'Inventory.store.BufferedOtherCharges',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedGradeAttribute',
@@ -266,7 +267,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'icbufferedlot'
         },
         parentLots: {
-            type: 'icbufferedlot'
+            type: 'icbufferedparentlot'
         },
         weightUOM: {
             type: 'icbuffereditemweightvolumeuom'
