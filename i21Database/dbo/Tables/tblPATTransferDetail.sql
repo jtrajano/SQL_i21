@@ -5,6 +5,7 @@
     [intTransferorId] INT NULL,
 	[strEquityType] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intFiscalYearId] INT NULL,
+	[intPatronageCategoryId] INT NULL,
 	[intRefundTypeId] INT NULL,
 	[intStockId] INT NULL,
 	[strStockName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,

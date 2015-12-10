@@ -4,6 +4,7 @@
 			CV.intCustomerPatronId,
 			ENT.strName,
 			CV.intPatronageCategoryId,
+			PC.strCategoryCode,
 			PC.strPurchaseSale,
 			CV.intFiscalYear,
 			FY.strFiscalYear,
@@ -25,3 +26,5 @@
 		 ON AR.intEntityCustomerId = CV.intCustomerPatronId
   LEFT JOIN tblSMTaxCode TC
 		 ON TC.intTaxCodeId = AR.intTaxCodeId
+
+GO
