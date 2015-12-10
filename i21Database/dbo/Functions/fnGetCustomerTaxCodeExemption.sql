@@ -152,6 +152,29 @@ BEGIN
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		RETURN @TaxCodeExemption
+
+
+	SELECT TOP 1
+		@TaxCodeExemption = 'Tax Exemption '
+							 + ISNULL('Number: ' + TE.[strException], '') 
+							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
+							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
+	FROM
+		tblARCustomerTaxingTaxException TE
+	LEFT OUTER JOIN
+		tblEntityLocation EL
+			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
+	WHERE
+		[intEntityCustomerId] = @CustomerId
+		AND TE.[intEntityCustomerLocationId] = @ShipToLocationId
+		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
+	ORDER BY
+		dtmStartDate	
+		
+		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		RETURN @TaxCodeExemption
 	
 	--Item
 	SELECT TOP 1
