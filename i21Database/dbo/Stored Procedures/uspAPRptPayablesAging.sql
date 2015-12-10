@@ -109,12 +109,18 @@ SET @innerQuery = 'SELECT
 				  FROM dbo.vyuAPPayables'
 
 IF @dateFrom IS NOT NULL
-BEGIN
-	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
-
+BEGIN	
+	IF @condition = 'Equal To'
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+	END
+    ELSE 
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+	END  
 END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate'
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
