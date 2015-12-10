@@ -2644,6 +2644,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.InventoryView' WHERE strMenuName = 'Inventory View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bin Type' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Bin Type', N'Manufacturing', @ManufacturingParentMenuId, N'Bin Type', N'Maintenance', N'Screen', N'Manufacturing.view.BinType', N'small-menu-maintenance', 0, 0, 0, 1, 14, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.BinType' WHERE strMenuName = 'Bin Type' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+
 /* STORE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Store' AND strModuleName = 'Store' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
