@@ -3084,6 +3084,7 @@
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostRefund.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
