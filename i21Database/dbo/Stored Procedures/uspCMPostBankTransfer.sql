@@ -233,6 +233,7 @@ BEGIN
 			,[ysnIsUnposted]
 			,[intConcurrencyId]
 			,[intUserId]
+			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intEntityId]
@@ -257,6 +258,7 @@ BEGIN
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
+			,[strTransactionType]	= @TRANSACTION_FORM
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
@@ -289,6 +291,7 @@ BEGIN
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
+			,[strTransactionType]	= @TRANSACTION_FORM
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
