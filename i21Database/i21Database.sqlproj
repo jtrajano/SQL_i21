@@ -3074,6 +3074,8 @@
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
     <Build Include="dbo\Views\vyuPATCancel.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
+    <Build Include="dbo\Functions\fnPATCreateRefundGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATReverseGLRefundEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
