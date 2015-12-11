@@ -1459,3 +1459,32 @@ BEGIN
     VALUES(2,'Waste')
 END
 GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 1)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(1,'Common')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 2)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(2,'Forecasting')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 3)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(3,'Inventory')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 4)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(4,'Efficiency')
+END
+GO

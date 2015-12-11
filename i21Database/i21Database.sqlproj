@@ -3069,6 +3069,7 @@
     <Build Include="dbo\Tables\tblMFShiftActivityMachines.sql" />
     <Build Include="dbo\Tables\tblMFWastageType.sql" />
     <Build Include="dbo\Tables\tblMFShiftActivityStatus.sql" />
+    <Build Include="dbo\Tables\tblMFReasonType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
