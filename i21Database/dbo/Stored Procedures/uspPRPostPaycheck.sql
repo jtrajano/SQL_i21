@@ -491,6 +491,7 @@ DECLARE
 	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'PCHK'		-- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100) = 'Payroll'		-- Module where this posting code belongs. 
 	,@TRANSACTION_FORM AS NVARCHAR(100) = 'Paychecks'
+	,@TRANSACTION_TYPE AS NVARCHAR(100) = 'Paycheck'
 	
 	-- Local Variables
 	,@dtmDate AS DATETIME
@@ -692,6 +693,7 @@ BEGIN
 			,[intConcurrencyId]
 			,[intUserId]
 			,[strTransactionForm]
+			,[strTransactionType]
 			,[strModuleName]
 			,[intEntityId]
 	)
@@ -717,6 +719,7 @@ BEGIN
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
 			,[strTransactionForm]	= @TRANSACTION_FORM
+			,[strTransactionType]	= @TRANSACTION_TYPE
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
@@ -750,6 +753,7 @@ BEGIN
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
 			,[strTransactionForm]	= @TRANSACTION_FORM
+			,[strTransactionType]	= @TRANSACTION_TYPE
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
