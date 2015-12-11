@@ -21,7 +21,7 @@
     [intEntityId]				INT              NULL,
     [strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intTransactionId]          INT              NULL,
-    [strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+    [strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
