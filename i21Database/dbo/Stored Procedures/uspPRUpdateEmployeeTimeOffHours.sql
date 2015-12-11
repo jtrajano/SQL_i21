@@ -33,8 +33,8 @@ BEGIN
 								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmDateHired), E.dtmDateHired)
 							 ELSE NULL 
 						END
-		,dblAccruedHours = 0
-		,dblEarnedHours = 0
+		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
+		,dblEarnedHours = CAST(0 AS NUMERIC(18, 6))
 		,dblRate
 		,dblPerPeriod
 		,strPeriod
