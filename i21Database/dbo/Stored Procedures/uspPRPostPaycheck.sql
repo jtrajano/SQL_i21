@@ -902,7 +902,7 @@ IF (@isSuccessful <> 0)
 						WHERE strPaycheckId = @strTransactionId
 						SET @isSuccessful = 1
 
-						/* Update the Employee Time Off Hours */
+						/* Update the Employee Time Off Hours Used */
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed + A.dblHours
 							FROM tblPRPaycheckEarning A
@@ -921,7 +921,7 @@ IF (@isSuccessful <> 0)
 							,dtmPosted = NULL 
 						WHERE strPaycheckId = @strTransactionId
 
-						/* Update the Employee Time Off Hours */
+						/* Update the Employee Time Off Hours Used */
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed - A.dblHours
 							FROM tblPRPaycheckEarning A
@@ -936,6 +936,28 @@ IF (@isSuccessful <> 0)
 						SET @isSuccessful = 1
 					END
 			END
+
+		/* Update the Employee Time Off Tiers and Accrued Hours */
+		SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
+		INTO #tmpAccrueTimeOff
+		FROM tblPRPaycheckEarning PE
+			INNER JOIN tblPREmployeeEarning EE
+				ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
+				WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
+					AND PE.intPaycheckId = @intPaycheckId
+					AND EE.intEntityEmployeeId = @intEmployeeId
+		
+		DECLARE @intAccrueTimeOffId INT
+		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
+		BEGIN
+			SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+
+			EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
+			EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+
+			DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
+		END
+
 	END
 ELSE
 	BEGIN
@@ -953,4 +975,7 @@ ELSE
 	END
 
 END
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAccrueTimeOff')) DROP TABLE #tmpAccrueTimeOff
+
 GO
