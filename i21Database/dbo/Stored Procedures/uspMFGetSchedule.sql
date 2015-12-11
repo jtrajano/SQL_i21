@@ -7,12 +7,16 @@
 AS
 DECLARE @dtmCurrentDate DATETIME
 	,@tblMFWorkOrderSchedule ScheduleTable
+	,@ysnAutoPriorityOrderByDemandRatio BIT
 DECLARE @tblWorkOrderDemandRatio TABLE (
 	intWorkOrderId INT
 	,intDemandRatio INT
 	)
 
 SELECT @dtmCurrentDate = GETDATE()
+
+SELECT @ysnAutoPriorityOrderByDemandRatio = ysnAutoPriorityOrderByDemandRatio
+FROM dbo.tblMFCompanyPreference
 
 IF @dtmFromDate IS NULL
 BEGIN
@@ -69,28 +73,31 @@ BEGIN
 		,@dtmToDate AS dtmToDate
 END
 
-INSERT INTO @tblMFWorkOrderSchedule (
-	intWorkOrderId
-	,intItemId
-	,intExecutionOrder
-	,intLocationId
-	)
-SELECT W.intWorkOrderId
-	,W.intItemId
-	,SL.intExecutionOrder
-	,W.intLocationId
-FROM dbo.tblMFWorkOrder W
-LEFT JOIN dbo.tblMFSchedule S ON S.intScheduleId = @intScheduleId
-LEFT JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
-	AND S.intScheduleId = SL.intScheduleId
-WHERE W.intStatusId <> 13
-	AND W.intManufacturingCellId = @intManufacturingCellId
+IF @ysnAutoPriorityOrderByDemandRatio = 1
+BEGIN
+	INSERT INTO @tblMFWorkOrderSchedule (
+		intWorkOrderId
+		,intItemId
+		,intExecutionOrder
+		,intLocationId
+		)
+	SELECT W.intWorkOrderId
+		,W.intItemId
+		,SL.intExecutionOrder
+		,W.intLocationId
+	FROM dbo.tblMFWorkOrder W
+	LEFT JOIN dbo.tblMFSchedule S ON S.intScheduleId = @intScheduleId
+	LEFT JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
+		AND S.intScheduleId = SL.intScheduleId
+	WHERE W.intStatusId <> 13
+		AND W.intManufacturingCellId = @intManufacturingCellId
 
-INSERT INTO @tblWorkOrderDemandRatio (
-	intWorkOrderId
-	,intDemandRatio
-	)
-EXEC dbo.uspMFCalculateDemandRatio @tblMFWorkOrderSchedule
+	INSERT INTO @tblWorkOrderDemandRatio (
+		intWorkOrderId
+		,intDemandRatio
+		)
+	EXEC dbo.uspMFCalculateDemandRatio @tblMFWorkOrderSchedule
+END
 
 SELECT C.intManufacturingCellId
 	,C.strCellName

@@ -1488,3 +1488,7 @@ BEGIN
     VALUES(4,'Efficiency')
 END
 GO
+UPDATE tblMFCompanyPreference
+SET ysnAutoPriorityOrderByDemandRatio = 0
+WHERE ysnAutoPriorityOrderByDemandRatio IS NULL
+Go
