@@ -3076,6 +3076,7 @@
     <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
     <Build Include="dbo\Functions\fnPATCreateRefundGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATReverseGLRefundEntries.sql" />
+    <Build Include="dbo\Views\vyuCFSearchTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
