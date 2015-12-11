@@ -183,20 +183,20 @@ JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
 WHERE A.Credit > 0
 
 	--GL-2040 For Journal entries - if there is a negative credit break into two entries on import
-	IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUnits = 1)
+IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUnits = 1)
 	BEGIN
 		insert INTO #iRelyImptblGLJournalDetail
-		(intJournalId,glarc_trans_dt,intAccountId,Debit,Credit,DebitUnits,CreditUnits, DebitRate,CreditRate,dblUnitsInlbs,DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glarc_period,glarc_jrnl_no,glarc_src_id,glarc_src_seq,gooddate,A4GLIdentity)
+		(intJournalId,glarc_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glarc_period,glarc_jrnl_no,glarc_src_id,glarc_src_seq,gooddate,A4GLIdentity)
 		SELECT 
 		intJournalId,
-		glarc_trans_dt,
+		A.glarc_trans_dt,
 		intAccountId,
-		Debit = Credit ,
+		0 AS Debit,
 		0 AS Credit,
+		CreditUnits = CASE WHEN B.glarc_units < 0 THEN glarc_units * -1 ELSE glarc_units END,
 		0 AS DebitUnits,
-		0 AS CreditUnits, 
 		0 AS DebitRate,	
-		0 AS CreditRate,	
+		0 AS CreditRate,
 		0 AS dblUnitsInlbs,
 		0 as DebitUnitsInlbs,
 		'''' AS strCheckbookNo,
@@ -206,17 +206,21 @@ WHERE A.Credit > 0
 		strComments,
 		strReference,
 		''N'' AS strCorrecting,
-		strSourcePgm,																	
-		glarc_period,
-		glarc_jrnl_no,
-		glarc_src_id,
-		glarc_src_seq,    
-		GETDATE() as gooddate,
-		A4GLIdentity
-	 FROM  #iRelyImptblGLJournalDetail
-	 WHERE NegativeCreditUnits = 1
+		strSourcePgm,																	-- aptrxu
+		A.glarc_period,
+		A.glarc_jrnl_no,
+		A.glarc_src_id,
+		A.glarc_src_seq,    
+		gooddate,
+		A.A4GLIdentity
+		FROM  #iRelyImptblGLJournalDetail A
+		JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
+		WHERE NegativeDebitUnits = 1
+	END
+	IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeDebitUnits = 1)
+	BEGIN
 
-	 insert INTO #iRelyImptblGLJournalDetail
+		INSERT INTO #iRelyImptblGLJournalDetail
 		(intJournalId,glarc_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glarc_period,glarc_jrnl_no,glarc_src_id,glarc_src_seq,gooddate,A4GLIdentity)
 		SELECT 
 		intJournalId,
@@ -247,11 +251,12 @@ WHERE A.Credit > 0
 		FROM  #iRelyImptblGLJournalDetail A
 		JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
 		WHERE NegativeCreditUnits = 1
-	END
+	END	
+
 
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
-   
- --+++++++++++++++++++++++++++++++++
+ 
+  --+++++++++++++++++++++++++++++++++
  -- UPDATE COLLATE JOURNAL
  --+++++++++++++++++++++++++++++++++
 ALTER TABLE #iRelyImptblGLJournalDetail
