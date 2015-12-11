@@ -21,7 +21,7 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodityUnitMeasure] PRIMARY KEY ([intCommodityUnitMeasureId]), 
-		CONSTRAINT [FK_tblICCommodityUnitMeasure_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ,
+		CONSTRAINT [FK_tblICCommodityUnitMeasure_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ON DELETE CASCADE,
 		CONSTRAINT [FK_tblICCommodityUnitMeasure_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [AK_tblICCommodityUnitMeasure] UNIQUE ([intCommodityId], [intUnitMeasureId]) 
 	)
