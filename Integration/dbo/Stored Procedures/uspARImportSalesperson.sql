@@ -68,16 +68,22 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
-				SUBSTRING(S.strZipCode,1,10),
-				SUBSTRING(S.strCity,1,20),
-				SUBSTRING(S.strState,1,2),
-				(CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
-				SUBSTRING(S.strPhone,1,15),
+				CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress,1,30), 0, CHARINDEX(CHAR(10),D.strAddress)) ELSE SUBSTRING(D.strAddress,1,30) END,
+				CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress, CHARINDEX(CHAR(10),D.strAddress) + 1, LEN(D.strAddress)),1,30) ELSE NULL END,
+				SUBSTRING(D.strZipCode,1,10),
+				SUBSTRING(D.strCity,1,20),
+				SUBSTRING(D.strState,1,2),
+				(CASE WHEN LEN(D.strCountry) = 3 THEN D.strCountry ELSE '''' END),
+				SUBSTRING(F.strPhone,1,15),
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
+				JOIN tblEntityToContact C
+					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
+				JOIN tblEntity F
+					on C.intEntityContactId = F.intEntityId
+				JOIN tblEntityLocation D
+					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId
 	
@@ -313,16 +319,22 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
-				SUBSTRING(S.strZipCode,1,10),
-				SUBSTRING(S.strCity,1,20),
-				SUBSTRING(S.strState,1,2),
+				CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress,1,30), 0, CHARINDEX(CHAR(10),D.strAddress)) ELSE SUBSTRING(D.strAddress,1,30) END,
+				CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress, CHARINDEX(CHAR(10),D.strAddress) + 1, LEN(D.strAddress)),1,30) ELSE NULL END,
+				SUBSTRING(D.strZipCode,1,10),
+				SUBSTRING(D.strCity,1,20),
+				SUBSTRING(D.strState,1,2),
 				--S.strCountry,
-				SUBSTRING(S.strPhone,1,15),
+				SUBSTRING(F.strPhone,1,15),
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
+				JOIN tblEntityToContact C
+					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
+				JOIN tblEntity F
+					on C.intEntityContactId = F.intEntityId
+				JOIN tblEntityLocation D
+					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId
 	
