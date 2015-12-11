@@ -65,6 +65,13 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
         return win.context;
     },
 
+    createRecord: function(config, action) {
+        var me = this;
+        var record = Ext.create('Inventory.model.Document');
+        record.set('intDocumentType', 0);
+        action(record);
+    },
+
     show : function(config) {
         "use strict";
 
