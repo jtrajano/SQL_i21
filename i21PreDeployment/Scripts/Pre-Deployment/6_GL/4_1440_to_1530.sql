@@ -54,8 +54,8 @@ PRINT 'Finish Fixing Segment Categories'
 PRINT 'Begin updating tblGLDetail null strTransactionType'
 
 UPDATE tblGLDetail SET strTransactionType = 'Paycheck' WHERE strTransactionForm = 'Paychecks' AND strModuleName = 'Payroll' AND strTransactionType IS NULL
-
-UPDATE tblGLDetail SET strTransactionType = strTransactionForm  WHERE strModuleName = 'Cash Management' AND strTransactionType IS NULL
+--update the remaining rows to strTransactionForm
+UPDATE tblGLDetail SET strTransactionType = strTransactionForm  WHERE strTransactionType IS NULL
 
 PRINT 'Finished updating tblGLDetail null strTransactionType'
 
