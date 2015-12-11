@@ -23,11 +23,16 @@ BEGIN
 			ON I.intItemId = VI.intItemId
 	WHERE
 		I.intItemId = @ItemId
-		AND VI.[intLocationId] = @CompanyLocationId	
+		AND VI.[intLocationId] = @CompanyLocationId
+
+	DECLARE @TaxGroupId INT
+	SET @TaxGroupId = NULL
 
 	
+	--Customer Special Tax
 	DECLARE @CustomerSpecialTax TABLE(
-		[intARSpecialTaxId] INT
+		 [intSequence] INT
+		,[intARSpecialTaxId] INT
 		,[intEntityCustomerId] INT
 		,[intEntityCustomerLocationId] INT
 		,[intEntityVendorId] INT
@@ -36,141 +41,264 @@ BEGIN
 		,[intTaxGroupId] INT)
 
 	INSERT INTO @CustomerSpecialTax(
-		 [intARSpecialTaxId]
+		 [intSequence]
+		,[intARSpecialTaxId]
 		,[intEntityCustomerId]
 		,[intEntityCustomerLocationId]
 		,[intEntityVendorId]
 		,[intItemId]
 		,[intCategoryId]
-		,[intTaxGroupId])
+		,[intTaxGroupId])	
+		
 	SELECT
-		 ST.[intARSpecialTaxId]
-		,ST.[intEntityCustomerId]
-		,ST.[intEntityCustomerLocationId]
-		,ST.[intEntityVendorId]
-		,ST.[intItemId]
-		,ST.[intCategoryId]
-		,ST.[intTaxGroupId]
+		 [intSequence]					= 0
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
 	FROM
 		tblARSpecialTax ST
 	INNER JOIN
 		tblARCustomer C
 			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
 	WHERE
-		C.intEntityCustomerId = @CustomerId
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityVendorId] = @VendorId
+		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+		AND ST.[intItemId] = @ItemId
+		AND ST.[intCategoryId] = @ItemCategoryId
 			
-	DECLARE @TaxGroupId INT
-	SET @TaxGroupId = NULL
-	--Customer Special Tax
-	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialTax))
-	BEGIN
-		-- 1.Customer > Vendor No. > Customer Location > Item No.
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intEntityVendorId] = @VendorId
-			AND [intEntityCustomerLocationId] = @CustomerLocationId 
-			AND [intItemId] = @ItemId 
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;
-		
-		-- 2.Customer > Vendor No. > Customer Location > Item Category	
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intEntityVendorId] = @VendorId
-			AND [intEntityCustomerLocationId] = @CustomerLocationId 
-			AND [intCategoryId] = @ItemCategoryId
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;
-			
-		-- 3.Customer > Vendor No. > Vendor Location
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intEntityVendorId] = @VendorId
-			AND [intEntityCustomerLocationId] = @CustomerLocationId 			
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;
-		
-		-- 4.Customer > Vendor No. > Item No. 
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intEntityVendorId] = @VendorId
-			AND [intItemId] = @ItemId 
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;			
-							
-		-- 5.Customer > Vendor No. >  Item Category
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intEntityVendorId] = @VendorId
-			AND [intCategoryId] = @ItemCategoryId
-						
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;
-			
-		-- 6.Customer > Vendor No.
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intEntityVendorId] = @VendorId		
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;
-			
-		-- 7.Customer > Item No.
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intItemId] = @ItemId 						
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;
+	UNION
 
-		-- 8.Customer > Item Category
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intCategoryId] = @ItemCategoryId			
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;		
-			
-		-- 9.Customer > Customer Location
-		SELECT TOP 1
-			@TaxGroupId = [intTaxGroupId]
-		FROM
-			@CustomerSpecialTax
-		WHERE
-			[intEntityCustomerLocationId] = @CustomerLocationId 			
-			
-		IF ISNULL(@TaxGroupId,0) <> 0
-			RETURN @TaxGroupId;											
-																																
-	END
+	SELECT
+		 [intSequence]					= 1
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityVendorId] = @VendorId
+		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+		AND ST.[intItemId] = @ItemId
+		
+	UNION	
+		
+	SELECT
+		 [intSequence]					= 2
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityVendorId] = @VendorId
+		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+		
+	UNION	
+		
+	SELECT
+		 [intSequence]					= 3
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+		AND ST.[intItemId] = @ItemId
+		AND ST.[intCategoryId] = @ItemCategoryId	
+		
+	UNION	
+		
+	SELECT
+		 [intSequence]					= 4
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+		AND ST.[intItemId] = @ItemId
+		
+	UNION			
+		
+	SELECT
+		 [intSequence]					= 5
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+		AND ST.[intCategoryId] = @ItemCategoryId	
+		
+	UNION
+
+	SELECT
+		 [intSequence]					= 6
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intItemId] = @ItemId
+		AND ST.[intCategoryId] = @ItemCategoryId
+		
+	UNION
+
+	SELECT
+		 [intSequence]					= 7
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityVendorId] = @VendorId
+				
+	UNION
+
+	SELECT
+		 [intSequence]					= 8
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+				
+	UNION
+
+	SELECT
+		 [intSequence]					= 9
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intItemId] = @ItemId
+
+	UNION
+
+	SELECT
+		 [intSequence]					= 10
+		,[intARSpecialTaxId]			= ST.[intARSpecialTaxId]
+		,[intEntityCustomerId]			= ST.[intEntityCustomerId]
+		,[intEntityCustomerLocationId]	= ST.[intEntityCustomerLocationId]
+		,[intEntityVendorId]			= ST.[intEntityVendorId]
+		,[intItemId]					= ST.[intItemId]
+		,[intCategoryId]				= ST.[intCategoryId]
+		,[intTaxGroupId]				= ST.[intTaxGroupId]
+	FROM
+		tblARSpecialTax ST
+	INNER JOIN
+		tblARCustomer C
+			ON ST.[intEntityCustomerId] = C.[intEntityCustomerId]
+	WHERE
+			C.[intEntityCustomerId] = @CustomerId
+		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ST.[intCategoryId] = @ItemCategoryId
+		
+
+	SELECT TOP 1
+		@TaxGroupId = [intTaxGroupId]
+	FROM
+		@CustomerSpecialTax
+	ORDER BY intSequence
+
+	IF ISNULL(@TaxGroupId,0) <> 0
+		RETURN @TaxGroupId;	
 	
 	--Customer Location
 	SELECT TOP 1
