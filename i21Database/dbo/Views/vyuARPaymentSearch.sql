@@ -15,6 +15,7 @@ SELECT P.intPaymentId
 	 , P.ysnPosted
 	 , 'Payment' AS strPaymentType
 	 , dbo.fnARGetInvoiceNumbersFromPayment(intPaymentId) AS strInvoices
+	 , P.intLocationId 
 FROM tblARPayment P 
 	LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
 	LEFT JOIN (tblARCustomer C INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = P.intEntityCustomerId
