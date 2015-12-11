@@ -26,17 +26,23 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				agsls_slsmn_id = UPPER(S.strSalespersonId),
 				agsls_name = SUBSTRING(E.strName,1,30),
 				agsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
-				agsls_email = E.strEmail,
-				agsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
-				agsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
-				agsls_zip = SUBSTRING(S.strZipCode,1,10),
-				agsls_city = SUBSTRING(S.strCity,1,20),
-				agsls_state = SUBSTRING(S.strState,1,2),
-				agsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
-				agsls_phone = SUBSTRING(S.strPhone,1,15),
+				agsls_email = F.strEmail,
+				agsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress,1,30), 0, CHARINDEX(CHAR(10),D.strAddress)) ELSE SUBSTRING(D.strAddress,1,30) END,
+				agsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress, CHARINDEX(CHAR(10),D.strAddress) + 1, LEN(D.strAddress)),1,30) ELSE NULL END,
+				agsls_zip = SUBSTRING(D.strZipCode,1,10),
+				agsls_city = SUBSTRING(D.strCity,1,20),
+				agsls_state = SUBSTRING(D.strState,1,2),
+				agsls_country = (CASE WHEN LEN(D.strCountry) = 3 THEN D.strCountry ELSE '''' END),
+				agsls_phone = SUBSTRING(F.strPhone,1,15),
 				agsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
+				JOIN tblEntityToContact C
+					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
+				JOIN tblEntity F
+					on C.intEntityContactId = F.intEntityId
+				JOIN tblEntityLocation D
+					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = UPPER(@SalespersonId)
 		END
@@ -136,12 +142,32 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		
 			--INSERT Entity record for Salesperson
 			INSERT [dbo].[tblEntity]	
-			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])
-			VALUES						
-			(@strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''')
+			([strEntityNo], [strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])					
+			SELECT @strSalespersonId, @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, ''''
 				
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
+
+			INSERT [dbo].[tblEntity]	
+			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber], [strPhone])
+			SELECT @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''', ISNULL(LTRIM(RTRIM(@strPhone)),'''')
+			
+			DECLARE @EntityContactId INT
+			SET @EntityContactId = SCOPE_IDENTITY()
+
+			INSERT INTO tblEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, strCountry, ysnDefaultLocation)
+			SELECT @EntityId, @strSalespersonId + '' Location'', 
+			ISNULL(LTRIM(RTRIM(@strAddress)),''''), 
+			ISNULL(LTRIM(RTRIM(@strZipCode)),''''), 
+			ISNULL(LTRIM(RTRIM(@strCity)),''''), 
+			ISNULL(LTRIM(RTRIM(@strState)),''''), 
+			ISNULL(LTRIM(RTRIM(@strCountry)),''''), 1
+			
+			insert into tblEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
+			select @EntityId, @EntityContactId, 0, 1, 1
+
+			insert into tblEntityType(intEntityId, strType, intConcurrencyId)
+			select @EntityId, ''Salesperson'', 0
 		
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
@@ -245,17 +271,23 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				ptsls_slsmn_id = UPPER(S.strSalespersonId),
 				ptsls_name = SUBSTRING(E.strName,1,30),
 				ptsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
-				ptsls_email = E.strEmail,
-				ptsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
-				ptsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
-				ptsls_zip = SUBSTRING(S.strZipCode,1,10),
-				ptsls_city = SUBSTRING(S.strCity,1,20),
-				ptsls_state = SUBSTRING(S.strState,1,2),
-				--ptsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
-				ptsls_phone = SUBSTRING(S.strPhone,1,15),
+				ptsls_email = F.strEmail,
+				ptsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress,1,30), 0, CHARINDEX(CHAR(10),D.strAddress)) ELSE SUBSTRING(D.strAddress,1,30) END,
+				ptsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), D.strAddress) > 0 THEN SUBSTRING(SUBSTRING(D.strAddress, CHARINDEX(CHAR(10),D.strAddress) + 1, LEN(D.strAddress)),1,30) ELSE NULL END,
+				ptsls_zip = SUBSTRING(D.strZipCode,1,10),
+				ptsls_city = SUBSTRING(D.strCity,1,20),
+				ptsls_state = SUBSTRING(D.strState,1,2),
+				--ptsls_country = (CASE WHEN LEN(D.strCountry) = 3 THEN D.strCountry ELSE '''' END),
+				ptsls_phone = SUBSTRING(F.strPhone,1,15),
 				ptsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
+				JOIN tblEntityToContact C
+					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
+				JOIN tblEntity F
+					on C.intEntityContactId = F.intEntityId
+				JOIN tblEntityLocation D
+					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = UPPER(@SalespersonId)
 		END
@@ -353,14 +385,30 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			FROM ptslsmst
 			WHERE ptsls_slsmn_id = @originSalespersonId
 		
-			--INSERT Entity record for Salesperson
+			--INSERT Entity record for Salesperson			
 			INSERT [dbo].[tblEntity]	
-			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])
-			VALUES						
-			(@strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''')
+			([strEntityNo], [strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])					
+			SELECT @strSalespersonId, @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, ''''
 				
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
+
+			INSERT [dbo].[tblEntity]	
+			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber], [strPhone])
+			SELECT @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''', ISNULL(LTRIM(RTRIM(@strPhone)),'''')
+			
+			DECLARE @EntityContactId INT
+			SET @EntityContactId = SCOPE_IDENTITY()
+
+			INSERT INTO tblEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, strCountry, ysnDefaultLocation)
+			SELECT @EntityId, @strSalespersonId + '' Location'', ISNULL(LTRIM(RTRIM(@strAddress)),''''), ISNULL(LTRIM(RTRIM(@strZipCode)),''''), ISNULL(LTRIM(RTRIM(@strCity)),''''), ISNULL(LTRIM(RTRIM(@strState)),''''), ISNULL(LTRIM(RTRIM(@strCountry)),''''), 1
+
+			
+			insert into tblEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
+			select @EntityId, @EntityContactId, 0, 1, 1
+
+			insert into tblEntityType(intEntityId, strType, intConcurrencyId)
+			select @EntityId, ''Salesperson'', 0
 		
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
