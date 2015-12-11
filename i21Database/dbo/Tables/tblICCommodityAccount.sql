@@ -19,7 +19,7 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodityAccount] PRIMARY KEY ([intCommodityAccountId]), 
-		CONSTRAINT [FK_tblICCommodityAccount_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
+		CONSTRAINT [FK_tblICCommodityAccount_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCommodityAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
 		CONSTRAINT [AK_tblICCommodityAccount] UNIQUE ([intAccountCategoryId], [intCommodityId])
 	)

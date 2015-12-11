@@ -8,5 +8,5 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICCommodityProductLine] PRIMARY KEY ([intCommodityProductLineId]), 
-    CONSTRAINT [FK_tblICCommodityProductLine_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])
+    CONSTRAINT [FK_tblICCommodityProductLine_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ON DELETE CASCADE
 )
