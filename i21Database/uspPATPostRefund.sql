@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostRefund] 
 	@intRefundId INT = NULL,
 	@ysnPosted BIT = NULL,
-	@successfulCount INT = 0 OUTPUT ,
+	@intUserId INT = NULL,
+	@intAPClearingId INT = NULL,
+	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
 	@success BIT = 0 OUTPUT 
 AS
@@ -61,7 +63,7 @@ INNER JOIN tblPATRefundCategory PRCA
 		ON PRCA.intRefundCustomerId = PRC.intRefundCustomerId
 
 SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	
---COMMIT TRANSACTION --COMMIT inserted transaction
+COMMIT TRANSACTION --COMMIT inserted transaction
 
 IF(@totalRecords = 0)  
 BEGIN
@@ -74,16 +76,32 @@ BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
---IF ISNULL(@ysnPosted,0) = 1
---BEGIN
---	INSERT INTO @GLEntries
---	SELECT * FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
---END
---ELSE
---BEGIN
---	INSERT INTO @GLEntries
---	SELECT * FROM dbo.fnAPReverseGLEntries(@validBillIds, 'Bill', DEFAULT, @userId, @batchId)
---END
+DECLARE @validRefundIds NVARCHAR(MAX)
+
+--CREATE TEMP GL ENTRIES
+SELECT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
+FROM #tmpRefundData
+ORDER BY intRefundId
+
+IF ISNULL(@ysnPosted,0) = 1
+BEGIN
+	INSERT INTO @GLEntries
+		SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId)
+END
+ELSE
+BEGIN
+	INSERT INTO @GLEntries
+	SELECT * FROM dbo.fnPATReverseGLRefundEntries(@validRefundIds, DEFAULT, @intUserId)
+END
+
+BEGIN TRY
+EXEC uspGLBookEntries @GLEntries, @ysnPosted
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_MESSAGE()
+	RAISERROR(@error, 16, 1);
+	GOTO Post_Rollback
+END CATCH
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
 --=====================================================================================================================================
@@ -153,6 +171,4 @@ Post_Exit:
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
-
-
 GO

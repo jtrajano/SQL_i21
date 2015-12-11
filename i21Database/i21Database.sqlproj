@@ -3085,6 +3085,8 @@
     <Build Include="dbo\Stored Procedures\uspPATPostRefund.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
+    <Build Include="dbo\Functions\fnPATCreateRefundGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATReverseGLRefundEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
