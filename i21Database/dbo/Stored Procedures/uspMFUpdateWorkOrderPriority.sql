@@ -41,6 +41,7 @@ BEGIN TRY
 		,ysnFrozen BIT
 		,intConcurrencyId INT
 		,intSequenceId int
+		,intDemandRatio int
 		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -86,6 +87,7 @@ BEGIN TRY
 		,ysnFrozen
 		,intConcurrencyId
 		,intSequenceId
+		,intDemandRatio
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -116,6 +118,7 @@ BEGIN TRY
 		,x.ysnFrozen
 		,@intConcurrencyId
 		,x.intSequenceNo
+		,x.intDemandRatio
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -145,6 +148,7 @@ BEGIN TRY
 			,ysnFrozen BIT
 			,intSequenceNo int
 			,ysnEOModified bit
+			,intDemandRatio int
 			) x Where x.intStatusId<>1
 	ORDER BY x.intExecutionOrder
 	
@@ -177,6 +181,7 @@ BEGIN TRY
 		,ysnFrozen
 		,intConcurrencyId
 		,intSequenceId
+		,intDemandRatio
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -206,6 +211,7 @@ BEGIN TRY
 		,x.ysnFrozen
 		,@intConcurrencyId
 		,x.intSequenceNo
+		,x.intDemandRatio
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -234,6 +240,7 @@ BEGIN TRY
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,intSequenceNo int
+			,intDemandRatio int
 			) x Where x.intStatusId=1
 	ORDER BY x.intExecutionOrder
 	
@@ -295,6 +302,7 @@ BEGIN TRY
 		,W.ysnIngredientAvailable 
 		,W.dtmLastProducedDate
 		,CONVERT(bit,0) AS ysnEOModified
+		,SL.intDemandRatio
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId

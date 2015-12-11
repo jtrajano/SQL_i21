@@ -194,6 +194,7 @@ BEGIN TRY
 		,strWIPItemNo
 		,intSetupDuration
 		,ysnPicked
+		,intDemandRatio
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -223,6 +224,7 @@ BEGIN TRY
 		,x.strWIPItemNo
 		,x.intSetupDuration
 		,0 AS ysnPicked
+		,x.intDemandRatio
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -244,6 +246,7 @@ BEGIN TRY
 			,ysnFrozen BIT
 			,strWIPItemNo NVARCHAR(50)
 			,intSetupDuration INT
+			,intDemandRatio int
 			) x
 	LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
 		AND MC.intPackTypeId = x.intPackTypeId
@@ -1118,6 +1121,7 @@ BEGIN TRY
 		,W.ysnIngredientAvailable
 		,W.dtmLastProducedDate
 		,CONVERT(bit,0) AS ysnEOModified
+		,SL.intDemandRatio
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		AND W.intManufacturingCellId = @intManufacturingCellId
