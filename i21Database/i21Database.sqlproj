@@ -3078,6 +3078,7 @@
     <Build Include="dbo\Functions\fnPATReverseGLRefundEntries.sql" />
     <Build Include="dbo\Views\vyuCFSearchTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOProcessToInvoice.sql" />
+    <Build Include="dbo\Views\vyuPRUnpostedTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
