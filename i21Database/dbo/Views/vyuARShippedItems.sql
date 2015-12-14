@@ -62,7 +62,7 @@ INNER JOIN
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
-		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge','Software')
+		AND (I.strLotTracking IS NULL OR I.strLotTracking = 'No')
 INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
@@ -265,7 +265,7 @@ LEFT OUTER JOIN
 		ON SO.[intShipViaId] = S.[intEntityShipViaId]
 INNER JOIN
 	tblICItem I
-		ON SOD.[intItemId] = I.[intItemId]
+		ON SOD.[intItemId] = I.[intItemId] AND ISNULL(I.strLotTracking, 'No') <> 'No'
 LEFT JOIN
 	tblICItemUOM IU
 		ON SOD.[intItemUOMId] = IU.[intItemUOMId]
@@ -456,6 +456,7 @@ LEFT OUTER JOIN
 		ISH.[ysnPosted] = 1
 		AND ISH.[intOrderType] <> 2
 		AND IND.[intInventoryShipmentItemId] IS NULL
+		AND ISNULL(I.strLotTracking, 'No') <> 'No'
 													
 																										
 UNION ALL
