@@ -39,7 +39,7 @@ PRINT 'Begin Fixing Segment Categories'
 PRINT 'Finish Fixing Segment Categories'
 
 PRINT 'Begin updating tblGLDetail null strTransactionType'
-IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumbers)
+IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblGLDetail' and type = 'U')
 BEGIN
 		DECLARE @sqlStmt NVARCHAR(MAX) = 'UPDATE tblGLDetail SET strTransactionType = ''Paycheck'' WHERE strTransactionForm = ''Paychecks'' AND strModuleName = ''Payroll'' AND strTransactionType IS NULL'
 		EXEC sp_executesql @sqlStmt
