@@ -151,8 +151,8 @@ SELECT TOP 1
 		@SplitId				=	intSplitId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
-EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment
-EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
 
 --GET NEW COMMENT FOR NEW INVOICE
 SET @InvoiceComment = 'ORIGIN: ' + @SalesOrderNumber + '; ' + @InvoiceComment
