@@ -5,10 +5,15 @@
 AS
 
 BEGIN	
-	DECLARE @intTransactionId INT
+	DECLARE @intTransactionId	INT,
+			@intUserId			INT
 	DECLARE @OrderToUpdate TABLE (intSalesOrderId INT, dblQuantity NUMERIC (18, 6));
 	
 	SELECT TOP 1 @intTransactionId = intShipmentId FROM @ItemsFromInventoryShipment
+	SELECT TOP 1 @intUserId = intEntityId 
+		FROM tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
+			ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId 
+	WHERE ISHI.intInventoryShipmentId = @intTransactionId
 
 	INSERT INTO @OrderToUpdate(intSalesOrderId, dblQuantity)
     SELECT DISTINCT intOrderId, dblQuantity 
@@ -18,7 +23,8 @@ BEGIN
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)
 	BEGIN				
 		DECLARE @intSalesOrderId INT,
-		        @qtyToPost NUMERIC (18, 6)
+				@NewInvoiceId	 INT,
+		        @qtyToPost		 NUMERIC (18, 6)
 					
 		SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @qtyToPost = dblQuantity FROM @OrderToUpdate ORDER BY intSalesOrderId        
 

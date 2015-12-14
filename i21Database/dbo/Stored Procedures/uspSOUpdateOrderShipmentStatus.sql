@@ -32,7 +32,7 @@ SET @IsOpen = (	SELECT COUNT(1)
 												tblICItem 
 											WHERE
 												tblICItem.[intItemId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
-												AND tblICItem.strType IN ('Inventory')
+												AND ISNULL(tblICItem.strLotTracking, 'No') <> 'No'
 											)
 						)
 						AND (NOT EXISTS(	SELECT NULL 
@@ -46,8 +46,8 @@ SET @IsOpen = (	SELECT COUNT(1)
 											FROM 
 												tblICItem 
 											WHERE
-												tblICItem.[intItemId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
-												AND tblICItem.strType NOT IN ('Inventory')
+												tblICItem.[intItemId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]												
+												AND ISNULL(tblICItem.strLotTracking, 'No') = 'No'
 											)										
 						)										
 					)
@@ -147,7 +147,7 @@ SET_ORDER_STATUS:
 	UPDATE tblSOSalesOrder
 	SET [strOrderStatus] = @OrderStatus
 	  , [dtmProcessDate] = GETDATE()
-	  , [ysnProcessed] = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END
+	  , [ysnProcessed]   = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END	  
 	WHERE [intSalesOrderId] = @SalesOrderId
 		
 	RETURN;
