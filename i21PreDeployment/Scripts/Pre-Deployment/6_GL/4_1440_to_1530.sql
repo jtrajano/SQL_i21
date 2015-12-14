@@ -39,11 +39,12 @@ PRINT 'Begin Fixing Segment Categories'
 PRINT 'Finish Fixing Segment Categories'
 
 PRINT 'Begin updating tblGLDetail null strTransactionType'
-
-UPDATE tblGLDetail SET strTransactionType = 'Paycheck' WHERE strTransactionForm = 'Paychecks' AND strModuleName = 'Payroll' AND strTransactionType IS NULL
---update the remaining rows to strTransactionForm
-UPDATE tblGLDetail SET strTransactionType = strTransactionForm  WHERE strTransactionType IS NULL
-
+IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumbers)
+BEGIN
+		DECLARE @sqlStmt NVARCHAR(MAX) = 'UPDATE tblGLDetail SET strTransactionType = ''Paycheck'' WHERE strTransactionForm = ''Paychecks'' AND strModuleName = ''Payroll'' AND strTransactionType IS NULL'
+		EXEC sp_executesql @sqlStmt
+		SELECT @sqlStmt = 'UPDATE tblGLDetail SET strTransactionType = strTransactionForm  WHERE strTransactionType IS NULL'
+		EXEC sp_executesql @sqlStmt
+END
 PRINT 'Finished updating tblGLDetail null strTransactionType'
-
 GO
