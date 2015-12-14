@@ -16,7 +16,8 @@ END
 PRINT 'Finished Renaming tblGLTempCOASegment column Location to Location'
 
 PRINT 'Begin Fixing Segment Categories'
-	BEGIN TRY
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo > 15.1)
+	BEGIN
 		declare @sqlStmt NVARCHAR(MAX) =
 		'UPDATE t SET intAccountCategoryId =(
 		select TOP 1 intAccountCategoryId FROM tblGLAccount where intAccountId =
@@ -30,13 +31,11 @@ PRINT 'Begin Fixing Segment Categories'
 		DECLARE @GeneralCategoryId INT
 		SELECT @GeneralCategoryId = intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'General'
 
-		SELECT @sqlStmt ='UPDATE tblGLAccountSegment SET intAccountCategoryId = ' + @GeneralCategoryId +
+		SELECT @sqlStmt ='UPDATE tblGLAccountSegment SET intAccountCategoryId = ' + CAST( @GeneralCategoryId AS VARCHAR(3)) +
 		' WHERE intAccountCategoryId NOT IN (SELECT intAccountCategoryId FROM tblGLAccountCategory) AND intAccountSegmentId NOT IN (SELECT intAccountSegmentId FROM tblGLAccountSegmentMapping)'
 		EXEC sp_executesql @sqlStmt
-	END TRY
-	BEGIN CATCH
-		PRINT 'Fixing Segment Categories is not applicable :' + ERROR_MESSAGE()
-	END CATCH
+	END
+	
 PRINT 'Finish Fixing Segment Categories'
 
 PRINT 'Begin updating tblGLDetail null strTransactionType'
