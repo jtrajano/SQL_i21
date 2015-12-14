@@ -710,8 +710,9 @@ BEGIN TRY
 
 			WHILE (@@FETCH_STATUS <> - 1)
 			BEGIN
-				IF @dblOriginalRequiredQty < @dblWeightPerQty
-					SELECT @intIssuedUOMTypeId = 1
+				IF @dblOriginalRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantityStorageLocationId, 0) > 0
+					--SELECT @intIssuedUOMTypeId = 1
+					GOTO LOOP_END
 
 				IF @intIssuedUOMTypeId = 2 --'BAG' 
 					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty)
