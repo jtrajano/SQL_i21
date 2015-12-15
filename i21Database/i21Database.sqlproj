@@ -3079,6 +3079,7 @@
     <Build Include="dbo\Views\vyuCFSearchTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOProcessToInvoice.sql" />
     <Build Include="dbo\Views\vyuPRUnpostedTransactions.sql" />
+    <Build Include="dbo\Views\vyuSMCompanyLogo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
