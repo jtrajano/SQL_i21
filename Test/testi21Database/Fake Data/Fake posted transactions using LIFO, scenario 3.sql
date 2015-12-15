@@ -433,6 +433,10 @@ BEGIN
 					,strBatchId
 					,dblExchangeRate
 					,intCurrencyId
+					,strModuleName
+					,strCode
+					,strTransactionType
+					,strTransactionForm
 			)
 			-- @WetGrains
 			SELECT	dtmDate = '01/01/2014'
@@ -446,6 +450,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intAccountId = @APClearing_BetterHaven
@@ -458,6 +466,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @StickyGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
@@ -471,6 +483,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intAccountId = @APClearing_BetterHaven
@@ -483,6 +499,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @PremiumGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
@@ -496,6 +516,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intAccountId = @APClearing_BetterHaven
@@ -508,6 +532,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @ColdGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
@@ -521,6 +549,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intAccountId = @APClearing_BetterHaven
@@ -533,6 +565,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @HotGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
@@ -546,6 +582,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intAccountId = @APClearing_BetterHaven
@@ -558,6 +598,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 
 			INSERT INTO dbo.tblGLSummary(
 					dtmDate
@@ -807,6 +851,10 @@ BEGIN
 					,intJournalLineNo
 					,dblExchangeRate
 					,strBatchId
+					,strModuleName
+					,strCode
+					,strTransactionType
+					,strTransactionForm
 			)
 			-- @WetGrains
 			SELECT	dtmDate = '01/16/2014'
@@ -819,6 +867,10 @@ BEGIN
 					,intJournalLineNo = 6
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
 					,intAccountId = @InventoryInTransit_BetterHaven
@@ -830,6 +882,10 @@ BEGIN
 					,intJournalLineNo = 6
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @StickyGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
@@ -842,6 +898,10 @@ BEGIN
 					,intJournalLineNo = 7 
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
 					,intAccountId = @InventoryInTransit_BetterHaven
@@ -853,6 +913,10 @@ BEGIN
 					,intJournalLineNo = 7
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @PremiumGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
@@ -865,6 +929,10 @@ BEGIN
 					,intJournalLineNo = 8
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
 					,intAccountId = @InventoryInTransit_BetterHaven
@@ -876,6 +944,10 @@ BEGIN
 					,intJournalLineNo = 8 
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @ColdGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
@@ -888,6 +960,10 @@ BEGIN
 					,intJournalLineNo = 9
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
 					,intAccountId = @InventoryInTransit_BetterHaven
@@ -899,6 +975,10 @@ BEGIN
 					,intJournalLineNo = 9
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @HotGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
@@ -911,6 +991,10 @@ BEGIN
 					,intJournalLineNo = 10 
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
 					,intAccountId = @InventoryInTransit_BetterHaven
@@ -922,6 +1006,10 @@ BEGIN
 					,intJournalLineNo = 10
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 
 			INSERT INTO dbo.tblGLSummary(
 					dtmDate

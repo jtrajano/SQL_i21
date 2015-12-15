@@ -55,6 +55,8 @@ BEGIN
 			,dblDebit
 			,dblCredit
 			,strModuleName 
+			,strTransactionType
+			,strTransactionForm
 		)
 		SELECT 
 			dtmDate = GETDATE()
@@ -67,6 +69,8 @@ BEGIN
 			,dblDebit = 1000
 			,dblCredit = 0
 			,strModuleName = 'Inventory'
+			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
 
 		UNION ALL 
 		SELECT 
@@ -80,6 +84,8 @@ BEGIN
 			,dblDebit = NULL 
 			,dblCredit = 99
 			,strModuleName = 'Inventory'
+			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
 
 		UNION ALL 
 		SELECT 
@@ -93,6 +99,8 @@ BEGIN
 			,dblDebit = 1000
 			,dblCredit = 0
 			,strModuleName = 'Inventory'
+			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
 
 		UNION ALL 
 		SELECT 
@@ -106,6 +114,8 @@ BEGIN
 			,dblDebit = NULL 
 			,dblCredit = 99
 			,strModuleName = 'Inventory'
+			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
 		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Debit and credit amounts are not balanced.', 50003)

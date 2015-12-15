@@ -27,6 +27,8 @@ BEGIN
 			,intAccountId
 			,strTransactionId 
 			,strModuleName 
+			,strTransactionType
+			,strTransactionForm
 		)
 		SELECT 
 			dtmDate = GETDATE()
@@ -37,6 +39,8 @@ BEGIN
 			,intAccountId = NULL
 			,strTransactionId = 'DUMMY-00001'
 			,strModuleName = 'Inventory'
+			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
 		INSERT INTO expected (
