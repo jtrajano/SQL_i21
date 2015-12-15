@@ -209,19 +209,21 @@ BEGIN TRY
 		 RAISERROR(@ErrMsg,16,1)		 
 		END
 		
-		
-		--Storage Charge Update
-		EXEC uspGRCalculateStorageCharge
-		 @intCustomerStorageId
-		 ,@strProcessType,NULL
-		 ,@UserKey
-		 ,@dblStorageDuePerUnit OUTPUT
-		,@dblStorageDueAmount OUTPUT
-		,@dblStorageDueTotalPerUnit OUTPUT
-		,@dblStorageDueTotalAmount OUTPUT
-		,@dblStorageBilledPerUnit OUTPUT
-		,@dblStorageBilledAmount OUTPUT
+		IF @strProcessType='Bill'
+		BEGIN
+			--Storage Charge Update
+			EXEC uspGRCalculateStorageCharge
+			  @intCustomerStorageId
+			 ,@strProcessType,NULL
+			 ,@UserKey
+			 ,@dblStorageDuePerUnit OUTPUT
+			 ,@dblStorageDueAmount OUTPUT
+			 ,@dblStorageDueTotalPerUnit OUTPUT
+			 ,@dblStorageDueTotalAmount OUTPUT
+			 ,@dblStorageBilledPerUnit OUTPUT
+			 ,@dblStorageBilledAmount OUTPUT
 
+		END
 		
 		WHILE @ActionKey > 0
 		BEGIN
