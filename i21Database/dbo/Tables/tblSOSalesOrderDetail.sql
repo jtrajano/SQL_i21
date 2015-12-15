@@ -10,6 +10,7 @@
     [dblDiscount]           NUMERIC (18, 6) NULL,
     [intTaxId]              INT             NULL,
     [dblPrice]              NUMERIC (18, 6) NULL,
+	[strPricing]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblTotalTax]           NUMERIC (18, 6) NULL,
     [dblTotal]              NUMERIC (18, 6) NULL,
     [strComments]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,

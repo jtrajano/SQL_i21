@@ -9,6 +9,7 @@
     [dblQtyShipped]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblDiscount]							NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblPrice]								NUMERIC(18, 6)									NULL DEFAULT 0,
+	[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblTotalTax]							NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblTotal]								NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intAccountId]							INT												NULL,
