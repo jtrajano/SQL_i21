@@ -78,7 +78,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			BEGIN
 				SELECT 
 					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEntity WHERE strEntityNo = D.strCustomerNumber)
-					,@Date							= D.[dtmDate] 					
+					,@Date							= D.[dtmDate]
+					,@ShipDate						= D.[dtmDate]		
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE intCompanyLocationId = CONVERT(INT, D.strLocationName))
 					,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])				
 					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 intEntitySalespersonId FROM vyuEMSalesperson WHERE strSalespersonName = D.strSalespersonNumber) ELSE 0 END
@@ -109,7 +110,41 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				WHERE
 					[intImportLogDetailId] = @ImportLogDetailId
 
-				UPDATE tblARImportLogDetail SET dblTotal = @Total WHERE intImportLogDetailId = @ImportLogDetailId
+				IF @SiteId IS NULL
+					SET @ErrorMessage = 'The Site Number provided does not exists. '
+				ELSE
+					BEGIN
+						SELECT TOP 1 @TermId = intDeliveryTermID FROM tblTMSite WHERE intSiteID = @SiteId
+						SELECT @DueDate = CAST(dbo.fnGetDueDateBasedOnTerm(@Date, @TermId) AS DATE)
+						SELECT TOP 1 @TaxGroupId = ISNULL(intTaxGroupId, 0) FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1					
+						SELECT TOP 1 @BillingBy				= TMS.strBillingBy
+									,@ItemId				= TMS.intProduct 
+									,@ItemDescription		= I.strDescription
+									,@PreviousMeterReading	= CCS.dblLastMeterReading
+									,@ConversionFactor		= CCS.dblConversionFactor
+						FROM tblTMSite TMS 
+							INNER JOIN vyuARCustomerConsumptionSite CCS ON TMS.intSiteID = CCS.intSiteID
+							LEFT JOIN tblICItem I ON TMS.intProduct = I.intItemId
+						WHERE TMS.intSiteID = @SiteId
+
+						IF @BillingBy = 'Tank'
+							BEGIN
+								SET @NewMeterReading	= NULL						
+								SET @PerformerId		= NULL
+							END
+						ELSE IF @BillingBy IN ('Flow Meter', 'Virtual Meter')
+							BEGIN
+								SET @PercentFull		= NULL						
+								SET @PerformerId		= NULL
+							END
+						ELSE IF @BillingBy = 'Service'
+							BEGIN
+								SET @NewMeterReading	= NULL
+								SET @PercentFull		= NULL
+							END
+					END
+
+				UPDATE tblARImportLogDetail SET dblTotal = @Total, strTransactionType = 'Invoice' WHERE intImportLogDetailId = @ImportLogDetailId
 			END
 		ELSE
 			BEGIN
@@ -160,56 +195,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			BEGIN
 				SELECT @ErrorMessage = 'Sales Order:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strSalesOrderNumber + '). ' FROM [tblSOSalesOrder] WHERE RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],'')))) > 0
 			END
-
-		IF @IsTank = 1
-			BEGIN
-				IF @SiteId IS NULL
-					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Site Number provided does not exists. '
-				ELSE
-					BEGIN
-						SELECT TOP 1 @TermId = intDeliveryTermID FROM tblTMSite WHERE intSiteID = @SiteId
-						SELECT @DueDate = CAST(dbo.fnGetDueDateBasedOnTerm(@Date, @TermId) AS DATE)
-						SELECT TOP 1 @TaxGroupId = ISNULL(intTaxGroupId, 0) FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1					
-						SELECT TOP 1 @BillingBy				= TMS.strBillingBy
-									,@ItemId				= TMS.intProduct 
-									,@ItemDescription		= I.strDescription
-									,@PreviousMeterReading	= CCS.dblLastMeterReading
-									,@ConversionFactor		= CCS.dblConversionFactor
-						FROM tblTMSite TMS 
-							INNER JOIN vyuARCustomerConsumptionSite CCS ON TMS.intSiteID = CCS.intSiteID
-							LEFT JOIN tblICItem I ON TMS.intProduct = I.intItemId
-						WHERE TMS.intSiteID = @SiteId
-
-						IF @BillingBy = 'Tank'
-							BEGIN
-								SET @NewMeterReading	= NULL						
-								SET @PerformerId		= NULL
-							END
-						ELSE IF @BillingBy IN ('Flow Meter', 'Virtual Meter')
-							BEGIN
-								SET @PercentFull		= NULL						
-								SET @PerformerId		= NULL
-							END
-						ELSE IF @BillingBy = 'Service'
-							BEGIN
-								SET @NewMeterReading	= NULL
-								SET @PercentFull		= NULL
-							END
-												
-					END
-			END
-		ELSE
-			BEGIN
-				SET @SiteId					= NULL				
-				SET @PerformerId			= NULL
-				SET @PercentFull			= NULL
-				SET @NewMeterReading		= NULL
-				SET @PreviousMeterReading	= NULL
-				SET @ConversionFactor		= NULL
-				SET @BillingBy				= NULL
-				SET @ItemId					= NULL
-			END
-
+					
 		IF ISNULL(@TransactionType, '') = '' OR @TransactionType NOT IN('Invoice', 'Sales Order', 'Credit Memo', 'Tank Delivery')
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Transaction Type provided does not exists. '
 
@@ -364,7 +350,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[ysnPost]					= CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END
 							,[intInvoiceDetailId]		= NULL
 							,[intItemId]				= CASE WHEN @IsTank = 1 THEN @ItemId ELSE NULL END
-							,[ysnInventory]				= 0
+							,[ysnInventory]				= CASE WHEN @IsTank = 1 AND ISNULL(@ItemId, 0) > 0 THEN 
+															CASE WHEN (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @ItemId) = 'Inventory' THEN 1 ELSE 0 END
+														  ELSE 0 END
 							,[strItemDescription]		= @ItemDescription
 							,[intItemUOMId]				= NULL
 							,[dblQtyOrdered]			= @ItemQtyShipped
@@ -409,6 +397,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,@CreatedIvoices	= @CreatedIvoices OUTPUT
 			
 						SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
+
+						IF ISNULL(@NewTransactionId, 0) > 0
+							UPDATE tblARInvoice 
+							SET intEntitySalespersonId = @EntitySalespersonId
+							  , strType = CASE WHEN @IsTank = 1 THEN 'Tank Delivery' ELSE @Type END
+							WHERE intInvoiceId = @NewTransactionId
 					END
 				ELSE
 					BEGIN
