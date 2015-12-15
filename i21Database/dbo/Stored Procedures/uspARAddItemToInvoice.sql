@@ -138,7 +138,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			RETURN 0;
 		END CATCH
 	END
-ELSE IF ISNULL(@ItemId, 0) <> 0
+ELSE IF ISNULL(@ItemId, 0) > 0
 	BEGIN
 		BEGIN TRY
 			INSERT INTO tblARInvoiceDetail
@@ -150,6 +150,11 @@ ELSE IF ISNULL(@ItemId, 0) <> 0
 				,[dblQtyShipped]
 				,[dblDiscount]
 				,[dblPrice]
+				,[intSiteId]
+				,[strBillingBy]
+				,[dblNewMeterReading]
+				,[dblPercentFull]
+				,[intPerformerId]
 				,[intTaxGroupId]
 				,[intSalesOrderDetailId]
 				,[strSalesOrderNumber])
@@ -161,7 +166,12 @@ ELSE IF ISNULL(@ItemId, 0) <> 0
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemDiscount
-				,@ItemPrice				
+				,@ItemPrice	
+				,@ItemSiteId
+				,@ItemBillingBy
+				,@ItemNewMeterReading
+				,@ItemPercentFull
+				,@ItemPerformerId							
 				,@ItemTaxGroupId					
 				,@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber
