@@ -20,7 +20,7 @@ IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblSMBuildNumber' and type = '
 BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo > 15.1)
 	BEGIN
-		declare @sqlStmt NVARCHAR(MAX) =
+		DECLARE @sqlStmt NVARCHAR(MAX) =
 		'UPDATE t SET intAccountCategoryId =(
 		select TOP 1 intAccountCategoryId FROM tblGLAccount where intAccountId =
 			(SELECT TOP 1  intAccountId from tblGLAccountSegmentMapping WHERE intAccountSegmentId = t.intAccountSegmentId ))
@@ -39,11 +39,12 @@ BEGIN
 	END
 END
 PRINT 'Finish Fixing Segment Categories'
+GO
 
 PRINT 'Begin updating tblGLDetail null strTransactionType'
 IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblGLDetail' and type = 'U')
 BEGIN
-		SELECT @sqlStmt = 'UPDATE tblGLDetail SET strTransactionType = ''Paycheck'' WHERE strTransactionForm = ''Paychecks'' AND strModuleName = ''Payroll'' AND strTransactionType IS NULL'
+		DECLARE @sqlStmt NVARCHAR(MAX)  = 'UPDATE tblGLDetail SET strTransactionType = ''Paycheck'' WHERE strTransactionForm = ''Paychecks'' AND strModuleName = ''Payroll'' AND strTransactionType IS NULL'
 		EXEC sp_executesql @sqlStmt
 		SELECT @sqlStmt = 'UPDATE tblGLDetail SET strTransactionType = strTransactionForm  WHERE strTransactionType IS NULL'
 		EXEC sp_executesql @sqlStmt
