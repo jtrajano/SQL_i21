@@ -10,6 +10,8 @@
 	[intStockId] INT NULL,
 	[strStockName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strCertificateNo] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dtmIssueDate] DATETIME NULL,
+	[strStockStatus] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dblParValue] NUMERIC(18,6) NULL,
 	[dblQuantityAvailable] NUMERIC(18,6) NULL,
     [intTransfereeId] INT NULL, 
