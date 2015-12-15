@@ -16,6 +16,8 @@ END
 PRINT 'Finished Renaming tblGLTempCOASegment column Location to Location'
 
 PRINT 'Begin Fixing Segment Categories'
+IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblSMBuildNumber' and type = 'U')
+BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo > 15.1)
 	BEGIN
 		declare @sqlStmt NVARCHAR(MAX) =
@@ -35,13 +37,13 @@ PRINT 'Begin Fixing Segment Categories'
 		' WHERE intAccountCategoryId NOT IN (SELECT intAccountCategoryId FROM tblGLAccountCategory) AND intAccountSegmentId NOT IN (SELECT intAccountSegmentId FROM tblGLAccountSegmentMapping)'
 		EXEC sp_executesql @sqlStmt
 	END
-	
+END
 PRINT 'Finish Fixing Segment Categories'
 
 PRINT 'Begin updating tblGLDetail null strTransactionType'
 IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblGLDetail' and type = 'U')
 BEGIN
-		DECLARE @sqlStmt NVARCHAR(MAX) = 'UPDATE tblGLDetail SET strTransactionType = ''Paycheck'' WHERE strTransactionForm = ''Paychecks'' AND strModuleName = ''Payroll'' AND strTransactionType IS NULL'
+		SELECT @sqlStmt = 'UPDATE tblGLDetail SET strTransactionType = ''Paycheck'' WHERE strTransactionForm = ''Paychecks'' AND strModuleName = ''Payroll'' AND strTransactionType IS NULL'
 		EXEC sp_executesql @sqlStmt
 		SELECT @sqlStmt = 'UPDATE tblGLDetail SET strTransactionType = strTransactionForm  WHERE strTransactionType IS NULL'
 		EXEC sp_executesql @sqlStmt
