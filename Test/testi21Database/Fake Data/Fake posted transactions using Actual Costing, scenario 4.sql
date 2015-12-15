@@ -460,6 +460,10 @@ BEGIN
 					,intJournalLineNo
 					,dblExchangeRate
 					,strBatchId
+					,strModuleName
+					,strCode
+					,strTransactionType
+					,strTransactionForm
 			)
 			-- @WetGrains
 			SELECT	dtmDate = @dtmDate
@@ -472,6 +476,11 @@ BEGIN
 					,intJournalLineNo = 1
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @InventoryInTransit_Default
@@ -483,6 +492,11 @@ BEGIN
 					,intJournalLineNo = 1
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- @StickyGrains
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -495,6 +509,11 @@ BEGIN
 					,intJournalLineNo = 2 
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @InventoryInTransit_Default
@@ -506,6 +525,10 @@ BEGIN
 					,intJournalLineNo = 2
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @PremiumGrains
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -518,6 +541,10 @@ BEGIN
 					,intJournalLineNo = 3
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @InventoryInTransit_Default
@@ -529,6 +556,10 @@ BEGIN
 					,intJournalLineNo = 3 
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @ColdGrains
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -541,6 +572,10 @@ BEGIN
 					,intJournalLineNo = 4
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @InventoryInTransit_Default
@@ -552,6 +587,10 @@ BEGIN
 					,intJournalLineNo = 4
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			-- @HotGrains
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -564,6 +603,10 @@ BEGIN
 					,intJournalLineNo = 5 
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @InventoryInTransit_Default
@@ -575,6 +618,10 @@ BEGIN
 					,intJournalLineNo = 5
 					,dblExchangeRate = 1
 					,@strBatchId
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 
 			INSERT INTO dbo.tblGLSummary(
 					dtmDate
@@ -1161,6 +1208,10 @@ BEGIN
 					,strBatchId
 					,dblExchangeRate
 					,intCurrencyId
+					,strModuleName 
+					,strCode 
+					,strTransactionType 
+					,strTransactionForm 
 			)
 			-----------------------------------------------
 			-- @WetGrains
@@ -1175,6 +1226,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @APClearing_Default
@@ -1187,6 +1243,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1200,6 +1261,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @WriteOffSold_Default
@@ -1212,6 +1278,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1225,6 +1296,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @Inventory_Default
@@ -1237,6 +1313,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 
 			-----------------------------------------------
 			-- @StickyGrains
@@ -1252,6 +1332,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @APClearing_Default
@@ -1264,6 +1349,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1277,6 +1367,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @WriteOffSold_Default
@@ -1289,6 +1384,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1302,6 +1402,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @Inventory_Default
@@ -1314,6 +1419,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 
 			-----------------------------------------------
 			-- @PremiumGrains
@@ -1329,6 +1439,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @APClearing_Default
@@ -1341,6 +1456,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1354,6 +1474,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @WriteOffSold_Default
@@ -1366,6 +1491,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1379,6 +1509,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @Inventory_Default
@@ -1391,6 +1526,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 
 			-----------------------------------------------
 			-- @ColdGrains
@@ -1406,6 +1545,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @APClearing_Default
@@ -1418,6 +1562,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1431,6 +1580,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @WriteOffSold_Default
@@ -1443,6 +1597,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1456,6 +1615,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @Inventory_Default
@@ -1468,6 +1632,10 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
 
 			-----------------------------------------------
 			-- @HotGrains
@@ -1483,6 +1651,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @APClearing_Default
@@ -1495,6 +1668,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1508,6 +1686,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @WriteOffSold_Default
@@ -1520,6 +1703,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1533,6 +1721,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intAccountId = @Inventory_Default
@@ -1545,6 +1738,11 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strModuleName = 'Inventory'
+					,strCode = 'IC'
+					,strTransactionType = 'Inventory Receipt'
+					,strTransactionForm = 'Inventory Receipt'
+
 
 			INSERT INTO dbo.tblGLSummary(
 					dtmDate

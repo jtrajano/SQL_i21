@@ -53,6 +53,8 @@ BEGIN
 			,intAccountId
 			,strTransactionId 
 			,strModuleName
+			,strTransactionType
+			,strTransactionForm
 		)
 		SELECT 
 			dtmDate = GETDATE()
@@ -63,6 +65,8 @@ BEGIN
 			,intAccountId = @InvalidAccountId
 			,strTransactionId = 'DUMMY-00001'
 			,strModuleName = 'Inventory'
+			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
 		INSERT INTO expected (
@@ -76,10 +80,6 @@ BEGIN
 		EXEC testi21Database.[Fake COA used for fake inventory items];
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 	END 
-
-			select * from tblGLFiscalYearPeriod
-			select * from @GLEntries
-
 
 	-- Act
 	BEGIN
