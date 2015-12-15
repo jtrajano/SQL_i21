@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARImportTransactionsCSV]
-	 @ImportLogId	INT		
+	 @ImportLogId	INT
+	,@IsTank		BIT = 0	
 	,@UserEntityId	INT	= NULL
 AS
 
@@ -70,6 +71,7 @@ BEGIN
 		,@DiscountPercentage			NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemQtyShipped				NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemPrice						NUMERIC(18,6)	= @ZeroDecimal
+		,@ItemId						INT				= NULL
 		,@ItemDescription				NVARCHAR(500)	= NULL
 		,@TaxGroupId					INT				= NULL
 		,@AmountDue						NUMERIC(18,6)	= @ZeroDecimal
@@ -84,53 +86,83 @@ BEGIN
 		,@ConversionFactor				NUMERIC(18,6)   = @ZeroDecimal	
 		,@BillingBy						NVARCHAR(50)	= NULL
 
-	SELECT 
-		 @EntityCustomerId				= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
-		,@Date							= D.[dtmDate] 					
-		,@CompanyLocationId				= (SELECT TOP 1 [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strLocationName])
-		,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
-		,@TermId						= CASE WHEN ISNULL(D.strTerms, '') <> '' THEN (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTerm] = D.[strTerms]) ELSE 0 END
-		,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 [intEntitySalespersonId] FROM tblARSalesperson WHERE [strSalespersonId] = D.[strSalespersonNumber]) ELSE 0 END
-		,@DueDate						= D.dtmDueDate		
-		,@ShipDate						= D.dtmShipDate
-		,@PostDate						= D.[dtmPostDate] 
-		,@TransactionType				= D.[strTransactionType]
-		,@Type							= (CASE WHEN D.strTransactionType = 'Credit Memo' 
-													THEN D.strTransactionType
-												WHEN D.strTransactionType = 'Tank Delivery'
-													THEN D.strTransactionType
-												ELSE 'Standard' 
-										   END)
-		,@Comment						= D.[strTransactionNumber]
-		,@OriginId						= D.[strTransactionNumber]
-		,@PONumber						= D.[strPONumber] 
-		,@BOLNumber						= D.[strBOLNumber]		
-		,@FreightTermId					= CASE WHEN ISNULL(D.strFreightTerm, '') <> '' THEN (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = D.strFreightTerm) ELSE 0 END
-		,@ShipViaId						= CASE WHEN ISNULL(D.strShipVia, '') <> '' THEN (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia WHERE strShipVia = D.strShipVia)	ELSE 0 END
-		,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
-		,@DiscountPercentage			= (CASE WHEN ISNULL(D.[dblDiscount], @ZeroDecimal) > 0 
-												THEN (1 - ((ABS(D.[dblTotal]) - ISNULL(D.[dblDiscount], @ZeroDecimal)) / ABS(D.[dblTotal]))) * 100
-												ELSE @ZeroDecimal
-										   END)
-		,@ItemQtyShipped				= 1.000000
-		,@ItemPrice						= ISNULL(D.[dblSubtotal], @ZeroDecimal)
-		,@ItemDescription				= D.[strComment] 
-		,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.[strTaxGroup]) ELSE 0 END
-		,@AmountDue						= CASE WHEN D.[strTransactionType] <> 'Sales Order' THEN ISNULL(D.[dblAmountDue], @ZeroDecimal) ELSE @ZeroDecimal END
-		,@TaxAmount						= ISNULL(D.[dblTax], @ZeroDecimal)
-		,@Total							= ISNULL(D.[dblTotal], @ZeroDecimal)
-		,@SiteId						= (SELECT TOP 1 intSiteID FROM tblTMSite WHERE intSiteNumber = CONVERT(INT, D.strSiteNumber))
-		,@PerformerId					= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 [intEntitySalespersonId] FROM tblARSalesperson WHERE [strSalespersonId] = D.strPerformer) ELSE 0 END
-		,@PercentFull					= ISNULL(D.dblPercentFull, @ZeroDecimal)
-		,@NewMeterReading				= ISNULL(D.dblNewMeterReading, @ZeroDecimal)
-	FROM
-		[tblARImportLogDetail] D
-	INNER JOIN
-		[tblARImportLog] H
-			ON D.[intImportLogId] = H.[intImportLogId] 
-	WHERE
-		[intImportLogDetailId] = @ImportLogDetailId
-	
+	IF @IsTank = 1
+		BEGIN
+			SELECT 
+				 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEntity WHERE strEntityNo = D.strCustomerNumber)
+				,@Date							= D.[dtmDate] 					
+				,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE intCompanyLocationId = CONVERT(INT, D.strLocationName))
+				,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])				
+				,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 intEntitySalespersonId FROM vyuEMSalesperson WHERE strSalespersonName = D.strSalespersonNumber) ELSE 0 END
+				,@TransactionType				= 'Invoice'
+				,@Type							= 'Tank Delivery'
+				,@Comment						= D.strTransactionNumber
+				,@OriginId						= D.strTransactionNumber
+				,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
+				,@DiscountPercentage			= (CASE WHEN ISNULL(D.dblDiscount, @ZeroDecimal) > 0 
+														THEN (1 - ((ABS(D.dblTotal) - ISNULL(D.dblDiscount, @ZeroDecimal)) / ABS(D.dblTotal))) * 100
+														ELSE @ZeroDecimal
+												   END)
+				,@ItemQtyShipped				= ISNULL(D.dblQuantity, @ZeroDecimal)
+				,@ItemPrice						= ISNULL(D.dblSubtotal, @ZeroDecimal)				
+				,@ItemId						= (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = D.strItemNumber)
+				,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.[strTaxGroup]) ELSE 0 END
+				,@AmountDue						= CASE WHEN D.strTransactionType <> 'Sales Order' THEN ISNULL(D.dblAmountDue, @ZeroDecimal) ELSE @ZeroDecimal END
+				,@Total							= ISNULL(D.dblQuantity, @ZeroDecimal) * ISNULL(D.dblSubtotal, @ZeroDecimal)
+				,@SiteId						= (SELECT TOP 1 intSiteID FROM tblTMSite WHERE intSiteNumber = CONVERT(INT, D.strSiteNumber))
+				,@PerformerId					= (CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 intEntitySalespersonId FROM tblARSalesperson WHERE strSalespersonId = D.strPerformer) ELSE 0 END)												  
+				,@PercentFull					= ISNULL(D.dblPercentFull, @ZeroDecimal)
+				,@NewMeterReading				= ISNULL(D.dblNewMeterReading, @ZeroDecimal)
+			FROM
+				[tblARImportLogDetail] D
+			INNER JOIN
+				[tblARImportLog] H
+					ON D.[intImportLogId] = H.[intImportLogId] 
+			WHERE
+				[intImportLogDetailId] = @ImportLogDetailId
+
+			UPDATE tblARImportLogDetail SET dblTotal = @Total WHERE intImportLogDetailId = @ImportLogDetailId
+		END
+	ELSE
+		SELECT 
+			 @EntityCustomerId				= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
+			,@Date							= D.[dtmDate] 					
+			,@CompanyLocationId				= (SELECT TOP 1 [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strLocationName])
+			,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
+			,@TermId						= CASE WHEN ISNULL(D.strTerms, '') <> '' THEN (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTerm] = D.[strTerms]) ELSE 0 END
+			,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 [intEntitySalespersonId] FROM tblARSalesperson WHERE [strSalespersonId] = D.[strSalespersonNumber]) ELSE 0 END
+			,@DueDate						= D.dtmDueDate		
+			,@ShipDate						= D.dtmShipDate
+			,@PostDate						= D.[dtmPostDate] 
+			,@TransactionType				= D.[strTransactionType]
+			,@Type							= CASE WHEN D.strTransactionType = 'Credit Memo' THEN D.strTransactionType ELSE 'Standard' END
+			,@Comment						= D.[strTransactionNumber]
+			,@OriginId						= D.[strTransactionNumber]
+			,@PONumber						= D.[strPONumber] 
+			,@BOLNumber						= D.[strBOLNumber]		
+			,@FreightTermId					= CASE WHEN ISNULL(D.strFreightTerm, '') <> '' THEN (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = D.strFreightTerm) ELSE 0 END
+			,@ShipViaId						= CASE WHEN ISNULL(D.strShipVia, '') <> '' THEN (SELECT TOP 1 intEntityShipViaId FROM tblSMShipVia WHERE strShipVia = D.strShipVia)	ELSE 0 END
+			,@DiscountAmount				= ISNULL(D.dblDiscount, @ZeroDecimal)
+			,@DiscountPercentage			= (CASE WHEN ISNULL(D.[dblDiscount], @ZeroDecimal) > 0 
+													THEN (1 - ((ABS(D.[dblTotal]) - ISNULL(D.[dblDiscount], @ZeroDecimal)) / ABS(D.[dblTotal]))) * 100
+													ELSE @ZeroDecimal
+											   END)
+			,@ItemQtyShipped				= 1.000000
+			,@ItemPrice						= ISNULL(D.[dblSubtotal], @ZeroDecimal)
+			,@ItemDescription				= D.[strComment] 
+			,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.[strTaxGroup]) ELSE 0 END
+			,@AmountDue						= CASE WHEN D.[strTransactionType] <> 'Sales Order' THEN ISNULL(D.[dblAmountDue], @ZeroDecimal) ELSE @ZeroDecimal END
+			,@TaxAmount						= ISNULL(D.[dblTax], @ZeroDecimal)
+			,@Total							= ISNULL(D.[dblTotal], @ZeroDecimal)			
+		FROM
+			[tblARImportLogDetail] D
+		INNER JOIN
+			[tblARImportLog] H
+				ON D.[intImportLogId] = H.[intImportLogId] 
+		WHERE
+			[intImportLogDetailId] = @ImportLogDetailId
+	END
+
 	IF @TransactionType <> 'Sales Order'
 		BEGIN
 			SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strInvoiceNumber + '). ' FROM [tblARInvoice] WHERE RTRIM(LTRIM(ISNULL([strInvoiceOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strInvoiceOriginId],'')))) > 0
@@ -140,12 +172,15 @@ BEGIN
 			SELECT @ErrorMessage = 'Sales Order:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strSalesOrderNumber + '). ' FROM [tblSOSalesOrder] WHERE RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strSalesOrderOriginId],'')))) > 0
 		END
 
-	IF @TransactionType = 'Tank Delivery'
+	IF @IsTank = 1
 		BEGIN
 			IF @SiteId IS NULL
 				SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Site Number provided does not exists. '
 			ELSE
 				BEGIN
+					SELECT TOP 1 @TermId = intDeliveryTermID FROM tblTMSite WHERE intSiteID = @SiteId
+					SELECT @DueDate = CAST(dbo.fnGetDueDateBasedOnTerm(@Date, @TermId) AS DATE)
+					SELECT TOP 1 @TaxGroupId = ISNULL(intTaxGroupId, 0) FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1					
 					SELECT TOP 1 @BillingBy				= TMS.strBillingBy
 								,@ItemId				= TMS.intProduct 
 								,@ItemDescription		= I.strDescription
@@ -197,19 +232,19 @@ BEGIN
 	
 	IF @TermId IS NULL
 		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
-	ELSE IF @TermId = 0
+	ELSE IF @TermId = 0 AND @IsTank = 0
 		BEGIN
 			SELECT TOP 1 @TermId = intTermsId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
 			IF ISNULL(@TermId, 0) = 0
 				SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
 		END
 	
-	IF @FreightTermId IS NULL
+	IF @FreightTermId IS NULL AND @IsTank = 0
 		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Freight Term provided does not exists. '
 	ELSE IF @FreightTermId = 0
 		SELECT TOP 1 @FreightTermId = intFreightTermId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
 
-	IF @ShipViaId IS NULL
+	IF @ShipViaId IS NULL AND @IsTank = 0
 		SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Ship Via provided does not exists. '
 	ELSE IF @ShipViaId = 0
 		SELECT TOP 1 @ShipViaId = intShipViaId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
@@ -339,7 +374,7 @@ BEGIN
 						,[ysnResetDetails]			= 1
 						,[ysnPost]					= CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END
 						,[intInvoiceDetailId]		= NULL
-						,[intItemId]				= @ItemId
+						,[intItemId]				= CASE WHEN @IsTank = 1 THEN @ItemId ELSE NULL END
 						,[ysnInventory]				= 0
 						,[strItemDescription]		= @ItemDescription
 						,[intItemUOMId]				= NULL
