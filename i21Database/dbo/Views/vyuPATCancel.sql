@@ -22,7 +22,8 @@
 		   CED.dblQuantityAvailable,
 		   CED.strCancelBy,
 		   CED.dblCancelByPercentage,
-		   CED.dblQuantityCancelled
+		   CED.dblQuantityCancelled,
+		   dblNewQuantity = CED.dblQuantityAvailable - CED.dblQuantityCancelled
 	  FROM tblPATCancelEquity CE
 INNER JOIN tblPATCancelEquityDetail CED
 		ON CED.intCancelId = CE.intCancelId
@@ -32,3 +33,5 @@ INNER JOIN tblEntity ENT
 		ON ENT.intEntityId = CED.intCustomerId
  LEFT JOIN tblPATRefundRate RR
 		ON RR.intRefundTypeId = CED.intRefundTypeId
+GO
+
