@@ -3,7 +3,6 @@
 	[intTicketTypeId] INT NOT NULL  IDENTITY, 
     [intTicketType] INT NOT NULL, 
     [intTicketPoolId] INT NOT NULL, 
-	[intListTicketTypeId] INT NOT NULL, 
     [strInOutIndicator] NVARCHAR(1) COLLATE Latin1_General_CI_AS NOT NULL,
     [ysnTicketAllowed] BIT NOT NULL, 
     [intNextTicketNumber] INT NOT NULL, 
@@ -21,8 +20,7 @@
     CONSTRAINT [PK_tblSCTicketType_intTicketTypeId] PRIMARY KEY ([intTicketTypeId]), 
     CONSTRAINT [UK_tblSCTicketType_intTicketType_strInOutIndicator] UNIQUE ([intTicketType],[intTicketPoolId],[strInOutIndicator]), 
     CONSTRAINT [FK_tblSCTicketType_tblSCTicketPool_intTicketPoolId] FOREIGN KEY (intTicketPoolId) REFERENCES tblSCTicketPool(intTicketPoolId),
-    CONSTRAINT [FK_tblSCTicketType_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-    CONSTRAINT [FK_tblSCTicketType_tblSCListTicketType] FOREIGN KEY ([intListTicketTypeId]) REFERENCES [tblSCListTicketTypes]([intTicketTypeId])
+    CONSTRAINT [FK_tblSCTicketType_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )
 
 GO
