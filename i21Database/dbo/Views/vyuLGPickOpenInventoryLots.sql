@@ -47,7 +47,7 @@ SELECT Lot.intLotId
 	, Lot.strBOLNo
 	, Lot.strVessel
 	, Lot.strReceiptNumber
-	, Lot.strMarkings
+	, ShipmentContainer.strMarks as strMarkings
 	, Lot.strNotes
 	, Lot.intEntityVendorId
 	, Lot.strVendorLotNo
