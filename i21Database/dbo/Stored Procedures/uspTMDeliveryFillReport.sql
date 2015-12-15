@@ -218,7 +218,7 @@ BEGIN
 		FROM @temp_params where [fieldname] = 'strFillMethod'
 		IF (ISNULL(@FromFillMethod,'') <> '')
 		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + ' (strFillMethod BETWEEN ''' + @FromFillMethod + ''' AND ''' + @ToFillMethod + ''')'
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + ' (strFillMethod = ''' + @FromFillMethod + ''')'
 		END
 		
 		--Quantity
