@@ -407,6 +407,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('intItemUOMId', records[0].get('intStockUOMId'));
+            current.set('dblAvailableQty', records[0].get('dblAvailable'));
+            current.set('strAvailableUOM', records[0].get('strStockUOM'));
+
+
         }
         else if (combo.itemId === 'cboLot') {
             current.set('intLotId', records[0].get('intLotId'));
