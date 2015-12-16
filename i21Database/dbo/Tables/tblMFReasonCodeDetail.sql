@@ -14,6 +14,6 @@
 	CONSTRAINT AK_tblMFReasonCodeDetail_intReasonCodeId_intManufacturingCellId UNIQUE (
 		intReasonCodeId,
 		intManufacturingCellId),
-	CONSTRAINT FK_tblMFReasonCodeDetail_tblMFReasonCode FOREIGN KEY (intReasonCodeId) REFERENCES tblMFReasonCode(intReasonCodeId),
+	CONSTRAINT FK_tblMFReasonCodeDetail_tblMFReasonCode FOREIGN KEY (intReasonCodeId) REFERENCES tblMFReasonCode(intReasonCodeId) ON DELETE CASCADE,
 	CONSTRAINT FK_tblMFReasonCodeDetail_tblMFManufacturingCell FOREIGN KEY (intManufacturingCellId) REFERENCES tblMFManufacturingCell(intManufacturingCellId)
 )

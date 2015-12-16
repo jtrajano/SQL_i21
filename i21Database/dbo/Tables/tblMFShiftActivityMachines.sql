@@ -15,6 +15,6 @@
 	CONSTRAINT AK_tblMFShiftActivityMachines_intShiftActivityId_intMachineId UNIQUE (
 		intShiftActivityId,
 		intMachineId),
-	CONSTRAINT FK_tblMFShiftActivityMachines_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId),
+	CONSTRAINT FK_tblMFShiftActivityMachines_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId) ON DELETE CASCADE,
 	CONSTRAINT FK_tblMFShiftActivityMachines_tblMFMachine FOREIGN KEY (intMachineId) REFERENCES tblMFMachine(intMachineId)
 )

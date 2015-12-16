@@ -3071,6 +3071,7 @@
     <Build Include="dbo\Tables\tblMFShiftActivityStatus.sql" />
     <Build Include="dbo\Tables\tblMFReasonType.sql" />
     <Build Include="dbo\Views\vyuMFGetReasonCode.sql" />
+    <Build Include="dbo\Tables\tblMFDowntimeMachines.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
