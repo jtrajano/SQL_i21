@@ -107,14 +107,8 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
-SELECT  @dtmDateFrom = CASE WHEN UPPER([condition]) = UPPER('As Of')
-						 THEN CAST(-53690 AS DATETIME)
-						 ELSE CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME) 
-					   END
-	   ,@dtmDateTo   = CASE WHEN UPPER([condition]) = UPPER('As Of')
-						 THEN CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE GETDATE() END AS DATETIME)
-						 ELSE CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
-					   END
+SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
+ 	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
        ,@condition	 = [condition]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
