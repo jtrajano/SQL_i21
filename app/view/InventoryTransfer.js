@@ -602,6 +602,24 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     dataType: 'string',
                                                                     text: 'Lot Tracking',
                                                                     hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intStockUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Stock UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblAvailable',
+                                                                    dataType: 'float',
+                                                                    text: 'Available Qty',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStockUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Stock UOM',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboItem',

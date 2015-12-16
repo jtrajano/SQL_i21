@@ -56,6 +56,17 @@ Ext.define('Inventory.model.TransferDetail', {
     validators: [
         { type: 'presence', field: 'strItemNo' },
         { type: 'presence', field: 'dblQuantity' }
-        //{ type: 'presence', field: 'strUnitMeasure' }
-    ]
+    ],
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+        if (this.get('dblQuantity') <= 0) {
+            errors.add({
+                field: 'dblQuantity',
+                message: 'Transfer Qty must be greater than zero(0).'
+            })
+        }
+
+        return errors;
+    }
 });
