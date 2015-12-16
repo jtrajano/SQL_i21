@@ -149,16 +149,17 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN 
-													(CASE WHEN E.dblUnitCost IS NOT NULL AND B.ysnCostAdjusted = 1 THEN --REMOVE THE ADJUSTMENT COST ON THE TOTAL (RECEIPT ITEM)
-															 (B.dblTotal - ((B.dblCost - E.dblUnitCost) * B.dblQtyReceived))
-															WHEN F.dblAmount IS NOT NULL AND B.ysnCostAdjusted = 1 THEN --REMOVE THE ADJUSTMENT COST ON THE TOTAL (OTHER CHARGE)
-															 (B.dblTotal - ((B.dblCost - F.dblAmount) * B.dblQtyReceived))
-															ELSE B.dblTotal
-													END)
-													* (-1) 
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) 
 												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
-														ELSE B.dblTotal + ISNULL(Taxes.dblTotalICTax, 0) END) --IC Tax
+														ELSE 
+															B.dblTotal 
+															- (CASE WHEN B.dblCost != B.dblOldCost AND E.dblUnitCost IS NOT NULL --RECEIPT ITEM
+																	THEN (B.dblCost - E.dblUnitCost) * B.dblQtyReceived
+																	WHEN B.dblCost != B.dblOldCost AND F.dblAmount IS NOT NULL --OTHER CHARGE
+																	THEN (B.dblCost - F.dblAmount) * B.dblQtyReceived
+																ELSE 0 END)
+															+ ISNULL(Taxes.dblTotalICTax, 0) END
+													 ) --IC Tax
 												END), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -214,14 +215,12 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN 
-													(CASE WHEN E.dblUnitCost IS NOT NULL  AND B.ysnCostAdjusted = 1 THEN
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN 
+													(CASE WHEN E.dblUnitCost IS NOT NULL  THEN
 															 ((B.dblCost - E.dblUnitCost) * B.dblQtyReceived)
-															WHEN F.dblAmount IS NOT NULL AND B.ysnCostAdjusted = 1 THEN
+														WHEN F.dblAmount IS NOT NULL THEN
 															 ((B.dblCost - F.dblAmount) * B.dblQtyReceived)
-															ELSE B.dblTotal
-													END)
-													* (-1)
+													ELSE 0 END)
 												ELSE 0 END), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -263,7 +262,7 @@ BEGIN
 			LEFT JOIN tblICInventoryReceiptCharge F
 				ON B.intInventoryReceiptChargeId = F.intInventoryReceiptChargeId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND B.ysnCostAdjusted = 1
+	AND B.dblCost != B.dblOldCost AND (B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL)
 	UNION ALL
 	--TAXES
 	SELECT	
