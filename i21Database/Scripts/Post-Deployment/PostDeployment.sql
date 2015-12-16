@@ -260,6 +260,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\016_MoveCustomerAccountStatusToNewTable.sql
 :r .\EM\017_MoveSplitCategoryToNewTable.sql
 :r .\EM\018_UpdateRoleId_ForEntityCredential.sql
+:r .\EM\019_RemoveEmailToParentEntity.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
