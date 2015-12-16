@@ -18,6 +18,15 @@ SELECT TC.intTaxCodeId
 	 , I.dtmDate
 	 , C.strCustomerNumber
 	 , E.strName
+	 , strItemNo        = (SELECT TOP 1 ICI.strItemNo FROM tblARInvoiceDetail IID 
+									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
+									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
+							WHERE intInvoiceId = I.intInvoiceId)
+	 , strItemCategory  = (SELECT TOP 1 ICC.strDescription FROM tblARInvoiceDetail IID 
+									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
+									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
+									LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
+							WHERE intInvoiceId = I.intInvoiceId)
 	 , dblTaxDifference = SUM(IDT.dblAdjustedTax - IDT.dblTax)
 	 , dblTaxAmount     = SUM(IDT.dblAdjustedTax)
 	 , dblNonTaxable    = (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId)
