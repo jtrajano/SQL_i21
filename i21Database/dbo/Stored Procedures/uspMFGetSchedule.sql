@@ -134,7 +134,35 @@ SELECT C.intManufacturingCellId
 	,SL.dtmChangeoverEndDate
 	,SL.dtmPlannedStartDate
 	,SL.dtmPlannedEndDate
-	,ISNULL(SL.intExecutionOrder, W.intExecutionOrder) intExecutionOrder
+	--,ISNULL(SL.intExecutionOrder, W.intExecutionOrder) intExecutionOrder
+	,Convert(int,Case When W.intStatusId=1 Then NULL Else Row_number() OVER (
+		ORDER BY WS.intSequenceNo DESC
+			,CASE 
+				WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+					AND W.intStatusId = 3
+					THEN WD.intDemandRatio
+				ELSE SL.intExecutionOrder
+				END
+			,CASE 
+				WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+					AND W.intStatusId = 3
+					THEN W.intItemId
+				ELSE SL.intExecutionOrder
+				END
+			,CASE 
+				WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+					AND W.intStatusId = 3
+					THEN W.dtmCreated
+				ELSE SL.intExecutionOrder
+				END
+			,CASE 
+				WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+					AND W.intStatusId = 3
+					THEN I.intPackTypeId
+				ELSE SL.intExecutionOrder
+				END
+			--,Case when @ysnAutoPriorityOrderByDemandRatio=1 and W.intStatusId=3 Then strWIPItemNo Else SL.intExecutionOrder end
+		)end)  AS intExecutionOrder
 	,SL.intChangeoverDuration
 	,SL.intSetupDuration
 	,SL.strComments
@@ -176,8 +204,32 @@ JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 	AND R.ysnActive = 1
 LEFT JOIN @tblWorkOrderDemandRatio WD ON W.intWorkOrderId = WD.intWorkOrderId
 ORDER BY WS.intSequenceNo DESC
-	,SL.intExecutionOrder
+	,CASE 
+		WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+			AND W.intStatusId = 3
+			THEN WD.intDemandRatio
+		ELSE SL.intExecutionOrder
+		END
+	,CASE 
+		WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+			AND W.intStatusId = 3
+			THEN W.intItemId
+		ELSE SL.intExecutionOrder
+		END
+	,CASE 
+		WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+			AND W.intStatusId = 3
+			THEN W.dtmCreated
+		ELSE SL.intExecutionOrder
+		END
+	,CASE 
+		WHEN @ysnAutoPriorityOrderByDemandRatio = 1
+			AND W.intStatusId = 3
+			THEN I.intPackTypeId
+		ELSE SL.intExecutionOrder
+		END
 
+--,Case when @ysnAutoPriorityOrderByDemandRatio=1 and W.intStatusId=3 Then strWIPItemNo Else SL.intExecutionOrder end
 SELECT WD.intScheduleWorkOrderDetailId
 	,WD.intScheduleWorkOrderId
 	,WD.intWorkOrderId

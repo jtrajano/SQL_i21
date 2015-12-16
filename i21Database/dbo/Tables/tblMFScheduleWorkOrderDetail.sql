@@ -12,10 +12,6 @@
 	,intCalendarDetailId INT NOT NULL
 	,intConcurrencyId INT NOT NULL, 
     CONSTRAINT PK_tblMFScheduleLineDetail_intScheduleLineDetailId PRIMARY KEY (intScheduleWorkOrderDetailId)
-	,CONSTRAINT UQ_tblMFScheduleLineDetail_intScheduleLineId_intPlannedShiftId UNIQUE (
-		intScheduleWorkOrderId
-		,intPlannedShiftId
-		)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFScheduleWorkOrder_intScheduleWorkOrderId] FOREIGN KEY (intScheduleWorkOrderId) REFERENCES [dbo].[tblMFScheduleWorkOrder](intScheduleWorkOrderId) ON DELETE CASCADE
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES [dbo].[tblMFWorkOrder](intWorkOrderId)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFScheduleCalendar_intCalendarDetailId] FOREIGN KEY (intCalendarDetailId) REFERENCES [dbo].[tblMFScheduleCalendarDetail](intCalendarDetailId)
