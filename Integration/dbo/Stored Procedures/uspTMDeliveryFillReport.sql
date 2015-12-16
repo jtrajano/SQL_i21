@@ -269,7 +269,7 @@ BEGIN
 		FROM @temp_params where [fieldname] = 'dtmForecastedDelivery'
 		IF (ISNULL(@FromForecastedDelivery,'') <> '')
 		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + '(DATEADD(dd, DATEDIFF(dd, 0, C.dtmForecastedDelivery), 0) BETWEEN ''' + @FromForecastedDelivery + ''' AND ''' + @ToForecastedDelivery + ''')'
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + '(DATEADD(dd, DATEDIFF(dd, 0, dtmForecastedDelivery), 0) BETWEEN ''' + @FromForecastedDelivery + ''' AND ''' + @ToForecastedDelivery + ''')'
 		END
 		
 		--On Hold
