@@ -8,6 +8,7 @@
     [dblQtyAllocated]       NUMERIC (18, 6) NULL,
 	[dblQtyShipped]			NUMERIC (18, 6) NULL DEFAULT ((0)),
     [dblDiscount]           NUMERIC (18, 6) NULL,
+	[dblDiscountAmount]		NUMERIC (18, 6)	NULL DEFAULT ((0)),
     [intTaxId]              INT             NULL,
     [dblPrice]              NUMERIC (18, 6) NULL,
 	[strPricing]			NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,

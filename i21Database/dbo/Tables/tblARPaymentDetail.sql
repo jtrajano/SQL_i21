@@ -6,6 +6,7 @@
     [intAccountId]       INT             NOT NULL,
     [dblInvoiceTotal]    NUMERIC (18, 6) NULL,
     [dblDiscount]        NUMERIC (18, 6) NULL,
+	[dblDiscountTaken]	 NUMERIC (18, 6) NULL DEFAULT 0,
 	[dblInterest]        NUMERIC (18, 6) NULL,
     [dblAmountDue]       NUMERIC (18, 6) NULL,
     [dblPayment]         NUMERIC (18, 6) NULL,
