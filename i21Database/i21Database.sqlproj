@@ -3080,6 +3080,7 @@
     <Build Include="dbo\Stored Procedures\uspSOProcessToInvoice.sql" />
     <Build Include="dbo\Views\vyuPRUnpostedTransactions.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLogo.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdatePaycheckReferenceNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
