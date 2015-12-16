@@ -29,8 +29,8 @@ SELECT A.strCustomerName
 	 , dblUnappliedCredits	= SUM(B.dblAvailableCredit)
 	 , dblPrepaids			= 0.000000
 	 , dblFuture			= 0.000000
-	 , dblBudgetAmount		= 0.000000
-	 , dblBudgetMonth		= 0.000000
+	 , dblBudgetAmount		= ISNULL((SELECT dblMonthlyBudget FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId), 0.000000)
+	 , dblBudgetMonth		= ISNULL(dbo.fnARGetCustomerBudget(A.intEntityCustomerId, GETDATE()), 0.000000)
 	 , dblThru				= 0.000000
 	 , dblPendingInvoice	= (SELECT ISNULL(SUM(CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
 	 , dblPendingPayment	= (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
@@ -218,7 +218,7 @@ LEFT JOIN
   , strInvoiceNumber  
   , dblInvoiceTotal    
   , dblAmountPaid
-  , (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) AS dblTotalDue
+  , dblAmountDue AS dblTotalDue
   , dblYTDSales
   , dblLastYearSales
   , dblAvailableCredit
@@ -236,7 +236,7 @@ FROM
 (SELECT I.strInvoiceNumber
       , 0 AS dblAmountPaid
       , dblInvoiceTotal = ISNULL(I.dblInvoiceTotal,0)
-	  , dblAmountDue = 0    
+	  , dblAmountDue
 	  , dblDiscount = 0    
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId
@@ -296,7 +296,7 @@ UNION ALL
 SELECT I.strInvoiceNumber
       , 0 AS dblAmountPaid
       , dblInvoiceTotal = 0
-	  , dblAmountDue = 0    
+	  , dblAmountDue * -1
 	  , dblDiscount = 0    
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId

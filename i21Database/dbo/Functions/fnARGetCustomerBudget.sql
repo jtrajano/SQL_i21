@@ -13,5 +13,5 @@ BEGIN
 	WHERE C.intEntityCustomerId = @entityCustomerId
 	AND @budgetDate BETWEEN CB.dtmBudgetDate AND DATEADD(MONTH, 1, CB.dtmBudgetDate)
 
-	RETURN ISNULL(@customerBudget, 0)
+	RETURN ISNULL(@customerBudget, 0.000000)
 END
