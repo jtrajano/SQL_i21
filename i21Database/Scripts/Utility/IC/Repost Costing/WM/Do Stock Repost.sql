@@ -62,7 +62,7 @@ BEGIN
 	INTO	#tmpICInventoryTransaction
 	FROM	tblICInventoryTransaction
 	WHERE	ISNULL(dblQty, 0) <> 0
-			-- AND ISNULL(ysnIsUnposted, 0) = 0 -- This where clause will exclude all the unposted transactions. 
+			AND ISNULL(ysnIsUnposted, 0) = 0 -- This where clause will exclude all the unposted transactions. 
 END
 
 BEGIN 
