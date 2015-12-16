@@ -3,9 +3,13 @@
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Open the fiscal year periods
 ------------------------------------------------------------------------------------------------------------------------------------
-SELECT	* 
-INTO	tblGLFiscalYearPeriodOriginal
-FROM	tblGLFiscalYearPeriod
+-- Open the fiscal year periods
+IF OBJECT_ID('tblGLFiscalYearPeriodOriginal') IS NULL 
+BEGIN 
+	SELECT	* 
+	INTO	tblGLFiscalYearPeriodOriginal
+	FROM	tblGLFiscalYearPeriod
+END 
 
 UPDATE tblGLFiscalYearPeriod
 SET ysnOpen = 1
@@ -57,8 +61,8 @@ BEGIN
 	SELECT * 
 	INTO	#tmpICInventoryTransaction
 	FROM	tblICInventoryTransaction
-	WHERE	ISNULL(ysnIsUnposted, 0) = 0
-			AND ISNULL(dblQty, 0) <> 0
+	WHERE	ISNULL(dblQty, 0) <> 0
+			-- AND ISNULL(ysnIsUnposted, 0) = 0 -- This where clause will exclude all the unposted transactions. 
 END
 
 BEGIN 
@@ -445,6 +449,12 @@ BEGIN
 					,[strTransactionForm]
 					,[strModuleName]
 					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
 			)	
 			EXEC [dbo].[uspICUnpostCosting]
 				@intTransactionId = @intTransactionId 
