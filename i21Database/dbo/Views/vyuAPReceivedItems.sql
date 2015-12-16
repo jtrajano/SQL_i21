@@ -151,7 +151,7 @@ FROM
 	,[intUnitMeasureId]			=	NULL
 	,[intWeightUOMId]			=	NULL
 	,[intCostUOMId]				=	NULL
-	,[dblNetWeight]				=	NULL
+	,[dblNetWeight]				=	0
 	,[strCostUOM]				=	NULL
 	,[strgrossNetUOM]			=	NULL
 	,[dblUnitQty]				=	NULL
@@ -266,7 +266,7 @@ FROM
   		,[intUnitMeasureId]							=	NULL
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	NULL
-		,[dblNetWeight]								=	NULL      
+		,[dblNetWeight]								=	0      
 		,[strCostUOM]								=	NULL
 		,[strgrossNetUOM]							=	NULL
 		,[dblUnitQty]								=	NULL   
@@ -312,7 +312,7 @@ FROM
 		,[intUnitMeasureId]							=	NULL
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	NULL
-		,[dblNetWeight]								=	NULL      
+		,[dblNetWeight]								=	0      
 		,[strCostUOM]								=	NULL
 		,[strgrossNetUOM]							=	NULL
 		,[dblUnitQty]								=	NULL

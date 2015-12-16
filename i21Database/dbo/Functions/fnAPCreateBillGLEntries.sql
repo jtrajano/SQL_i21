@@ -149,7 +149,14 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) 
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN 
+													(CASE WHEN E.dblUnitCost IS NOT NULL AND B.ysnCostAdjusted = 1 THEN --REMOVE THE ADJUSTMENT COST ON THE TOTAL (RECEIPT ITEM)
+															 (B.dblTotal - ((B.dblCost - E.dblUnitCost) * B.dblQtyReceived))
+															WHEN F.dblAmount IS NOT NULL AND B.ysnCostAdjusted = 1 THEN --REMOVE THE ADJUSTMENT COST ON THE TOTAL (OTHER CHARGE)
+															 (B.dblTotal - ((B.dblCost - F.dblAmount) * B.dblQtyReceived))
+															ELSE B.dblTotal
+													END)
+													* (-1) 
 												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 														ELSE B.dblTotal + ISNULL(Taxes.dblTotalICTax, 0) END) --IC Tax
 												END), --Bill Detail
@@ -184,10 +191,14 @@ BEGIN
 		[dblForeignRate]				=	0,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
-			LEFT JOIN [dbo].tblAPBillDetail B
+			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			LEFT JOIN tblAPVendor C
+			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
+			LEFT JOIN tblICInventoryReceiptItem E
+				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+			LEFT JOIN tblICInventoryReceiptCharge F
+				ON B.intInventoryReceiptChargeId = F.intInventoryReceiptChargeId
 			OUTER APPLY (
 				--Add the tax from IR
 				SELECT 
@@ -197,6 +208,62 @@ BEGIN
 				GROUP BY D.intBillDetailId
 			) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	--COST ADJUSTMENT
+	UNION ALL 
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	B.intAccountId,
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN 
+													(CASE WHEN E.dblUnitCost IS NOT NULL  AND B.ysnCostAdjusted = 1 THEN
+															 ((B.dblCost - E.dblUnitCost) * B.dblQtyReceived)
+															WHEN F.dblAmount IS NOT NULL AND B.ysnCostAdjusted = 1 THEN
+															 ((B.dblCost - F.dblAmount) * B.dblQtyReceived)
+															ELSE B.dblTotal
+													END)
+													* (-1)
+												ELSE 0 END), 
+		[dblCredit]						=	0, -- Bill
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	A.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	B.strMiscDescription,
+		[intJournalLineNo]				=	B.intBillDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
+												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Debit Memo'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[intConcurrencyId]				=	1
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			INNER JOIN tblAPVendor C
+				ON A.intEntityVendorId = C.intEntityVendorId
+			LEFT JOIN tblICInventoryReceiptItem E
+				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+			LEFT JOIN tblICInventoryReceiptCharge F
+				ON B.intInventoryReceiptChargeId = F.intInventoryReceiptChargeId
+	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND B.ysnCostAdjusted = 1
 	UNION ALL
 	--TAXES
 	SELECT	
