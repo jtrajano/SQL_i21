@@ -12,8 +12,8 @@ PRINT 'Begin updating Trial Balance Detail Report'
 DECLARE @TBReportId INT
 DECLARE @GLReportId INT
 
-SELECT @TBReportId = intReportId FROM tblRMReport WHERE strName = 'Trial Balance Detail' and strGroup = 'General Ledger' 
-SELECT  TOP 1 @GLReportId =intReportId from tblRMReport where strName like 'General Ledger by Account ID Detail'  and strGroup = 'General Ledger' 
+SELECT TOP 1 @TBReportId = intReportId FROM tblRMReport WHERE strName = 'Trial Balance Detail' and strGroup = 'General Ledger' 
+SELECT TOP 1 @GLReportId =intReportId FROM tblRMReport WHERE strName like 'General Ledger by Account ID Detail'  and strGroup = 'General Ledger' 
 
 DELETE FROM [tblRMOption] WHERE strName = 'Include Audit Adjustment' and intReportId = @TBReportId
 DELETE FROM [tblRMDefaultOption] where intReportId = @TBReportId and strName = 'Include Audit Adjustment'
@@ -68,10 +68,10 @@ FROM tblRMDatasource d join tblRMReport r on d.intReportId = r.intReportId
 WHERE r.intReportId = @TBReportId
 
 -- COPY GL DETAIL REPORT SORTING
-INSERT INTO tblRMSort (strSortField,intReportId,intSortDirection,intUserId, ysnDefault,ysnCanned,intConcurrencyId,intSortConcurrencyId)
-	SELECT strSortField,@TBReportId,intSortDirection,intUserId,ysnDefault,ysnCanned,intConcurrencyId,intSortConcurrencyId FROM tblRMSort WHERE intReportId = @GLReportId
-INSERT INTO tblRMDefaultSort (strSortField,intReportId,intSortDirection,intUserId, ysnCanned,ysnRequired,intConcurrencyId,intSortConcurrencyId)
-	SELECT strSortField,@TBReportId,intSortDirection,intUserId,ysnCanned,ysnRequired,intConcurrencyId,intSortConcurrencyId FROM tblRMDefaultSort WHERE intReportId = @GLReportId
+INSERT INTO tblRMSort (strSortField,intReportId,intSortDirection,intUserId, ysnDefault,ysnCanned,ysnRequired,intSortConcurrencyId)
+	SELECT strSortField,@TBReportId,intSortDirection,intUserId,ysnDefault,ysnCanned,ysnRequired,intSortConcurrencyId FROM tblRMSort WHERE intReportId = @GLReportId
+INSERT INTO tblRMDefaultSort (strSortField,intReportId,intSortDirection,intUserId, ysnCanned,ysnRequired,intSortConcurrencyId)
+	SELECT strSortField,@TBReportId,intSortDirection,intUserId,ysnCanned,ysnRequired,intSortConcurrencyId FROM tblRMDefaultSort WHERE intReportId = @GLReportId
 
 PRINT 'Finish updating Trial Balance Detail Report'
 END
