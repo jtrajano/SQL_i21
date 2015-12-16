@@ -6,6 +6,7 @@
     [intTotalSalesCount] INT NULL, 
     [dblTotalSalesAmount] DECIMAL(18, 6) NULL, 
     [dblRegisterSalesAmount] DECIMAL(18, 6) NULL, 
+	[strDepartmentTotalsComment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [intPromotionalDiscountsCount] INT NULL, 
     [dblPromotionalDiscountAmount] DECIMAL(18, 6) NULL, 
     [intManagerDiscountCount] INT NULL, 
