@@ -3082,6 +3082,8 @@
     <Build Include="dbo\Views\vyuSMCompanyLogo.sql" />
     <Build Include="dbo\Tables\tblSCListTicketTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdatePaycheckReferenceNo.sql" />
+    <Build Include="dbo\Functions\fnPATCreateDividendGLEntries.sql" />
+    <Build Include="dbo\Functions\fnPATReverseGLDividendEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
