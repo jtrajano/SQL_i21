@@ -48,6 +48,8 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dtmReceiveTime
 	, Receipt.dblActualTempReading
 	, Receipt.intShipmentId
+	, Receipt.intTaxGroupId
+	, TaxGroup.strTaxGroup
 	, Receipt.ysnPosted
 	, Receipt.intEntityId
 	, strEntityName = Entity.strName
@@ -62,3 +64,4 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblSMUserSecurity Receiver ON Receiver.intEntityUserSecurityId = Receipt.intReceiverId
 	LEFT JOIN vyuEMEntity Entity ON Entity.intEntityId = Receipt.intEntityId AND Entity.strType = 'User'
 	LEFT JOIN tblEntityLocation ShipFrom ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
+	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
