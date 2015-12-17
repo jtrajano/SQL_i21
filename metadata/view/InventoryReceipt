@@ -1240,6 +1240,7 @@
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strDescription",
                                                                 "fieldLabel": "Allocate Freight",
+                                                                "hidden": true,
                                                                 "hideTrigger": null,
                                                                 "itemId": "cboAllocateFreight",
                                                                 "labelWidth": 95,
@@ -1255,6 +1256,67 @@
                                                                 "columns": "array"
                                                             },
                                                             "designerId": "23317158-9497-4ac2-9e4b-a377d66b5fa9",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "columns": [
+                                                                    "[",
+                                                                    "    {",
+                                                                    "        dataIndex: 'intTaxGroupId',",
+                                                                    "        dataType: 'numeric',",
+                                                                    "        hidden: true",
+                                                                    "    },",
+                                                                    "    {",
+                                                                    "        dataIndex: 'strTaxGroup',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Tax Group',",
+                                                                    "        flex: 1",
+                                                                    "    },",
+                                                                    "    {",
+                                                                    "        dataIndex: 'strDescription',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Description',",
+                                                                    "        flex: 1",
+                                                                    "    }",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strTaxGroup",
+                                                                "fieldLabel": "Tax Group",
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboTaxGroup",
+                                                                "labelWidth": 95,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "valueField": "intTaxGroupId",
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox5",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean",
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "c235bca6-dcd2-4536-a088-058610a12c0b",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",

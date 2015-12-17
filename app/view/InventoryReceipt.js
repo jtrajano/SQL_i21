@@ -598,11 +598,39 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        hidden: true,
                                                                         itemId: 'cboAllocateFreight',
                                                                         fieldLabel: 'Allocate Freight',
                                                                         labelWidth: 95,
                                                                         displayField: 'strDescription',
                                                                         valueField: 'strDescription'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intTaxGroupId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strTaxGroup',
+                                                                                dataType: 'string',
+                                                                                text: 'Tax Group',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboTaxGroup',
+                                                                        fieldLabel: 'Tax Group',
+                                                                        labelWidth: 95,
+                                                                        displayField: 'strTaxGroup',
+                                                                        valueField: 'intTaxGroupId'
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
@@ -1850,9 +1878,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotParentLotId',
                                                                                 width: 100,
+                                                                                dataIndex: 'string',
                                                                                 text: 'Parent Lot Number',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',

@@ -398,7 +398,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         checkHideLoadContract: function (get) {
             if (get('grdInventoryReceipt.selection.ysnLoad') !== true) {
-                return false;
+                if (get('current.strReceiptType') === 'Purchase Contract' || get('current.strReceiptType') === 'Purchase Order') {
+                    return false;
+                }
+                else {
+                    return true;
+                }
             }
             else {
                 return true;

@@ -41,11 +41,29 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                     },
                     {
                         xtype: 'gridcolumn',
+                        itemId: 'colTaxGroup',
+                        width: 85,
+                        sortable: false,
+                        dataIndex: 'strTaxGroup',
+                        text: 'Tax Group',
+                        flex: 1.25
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colTaxClass',
+                        width: 85,
+                        sortable: false,
+                        dataIndex: 'strTaxClass',
+                        text: 'Tax Class',
+                        flex: 1.25
+                    },
+                    {
+                        xtype: 'gridcolumn',
                         itemId: 'colTaxCode',
                         width: 85,
                         sortable: false,
                         dataIndex: 'strTaxCode',
-                        text: 'Tax Class',
+                        text: 'Tax Code',
                         flex: 1.25
                     },
                     {

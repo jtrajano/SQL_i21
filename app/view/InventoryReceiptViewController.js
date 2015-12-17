@@ -193,7 +193,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 defaultFilters: [
                     {
                         column: 'intEntityId',
-                        value: '{current.intVendorEntityId}'
+                        value: '{current.intEntityVendorId}'
                     }
                 ],
                 readOnly: '{current.ysnPosted}'
@@ -221,6 +221,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             txtFobPoint: {
                 value: '{current.strFobPoint}',
                 readOnly: '{current.ysnPosted}'
+            },
+            cboTaxGroup: {
+                value: '{current.intTaxGroupId}',
+                store: '{taxGroup}'
             },
             txtShiftNumber: {
                 value: '{current.intShiftNumber}',
@@ -1098,6 +1102,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vendorLocation = records[0].getDefaultLocation();
             if (vendorLocation) {
                 current.set('intShipViaId', vendorLocation.get('intShipViaId'));
+                current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
             }
         }
     },
@@ -1310,7 +1315,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 TransactionDate: masterRecord.get('dtmReceiptDate'),
                 TransactionType: 'Purchase',
                 EntityId: masterRecord.get('intEntityVendorId'),
-                TaxMasterId: detailRecord.get('intTaxGroupId')
+                TaxGroupId: masterRecord.get('intTaxGroupId')
             };
 
             if (reset)
@@ -2081,7 +2086,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
-        if (current) current.set('intShipViaId', records[0].get('intShipViaId'));
+        if (current) {
+            current.set('intShipViaId', records[0].get('intShipViaId'));
+            current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+        }
     },
 
     onOrderNumberSelect: function (combo, records) {
