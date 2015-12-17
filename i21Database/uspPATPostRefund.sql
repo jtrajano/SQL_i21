@@ -16,6 +16,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+BEGIN TRANSACTION -- START TRANSACTION
 
 ----=====================================================================================================================================
 ---- 	DECLARE TEMPORARY TABLES
@@ -38,15 +39,6 @@ DECLARE @error NVARCHAR(200)
 
 
 --=====================================================================================================================================
--- 	UPDATE REFUND TABLE
----------------------------------------------------------------------------------------------------------------------------------------
-
-	UPDATE tblPATRefund 
-	   SET ysnPosted = ISNULL(@ysnPosted,0)
-	  FROM tblPATRefund R
-	 WHERE R.intRefundId = @intRefundId
-
---=====================================================================================================================================
 --  GET REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
 	SELECT PR.intRefundId, PR.intFiscalYearId, PR.dtmRefundDate, PR.strRefund, PR.dblMinimumRefund, PR.dblServiceFee,
@@ -63,7 +55,9 @@ INNER JOIN tblPATRefundCategory PRCA
 		ON PRCA.intRefundCustomerId = PRC.intRefundCustomerId
 
 SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	
-COMMIT TRANSACTION --COMMIT inserted transaction
+
+COMMIT TRANSACTION --COMMIT inserted invalid transaction
+
 
 IF(@totalRecords = 0)  
 BEGIN
@@ -76,6 +70,17 @@ BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
+
+--=====================================================================================================================================
+-- 	UPDATE REFUND TABLE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+	UPDATE tblPATRefund 
+	   SET ysnPosted = ISNULL(@ysnPosted,0)
+	  FROM tblPATRefund R
+	 WHERE R.intRefundId = @intRefundId
+
+
 DECLARE @validRefundIds NVARCHAR(MAX)
 
 --CREATE TEMP GL ENTRIES
@@ -104,6 +109,8 @@ BEGIN CATCH
 END CATCH
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
+BEGIN TRANSACTION
+
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER EQUITY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
