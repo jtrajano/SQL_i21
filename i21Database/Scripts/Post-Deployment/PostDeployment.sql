@@ -111,7 +111,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
-:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
+--:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 
 
 
