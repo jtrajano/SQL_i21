@@ -45,7 +45,7 @@ END
 
 SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   strCustomerName = ENT.strName,
-			   AC.strStockStatus,
+			   strStockStatus = AC.strStockStatus,
 			   dtmLastActivityDate = CV.dtmLastActivityDate,
 			   TC.strTaxCode,
 			   ysnEligibleRefund = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND Total.dblRefundAmount < @dblMinimumRefund  THEN 1 ELSE 0 END),
@@ -132,5 +132,7 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 	-- End Transaction
 	-- ==================================================================
 END
+
+
 
 GO
