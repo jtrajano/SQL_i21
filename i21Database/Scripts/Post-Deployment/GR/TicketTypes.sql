@@ -28,19 +28,19 @@ GO
     IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCListTicketTypes WHERE [intTicketType] = 3)
     BEGIN
         INSERT [dbo].[tblSCListTicketTypes] ([intTicketTypeId], [intTicketType], [strTicketType], [strInOutIndicator], [ysnActive], [intConcurrencyId])
-        VALUES (5 , 3 , 'Memo/Weigh' , '' , 1, 0)
+        VALUES (5 , 3 , 'Memo/Weigh' , 'I' , 1, 0)
     END
 GO
     IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCListTicketTypes WHERE [intTicketType] = 4)
     BEGIN
         INSERT [dbo].[tblSCListTicketTypes] ([intTicketTypeId], [intTicketType], [strTicketType], [strInOutIndicator], [ysnActive], [intConcurrencyId])
-        VALUES (6 , 4 , 'Storage Take Out' , '' , 0, 0)
+        VALUES (6 , 4 , 'Storage Take Out' , 'I' , 0, 0)
     END
 GO
     IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCListTicketTypes WHERE [intTicketType] = 5)
     BEGIN
         INSERT [dbo].[tblSCListTicketTypes] ([intTicketTypeId], [intTicketType], [strTicketType], [strInOutIndicator], [ysnActive], [intConcurrencyId])
-        VALUES (7 , 5 , 'AG Outbound' , '' , 0, 0)
+        VALUES (7 , 5 , 'AG Outbound' , 'I' , 0, 0)
     END
 GO
     IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCListTicketTypes WHERE [intTicketType] = 6 AND [strInOutIndicator] = 'I')
@@ -55,4 +55,17 @@ GO
         VALUES (9 , 6 , 'Direct Out' , 'O' , 1, 0)
     END
     SET IDENTITY_INSERT [dbo].[tblSCListTicketTypes] OFF
+GO
+	UPDATE
+    Table_A
+		SET
+			Table_A.intListTicketTypeId = Table_B.intTicketTypeId
+		FROM
+			tblSCTicketType AS Table_A
+		INNER JOIN
+			tblSCListTicketTypes AS Table_B
+		ON
+			Table_A.intTicketType = Table_B.intTicketType
+			AND Table_A.strInOutIndicator = Table_B.strInOutIndicator
+		WHERE intListTicketTypeId IS NULL
 GO
