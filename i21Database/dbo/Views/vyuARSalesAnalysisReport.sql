@@ -55,9 +55,10 @@ FROM
 	  , I.strTransactionType
 	  , I.strType
 	  , ID.strItemDescription
+	  , ID.intAccountId				  AS intItemAccountId
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
-	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 THEN ICIT.dblCost ELSE ICIT1.dblCost END) --CASE WHEN I.intDistributionHeaderId IS NULL THEN ISNULL(ICP.dblStandardCost, 0) ELSE ISNULL(TR.dblUnitCost, 0) END
+	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 THEN ICIT.dblCost ELSE ICIT1.dblCost END)
 	  , dblPrice
 	  , ID.dblTotalTax				  AS dblTax
 	  , ID.dblTotal					  AS dblLineTotal
@@ -65,7 +66,6 @@ FROM
 	  , I.strBillToLocationName
 	  , I.strShipToLocationName
 FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
---LEFT JOIN tblICItemUOM SU ON ID.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
 LEFT OUTER JOIN 
 	tblICInventoryTransaction ICIT 
 		ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
@@ -96,12 +96,6 @@ LEFT OUTER JOIN
 		ON  ID.intInventoryShipmentItemId = ICIT1.intInventoryShipmentItemId 
 		AND ID.intItemId = ICIT1.intItemId 
 		AND ID.intItemUOMId = ICIT1.intItemUOMId
-
---LEFT JOIN (tblICItemLocation ICL 
---		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON I.intCompanyLocationId = ICL.intLocationId AND ID.intItemId = ICL.intItemId AND ID.intItemId = ICP.intItemId	
---LEFT JOIN (tblTRTransportLoad TL 
---		INNER JOIN tblTRTransportReceipt TR ON TL.intTransportLoadId = TR.intTransportLoadId) ON I.strInvoiceOriginId = TL.strTransaction AND ID.intItemId = TR.intItemId AND I.intCompanyLocationId = TR.intCompanyLocationId
-
 WHERE I.ysnPosted = 1 
   AND I.strTransactionType IN ('Invoice', 'Credit Memo')
 
@@ -119,9 +113,10 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.strTransactionType
 	 , SO.strType
 	 , SOD.strItemDescription
+	 , SOD.intAccountId				  AS intItemAccountId
 	 , SOD.dblQtyOrdered
 	 , SOD.dblQtyShipped
-	 , dblStandardCost				  = ICP.dblStandardCost
+	 , ICP.dblStandardCost			  AS dblStandardCost				  
 	 , dblPrice
 	 , SOD.dblTotalTax				  AS dblTax
 	 , SOD.dblTotal					  AS dblLineTotal
@@ -134,7 +129,7 @@ LEFT JOIN (tblICItemLocation ICL
 		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
 
 WHERE SO.ysnProcessed = 1) AS A
-	INNER JOIN tblGLAccount GA ON A.intAccountId = GA.intAccountId
+	LEFT JOIN tblGLAccount GA ON A.intItemAccountId = GA.intAccountId
 	INNER JOIN tblSMCompanyLocation L ON A.intCompanyLocationId = L.intCompanyLocationId
 	INNER JOIN (tblARCustomer C 
 		INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON A.intEntityCustomerId = C.intEntityCustomerId
