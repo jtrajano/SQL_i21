@@ -49,6 +49,7 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'dtmReceiveTime', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'dblActualTempReading', type: 'float' },
         { name: 'intShipmentId', type: 'int', allowNull: true },
+        { name: 'intTaxGroupId', type: 'int', allowNull: true },
         { name: 'ysnPosted', type: 'boolean' },
         { name: 'intCreatedUserId', type: 'int', allowNull: true },
         { name: 'intEntityId', type: 'int', allowNull: true }
