@@ -143,6 +143,7 @@
 :r "..\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 :r "..\dbo\Views\vyuTMDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 
 
 

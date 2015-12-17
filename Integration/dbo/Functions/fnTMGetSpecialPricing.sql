@@ -12,23 +12,33 @@ IF (EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwcu
 BEGIN
 	EXEC('
 CREATE FUNCTION [dbo].[fnTMGetSpecialPricing](
-	@strCustomerNumber AS NVARCHAR(20)
-	,@strItemNumber NVARCHAR(20)
-	,@strLocation NVARCHAR(20)
-	,@strItemClass NVARCHAR(20)
-	,@dtmOrderDate DATETIME
-	,@dblQuantity DECIMAL(18,6)
-	,@strContractNumber NVARCHAR(20)
+	@strCustomerNumberParam AS NVARCHAR(20)
+	,@strItemNumberParam NVARCHAR(20)
+	,@strLocationParam NVARCHAR(20)
+	,@strItemClassParam NVARCHAR(20)
+	,@dtmOrderDateParam DATETIME
+	,@dblQuantityParam DECIMAL(18,6)
+	,@strContractNumberParam NVARCHAR(20)
 )
 RETURNS NVARCHAR(50)
 AS
 BEGIN 
 
-	--DECLARE @strCustomerNumber NVARCHAR(20)
-	--DECLARE @strItemNumber NVARCHAR(20)
-	--DECLARE @strLocation NVARCHAR(20)
-	--DECLARE @strItemClass NVARCHAR(20)
-	--DECLARE @dtmOrderDate DATETIME
+	DECLARE @strCustomerNumber AS NVARCHAR(20)
+	DECLARE @strItemNumber NVARCHAR(20)
+	DECLARE @strLocation NVARCHAR(20)
+	DECLARE @strItemClass NVARCHAR(20)
+	DECLARE @dtmOrderDate DATETIME
+	DECLARE @dblQuantity DECIMAL(18,6)
+	DECLARE @strContractNumber NVARCHAR(20)
+
+	SET @strCustomerNumber  = @strCustomerNumberParam
+	SET	@strItemNumber = @strItemNumberParam
+	SET	@strLocation  = @strLocationParam
+	SET	@strItemClass = @strItemClassParam
+	SET	@dtmOrderDate = @dtmOrderDateParam
+	SET	@dblQuantity = @dblQuantityParam
+	SET	@strContractNumber = @strContractNumberParam
 
 	DECLARE @dblCurrentItemPrice DECIMAL(18,6)
 	DECLARE @dblItemPrice DECIMAL(18,6)
