@@ -133,6 +133,7 @@ INSERT INTO
 		,[strBillToZipCode]
 		,[strBillToCountry]
 		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
 		,[intConcurrencyId]
 		,[intEntityId]
 		,[strDeliverPickup]
@@ -180,7 +181,8 @@ SELECT
 	,min(BL.[strState])				--[strBillToState]
 	,min(BL.[strZipCode])			--[strBillToZipCode]
 	,min(BL.[strCountry])			--[strBillToCountry]
-	,IE.intSourceId
+	,CASE WHEN IE.strSourceScreenName = 'Transport Load' THEN IE.intSourceId ELSE NULL END
+	,CASE WHEN IE.strSourceScreenName = 'Transport Loads' THEN IE.intSourceId ELSE NULL END
 	,1
 	,@EntityId
 	,IE.strDeliverPickup
@@ -224,58 +226,59 @@ LEFT OUTER JOIN
 		ON AC.intShipToId = BL.intEntityLocationId	
 WHERE
 	IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
-group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber;				
+group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber,IE.strSourceScreenName;				
 
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
 
 UPDATE [tblARInvoice]
 SET	   
-	 [strInvoiceOriginId]		= IE.strSourceId
-	,[intEntityCustomerId]		= IE.[intEntityCustomerId]
-	,[dtmDate]					= IE.dtmDate
-	,[dtmDueDate]				= dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))
-	,[intCurrencyId]			= ISNULL(IE.intCurrencyId,AC.[intCurrencyId])
-	,[intCompanyLocationId]		= ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
-	,[intEntitySalespersonId]	= ISNULL(IE.[intSalesPersonId],AC.[intSalespersonId])
-	,[dtmShipDate]				= IE.dtmDate
-	,[intShipViaId]				= ISNULL(IE.intShipViaId,ISNULL(EL.[intShipViaId], 0))
-	,[strPONumber]				= IE.strPurchaseOrder
-	,[intTermId]				= EL.[intTermsId]
-	,[dblInvoiceSubtotal]		= @ZeroDecimal
-	,[dblShipping]				= @ZeroDecimal
-	,[dblTax]					= @ZeroDecimal
-	,[dblInvoiceTotal]			= @ZeroDecimal
-	,[dblDiscount]				= @ZeroDecimal
-	,[dblAmountDue]				= @ZeroDecimal
-	,[dblPayment]				= @ZeroDecimal
-	,[strTransactionType]		= 'Invoice'
-	,[intPaymentMethodId]		= 0
-	,[strComments]				= IE.strComments
-	,[intAccountId]				= @ARAccountId
-	,[dtmPostDate]				= NULL
-	,[ysnPosted]				= 0
-	,[ysnPaid]					= 0
-	,[intShipToLocationId]		= ISNULL(IE.[intShipToLocationId], EL.[intEntityLocationId]) 
-	,[strShipToLocationName]	= SL.[strLocationName]
-	,[strShipToAddress]			= SL.[strAddress]
-	,[strShipToCity]			= SL.[strCity]
-	,[strShipToState]			= SL.[strState]
-	,[strShipToZipCode]			= SL.[strZipCode]
-	,[strShipToCountry]			= SL.[strCountry]
-	,[intBillToLocationId]		= ISNULL(AC.[intBillToId],EL.[intEntityLocationId])
-	,[strBillToLocationName]	= BL.[strLocationName]
-	,[strBillToAddress]			= BL.[strAddress]
-	,[strBillToCity]			= BL.[strCity]
-	,[strBillToState]			= BL.[strState]
-	,[strBillToZipCode]			= BL.[strZipCode]
-	,[strBillToCountry]			= BL.[strCountry]
-	,[intDistributionHeaderId]	= IE.intSourceId
-	,[intConcurrencyId]			= I.[intConcurrencyId] + 1
-	,[intEntityId]				= @EntityId
-	,[strDeliverPickup]			= IE.strDeliverPickup   
-	,[strActualCostId]  		= IE.strActualCostId
-	,[strBOLNumber]  			= IE.[strBOLNumber]
+	 [strInvoiceOriginId]			= IE.strSourceId
+	,[intEntityCustomerId]			= IE.[intEntityCustomerId]
+	,[dtmDate]						= IE.dtmDate
+	,[dtmDueDate]					= dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))
+	,[intCurrencyId]				= ISNULL(IE.intCurrencyId,AC.[intCurrencyId])
+	,[intCompanyLocationId]			= ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
+	,[intEntitySalespersonId]		= ISNULL(IE.[intSalesPersonId],AC.[intSalespersonId])
+	,[dtmShipDate]					= IE.dtmDate
+	,[intShipViaId]					= ISNULL(IE.intShipViaId,ISNULL(EL.[intShipViaId], 0))
+	,[strPONumber]					= IE.strPurchaseOrder
+	,[intTermId]					= EL.[intTermsId]
+	,[dblInvoiceSubtotal]			= @ZeroDecimal
+	,[dblShipping]					= @ZeroDecimal
+	,[dblTax]						= @ZeroDecimal
+	,[dblInvoiceTotal]				= @ZeroDecimal
+	,[dblDiscount]					= @ZeroDecimal
+	,[dblAmountDue]					= @ZeroDecimal
+	,[dblPayment]					= @ZeroDecimal
+	,[strTransactionType]			= 'Invoice'
+	,[intPaymentMethodId]			= 0
+	,[strComments]					= IE.strComments
+	,[intAccountId]					= @ARAccountId
+	,[dtmPostDate]					= NULL
+	,[ysnPosted]					= 0
+	,[ysnPaid]						= 0
+	,[intShipToLocationId]			= ISNULL(IE.[intShipToLocationId], EL.[intEntityLocationId]) 
+	,[strShipToLocationName]		= SL.[strLocationName]
+	,[strShipToAddress]				= SL.[strAddress]
+	,[strShipToCity]				= SL.[strCity]
+	,[strShipToState]				= SL.[strState]
+	,[strShipToZipCode]				= SL.[strZipCode]
+	,[strShipToCountry]				= SL.[strCountry]
+	,[intBillToLocationId]			= ISNULL(AC.[intBillToId],EL.[intEntityLocationId])
+	,[strBillToLocationName]		= BL.[strLocationName]
+	,[strBillToAddress]				= BL.[strAddress]
+	,[strBillToCity]				= BL.[strCity]
+	,[strBillToState]				= BL.[strState]
+	,[strBillToZipCode]				= BL.[strZipCode]
+	,[strBillToCountry]				= BL.[strCountry]
+	,[intDistributionHeaderId]		= CASE WHEN IE.strSourceScreenName = 'Transport Load' THEN IE.intSourceId ELSE NULL END
+	,[intLoadDistributionHeaderId]	= CASE WHEN IE.strSourceScreenName = 'Transport Loads' THEN IE.intSourceId ELSE NULL END
+	,[intConcurrencyId]				= I.[intConcurrencyId] + 1
+	,[intEntityId]					= @EntityId
+	,[strDeliverPickup]				= IE.strDeliverPickup   
+	,[strActualCostId]  			= IE.strActualCostId
+	,[strBOLNumber]  				= IE.[strBOLNumber]
 FROM
 	[tblARInvoice] I
 INNER JOIN 
@@ -348,7 +351,7 @@ BEGIN
 		@InvoiceEntries IE
 	INNER JOIN
 		tblARInvoice I
-			ON IE.intSourceId = I.intDistributionHeaderId
+			ON IE.intSourceId = CASE WHEN IE.strSourceScreenName = 'Transport Load' THEN I.intDistributionHeaderId ELSE I.intLoadDistributionHeaderId END
 	WHERE
 		ISNULL(IE.intInvoiceId,0) <> 0
 		AND I.intInvoiceId = @InvoiceIdForUpdate
@@ -545,7 +548,7 @@ BEGIN
 		@InvoiceEntries IE
 	INNER JOIN
 		tblARInvoice I
-			ON IE.intSourceId = I.intDistributionHeaderId
+			ON IE.intSourceId = CASE WHEN IE.strSourceScreenName = 'Transport Load' THEN I.intDistributionHeaderId ELSE I.intLoadDistributionHeaderId END
 	WHERE
 		ISNULL(IE.intInvoiceId,0) = 0
 		AND I.intInvoiceId = @InvoiceId
