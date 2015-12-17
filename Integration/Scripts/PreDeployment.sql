@@ -158,6 +158,10 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateItemUsedBySiteView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateLocationUsedBySiteView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDriverUsedBySiteView.sql"
+:r "..\dbo\Views\vyuTMDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspTMDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
+
 
 
 
