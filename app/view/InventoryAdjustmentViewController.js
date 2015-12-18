@@ -485,6 +485,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             // Populate the default data.
             current.set('intItemId', record.get('intItemId'));
             current.set('strItemDescription', record.get('strDescription'));
+            current.set('dblCost', record.get('dblLastCost'));
             me.getStockQuantity(current, win);
 
             // Check if selected item lot-tracking = NO.
@@ -492,19 +493,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             var strLotTracking = record.get('strLotTracking');
 
             if (strLotTracking == 'No'){
-                current.set('dblCost', record.get('dblLastCost'));
                 current.set('intItemUOMId', record.get('intStockUOMId'));
                 current.set('strItemUOM', record.get('strStockUOM'));
                 current.set('dblItemUOMUnitQty', record.get('dblStockUnitQty'));
             }
             else {
-                current.set('dblCost', null);
                 current.set('intItemUOMId', null);
                 current.set('strItemUOM', null);
                 current.set('dblItemUOMUnitQty', null);
             }
 
             // Clear the values for the following fields:
+
             current.set('strSubLocation', null);
             current.set('strStorageLocation', null);
             current.set('intLotId', null);
@@ -546,7 +546,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
             me.getStockQuantity(current, win);
-            current.set('dblCost', null);
             current.set('intItemUOMId', null);
             current.set('dblItemUOMUnitQty', null);
             current.set('strItemUOM', null);
@@ -576,7 +575,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intStorageLocationId', record.get('intStorageLocationId'));
             me.getStockQuantity(current, win);
-            current.set('dblCost', null);
             current.set('intItemUOMId', null);
             current.set('dblItemUOMUnitQty', null);
             current.set('strItemUOM', null);
