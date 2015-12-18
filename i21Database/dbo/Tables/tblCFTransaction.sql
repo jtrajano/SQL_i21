@@ -3,7 +3,7 @@
     [intContractId]           INT             NULL,
     [dblQuantity]             NUMERIC (18, 6) NULL,
     [dtmBillingDate]          DATETIME        NULL,
-    [dtmTransactionDate]      DATETIME        NULL,
+    [dtmTransactionDate]      DATETIME        NOT NULL,
     [intTransTime]            INT             NULL,
     [strSequenceNumber]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strPONumber]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
