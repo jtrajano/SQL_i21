@@ -506,7 +506,9 @@ BEGIN TRY
 	           ,[dblCurrencyRate]
 			   ,[intCurrencyId]
 			   ,[strStorageTicketNumber]
-			   ,[intItemId])
+			   ,[intItemId]
+			   ,[intCompanyLocationSubLocationId]
+			   ,[intStorageLocationId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -536,6 +538,8 @@ BEGIN TRY
 			,[intCurrencyId] = SC.intCurrencyId
 			,[intStorageTicketNumber] = SC.strTicketNumber
 			,SC.[intItemId]
+			,SC.[intSubLocationId]
+			,SC.[intStorageLocationId]
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
