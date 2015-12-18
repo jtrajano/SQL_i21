@@ -6,7 +6,6 @@
 	intReasonCodeId INT NOT NULL,
 	intDowntime INT NOT NULL,
 	strExplanation NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-	intMachineId INT NOT NULL,
 	dtmShiftStartTime DATETIME,
 	dtmShiftEndTime DATETIME,
 	ysnReduceavailabletime BIT NOT NULL CONSTRAINT DF_tblMFDowntime_ysnReduceavailabletime DEFAULT 0, 
@@ -18,6 +17,5 @@
 		
 	CONSTRAINT PK_tblMFDowntime PRIMARY KEY (intDowntimeId), 
 	CONSTRAINT FK_tblMFDowntime_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId),
-	CONSTRAINT FK_tblMFDowntime_tblMFReasonCode FOREIGN KEY (intReasonCodeId) REFERENCES tblMFReasonCode(intReasonCodeId),
-	CONSTRAINT FK_tblMFDowntime_tblMFMachine FOREIGN KEY (intMachineId) REFERENCES tblMFMachine(intMachineId)
+	CONSTRAINT FK_tblMFDowntime_tblMFReasonCode FOREIGN KEY (intReasonCodeId) REFERENCES tblMFReasonCode(intReasonCodeId)
 )
