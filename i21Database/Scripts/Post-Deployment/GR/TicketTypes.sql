@@ -56,16 +56,3 @@ GO
     END
     SET IDENTITY_INSERT [dbo].[tblSCListTicketTypes] OFF
 GO
-	UPDATE
-    Table_A
-		SET
-			Table_A.intListTicketTypeId = Table_B.intTicketTypeId
-		FROM
-			tblSCTicketType AS Table_A
-		INNER JOIN
-			tblSCListTicketTypes AS Table_B
-		ON
-			Table_A.intTicketType = Table_B.intTicketType
-			AND Table_A.strInOutIndicator = Table_B.strInOutIndicator
-		WHERE intListTicketTypeId IS NULL
-GO
