@@ -334,7 +334,7 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 1
 
 	
-	UPDATE #iRelyImptblGLJournalDetail
+	UPDATE tblGLJournalDetail
 	SET gooddate = cast( substring(replace(convert(varchar(20),j.dtmDate,102),'.',''),1,6) + '01'  as datetime )
 	FROM #iRelyImptblGLJournalDetail a INNER JOIN
 	tblGLJournal j on a.intJournalId =j.intJournalId
@@ -359,8 +359,9 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	--	UPDATE POST DATE JOURNAL [HEADER]
 	--+++++++++++++++++++++++++++++++++++++											
 						
-	--UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
- --                                       WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+	UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
+                                        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+										WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
                                         						
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT	
 

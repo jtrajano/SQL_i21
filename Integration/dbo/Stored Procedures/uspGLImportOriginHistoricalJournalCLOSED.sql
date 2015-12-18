@@ -344,6 +344,7 @@ INSERT tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,
    
  UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +''/01/''+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail
  WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+ WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
    
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
     
