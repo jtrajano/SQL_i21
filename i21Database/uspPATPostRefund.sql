@@ -84,9 +84,9 @@ BEGIN TRANSACTION
 DECLARE @validRefundIds NVARCHAR(MAX)
 
 --CREATE TEMP GL ENTRIES
-SELECT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
+SELECT DISTINCT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
 FROM #tmpRefundData
-ORDER BY intRefundId
+ORDER BY 1
 
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
