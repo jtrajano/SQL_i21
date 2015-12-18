@@ -79,6 +79,7 @@ DECLARE @DataForReceiptHeader TABLE(
 	,Currency INT
 	,intSourceType INT
 	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,intTaxGroupId INT
 )
 
 -- Sort the data from @ReceiptEntries and determine which ones are the header records. 
@@ -91,6 +92,7 @@ INSERT INTO @DataForReceiptHeader(
 		,ShipFrom
 		,Currency
 		,intSourceType
+		,intTaxGroupId
 )
 SELECT	RawData.intEntityVendorId
 		,RawData.strBillOfLadding
@@ -100,6 +102,7 @@ SELECT	RawData.intEntityVendorId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
+		,RawData.intTaxGroupId
 FROM	@ReceiptEntries RawData
 GROUP BY RawData.intEntityVendorId
 		,RawData.strBillOfLadding
@@ -109,6 +112,7 @@ GROUP BY RawData.intEntityVendorId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
+		,RawData.intTaxGroupId
 ;
 
 -- Validate if there is data to process. If there is no data, then raise an error. 
@@ -214,7 +218,7 @@ BEGIN
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
 				,strActualCostId		= IntegrationData.strActualCostId
-
+				,intTaxGroupId			= IntegrationData.intTaxGroupId
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -249,6 +253,7 @@ BEGIN
 				,intCreatedUserId
 				,ysnPosted
 				,strActualCostId
+				,intTaxGroupId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@ReceiptNumber
@@ -283,6 +288,7 @@ BEGIN
 				/*intCreatedUserId*/			,@intUserId
 				/*ysnPosted*/					,0
 				/*strActualCostId*/				,IntegrationData.strActualCostId
+				/*intTaxGroupId*/				,IntegrationData.intTaxGroupId
 			)
 		;
 				
@@ -329,6 +335,7 @@ BEGIN
 				,intOwnershipType
 				,dblGross
 				,dblNet
+				,intCostUOMId
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -360,6 +367,7 @@ BEGIN
 										  END
 				,dblGross				= RawData.dblGross
 				,dblNet					= RawData.dblNet
+				,intCostUOMId			= RawData.intCostUOMId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
