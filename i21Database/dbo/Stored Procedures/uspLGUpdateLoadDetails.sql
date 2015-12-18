@@ -14,7 +14,10 @@ BEGIN TRY
 	BEGIN
 		IF NOT EXISTS(SELECT 1 FROM tblTRTransportLoad WHERE intTransportLoadId=@intTicketId) AND @intTicketId IS NOT NULL
 		BEGIN
-			RAISERROR('Invalid Ticket/TransportId', 16, 1)
+			IF NOT EXISTS(SELECT 1 FROM tblTRLoadHeader WHERE intLoadHeaderId=@intTicketId) AND @intTicketId IS NOT NULL
+			BEGIN
+				RAISERROR('Invalid Ticket/TransportId', 16, 1)
+			END
 		END
 	END
 
@@ -28,6 +31,12 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblLGLoad SET 
 			intTransportLoadId=@intTicketId
+		WHERE intLoadId=@intLoadId
+	END
+	IF EXISTS(SELECT 1 FROM tblTRLoadHeader WHERE intLoadHeaderId=@intTicketId)
+	BEGIN
+		UPDATE tblLGLoad SET 
+			intLoadHeaderId=@intTicketId
 		WHERE intLoadId=@intLoadId
 	END
 
@@ -48,5 +57,5 @@ END TRY
 
 BEGIN CATCH
 SET @ErrMsg = ERROR_MESSAGE()
- RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')
+	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')
 END CATCH
