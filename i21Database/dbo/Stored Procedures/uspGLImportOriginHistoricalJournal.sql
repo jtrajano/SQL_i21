@@ -334,7 +334,7 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 1
 
 	
-	UPDATE tblGLJournalDetail
+	UPDATE #iRelyImptblGLJournalDetail
 	SET gooddate = cast( substring(replace(convert(varchar(20),j.dtmDate,102),'.',''),1,6) + '01'  as datetime )
 	FROM #iRelyImptblGLJournalDetail a INNER JOIN
 	tblGLJournal j on a.intJournalId =j.intJournalId
