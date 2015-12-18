@@ -27,7 +27,7 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 
 --VALIDATE IF HAS NON-STOCK ITEMS
 IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
-				LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId WHERE ISNULL(I.strLotTracking, 'No') = 'No' AND SO.intSalesOrderId = @SalesOrderId)
+				LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId WHERE ISNULL(I.strLotTracking, 'No') = 'No' AND SO.intSalesOrderId = @SalesOrderId AND SI.dblQtyRemaining > 0)
 	BEGIN
 		RAISERROR('Process To Invoice Failed. There is no item to process to Invoice.', 16, 1);
         RETURN;
