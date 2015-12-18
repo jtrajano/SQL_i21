@@ -1,25 +1,39 @@
 ﻿CREATE FUNCTION [dbo].[fnGetCustomerTaxCodeExemption]
 ( 
-	 @CustomerId		INT
-	,@TransactionDate	DATETIME
-	,@TaxCodeId			INT
-	,@TaxClassId		INT
-	,@TaxState			NVARCHAR(100)
-	,@ItemId			INT
-	,@ItemCategoryId	INT
-	,@ShipToLocationId	INT
+	 @CustomerId			INT
+	,@TransactionDate		DATETIME
+	,@TaxCodeId				INT
+	,@TaxClassId			INT
+	,@TaxState				NVARCHAR(100)
+	,@ItemId				INT
+	,@ItemCategoryId		INT
+	,@ShipToLocationId		INT
+	,@IsCustomerSiteTaxable	BIT
 )
 RETURNS NVARCHAR(500)
 AS
 BEGIN
 	DECLARE @TaxCodeExemption	NVARCHAR(500)
 	
-	--Customer
-	IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
-		SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+	IF @IsCustomerSiteTaxable IS NULL
+		BEGIN
+			--Customer
+			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
+				SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+				RETURN @TaxCodeExemption
+		END
+
+	IF @IsCustomerSiteTaxable IS NOT NULL
+		BEGIN
+			--Customer
+			IF ISNULL(@IsCustomerSiteTaxable,0) = 0
+				SET @TaxCodeExemption = 'Customer Site is non taxable; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+		
+			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+				RETURN @TaxCodeExemption
+		END
 		
 	--Item Category Tax Class		
 	SELECT TOP 1
