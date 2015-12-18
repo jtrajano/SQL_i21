@@ -3084,6 +3084,7 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdatePaycheckReferenceNo.sql" />
     <Build Include="dbo\Functions\fnPATCreateDividendGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATReverseGLDividendEntries.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CallEntryPrintOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
