@@ -6,7 +6,8 @@
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
-	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemPrice						NUMERIC(18,6)	= 0.000000
+	,@ItemSalesOrderDetailId		INT				= NULL	
 	,@ItemTaxGroupId				INT				= NULL	
 AS
 
@@ -133,7 +134,7 @@ BEGIN TRY
 		,[strSCInvoiceNumber]				= NULL 
 		,[intInventoryShipmentItemId]		= NULL 
 		,[strShipmentNumber]				= NULL 
-		,[intSalesOrderDetailId]			= NULL 
+		,[intSalesOrderDetailId]			= @ItemSalesOrderDetailId 
 		,[strSalesOrderNumber]				= NULL 
 		,[intContractHeaderId]				= NULL
 		,[intContractDetailId]				= NULL

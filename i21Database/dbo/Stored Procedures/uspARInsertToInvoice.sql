@@ -48,19 +48,21 @@ DECLARE @EntityCustomerId		INT,
 		@BillToLocationId		INT,
 		@SplitId				INT
 
-DECLARE @tblSODNonStock TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
-							intItemId				INT, 
-							ysnIsInventory			BIT,
-							strItemDescription		NVARCHAR(100),
-							intItemUOMId			INT,
-							dblQtyRemaining			NUMERIC(18,6),
-							dblMaintenanceAmount	NUMERIC(18,6),
-							dblDiscount				NUMERIC(18,6),
-							dblPrice				NUMERIC(18,6),
-							intTaxGroupId			INT,
-							intSalesOrderDetailId	INT,
-							strItemType				NVARCHAR(100),
-							strSalesOrderNumber		NVARCHAR(100))
+DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
+							intItemId					INT, 
+							ysnIsInventory				BIT,
+							strItemDescription			NVARCHAR(100),
+							intItemUOMId				INT,
+							dblQtyRemaining				NUMERIC(18,6),
+							dblMaintenanceAmount		NUMERIC(18,6),
+							dblDiscount					NUMERIC(18,6),
+							dblPrice					NUMERIC(18,6),
+							intTaxGroupId				INT,
+							intSalesOrderDetailId		INT,
+							intInventoryShipmentItemId	INT,
+							strItemType					NVARCHAR(100),
+							strSalesOrderNumber			NVARCHAR(100),
+							strShipmentNumber			NVARCHAR(100))
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -72,20 +74,22 @@ DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 
 SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 
---GET NON-STOCK ITEMS 
-INSERT INTO @tblSODNonStock
-SELECT SI.intItemId,
-		CASE WHEN I.strType = 'Inventory' THEN 1 ELSE 0 END,
-		SI.strItemDescription,
-		SI.intItemUOMId,
-		SI.dblQtyRemaining,
-		CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END,
-		SI.dblDiscount,
-		SI.dblPrice,
-		SI.intTaxGroupId,
-		SI.intSalesOrderDetailId,
-		I.strType,
-		SI.strSalesOrderNumber
+--GET ITEMS FROM SALES ORDER
+INSERT INTO @tblItemsToInvoice
+SELECT SI.intItemId
+	 , dbo.fnIsStockTrackingItem(SI.intItemId)
+	 , SI.strItemDescription
+	 , SI.intItemUOMId
+	 , SI.dblQtyRemaining
+	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
+	 , SI.dblDiscount
+	 , CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , SI.intTaxGroupId
+	 , SI.intSalesOrderDetailId
+	 , NULL
+	 , I.strType
+	 , SI.strSalesOrderNumber
+	 , NULL
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -93,6 +97,30 @@ FROM tblSOSalesOrder SO
 WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining > 0
+
+--GET ITEMS FROM POSTED SHIPMENT
+INSERT INTO @tblItemsToInvoice
+SELECT ICSI.intItemId
+	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
+	 , SOD.strItemDescription
+	 , ICSI.intItemUOMId
+	 , ICSI.dblQuantity
+	 , @dblZeroAmount
+	 , SOD.dblDiscount
+	 , ICSI.dblUnitPrice
+	 , SOD.intTaxGroupId
+	 , SOD.intSalesOrderDetailId
+	 , ICSI.intInventoryShipmentItemId
+	 , ICI.strType
+	 , SO.strSalesOrderNumber
+	 , ICS.strShipmentNumber
+FROM tblICInventoryShipmentItem ICSI 
+INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
+INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
+INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
+WHERE ICSI.intOrderId = @SalesOrderId
+AND ICS.ysnPosted = 1
 
 --GET SOFTWARE ITEMS
 IF @FromShipping = 0
@@ -103,26 +131,10 @@ IF @FromShipping = 0
 				, @dblZeroAmount
 				, dblMaintenanceAmount
 				, dblMaintenanceAmount * dblQtyRemaining
-		FROM @tblSODNonStock WHERE strItemType = 'Software'
+		FROM @tblItemsToInvoice WHERE strItemType = 'Software'
 			ORDER BY intSalesOrderDetailId
 	END
-ELSE
-	BEGIN --STOCK SOFTWARE
-		INSERT INTO @tblSODSoftware (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)	
-		SELECT SOD.intSalesOrderDetailId
-			 , @dblZeroAmount
-			 , @dblZeroAmount
-			 , SOD.dblMaintenanceAmount
-			 , SOD.dblMaintenanceAmount * ISHI.dblQuantity 
-		FROM tblICInventoryShipmentItem ISHI 
-		INNER JOIN tblICItem IC ON ISHI.intItemId = IC.intItemId
-		INNER JOIN tblSOSalesOrderDetail SOD ON ISHI.intOrderId = SOD.intSalesOrderId AND ISHI.intLineNo = SOD.intSalesOrderDetailId 
-		WHERE intInventoryShipmentId = @ShipmentId
-	END
-
---REMOVE SOFTWARE ITEMS FROM NON STOCK TABLE
-DELETE FROM @tblSODNonStock WHERE strItemType = 'Software'
-
+	
 --COMPUTE INVOICE TOTAL AMOUNTS FOR SOFTWARE
 SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
 	    , @dblTax				  = SUM(dblTotalTax)
@@ -345,7 +357,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 	END
 
 --CHECK IF THERE IS NON STOCK ITEMS
-IF EXISTS (SELECT NULL FROM @tblSODNonStock)
+IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 	BEGIN
 		--INSERT INVOICE HEADER
 		BEGIN TRY
@@ -397,7 +409,7 @@ IF EXISTS (SELECT NULL FROM @tblSODNonStock)
 		END CATCH
 
 		--INSERT TO INVOICE DETAIL
-		WHILE EXISTS(SELECT NULL FROM @tblSODNonStock)
+		WHILE EXISTS(SELECT NULL FROM @tblItemsToInvoice)
 			BEGIN
 				DECLARE @intItemToInvoiceId		INT,
 						@ItemId					INT,
@@ -410,7 +422,9 @@ IF EXISTS (SELECT NULL FROM @tblSODNonStock)
 						@ItemPrice				NUMERIC(18,6),
 						@ItemTaxGroupId			INT,		
 						@ItemSalesOrderDetailId	INT,
-						@ItemSalesOrderNumber	NVARCHAR(100)
+						@ItemShipmentDetailId	INT,
+						@ItemSalesOrderNumber	NVARCHAR(100),
+						@ItemShipmentNumber		NVARCHAR(100)
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -422,62 +436,45 @@ IF EXISTS (SELECT NULL FROM @tblSODNonStock)
 						@ItemDiscount			= dblDiscount,
 						@ItemPrice				= dblPrice,
 						@ItemTaxGroupId			= intTaxGroupId,
-						@ItemSalesOrderDetailId	= intSalesOrderDetailId,
-						@ItemSalesOrderNumber	= strSalesOrderNumber
-				FROM @tblSODNonStock ORDER BY intItemToInvoiceId ASC
+						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
+						@ItemShipmentDetailId	= intInventoryShipmentItemId,
+						@ItemSalesOrderNumber	= strSalesOrderNumber,
+						@ItemShipmentNumber		= strShipmentNumber
+				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 
-				BEGIN TRY
-					EXEC [dbo].[uspARAddItemToInvoice]
-								 @InvoiceId						= @NewInvoiceId	
-								,@ItemId						= @ItemId
-								,@ItemIsInventory				= @ItemIsInventory
-								,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
-								,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
-								,@RaiseError					= @RaiseError
-								,@ItemDescription				= @ItemDescription
-								,@ItemUOMId						= @ItemUOMId
-								,@ItemQtyOrdered				= @ItemQtyShipped
-								,@ItemQtyShipped				= @ItemQtyShipped
-								,@ItemDiscount					= @ItemDiscount
-								,@ItemPrice						= @ItemPrice
-								,@RefreshPrice					= 0
-								,@ItemTaxGroupId				= @ItemTaxGroupId
-								,@RecomputeTax					= 0
-								,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
-								,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+				EXEC [dbo].[uspARAddItemToInvoice]
+							 @InvoiceId						= @NewInvoiceId	
+							,@ItemId						= @ItemId
+							,@ItemIsInventory				= @ItemIsInventory
+							,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
+							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
+							,@RaiseError					= @RaiseError
+							,@ItemDescription				= @ItemDescription
+							,@ItemUOMId						= @ItemUOMId
+							,@ItemQtyOrdered				= @ItemQtyShipped
+							,@ItemQtyShipped				= @ItemQtyShipped
+							,@ItemDiscount					= @ItemDiscount
+							,@ItemPrice						= @ItemPrice
+							,@RefreshPrice					= 0
+							,@ItemTaxGroupId				= @ItemTaxGroupId
+							,@RecomputeTax					= 0
+							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId							
+							,@ItemInventoryShipmentItemId	= @ItemShipmentDetailId
+							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+							,@ItemShipmentNumber			= @ItemShipmentNumber
 
-					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
-						BEGIN
-							IF ISNULL(@RaiseError,0) = 0
-								ROLLBACK TRANSACTION
-							SET @ErrorMessage = @CurrentErrorMessage;
-							IF ISNULL(@RaiseError,0) = 1
-								RAISERROR(@ErrorMessage, 16, 1);
-							RETURN 0;
-						END
-					ELSE
-						DELETE FROM @tblSODNonStock WHERE intItemToInvoiceId = @intItemToInvoiceId
-				END TRY
-				BEGIN CATCH
-					IF ISNULL(@RaiseError,0) = 0
-						ROLLBACK TRANSACTION
-					SET @ErrorMessage = ERROR_MESSAGE();
-					IF ISNULL(@RaiseError,0) = 1
-						RAISERROR(@ErrorMessage, 16, 1);
-					RETURN 0;
-				END CATCH
-			END
-		
-		--UPDATE OTHER TABLE INTEGRATIONS
-		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
-			BEGIN
-				IF ISNULL(@RaiseError,0) = 0
-					ROLLBACK TRANSACTION
-				SET @ErrorMessage = @CurrentErrorMessage;
-				IF ISNULL(@RaiseError,0) = 1
-					RAISERROR(@ErrorMessage, 16, 1);
-				RETURN 0;
-			END			
+				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+					BEGIN
+						IF ISNULL(@RaiseError,0) = 0
+							ROLLBACK TRANSACTION
+						SET @ErrorMessage = @CurrentErrorMessage;
+						IF ISNULL(@RaiseError,0) = 1
+							RAISERROR(@ErrorMessage, 16, 1);
+						RETURN 0;
+					END
+				ELSE
+					DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId				
+			END	
 	END
 
 --UPDATE OTHER TABLE INTEGRATIONS
@@ -492,7 +489,6 @@ IF ISNULL(@RaiseError,0) = 0
 		SET
 			dtmProcessDate = GETDATE()
 			, ysnProcessed = 1
-			, ysnShipped = 0
 		WHERE
 			intSalesOrderId = @SalesOrderId
 	END
