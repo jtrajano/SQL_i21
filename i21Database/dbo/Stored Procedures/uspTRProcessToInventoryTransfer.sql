@@ -181,7 +181,7 @@ _PostOrUnPost:
 		WHERE	[intEntityUserSecurityId] = @intUserId
 		if @ysnRecap = 0
 		BEGIN
-	    	EXEC dbo.uspICPostInventoryTransfer @ysnPostOrUnPost, 0, @strTransactionId, @intUserId, @intEntityId;			
+	    	EXEC dbo.uspICPostInventoryTransfer @ysnPostOrUnPost, 0, @strTransactionId, @intEntityId;			
 		END
 		DELETE	FROM #tmpAddInventoryTransferResult 
 		WHERE	intInventoryTransferId = @TransferId
