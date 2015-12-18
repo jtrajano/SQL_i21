@@ -15,22 +15,26 @@ BEGIN
 	DECLARE @TaxCodeExemption	NVARCHAR(500)
 	
 	--Item Category Tax Class
-	SELECT TOP 1
-		@TaxCodeExemption = ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
-							+ ISNULL(' is not included in Item Category - ' + ICC.[strCategoryCode] + ' tax class setup.', '') 							 
-	FROM
-		tblICItem ICI
-	INNER JOIN
-		tblICCategory ICC
-			ON ICI.[intCategoryId] = ICC.[intCategoryId]
-	LEFT OUTER JOIN
-		tblICCategoryTax ICCT
-			ON ICC.[intCategoryId] = ICCT.[intCategoryId]
-			--AND ICCT.[ysnActive] = 1
-	WHERE
-		ISNULL(ICCT.[intCategoryTaxId],0) = 0
-		AND ICI.[intItemId] = @ItemId 
-		AND ICI.[intCategoryId] = @ItemCategoryId
+	IF NOT EXISTS	(
+						SELECT
+							ICCT.intTaxClassId
+						FROM 
+							tblICItem ICI
+						INNER JOIN
+							tblICCategory ICC
+								ON ICI.[intCategoryId] = ICC.[intCategoryId]
+						INNER JOIN 
+							tblICCategoryTax ICCT
+								ON ICC.[intCategoryId] = ICCT.[intCategoryId]
+						WHERE 
+							ICI.intItemId = @ItemId
+							AND ICC.intCategoryId = @ItemCategoryId
+							AND ICCT.intTaxClassId = @TaxClassId
+					)
+	BEGIN
+		SET @TaxCodeExemption	= ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
+								+ ISNULL(' is not included in Item Category - ' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ' tax class setup.', '') 	
+	END
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		RETURN @TaxCodeExemption
