@@ -6,9 +6,9 @@
 	intWastageTypeId INT NOT NULL,
 	intBinTypeId INT NOT NULL,
 	dblGrossWeight NUMERIC(18, 6) NOT NULL,
+	dblTareWeight NUMERIC(18, 6) NOT NULL,
 	dblNetWeight NUMERIC(18, 6) NOT NULL,
-	intGrossUnitMeasureId INT,
-	intNetUnitMeasureId INT,
+	intWeightUnitMeasureId INT NOT NULL,
 
 	intCreatedUserId int NULL,
 	dtmCreated datetime NULL CONSTRAINT DF_tblMFWastage_dtmCreated DEFAULT GetDate(),
@@ -19,6 +19,5 @@
 	CONSTRAINT FK_tblMFWastage_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId),
 	CONSTRAINT FK_tblMFWastage_tblMFWastageType FOREIGN KEY (intWastageTypeId) REFERENCES tblMFWastageType(intWastageTypeId),
 	CONSTRAINT FK_tblMFWastage_tblMFBinType FOREIGN KEY (intBinTypeId) REFERENCES tblMFBinType(intBinTypeId),
-	CONSTRAINT FK_tblMFWastage_tblICUnitMeasure_intGrossUnitMeasureId FOREIGN KEY (intGrossUnitMeasureId) REFERENCES tblICUnitMeasure(intUnitMeasureId),
-	CONSTRAINT FK_tblMFWastage_tblICUnitMeasure_intNetUnitMeasureId FOREIGN KEY (intNetUnitMeasureId) REFERENCES tblICUnitMeasure(intUnitMeasureId)
+	CONSTRAINT FK_tblMFWastage_tblICUnitMeasure_intWeightUnitMeasureId FOREIGN KEY (intWeightUnitMeasureId) REFERENCES tblICUnitMeasure(intUnitMeasureId)
 )
