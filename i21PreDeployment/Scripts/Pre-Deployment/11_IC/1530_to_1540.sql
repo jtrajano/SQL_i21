@@ -29,3 +29,27 @@ BEGIN
 	')
 
 END
+
+-- Pre deployment fix for Tax Group Ids, transfer from detail to header
+IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE name = 'tblICInventoryReceiptItem')
+BEGIN
+	IF EXISTS (SELECT * FROM sys.columns WHERE name = 'intTaxGroupId' AND object_id = OBJECT_ID('tblICInventoryReceiptItem'))
+	BEGIN
+		IF NOT EXISTS(SELECT * FROM sys.columns WHERE name = 'intTaxGroupId' AND object_id = OBJECT_ID('tblICInventoryReceipt'))
+		BEGIN
+			EXEC ('
+				ALTER TABLE tblICInventoryReceipt
+				ADD intTaxGroupId INT
+			')
+		END
+
+		EXEC ('
+			UPDATE tblICInventoryReceipt
+			SET tblICInventoryReceipt.intTaxGroupId = tblPatch.intTaxGroupId
+			FROM (
+				SELECT intInventoryReceiptId, intTaxGroupId = MAX(intTaxGroupId) FROM tblICInventoryReceiptItem
+				GROUP BY intInventoryReceiptId
+			) tblPatch WHERE tblPatch.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
+		')
+	END
+END
