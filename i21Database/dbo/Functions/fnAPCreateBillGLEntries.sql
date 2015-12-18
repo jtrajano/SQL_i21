@@ -214,7 +214,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	B.intAccountId,
+		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Cost Adjustment'),
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN 
 													(CASE WHEN E.dblUnitCost IS NOT NULL  THEN
 															 ((B.dblCost - E.dblUnitCost) * B.dblQtyReceived)
@@ -257,6 +257,8 @@ BEGIN
 				ON A.intBillId = B.intBillId
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
+			INNER JOIN tblICItemLocation ItemLoc
+				ON A.intShipToId = ItemLoc.intLocationId AND B.intItemId = ItemLoc.intItemId
 			LEFT JOIN tblICInventoryReceiptItem E
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN tblICInventoryReceiptCharge F
