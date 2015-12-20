@@ -142,51 +142,54 @@ BEGIN
 		SELECT * INTO  ##Tempi21APPaymentFROMBillOrigin 
 		FROM tblAPPayment WHERE intPaymentId  in (SELECT intPaymentId FROM  @createdPayment) 
 
-		--Update Record no.
-		UPDATE A set strPaymentRecordNum  =  ''PAY-'' + convert (NVARCHAR,B.intPaymentId)
-		FROM tblAPPayment A
-		INNER JOIN ##Tempi21APPaymentFROMBillOrigin B
-		on A.intPaymentId  = B.intPaymentId 
+		IF EXISTS(SELECT 1 FROM Tempi21APPaymentFROMBillOrigin)
+		BEGIN
+			--Update Record no.
+			UPDATE A set strPaymentRecordNum  =  ''PAY-'' + convert (NVARCHAR,B.intPaymentId)
+			FROM tblAPPayment A
+			INNER JOIN ##Tempi21APPaymentFROMBillOrigin B
+			on A.intPaymentId  = B.intPaymentId 
 
-		--Update the Starting Number + 1 to the last prefix id inserted.
-		UPDATE tblSMStartingNumber 
-		SET intNumber = (select top 1 intPaymentId from ##Tempi21APPaymentFROMBillOrigin order by intPaymentId DESC) + 1
-		where strPrefix =''PAY-''
+			--Update the Starting Number + 1 to the last prefix id inserted.
+			UPDATE tblSMStartingNumber 
+			SET intNumber = (select top 1 intPaymentId from ##Tempi21APPaymentFROMBillOrigin order by intPaymentId DESC) + 1
+			where strPrefix =''PAY-''
 
-		--Insert PaymentDetail
-		INSERT INTO tblAPPaymentDetail 
-		(
-		intPaymentId
-		,intBillId
-		,intAccountId
-		,dblDiscount
-		,dblAmountDue
-		,dblPayment
-		,dblInterest
-		,dblTotal
-		,dblWithheld
+			--Insert PaymentDetail
+			INSERT INTO tblAPPaymentDetail 
+			(
+			intPaymentId
+			,intBillId
+			,intAccountId
+			,dblDiscount
+			,dblAmountDue
+			,dblPayment
+			,dblInterest
+			,dblTotal
+			,dblWithheld
 
-		)
-		OUTPUT inserted.intPaymentId
+			)
+			OUTPUT inserted.intPaymentId
 
-		SELECT 
-		A.intPaymentId 
-		,C.intBillId
-		,C.intAccountId
-		,C.dblDiscount
-		,0
-		,A.dblAmountPaid
-		,0
-		,A.dblAmountPaid
-		,C.dblWithheld
-		 FROM  ##Tempi21APPaymentFROMBillOrigin A
-		 INNER JOIN tblAPBill C
-		 on C.strBillId = A.strNotes
+			SELECT 
+			A.intPaymentId 
+			,C.intBillId
+			,C.intAccountId
+			,C.dblDiscount
+			,0
+			,A.dblAmountPaid
+			,0
+			,A.dblAmountPaid
+			,C.dblWithheld
+			 FROM  ##Tempi21APPaymentFROMBillOrigin A
+			 INNER JOIN tblAPBill C
+			 on C.strBillId = A.strNotes
 		
-		 --INNER JOIN ##OriginChecks D
-		 --ON D.apivc_ivc_no = C.strVendorOrderNumber   COLLATE Latin1_General_CS_AS
-		 --AND C.intEntityVendorId = D.intEntityVendorId
+			 --INNER JOIN ##OriginChecks D
+			 --ON D.apivc_ivc_no = C.strVendorOrderNumber   COLLATE Latin1_General_CS_AS
+			 --AND C.intEntityVendorId = D.intEntityVendorId
 
+		 END
 		END
 	')
 END

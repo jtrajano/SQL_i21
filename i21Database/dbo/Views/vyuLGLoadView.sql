@@ -16,6 +16,7 @@ SELECT Load.intLoadId
 		,Load.intGenerateLoadId
 		,Load.intUserSecurityId
 		,Load.intTransportLoadId
+		,Load.intLoadHeaderId
 		,Load.intDriverEntityId
 		,Load.intDispatcherId
         ,Load.strExternalLoadNumber
@@ -43,7 +44,12 @@ SELECT Load.intLoadId
 										THEN 
 											TL.strTransaction
 										ELSE 
-											NULL 
+											CASE WHEN IsNull(Load.intLoadHeaderId, 0) <> 0 
+												THEN 
+													TR.strTransaction
+												ELSE 
+													NULL 
+												END 
 										END 
 								 END
         ,Load.dblDeliveredQuantity
@@ -94,5 +100,6 @@ LEFT JOIN tblEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
 LEFT JOIN vyuCTContractDetailView CDetail ON CDetail.intContractDetailId = Load.intContractDetailId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId
+LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId

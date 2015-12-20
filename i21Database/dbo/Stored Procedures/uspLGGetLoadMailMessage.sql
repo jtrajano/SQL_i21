@@ -139,7 +139,7 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 									'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Vendor: </B> </TD>' +
-									'<TD>' + IsNull(@strVendorName, '') + '<BR>' + IsNull(@strVendorAddress, '') + '<BR>' + IsNull(@strVendorCity, '') + ', ' + IsNull(@strVendorState, '') + ' ' + IsNull(@strVendorZipCode, '') + '</TD>' +
+									'<TD>' + IsNull(@strVendorName, '') + '<BR>' + IsNull(@strVendorLocationName, '') + '<BR>' + IsNull(@strVendorAddress, '') + '<BR>' + IsNull(@strVendorCity, '') + ', ' + IsNull(@strVendorState, '') + ' ' + IsNull(@strVendorZipCode, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 
@@ -148,7 +148,7 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Customer: </B> </TD>' +
-									'<TD>' + IsNull(@strCustomerName, '') + '<BR>' + IsNull(@strCustomerAddress, '') + '<BR>' + IsNull(@strCustomerCity, '') + ', ' + IsNull(@strCustomerState, '') + ' ' + IsNull(@strCustomerZipCode, '') + '</TD>' +
+									'<TD>' + IsNull(@strCustomerName, '') + '<BR>' + IsNull(@strCustomerLocationName, '') + '<BR>' + IsNull(@strCustomerAddress, '') + '<BR>' + IsNull(@strCustomerCity, '') + ', ' + IsNull(@strCustomerState, '') + ' ' + IsNull(@strCustomerZipCode, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 
@@ -198,14 +198,44 @@ BEGIN
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Driver: </B> </TD>' +
 									'<TD>' + IsNull(@strDriver, '') + '</TD>' +
-								'</FONT></TR>' +
+								'</FONT></TR>'
+
+								IF IsNull(@strHauler, '') <> ''
+								BEGIN
+	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Hauler: </B> </TD>' +
 									'<TD>' + IsNull(@strHauler, '') + '<BR>' + IsNull(@strHaulerAddress, '') + '<BR>' + IsNull(@strHaulerCity, '') + ', ' + IsNull(@strHaulerState, '') + ' ' + IsNull(@strHaulerZip, '') + '</TD>' +
-								'</FONT></TR>' +
+								'</FONT></TR>'
+								END
+
+								IF IsNull(@strEquipmentType, '') <> ''
+								BEGIN
+	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Equipment: </B> </TD>' +
 									'<TD>' + IsNull(@strEquipmentType, '') + '</TD>' +
-								'</FONT></TR>' +
+								'</FONT></TR>'
+								END
+
+								IF IsNull(@strInboundComments, '') <> ''
+								BEGIN
+	SET @strMailMessage =	@strMailMessage + 
+								'<TR><FONT face=tahoma size=2>' +
+									'<TD size=210> <B> Inbound Comments: </B> </TD>' +
+									'<TD>' + IsNull(@strInboundComments, '') + '</TD>' +
+								'</FONT></TR>'
+								END
+
+								IF IsNull(@strOutboundComments, '') <> ''
+								BEGIN
+	SET @strMailMessage =	@strMailMessage + 
+								'<TR><FONT face=tahoma size=2>' +
+									'<TD size=210> <B> Outbound Comments: </B> </TD>' +
+									'<TD>' + IsNull(@strOutboundComments, '') + '</TD>' +
+								'</FONT></TR>'
+								END
+
+	SET @strMailMessage =	@strMailMessage + 
 							'</TABLE> </BODY> </HTML>'
 END

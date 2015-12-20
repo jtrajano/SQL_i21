@@ -1660,7 +1660,8 @@ IF @recap = 0
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount
-				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) - P.dblInterest
+				,tblARInvoice.dblDiscountTaken = 0
+				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) - P.dblInterest				
 			FROM
 				(
 					SELECT 
@@ -1912,12 +1913,14 @@ IF @recap = 0
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount
+				,tblARInvoice.dblDiscountTaken = ISNULL(tblARInvoice.dblDiscountTaken,0.00) + P.dblDiscountTaken
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
 						,SUM(A.dblDiscount) dblDiscount
+						,SUM(A.dblDiscountTaken) dblDiscountTaken
 						,SUM(A.dblInterest) dblInterest
 						,A.intInvoiceId 
 					FROM

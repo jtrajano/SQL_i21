@@ -4,7 +4,7 @@
 	,@strLocation NVARCHAR(20)
 	,@strItemClass NVARCHAR(20)
 	,@dtmOrderDate DATETIME
-	,@dblQuantity DECIMAL(18,6)
+	,@dblQuantityParam DECIMAL(18,6)
 	,@strContractNumber NVARCHAR(20)
 	,@intSiteId INT
 )
@@ -18,7 +18,9 @@ BEGIN
 	DECLARE @intProductId INT
 	DECLARE @intLocationId INT
 	DECLARE @intEntityCustomerId INT
+	DECLARE @dblQuantity DECIMAL(18,6)
 
+	SET @dblQuantity = @dblQuantityParam
 	SELECT 
 		@intProductId = A.intProduct
 		,@intLocationId = A.intLocationId

@@ -48,6 +48,7 @@ SELECT
 	   ,CT.dblCashPriceInQtyUOM
 	   ,intWeightItemUOMId = (SELECT WeightItem.intItemUOMId FROM tblICItemUOM WeightItem WHERE WeightItem.intItemId=SCQ.intItemId AND WeightItem.intUnitMeasureId=S.intWeightUnitMeasureId)
 	   ,CT.intPriceItemUOMId
+	   ,CT.strPriceUOM
 
 FROM tblLGShipmentContractQty SCQ
 JOIN tblLGShipment S ON S.intShipmentId = SCQ.intShipmentId

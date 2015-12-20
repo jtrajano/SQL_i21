@@ -4,8 +4,14 @@
 	@strSalesperson NVARCHAR(100) = NULL
 AS
 
+IF @dtmDateFrom IS NULL
+	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+
 IF @dtmDateTo IS NULL
 	SET @dtmDateTo = GETDATE()
+
+IF RTRIM(LTRIM(@strSalesperson)) = ''
+	SET @strSalesperson = NULL
 
 SELECT A.strCustomerName
      , A.strEntityNo

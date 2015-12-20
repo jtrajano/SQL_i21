@@ -18,14 +18,14 @@ BEGIN
 	BEGIN
 		EXEC('
 			CREATE FUNCTION [dbo].[fnTMGetSpecialPricingPriceTable](
-				@strCustomerNumber AS NVARCHAR(20)
-				,@strItemNumber NVARCHAR(20)
-				,@strLocation NVARCHAR(20)
-				,@strItemClass NVARCHAR(20)
-				,@dtmOrderDate DATETIME
-				,@dblQuantity DECIMAL(18,6)
-				,@strContractNumber NVARCHAR(20)
-				,@intSiteId INT
+				@strCustomerNumberParam AS NVARCHAR(20)
+				,@strItemNumberParam NVARCHAR(20)
+				,@strLocationParam NVARCHAR(20)
+				,@strItemClassParam NVARCHAR(20)
+				,@dtmOrderDateParam DATETIME
+				,@dblQuantityParam DECIMAL(18,6)
+				,@strContractNumberParam NVARCHAR(20)
+				,@intSiteIdParam INT
 			)
 			RETURNS @tblSpecialPriceTableReturn TABLE(
 				dblPrice NUMERIC(18,6)
@@ -34,7 +34,26 @@ BEGIN
 			BEGIN 
 				DECLARE @dblPrice NUMERIC(18,6)
 				DECLARE @strSpecialPricing NVARCHAR(50)
-		
+
+				DECLARE @strCustomerNumber AS NVARCHAR(20)
+				DECLARE @strItemNumber NVARCHAR(20)
+				DECLARE @strLocation NVARCHAR(20)
+				DECLARE @strItemClass NVARCHAR(20)
+				DECLARE @dtmOrderDate DATETIME
+				DECLARE @dblQuantity DECIMAL(18,6)
+				DECLARE @strContractNumber NVARCHAR(20)
+				DECLARE @intSiteId INT
+
+				SET @dblQuantity = @dblQuantityParam
+				SET	@strCustomerNumber = @strCustomerNumberParam
+				SET	@strItemNumber = @strItemNumberParam
+				SET	@strLocation = @strLocationParam
+				SET	@strItemClass = @strItemClassParam
+				SET	@dtmOrderDate = @dtmOrderDateParam
+				SET	@strContractNumber =  @strContractNumberParam
+				SET	@intSiteId = @intSiteIdParam
+
+
 		
 				SET @strSpecialPricing = dbo.fnTMGetSpecialPricing(
 								@strCustomerNumber
@@ -60,14 +79,14 @@ BEGIN
 	BEGIN
 		EXEC('
 			CREATE FUNCTION [dbo].[fnTMGetSpecialPricingPriceTable](
-				@strCustomerNumber AS NVARCHAR(20)
-				,@strItemNumber NVARCHAR(20)
-				,@strLocation NVARCHAR(20)
-				,@strItemClass NVARCHAR(20)
-				,@dtmOrderDate DATETIME
-				,@dblQuantity DECIMAL(18,6)
-				,@strContractNumber NVARCHAR(20)
-				,@intSiteId INT
+				@strCustomerNumberParam AS NVARCHAR(20)
+				,@strItemNumberParam NVARCHAR(20)
+				,@strLocationParam NVARCHAR(20)
+				,@strItemClassParam NVARCHAR(20)
+				,@dtmOrderDateParam DATETIME
+				,@dblQuantityParam DECIMAL(18,6)
+				,@strContractNumberParam NVARCHAR(20)
+				,@intSiteIdParam INT
 			)
 			RETURNS @tblSpecialPriceTableReturn TABLE(
 				dblPrice NUMERIC(18,6)
@@ -79,6 +98,25 @@ BEGIN
 				DECLARE @intProductId INT
 				DECLARE @intLocationId INT
 				DECLARE @intEntityCustomerId INT
+
+				DECLARE @strCustomerNumber AS NVARCHAR(20)
+				DECLARE @strItemNumber NVARCHAR(20)
+				DECLARE @strLocation NVARCHAR(20)
+				DECLARE @strItemClass NVARCHAR(20)
+				DECLARE @dtmOrderDate DATETIME
+				DECLARE @dblQuantity DECIMAL(18,6)
+				DECLARE @strContractNumber NVARCHAR(20)
+				DECLARE @intSiteId INT
+
+				SET @dblQuantity = @dblQuantityParam
+				SET	@strCustomerNumber = @strCustomerNumberParam
+				SET	@strItemNumber = @strItemNumberParam
+				SET	@strLocation = @strLocationParam
+				SET	@strItemClass = @strItemClassParam
+				SET	@dtmOrderDate = @dtmOrderDateParam
+				SET	@strContractNumber =  @strContractNumberParam
+				SET	@intSiteId = @intSiteIdParam
+				
 		
 				SELECT 
 					@intProductId = A.intProduct

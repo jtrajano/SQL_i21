@@ -15,27 +15,32 @@ BEGIN
 	DECLARE @TaxCodeExemption	NVARCHAR(500)
 	
 	--Item Category Tax Class
-	SELECT TOP 1
-		@TaxCodeExemption = ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
-							+ ISNULL(' is not included in Item Category - ' + ICC.[strCategoryCode] + ' tax class setup.', '') 							 
-	FROM
-		tblICItem ICI
-	INNER JOIN
-		tblICCategory ICC
-			ON ICI.[intCategoryId] = ICC.[intCategoryId]
-	LEFT OUTER JOIN
-		tblICCategoryTax ICCT
-			ON ICC.[intCategoryId] = ICCT.[intCategoryId]
-			--AND ICCT.[ysnActive] = 1
-	WHERE
-		ISNULL(ICCT.[intCategoryTaxId],0) = 0
-		AND ICI.[intItemId] = @ItemId 
-		AND ICI.[intCategoryId] = @ItemCategoryId
+	IF NOT EXISTS	(
+						SELECT
+							ICCT.intTaxClassId
+						FROM 
+							tblICItem ICI
+						INNER JOIN
+							tblICCategory ICC
+								ON ICI.[intCategoryId] = ICC.[intCategoryId]
+						INNER JOIN 
+							tblICCategoryTax ICCT
+								ON ICC.[intCategoryId] = ICCT.[intCategoryId]
+						WHERE 
+							ICI.intItemId = @ItemId
+							AND ICC.intCategoryId = @ItemCategoryId
+							AND ICCT.intTaxClassId = @TaxClassId
+					)
+	BEGIN
+		SET @TaxCodeExemption	= ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
+								+ ISNULL(' is not included in Item Category - ' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ' tax class setup.', '') 	
+	END
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		RETURN @TaxCodeExemption
 			
 	--Vendor Location
+
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + strException, '') 
@@ -54,6 +59,36 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.intEntityVendorLocationId = @ShipFromLocationId
+		AND TE.[intItemId] = @ItemId
+		AND TE.[intTaxCodeId] = @TaxCodeId
+		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
+	ORDER BY
+		dtmStartDate
+		
+		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		RETURN @TaxCodeExemption
+
+
+	SELECT TOP 1
+		@TaxCodeExemption = 'Tax Exemption '
+							 + ISNULL('Number: ' + strException, '') 
+							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
+							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
+							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
+	FROM
+		tblAPVendorTaxException TE
+	LEFT OUTER JOIN
+		tblSMTaxCode TC
+			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
+	LEFT OUTER JOIN
+		tblEntityLocation EL
+			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
+	WHERE
+		[intEntityVendorId] = @VendorId
+		AND TE.intEntityVendorLocationId = @ShipFromLocationId
+		AND ISNULL(TE.[intItemId],0) = 0
 		AND TE.[intTaxCodeId] = @TaxCodeId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -82,6 +117,7 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND intEntityVendorLocationId = @ShipFromLocationId
+		AND ISNULL(TE.[intItemId],0) = 0
 		AND TE.[intTaxClassId] = @TaxClassId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -107,6 +143,7 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.intEntityVendorLocationId = @ShipFromLocationId
+		AND ISNULL(TE.[intItemId],0) = 0
 		AND LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0
 		AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = @TaxState
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
@@ -157,6 +194,7 @@ BEGIN
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
+		AND ISNULL(TE.[intItemId],0) = 0
 		AND TE.intEntityVendorLocationId = @ShipFromLocationId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -186,6 +224,7 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.[intItemId] = @ItemId
+		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
 		AND TE.[intTaxCodeId] = @TaxCodeId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -214,6 +253,7 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.[intItemId] = @ItemId
+		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
 		AND TE.[intTaxClassId] = @TaxClassId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -239,6 +279,7 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.[intItemId] = @ItemId
+		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
 		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = @TaxState)
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
@@ -262,6 +303,7 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.[intItemId] = @ItemId
+		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
 		dtmStartDate
@@ -285,6 +327,8 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.[intTaxCodeId] = @TaxCodeId
+		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
+		AND ISNULL(TE.[intItemId],0) = 0
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
 		dtmStartDate
@@ -308,6 +352,8 @@ BEGIN
 	WHERE
 		[intEntityVendorId] = @VendorId
 		AND TE.[intTaxClassId] = @TaxClassId
+		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
+		AND ISNULL(TE.[intItemId],0) = 0
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
 		dtmStartDate	
@@ -330,6 +376,8 @@ BEGIN
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
+		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
+		AND ISNULL(TE.[intItemId],0) = 0
 		AND LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0
 		AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = @TaxState
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)

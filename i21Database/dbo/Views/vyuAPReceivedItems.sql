@@ -287,15 +287,15 @@ FROM
 		,[strItemNo]								=	A.strItemNo
 		,[strDescription]							=	A.strItemDescription
 		,[intPurchaseTaxGroupId]					=	NULL
-		,[dblOrderQty]								=	A.dblNetWt
+		,[dblOrderQty]								=	A.dblQuantity
 		,[dblPOOpenReceive]							=	0
-		,[dblOpenReceive]							=	A.dblNetWt
-		,[dblQuantityToBill]						=	A.dblNetWt
+		,[dblOpenReceive]							=	A.dblQuantity
+		,[dblQuantityToBill]						=	A.dblQuantity
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	A.intShipmentContractQtyId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
-		,[dblUnitCost]								=	A.dblCashPriceInWeightUOM
+		,[dblUnitCost]								=	A.dblCashPrice
 		,[dblTax]									=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -310,16 +310,16 @@ FROM
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
-		,[intUnitMeasureId]							=	NULL
-		,[intWeightUOMId]							=	NULL
-		,[intCostUOMId]								=	NULL
-		,[dblNetWeight]								=	NULL      
-		,[strCostUOM]								=	NULL
-		,[strgrossNetUOM]							=	NULL
-		,[dblUnitQty]								=	NULL
+		,[intUnitMeasureId]							=	A.intItemUOMId
+		,[intWeightUOMId]							=	A.intWeightItemUOMId
+		,[intCostUOMId]								=	A.intPriceItemUOMId
+		,[dblNetWeight]								=	A.dblNetWt      
+		,[strCostUOM]								=	A.strPriceUOM
+		,[strgrossNetUOM]							=	A.strWeightUOM
+		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
-	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT intShipmentContractQtyId FROM tblAPBillDetail)
+	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
 ) Items
 
 

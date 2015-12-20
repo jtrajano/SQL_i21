@@ -121,7 +121,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Views\vyuTMLeaseSearch.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
-:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
+--:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
 
 
@@ -235,6 +235,9 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
+:r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
+:r .\PR\DataFixes\ResetEaningHoursToProcess.sql
+:r .\PR\DataFixes\UpdateEarningDeductionTaxId.sql
 
 -- Version Update
 :r .\VersionUpdate.sql
@@ -258,6 +261,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\016_MoveCustomerAccountStatusToNewTable.sql
 :r .\EM\017_MoveSplitCategoryToNewTable.sql
 :r .\EM\018_UpdateRoleId_ForEntityCredential.sql
+:r .\EM\019_RemoveEmailToParentEntity.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

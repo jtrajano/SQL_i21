@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesOrderReport]
 AS
-SELECT SO.intSalesOrderId
-	 , blbCompanyLogo = [dbo].fnSMGetCompanyLogo('Header')
+SELECT SO.intSalesOrderId	 
 	 , strCompanyName = CASE WHEN L.strUseLocationAddress = 'Letterhead'
 								THEN ''
 							 ELSE
