@@ -5,15 +5,15 @@ SELECT R.intRecipeId
      , RI.intItemId AS intComponentItemId	 
 	 , I.strItemNo
 	 , I.strDescription	 
-	 , RI.intUOMId AS intItemUnitMeasureId
+	 , RI.intItemUOMId AS intItemUnitMeasureId
 	 , UOM.strUnitMeasure
 	 , RI.dblQuantity
-	 , dblPrice = ISNULL(dbo.fnARGetItemPrice(RI.intItemId, R.intCustomerId, R.intLocationId, RI.intUOMId, NULL, RI.dblQuantity, NULL, NULL, NULL, NULL, RI.dblQuantity, 0, NULL, NULL, NULL, NULL, NULL), 0)
+	 , dblPrice = ISNULL(dbo.fnARGetItemPrice(RI.intItemId, R.intCustomerId, R.intLocationId, RI.intItemUOMId, NULL, RI.dblQuantity, NULL, NULL, NULL, NULL, RI.dblQuantity, 0, NULL, NULL, NULL, NULL, NULL), 0)
 	 , strItemType = (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = RI.intItemId)
 	 , strType = 'Finished Good'
 FROM tblICItem I 
 INNER JOIN (tblMFRecipe R INNER JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId) ON I.intItemId = RI.intItemId
-INNER JOIN vyuARItemUOM UOM ON RI.intUOMId = UOM.intItemUOMId
+INNER JOIN vyuARItemUOM UOM ON RI.intItemUOMId = UOM.intItemUOMId
   AND R.ysnActive = 1
   AND RI.intRecipeItemTypeId = 1  
 

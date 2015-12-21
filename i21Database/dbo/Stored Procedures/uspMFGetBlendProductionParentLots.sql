@@ -68,13 +68,15 @@ Begin
 		Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblWOQty/r.dblQuantity)) dblQuantity,0,u.strUnitMeasure,0,0,''
 		From tblMFWorkOrderRecipeItem ri 
 		Join tblMFWorkOrderRecipe r on r.intRecipeId=ri.intRecipeId 
-		Join tblICUnitMeasure u on ri.intUOMId=u.intUnitMeasureId
+		Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 		where r.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1
 		Union
 		Select rs.intSubstituteItemId AS intItemId,(rs.dblQuantity * (@dblWOQty/r.dblQuantity)) RequiredQty,0,u.strUnitMeasure,0,0,''
 		From tblMFWorkOrderRecipeSubstituteItem rs
 		Join tblMFWorkOrderRecipe r on r.intRecipeId=rs.intRecipeId 
-		Join tblICUnitMeasure u on rs.intUOMId=u.intUnitMeasureId
+		Join tblICItemUOM iu on rs.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 		where r.intWorkOrderId=@intWorkOrderId and rs.intRecipeItemTypeId=1
 	End
 

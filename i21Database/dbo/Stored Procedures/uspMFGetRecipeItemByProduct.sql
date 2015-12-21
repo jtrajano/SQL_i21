@@ -41,7 +41,8 @@ If @intWorkOrderId=0
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
-		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = ri.intUOMId
+		Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure UM on iu.intUnitMeasureId=UM.intUnitMeasureId
 		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
 		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
 		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
@@ -89,7 +90,8 @@ If @intWorkOrderId=0
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId and r.intWorkOrderId = ri.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
-		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = ri.intUOMId
+		Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure UM on iu.intUnitMeasureId=UM.intUnitMeasureId
 		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
 		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
 		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId

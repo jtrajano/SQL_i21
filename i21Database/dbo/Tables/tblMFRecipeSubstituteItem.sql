@@ -6,7 +6,7 @@
     [intItemId] INT NOT NULL, 
     [intSubstituteItemId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
-    [intUOMId] INT NOT NULL, 
+    [intItemUOMId] INT NOT NULL, 
     [dblSubstituteRatio] NUMERIC(18, 6) NOT NULL, 
     [dblMaxSubstituteRatio] NUMERIC(18, 6) NOT NULL,
     [dblCalculatedUpperTolerance] NUMERIC(18, 6) NOT NULL , 
@@ -22,6 +22,6 @@
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblICItem_intItemId_intSubstituteItemId] FOREIGN KEY ([intSubstituteItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblICUnitMeasure_intUnitMeasureId_intUOMId] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblMFRecipeItemType_intRecipeItemTypeId] FOREIGN KEY ([intRecipeItemTypeId]) REFERENCES [tblMFRecipeItemType]([intRecipeItemTypeId])
 )

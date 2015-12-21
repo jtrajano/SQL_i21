@@ -62,7 +62,8 @@ ri.dblQuantity AS dblRecipeItemQty,u.strUnitMeasure AS strRecipeItemUOM,
 ISNULL(sl.strName,'') AS strConsumptionStorageLocation
 From tblMFRecipeItem ri 
 Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
-Join tblICUnitMeasure u on ri.intUOMId=u.intUnitMeasureId
+Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 Left Join tblICStorageLocation sl on ri.intStorageLocationId=sl.intStorageLocationId
 where r.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 and
 ((ri.ysnYearValidationRequired = 1 AND @dtmDate BETWEEN ri.dtmValidFrom AND ri.dtmValidTo)
@@ -76,7 +77,8 @@ rs.dblQuantity AS dblRecipeItemQty,u.strUnitMeasure AS strRecipeItemUOM,
 '' AS strConsumptionStorageLocation
 From tblMFRecipeSubstituteItem rs
 Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
-Join tblICUnitMeasure u on rs.intUOMId=u.intUnitMeasureId
+Join tblICItemUOM iu on rs.intItemUOMId=iu.intItemUOMId
+Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 where r.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
 
 Update a Set a.ysnHasSubstitute=1 from @tblRequiredQty a Join @tblRequiredQty b on a.intItemId=b.intParentItemId

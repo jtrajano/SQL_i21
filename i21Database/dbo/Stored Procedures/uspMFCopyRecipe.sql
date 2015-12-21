@@ -58,7 +58,7 @@ BEGIN TRY
 			intRecipeId
 			,intItemId
 			,dblQuantity
-			,intUOMId
+			,[intItemUOMId]
 			,intManufacturingCellId
 			,intLocationId
 			,intVersionNo
@@ -81,7 +81,7 @@ BEGIN TRY
 		SELECT intRecipeId
 			,intItemId
 			,dblQuantity
-			,intUOMId
+			,[intItemUOMId]
 			,intManufacturingCellId
 			,intLocationId
 			,intVersionNo
@@ -109,7 +109,7 @@ BEGIN TRY
 			,intItemId
 			,dblQuantity
 			,dblCalculatedQuantity
-			,intUOMId
+			,[intItemUOMId]
 			,intRecipeItemTypeId
 			,strItemGroupName
 			,dblUpperTolerance
@@ -145,7 +145,7 @@ BEGIN TRY
 			,intItemId
 			,dblQuantity
 			,dblCalculatedQuantity
-			,intUOMId
+			,[intItemUOMId]
 			,intRecipeItemTypeId
 			,strItemGroupName
 			,dblUpperTolerance
@@ -201,7 +201,7 @@ BEGIN TRY
 			,intItemId
 			,intSubstituteItemId
 			,dblQuantity
-			,intUOMId
+			,[intItemUOMId]
 			,dblSubstituteRatio
 			,dblMaxSubstituteRatio
 			,dblCalculatedUpperTolerance
@@ -220,7 +220,7 @@ BEGIN TRY
 			,rs.intItemId
 			,rs.intSubstituteItemId
 			,rs.dblQuantity
-			,rs.intUOMId
+			,rs.[intItemUOMId]
 			,rs.dblSubstituteRatio
 			,rs.dblMaxSubstituteRatio
 			,rs.dblCalculatedUpperTolerance
