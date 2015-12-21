@@ -3088,6 +3088,17 @@
     <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
+    <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
+    <Build Include="dbo\Functions\fnTRSplit.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadPostingValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadProcessContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadProcessLoadContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadProcessLogisticsLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadProcessToInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadProcessToInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadProcessToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRLoadProcessTransportLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
