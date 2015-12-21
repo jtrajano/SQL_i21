@@ -439,7 +439,6 @@ BEGIN
 			DECLARE @Taxes AS TABLE (
 				id						INT
 				,intInvoiceDetailId		INT
-				,intTaxGroupMasterId	INT
 				,intTaxGroupId			INT 
 				,intTaxCodeId			INT
 				,intTaxClassId			INT
@@ -492,7 +491,6 @@ BEGIN
 				INSERT INTO @Taxes (
 					id
 					,intInvoiceDetailId
-					--,intTaxGroupMasterId
 					,intTaxGroupId
 					,intTaxCodeId
 					,intTaxClassId
@@ -506,8 +504,8 @@ BEGIN
 					,ysnCheckoffTax
 					,strTaxCode
 					,ysnTaxExempt
-					,strTaxGroup 
-					,strNotes
+					,[strTaxGroup]
+					,[strNotes]
 				)
 				EXEC dbo.uspSMGetItemTaxes 
 					@ItemId
@@ -516,8 +514,6 @@ BEGIN
 					,@TransactionType
 					,@EntityId
 					,@TaxGroupId
-					,NULL
-					,NULL 
 
 				DECLARE	@Amount	NUMERIC(18,6) 
 						,@Qty	NUMERIC(18,6)
