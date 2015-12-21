@@ -40,8 +40,12 @@ BEGIN TRY
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
 		,@dblAdjustByQuantity NUMERIC(18, 6)
+		,@intAttributeIdByBatch INT
+		,@strAttributeValueByBatch NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GETDATE()
+
+
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -97,6 +101,21 @@ BEGIN TRY
 		,@intStorageLocationId = intStorageLocationId
 	FROM dbo.tblICLot
 	WHERE intLotId = @intLotId
+
+	SELECT @intAttributeIdByBatch = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Warehouse Release Lot By Batch'
+
+	SELECT @strAttributeValueByBatch = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeIdByBatch
+
+	IF @strAttributeValueByBatch = 'True'
+	BEGIN
+		SELECT @dblReleaseQty=dblQty FROM dbo.tblICLot WHERE intLotId=@intLotId
+	END
 
 	IF NOT EXISTS (
 			SELECT 1
