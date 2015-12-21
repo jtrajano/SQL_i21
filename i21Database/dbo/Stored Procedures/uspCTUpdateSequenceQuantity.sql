@@ -59,7 +59,7 @@ BEGIN TRY
 			@intContractDetailId	=	@intContractDetailId,
 			@strScreenName			=	@strScreenName,
 			@intExternalId			=	@intExternalId,
-			@strFieldName			=	'Quantiy',
+			@strFieldName			=	'Quantity',
 			@dblOldValue			=	@dblQuantity,
 			@dblTransactionQuantity =	@dblQuantityToUpdate,
 			@dblNewValue			=	@dblNewQuantity,	

@@ -3163,6 +3163,7 @@
     <None Include="Scripts\Post-Deployment\EM\018_UpdateRoleId_ForEntityCredential.sql" />
     <None Include="Scripts\Post-Deployment\GR\TicketTypes.sql" />
     <None Include="Scripts\Post-Deployment\EM\019_RemoveEmailToParentEntity.sql" />
+    <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
