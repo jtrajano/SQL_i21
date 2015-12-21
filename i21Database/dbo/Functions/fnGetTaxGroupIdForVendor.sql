@@ -135,6 +135,7 @@ BEGIN
 	WHERE
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
 		AND ST.[intItemId] = @ItemId
 		AND ST.[intCategoryId] = @ItemCategoryId	
@@ -158,6 +159,7 @@ BEGIN
 	WHERE
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
 		AND ST.[intItemId] = @ItemId
 		
@@ -180,6 +182,7 @@ BEGIN
 	WHERE
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
 		AND ST.[intCategoryId] = @ItemCategoryId	
 		
@@ -202,6 +205,8 @@ BEGIN
 	WHERE
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intEntityVendorLocationId],0) = 0
+		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		AND ST.[intItemId] = @ItemId
 		AND ST.[intCategoryId] = @ItemCategoryId
 		
@@ -225,6 +230,7 @@ BEGIN
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intTaxEntityVendorId] = @VendorId
+		AND ISNULL(ST.[intEntityVendorLocationId],0) = 0
 				
 	UNION
 
@@ -246,6 +252,7 @@ BEGIN
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intEntityVendorLocationId] = @VendorLocationId
+		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 				
 	UNION
 
@@ -267,6 +274,8 @@ BEGIN
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intItemId] = @ItemId
+		AND ST.[intEntityVendorLocationId] = @VendorLocationId
+		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 
 	UNION
 
@@ -288,6 +297,8 @@ BEGIN
 			V.[intEntityVendorId] = @VendorId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intCategoryId] = @ItemCategoryId
+		AND ST.[intEntityVendorLocationId] = @VendorLocationId
+		AND ISNULL(ST.[intTaxEntityVendorId],0) = 0
 		
 
 	SELECT TOP 1
