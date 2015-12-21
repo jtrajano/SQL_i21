@@ -32,8 +32,8 @@ SELECT
 , dblUnappliedCredits	= CAR.dblCredits
 , dblPrepaids			= 0.000000
 , dblFuture				= 0.000000
-, dblBudgetAmount		= ISNULL((SELECT dblMonthlyBudget FROM tblARCustomer WHERE intEntityCustomerId = CAR.intEntityCustomerId), 0.000000)
-, dblBudgetMonth		= ISNULL(dbo.fnARGetCustomerBudget(CAR.intEntityCustomerId, GETDATE()), 0.000000)
+, dblBudgetAmount		= ISNULL(dbo.fnARGetCustomerBudget(CAR.intEntityCustomerId, GETDATE()), 0.000000) 
+, dblBudgetMonth		= ISNULL((SELECT dblMonthlyBudget FROM tblARCustomer WHERE intEntityCustomerId = CAR.intEntityCustomerId), 0.000000)
 , dblThru				= 0.000000
 , dblPendingInvoice		= (SELECT ISNULL(SUM(CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0)
 , dblPendingPayment		= (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 0)
