@@ -1792,13 +1792,37 @@ Ext.define('Inventory.view.ItemViewController', {
                                 defaultUOMId = win.defaultUOM.get('intItemUOMId');
                             }
                             var newRecord = {
-                                intItemId : location.data.intItemId,
-                                intLocationId : location.data.intCompanyLocationId,
-                                intIssueUOMId : defaultUOMId,
-                                intReceiveUOMId : defaultUOMId,
-                                strLocationName : location.data.strLocationName
+                                intItemId: location.data.intItemId,
+                                intLocationId: location.data.intCompanyLocationId,
+                                intIssueUOMId: defaultUOMId,
+                                intReceiveUOMId: defaultUOMId,
+                                strLocationName: location.data.strLocationName
                             };
                             currentVM.tblICItemLocations().add(newRecord);
+
+                            var prices = currentVM.tblICItemPricings().data.items;
+                            var exists = Ext.Array.findBy(prices, function (row) {
+                                if (newRecord.intItemLocationId === row.get('intItemLocationId')) {
+                                    return true;
+                                }
+                            });
+                            if (!exists) {
+                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
+                                    intItemId: newRecord.intItemId,
+                                    intItemLocationId: newRecord.intItemLocationId,
+                                    strLocationName: newRecord.strLocationName,
+                                    dblAmountPercent: 0.00,
+                                    dblSalePrice: 0.00,
+                                    dblMSRPPrice: 0.00,
+                                    strPricingMethod: 'None',
+                                    dblLastCost: 0.00,
+                                    dblStandardCost: 0.00,
+                                    dblAverageCost: 0.00,
+                                    dblEndMonthCost: 0.00,
+                                    intSort: newRecord.intSort
+                                });
+                                currentVM.tblICItemPricings().add(newPrice);
+                            }
                         }
                     });
                     search.close();

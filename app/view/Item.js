@@ -4074,7 +4074,10 @@ Ext.define('Inventory.view.Item', {
                                                         pluginId: 'cepPricing',
                                                         clicksToEdit: 1
                                                     }
-                                                ]
+                                                ],
+                                                selModel: {
+                                                    selType: 'checkboxmodel'
+                                                }
                                             },
                                             {
                                                 xtype: 'tabpanel',
