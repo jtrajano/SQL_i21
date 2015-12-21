@@ -220,6 +220,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Contract Management
 :R .\CT\1_MasterTables.sql
 :R .\CT\2_DataMigration.sql
+:R .\CT\3_Miscellaneous.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
