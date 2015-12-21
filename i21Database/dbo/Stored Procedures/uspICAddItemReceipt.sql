@@ -492,7 +492,7 @@ BEGIN
 				INSERT INTO @Taxes (
 					id
 					,intInvoiceDetailId
-					,intTaxGroupMasterId
+					--,intTaxGroupMasterId
 					,intTaxGroupId
 					,intTaxCodeId
 					,intTaxClassId
@@ -516,6 +516,8 @@ BEGIN
 					,@TransactionType
 					,@EntityId
 					,@TaxGroupId
+					,NULL
+					,NULL 
 
 				DECLARE	@Amount	NUMERIC(18,6) 
 						,@Qty	NUMERIC(18,6)
