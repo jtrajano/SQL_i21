@@ -2216,6 +2216,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     current.set('dblUnitCost', contractPrice);
                                 });
                         } else {
+                            current.set('intCostUOMId', po.get('intPriceItemUOMId'));
+                            current.set('strCostUOM', po.get('strPriceUOM'));
                             current.set('dblUnitCost', po.get('dblCashPrice'));
                         }
 
