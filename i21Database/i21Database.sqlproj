@@ -3035,7 +3035,6 @@
     <Build Include="dbo\Tables\tblSMMessage.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
-    <Build Include="uspPATPostRefund.sql" />
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
@@ -3084,6 +3083,7 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdatePaycheckReferenceNo.sql" />
     <Build Include="dbo\Functions\fnPATCreateDividendGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATReverseGLDividendEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostRefund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
