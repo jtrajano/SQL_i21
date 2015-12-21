@@ -29,10 +29,6 @@ Ext.define('Inventory.view.ContractDocumentViewModel', {
             autoLoad: true,
             data: [
                 {
-                    intDocumentType: 0,
-                    strDescription: ''
-                },
-                {
                     intDocumentType: 1,
                     strDescription: 'Contract'
                 },
