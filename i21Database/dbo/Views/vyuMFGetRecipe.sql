@@ -5,7 +5,8 @@ r.dblQuantity,um.strUnitMeasure AS strUOM,r.intVersionNo,r.ysnActive,
 cl.strLocationName,mc.strCellName,mp.strProcessName,cs.strCustomerNumber AS strCustomer
 from tblMFRecipe r
 Join tblICItem i on r.intItemId=i.intItemId 
-Join tblICUnitMeasure um on r.intUOMId=um.intUnitMeasureId
+Join tblICItemUOM iu on r.intItemUOMId=iu.intItemUOMId
+Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Join tblSMCompanyLocation cl on r.intLocationId=cl.intCompanyLocationId
 Left Join tblMFManufacturingCell mc on r.intManufacturingCellId=mc.intManufacturingCellId
 Join tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 

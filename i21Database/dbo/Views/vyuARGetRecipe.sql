@@ -4,7 +4,7 @@ SELECT R.intRecipeId
      , R.intItemId
 	 , I.strItemNo
 	 , I.strDescription
-	 , R.intUOMId
+	 , R.[intItemUOMId]
 	 , UOM.strUnitMeasure
 	 , R.intLocationId AS intCompanyLocationId
 	 , L.strLocationName
@@ -18,7 +18,7 @@ SELECT R.intRecipeId
 	 , E.strEntityNo AS strCustomerNumber	 
 FROM tblMFRecipe R
 	LEFT JOIN tblICItem I ON R.intItemId = I.intItemId
-	LEFT JOIN vyuARItemUOM UOM ON R.intUOMId = UOM.intItemUOMId
+	LEFT JOIN vyuARItemUOM UOM ON R.[intItemUOMId] = UOM.intItemUOMId
 	LEFT JOIN tblSMCompanyLocation L ON R.intLocationId = L.intCompanyLocationId
 	LEFT JOIN tblMFManufacturingCell MC ON R.intManufacturingCellId = MC.intManufacturingCellId
 	LEFT JOIN tblMFManufacturingProcess MP ON R.intManufacturingProcessId = MP.intManufacturingProcessId
