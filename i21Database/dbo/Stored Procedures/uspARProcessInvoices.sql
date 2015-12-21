@@ -1141,20 +1141,34 @@ BEGIN TRY
 						DECLARE @Pricing			NVARCHAR(250)				
 								,@ContractNumber	INT
 								,@ContractSeq		INT
+								,@InvoiceType		NVARCHAR(200)
 						BEGIN TRY
+						SELECT TOP 1 @InvoiceType = strType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 						EXEC dbo.[uspARGetItemPrice]  
-								 @ItemId  
-								,@EntityCustomerId
-								,@CompanyLocationId
-								,@ItemUOMId
-								,@Date
-								,@ItemQtyShipped
-								,@ItemPrice				OUTPUT
-								,@Pricing				OUTPUT
-								,@ItemContractHeaderId	OUTPUT
-								,@ItemContractDetailId	OUTPUT
-								,@ContractNumber		OUTPUT
-								,@ContractSeq			OUTPUT
+							 @ItemId					= @ItemId
+							,@CustomerId				= @EntityCustomerId
+							,@LocationId				= @CompanyLocationId
+							,@ItemUOMId					= @ItemUOMId
+							,@TransactionDate			= @Date
+							,@Quantity					= @ItemQtyShipped
+							,@Price						= @ItemPrice OUTPUT
+							,@Pricing					= @Pricing OUTPUT
+							,@ContractHeaderId			= @ItemContractHeaderId OUTPUT
+							,@ContractDetailId			= @ItemContractDetailId OUTPUT
+							,@ContractNumber			= @ContractNumber OUTPUT
+							,@ContractSeq				= @ContractSeq OUTPUT
+							--,@AvailableQuantity			= NULL OUTPUT
+							--,@UnlimitedQuantity			= 0    OUTPUT
+							--,@OriginalQuantity			= NULL
+							--,@CustomerPricingOnly		= 0
+							--,@VendorId					= NULL
+							--,@SupplyPointId				= NULL
+							--,@LastCost					= NULL
+							--,@ShipToLocationId			= NULL
+							--,@VendorLocationId			= NULL
+							--,@PricingLevelId			= NULL
+							--,@AllowQtyToExceedContract	= 0
+							,@InvoiceType				= @InvoiceType
 						END TRY
 						BEGIN CATCH
 							SET @ErrorMessage = ERROR_MESSAGE();

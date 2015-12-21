@@ -109,6 +109,7 @@ BEGIN
 								,NULL --@LastCost			
 								,NULL --@ShipToLocationId  
 								,NULL --@VendorLocationId
+								,NULL --@InvoiceType
 								)
 						ELSE
 							B.dblPrice
