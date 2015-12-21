@@ -136,6 +136,7 @@ BEGIN
 	WHERE
 			C.[intEntityCustomerId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
 		AND ST.[intItemId] = @ItemId
 		AND ST.[intCategoryId] = @ItemCategoryId	
@@ -159,6 +160,7 @@ BEGIN
 	WHERE
 			C.[intEntityCustomerId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
 		AND ST.[intItemId] = @ItemId
 		
@@ -181,6 +183,7 @@ BEGIN
 	WHERE
 			C.[intEntityCustomerId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
 		AND ST.[intCategoryId] = @ItemCategoryId	
 		
@@ -205,6 +208,8 @@ BEGIN
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intItemId] = @ItemId
 		AND ST.[intCategoryId] = @ItemCategoryId
+		AND ISNULL(ST.[intEntityVendorId],0) = 0
+		AND ISNULL(ST.[intEntityCustomerLocationId],0) = 0
 		
 	UNION
 
@@ -226,6 +231,7 @@ BEGIN
 			C.[intEntityCustomerId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intEntityVendorId] = @VendorId
+		AND ISNULL(ST.[intEntityCustomerLocationId],0) = 0
 				
 	UNION
 
@@ -246,6 +252,7 @@ BEGIN
 	WHERE
 			C.[intEntityCustomerId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
+		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
 				
 	UNION
@@ -268,6 +275,8 @@ BEGIN
 			C.[intEntityCustomerId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intItemId] = @ItemId
+		AND ISNULL(ST.[intEntityVendorId],0) = 0
+		AND ISNULL(ST.[intEntityCustomerLocationId],0) = 0
 
 	UNION
 
@@ -289,6 +298,8 @@ BEGIN
 			C.[intEntityCustomerId] = @CustomerId
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ST.[intCategoryId] = @ItemCategoryId
+		AND ISNULL(ST.[intEntityVendorId],0) = 0
+		AND ISNULL(ST.[intEntityCustomerLocationId],0) = 0
 		
 
 	SELECT TOP 1
