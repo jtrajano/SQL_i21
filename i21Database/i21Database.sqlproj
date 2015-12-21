@@ -3073,6 +3073,8 @@
     <Build Include="dbo\Views\vyuMFGetReasonCode.sql" />
     <Build Include="dbo\Tables\tblMFDowntimeMachines.sql" />
     <Build Include="dbo\Views\vyuMFGetReasonDowntime.sql" />
+	<Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
