@@ -379,6 +379,9 @@ UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Hid
 -- 	COLUMN: OFFSET DATE
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+update tblFRColumn set dtmRunDate = GETDATE() WHERE dtmRunDate IS NULL
+
+UPDATE tblFRColumnDesign SET strStartOffset = 'Custom', strEndOffset = 'Custom' WHERE strFilterType = 'Custom' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '0' WHERE strFilterType = 'As Of' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'EOY-1yr' WHERE strFilterType = 'As Of Previous Fiscal Year' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'EOY' WHERE strFilterType = 'As Of Fiscal Year' AND strStartOffset IS NULL
