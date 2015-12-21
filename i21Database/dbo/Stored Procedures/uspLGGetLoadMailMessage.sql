@@ -2,7 +2,7 @@
 		@intLoadNumber INT,
 		@strMailMessage NVARCHAR(MAX) OUTPUT
 AS
---DECLARE @intLoadNumber INT = 1354
+--DECLARE @intLoadNumber INT = 1364
 --DECLARE @strMailMessage NVARCHAR(MAX)
 DECLARE @intPLoadId INT
 DECLARE @intPEntityId INT
@@ -15,9 +15,9 @@ DECLARE @strLocationName NVARCHAR(MAX), @strLocationAddress NVARCHAR(MAX), @strL
 DECLARE @strLocationFax NVARCHAR(MAX), @strLocationMail NVARCHAR(MAX), @strItemNo NVARCHAR(MAX), @strDescription NVARCHAR(MAX), @strUnitMeasure NVARCHAR(MAX), @strEquipmentType NVARCHAR(MAX)
 DECLARE @strVendorReference NVARCHAR(MAX), @strCustomerReference NVARCHAR(MAX), @strInboundComments NVARCHAR(MAX), @strOutboundComments NVARCHAR(MAX), @strPCustomerContract NVARCHAR(MAX), @strSCustomerContract NVARCHAR(MAX)
 DECLARE @strSupplierLoadNumber NVARCHAR(MAX), @strVendorName NVARCHAR(MAX), @strVendorNo NVARCHAR(MAX), @strVendorEmail NVARCHAR(MAX), @strVendorFax NVARCHAR(MAX), @strVendorMobile NVARCHAR(MAX), @strVendorPhone NVARCHAR(MAX)
-DECLARE @strVendorLocationName NVARCHAR(MAX), @strVendorAddress NVARCHAR(MAX), @strVendorCity NVARCHAR(MAX), @strVendorCountry NVARCHAR(MAX), @strVendorState NVARCHAR(MAX), @strVendorZipCode NVARCHAR(MAX)
+DECLARE @strVendorLocationName NVARCHAR(MAX), @strVendorAddress NVARCHAR(MAX), @strVendorFirstLineAddress NVARCHAR(MAX), @strVendorMapLink NVARCHAR(MAX), @strVendorCity NVARCHAR(MAX), @strVendorCountry NVARCHAR(MAX), @strVendorState NVARCHAR(MAX), @strVendorZipCode NVARCHAR(MAX)
 DECLARE @strCustomerName NVARCHAR(MAX), @strCustomerNo NVARCHAR(MAX), @strCustomerEmail NVARCHAR(MAX), @strCustomerFax NVARCHAR(MAX), @strCustomerMobile NVARCHAR(MAX), @strCustomerPhone NVARCHAR(MAX)
-DECLARE @strCustomerLocationName NVARCHAR(MAX), @strCustomerAddress NVARCHAR(MAX), @strCustomerCity NVARCHAR(MAX), @strCustomerCountry NVARCHAR(MAX), @strCustomerState NVARCHAR(MAX), @strCustomerZipCode NVARCHAR(MAX)
+DECLARE @strCustomerLocationName NVARCHAR(MAX), @strCustomerAddress NVARCHAR(MAX), @strCustomerFirstLineAddress NVARCHAR(MAX), @strCustomerMapLink NVARCHAR(MAX), @strCustomerCity NVARCHAR(MAX), @strCustomerCountry NVARCHAR(MAX), @strCustomerState NVARCHAR(MAX), @strCustomerZipCode NVARCHAR(MAX)
 DECLARE @strHauler NVARCHAR(MAX), @strHaulerAddress NVARCHAR(MAX), @strHaulerCity NVARCHAR(MAX), @strHaulerCountry NVARCHAR(MAX), @strHaulerState NVARCHAR(MAX), @strHaulerZip NVARCHAR(MAX), @strHaulerPhone NVARCHAR(MAX)
 DECLARE @strDriver NVARCHAR(MAX), @strDispatcher NVARCHAR(MAX), @strTrailerNo1 NVARCHAR(MAX), @strTrailerNo2 NVARCHAR(MAX), @strTrailerNo3 NVARCHAR(MAX), @strTruckNo NVARCHAR(MAX)
 DECLARE @dblQuantity NUMERIC(18, 6)
@@ -115,6 +115,62 @@ BEGIN
 	LEFT JOIN	tblLGEquipmentType		Equipment On		Equipment.intEquipmentTypeId = L.intEquipmentTypeId
 	LEFT JOIN	tblSMUserSecurity	Dispatcher On					Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
 
+	SET @strVendorMapLink = 'http://maps.google.com/maps?q='
+	IF IsNull(@strVendorAddress, '') <> ''
+	BEGIN
+		SET @strVendorMapLink =	@strVendorMapLink + REPLACE(REPLACE(@strVendorAddress, ' ', '+'), Char(10), '+')
+	END
+	IF IsNull(@strVendorCity, '') <> ''
+	BEGIN
+		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorCity
+	END
+	IF IsNull(@strVendorState, '') <> ''
+	BEGIN
+		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorState
+	END
+	IF IsNull(@strVendorZipCode, '') <> ''
+	BEGIN
+		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorZipCode
+	END
+	IF IsNull(@strVendorCountry, '') <> ''
+	BEGIN
+		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorCountry
+	END
+
+	SET @strCustomerMapLink = 'http://maps.google.com/maps?q='
+	IF IsNull(@strCustomerAddress, '') <> ''
+	BEGIN
+		SET @strCustomerMapLink =	@strCustomerMapLink + REPLACE(REPLACE(@strCustomerAddress, ' ', '+'), Char(10), '+')
+	END
+	IF IsNull(@strCustomerCity, '') <> ''
+	BEGIN
+		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerCity
+	END
+	IF IsNull(@strCustomerState, '') <> ''
+	BEGIN
+		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerState
+	END
+	IF IsNull(@strCustomerZipCode, '') <> ''
+	BEGIN
+		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerZipCode
+	END
+	IF IsNull(@strCustomerCountry, '') <> ''
+	BEGIN
+		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerCountry
+	END
+
+	SET @strVendorFirstLineAddress = @strVendorAddress
+	IF CHARINDEX(Char(10), @strVendorAddress) > 0
+	BEGIN
+		SET @strVendorFirstLineAddress = SUBSTRING(@strVendorAddress, 1, CHARINDEX(Char(10), @strVendorAddress))
+	END
+
+	SET @strCustomerFirstLineAddress = @strCustomerAddress
+	IF CHARINDEX(Char(10), @strCustomerAddress) > 0
+	BEGIN
+		SET @strCustomerFirstLineAddress = SUBSTRING(@strCustomerAddress, 1, CHARINDEX(Char(10), @strCustomerAddress))
+	END
+
 	SET @strMailMessage =	N'<HTML> <BODY> <TABLE cellpadding=2 border=1 >' + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Load #: </B> </TD>' +
@@ -140,6 +196,11 @@ BEGIN
 									'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Vendor: </B> </TD>' +
 									'<TD>' + IsNull(@strVendorName, '') + '<BR>' + IsNull(@strVendorLocationName, '') + '<BR>' + IsNull(@strVendorAddress, '') + '<BR>' + IsNull(@strVendorCity, '') + ', ' + IsNull(@strVendorState, '') + ' ' + IsNull(@strVendorZipCode, '') + '</TD>' +
+								'</FONT></TR>' +
+
+									'<TR><FONT face=tahoma size=2>' +
+									'<TD size=210> <B> Vendor Map Link: </B> </TD>' +
+									'<TD><a href="' + @strVendorMapLink + '">' + @strVendorFirstLineAddress + '</a></TD>' +
 								'</FONT></TR>'
 								END
 
@@ -149,6 +210,11 @@ BEGIN
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Customer: </B> </TD>' +
 									'<TD>' + IsNull(@strCustomerName, '') + '<BR>' + IsNull(@strCustomerLocationName, '') + '<BR>' + IsNull(@strCustomerAddress, '') + '<BR>' + IsNull(@strCustomerCity, '') + ', ' + IsNull(@strCustomerState, '') + ' ' + IsNull(@strCustomerZipCode, '') + '</TD>' +
+								'</FONT></TR>' +
+
+									'<TR><FONT face=tahoma size=2>' +
+									'<TD size=210> <B> Customer Map Link: </B> </TD>' +
+									'<TD><a href="' + @strCustomerMapLink + '">' + @strCustomerFirstLineAddress + '</a></TD>' +
 								'</FONT></TR>'
 								END
 
@@ -238,4 +304,6 @@ BEGIN
 
 	SET @strMailMessage =	@strMailMessage + 
 							'</TABLE> </BODY> </HTML>'
+
+--SELECT @strMailMessage
 END
