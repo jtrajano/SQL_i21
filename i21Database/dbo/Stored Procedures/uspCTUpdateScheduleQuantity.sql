@@ -74,7 +74,7 @@ BEGIN TRY
 				@intContractDetailId	=	@intContractDetailId,
 				@strScreenName			=	@strScreenName,
 				@intExternalId			=	@intExternalId,
-				@strFieldName			=	'Scheduled Quantiy',
+				@strFieldName			=	'Scheduled Quantity',
 				@dblOldValue			=	@dblScheduleQty,
 				@dblTransactionQuantity =	@dblQuantityToUpdate,
 				@dblNewValue			=	@dblNewScheduleQty,	
