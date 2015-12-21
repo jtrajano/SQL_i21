@@ -3083,6 +3083,8 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdatePaycheckReferenceNo.sql" />
     <Build Include="dbo\Functions\fnPATCreateDividendGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATReverseGLDividendEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
