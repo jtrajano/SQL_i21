@@ -79,7 +79,7 @@ AS
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblTRTransportReceipt		DL	ON	DL.intTransportReceiptId		=	UH.intExternalId 
 	JOIN	tblTRTransportLoad			HR	ON	HR.intTransportLoadId			=	DL.intTransportLoadId
-	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Transport Purchase'
 	
 	UNION ALL
@@ -101,7 +101,49 @@ AS
 	JOIN	tblTRDistributionHeader		DL	ON	DL.intDistributionHeaderId		=	UH.intExternalId 
 	JOIN	tblTRTransportReceipt		TR	ON	TR.intTransportReceiptId		=	DL.intTransportReceiptId 	
 	JOIN	tblTRTransportLoad			HR	ON	HR.intTransportLoadId			=	TR.intTransportLoadId
-	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
+	WHERE	UH.strScreenName	=	'Transport Sale'
+
+	UNION ALL
+
+	SELECT	UH.intSequenceUsageHistoryId,
+			UH.intContractDetailId,
+			CD.intContractHeaderId,
+			CD.intContractSeq,
+			UH.dtmTransactionDate,
+			'Transport'	AS strScreenName,
+			LTRIM(HR.strTransaction)	AS	strNumber,
+			UH.strFieldName,
+			UH.dblOldValue,
+			UH.dblTransactionQuantity,
+			UH.dblNewValue,
+			US.strUserName
+	FROM	tblCTSequenceUsageHistory	UH
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
+	JOIN	tblTRLoadReceipt			DL	ON	DL.intLoadReceiptId				=	UH.intExternalId 
+	JOIN	tblTRLoadHeader				HR	ON	HR.intLoadHeaderId				=	DL.intLoadHeaderId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
+	WHERE	UH.strScreenName	=	'Transport Purchase'
+	
+	UNION ALL
+
+	SELECT	UH.intSequenceUsageHistoryId,
+			UH.intContractDetailId,
+			CD.intContractHeaderId,
+			CD.intContractSeq,
+			UH.dtmTransactionDate,
+			'Transport'	AS strScreenName,
+			LTRIM(HR.strTransaction)	AS	strNumber,
+			UH.strFieldName,
+			UH.dblOldValue,
+			UH.dblTransactionQuantity,
+			UH.dblNewValue,
+			US.strUserName
+	FROM	tblCTSequenceUsageHistory	UH
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
+	JOIN	tblTRLoadDistributionHeader	DL	ON	DL.intLoadDistributionHeaderId	=	UH.intExternalId 
+	JOIN	tblTRLoadHeader				HR	ON	HR.intLoadHeaderId				=	DL.intLoadHeaderId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Transport Sale'
 
 	UNION ALL
