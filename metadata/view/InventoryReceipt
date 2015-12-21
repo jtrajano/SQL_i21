@@ -2335,7 +2335,7 @@
                                                                         "dataType": null,
                                                                         "format": "0,000.00####",
                                                                         "itemId": "colUnitCost",
-                                                                        "text": "Cost per Cost UOM",
+                                                                        "text": "Cost",
                                                                         "width": 120
                                                                     },
                                                                     "name": "MyNumberColumn4",

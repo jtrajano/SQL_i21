@@ -1223,7 +1223,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colUnitCost',
                                                                                 width: 120,
                                                                                 dataIndex: 'dblUnitCost',
-                                                                                text: 'Cost per Cost UOM',
+                                                                                text: 'Cost',
                                                                                 format: '0,000.00####',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
