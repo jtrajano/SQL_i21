@@ -52,6 +52,10 @@ Ext.define('Inventory.view.PickLotViewController', {
             {
                 column: 'intCompanyLocationId',
                 value: config.param.intShipFromId
+            },
+            {
+                column: 'ysnShipped',
+                value: false
             }
         ];
         context.data.load({
