@@ -98,7 +98,8 @@ AS
 			US.strUserName
 	FROM	tblCTSequenceUsageHistory	UH
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
-	JOIN	tblTRDistributionHeader		DL	ON	DL.intDistributionHeaderId		=	UH.intExternalId 
+	JOIN	tblTRDistributionDetail		DD	ON	DD.intDistributionDetailId		=	UH.intExternalId 
+	JOIN	tblTRDistributionHeader		DL	ON	DL.intDistributionHeaderId		=	DD.intDistributionHeaderId
 	JOIN	tblTRTransportReceipt		TR	ON	TR.intTransportReceiptId		=	DL.intTransportReceiptId 	
 	JOIN	tblTRTransportLoad			HR	ON	HR.intTransportLoadId			=	TR.intTransportLoadId
 	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
@@ -141,7 +142,8 @@ AS
 			US.strUserName
 	FROM	tblCTSequenceUsageHistory	UH
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
-	JOIN	tblTRLoadDistributionHeader	DL	ON	DL.intLoadDistributionHeaderId	=	UH.intExternalId 
+	JOIN	tblTRLoadDistributionDetail	DD	ON	DD.intLoadDistributionDetailId	=	UH.intExternalId 
+	JOIN	tblTRLoadDistributionHeader	DL	ON	DL.intLoadDistributionHeaderId	=	DD.intLoadDistributionHeaderId 
 	JOIN	tblTRLoadHeader				HR	ON	HR.intLoadHeaderId				=	DL.intLoadHeaderId
 	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Transport Sale'
