@@ -174,10 +174,16 @@ BEGIN
 									'Inventory Adjustment'
 								WHEN @strTransactionForm = 'Inventory Receipt' THEN 
 									'AP Clearing'
-								WHEN @strTransactionForm = 'Inventory Shipment' THEN 
+								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId LIKE 'SI%' THEN 
+									'Cost of Goods'
+								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId NOT LIKE 'SI%' THEN 
 									'Inventory In-Transit'
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
-									'Inventory In-Transit'
+									CASE WHEN EXISTS (SELECT 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND strTransferType = 'Location to Location') THEN 
+											NULL
+										ELSE 
+											'Inventory In-Transit'
+									END 									
 								ELSE 
 									NULL 
 						END
@@ -290,6 +296,115 @@ BEGIN
 					,@strGLDescription
 					,@ItemsToPost
 			END 
+			ELSE IF @strTransactionForm = 'Inventory Transfer'
+			BEGIN 
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId
+						,strActualCostId
+				)
+				SELECT 	intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  = (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId) * dblUOMQty  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId
+						,strActualCostId = NULL 
+				FROM	#tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId
+						AND dblQty < 0 
+					
+				EXEC dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intUserId
+					,@strGLDescription
+					,@ItemsToPost
+
+				DELETE FROM @ItemsToPost
+
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId		
+						,strActualCostId
+				)
+				SELECT 	intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost = (
+								SELECT	dblCost 
+								FROM	dbo.tblICInventoryTransaction 
+								WHERE	strTransactionId = @strTransactionId 
+										AND strBatchId = @strBatchId
+										AND dblQty < 0 
+										AND ysnIsUnposted = 0 
+						) 
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId
+						,strActualCostId = NULL 
+				FROM	#tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId
+						AND dblQty > 0 
+
+				EXEC dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intUserId
+					,@strGLDescription
+					,@ItemsToPost
+			END
 			ELSE 
 			BEGIN 
 				INSERT INTO @ItemsToPost (
