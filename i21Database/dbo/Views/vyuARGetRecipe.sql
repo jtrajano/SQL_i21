@@ -4,9 +4,9 @@ SELECT R.intRecipeId
      , R.intItemId
 	 , I.strItemNo
 	 , I.strDescription
-	 , R.[intItemUOMId]
+	 , R.intItemUOMId
 	 , UOM.strUnitMeasure
-	 , R.intLocationId AS intCompanyLocationId
+	 , R.intLocationId	AS intCompanyLocationId
 	 , L.strLocationName
 	 , R.dblQuantity
 	 , R.intVersionNo
@@ -14,8 +14,8 @@ SELECT R.intRecipeId
 	 , MC.strCellName
 	 , R.intManufacturingProcessId
 	 , MP.strProcessName
-	 , R.intCustomerId AS intEntityCustomerId
-	 , E.strEntityNo AS strCustomerNumber	 
+	 , R.intCustomerId	AS intEntityCustomerId
+	 , E.strEntityNo	AS strCustomerNumber	 
 FROM tblMFRecipe R
 	LEFT JOIN tblICItem I ON R.intItemId = I.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON R.[intItemUOMId] = UOM.intItemUOMId
