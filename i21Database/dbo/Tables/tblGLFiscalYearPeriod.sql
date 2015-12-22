@@ -10,7 +10,8 @@
 	[ysnINVOpen]                 BIT           DEFAULT 1 NULL,
 	[ysnCMOpen]                 BIT           DEFAULT 1 NULL,
 	[ysnPROpen]	BIT DEFAULT 1 NULL,
-    [intConcurrencyId]        INT           DEFAULT 1 NOT NULL,
+    [dblEndingBalance] NUMERIC(18, 6) NULL, 
+	[intConcurrencyId]        INT           DEFAULT 1 NOT NULL
     CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED ([intGLFiscalYearPeriodId] ASC, [intFiscalYearId] ASC),
     CONSTRAINT [FK_tblGLPeriod_tblGLFiscalYearPeriod] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId]) ON DELETE CASCADE
 );
