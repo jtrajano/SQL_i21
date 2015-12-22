@@ -22,7 +22,7 @@ AS
 				CH.strApprovalBasis,				CH.strContractBasis,			CH.strPricingType,
 				CH.strPricingLevelName,				CH.strLoadUnitMeasure,			CH.strCategoryUnitMeasure,
 				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				CH.strStatuses,
-				CH.dtmCreated,
+				CH.dtmCreated,						CH.intContractPlanId,			CH.strContractPlan,
 				CASE WHEN CH.ysnLoad = 1 THEN CH.strHeaderUnitMeasure + '/Load' ELSE CH.strHeaderUnitMeasure END strHeaderUnitMeasure
 
 	FROM		vyuCTContractHeaderView		CH	LEFT
