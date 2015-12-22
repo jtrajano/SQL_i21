@@ -3073,8 +3073,10 @@
     <Build Include="dbo\Views\vyuMFGetReasonCode.sql" />
     <Build Include="dbo\Tables\tblMFDowntimeMachines.sql" />
     <Build Include="dbo\Views\vyuMFGetReasonDowntime.sql" />
-	<Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionByPeriodSelection.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionByPeriodSelectionHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
