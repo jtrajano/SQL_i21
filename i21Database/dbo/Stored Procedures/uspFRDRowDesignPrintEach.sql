@@ -114,7 +114,9 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 
 END
 
-
+DELETE #tempGLAccount
+DELETE #tempRowDesignPrintEach
+DELETE #tempRowDesign
 
 --=====================================================================================================================================
 -- 	SCRIPT EXECUTION 
