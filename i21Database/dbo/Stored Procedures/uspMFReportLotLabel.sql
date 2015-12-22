@@ -42,18 +42,24 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strLotNo'
 
-	SELECT l.intItemId, 
-		   CASE WHEN iu.intItemUOMId = l.intWeightUOMId THEN l.dblWeight ELSE dblQty END dblQty, 
-		   l.strLotNumber, 
+	SELECT l.intLotId,
+		   l.intItemId, 
+		   l.dblQty,
+		   um.strUnitMeasure AS strQtyUOM,
 		   l.dblWeight, 
+		   um1.strUnitMeasure AS strWeightUOM,
+		   l.strLotNumber, 
 		   i.strItemNo, 
 		   i.strDescription,
-		   um.strUnitMeasure
-	FROM dbo.tblICLot l
-	INNER JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
-	INNER JOIN dbo.tblICItemUOM iu ON iu.intItemId = l.intItemId
-	INNER JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-	WHERE iu.ysnStockUnit = 1 AND l.strLotNumber = @strLotNo AND l.dblQty>0
+		   pl.strParentLotNumber
+	FROM tblICLot l
+	JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
+	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
+	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
+	LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
+	LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu1.intUnitMeasureId
+	WHERE l.strLotNumber = @strLotNo AND l.dblQty>0
 	
 END TRY
 
