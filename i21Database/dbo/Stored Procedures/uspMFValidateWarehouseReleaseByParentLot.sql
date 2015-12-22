@@ -7,17 +7,65 @@ BEGIN TRY
 	DECLARE @intRecordId INT
 		,@strLotNumber NVARCHAR(50)
 		,@ErrMsg NVARCHAR(MAX)
+		,@intLotId int
+		,@intParentLotId int
+		,@intManufacturingProcessId int
+		,@intAttributeId INT
+		,@strAttributeValue NVARCHAR(50)
+
 	DECLARE @tblMFParentLot TABLE (
 		intRecordId INT identity(1, 1)
 		,strLotNumber NVARCHAR(50)
 		)
+	SELECT @intLotId = intLotId
+	FROM dbo.tblICLot
+	WHERE strLotNumber = @strParentLotNumber
+		AND intLocationId = @intLocationId
 
-	INSERT INTO @tblMFParentLot (strLotNumber)
-	SELECT L.strLotNumber
-	FROM dbo.tblICLot L
-	JOIN dbo.tblICParentLot PL ON L.intParentLotId = PL.intParentLotId
-	WHERE PL.strParentLotNumber = @strParentLotNumber
-		AND L.intLotStatusId = 3
+	IF @intLotId IS NULL
+	BEGIN
+		SELECT @intParentLotId = intParentLotId
+		FROM dbo.tblICParentLot
+		WHERE strParentLotNumber = @strParentLotNumber
+
+		SELECT @intLotId = intLotId
+		FROM dbo.tblICLot
+		WHERE intParentLotId = @intParentLotId
+		AND intLocationId = @intLocationId
+	END
+
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
+	FROM tblMFWorkOrderProducedLot WPL
+	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+	WHERE WPL.intLotId = @intLotId
+
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Warehouse Release Lot By Batch'
+
+	SELECT @strAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @strAttributeValue = 'True'
+	BEGIN
+		INSERT INTO @tblMFParentLot (strLotNumber)
+		SELECT L.strLotNumber
+		FROM dbo.tblICLot L
+		JOIN dbo.tblICParentLot PL ON L.intParentLotId = PL.intParentLotId
+		WHERE PL.strParentLotNumber = @strParentLotNumber
+			AND L.intLotStatusId = 3
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFParentLot (strLotNumber)
+		SELECT L.strLotNumber
+		FROM dbo.tblICLot L
+		WHERE L.strLotNumber = @strParentLotNumber
+			AND L.intLotStatusId = 3
+	END
 
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFParentLot
@@ -43,6 +91,8 @@ BEGIN TRY
 		,L.intLocationId
 		,L.intParentLotId
 		,PL.strParentLotNumber
+		,0 as intLotId
+		,'' As strLotNumber
 		,I.strItemNo
 		,I.strDescription
 		,SUM(L.dblQty) dblQty
@@ -50,6 +100,7 @@ BEGIN TRY
 		,U.strUnitMeasure
 		,U.intUnitMeasureId
 		,W.intManufacturingProcessId
+		,@strAttributeValue as strWarehouseReleaseLotByBatch
 	FROM tblICLot L
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId

@@ -149,6 +149,8 @@ BEGIN TRY
 		SELECT W.intWorkOrderId
 			,W.strWorkOrderNo
 			,L.intLocationId
+			,L.intParentLotId
+			,PL.strParentLotNumber
 			,L.intLotId
 			,L.strLotNumber
 			,I.strItemNo
@@ -158,12 +160,14 @@ BEGIN TRY
 			,U.strUnitMeasure
 			,U.intUnitMeasureId
 			,W.intManufacturingProcessId
+			,@strAttributeValue as strWarehouseReleaseLotByBatch
 		FROM tblICLot L
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
-		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 		WHERE L.intLotId = @intLotId
 	END
 END TRY
