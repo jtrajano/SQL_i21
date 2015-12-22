@@ -3100,6 +3100,9 @@
     <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <Build Include="dbo\Views\vyuARCustomerGroup.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileTransmitter.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFilePayer.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileMISCPayee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

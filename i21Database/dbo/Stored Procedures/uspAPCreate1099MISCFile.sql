@@ -13,6 +13,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+WITH Transmitter AS (
+	SELECT dbo.[fnAP1099EFileTransmitter](@year,@test)
+),
+Payer AS(
+	SELECT dbo.[fnAP1099EFilePayer](@year)
+)
+
 SELECT 
 	'T' --1
 	+ CAST(A.intYear AS NVARCHAR(10))  --Position 2-5

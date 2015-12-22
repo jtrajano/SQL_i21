@@ -8,6 +8,7 @@ WITH MISC1099 (
 	,strFederalTaxId
 	,strAddress
 	,strVendorCompanyName
+	,strPayeeName
 	,strVendorId
 	,strZip
 	,strCity
@@ -42,6 +43,7 @@ AS
 										, B.strCountry
 										, B.strPhone)
 		, B.strCompanyName
+		, A.strPayeeName
 		, strEIN = B.strFederalTaxID
 		, A.strFederalTaxId
 		, A.strAddress
@@ -77,6 +79,7 @@ AS
 	,C.dbl1099MISCRoyalties, C.dbl1099MISCSubstitute, dblDirectSales
 	, A.strAddress
 	, A.strVendorCompanyName
+	, A.strPayeeName
 	, A.strVendorId
 	, A.strZip
 	, A.strFederalTaxId
@@ -107,6 +110,7 @@ GROUP BY intEntityVendorId
 	,strFederalTaxId
 	,strAddress
 	,strVendorCompanyName
+	,strPayeeName
 	,strVendorId
 	,strZip
 	,strCity
