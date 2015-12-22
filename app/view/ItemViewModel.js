@@ -899,6 +899,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Service':
                     isNotStockTracked = true;
                     break;
+                case 'Software':
+                    isNotStockTracked = true;
+                    break;
                 case 'Raw Material':
                     isNotStockTracked = false;
                     break;
