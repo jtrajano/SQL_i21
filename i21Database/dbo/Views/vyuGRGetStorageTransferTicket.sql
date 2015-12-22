@@ -7,6 +7,7 @@ SELECT TOP 100 PERCENT
  ,E.strName  
  ,a.intStorageTypeId  
  ,b.strStorageTypeDescription
+ ,b.ysnCustomerStorage
  ,a.intStorageScheduleId
  ,SR.strScheduleId  
  ,a.intCommodityId  

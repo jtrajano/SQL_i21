@@ -3077,6 +3077,8 @@
     <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionByPeriodSelection.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionByPeriodSelectionHeader.sql" />
+    <Build Include="dbo\Views\vyuGROffSiteSearchView.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKValidateElectronicPricingSetUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
