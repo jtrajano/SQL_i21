@@ -3102,6 +3102,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
     <Build Include="dbo\Tables\tblSCListTicketTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostDividend.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
