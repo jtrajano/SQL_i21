@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4a6e057c1d6c2d8acc74048417924eae3eee1f5c107c5eccca1fc9df9774a156))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2751ee942e3b418528af704446558ffd08b97f2cd1e749a3c118d9c86fa2b71e))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets4a6e057c1d6c2d8acc74048417924eae3eee1f5c107c5eccca1fc9df9774a156 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets2751ee942e3b418528af704446558ffd08b97f2cd1e749a3c118d9c86fa2b71e : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "4a6e057c1d6c2d8acc74048417924eae3eee1f5c107c5eccca1fc9df9774a156"; }
+            get { return "2751ee942e3b418528af704446558ffd08b97f2cd1e749a3c118d9c86fa2b71e"; }
         }
 
         /// <summary>
@@ -3213,7 +3213,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryShipment
-        [CodeFirstDatabaseSchema.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_dtmFreeTime, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_dtmFreeTime, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted, T1.vyuICGetInventoryShipment_intWarehouseInstructionHeaderId)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS vyuICGetInventoryShipment_intInventoryShipmentId, 
@@ -3253,6 +3253,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strReceivedBy AS vyuICGetInventoryShipment_strReceivedBy, 
             T.strComment AS vyuICGetInventoryShipment_strComment, 
             T.ysnPosted AS vyuICGetInventoryShipment_ysnPosted, 
+            T.intWarehouseInstructionHeaderId AS vyuICGetInventoryShipment_intWarehouseInstructionHeaderId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetInventoryShipments AS T
     ) AS T1");
@@ -6546,7 +6547,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryShipments
-        [iRely.Inventory.Model.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_dtmFreeTime, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted)
+        [iRely.Inventory.Model.vyuICGetInventoryShipment](T1.vyuICGetInventoryShipment_intInventoryShipmentId, T1.vyuICGetInventoryShipment_strShipmentNumber, T1.vyuICGetInventoryShipment_dtmShipDate, T1.vyuICGetInventoryShipment_intOrderType, T1.vyuICGetInventoryShipment_strOrderType, T1.vyuICGetInventoryShipment_intSourceType, T1.vyuICGetInventoryShipment_strSourceType, T1.vyuICGetInventoryShipment_strReferenceNumber, T1.vyuICGetInventoryShipment_dtmRequestedArrivalDate, T1.vyuICGetInventoryShipment_intShipFromLocationId, T1.vyuICGetInventoryShipment_strShipFromLocation, T1.vyuICGetInventoryShipment_strShipFromAddress, T1.vyuICGetInventoryShipment_intEntityCustomerId, T1.vyuICGetInventoryShipment_strCustomerNumber, T1.vyuICGetInventoryShipment_strCustomerName, T1.vyuICGetInventoryShipment_intShipToLocationId, T1.vyuICGetInventoryShipment_strShipToLocation, T1.vyuICGetInventoryShipment_strShipToAddress, T1.vyuICGetInventoryShipment_intFreightTermId, T1.vyuICGetInventoryShipment_strFreightTerm, T1.vyuICGetInventoryShipment_strFobPoint, T1.vyuICGetInventoryShipment_strBOLNumber, T1.vyuICGetInventoryShipment_intShipViaId, T1.vyuICGetInventoryShipment_strShipVia, T1.vyuICGetInventoryShipment_strVessel, T1.vyuICGetInventoryShipment_strProNumber, T1.vyuICGetInventoryShipment_strDriverId, T1.vyuICGetInventoryShipment_strSealNumber, T1.vyuICGetInventoryShipment_strDeliveryInstruction, T1.vyuICGetInventoryShipment_dtmAppointmentTime, T1.vyuICGetInventoryShipment_dtmDepartureTime, T1.vyuICGetInventoryShipment_dtmArrivalTime, T1.vyuICGetInventoryShipment_dtmDeliveredDate, T1.vyuICGetInventoryShipment_dtmFreeTime, T1.vyuICGetInventoryShipment_strReceivedBy, T1.vyuICGetInventoryShipment_strComment, T1.vyuICGetInventoryShipment_ysnPosted, T1.vyuICGetInventoryShipment_intWarehouseInstructionHeaderId)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS vyuICGetInventoryShipment_intInventoryShipmentId, 
@@ -6586,6 +6587,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strReceivedBy AS vyuICGetInventoryShipment_strReceivedBy, 
             T.strComment AS vyuICGetInventoryShipment_strComment, 
             T.ysnPosted AS vyuICGetInventoryShipment_ysnPosted, 
+            T.intWarehouseInstructionHeaderId AS vyuICGetInventoryShipment_intWarehouseInstructionHeaderId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryShipment AS T
     ) AS T1");
