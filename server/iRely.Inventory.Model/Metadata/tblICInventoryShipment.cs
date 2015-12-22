@@ -104,6 +104,22 @@ namespace iRely.Inventory.Model
                 _custName = value;
             }
         }
+        private int? _warehouseId;
+        [NotMapped]
+        public int? intWarehouseInstructionHeaderId
+        {
+            get
+            {
+                if (vyuICGetInventoryShipment != null)
+                    return vyuICGetInventoryShipment.intWarehouseInstructionHeaderId;
+                else
+                    return null;
+            }
+            set
+            {
+                _warehouseId = value;
+            }
+        }
         
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public ICollection<tblICInventoryShipmentCharge> tblICInventoryShipmentCharges { get; set; }
@@ -149,6 +165,7 @@ namespace iRely.Inventory.Model
         public string strReceivedBy { get; set; }
         public string strComment { get; set; }
         public bool? ysnPosted { get; set; }
+        public int? intWarehouseInstructionHeaderId { get; set; }
 
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
     }

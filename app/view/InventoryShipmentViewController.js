@@ -1630,16 +1630,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             return;
         }
 
-        iRely.Functions.openScreen('Logistics.view.WarehouseInstructions',
-            {
-                action: 'new',
-                intInventoryShipmentId: current.data.intInventoryShipmentId,
-                strReferenceNumber: current.data.strReferenceNumber,
-                intSourceType: 2,
-                intCommodityId: commodity.get('intCommodityId'),
-                intCompanyLocationId: current.data.intShipFromLocationId,
-                intCompanyLocationSubLocationId: subLocation.get('intSubLocationId')
-            });
+        if (iRely.Functions.isEmpty(current.data.intWarehouseInstructionHeaderId) === false)
+        {
+            iRely.Functions.openScreen('Logistics.view.WarehouseInstructions',
+                {
+                    action: 'edit',
+                    filters : [{ column: 'intWarehouseInstructionHeaderId', value: current.data.intWarehouseInstructionHeaderId, conjunction: 'and'}]
+                });
+        }
+        else {
+            iRely.Functions.openScreen('Logistics.view.WarehouseInstructions',
+                {
+                    action: 'new',
+                    intInventoryShipmentId: current.data.intInventoryShipmentId,
+                    strReferenceNumber: current.data.strReferenceNumber,
+                    intSourceType: 2,
+                    intCommodityId: commodity.get('intCommodityId'),
+                    intCompanyLocationId: current.data.intShipFromLocationId,
+                    intCompanyLocationSubLocationId: subLocation.get('intSubLocationId')
+                });
+        }
     },
 
     onPrintBOLClick: function(button, e, eOpts) {
