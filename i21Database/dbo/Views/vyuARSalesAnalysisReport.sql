@@ -3,7 +3,7 @@ AS
 SELECT strRecordNumber
 	 , intTransactionId
 	 , A.intAccountId	 
-	 , dtmDate
+	 , DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) AS dtmDate
 	 , A.intCompanyLocationId
 	 , A.intEntityCustomerId	 
 	 , IC.intItemId
