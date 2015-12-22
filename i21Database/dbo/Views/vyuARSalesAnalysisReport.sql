@@ -28,6 +28,7 @@ SELECT strRecordNumber
 	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
 	 , ISNULL(A.dblTotal, 0)		  AS dblTotal
 	 , C.strCustomerNumber
+	 , GA.strAccountId				  AS strAccountId
 	 , GA.strDescription			  AS strAccountName
 	 , L.strLocationName
 	 , IC.strItemNo					  AS strItemName
