@@ -39,7 +39,6 @@ AS
 			l.intCreatedUserId,
 			l.intConcurrencyId,
 
-
 			i.strItemNo,         
 			i.strDescription strItemDescription,         
 			i.strType strItemType,         
@@ -64,8 +63,9 @@ AS
 		    '' AS strCostUOM,    
 		    0 AS intContainerId,    
 		    '' AS strContainerNo,
-			re.dblQty dblReservedQty, 
-			rum.strUnitMeasure strReservedQtyUOM    
+			ISNULL(re.dblQty,0) dblReservedQty, 
+			rum.strUnitMeasure strReservedQtyUOM,
+			l.dblWeight -ISNULL(re.dblQty,0) dblAvailableQty
 	FROM tblICLot l
 	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 	LEFT JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
