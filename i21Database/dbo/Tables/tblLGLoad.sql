@@ -39,6 +39,12 @@
 [dtmDispatchMailSent] DATETIME NULL,
 [dtmCancelDispatchMailSent] DATETIME NULL,
 [intLoadHeaderId] INT NULL,
+[strScheduleInfoMsg]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+[ysnUpdateScheduleInfo] [bit] NULL,
+[ysnPrintScheduleInfo] [bit] NULL,
+[strLoadDirectionMsg]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+[ysnUpdateLoadDirections] [bit] NULL,
+[ysnPrintLoadDirections] [bit] NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
