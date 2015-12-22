@@ -44,6 +44,7 @@ CREATE TABLE #tmpComputeItemTaxes (
 	,intItemId				INT
 
 	-- Taxes fields
+	,intTaxGroupId			INT
 	,intTaxCodeId			INT
 	,intTaxClassId			INT
 	,strTaxableByOtherTaxes NVARCHAR(MAX) 
@@ -565,7 +566,7 @@ BEGIN
 						,[strTaxCode]					= [strTaxCode]
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, NULL, @LocationId, @ShipFromId, 0)
+				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0)
 
 				--Compute the tax
 				BEGIN 
@@ -582,6 +583,7 @@ BEGIN
 						,intItemId
 
 						-- Taxes fields
+						,intTaxGroupId
 						,intTaxCodeId
 						,intTaxClassId
 						,strTaxableByOtherTaxes
@@ -604,6 +606,7 @@ BEGIN
 						,intItemId					= ReceiptItem.intItemId
 
 						-- Taxes fields
+						,intTaxGroupId				= Receipt.intTaxGroupId
 						,intTaxCodeId				= ItemTax.intTaxCodeId
 						,intTaxClassId				= ItemTax.intTaxClassId
 						,strTaxableByOtherTaxes		= ItemTax.strTaxableByOtherTaxes
