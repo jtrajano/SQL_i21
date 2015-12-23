@@ -3085,6 +3085,8 @@
     <Build Include="dbo\Functions\fnPATReverseGLDividendEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
