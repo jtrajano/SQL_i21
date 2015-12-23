@@ -2526,11 +2526,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transacti
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.TransactionView' WHERE strMenuName = 'Transaction View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Production Runs View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = N'Production Runs View' WHERE strMenuName = 'Process Production Runs View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Runs View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Process Production Runs View', N'Manufacturing', @ManufacturingParentMenuId, N'Process Production Runs View', N'Activity', N'Screen', N'Manufacturing.view.ProcessProductionRunsView', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Production Runs View', N'Manufacturing', @ManufacturingParentMenuId, N'Production Runs View', N'Activity', N'Screen', N'Manufacturing.view.ProcessProductionRunsView', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ProcessProductionRunsView' WHERE strMenuName = 'Process Production Runs View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ProcessProductionRunsView' WHERE strMenuName = 'Production Runs View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Plant Schedule' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
