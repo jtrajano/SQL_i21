@@ -4634,4 +4634,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intItemUOMId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6da6e213-7772-4653-b80a-06d273abf7e6" ChangeDateTime="12/23/2015 14:12:55">
+    <Property Name="ElementName" Value="[dbo].[tblSTPumpItem].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPumpItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorePumpItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a6dc082-7b08-4e07-bde0-61b56bfbf3b5" ChangeDateTime="12/23/2015 14:14:14">
+    <Property Name="ElementName" Value="[dbo].[tblSTPumpItem].[5 intConcurrencyId ]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPumpItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId " />
+  </Operation>
 </Operations>
