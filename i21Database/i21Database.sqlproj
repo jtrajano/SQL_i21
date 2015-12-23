@@ -3083,6 +3083,7 @@
     <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
     <Build Include="dbo\Tables\tblSTPumpItem.sql" />
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShiftActivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
