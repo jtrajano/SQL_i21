@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFProduceWorkOrder] (
 	@intWorkOrderId INT
-	,@intItemId int =NULL
+	,@intItemId INT = NULL
 	,@dblProduceQty NUMERIC(18, 6)
 	,@intProduceUOMKey INT = NULL
 	,@strVesselNo NVARCHAR(50)
@@ -10,38 +10,45 @@
 	,@strLotNumber NVARCHAR(50)
 	,@intContainerId INT
 	,@dblTareWeight NUMERIC(18, 6) = NULL
-	,@dblUnitQty  NUMERIC(18, 6) = NULL
+	,@dblUnitQty NUMERIC(18, 6) = NULL
 	,@dblPhysicalCount NUMERIC(18, 6) = NULL
 	,@intPhysicalItemUOMId INT = NULL
 	,@intBatchId INT
-	,@intShiftId int=NULL
-	,@strReferenceNo nvarchar(50)=NULL
-	,@intStatusId int=NULL
-	,@intLotId int OUTPUT
-	,@ysnPostProduction bit=0
-	,@strLotAlias nvarchar(50)
-	,@intLocationId int=NULL
-	,@intMachineId int =NULL
-	,@dtmProductionDate datetime=NULL
-	,@strVendorLotNo nvarchar(50)=NULL
-	,@strComment nvarchar(MAX)=NULL
-	,@strParentLotNumber nvarchar(50)=NULL
-	,@intInputLotId int=NULL
-	,@intInputStorageLocationId int=NULL
+	,@intShiftId INT = NULL
+	,@strReferenceNo NVARCHAR(50) = NULL
+	,@intStatusId INT = NULL
+	,@intLotId INT OUTPUT
+	,@ysnPostProduction BIT = 0
+	,@strLotAlias NVARCHAR(50)
+	,@intLocationId INT = NULL
+	,@intMachineId INT = NULL
+	,@dtmProductionDate DATETIME = NULL
+	,@strVendorLotNo NVARCHAR(50) = NULL
+	,@strComment NVARCHAR(MAX) = NULL
+	,@strParentLotNumber NVARCHAR(50) = NULL
+	,@intInputLotId INT = NULL
+	,@intInputStorageLocationId INT = NULL
 	)
 AS
 BEGIN
 	DECLARE @dtmCreated DATETIME
-			,@dtmBusinessDate datetime
-			,@intBusinessShiftId int
+		,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
 
 	SELECT @dtmCreated = Getdate()
 
-	If @intStatusId=0 or @intStatusId is null
-	Select @intStatusId=13--Complete Work Order
+	IF @intStatusId = 0
+		OR @intStatusId IS NULL
+		SELECT @intStatusId = 13 --Complete Work Order
 
-	If exists(Select *from tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId and intBlendRequirementId is not null) or @ysnPostProduction=1
-	Begin
+	IF EXISTS (
+			SELECT *
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intBlendRequirementId IS NOT NULL
+			)
+		OR @ysnPostProduction = 1
+	BEGIN
 		EXEC uspMFPostProduction 1
 			,0
 			,@intWorkOrderId
@@ -62,33 +69,33 @@ BEGIN
 			,@strVendorLotNo
 			,@strParentLotNumber
 			,@strVesselNo
-	End
-	Else
-	Begin
-		Exec uspMFPostConsumptionProduction 
-			@intWorkOrderId =@intWorkOrderId
-			,@intItemId=@intItemId
-			,@strLotNumber=@strLotNumber
-			,@dblWeight=@dblProduceQty
-			,@intWeightUOMId =@intProduceUOMKey
-			,@dblUnitQty =@dblUnitQty
-			,@dblQty =@dblPhysicalCount
-			,@intItemUOMId =@intPhysicalItemUOMId
-			,@intUserId =@intUserId
-			,@intBatchId=@intBatchId
-			,@intLotId =@intLotId OUT
-			,@strLotAlias=@strLotAlias
-			,@strVendorLotNo=@strVendorLotNo
-			,@strParentLotNumber=@strParentLotNumber
-	End
+	END
+	ELSE
+	BEGIN
+		EXEC uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
+			,@intItemId = @intItemId
+			,@strLotNumber = @strLotNumber
+			,@dblWeight = @dblProduceQty
+			,@intWeightUOMId = @intProduceUOMKey
+			,@dblUnitQty = @dblUnitQty
+			,@dblQty = @dblPhysicalCount
+			,@intItemUOMId = @intPhysicalItemUOMId
+			,@intUserId = @intUserId
+			,@intBatchId = @intBatchId
+			,@intLotId = @intLotId OUT
+			,@strLotAlias = @strLotAlias
+			,@strVendorLotNo = @strVendorLotNo
+			,@strParentLotNumber = @strParentLotNumber
+			,@intStorageLocationId = @intStorageLocationId
+	END
 
-	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated,@intLocationId) 
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intLocationId
-		AND @dtmCreated BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
-					AND @dtmBusinessDate+dtmShiftEndTime + intEndOffset
+		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 	INSERT INTO dbo.tblMFWorkOrderProducedLot (
 		intWorkOrderId
@@ -105,9 +112,9 @@ BEGIN
 		,intStorageLocationId
 		,dtmBusinessDate
 		,intBusinessShiftId
-		,dtmProductionDate 
-		,intShiftId 
-		,strReferenceNo 
+		,dtmProductionDate
+		,intShiftId
+		,strReferenceNo
 		,intBatchId
 		,intMachineId
 		,dtmCreated
@@ -116,26 +123,38 @@ BEGIN
 		,intLastModifiedUserId
 		,strComment
 		,strParentLotNumber
-		,intInputLotId 
-		,intInputStorageLocationId  
+		,intInputLotId
+		,intInputStorageLocationId
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
 		,@intLotId
 		,@dblProduceQty
 		,@intProduceUOMKey
-		,(Case When @dblUnitQty is not null Then @dblUnitQty else @dblProduceQty/@dblPhysicalCount End)
+		,(
+			CASE 
+				WHEN @dblUnitQty IS NOT NULL
+					THEN @dblUnitQty
+				ELSE @dblProduceQty / @dblPhysicalCount
+				END
+			)
 		,@dblPhysicalCount
 		,@intPhysicalItemUOMId
 		,@dblTareWeight
 		,@strVesselNo
-		,(Case When @intContainerId=0 Then NULL Else @intContainerId End)
+		,(
+			CASE 
+				WHEN @intContainerId = 0
+					THEN NULL
+				ELSE @intContainerId
+				END
+			)
 		,@intStorageLocationId
 		,@dtmBusinessDate
 		,@intBusinessShiftId
-		,@dtmProductionDate 
+		,@dtmProductionDate
 		,@intShiftId
-		,@strReferenceNo 
+		,@strReferenceNo
 		,@intBatchId
 		,@intMachineId
 		,@dtmCreated
@@ -144,12 +163,24 @@ BEGIN
 		,@intUserId
 		,@strComment
 		,@strParentLotNumber
-		,@intInputLotId 
-		,@intInputStorageLocationId  
+		,@intInputLotId
+		,@intInputStorageLocationId
 
 	UPDATE tblMFWorkOrder
 	SET intBatchID = @intWorkOrderId
-		,dblProducedQuantity = isnull(dblProducedQuantity, 0) + (Case When intItemId=@intItemId Then (Case When intItemUOMId=@intProduceUOMKey Then @dblProduceQty Else @dblPhysicalCount End) Else 0 End)
+		,dblProducedQuantity = isnull(dblProducedQuantity, 0) + (
+			CASE 
+				WHEN intItemId = @intItemId
+					THEN (
+							CASE 
+								WHEN intItemUOMId = @intProduceUOMKey
+									THEN @dblProduceQty
+								ELSE @dblPhysicalCount
+								END
+							)
+				ELSE 0
+				END
+			)
 		,dtmActualProductionEndDate = @dtmCreated
 		,dtmCompletedDate = @dtmCreated
 		,intStatusId = @intStatusId
@@ -157,10 +188,15 @@ BEGIN
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE dbo.tblMFWorkOrder
-	SET dtmLastProducedDate =@dtmCreated
-	WHERE intItemId=@intItemId
+	SET dtmLastProducedDate = @dtmCreated
+	WHERE intItemId = @intItemId
 
-	IF NOT EXISTS(SELECT *FROM tblMFProductionSummary WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId)
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblMFProductionSummary
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemId = @intItemId
+			)
 	BEGIN
 		INSERT INTO tblMFProductionSummary (
 			intWorkOrderId
@@ -193,6 +229,9 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		UPDATE tblMFProductionSummary SET dblOutputQuantity=dblOutputQuantity+@dblProduceQty WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId
+		UPDATE tblMFProductionSummary
+		SET dblOutputQuantity = dblOutputQuantity + @dblProduceQty
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intItemId
 	END
 END
