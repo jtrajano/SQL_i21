@@ -3079,6 +3079,8 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionByPeriodSelectionHeader.sql" />
     <Build Include="dbo\Views\vyuGROffSiteSearchView.sql" />
     <Build Include="dbo\Stored Procedures\uspRKValidateElectronicPricingSetUp.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
