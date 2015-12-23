@@ -3103,6 +3103,7 @@
     <Build Include="dbo\Functions\fnTRConcatString.sql" />
     <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
