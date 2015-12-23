@@ -94,7 +94,7 @@ FROM (
 	
 	SELECT DISTINCT intCommodityId
 		,strCommodityCode
-	FROM vyuRKUnrealizedPnL
+	FROM vyuRKUnrealizedPnL where intCommodityId= @intCommodityId
 	) t
 ORDER BY strCommodityCode
 

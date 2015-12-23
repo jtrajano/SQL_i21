@@ -1,5 +1,6 @@
 ﻿CREATE PROC uspRKGetM2MBasisOnDate
-	 @intM2MBasisId int
+	 @intM2MBasisId int,
+	 @intCommodityId int
 
 AS
 SELECT bd.intM2MBasisDetailId, c.strCommodityCode,	i.strItemNo,		ca.strDescription as strOriginDest,		fm.strFutMarketName, '' as strFutureMonth,
@@ -21,5 +22,5 @@ LEFT JOIN tblCTPricingType pt on pt.intPricingTypeId=bd.intPricingTypeId
 LEFT JOIN tblCTContractType ct on ct.intContractTypeId=bd.intContractTypeId
 LEFT JOIN tblARMarketZone mz on mz.intMarketZoneId=bd.intMarketZoneId
 LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=bd.intUnitMeasureId
-WHERE b.intM2MBasisId= @intM2MBasisId and bd.intFutureMarketId is not null
+WHERE b.intM2MBasisId= @intM2MBasisId and bd.intFutureMarketId is not null and  c.intCommodityId=@intCommodityId
 order by strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)

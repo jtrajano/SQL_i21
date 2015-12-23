@@ -332,9 +332,11 @@ CONVERT(DECIMAL(24,6),
                   cd.dblRate,
                   cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId ,null as intltemPrice,
- (SELECT SUM(iv.dblPurchaseContractShippedQty) OVER (PARTITION BY cd.intContractDetailId)                       
+ (SELECT SUM(iv.dblPurchaseContractShippedQty)-- OVER (PARTITION BY iv.intContractDetailId)                       
 	FROM vyuLGInboundShipmentView iv WHERE iv.intContractDetailId=cd.intContractDetailId
-	AND intContractStatusId<>3 AND convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)) as InTransQty,
+	AND intContractStatusId<>3 AND convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)) as 
+	 InTransQty,
+
 	  (select 
 				  	CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 						dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,cuc2.intCommodityUnitMeasureId,SUM(cv.dblRate))
