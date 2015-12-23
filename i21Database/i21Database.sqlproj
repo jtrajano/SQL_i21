@@ -3101,6 +3101,8 @@
     <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <Build Include="dbo\Views\vyuARCustomerGroup.sql" />
     <Build Include="dbo\Functions\fnTRConcatString.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
