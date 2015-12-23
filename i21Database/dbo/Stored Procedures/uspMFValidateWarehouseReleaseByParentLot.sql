@@ -7,16 +7,16 @@ BEGIN TRY
 	DECLARE @intRecordId INT
 		,@strLotNumber NVARCHAR(50)
 		,@ErrMsg NVARCHAR(MAX)
-		,@intLotId int
-		,@intParentLotId int
-		,@intManufacturingProcessId int
+		,@intLotId INT
+		,@intParentLotId INT
+		,@intManufacturingProcessId INT
 		,@intAttributeId INT
 		,@strAttributeValue NVARCHAR(50)
-
 	DECLARE @tblMFParentLot TABLE (
 		intRecordId INT identity(1, 1)
 		,strLotNumber NVARCHAR(50)
 		)
+
 	SELECT @intLotId = intLotId
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strParentLotNumber
@@ -31,7 +31,7 @@ BEGIN TRY
 		SELECT @intLotId = intLotId
 		FROM dbo.tblICLot
 		WHERE intParentLotId = @intParentLotId
-		AND intLocationId = @intLocationId
+			AND intLocationId = @intLocationId
 	END
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
@@ -67,6 +67,20 @@ BEGIN TRY
 			AND L.intLotStatusId = 3
 	END
 
+	IF NOT EXISTS (
+			SELECT *
+			FROM @tblMFParentLot
+			)
+	BEGIN
+		RAISERROR (
+				80020
+				,11
+				,1
+				)
+
+		RETURN
+	END
+
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFParentLot
 
@@ -86,41 +100,44 @@ BEGIN TRY
 		WHERE intRecordId > @intRecordId
 	END
 
-	SELECT W.intWorkOrderId
-		,W.strWorkOrderNo
-		,L.intLocationId
-		,L.intParentLotId
-		,PL.strParentLotNumber
-		,0 as intLotId
-		,'' As strLotNumber
-		,I.strItemNo
-		,I.strDescription
-		,SUM(L.dblQty) dblQty
-		,IU.intItemUOMId
-		,U.strUnitMeasure
-		,U.intUnitMeasureId
-		,W.intManufacturingProcessId
-		,@strAttributeValue as strWarehouseReleaseLotByBatch
-	FROM tblICLot L
-	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
-	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
-	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-	JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-	WHERE PL.strParentLotNumber = @strParentLotNumber
-		AND L.intLotStatusId = 3
-	GROUP BY W.intWorkOrderId
-		,W.strWorkOrderNo
-		,L.intLocationId
-		,L.intParentLotId
-		,PL.strParentLotNumber
-		,I.strItemNo
-		,I.strDescription
-		,IU.intItemUOMId
-		,U.strUnitMeasure
-		,U.intUnitMeasureId
-		,W.intManufacturingProcessId
+	IF @strAttributeValue = 'True'
+	BEGIN
+		SELECT W.intWorkOrderId
+			,W.strWorkOrderNo
+			,L.intLocationId
+			,L.intParentLotId
+			,PL.strParentLotNumber
+			,0 AS intLotId
+			,'' AS strLotNumber
+			,I.strItemNo
+			,I.strDescription
+			,SUM(L.dblQty) dblQty
+			,IU.intItemUOMId
+			,U.strUnitMeasure
+			,U.intUnitMeasureId
+			,W.intManufacturingProcessId
+			,@strAttributeValue AS strWarehouseReleaseLotByBatch
+		FROM tblICLot L
+		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
+		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+		WHERE PL.strParentLotNumber = @strParentLotNumber
+			AND L.intLotStatusId = 3
+		GROUP BY W.intWorkOrderId
+			,W.strWorkOrderNo
+			,L.intLocationId
+			,L.intParentLotId
+			,PL.strParentLotNumber
+			,I.strItemNo
+			,I.strDescription
+			,IU.intItemUOMId
+			,U.strUnitMeasure
+			,U.intUnitMeasureId
+			,W.intManufacturingProcessId
+	END
 END TRY
 
 BEGIN CATCH
