@@ -494,13 +494,13 @@ FROM(
 	 SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
 			 ,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,-sum(dblNoOfContract) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,-sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity 
-	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)' and strAccountNumber='Purchase - Arabica washed'
+	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)' and strAccountNumber like '%Purchase%'
 	GROUP BY strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor
 	UNION
 	SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
 			 ,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,abs (sum(dblNoOfContract)) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,abs(sum(dblNoOfLot)) dblNoOfLot,  abs(sum(dblQuantity))  dblQuantity 
-	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)'  and strAccountNumber='Sale - Arabica washed'
+	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)'  and strAccountNumber like '%Sale%'
 	GROUP BY strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor
 	UNION 
 	SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
@@ -961,19 +961,20 @@ FROM(
 	)t 
 GROUP BY Selection,PriceStatus,strAccountNumber,strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor
 --- Switch Position ---------
+
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity)  
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,sum(dblNoOfContract),strTradeNo,TransactionDate,TranType,CustVendor,sum(dblNoOfLot), sum(dblQuantity)
 FROM(
 	 SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
 			 ,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,-sum(dblNoOfContract) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,-sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity 
-	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)' and strAccountNumber='Purchase - Arabica washed'
+	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)' and strAccountNumber like '%Purchase%'
 	GROUP BY strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor
 	UNION
 	SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
 			 ,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,abs (sum(dblNoOfContract)) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,abs(sum(dblNoOfLot)) dblNoOfLot,  abs(sum(dblQuantity))  dblQuantity 
-	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)'  and strAccountNumber='Sale - Arabica washed'
+	FROM @List WHERE Selection='1.Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)'  and strAccountNumber like '%Sale%'
 	GROUP BY strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor
 	UNION 
 	SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
