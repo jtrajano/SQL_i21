@@ -1,5 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingURL] 
+﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingURL]
 	 @FutureMarketId INT
+	,@FutureMonthId INT
 	,@intUserId INT
 AS
 BEGIN TRY
@@ -23,241 +24,82 @@ BEGIN TRY
 	FROM tblRKMarketExchange E
 	JOIN tblRKFutureMarket M ON M.intMarketExchangeId = E.intMarketExchangeId AND M.intFutureMarketId = @FutureMarketId
 
-	DECLARE @FutureTradedMonths AS TABLE 
-	(
-		 IntMonthNumber INT
-		,StrMonthName NVARCHAR(20)
-		,IsTraded BIT
-		,StrTradedMonthSymbol NVARCHAR(2)
-	 )
+	IF @FutureMonthId >0
+	BEGIN
+		SELECT @StrTradedMonthSymbol=strSymbol+RIGHT(intYear,1) from tblRKFuturesMonth Where  intFutureMonthId=@FutureMonthId
+	END
+	ELSE
+	BEGIN
 
-	--Jan    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 1
-		,'JAN'
-		,ysnFutJan
-		,'F'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
+		DECLARE @FutureTradedMonths AS TABLE 
+		(
+			 IntMonthNumber INT
+			,StrMonthName NVARCHAR(20)
+			,IsTraded BIT
+			,StrTradedMonthSymbol NVARCHAR(2)
+		 )
+	 	 
+		INSERT INTO @FutureTradedMonths (IntMonthNumber,StrMonthName,IsTraded,StrTradedMonthSymbol)
+
+		SELECT 1,'JAN',ysnFutJan,'F' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 2,'FEB',ysnFutFeb,'G' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId	
+		UNION
+		SELECT 3,'MAR',ysnFutMar,'H' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 4,'APR',ysnFutApr,'J' FROM tblRKFutureMarket	WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 5,'MAY',ysnFutMay,'K' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+		UNION 
+		SELECT 6,'JUN',ysnFutJun,'M' FROM tblRKFutureMarket	WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 7,'JUL',ysnFutJul,'N' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 8,'AUG',ysnFutAug,'Q' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 9,'SEP',ysnFutSep,'U' FROM tblRKFutureMarket	WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 10,'OCT',ysnFutOct,'V' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 11,'NOV',ysnFutNov,'X' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+		UNION
+		SELECT 12,'DEC',ysnFutDec,'Z' FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+
+		SELECT TOP 1 @StrTradedMonthSymbol = StrTradedMonthSymbol
+		FROM @FutureTradedMonths
+		WHERE IntMonthNumber >= MONTH(Getdate()) AND IsTraded = 1
+		ORDER BY IntMonthNumber ASC
+
+		IF ISNULL(@StrTradedMonthSymbol, '') = ''
+		BEGIN
+				SET @StrTradedMonthSymbol = (
+												SELECT TOP 1 StrTradedMonthSymbol
+												FROM @FutureTradedMonths
+												WHERE IsTraded = 1
+												ORDER BY IntMonthNumber ASC
+											)
+				SET @StrTradedMonthSymbol = @StrTradedMonthSymbol + Convert(NVARCHAR, RIGHT(YEAR(GetDate()), 1) + 1)
+		END
+		ELSE
+		BEGIN
+			SET @StrTradedMonthSymbol = @StrTradedMonthSymbol + RIGHT(YEAR(GetDate()), 1)
+		END
 		
-
-	--Feb    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 2
-		,'FEB'
-		,ysnFutFeb
-		,'G'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--March    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 3
-		,'MAR'
-		,ysnFutMar
-		,'H'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--APR    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 4
-		,'APR'
-		,ysnFutApr
-		,'J'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--May    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 5
-		,'MAY'
-		,ysnFutMay
-		,'K'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--JUN    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 6
-		,'JUN'
-		,ysnFutJun
-		,'M'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--JUly    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 7
-		,'JUL'
-		,ysnFutJul
-		,'N'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--AUGUST    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 8
-		,'AUG'
-		,ysnFutAug
-		,'Q'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--SEP    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 9
-		,'SEP'
-		,ysnFutSep
-		,'U'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--OCT    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 10
-		,'OCT'
-		,ysnFutOct
-		,'V'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--Nov    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 11
-		,'NOV'
-		,ysnFutNov
-		,'X'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--DEC    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 12
-		,'DEC'
-		,ysnFutDec
-		,'Z'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-
-	SELECT TOP 1 @StrTradedMonthSymbol = StrTradedMonthSymbol
-	FROM @FutureTradedMonths
-	WHERE IntMonthNumber >= MONTH(Getdate()) AND IsTraded = 1
-	ORDER BY IntMonthNumber ASC
+	END
 
 	SELECT @URL = strInterfaceWebServicesURL FROM tblSMCompanyPreference
 
 	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId  
 
-	 IF NOT EXISTS (SELECT 1 FROM tblGRUserPreference Where strQuoteProvider='DTN/Agricharts' AND [intEntityUserSecurityId]=@intUserId) OR (@strUserName = '')  
-	 BEGIN
-	  RAISERROR ('The User cannot access Electronic Pricing',16,1)  
-	 END
+	 --IF NOT EXISTS (SELECT 1 FROM tblGRUserPreference Where strQuoteProvider='DTN/Agricharts' AND [intEntityUserSecurityId]=@intUserId) OR (@strUserName = '')  
+	 --BEGIN
+	 -- RAISERROR ('The User cannot access Electronic Pricing',16,1)  
+	 --END
 
 
 	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId  
 
 	SELECT @IntinterfaceSystem = intInterfaceSystemId FROM   tblSMCompanyPreference
-
-	
-	IF ISNULL(@StrTradedMonthSymbol, '') = ''
-	BEGIN
-			SET @StrTradedMonthSymbol = (
-											SELECT TOP 1 StrTradedMonthSymbol
-											FROM @FutureTradedMonths
-											WHERE IsTraded = 1
-											ORDER BY IntMonthNumber ASC
-										)
-			SET @StrTradedMonthSymbol = @StrTradedMonthSymbol + Convert(NVARCHAR, RIGHT(YEAR(GetDate()), 1) + 1)
-	END
-	ELSE
-	BEGIN
-		SET @StrTradedMonthSymbol = @StrTradedMonthSymbol + RIGHT(YEAR(GetDate()), 1)
-	END
-		
-	
 
 	IF @IntinterfaceSystem = 1
 	BEGIN
