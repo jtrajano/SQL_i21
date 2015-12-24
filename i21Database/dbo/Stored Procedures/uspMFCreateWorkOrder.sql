@@ -98,10 +98,19 @@ BEGIN TRY
 			,@strWorkOrderNo OUTPUT
 	END
 
-	SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
-	FROM dbo.tblMFWorkOrder
-	WHERE dtmPlannedDate = @dtmPlannedDate
-		AND intManufacturingCellId = ISNULL(@intManufacturingCellId,intManufacturingCellId)
+	IF @intManufacturingCellId IS NULL
+	BEGIN
+		SELECT @intExecutionOrder = MAX(intExecutionOrder) + 1
+		FROM dbo.tblMFWorkOrder
+		WHERE dtmPlannedDate = @dtmPlannedDate
+	END
+	ELSE
+	BEGIN
+		SELECT @intExecutionOrder = MAX(intExecutionOrder) + 1
+		FROM dbo.tblMFWorkOrder
+		WHERE dtmPlannedDate = @dtmPlannedDate
+			AND intManufacturingCellId = @intManufacturingCellId
+	END
 
 	INSERT INTO dbo.tblMFWorkOrder (
 		strWorkOrderNo
