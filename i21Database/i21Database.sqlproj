@@ -3084,6 +3084,8 @@
     <Build Include="dbo\Tables\tblSTPumpItem.sql" />
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivity.sql" />
+    <Build Include="dbo\Views\vyuGRGetSellStorageItems.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleSubLocations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
