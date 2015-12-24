@@ -896,9 +896,9 @@ DECLARE @RunningQtyBalance AS TABLE
 INSERT INTO @RunningQtyBalance (RowNum,intItemId,dblRunningQtyBalance)
 SELECT RowNum,intItemId,dblRunningQtyBalance from
           (
-          SELECT intItemId,dblRunningQtyBalance,ROW_NUMBER()
+          SELECT intItemId,dblRunningQtyBalance,dtmDate,ROW_NUMBER()
           over(Partition by intItemId order by dtmDate desc)RowNum FROM
-          vyuICGetInventoryValuation  
+          vyuICGetInventoryValuation  WHERE convert(datetime,convert(varchar,dtmDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10) 
           )sr WHERE RowNum=1
 
 INSERT INTO @tblFinalDetail (
@@ -1052,7 +1052,7 @@ FROM
                   null as dblFuturesClosingPrice1,                               
                   null as intContractTypeId ,
                   0 as intConcurrencyId ,
-			      (select sum (isnull(giv.dblRunningQtyBalance,0)) from  @RunningQtyBalance giv where giv.intItemId=iv.intItemId) dblOpenQty,
+			      isnull((select sum (isnull(giv.dblRunningQtyBalance,0)) from  @RunningQtyBalance giv where giv.intItemId=iv.intItemId),0) dblOpenQty,
                   null dblRate,
                   null as intCommodityUnitMeasureId,
                   null as  intQuantityUOMId,
@@ -1067,6 +1067,7 @@ JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId
 JOIN tblICCommodityUnitMeasure cuc on c.intCommodityId=cuc.intCommodityId 
 WHERE i.intCommodityId= case when isnull(@intCommodityId,0)=0 then i.intCommodityId else @intCommodityId end
 AND strLocationName= case when isnull(@strLocationName,0)=0 then strLocationName else @strLocationName end
+
 )t WHERE strContractOrInventoryType= case when @ysnIncludeInventoryM2M = 1 then 'Inventory' else '' end )t2
 
 
