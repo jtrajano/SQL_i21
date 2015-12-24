@@ -53,11 +53,11 @@ while @i <= @rowsCount
 begin
  if @i = 1
  BEGIN
-    set @names = (select name from @MyTable where Id = @i)
+    set @names = (select Name from @MyTable where Id = @i)
  END
  ELSE
  BEGIN
-      set @names = @names + @Delimiter + (select name from @MyTable where Id = @i)
+      set @names = @names + @Delimiter + (select Name from @MyTable where Id = @i)
  END
  set @i = @i + 1
 end
