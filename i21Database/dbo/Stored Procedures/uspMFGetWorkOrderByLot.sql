@@ -1,7 +1,6 @@
-﻿CREATE PROCEDURE dbo.uspMFGetWorkOrderByLot (@intLotId INT) 
+﻿CREATE PROCEDURE dbo.uspMFGetWorkOrderByLot (@intLotId INT)
 AS
 BEGIN
-	
 	SELECT W.intWorkOrderId
 		,W.strWorkOrderNo
 		,W.dtmOrderDate
@@ -30,6 +29,7 @@ BEGIN
 	JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 	LEFT JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = W.intOrderHeaderId
 	LEFT JOIN dbo.tblWHOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
-	WHERE WL.intLotId=@intLotId
+	WHERE WL.intLotId = @intLotId
+		AND WS.intStatusId <> 14
 	ORDER BY W.dtmOrderDate
 END

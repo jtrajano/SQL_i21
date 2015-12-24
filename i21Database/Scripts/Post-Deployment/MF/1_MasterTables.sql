@@ -183,6 +183,12 @@ BEGIN
     VALUES(13,'Completed')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 14)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(14,'Cancel')
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFReleaseStatus
