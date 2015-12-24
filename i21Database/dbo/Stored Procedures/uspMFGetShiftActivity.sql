@@ -16,7 +16,7 @@ BEGIN
 	IF @intShiftActivityStatusId = 1
 	BEGIN
 		CREATE TABLE #tmp_ActualTable (
-			intShiftActivityId NUMERIC(18, 0) Identity
+			intShiftActivityId INT Identity
 			,intManufacturingCellId INT
 			,dtmShiftDate DATETIME
 			,intShiftId INT
@@ -105,10 +105,8 @@ BEGIN
 			,MC.strCellName
 			,AT.dtmShiftDate
 			,S.strShiftName
-			,CONVERT(CHAR, AT.dtmShiftStartTime, 108) AS dtmShiftStartTime
-			,CONVERT(CHAR, AT.dtmShiftEndTime, 108) AS dtmShiftEndTime
-			,AT.dtmShiftStartTime AS dtmStartTime
-			,AT.dtmShiftEndTime AS dtmEndTime
+			,AT.dtmShiftStartTime
+			,AT.dtmShiftEndTime
 			,S.intShiftId
 			,AT.intManufacturingCellId
 		FROM #tmp_ActualTable AT
@@ -132,8 +130,8 @@ BEGIN
 			,SA.intShiftId
 			,SA.dtmShiftDate
 			,S.strShiftName
-			,CONVERT(NVARCHAR, SA.dtmShiftStartTime, 108) AS dtmShiftStartTime
-			,CONVERT(NVARCHAR, SA.dtmShiftEndTime, 108) AS dtmShiftEndTime
+			,SA.dtmShiftStartTime
+			,SA.dtmShiftEndTime
 			,COUNT(DISTINCT (SAM.intMachineId)) AS intNoOfMachines
 			,(SA.intScheduledRuntime / 60) AS intScheduledRuntime
 			,SA.strComments
@@ -176,8 +174,8 @@ BEGIN
 			,MC.strCellName
 			,SA.dtmShiftDate
 			,S.strShiftName
-			,CONVERT(NVARCHAR, SA.dtmShiftStartTime, 108) AS dtmShiftStartTime
-			,CONVERT(NVARCHAR, SA.dtmShiftEndTime, 108) AS dtmShiftEndTime
+			,SA.dtmShiftStartTime
+			,SA.dtmShiftEndTime
 			,COUNT(DISTINCT SAM.intMachineId) AS intNoOfMachines
 			,SA.dblPartialQtyProduced AS dblPartialQtyProduced
 			,CASE SA.intUnitMeasureId
