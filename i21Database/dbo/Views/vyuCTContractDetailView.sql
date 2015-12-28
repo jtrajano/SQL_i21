@@ -76,6 +76,15 @@ AS
 					ELSE	''
 			END		AS strPricingStatus,
 			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)	AS intLoadReceived,
+			CAST(
+				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysPurchase,dtmContractDate) AND CH.intContractTypeId = 1 
+						THEN	1
+						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysSales,dtmContractDate) AND CH.intContractTypeId = 2
+						THEN	1
+						ELSE	0
+				END		AS BIT
+			)	AS		ysnEarlyDayPassed,
+
 			--Header Detail
 
 			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,
@@ -102,8 +111,8 @@ AS
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
 			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad
 			
-	FROM	tblCTContractDetail				CD
-	
+	FROM	tblCTContractDetail				CD	CROSS
+	JOIN	tblCTCompanyPreference			CP
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
