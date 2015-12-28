@@ -29,6 +29,8 @@ DECLARE @dtmLoadDateTime DATETIME,
 		@dblNet DECIMAL(18, 6) = 0,
 		@dblGross DECIMAL(18, 6) = 0,
 		@dblUnitCost DECIMAL(18, 6) = 0,
+		@dblTotalGross DECIMAL(18, 6) = 0,
+		@dblTotalNet DECIMAL(18, 6) = 0,
 		@GrossorNet nvarchar(50),
 		@intLoadReceipt int,
 		@DistCount int = 0,
@@ -45,6 +47,7 @@ DECLARE @dtmLoadDateTime DATETIME,
 		@intCompanyLocationId int,
 		@dtmInvoiceDateTime DATETIME,	
 		@strresult NVARCHAR(MAX),	
+		@strDescription NVARCHAR(100),
         @dblReveivedQuantity DECIMAL(18, 6) = 0,
         @dblDistributedQuantity DECIMAL(18, 6) = 0;
 
@@ -69,7 +72,6 @@ DECLARE @DistributionHeaderTable TABLE
     intDistHeadId INT IDENTITY PRIMARY KEY CLUSTERED,
 	[intLoadHeaderId] INT NULL,
 	[intLoadDistributionHeaderId] INT NULL,
---	[intLoadReceiptId] INT NULL,
 	[strDestination] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intEntityCustomerId] INT NULL,	
 	[intShipToLocationId] INT NULL,
@@ -82,7 +84,6 @@ DECLARE @DistributionDetailTable TABLE
 (
     intDistDetailId INT IDENTITY PRIMARY KEY CLUSTERED,
 	[intLoadHeaderId] INT NULL,
---	[intLoadReceiptId] INT NULL,
 	[intLoadDistributionDetailId] INT NULL,
 	[intLoadDistributionHeaderId] INT NULL,
 	[intItemId] INT NULL,		
@@ -162,7 +163,6 @@ INSERT into @DistributionHeaderTable
 select 
     TL.intLoadHeaderId,
     DH.intLoadDistributionHeaderId,
- --   DH.intLoadReceiptId,
 	DH.strDestination,
 	DH.intEntityCustomerId,	
 	DH.intShipToLocationId,
@@ -177,7 +177,6 @@ select
 INSERT into @DistributionDetailTable
 (
   intLoadHeaderId,
- -- intLoadReceiptId,
   intLoadDistributionDetailId,
   intLoadDistributionHeaderId,
   intItemId,		
@@ -186,7 +185,6 @@ INSERT into @DistributionDetailTable
 )
 select 
   TL.intLoadHeaderId,
- -- TR.intLoadReceiptId,
   DD.intLoadDistributionDetailId,
   DD.intLoadDistributionHeaderId,
   DD.intItemId,		
@@ -276,53 +274,44 @@ BEGIN
 	       BEGIN	               
 	           RAISERROR('Gross and Net Quantity cannot be 0', 16, 1);	         	    
 	       END
-		 --  select @DistCount = count(*) from tblTRLoadDistributionHeader DH
-		 --                join tblTRLoadDistributionDetail DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-		--				 where DH.intLoadHeaderId = @intLoadHeaderId		   
-		--   if (@DistCount = 0)
-       --    BEGIN
-       --        RAISERROR('Distribution entries are Not Found', 16, 1);
-        --   END	
+
 	  END
-  --if (@dblUnitCost is null or @dblUnitCost = 0)
-  --   BEGIN
-	 --  if(@strOrigin != 'Location')
-	 --  BEGIN
-  --       RAISERROR('Unit Cost cannot be 0', 16, 1);
-  --     END
-  --   END
+
+
+    select @dblTotalGross = sum(TR.dblGross) ,@dblTotalNet = sum(TR.dblNet)  from tblTRLoadReceipt TR
+    where TR.intLoadHeaderId = @intLoadHeaderId
+	      and TR.intItemId = @intItem
+	group by TR.intItemId
+
+
+	select @dblDistributedQuantity = sum(DD.dblUnits) from tblTRLoadDistributionHeader DH
+                                  join tblTRLoadDistributionDetail DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+    where intLoadHeaderId = @intLoadHeaderId
+	      and DD.intItemId = @intItem
+	group by DD.intItemId
+
   if(@GrossorNet = 'Gross')
       BEGIN
-	   set @dblReveivedQuantity = @dblGross
+	   set @dblReveivedQuantity = @dblTotalGross
       END
   else
       BEGIN
 	   if(@GrossorNet = 'Net')
 	     BEGIN
-		    set @dblReveivedQuantity = @dblNet
+		    set @dblReveivedQuantity = @dblTotalNet
 	     END
        else
 	     BEGIN
-		    set @dblReveivedQuantity = @dblGross
+		    set @dblReveivedQuantity = @dblTotalGross
 	     END
 	  END
-  --select @dblDistributedQuantity = sum(DD.dblUnits) from @DistributionHeaderTable DH
-	 --join @DistributionDetailTable DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-	 --where DH.intLoadReceiptId = @intLoadReceipt and DD.intItemId = @intItem and DH.intLoadHeaderId = @intLoadHeaderId
 
-  --if (@strOrigin = 'Terminal' and @dblReveivedQuantity != @dblDistributedQuantity and @dblDistributedQuantity != 0)
-  --   BEGIN
-  --      SET @strresult = 'Received Quantity ' + ltrim(convert(int,@dblReveivedQuantity)) + ' Doesnot match Distributed Quantity ' + ltrim(convert(int,@dblDistributedQuantity)) 
-  --      RAISERROR(@strresult, 16, 1);
-  --   END
-  --else
-  --    BEGIN
-	 --    if (@strOrigin = 'Location' and @dblReveivedQuantity != @dblDistributedQuantity)
-		-- BEGIN
-		--    SET @strresult = 'Received Quantity ' + ltrim(convert(int,@dblReveivedQuantity))  + ' Doesnot match Distributed Quantity ' + ltrim(convert(int,@dblDistributedQuantity))
-		--    RAISERROR(@strresult, 16, 1);
-		-- END
-	 -- END
+      if (@dblReveivedQuantity != @dblDistributedQuantity)
+		BEGIN
+		    select top 1 @strDescription = strDescription from vyuICGetItemStock IC where IC.intItemId = @intItem 
+		    SET @strresult = @strDescription + ' Received Quantity ' + ltrim(convert(int,@dblReveivedQuantity))  + ' Doesnot match Distributed Quantity ' + ltrim(convert(int,@dblDistributedQuantity))
+		    RAISERROR(@strresult, 16, 1);
+		 END
 
    SET @incReceiptval = @incReceiptval + 1;
 END;
@@ -365,10 +354,6 @@ BEGIN
 	   BEGIN
           RAISERROR('Ship To is Invalid', 16, 1); 
        END
-	   --if(@dblPrice = 0)
-	   --BEGIN
-    --      RAISERROR('Distribution Price cannot be 0', 16, 1); 
-    --   END
 	   
     END
 	if(@intCompanyLocationId is NULL)
