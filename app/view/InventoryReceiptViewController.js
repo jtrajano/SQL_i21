@@ -1247,6 +1247,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             var dblCost = records[0].get('dblLastCost');
             if (win.viewModel.data.current.get('strReceiptType') === 'Purchase Contract') {
+                dblCost = current.get('dblUnitCost');
                 if (current.get('strOrderUOM') !== records[0].get('strUnitMeasure')) {
                     var orderUOMCF = current.get('dblOrderUOMConvFactor');
                     var receiptUOMCF = records[0].get('dblUnitQty');
