@@ -125,8 +125,10 @@ END
 				ON TL.intLoadHeaderId = DH.intLoadHeaderId		
 			JOIN tblTRLoadDistributionDetail DD 
 				ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-               			
-    WHERE	TL.intLoadHeaderId = @intLoadHeaderId 
+            LEFT JOIN vyuICGetItemStock IC
+			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId   			
+    WHERE	TL.intLoadHeaderId = @intLoadHeaderId
+	        AND IC.strType != 'Non-Inventory'
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
 			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)

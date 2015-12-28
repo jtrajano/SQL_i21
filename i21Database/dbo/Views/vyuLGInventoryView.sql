@@ -8,7 +8,11 @@ SELECT
 	,Shipment.intContractDetailId
 	,Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0) as dblStockQty
 	,Shipment.strItemUOM as strStockUOM
-	,Shipment.dblContainerContractGrossWt - Shipment.dblContainerContractTareWt as dblNetWeight
+	,CASE WHEN IsNull (Shipment.dblContainerContractReceivedQty, 0) > 0 THEN
+							((Shipment.dblContainerContractGrossWt - Shipment.dblContainerContractTareWt) / Shipment.dblContainerContractQty) * (Shipment.dblContainerContractQty - Shipment.dblContainerContractReceivedQty)
+						ELSE
+							Shipment.dblContainerContractGrossWt - Shipment.dblContainerContractTareWt
+						END as dblNetWeight
 	,Shipment.strWeightUOM
 	,Shipment.intVendorEntityId
 	,Shipment.strVendor

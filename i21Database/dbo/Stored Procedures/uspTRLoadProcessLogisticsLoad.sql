@@ -44,7 +44,7 @@ BEGIN TRY
 	   if (@action = 'Delete')
 	   BEGIN
 	      UPDATE tblLGLoad SET 
-			intTransportLoadId=null,
+			intLoadHeaderId=null,
 			ysnInProgress = 0,
 			intConcurrencyId	=	intConcurrencyId + 1
 		  WHERE intLoadId=@intInboundLoadId

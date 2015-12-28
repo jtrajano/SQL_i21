@@ -26,7 +26,9 @@ RETURNS @Receipts TABLE (
 	[intConcurrencyId] [int] NOT NULL,
 	[strFuelSupplier] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strSupplyPoint] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[strReceiptCompanyLocation] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
+	[strReceiptCompanyLocation] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[strReceiptNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[strTransferNo] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 )
 
 AS
@@ -54,7 +56,11 @@ BEGIN
 			TR.intConcurrencyId,
 			SP.strFuelSupplier,
 			SP.strSupplyPoint,
-			(select top 1 SM.strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = TR.intCompanyLocationId) as strReceiptCompanyLocation
+			(select top 1 SM.strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = TR.intCompanyLocationId) as strReceiptCompanyLocation,
+            (select top 1 yy.strReceiptNumber from tblTRLoadReceipt xx
+                                 left join dbo.tblICInventoryReceipt yy on xx.intInventoryReceiptId = yy.intInventoryReceiptId where xx.intLoadReceiptId = TR.intLoadReceiptId ),
+            (select top 1 yyy.strTransferNo from tblTRLoadReceipt xxx
+                                 left join dbo.tblICInventoryTransfer yyy on xxx.intInventoryTransferId = yyy.intInventoryTransferId  where xxx.intLoadReceiptId = TR.intLoadReceiptId)
 	from tblTRLoadReceipt TR 
          join vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
      where TR.strReceiptLine in (select Item from fnTRSplit(@strReceiptLink,','))
