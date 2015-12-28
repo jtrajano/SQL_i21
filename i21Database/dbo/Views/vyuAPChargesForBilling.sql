@@ -23,14 +23,38 @@ SELECT
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
 																OtherChargeExpense.intAccountId 
-															ELSE 
-																NULL 
+															ELSE 																
+																(
+																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
+																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
+																	SELECT	TOP 1 
+																			OtherChargeAPClearing.intAccountId
+																	FROM	tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
+																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+																			LEFT JOIN tblGLAccount OtherChargeAPClearing
+																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
+																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+																)
+
 													END 
 	,[strAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
 																OtherChargeExpense.strAccountId
 															ELSE 
-																NULL 
+																(
+																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
+																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
+																	SELECT	TOP 1 
+																			OtherChargeAPClearing.strAccountId
+																	FROM	tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
+																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+																			LEFT JOIN tblGLAccount OtherChargeAPClearing
+																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
+																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+																)
+
 													END 
 
 	,[strName]									=	Entity.strName
@@ -50,6 +74,10 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
+
+	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
+	--LEFT JOIN tblGLAccount OtherChargeAPClearing
+	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
 
 WHERE	ReceiptCharge.ysnAccrue = 1 
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
