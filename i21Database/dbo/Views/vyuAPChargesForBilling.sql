@@ -21,28 +21,64 @@ SELECT
 	,[dblUnitCost]								=	B.dblCalculatedAmount
 	,[dblTax]									=	0
 	,[intAccountId]								=	
-													CASE	WHEN ISNULL(A.ysnInventoryCost, 0) = 0 THEN 
-																H.intAccountId
-															ELSE 
-																F.intAccountId
+													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
+																OtherChargeExpense.intAccountId 
+															ELSE 																
+																(
+																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
+																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
+																	SELECT	TOP 1 
+																			OtherChargeAPClearing.intAccountId
+																	FROM	tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
+																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+																			LEFT JOIN tblGLAccount OtherChargeAPClearing
+																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
+																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+																)
+
 													END 
 	,[strAccountId]								=	
 													CASE	WHEN ISNULL(A.ysnInventoryCost, 0) = 0 THEN 
 																H.strAccountId
 															ELSE 
-																F.strAccountId
+																(
+																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
+																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
+																	SELECT	TOP 1 
+																			OtherChargeAPClearing.strAccountId
+																	FROM	tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
+																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+																			LEFT JOIN tblGLAccount OtherChargeAPClearing
+																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
+																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+																)
+
 													END 
 
-	,[strName]									=	E2.strName
-	,[strVendorId]								=	E.strVendorId
-FROM tblICInventoryReceiptCharge A
-INNER JOIN tblICInventoryReceiptChargePerItem B ON A.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-INNER JOIN tblICItem C ON B.intChargeId = C.intItemId
-INNER JOIN tblICInventoryReceiptItem G ON B.intInventoryReceiptItemId = G.intInventoryReceiptItemId
-INNER JOIN tblICItem C1 ON G.intItemId = C1.intItemId
-INNER JOIN tblICInventoryReceipt D ON A.intInventoryReceiptId = D.intInventoryReceiptId
-INNER JOIN (tblAPVendor E INNER JOIN tblEntity E2 ON E.intEntityVendorId = E2.intEntityId) ON (CASE WHEN A.ysnAccrue = 1 THEN ISNULL(A.intEntityVendorId, D.intEntityVendorId) ELSE NULL END) = E.intEntityVendorId
-LEFT JOIN tblGLAccount F ON [dbo].[fnGetItemGLAccount](C1.intItemId, D.intLocationId, 'AP Clearing') = F.intAccountId
-LEFT JOIN tblGLAccount H ON [dbo].[fnGetItemGLAccount](C.intItemId, D.intLocationId, 'Other Charge Expense') = H.intAccountId
-WHERE	A.ysnAccrue = 1 
-		AND B.dblAmountBilled != B.dblCalculatedAmount
+	,[strName]									=	Entity.strName
+	,[strVendorId]								=	Vendor.strVendorId
+FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
+		ON ReceiptCharge.intChargeId = Item.intItemId
+	INNER JOIN tblICInventoryReceipt Receipt
+		ON ReceiptCharge.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	INNER JOIN (
+		tblAPVendor Vendor INNER JOIN tblEntity Entity
+			ON Vendor.intEntityVendorId = Entity.intEntityId
+	) 
+		ON Vendor.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId,  Receipt.intEntityVendorId) 
+	INNER JOIN tblICItemLocation ItemLocation 
+		ON ItemLocation.intItemId = Item.intItemId
+		AND ItemLocation.intLocationId = Receipt.intLocationId
+
+	LEFT JOIN tblGLAccount OtherChargeExpense
+		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
+
+	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
+	--LEFT JOIN tblGLAccount OtherChargeAPClearing
+	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
+
+WHERE	ReceiptCharge.ysnAccrue = 1 
+		AND ISNULL(Receipt.ysnPosted, 0) = 1
+		AND ISNULL(ReceiptCharge.dblAmountBilled, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
