@@ -49,6 +49,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intDiscountId] [int] NULL,
 	[intDiscountScheduleId] [int] NULL,
 	[intDiscountScheduleCodeId] [int] NULL,
+	[intStorageScheduleRuleId] [int] NULL,
 	[intContractOptHeaderId] [int] NULL,
 	[strBuyerSeller] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intBillTo] [int] NULL,
@@ -122,7 +123,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountTypeId] FOREIGN KEY ([intDiscountTypeId]) REFERENCES [tblCTDiscountType]([intDiscountTypeId]),
-	
+	CONSTRAINT [FK_tblCTContractDetail_tblGRStorageScheduleRule_intStorageScheduleRuleId] FOREIGN KEY ([intStorageScheduleRuleId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]),
+
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
