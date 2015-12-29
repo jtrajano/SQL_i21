@@ -165,7 +165,6 @@
     <Folder Include="Scripts\Post-Deployment\SM" />
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Utility\IC\Repost Costing" />
-    <Folder Include="Scripts\Utility\IC\Repost Costing\WM" />
     <Folder Include="Scripts\Utility\IC\Query tools" />
     <Folder Include="Scripts\Post-Deployment\TF" />
     <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
@@ -2890,8 +2889,6 @@
     <Build Include="dbo\Tables\tblARServiceChargeRecap.sql" />
     <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
     <Build Include="dbo\Tables\tblPATChangeStatus.sql" />
@@ -2986,7 +2983,6 @@
     <Build Include="dbo\Views\vyuARCustomerInquiry.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Compare On Hand Qty vs Posted Transactions.sql" />
     <None Include="Scripts\Utility\IC\Query tools\Query to debug Stock UOM Quantities.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Views\vyuTMItemUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMLocationUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMRouteUsedBySite.sql" />
@@ -3106,7 +3102,9 @@
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Tables\tblEntityGroup.sql" />
     <Build Include="dbo\Tables\tblEntityGroupDetail.sql" />
-    <Build Include="dbo\Views\vyuARBatchPostingTransaction.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\Do Stock Repost.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\uspICDetectBadOnHand.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

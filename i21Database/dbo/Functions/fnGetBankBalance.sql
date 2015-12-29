@@ -49,6 +49,23 @@ WHERE	ysnPosted = 1
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
 		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT)
 
+--Include voided check that not yet effect in the bank balance for the voiding date is greater than the statement date
+SELECT	 @returnBalance = ISNULL(@returnBalance,0) + ISNULL(SUM(ISNULL(dblAmount, 0) * -1),0)
+FROM	[dbo].[tblCMBankTransaction] A
+WHERE	ysnPosted = 1
+		AND ysnCheckVoid = 1 
+		AND
+		(1 = CASE 
+			WHEN  (SELECT CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) FROM tblCMBankTransaction where strTransactionId = A.strTransactionId + 'V') >  CAST(FLOOR(CAST(ISNULL(@dtmDate,A.dtmDate) AS FLOAT)) AS DATETIME)	
+				THEN 1
+				ELSE 0
+			END
+		)
+		AND dblAmount <> 0 
+		AND intBankAccountId = @intBankAccountId
+		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @VOID_CHECK)
+
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0)

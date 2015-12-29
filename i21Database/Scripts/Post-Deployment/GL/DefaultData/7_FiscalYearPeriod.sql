@@ -1,4 +1,5 @@
 ﻿--UPDATES THE STATUS OF AR/AP/INVENTORY MODULE IF IT WILL BE OPEN FOR POSTING IN THE FISCAL YEAR SCREEN
 GO
-	UPDATE tblGLFiscalYearPeriod SET  ysnAPOpen = ysnOpen,ysnAROpen = ysnOpen ,ysnINVOpen = ysnOpen, ysnPROpen = ysnOpen
+	IF EXISTS (SELECT TOP 1 1 FROM tblGLFiscalYearPeriod WHERE ysnAPOpen IS NULL)
+	 UPDATE tblGLFiscalYearPeriod SET  ysnAPOpen = ysnOpen,	ysnAROpen = ysnOpen ,ysnINVOpen = ysnOpen, ysnPROpen = ysnOpen
 GO
