@@ -295,7 +295,7 @@ BEGIN
 					,@intUserId
 					,@strGLDescription
 					,@ItemsToPost
-			END 
+			END
 			ELSE IF @strTransactionForm = 'Inventory Transfer'
 			BEGIN 
 				INSERT INTO @ItemsToPost (
