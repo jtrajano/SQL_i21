@@ -203,7 +203,9 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
+		--[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
+		[dblDebit]						=	(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END)
+											* (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -239,7 +241,7 @@ BEGIN
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND A.intTransactionType = 1
+	AND A.intTransactionType IN (1,3)
 	AND D.dblTax != 0
 	AND 1 = (
 		--create tax only from item receipt if it is adjusted
@@ -252,6 +254,7 @@ BEGIN
 	,C.strVendorId
 	,D.intBillDetailTaxId
 	,A.intCurrencyId
+	,A.intTransactionType
 	,A.strBillId
 	,A.intBillId
 	
