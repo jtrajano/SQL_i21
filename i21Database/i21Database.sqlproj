@@ -164,7 +164,6 @@
     <Folder Include="Scripts\Utility\IC\IC-1092" />
     <Folder Include="Scripts\Post-Deployment\ST" />
     <Folder Include="Scripts\Utility\IC\Repost Costing" />
-    <Folder Include="Scripts\Utility\IC\Repost Costing\WM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -2392,10 +2391,12 @@
     <Build Include="dbo\Tables\tblARServiceChargeRecapDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateReport.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
+    <Build Include="Scripts\Utility\IC\Repost Costing\Do Stock Repost.sql" />
+    <Build Include="Scripts\Utility\IC\Repost Costing\uspICDetectBadOnHand.sql" />
+    <Build Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2459,8 +2460,6 @@
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
   </ItemGroup>
