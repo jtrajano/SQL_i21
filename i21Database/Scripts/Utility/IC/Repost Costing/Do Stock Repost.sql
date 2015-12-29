@@ -78,7 +78,7 @@ BEGIN
 	INTO	#tmpICInventoryTransaction
 	FROM	tblICInventoryTransaction
 	WHERE	ISNULL(dblQty, 0) <> 0
-			AND ISNULL(ysnIsUnposted, 0) = 0 -- This where clause will exclude all the unposted transactions. 
+			AND ISNULL(ysnIsUnposted, 0) = 0 -- This part of the 'WHERE' clause will exclude any unposted transactions during the re-post. 
 END
 
 BEGIN 
@@ -145,7 +145,7 @@ BEGIN
 				,@intItemId = intItemId
 				,@dblQty = dblQty 
 		FROM	#tmpICInventoryTransaction
-		ORDER BY dtmDate ASC 
+		ORDER BY dtmDate ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 		-- ORDER BY intInventoryTransactionId ASC 
 
 		-- Detect if the transaction is posted or not. 
