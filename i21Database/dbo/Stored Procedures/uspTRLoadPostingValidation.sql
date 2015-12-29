@@ -309,7 +309,7 @@ BEGIN
       if (@dblReveivedQuantity != @dblDistributedQuantity)
 		BEGIN
 		    select top 1 @strDescription = strDescription from vyuICGetItemStock IC where IC.intItemId = @intItem 
-		    SET @strresult = @strDescription + ' Received Quantity ' + ltrim(convert(int,@dblReveivedQuantity))  + ' Doesnot match Distributed Quantity ' + ltrim(convert(int,@dblDistributedQuantity))
+		    SET @strresult = @strDescription + ' Received Quantity ' + ltrim(@dblReveivedQuantity)  + ' Doesnot match Distributed Quantity ' + ltrim(@dblDistributedQuantity)
 		    RAISERROR(@strresult, 16, 1);
 		 END
 
