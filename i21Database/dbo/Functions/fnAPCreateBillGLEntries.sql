@@ -197,6 +197,63 @@ BEGIN
 				GROUP BY D.intBillDetailId
 			) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	UNION ALL
+	--CHARGES
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	[dbo].[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'),
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
+												ELSE D.dblAmount
+												END), --Bill Detail
+		[dblCredit]						=	0, -- Bill
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	A.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	B.strMiscDescription,
+		[intJournalLineNo]				=	B.intBillDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
+												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Debit Memo'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[intConcurrencyId]				=	1
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			INNER JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			INNER JOIN tblAPVendor C
+				ON A.intEntityVendorId = C.intEntityVendorId
+			INNER JOIN tblICInventoryReceiptItemAllocatedCharge D
+				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
+			INNER JOIN tblICInventoryReceiptItem E
+				ON D.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+			INNER JOIN tblICItem F
+				ON E.intItemId = F.intItemId
+	WHERE B.intInventoryReceiptChargeId IS NOT NULL
+	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
 	--TAXES
 	SELECT	

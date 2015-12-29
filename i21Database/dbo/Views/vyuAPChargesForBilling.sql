@@ -29,7 +29,7 @@ SELECT
 																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 																	SELECT	TOP 1 
 																			OtherChargeAPClearing.intAccountId
-																	FROM	tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
+																	FROM	tblICInventoryReceiptItemAllocatedCharge ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
 																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 																			LEFT JOIN tblGLAccount OtherChargeAPClearing
 																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
@@ -47,7 +47,7 @@ SELECT
 																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 																	SELECT	TOP 1 
 																			OtherChargeAPClearing.strAccountId
-																	FROM	tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
+																	FROM	tblICInventoryReceiptItemAllocatedCharge ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
 																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 																			LEFT JOIN tblGLAccount OtherChargeAPClearing
 																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
