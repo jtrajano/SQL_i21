@@ -267,10 +267,10 @@ FROM
   		,[intUnitMeasureId]							=	NULL
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	NULL
-		,[dblNetWeight]								=	NULL      
+		,[dblNetWeight]								=	0      
 		,[strCostUOM]								=	NULL
 		,[strgrossNetUOM]							=	NULL
-		,[dblUnitQty]								=	NULL   
+		,[dblUnitQty]								=	0   
 	FROM [vyuAPChargesForBilling] A
 
 	UNION ALL
@@ -313,7 +313,7 @@ FROM
 		,[intUnitMeasureId]							=	A.intItemUOMId
 		,[intWeightUOMId]							=	A.intWeightItemUOMId
 		,[intCostUOMId]								=	A.intPriceItemUOMId
-		,[dblNetWeight]								=	A.dblNetWt      
+		,[dblNetWeight]								=	ISNULL(A.dblNetWt,0)      
 		,[strCostUOM]								=	A.strPriceUOM
 		,[strgrossNetUOM]							=	A.strWeightUOM
 		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
