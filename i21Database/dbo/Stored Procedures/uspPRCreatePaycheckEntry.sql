@@ -26,7 +26,7 @@ SELECT @intEmployee		= @intEmployeeId
 	  ,@dtmEnd			= @dtmEndDate
 	  ,@dtmPay			= @dtmPayDate
 	  ,@ysnUseStandard	= @ysnUseStandardHours
-	  ,@xmlPayGroups	= CAST('<A>'+ REPLACE(@strDepartmentIds, ',', '</A><A>')+ '</A>' AS XML) 
+	  ,@xmlPayGroups	= CAST('<A>'+ REPLACE(@strPayGroupIds, ',', '</A><A>')+ '</A>' AS XML) 
 	  ,@xmlDepartments  = CAST('<A>'+ REPLACE(@strDepartmentIds, ',', '</A><A>')+ '</A>' AS XML) 
 
 --Parse the Departments Parameter to Temporary Table
