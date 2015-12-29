@@ -496,7 +496,7 @@ BEGIN
 					ON InvTrans.intInventoryTransactionId = @intInventoryTransactionId
 
 				INNER JOIN @ItemsForAutoNegative AutoNegative
-					ON AutoNegative.intId = @intId 
+					ON AutoNegative.intId = @intAutoNegativeId 
 
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
