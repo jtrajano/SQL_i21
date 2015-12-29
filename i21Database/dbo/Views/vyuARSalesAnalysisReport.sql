@@ -43,6 +43,8 @@ SELECT strRecordNumber
 	 , ESP.strName					  AS strSalespersonName	 
 	 , RTRIM(A.strBillToLocationName) AS strBillTo
 	 , RTRIM(A.strShipToLocationName) AS strShipTo
+	 , REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0') AS strSiteNumber
+	 , TMS.strDescription			  AS strSiteDescription
 FROM
 (SELECT I.strInvoiceNumber			  AS strRecordNumber
 	  , I.intInvoiceId				  AS intTransactionId
@@ -66,6 +68,7 @@ FROM
 	  , I.dblInvoiceTotal			  AS dblTotal
 	  , I.strBillToLocationName
 	  , I.strShipToLocationName
+	  , intSiteId
 FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 LEFT OUTER JOIN 
 	tblICInventoryTransaction ICIT 
@@ -124,6 +127,7 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.dblSalesOrderTotal		  AS dblTotal 
 	 , SO.strBillToLocationName
 	 , SO.strShipToLocationName
+	 , NULL							  AS intSiteId
 FROM tblSOSalesOrder SO INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 LEFT JOIN tblICItemUOM SU ON SOD.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
 LEFT JOIN (tblICItemLocation ICL 
@@ -142,3 +146,4 @@ WHERE SO.ysnProcessed = 1) AS A
 		LEFT JOIN tblICCategory CAT ON IC.intCategoryId = CAT.intCategoryId		
 		LEFT JOIN tblICBrand ICB ON IC.intBrandId = ICB.intBrandId) ON A.intItemId = IC.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON A.intItemUOMId = UOM.intItemUOMId		
+	LEFT JOIN tblTMSite TMS ON A.intSiteId = TMS.intSiteID
