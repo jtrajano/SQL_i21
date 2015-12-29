@@ -217,13 +217,14 @@
             // 
             // xrLabel4
             // 
+            this.xrLabel4.CanShrink = true;
             this.xrLabel4.LocationFloat = new DevExpress.Utils.PointFloat(254.6112F, 259.3248F);
             this.xrLabel4.Name = "xrLabel4";
             this.xrLabel4.Padding = new DevExpress.XtraPrinting.PaddingInfo(1, 1, 0, 0, 100F);
+            this.xrLabel4.Scripts.OnBeforePrint = "xrLabel4_BeforePrint";
             this.xrLabel4.SizeF = new System.Drawing.SizeF(162F, 17F);
             this.xrLabel4.StyleName = "FieldCaption";
             this.xrLabel4.Text = "Customer PO:";
-            this.xrLabel4.Visible = false;
             // 
             // xrLabel5
             // 
@@ -364,6 +365,7 @@
             // 
             // xrLabel20
             // 
+            this.xrLabel20.CanShrink = true;
             this.xrLabel20.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "CustomSqlQuery.strCustomerPO")});
             this.xrLabel20.LocationFloat = new DevExpress.Utils.PointFloat(416.6114F, 259.3248F);
@@ -372,7 +374,6 @@
             this.xrLabel20.SizeF = new System.Drawing.SizeF(151F, 17F);
             this.xrLabel20.StyleName = "DataField";
             this.xrLabel20.Text = "xrLabel20";
-            this.xrLabel20.Visible = false;
             // 
             // xrLabel21
             // 
@@ -655,6 +656,7 @@
             this.Margins = new System.Drawing.Printing.Margins(100, 100, 61, 100);
             this.Parameters.AddRange(new DevExpress.XtraReports.Parameters.Parameter[] {
             this.ShipmentNumber});
+            this.ScriptsSource = resources.GetString("$this.ScriptsSource");
             this.StyleSheet.AddRange(new DevExpress.XtraReports.UI.XRControlStyle[] {
             this.Title,
             this.FieldCaption,
