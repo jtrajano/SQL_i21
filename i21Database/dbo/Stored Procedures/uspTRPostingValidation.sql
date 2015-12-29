@@ -314,14 +314,14 @@ BEGIN
 
   if (@strOrigin = 'Terminal' and @dblReveivedQuantity != @dblDistributedQuantity and @dblDistributedQuantity != 0)
      BEGIN
-        SET @strresult = 'Received Quantity ' + ltrim(convert(int,@dblReveivedQuantity)) + ' Doesnot match Distributed Quantity ' + ltrim(convert(int,@dblDistributedQuantity)) 
+        SET @strresult = 'Received Quantity ' + ltrim(@dblReveivedQuantity) + ' Doesnot match Distributed Quantity ' + ltrim(@dblDistributedQuantity) 
         RAISERROR(@strresult, 16, 1);
      END
   else
       BEGIN
 	     if (@strOrigin = 'Location' and @dblReveivedQuantity != @dblDistributedQuantity)
 		 BEGIN
-		    SET @strresult = 'Received Quantity ' + ltrim(convert(int,@dblReveivedQuantity))  + ' Doesnot match Distributed Quantity ' + ltrim(convert(int,@dblDistributedQuantity))
+		    SET @strresult = 'Received Quantity ' + ltrim(@dblReveivedQuantity)  + ' Doesnot match Distributed Quantity ' + ltrim(@dblDistributedQuantity)
 		    RAISERROR(@strresult, 16, 1);
 		 END
 	  END
