@@ -80,12 +80,12 @@ Ext.define('Inventory.model.ReceiptItem', {
 
     validate: function(options) {
         var errors = this.callParent(arguments);
-        if (this.get('dblOpenReceive') <= 0) {
-            errors.add({
-                field: 'dblOpenReceive',
-                message: 'Qty to Receive must be greater than zero(0).'
-            })
-        }
+//        if (this.get('dblOpenReceive') <= 0) {
+//            errors.add({
+//                field: 'dblOpenReceive',
+//                message: 'Qty to Receive must be greater than zero(0).'
+//            })
+//        }
         if (this.get('strLotTracking') !== 'No') {
             if (iRely.Functions.isEmpty(this.get('intSubLocationId'))) {
                 errors.add({
