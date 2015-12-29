@@ -3098,6 +3098,7 @@
     <Build Include="dbo\Stored Procedures\uspTRLoadProcessToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLoadProcessTransportLoad.sql" />
     <Build Include="dbo\Functions\fnTRConcatString.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFShiftActivity_Create.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
