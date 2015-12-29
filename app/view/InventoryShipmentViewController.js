@@ -659,7 +659,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('dblQuantity', records[0].get('dblBalance'));
                     current.set('strOrderUOM', records[0].get('strItemUOM'));
                     current.set('dblQtyOrdered', records[0].get('dblDetailQuantity'));
-                    current.set('dblUnitPrice', records[0].get('dblCost'));
+                    current.set('dblUnitPrice', records[0].get('dblCashPrice'));
                     current.set('intOwnershipType', 1);
                     current.set('strOwnershipType', 'Own');
 
