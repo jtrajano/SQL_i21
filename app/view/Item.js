@@ -184,7 +184,9 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtItemNo',
                                                                 fieldLabel: 'Item No',
-                                                                labelWidth: 80
+                                                                labelWidth: 80,
+                                                                enforceMaxLength: true,
+                                                                maxLength: 50
                                                             },
                                                             {
                                                                 xtype: 'combobox',
@@ -199,7 +201,9 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtShortName',
                                                                 fieldLabel: 'Short Name',
-                                                                labelWidth: 80
+                                                                labelWidth: 80,
+                                                                enforceMaxLength: true,
+                                                                maxLength: 50
                                                             },
                                                             {
                                                                 xtype: 'textareafield',
@@ -207,7 +211,9 @@ Ext.define('Inventory.view.Item', {
                                                                 height: 62,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
-                                                                labelWidth: 80
+                                                                labelWidth: 80,
+                                                                enforceMaxLength: true,
+                                                                maxLength: 250
                                                             }
                                                         ]
                                                     },
@@ -338,7 +344,9 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtModelNo',
                                                                 fieldLabel: 'Model No',
-                                                                labelWidth: 116
+                                                                labelWidth: 116,
+                                                                enforceMaxLength: true,
+                                                                maxLength: 50
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -1113,7 +1121,9 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtEpaNumber',
                                                                         fieldLabel: 'EPA Number',
-                                                                        labelWidth: 116
+                                                                        labelWidth: 116,
+                                                                        enforceMaxLength: true,
+                                                                        maxLength: 50
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
@@ -1502,7 +1512,9 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'textfield',
                                                                                 itemId: 'txtNacsCategory',
                                                                                 fieldLabel: 'NACS Category',
-                                                                                labelWidth: 130
+                                                                                labelWidth: 130,
+                                                                                enforceMaxLength: true,
+                                                                                maxLength: 50
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
@@ -1560,7 +1572,9 @@ Ext.define('Inventory.view.Item', {
                                                                                         itemId: 'txtLeadTime',
                                                                                         margin: '0 5 0 0 ',
                                                                                         fieldLabel: 'Lead Time',
-                                                                                        labelWidth: 90
+                                                                                        labelWidth: 90,
+                                                                                        enforceMaxLength: true,
+                                                                                        maxLength: 50
                                                                                     },
                                                                                     {
                                                                                         xtype: 'checkboxfield',
@@ -1574,7 +1588,9 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'textfield',
                                                                                 itemId: 'txtKeywords',
                                                                                 fieldLabel: 'Keywords',
-                                                                                labelWidth: 90
+                                                                                labelWidth: 90,
+                                                                                enforceMaxLength: true,
+                                                                                maxLength: 50
                                                                             },
                                                                             {
                                                                                 xtype: 'numberfield',
@@ -1944,7 +1960,9 @@ Ext.define('Inventory.view.Item', {
                                                                                                 itemId: 'txtReceiveLife',
                                                                                                 modelValidation: true,
                                                                                                 fieldLabel: 'Receive Life',
-                                                                                                labelWidth: 125
+                                                                                                labelWidth: 125,
+                                                                                                enforceMaxLength: true,
+                                                                                                maxLength: 50
                                                                                             }
                                                                                         ]
                                                                                     }
@@ -1983,7 +2001,9 @@ Ext.define('Inventory.view.Item', {
                                                                                                         xtype: 'textfield',
                                                                                                         itemId: 'txtGTIN',
                                                                                                         fieldLabel: 'GTIN',
-                                                                                                        labelWidth: 125
+                                                                                                        labelWidth: 125,
+                                                                                                        enforceMaxLength: true,
+                                                                                                        maxLength: 50
                                                                                                     },
                                                                                                     {
                                                                                                         xtype: 'combobox',
@@ -2238,19 +2258,25 @@ Ext.define('Inventory.view.Item', {
                                                                                                         xtype: 'textfield',
                                                                                                         itemId: 'txtMask1',
                                                                                                         fieldLabel: 'Mask 1',
-                                                                                                        labelWidth: 125
+                                                                                                        labelWidth: 125,
+                                                                                                        enforceMaxLength: true,
+                                                                                                        maxLength: 50
                                                                                                     },
                                                                                                     {
                                                                                                         xtype: 'textfield',
                                                                                                         itemId: 'txtMask2',
                                                                                                         fieldLabel: 'Mask 2',
-                                                                                                        labelWidth: 125
+                                                                                                        labelWidth: 125,
+                                                                                                        enforceMaxLength: true,
+                                                                                                        maxLength: 50
                                                                                                     },
                                                                                                     {
                                                                                                         xtype: 'textfield',
                                                                                                         itemId: 'txtMask3',
                                                                                                         fieldLabel: 'Mask 3',
-                                                                                                        labelWidth: 125
+                                                                                                        labelWidth: 125,
+                                                                                                        enforceMaxLength: true,
+                                                                                                        maxLength: 50
                                                                                                     }
                                                                                                 ]
                                                                                             }
