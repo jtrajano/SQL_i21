@@ -35,6 +35,7 @@ Declare @tblItemConfirmQty table
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
 
 Select @dblWOQty = dblQuantity,@intItemId=intItemId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
 Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 If @ysnEnableParentLot=0 OR @strLotTracking = 'No'
@@ -61,6 +62,30 @@ Begin
 	Where wcl.intWorkOrderId=@intWorkOrderId
 	group by i.intItemId
 
+	--Find Required Qty For By Location And FIFO Lots
+	--intSalesOrderLineItemId = 0 implies WOs are created from Blend Managemnet Screen And Lots are already attached
+	If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId)=0
+	Begin
+		--If Recipe Contains Bulk Items(By Location or FIFO Use dblPlannedQuantity)
+		If Exists (Select 1 
+		From tblMFWorkOrderRecipeItem ri 
+		Join tblMFWorkOrderRecipe r on r.intWorkOrderId=ri.intWorkOrderId AND r.intRecipeId=ri.intRecipeId 
+		where r.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1 and ri.intConsumptionMethodId in (2,3))
+		Begin	
+			Select @dblWOQty = dblPlannedQuantity From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+		End
+	End
+
+	Insert into @tblItemQty(intItemId,dblQuantity,intItemUOMId,strUOM,dblIssuedQuantity,intItemIssuedUOMId,strIssuedUOM)
+	Select DISTINCT ri.intItemId,(ri.dblCalculatedQuantity * (@dblWOQty/r.dblQuantity)) dblQuantity,iu.intItemUOMId,u.strUnitMeasure,
+	(ri.dblCalculatedQuantity * (@dblWOQty/r.dblQuantity)) dblIssuedQuantity,iu.intItemUOMId AS intItemIssuedUOMId,u.strUnitMeasure
+	From tblMFWorkOrderRecipeItem ri 
+	Join tblMFWorkOrderRecipe r on r.intWorkOrderId=ri.intWorkOrderId AND r.intRecipeId=ri.intRecipeId 
+	Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
+	where r.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1 and ri.intConsumptionMethodId in (2,3)
+
+
 	--When Work Order Created without Input Lots take the required qty from recipe
 	if (Select count(1) From @tblItemQty)=0
 	Begin
@@ -83,7 +108,7 @@ Begin
 	Select wri.intWorkOrderId,i.intItemId,i.strItemNo,i.strDescription,
 	ISNULL(iq.dblQuantity,0) AS dblQuantity,ISNULL(iq.intItemUOMId,0) AS intItemUOMId,ISNULL(iq.strUOM,'') AS strUOM,
 	ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
-	ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
+	ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty,wri.intConsumptionMethodId 
 	From tblMFWorkOrderRecipeItem wri Join tblICItem i on wri.intItemId=i.intItemId 
 	Left Join @tblItemQty iq on wri.intItemId=iq.intItemId
 	Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
@@ -92,7 +117,7 @@ Begin
 	Select wri.intWorkOrderId,i.intItemId,i.strItemNo,i.strDescription,
 	ISNULL(iq.dblQuantity,0) AS dblQuantity,ISNULL(iq.intItemUOMId,0) AS intItemUOMId,ISNULL(iq.strUOM,'') AS strUOM,
 	ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
-	ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
+	ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty,0 
 	From tblMFWorkOrderRecipeSubstituteItem wri Join tblICItem i on wri.intSubstituteItemId=i.intItemId 
 	Left Join @tblItemQty iq on wri.intSubstituteItemId=iq.intItemId
 	Left Join @tblItemConfirmQty cq on wri.intSubstituteItemId=cq.intItemId

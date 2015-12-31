@@ -21,6 +21,15 @@ Declare @ysnBlendSheetRequired bit
 Declare @intBlendRequirementId int
 DECLARE @intKitStagingLocationId INT
 DECLARE @intBlendStagingLocationId INT
+Declare @intMinItemCount int,
+		@intRecipeItemId int,
+		@intRawItemId int,
+		@dblRequiredQty numeric(18,6),
+		@intConsumptionMethodId int,
+		@intConsumptionStoragelocationId int,
+		@strXml nvarchar(max),
+		@intRecipeId int,
+		@intBlendItemId int
 
 Declare @tblWorkOrder AS table
 (
@@ -129,6 +138,53 @@ Declare @tblPickedLots AS table
 	strRowState nvarchar(50)
 )
 
+--to hold not available and less qty lots
+Declare @tblRemainingPickedLots AS table
+( 
+	intWorkOrderInputLotId int,
+	intLotId int,
+	strLotNumber nvarchar(50),
+	strItemNo nvarchar(50),
+	strDescription nvarchar(200),
+	dblQuantity numeric(18,6),
+	intItemUOMId int,
+	strUOM nvarchar(50),
+	dblIssuedQuantity numeric(18,6),
+	intItemIssuedUOMId int,
+	strIssuedUOM nvarchar(50),
+	intItemId int,
+	intRecipeItemId int,
+	dblUnitCost numeric(18,6),
+	dblDensity numeric(18,6),
+	dblRequiredQtyPerSheet numeric(18,6),
+	dblWeightPerUnit numeric(18,6),
+	dblRiskScore numeric(18,6),
+	intStorageLocationId int,
+	strStorageLocationName nvarchar(50),
+	strLocationName nvarchar(50),
+	intLocationId int,
+	strSubLocationName nvarchar(50),
+	strLotAlias nvarchar(50),
+	ysnParentLot bit,
+	strRowState nvarchar(50)
+)
+
+--Bulk Item Picking if WO is created from Blend Management
+Declare @tblRemainingPickedItems AS table
+( 
+	intRowNo int IDENTITY,
+	intItemId int,
+	dblRemainingQuantity numeric(18,6),
+	intConsumptionMethodId int
+)
+
+DECLARE @tblInputItem TABLE (
+	intItemId INT
+	,dblRequiredQty NUMERIC(18, 6)
+	,ysnIsSubstitute BIT
+	,intConsumptionMethodId INT
+)
+
 --Get the Comma Separated Work Order Ids into a table
 SET @index = CharIndex(',',@strWorkOrderIds)
 WHILE @index > 0
@@ -152,11 +208,102 @@ Begin
 	Select @dblQuantity=SUM(dblQuantity) From tblMFWorkOrder 
 	Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder)
 
-	Select @intBlendRequirementId=intBlendRequirementId From tblMFWorkOrder 
+	Select @intBlendRequirementId=intBlendRequirementId,@intBlendItemId=intItemId From tblMFWorkOrder 
 	Where intWorkOrderId in (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
-	Insert Into @tblPickedLots
-	Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,@dblQuantity
+	--WO created from Blend Management Screen if Lots are there input lot table when kitting enabled
+	If Exists (Select 1 From tblMFWorkOrderInputLot Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder))
+		Begin
+			Insert Into @tblPickedLots
+			Select 0,l.intLotId,l.strLotNumber,i.strItemNo,i.strDescription,SUM(wi.dblQuantity),wi.intItemUOMId,um.strUnitMeasure,
+			SUM(wi.dblIssuedQuantity),wi.intItemIssuedUOMId,um1.strUnitMeasure,i.intItemId,
+			0,0.0,0.0,0.0,AVG(l.dblWeightPerQty),0.0,l.intStorageLocationId,sl.strName,'',@intLocationId,'',l.strLotAlias,0,'Added'
+			From tblMFWorkOrderInputLot wi join tblICLot l on wi.intLotId=l.intLotId 
+			Join tblICItem i on l.intItemId=i.intItemId
+			Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
+			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+			Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
+			Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+			Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
+			Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder) 
+			Group By l.intLotId,l.strLotNumber,i.strItemNo,i.strDescription,wi.intItemUOMId,um.strUnitMeasure,
+			wi.intItemIssuedUOMId,um1.strUnitMeasure,i.intItemId,
+			l.intStorageLocationId,sl.strName,l.strLotAlias
+
+			Select @dblQuantity=SUM(dblPlannedQuantity) From tblMFWorkOrder 
+			Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder)
+
+			SELECT @intRecipeId = intRecipeId
+			FROM tblMFRecipe
+			WHERE intItemId = @intBlendItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+
+				INSERT INTO @tblInputItem (
+				intItemId
+				,dblRequiredQty
+				,ysnIsSubstitute
+				,intConsumptionMethodId
+				)
+			SELECT 
+				ri.intItemId
+				,(ri.dblCalculatedQuantity * (@dblQuantity / r.dblQuantity)) AS dblRequiredQty
+				,0
+				,ri.intConsumptionMethodId
+			FROM tblMFRecipeItem ri
+			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			WHERE r.intRecipeId = @intRecipeId
+				AND ri.intRecipeItemTypeId = 1
+
+			--Bulk Items
+			Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId)
+			Select ti.intItemId,ti.dblRequiredQty AS dblRemainingQuantity,ti.intConsumptionMethodId 
+			From @tblInputItem ti 
+			WHERE ti.intConsumptionMethodId in (2,3)
+
+			--Find the Remaining Lots
+			If (Select COUNT(1) From @tblRemainingPickedItems) > 0
+			Begin
+				Select @intMinItemCount=Min(intRowNo) from @tblRemainingPickedItems
+
+				Set @strXml = '<root>'
+				While(@intMinItemCount is not null)
+				Begin
+					Select @intRawItemId=intItemId,@dblRequiredQty=dblRemainingQuantity
+					From @tblRemainingPickedItems Where intRowNo=@intMinItemCount
+
+					Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
+					From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
+					Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+
+					Set @strXml = @strXml + '<item>'
+					Set @strXml = @strXml + '<intRecipeId>' + CONVERT(varchar,@intRecipeId) + '</intRecipeId>'
+					Set @strXml = @strXml + '<intRecipeItemId>' + CONVERT(varchar,@intRecipeItemId) + '</intRecipeItemId>'
+					Set @strXml = @strXml + '<intItemId>' + CONVERT(varchar,@intRawItemId) + '</intItemId>'
+					Set @strXml = @strXml + '<dblRequiredQty>' + CONVERT(varchar,@dblRequiredQty) + '</dblRequiredQty>'
+					Set @strXml = @strXml + '<ysnIsSubstitute>' + CONVERT(varchar,0) + '</ysnIsSubstitute>'
+					Set @strXml = @strXml + '<ysnMinorIngredient>' + CONVERT(varchar,0) + '</ysnMinorIngredient>'
+					Set @strXml = @strXml + '<intConsumptionMethodId>' + CONVERT(varchar,@intConsumptionMethodId) + '</intConsumptionMethodId>'
+					Set @strXml = @strXml + '<intConsumptionStoragelocationId>' + CONVERT(varchar,ISNULL(@intConsumptionStoragelocationId,0)) + '</intConsumptionStoragelocationId>'
+					Set @strXml = @strXml + '</item>'
+
+					Select @intMinItemCount=Min(intRowNo) from @tblRemainingPickedItems Where intRowNo > @intMinItemCount
+				End
+				Set @strXml = @strXml + '</root>'
+
+				Insert Into @tblPickedLots
+				Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml
+			End
+		End
+	Else
+		Insert Into @tblPickedLots
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,@dblQuantity
+
+	--Remaining Lots to Pick
+	Insert Into @tblRemainingPickedLots
+	Select * from @tblPickedLots Where intLotId=0
+
+	Delete From @tblPickedLots Where intLotId=0
 
 	Insert @tblReservedQty(intLotId,dblReservedQty)
 	Select sr.intLotId,sum(sr.dblQty) from tblICLot l join tblICStockReservation sr on l.intLotId=sr.intLotId 
@@ -178,6 +325,10 @@ Begin
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
 	Left Join @tblReservedQty rq on tpl.intLotId = rq.intLotId
+	UNION 
+	Select rpl.*,0.0 AS dblAvailableQty,0.0 AS dblReservedQty,0.0 AS dblAvailableUnit,'' AS strAvailableUnitUOM, 
+	0.0 AS dblPickQuantity,0 AS intPickUOMId,'' AS strPickUOM,0 AS intParentLotId,'' AS strParentLotNumber
+	From @tblRemainingPickedLots rpl
 	ORDER BY tpl.strItemNo,tpl.strStorageLocationName
 
 	return
