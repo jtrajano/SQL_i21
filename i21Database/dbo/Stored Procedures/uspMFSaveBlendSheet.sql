@@ -14,6 +14,10 @@ SET ANSI_WARNINGS OFF
 DECLARE @idoc int 
 Declare @ErrMsg nVarchar(Max)
 Declare @ysnEnableParentLot bit=0
+Declare @intBlendItemId int
+Declare @intLocationId int
+Declare @dblPlannedQuantity numeric(18,6)
+Declare @dblBulkReqQuantity numeric(18,6)
 
 Set @intWorkOrderId=0;
 
@@ -129,6 +133,8 @@ Select @intManufacturingProcessId=a.intManufacturingProcessId
 from tblMFRecipe a Join @tblBlendSheet b on a.intItemId=b.intItemId
  and a.intLocationId=b.intLocationId and ysnActive=1
 
+Select @intBlendItemId=intItemId,@intLocationId=intLocationId,@dblPlannedQuantity=dblPlannedQuantity From @tblBlendSheet
+
 Begin Tran
 
 If @intWorkOrderId=0
@@ -221,6 +227,19 @@ End
 --Select @intWorkOrderId,intLotId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,null,
 --GetDate(),intUserId,GetDate(),intUserId
 --From @tblLot
+
+--Update Bulk Item(By Location or FIFO) Standard Required Qty Calculated Using Planned Qty
+	SELECT 
+		@dblBulkReqQuantity = ISNULL(SUM((ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity))),0)
+	FROM tblMFRecipeItem ri
+	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+	WHERE r.intItemId = @intBlendItemId
+		AND intLocationId = @intLocationId
+		AND ysnActive = 1
+		AND ri.intRecipeItemTypeId = 1
+		AND ri.intConsumptionMethodId IN (2,3)
+
+Update tblMFWorkOrder Set dblQuantity=dblQuantity + @dblBulkReqQuantity Where intWorkOrderId=@intWorkOrderId
 
 Update tblMFBlendRequirement Set dblIssuedQty=(Select SUM(dblQuantity) from tblMFWorkOrder where intBlendRequirementId=@intBlendRequirementId) where intBlendRequirementId=@intBlendRequirementId
 
