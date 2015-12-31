@@ -24,6 +24,15 @@ BEGIN
     insert into @MyTable select distinct strBillOfLading from  dbo.fnTRLinkedReceipt(@strReceiptLink,@intLoadHeaderId)
     set @rowsCount = (select COUNT(Id) from @MyTable)
 END
+if @Type = 'strReceiptLink'
+BEGIN
+--pass invoice id in @intLoadHeaderId 
+    insert into @MyTable select distinct DD.strReceiptLink from tblTRLoadDistributionHeader DH
+              join tblARInvoice AR on DH.intInvoiceId = AR.intInvoiceId
+              join tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+              where AR.intInvoiceId = @intLoadHeaderId
+    set @rowsCount = (select COUNT(Id) from @MyTable)
+END
 if @Type = 'strSupplyPoint'
 BEGIN
     insert into @MyTable select distinct strSupplyPoint from  dbo.fnTRLinkedReceipt(@strReceiptLink,@intLoadHeaderId)

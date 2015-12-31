@@ -18,6 +18,8 @@ DECLARE @InventoryReceiptId AS INT;
 DECLARE @ErrMsg                    NVARCHAR(MAX);
 
 DECLARE @InvoiceStagingTable AS InvoiceStagingTable,
+        @strReceiptLink AS NVARCHAR(100),
+		@strBOL AS NVARCHAR(50),
         @total as int;
 
 DECLARE @InvoiceOutputTable TABLE
@@ -26,7 +28,11 @@ DECLARE @InvoiceOutputTable TABLE
     intSourceId int,
 	intInvoiceId int
     )
-
+DECLARE @InvoicePostOutputTable TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+	intInvoiceId int
+    )
 BEGIN TRY
 
 if @ysnPostOrUnPost = 0 and @ysnRecap = 0
@@ -133,7 +139,7 @@ END
 			         and HH.strDestination = 'Customer' 
 			         and HH.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId ) as strActualCostId,
 		DH.intShipToLocationId,
-		(select dbo.fnTRConcatString(DD.strReceiptLink,DH.intLoadHeaderId,',','strBillOfLading')),
+		NULL,
 		DH.intInvoiceId,
 		'Transport Loads' 
 	   from tblTRLoadHeader TL           
@@ -188,39 +194,62 @@ BEGIN
        set intInvoiceId = @InvoiceId
          where @SouceId = intLoadDistributionHeaderId 
 
-   if @ysnRecap = 0
-   BEGIN		
-        EXEC	 [dbo].[uspARPostInvoice]
-             				@batchId = NULL,
-             				@post = @ysnPostOrUnPost,
-             				@recap = 0,
-             				@param = NULL,
-             				@userId = @intUserId,
-             				@beginDate = NULL,
-             				@endDate = NULL,
-             				@beginTransaction = @InvoiceId,
-             				@endTransaction = @InvoiceId,
-             				@exclude = NULL,
-             				@successfulCount = @SuccessCount OUTPUT,
-             				@invalidCount = @InvCount OUTPUT,
-             				@success = @IsSuccess OUTPUT,
-             				@batchIdUsed = @batchId OUTPUT,
-             				@recapId = NULL,
-             				@transType = N'Invoice',
-                            @raiseError = 1
-             if @IsSuccess = 0
-             BEGIN
-                RAISERROR('Invoice did not Post/UnPost', 16, 1);
-             END
-   END
+   set @strReceiptLink = (select dbo.fnTRConcatString('',@InvoiceId,',','strReceiptLink'))
+   set @strBOL = (select dbo.fnTRConcatString(@strReceiptLink,@intLoadHeaderId,',','strBillOfLading'))
 
+    update tblARInvoice 
+       set strBOLNumber = @strBOL
+         where intInvoiceId = @InvoiceId 
 
    SET @incval = @incval + 1;
 
 END;
 
+ if @ysnRecap = 0
+    BEGIN
+        INSERT INTO @InvoicePostOutputTable
+        select Distinct IV.intInvoiceId              
+        FROM
+            @InvoiceStagingTable IE  
+            JOIN tblARInvoice IV
+                on IE.intSourceId = IV.intLoadDistributionHeaderId
+        select @total = count(*) from @InvoicePostOutputTable;
+        set @incval = 1 
+        WHILE @incval <=@total 
+        BEGIN
+           select @InvoiceId =intInvoiceId  from @InvoicePostOutputTable where @incval = intId
+        
+          		
+                EXEC	 [dbo].[uspARPostInvoice]
+                     				@batchId = NULL,
+                     				@post = @ysnPostOrUnPost,
+                     				@recap = 0,
+                     				@param = NULL,
+                     				@userId = @intUserId,
+                     				@beginDate = NULL,
+                     				@endDate = NULL,
+                     				@beginTransaction = @InvoiceId,
+                     				@endTransaction = @InvoiceId,
+                     				@exclude = NULL,
+                     				@successfulCount = @SuccessCount OUTPUT,
+                     				@invalidCount = @InvCount OUTPUT,
+                     				@success = @IsSuccess OUTPUT,
+                     				@batchIdUsed = @batchId OUTPUT,
+                     				@recapId = NULL,
+                     				@transType = N'Invoice',
+                                    @raiseError = 1
+                     if @IsSuccess = 0
+                     BEGIN
+                        RAISERROR('Invoice did not Post/UnPost', 16, 1);
+                     END
+           
+        
+        
+           SET @incval = @incval + 1;
+        
+        END;
 --Post the invoice that was created
-
+    END
 
 END TRY
 BEGIN CATCH
