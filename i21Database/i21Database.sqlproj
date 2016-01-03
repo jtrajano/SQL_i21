@@ -3099,6 +3099,7 @@
     <Build Include="dbo\Stored Procedures\uspTRLoadProcessTransportLoad.sql" />
     <Build Include="dbo\Functions\fnTRConcatString.sql" />
     <Build Include="dbo\Stored Procedures\uspMFShiftActivity_Create.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
