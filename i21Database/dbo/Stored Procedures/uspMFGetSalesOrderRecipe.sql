@@ -37,17 +37,18 @@ Declare @tblItemFinal AS table
 	dtmDueDate DateTime,
 	intCellId int,
 	intLocationId int,
-	dtmOrderDueDate DateTime
+	dtmOrderDueDate DateTime,
+	intManufacturingProcessId int
 )
 
 --Sales Order Item
 Insert Into @tblItemFinal(intItemId,strItemNo,strDescription,dblRequiredQty,intItemUOMId,strUOM,strProcessName,intRecipeId,intWorkOrderId,
-strWorkOrderNo,dblWOQty,dtmDueDate,intCellId,intLocationId,dtmOrderDueDate)
+strWorkOrderNo,dblWOQty,dtmDueDate,intCellId,intLocationId,dtmOrderDueDate,intManufacturingProcessId)
 Select r.intItemId,i.strItemNo,i.strDescription,sd.dblQtyOrdered AS dblRequiredQty,
 sd.intItemUOMId,um.strUnitMeasure AS strUOM,mp.strProcessName,r.intRecipeId,
 --ISNULL(w.intWorkOrderId,0),w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate,w.intManufacturingCellId,
 0 AS intWorkOrderId,'' AS strWorkOrderNo,0.0 AS dblQuantity,NULL AS dtmExpectedDate,0 AS intManufacturingCellId,
-@intLocationId,@dtmOrderDueDate
+@intLocationId,@dtmOrderDueDate,mp.intManufacturingProcessId
 From tblMFRecipe r 
 Join tblSOSalesOrderDetail sd on r.intItemId=sd.intItemId
 Join tblICItem i on r.intItemId=i.intItemId
@@ -79,12 +80,12 @@ dblAvailableQty=@dblAvailableQty
 
 --Sales Order Recipe Item for next process
 Insert Into @tblItemFinal(intItemId,strItemNo,strDescription,dblRequiredQty,intItemUOMId,strUOM,strProcessName,intRecipeId,intWorkOrderId,
-strWorkOrderNo,dblWOQty,dtmDueDate,intCellId,intLocationId,dtmOrderDueDate)
+strWorkOrderNo,dblWOQty,dtmDueDate,intCellId,intLocationId,dtmOrderDueDate,intManufacturingProcessId)
 Select ri.intItemId,i.strItemNo,i.strDescription,(ri.dblCalculatedQuantity * (@dblStandardQty/@dblRecipeQty)) AS dblRequiredQty,
 iu.intItemUOMId,um.strUnitMeasure AS strUOM,mp.strProcessName,r.intRecipeId,
 --ISNULL(w.intWorkOrderId,0),w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate,w.intManufacturingCellId,
 0 AS intWorkOrderId,'' AS strWorkOrderNo,0.0 AS dblQuantity,NULL AS dtmExpectedDate,0 AS intManufacturingCellId,
-@intLocationId,@dtmOrderDueDate
+@intLocationId,@dtmOrderDueDate,mp.intManufacturingProcessId
 From tblMFRecipeItem ri 
 Join tblICItem i on ri.intItemId=i.intItemId
 Join tblICItemUOM iu on i.intItemId=iu.intItemId And iu.ysnStockUnit=1
