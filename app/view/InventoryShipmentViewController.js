@@ -134,7 +134,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             cboSourceType: {
                 value: '{current.intSourceType}',
                 store: '{sourceTypes}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{current.ysnPosted}',
+                defaultFilters: '{filterSourceByType}'
             },
             txtReferenceNumber: {
                 value: '{current.strReferenceNumber}',
