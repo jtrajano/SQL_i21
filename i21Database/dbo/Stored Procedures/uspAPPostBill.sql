@@ -325,13 +325,21 @@ BEGIN
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
-		--UPDATE CHARGES
-		UPDATE A
-			SET A.dblAmountBilled = A.dblAmountBilled + B.dblTotal
-		FROM tblICInventoryReceiptCharge A
-			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
-		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		--UPDATE CHARGES (Acrrue)
+		UPDATE	A
+		SET		A.dblAmountBilled = A.dblAmountBilled + B.dblTotal
+		FROM	tblICInventoryReceiptCharge A INNER JOIN tblAPBillDetail B 
+					ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
+					AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
+		--UPDATE CHARGES (Price)
+		UPDATE	A
+		SET		A.dblAmountPriced = A.dblAmountPriced + B.dblTotal
+		FROM	tblICInventoryReceiptCharge A INNER JOIN tblAPBillDetail B 
+					ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
+					AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		WHERE	ISNULL(A.ysnPrice, 0) = 1
+		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
