@@ -58,10 +58,17 @@ FROM
 	  , I.strTransactionType
 	  , I.strType
 	  , ID.strItemDescription
-	  , ID.intAccountId				  AS intItemAccountId
+	  , intItemAccountId = CASE WHEN dbo.fnIsStockTrackingItem(ID.intItemId) = 1 THEN IA.intSalesAccountId ELSE IA.intGeneralAccountId END
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
-	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 THEN ICIT.dblCost ELSE ICIT1.dblCost END)
+	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 
+											THEN (SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
+												AND intTransactionId = I.intInvoiceId
+												AND strTransactionId = I.strInvoiceNumber
+												AND intItemId		 = ID.intItemId
+												AND intItemUOMId	 = ID.intItemUOMId) 
+											ELSE ICIT1.dblCost 
+										END)
 	  , dblPrice
 	  , ID.dblTotalTax				  AS dblTax
 	  , ID.dblTotal					  AS dblLineTotal
@@ -70,13 +77,7 @@ FROM
 	  , I.strShipToLocationName
 	  , intSiteId
 FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-LEFT OUTER JOIN 
-	tblICInventoryTransaction ICIT 
-		ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-		AND I.intInvoiceId = ICIT.intTransactionId 
-		AND I.strInvoiceNumber = ICIT.strTransactionId 
-		AND ID.intItemId = ICIT.intItemId 
-		AND ID.intItemUOMId = ICIT.intItemUOMId
+LEFT JOIN vyuARGetItemAccount IA ON ID.intItemId = IA.intItemId AND I.intCompanyLocationId = IA.intLocationId
 LEFT OUTER JOIN
 	(
 		SELECT
@@ -117,7 +118,7 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.strTransactionType
 	 , SO.strType
 	 , SOD.strItemDescription
-	 , SOD.intAccountId				  AS intItemAccountId
+	 , intItemAccountId = CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 THEN IA.intSalesAccountId ELSE IA.intGeneralAccountId END	 
 	 , SOD.dblQtyOrdered
 	 , SOD.dblQtyShipped
 	 , ICP.dblStandardCost			  AS dblStandardCost				  
@@ -132,7 +133,7 @@ FROM tblSOSalesOrder SO INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrder
 LEFT JOIN tblICItemUOM SU ON SOD.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
 LEFT JOIN (tblICItemLocation ICL 
 		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
-
+LEFT JOIN vyuARGetItemAccount IA ON SOD.intItemId = IA.intItemId AND SO.intCompanyLocationId = IA.intLocationId
 WHERE SO.ysnProcessed = 1) AS A
 	LEFT JOIN tblGLAccount GA ON A.intItemAccountId = GA.intAccountId
 	INNER JOIN tblSMCompanyLocation L ON A.intCompanyLocationId = L.intCompanyLocationId
@@ -146,4 +147,4 @@ WHERE SO.ysnProcessed = 1) AS A
 		LEFT JOIN tblICCategory CAT ON IC.intCategoryId = CAT.intCategoryId		
 		LEFT JOIN tblICBrand ICB ON IC.intBrandId = ICB.intBrandId) ON A.intItemId = IC.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON A.intItemUOMId = UOM.intItemUOMId		
-	LEFT JOIN tblTMSite TMS ON A.intSiteId = TMS.intSiteID
+	LEFT JOIN tblTMSite TMS ON A.intSiteId = TMS.intSiteID	
