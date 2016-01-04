@@ -28,6 +28,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
 		
 DECLARE @openingBalance AS NUMERIC(18,6)		
@@ -43,10 +44,28 @@ WHERE 	intBankAccountId = @intBankAccountId
 SELECT	@returnBalance = SUM(ISNULL(dblAmount, 0) * -1)
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
+		AND ysnCheckVoid = 0
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT)
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @ACH )
+
+--Include voided check that not yet effect in the bank balance for the voiding date is greater than the statement date
+SELECT	 @returnBalance = ISNULL(@returnBalance,0) + ISNULL(SUM(ISNULL(dblAmount, 0) * -1),0)
+FROM	[dbo].[tblCMBankTransaction] A
+WHERE	ysnPosted = 1
+		AND ysnCheckVoid = 1 
+		AND
+		(1 = CASE 
+			WHEN  (SELECT CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) FROM tblCMBankTransaction where strTransactionId = A.strTransactionId + 'V') >  CAST(FLOOR(CAST(ISNULL(@dtmDate,A.dtmDate) AS FLOAT)) AS DATETIME)	
+				THEN 1
+				ELSE 0
+			END
+		)
+		AND dblAmount <> 0 
+		AND intBankAccountId = @intBankAccountId
+		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @VOID_CHECK, @ACH)
 
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
@@ -54,6 +73,7 @@ SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredi
 FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail] B
 			ON A.intTransactionId = B.intTransactionId
 WHERE	A.ysnPosted = 1
+		AND A.ysnCheckVoid = 0
 		AND A.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, A.dtmDate) AS FLOAT)) AS DATETIME)		
 		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL)
@@ -63,10 +83,11 @@ HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
+		AND ysnCheckVoid = 0
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT)
+		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @ACH)
 
 -- Add the opening balance to the return balance. 
 SET @returnBalance = ISNULL(@openingBalance, 0) + @returnBalance
