@@ -66,7 +66,7 @@ AS
 		, CASE WHEN SUM(A.dblRoyalties) >= C.dbl1099MISCRoyalties THEN SUM(dblRoyalties) ELSE 0 END AS dblRoyalties
 		, CASE WHEN SUM(A.dblSubstitutePayments) >= C.dbl1099MISCSubstitute THEN SUM(dblSubstitutePayments) ELSE 0 END AS dblSubstitutePayments
 		, CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN SUM(A.dblDirectSales) ELSE 0 END AS dblDirectSales
-		, (CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN 'X' ELSE NULL END) AS ysnDirectSales
+		, (CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN 'X' ELSE NULL END) AS strDirectSales
 		, A.intEntityVendorId
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B

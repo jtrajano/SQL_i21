@@ -19,7 +19,7 @@ WHILE @charounter <= @length BEGIN
 	IF	@char BETWEEN 48 AND 57 
 		OR @char BETWEEN 65 AND 90 
 		OR @char BETWEEN 97 AND 122 
-		OR @char IN (32, 44, 46) 
+		OR @char IN (32, 44) --46 is the period character, we want to remove the period on this function
 		SET @result = @result + CHAR(@char)
 	SET @charounter = @charounter + 1
 END
