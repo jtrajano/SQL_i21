@@ -224,7 +224,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             cboTaxGroup: {
                 value: '{current.intTaxGroupId}',
-                store: '{taxGroup}'
+                store: '{taxGroup}',
+                readOnly: '{current.ysnPosted}'
             },
             txtShiftNumber: {
                 value: '{current.intShiftNumber}',
