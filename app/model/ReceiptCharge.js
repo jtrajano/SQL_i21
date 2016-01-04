@@ -87,8 +87,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
             if (data) {
                 ReceiptVendorId = data.get('intEntityVendorId');
             }
-            if (this.get('ysnInventoryCost') === true &&
-                this.get('ysnPrice') === true &&
+            if (this.get('ysnPrice') === true &&
                 this.get('ysnAccrue') === true &&
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
                 this.get('intEntityVendorId') === ReceiptVendorId) {
@@ -101,18 +100,19 @@ Ext.define('Inventory.model.ReceiptCharge', {
                     message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please correct the accrue or price checkbox.'
                 })
             }
+
             if (this.get('ysnInventoryCost') === true &&
                 this.get('ysnPrice') === true &&
                 this.get('ysnAccrue') === true &&
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
                 this.get('intEntityVendorId') !== ReceiptVendorId) {
                 errors.add({
-                    field: 'ysnAccrue',
-                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                    field: 'ysnPrice',
+                    message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
                 })
                 errors.add({
                     field: 'ysnInventoryCost',
-                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                    message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
                 })
             }
             if (this.get('ysnInventoryCost') === true &&
@@ -121,11 +121,11 @@ Ext.define('Inventory.model.ReceiptCharge', {
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) === true) {
                 errors.add({
                     field: 'ysnAccrue',
-                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                    message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
                 })
                 errors.add({
                     field: 'ysnInventoryCost',
-                    message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
+                    message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
                 })
             }
         }
