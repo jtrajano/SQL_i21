@@ -246,6 +246,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
                                                                 displayField: 'strSourceType',
+                                                                queryMode: 'local',
                                                                 valueField: 'intSourceType'
                                                             },
                                                             {

@@ -46,7 +46,6 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
         },
         sourceTypes: {
-            autoLoad: true,
             data: [
                 {
                     intSourceType: 0,
@@ -295,6 +294,20 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                         return false;
                         break;
                 };
+            }
+        },
+        filterSourceByType: function (get) {
+            switch (get('current.intOrderType')) {
+                case 1:
+                    return [];
+                    break;
+                default:
+                    return [{
+                        column: 'intSourceType',
+                        value: 3,
+                        condition: 'noteq'
+                    }];
+                    break;
             }
         }
     }
