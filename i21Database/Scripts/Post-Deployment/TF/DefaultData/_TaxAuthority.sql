@@ -1,4 +1,6 @@
-﻿
+﻿GO
+PRINT 'START TF TA'
+GO
 DECLARE @intTaxAuthorityId INT
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority
@@ -61,3 +63,6 @@ BEGIN
 	,('WY','Wyoming',				'TRUE',		'FALSE',	'FALSE')
 	,('US','Federal Government',	'TRUE',		'FALSE',	'FALSE')
 END
+GO
+PRINT 'END TF TA'
+GO
