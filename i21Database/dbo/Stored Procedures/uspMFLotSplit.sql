@@ -66,6 +66,11 @@ BEGIN TRY
 			RAISERROR('Lot tracking for the item is set as manual. Please supply the split lot number.',11,1)
 		END
 	END
+
+	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
+	BEGIN
+		RAISERROR(90008,11,1)
+	END
 							 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,

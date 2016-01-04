@@ -45,3 +45,8 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90007) EXEC sp_dropmessa
 SET @strmessage = 'Default warehouse staging unit is not configured.'
 EXEC sp_addmessage 90007,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90008) EXEC sp_dropmessage 90008, 'us_english'	
+SET @strmessage = 'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
+EXEC sp_addmessage 90008,11,@strmessage,'us_english','False'
+
+

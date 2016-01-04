@@ -56,6 +56,11 @@ BEGIN TRY
 		RAISERROR(51191,16,1)                           
 	END  
 
+	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
+	BEGIN
+		RAISERROR(90008,11,1)
+	END
+
 	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId,
 													  @dtmDate,
 													  @intLocationId,
