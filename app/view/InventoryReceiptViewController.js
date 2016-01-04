@@ -2274,8 +2274,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intUnitMeasureId', po.get('intItemUOMId'));
                 current.set('strUnitMeasure', po.get('strUnitMeasure'));
                 current.set('strOrderUOM', po.get('strUnitMeasure'));
-                current.set('strCostUOM', po.get('strUnitMeasure'));
-                current.set('intCostUOMId', po.get('intItemUOMId'));
+                current.set('strCostUOM', po.get('strCostUOM'));
+                current.set('intCostUOMId', po.get('intCostUOMId'));
                 current.set('dblUnitCost', po.get('dblCost'));
                 current.set('dblLineTotal', po.get('dblTotal'));
                 current.set('strLotTracking', po.get('strLotTracking'));
@@ -2286,7 +2286,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strSubLocationName', po.get('strSubLocationName'));
                 current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
                 current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
-                current.set('dblCostUOMConvFactor', po.get('dblItemUOMCF'));
+                current.set('dblCostUOMConvFactor', po.get('dblCostUOMCF'));
                 current.set('strUnitType', po.get('strStockUOMType'));
                 current.set('strContainer', po.get('strContainerNumber'));
                 current.set('intContainerId', po.get('intShipmentBLContainerId'));
