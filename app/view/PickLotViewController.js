@@ -47,15 +47,18 @@ Ext.define('Inventory.view.PickLotViewController', {
         config.filters = [
             {
                 column: 'intCustomerEntityId',
-                value: config.param.intCustomerId
+                value: config.param.intCustomerId,
+                conjunction: 'and'
             },
             {
                 column: 'intCompanyLocationId',
-                value: config.param.intShipFromId
+                value: config.param.intShipFromId,
+                conjunction: 'and'
             },
             {
                 column: 'ysnShipped',
-                value: false
+                value: false,
+                conjunction: 'and'
             }
         ];
         context.data.load({
