@@ -2190,15 +2190,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             },
                                                             {
-                                                                xtype: 'checkcolumn',
-                                                                itemId: 'colInventoryCost',
-                                                                text: 'Inventory Cost',
-                                                                flex: 1.2,
-                                                                editor: {
-                                                                    xtype: 'checkboxfield'
-                                                                }
-                                                            },
-                                                            {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colOnCostType',
                                                                 text: 'On Cost',
@@ -2283,26 +2274,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             },
                                                             {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colAllocateCostBy',
-                                                                text: 'Allocate Cost By',
-                                                                flex: 1.2,
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'strDescription',
-                                                                            dataType: 'string',
-                                                                            text: 'Allocate Cost By',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboAllocateCostBy',
-                                                                    displayField: 'strDescription',
-                                                                    valueField: 'strDescription'
-                                                                }
-                                                            },
-                                                            {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colAccrue',
                                                                 text: 'Accrue',
@@ -2341,6 +2312,35 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     itemId: 'cboCostVendor',
                                                                     displayField: 'strVendorId',
                                                                     valueField: 'strVendorId'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colInventoryCost',
+                                                                text: 'Inventory Cost',
+                                                                flex: 1.2,
+                                                                editor: {
+                                                                    xtype: 'checkboxfield'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colAllocateCostBy',
+                                                                text: 'Allocate Cost By',
+                                                                flex: 1.2,
+                                                                editor: {
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'strDescription',
+                                                                            dataType: 'string',
+                                                                            text: 'Allocate Cost By',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboAllocateCostBy',
+                                                                    displayField: 'strDescription',
+                                                                    valueField: 'strDescription'
                                                                 }
                                                             },
                                                             {
