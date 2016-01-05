@@ -3100,6 +3100,7 @@
     <None Include="Scripts\Utility\IC\Repost Costing\uspICDetectBadOnHand.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
+    <Build Include="dbo\Tables\tblSCListTicketTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
