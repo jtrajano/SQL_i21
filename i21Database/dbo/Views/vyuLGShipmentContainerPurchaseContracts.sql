@@ -22,7 +22,7 @@ SELECT
        dblGrossWt = (Container.dblGrossWt / Container.dblQuantity) * SC.dblQuantity,
        dblTareWt = (Container.dblTareWt / Container.dblQuantity) * SC.dblQuantity,
        dblNetWt = (Container.dblNetWt / Container.dblQuantity) * SC.dblQuantity,
-       dblCost = CT.dblCashPriceInQtyUOM, 
+       dblCost = CT.dblCashPrice, 
        intWeightUOMId = S.intWeightUnitMeasureId,
        WTUOM.strUnitMeasure as strWeightUOM,
        intEntityVendorId = S.intVendorEntityId,
@@ -47,6 +47,9 @@ SELECT
 	   , Container.strOtherMarks
 	   , Container.strSealNumber
 	   , ContType.strContainerType
+	   ,intCostUOMId = CT.intPriceItemUOMId
+	   ,strCostUOM = CT.strPriceUOM
+	   ,dblCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId),0)
 
 FROM tblLGShipmentBLContainerContract SC
 LEFT JOIN tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
