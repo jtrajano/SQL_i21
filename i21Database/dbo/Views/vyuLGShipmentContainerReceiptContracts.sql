@@ -26,6 +26,9 @@ SELECT
 	,dblTareWt
 	,dblNetWt
 	,dblCost
+	,strCostUOM
+	,intCostUOMId
+	,dblCostUOMCF 
 	,intWeightUOMId
 	,strWeightUOM
 	,intEntityVendorId
@@ -80,6 +83,9 @@ SELECT
 	,dblTareWt
 	,dblNetWt
 	,dblCost
+	,strCostUOM
+	,intCostUOMId
+	,dblCostUOMCF
 	,intWeightUOMId
 	,strWeightUOM
 	,intEntityVendorId
