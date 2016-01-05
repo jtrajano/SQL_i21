@@ -121,34 +121,35 @@
     <value>17, 17</value>
   </metadata>
   <data name="customSqlQuery1.Sql" xml:space="preserve">
-    <value>SELECT Shipment.intInventoryShipmentId
-	, Shipment.strShipmentNumber
-	, strShipFromAddress = Shipment.strShipFromLocation + CHAR (13) + Shipment.strShipFromAddress
-	, strShipToAddress = Shipment.strShipToLocation + CHAR (13) + Shipment.strShipToAddress
-	, Shipment.strBOLNumber
-	, ShipmentItem.strOrderNumber
-	, strCustomerPO = SO.strPONumber
-	, Shipment.dtmShipDate
-	, ShipVia.strShipVia
-	, Shipment.strDeliveryInstruction
-	, FreightTerm.strFreightTerm
-	, ShipmentItem.strItemNo
-	, ShipmentItem.strItemDescription
-	, Lot.strLotNumber
-	, Lot.strLotAlias
-	, ShipmentItemLot.dblLotQty
-	, ShipmentItemLot.strLotUOM
-	, intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
-FROM vyuICGetInventoryShipmentItem ShipmentItem
-LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
-LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Shipment.intShipViaId
-LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
-LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
-LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ShipmentItem.intSourceId
-	AND ShipmentItem.strOrderType = 'Sales Order'
-</value>
+    <value>SELECT Shipment.intInventoryShipmentId, Shipment.strShipmentNumber,
+       strShipFromAddress = Shipment.strShipFromLocation + CHAR (13) +
+       Shipment.strShipFromAddress,
+       strShipToAddress = Shipment.strShipToLocation + CHAR (13) +
+       Shipment.strShipToAddress, Shipment.strBOLNumber,
+       ShipmentItem.strOrderNumber, strCustomerPO = SO.strPONumber,
+       Shipment.dtmShipDate, ShipVia.strShipVia,
+       Shipment.strDeliveryInstruction, FreightTerm.strFreightTerm,
+       ShipmentItem.strItemNo, ShipmentItem.strItemDescription,
+       Lot.strLotNumber, Lot.strLotAlias, ShipmentItemLot.dblLotQty,
+       ShipmentItemLot.strLotUOM,
+       intWarehouseInstructionHeaderId = ISNULL
+       (WarehouseInstruction.intWarehouseInstructionHeaderId, 0) FROM
+       vyuICGetInventoryShipmentItem ShipmentItem LEFT JOIN
+       vyuICGetInventoryShipmentItemLot ShipmentItemLot ON
+       ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+       LEFT JOIN vyuICGetLot Lot ON
+       Lot.intLotId = ShipmentItemLot.intLotId LEFT JOIN
+       vyuICGetInventoryShipment Shipment ON
+       Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+       LEFT JOIN tblSMShipVia ShipVia ON
+       ShipVia.intEntityShipViaId = Shipment.intShipViaId LEFT JOIN
+       tblSMFreightTerms FreightTerm ON
+       FreightTerm.intFreightTermId = Shipment.intFreightTermId LEFT
+       JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON
+       WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
+       LEFT JOIN tblSOSalesOrder SO ON
+       SO.intSalesOrderId = ShipmentItem.intOrderId AND
+       ShipmentItem.strOrderType = 'Sales Order'</value>
   </data>
   <data name="sqlDataSource1.ResultSchemaSerializable" xml:space="preserve">
     <value>PERhdGFTZXQgTmFtZT0ic3FsRGF0YVNvdXJjZTEiPjxWaWV3IE5hbWU9IkN1c3RvbVNxbFF1ZXJ5Ij48RmllbGQgTmFtZT0iaW50SW52ZW50b3J5U2hpcG1lbnRJZCIgVHlwZT0iSW50MzIiIC8+PEZpZWxkIE5hbWU9InN0clNoaXBtZW50TnVtYmVyIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0clNoaXBGcm9tQWRkcmVzcyIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJTaGlwVG9BZGRyZXNzIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckJPTE51bWJlciIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJPcmRlck51bWJlciIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJDdXN0b21lclBPIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9ImR0bVNoaXBEYXRlIiBUeXBlPSJEYXRlVGltZSIgLz48RmllbGQgTmFtZT0ic3RyU2hpcFZpYSIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJEZWxpdmVyeUluc3RydWN0aW9uIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckZyZWlnaHRUZXJtIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckl0ZW1ObyIgVHlwZT0iU3RyaW5nIiAvPjxGaWVsZCBOYW1lPSJzdHJJdGVtRGVzY3JpcHRpb24iIFR5cGU9IlN0cmluZyIgLz48RmllbGQgTmFtZT0ic3RyTG90TnVtYmVyIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9InN0ckxvdEFsaWFzIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9ImRibExvdFF0eSIgVHlwZT0iRGVjaW1hbCIgLz48RmllbGQgTmFtZT0ic3RyTG90VU9NIiBUeXBlPSJTdHJpbmciIC8+PEZpZWxkIE5hbWU9ImludFdhcmVob3VzZUluc3RydWN0aW9uSGVhZGVySWQiIFR5cGU9IkludDMyIiAvPjwvVmlldz48L0RhdGFTZXQ+</value>
