@@ -45,6 +45,7 @@
             this.xrLabel2 = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabel3 = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabel4 = new DevExpress.XtraReports.UI.XRLabel();
+            this.hideCustomerPO = new DevExpress.XtraReports.UI.FormattingRule();
             this.xrLabel5 = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabel6 = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabel7 = new DevExpress.XtraReports.UI.XRLabel();
@@ -218,6 +219,7 @@
             // xrLabel4
             // 
             this.xrLabel4.CanShrink = true;
+            this.xrLabel4.FormattingRules.Add(this.hideCustomerPO);
             this.xrLabel4.LocationFloat = new DevExpress.Utils.PointFloat(254.6112F, 259.3248F);
             this.xrLabel4.Name = "xrLabel4";
             this.xrLabel4.Padding = new DevExpress.XtraPrinting.PaddingInfo(1, 1, 0, 0, 100F);
@@ -225,6 +227,16 @@
             this.xrLabel4.SizeF = new System.Drawing.SizeF(162F, 17F);
             this.xrLabel4.StyleName = "FieldCaption";
             this.xrLabel4.Text = "Customer PO:";
+            // 
+            // hideCustomerPO
+            // 
+            this.hideCustomerPO.Condition = "[strCustomerPO]  == null";
+            this.hideCustomerPO.DataMember = "CustomSqlQuery";
+            // 
+            // 
+            // 
+            this.hideCustomerPO.Formatting.Visible = DevExpress.Utils.DefaultBoolean.False;
+            this.hideCustomerPO.Name = "hideCustomerPO";
             // 
             // xrLabel5
             // 
@@ -653,10 +665,11 @@
             this.sqlDataSource1});
             this.DataMember = "CustomSqlQuery";
             this.DataSource = this.sqlDataSource1;
+            this.FormattingRuleSheet.AddRange(new DevExpress.XtraReports.UI.FormattingRule[] {
+            this.hideCustomerPO});
             this.Margins = new System.Drawing.Printing.Margins(100, 100, 61, 100);
             this.Parameters.AddRange(new DevExpress.XtraReports.Parameters.Parameter[] {
             this.ShipmentNumber});
-            this.ScriptsSource = resources.GetString("$this.ScriptsSource");
             this.StyleSheet.AddRange(new DevExpress.XtraReports.UI.XRControlStyle[] {
             this.Title,
             this.FieldCaption,
@@ -719,5 +732,6 @@
         private DevExpress.XtraReports.UI.GroupFooterBand GroupFooter1;
         private DevExpress.XtraReports.UI.XRSubreport xrSubreport1;
         private DevExpress.XtraReports.UI.GroupFooterBand GroupFooter2;
+        private DevExpress.XtraReports.UI.FormattingRule hideCustomerPO;
     }
 }

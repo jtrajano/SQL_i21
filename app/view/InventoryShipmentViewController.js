@@ -1666,10 +1666,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 Operator: 'AND'
             }];
 
-        iRely.Functions.openScreen('Reporting.view.ReportViewer', {
-            selectedReport: 'BillOfLading',
-            selectedGroup: 'Inventory',
-            selectedParameters: filters
+        // Save has data changes first before doing the post.
+        win.context.data.saveRecord({
+            callbackFn: function() {
+                iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+                    selectedReport: 'BillOfLading',
+                    selectedGroup: 'Inventory',
+                    selectedParameters: filters
+                });
+            }
         });
     },
 

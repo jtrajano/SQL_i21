@@ -410,6 +410,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 'tblICInventoryAdjustmentDetails.NewSubLocation, ' +
                 'tblICInventoryAdjustmentDetails.NewStorageLocation',
             createRecord : me.createRecord,
+            validateRecord : me.validateRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.InventoryAdjustment',
@@ -467,6 +468,35 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         action(record);
     },
 
+    validateRecord: function(config, action) {
+        var win = config.window;
+        this.validateRecord(config, function (result) {
+            var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
+            var zeroCost = false;
+            zeroCost = Ext.Array.each(lineItems.data.items, function (detail) {
+                if (!detail.dummy) {
+                    if (detail.get('dblNewCost') <= 0) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            if (zeroCost) {
+                var msgAction = function (button) {
+                    if (button === 'yes') {
+                        action(true);
+                    }
+                    else action(false);
+                };
+                iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
+            }
+            else {
+                action(true);
+            }
+        });
+    },
+
     onAdjustmentDetailSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -486,6 +516,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intItemId', record.get('intItemId'));
             current.set('strItemDescription', record.get('strDescription'));
             current.set('dblCost', record.get('dblLastCost'));
+            current.set('dblNewCost', record.get('dblLastCost'));
             me.getStockQuantity(current, win);
 
             // Check if selected item lot-tracking = NO.
@@ -513,7 +544,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strNewLotNumber', null);
             current.set('dblAdjustByQuantity', null);
             current.set('dblNewQuantity', null);
-            current.set('dblNewCost', null);
             current.set('intNewItemUOMId', null);
             current.set('dblNewItemUOMUnitQty', null);
             current.set('strNewItemUOM', null);
@@ -629,7 +659,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblAdjustByQuantity', null);
             current.set('dblNewQuantity', null);
             current.set('dblNewWeight', null);
-            current.set('dblNewCost', null);
+            current.set('dblNewCost', record.get('dblCost') * record.get('dblItemUOMUnitQty'));
             current.set('dblNewWeightPerQty', null);
             current.set('intNewItemUOMId', null);
             current.set('dblNewItemUOMUnitQty', null);
@@ -682,6 +712,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
             current.set('dblCost', newUnitCost);
+            current.set('dblNewCost', newUnitCost);
 //            current.set('dblQuantity', selectedOnHandQty);
             current.set('intItemUOMId', record.get('intItemUOMId'));
             current.set('dblItemUOMUnitQty', selectedItemUOMUnitQty);
