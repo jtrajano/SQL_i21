@@ -58,7 +58,12 @@ FROM
 	  , I.strTransactionType
 	  , I.strType
 	  , ID.strItemDescription
-	  , intItemAccountId = CASE WHEN dbo.fnIsStockTrackingItem(ID.intItemId) = 1 THEN IA.intSalesAccountId ELSE IA.intGeneralAccountId END
+	  , intItemAccountId			  = (CASE WHEN dbo.fnIsStockTrackingItem(ID.intItemId) = 1 
+												THEN IA.intSalesAccountId 
+											  WHEN IA.strType = 'Other Charge'
+												THEN IA.intOtherChargeIncomeAccountId
+											ELSE IA.intGeneralAccountId 
+										 END)
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
 	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 
@@ -118,7 +123,12 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.strTransactionType
 	 , SO.strType
 	 , SOD.strItemDescription
-	 , intItemAccountId = CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 THEN IA.intSalesAccountId ELSE IA.intGeneralAccountId END	 
+	 , intItemAccountId				= (CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 
+												THEN IA.intSalesAccountId 
+											WHEN IA.strType = 'Other Charge'
+												THEN IA.intOtherChargeIncomeAccountId
+											ELSE IA.intGeneralAccountId 
+									   END)
 	 , SOD.dblQtyOrdered
 	 , SOD.dblQtyShipped
 	 , ICP.dblStandardCost			  AS dblStandardCost				  
