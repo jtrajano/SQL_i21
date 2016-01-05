@@ -1138,7 +1138,7 @@ IF EXISTS (
 BEGIN
 	UPDATE tblMFCompanyPreference
 	SET intDefaultGanttChartViewDuration = 7
-	Where intDefaultGanttChartViewDuration=NULL
+	Where intDefaultGanttChartViewDuration IS NULL
 END
 ELSE
 BEGIN
