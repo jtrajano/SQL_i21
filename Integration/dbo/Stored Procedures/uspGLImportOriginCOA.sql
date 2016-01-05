@@ -124,19 +124,17 @@ BEGIN
 				
 
 				
-				IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
+				IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8_new)) AS SegmentCode FROM tblGLOriginAccounts) tblSegment) > 1 and @ysnOverride = 0)
 				BEGIN
 					
-					
-					IF EXISTS(
-						SELECT TOP 1 1 FROM tblGLOriginAccounts 
-						where replicate(''0'',@primarylen-len( cast(cast(glact_acct1_8_new as int) as varchar(30)))) + cast(cast(glact_acct1_8_new as int) as varchar(30)) = 
-						glact_acct1_8 and len( cast(cast(glact_acct1_8_new as int) as varchar(30))) < @primarylen)
+					IF EXISTS(SELECT TOP 1 1 FROM tblGLOriginAccounts where LEN(glact_acct1_8_new) < @primarylen and CAST(glact_acct1_8_new AS  VARCHAR) + REPLICATE(''0'',@primarylen-LEN(glact_acct1_8_new)) 
+					IN (SELECT glact_acct1_8 FROM tblGLOriginAccounts))
 					BEGIN
 						SET @result = ''invalid-2,'' + cast(  @primarylen as varchar)
 						COMMIT TRANSACTION
 						RETURN
 					END
+					UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8_new  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8_new))
 				END
 				DECLARE	@Length		INT
 						,@query		VARCHAR(500)	

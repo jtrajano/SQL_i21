@@ -1,31 +1,15 @@
-
--- USE irely98
+﻿-- USE i21Demo01
 
 ------------------------------------------------------------------------------------------------------------------------------------
--- READ ME 
-------------------------------------------------------------------------------------------------------------------------------------
-/*
-	This stored procedure will re-post all inventory transactions. It will impact the following: 
-
-	1. Stock Quantities from all costing tables like costing buckets. 
-	2. Recalculate the average cost. 
-	3. It will have an impact to the last cost and standard cost. 
-	4. It will delete the old inventory-transaction related records including g/l entries. 
-	5. It will re-populate the inventory-transaction records. It will create a new set of g/l entries. 
-	6. During the repopulate process, it will use the same transaction date and batch ids. 
-
-	Pre-requisites:
-	1. uspICRepostCosting
-	2. uspICDetectBadOnHand
-
-	Make sure to back-up your database before running this process. 
-
-*/
-
 -- Open the fiscal year periods
-SELECT	* 
-INTO	tblGLFiscalYearPeriodOriginal
-FROM	tblGLFiscalYearPeriod
+------------------------------------------------------------------------------------------------------------------------------------
+-- Open the fiscal year periods
+IF OBJECT_ID('tblGLFiscalYearPeriodOriginal') IS NULL 
+BEGIN 
+	SELECT	* 
+	INTO	tblGLFiscalYearPeriodOriginal
+	FROM	tblGLFiscalYearPeriod
+END 
 
 UPDATE tblGLFiscalYearPeriod
 SET ysnOpen = 1
@@ -78,7 +62,7 @@ BEGIN
 	INTO	#tmpICInventoryTransaction
 	FROM	tblICInventoryTransaction
 	WHERE	ISNULL(dblQty, 0) <> 0
-			AND ISNULL(ysnIsUnposted, 0) = 0 -- This where clause will exclude all the unposted transactions. 
+			AND ISNULL(ysnIsUnposted, 0) = 0 -- This part of the 'WHERE' clause will exclude any unposted transactions during the re-post. 
 END
 
 BEGIN 
@@ -146,8 +130,8 @@ BEGIN
 				,@intItemId = intItemId
 				,@dblQty = dblQty 
 				,@intTransactionTypeId = intTransactionTypeId
-		FROM	#tmpICInventoryTransaction
-		ORDER BY dtmDate ASC 
+		FROM	#tmpICInventoryTransaction		
+		ORDER BY dtmDate ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 		-- ORDER BY intInventoryTransactionId ASC 
 
 		-- Detect if the transaction is posted or not. 
@@ -185,10 +169,16 @@ BEGIN
 									'Inventory Adjustment'
 								WHEN @strTransactionForm = 'Inventory Receipt' THEN 
 									'AP Clearing'
-								WHEN @strTransactionForm = 'Inventory Shipment' THEN 
+								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId LIKE 'SI%' THEN 
+									'Cost of Goods'
+								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId NOT LIKE 'SI%' THEN 
 									'Inventory In-Transit'
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
-									'Inventory In-Transit'
+									CASE WHEN EXISTS (SELECT 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND strTransferType = 'Location to Location') THEN 
+											NULL
+										ELSE 
+											'Inventory In-Transit'
+									END 									
 								ELSE 
 									NULL 
 						END
@@ -197,8 +187,6 @@ BEGIN
 
 			IF @strTransactionForm IN ('Consume', 'Produce') 
 			BEGIN 
-				PRINT 'Processing Consume'
-
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -250,8 +238,6 @@ BEGIN
 
 				DELETE FROM @ItemsToPost
 
-				PRINT 'Processing Produce'
-
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -279,13 +265,8 @@ BEGIN
 						,dblQty  
 						,dblUOMQty  
 						,dblCost = ISNULL(
-								(
-									SELECT	SUM(-1 * dblQty * dblCost )
-									FROM	dbo.tblICInventoryTransaction 
-									WHERE	strBatchId = @strBatchId
-											AND intTransactionTypeId = 8 
-								)									 
-								/ #tmpICInventoryTransaction.dblQty
+								(SELECT SUM( -1 * dblQty * dblCost ) FROM dbo.tblICInventoryTransaction WHERE strTransactionId = @strTransactionId AND strBatchId = @strBatchId) 
+								/ dblQty
 								, 0
 							)
 						,dblSalesPrice  
@@ -310,6 +291,115 @@ BEGIN
 					,@strGLDescription
 					,@ItemsToPost
 			END 
+			ELSE IF @strTransactionForm = 'Inventory Transfer'
+			BEGIN 
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId
+						,strActualCostId
+				)
+				SELECT 	intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  = (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId) * dblUOMQty  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId
+						,strActualCostId = NULL 
+				FROM	#tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId
+						AND dblQty < 0 
+					
+				EXEC dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intUserId
+					,@strGLDescription
+					,@ItemsToPost
+
+				DELETE FROM @ItemsToPost
+
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId		
+						,strActualCostId
+				)
+				SELECT 	intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost = (
+								SELECT	dblCost 
+								FROM	dbo.tblICInventoryTransaction 
+								WHERE	strTransactionId = @strTransactionId 
+										AND strBatchId = @strBatchId
+										AND dblQty < 0 
+										AND ysnIsUnposted = 0 
+						) 
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId
+						,strActualCostId = NULL 
+				FROM	#tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId
+						AND dblQty > 0 
+
+				EXEC dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intUserId
+					,@strGLDescription
+					,@ItemsToPost
+			END 			
 			ELSE 
 			BEGIN 
 				INSERT INTO @ItemsToPost (
@@ -474,19 +564,26 @@ BEGIN
 					,[strTransactionForm]
 					,[strModuleName]
 					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
 			)	
 			EXEC [dbo].[uspICUnpostCosting]
 				@intTransactionId = @intTransactionId 
 				,@strTransactionId = @strTransactionId 
 				,@strBatchId = @strBatchId 
 				,@intEntityUserSecurityId = @intUserId 
-				,@ysnRecap = 0 
 		END 		
 
 		-- Book the G/L Entries
 		BEGIN 
 			BEGIN TRY
+
 				EXEC dbo.uspGLBookEntries @GLEntries, 1 
+
 			END TRY
 			BEGIN CATCH
 				PRINT 'Error in posting the g/l entries.'
@@ -561,9 +658,12 @@ COMMIT TRANSACTION
 SELECT '#tmpStockDiscrepancies', * FROM #tmpStockDiscrepancies
 
 STOP_QUERY: 
+
 GO
 
+------------------------------------------------------------------------------------------------------------------------------------
 -- Re-close the fiscal year periods
+------------------------------------------------------------------------------------------------------------------------------------
 UPDATE FYPeriod
 SET ysnOpen = FYPeriodOriginal.ysnOpen
 FROM	tblGLFiscalYearPeriod FYPeriod INNER JOIN tblGLFiscalYearPeriodOriginal FYPeriodOriginal
@@ -572,5 +672,3 @@ FROM	tblGLFiscalYearPeriod FYPeriod INNER JOIN tblGLFiscalYearPeriodOriginal FYP
 DROP TABLE tblGLFiscalYearPeriodOriginal
 
 GO
-
-

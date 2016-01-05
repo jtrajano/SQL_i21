@@ -83,6 +83,7 @@
     <Folder Include="Scripts\Pre-Deployment\16_HD" />
     <Folder Include="Scripts\Pre-Deployment\17_TR" />
     <Folder Include="Scripts\Pre-Deployment\18_IU" />
+    <Folder Include="Scripts\Pre-Deployment\19_MF" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -141,6 +142,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\1530_to_1540.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\15_DropSMUserSecurityTrigger.sql" />
     <None Include="Scripts\Pre-Deployment\16_HD\HDGroupUserConfigDataEntryFix.sql" />
+    <None Include="Scripts\Pre-Deployment\19_MF\01_Recipe_UOM_Update.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

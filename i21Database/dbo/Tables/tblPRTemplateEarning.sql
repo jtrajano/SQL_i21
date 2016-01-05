@@ -8,7 +8,9 @@
 	[intAccountId] INT NULL,
 	[strW2Code] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intTemplateTimeOffId] [int] NULL,
+	[intTemplateAccrueTimeOffId] [int] NULL,
 	[intTemplateEarningLinkId] [int] NULL,
+	[intPayGroupId] INT NULL,
 	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
@@ -77,7 +79,7 @@ GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Time Off Type Id',
+    @value = N'Deduct Time Off Type Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -142,3 +144,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'intTemplateEarningLinkId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Accrue Time Off Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTemplateEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intTemplateAccrueTimeOffId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Pay Group Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTemplateEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intPayGroupId'

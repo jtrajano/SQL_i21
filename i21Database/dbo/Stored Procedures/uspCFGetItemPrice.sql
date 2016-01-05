@@ -67,6 +67,7 @@ EXEC [uspARGetItemPrice]
 ,@ContractNumber = @CFContractNumber OUTPUT
 ,@ContractSeq = @CFContractSeq OUTPUT  
 ,@AvailableQuantity = @CFAvailableQuantity OUTPUT
+,@AllowQtyToExceedContract = 1
 
 print @CFPriceOut 
 

@@ -49,7 +49,8 @@ Declare @tblRequiredQty table
 	dblRecipeQty numeric(18,6),
 	dblRecipeItemQty numeric(18,6),
 	strRecipeItemUOM nvarchar(50),
-	strConsumptionStorageLocation nvarchar(50)
+	strConsumptionStorageLocation nvarchar(50),
+	intConsumptionMethodId int
 )
 
 Insert into @tblRequiredQty
@@ -59,10 +60,11 @@ Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/r.dblQuantity)
 (ri.dblCalculatedUpperTolerance * (@dblQtyToProduce/r.dblQuantity)) AS dblUpperToleranceQty,
 ri.ysnMinorIngredient,ysnScaled,r.dblQuantity AS dblRecipeQty,
 ri.dblQuantity AS dblRecipeItemQty,u.strUnitMeasure AS strRecipeItemUOM,
-ISNULL(sl.strName,'') AS strConsumptionStorageLocation
+ISNULL(sl.strName,'') AS strConsumptionStorageLocation,ri.intConsumptionMethodId
 From tblMFRecipeItem ri 
 Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
-Join tblICUnitMeasure u on ri.intUOMId=u.intUnitMeasureId
+Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 Left Join tblICStorageLocation sl on ri.intStorageLocationId=sl.intStorageLocationId
 where r.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 and
 ((ri.ysnYearValidationRequired = 1 AND @dtmDate BETWEEN ri.dtmValidFrom AND ri.dtmValidTo)
@@ -73,10 +75,11 @@ Select rs.intSubstituteItemId AS intItemId,(rs.dblQuantity * (@dblQtyToProduce/r
 (rs.dblCalculatedUpperTolerance * (@dblQtyToProduce/r.dblQuantity)) AS dblUpperToleranceQty,
 0 AS ysnMinorIngredient,0 AS ysnScaled,r.dblQuantity AS dblRecipeQty,
 rs.dblQuantity AS dblRecipeItemQty,u.strUnitMeasure AS strRecipeItemUOM,
-'' AS strConsumptionStorageLocation
+'' AS strConsumptionStorageLocation,0
 From tblMFRecipeSubstituteItem rs
 Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
-Join tblICUnitMeasure u on rs.intUOMId=u.intUnitMeasureId
+Join tblICItemUOM iu on rs.intItemUOMId=iu.intItemUOMId
+Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 where r.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
 
 Update a Set a.ysnHasSubstitute=1 from @tblRequiredQty a Join @tblRequiredQty b on a.intItemId=b.intParentItemId
@@ -133,7 +136,7 @@ ISNULL(ROUND((ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0
 a.ysnIsSubstitute,a.intParentItemId,a.ysnHasSubstitute,a.intRecipeItemId,a.intParentRecipeItemId,a.strGroupName,
 a.dblLowerToleranceQty,a.dblUpperToleranceQty,
 a.ysnMinorIngredient,a.ysnScaled,a.dblRecipeQty,
-a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation
+a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId
 from @tblRequiredQty a 
 Left Join @tblPhysicalQty b on a.intItemId=b.intItemId
 Left Join @tblReservedQty c on a.intItemId=c.intItemId

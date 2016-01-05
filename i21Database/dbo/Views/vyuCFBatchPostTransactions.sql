@@ -22,8 +22,8 @@ FROM            dbo.tblCFTransaction AS cfTrans INNER JOIN
                                FROM            dbo.tblCFSite AS icfSite INNER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId INNER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId INNER JOIN
-                                                         dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId) AS cfSiteItem ON 
-                         cfTrans.intSiteId = cfSiteItem.intSiteId INNER JOIN
+                                                         dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId) AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId AND 
+                         cfSiteItem.intARItemId = cfTrans.intARItemId AND cfSiteItem.intItemId = cfTrans.intProductId INNER JOIN
                              (SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                FROM            dbo.tblCFTransactionPrice
                                WHERE        (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId INNER JOIN

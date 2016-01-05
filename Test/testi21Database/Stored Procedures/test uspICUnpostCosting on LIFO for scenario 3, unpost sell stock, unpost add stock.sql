@@ -162,7 +162,7 @@ BEGIN
 
 		-- Setup the expected data. 
 		-- Reverse the posted GL entries
-		INSERT INTO dbo.expectedGLDetail (
+		INSERT INTO expectedGLDetail (
 			dtmDate
 			,strBatchId
 			,intAccountId
@@ -302,7 +302,7 @@ BEGIN
 				,dblUnitOnHand = 100
 			
 		-- Setup the expected LIFO data
-		INSERT INTO dbo.expectedLIFO (
+		INSERT INTO expectedLIFO (
 				intInventoryLIFOId
 				,intItemId
 				,intItemLocationId
@@ -426,7 +426,7 @@ BEGIN
 
 		-- Setup the expected data. 
 		-- Reverse the posted GL entries
-		INSERT INTO dbo.expectedGLDetail (
+		INSERT INTO expectedGLDetail (
 			dtmDate
 			,strBatchId
 			,intAccountId
@@ -599,7 +599,7 @@ END
 BEGIN
 	-- Get the data for assertion 
 	-- Actual data from @GLDetail
-	INSERT INTO dbo.actualGLDetail (
+	INSERT INTO actualGLDetail (
 		dtmDate
 		,strBatchId
 		,intAccountId
@@ -691,7 +691,7 @@ BEGIN
 				AND ItemStock.intItemLocationId = ItemPricing.intItemLocationId	
 	
 	-- Actual LIFO data 
-	INSERT INTO dbo.actualLIFO (
+	INSERT INTO actualLIFO (
 			intInventoryLIFOId
 			,intItemId
 			,intItemLocationId
@@ -733,23 +733,23 @@ IF OBJECT_ID('expectedGLDetail') IS NOT NULL
 	DROP TABLE expectedGLDetail
 
 IF OBJECT_ID('actualGLDetail') IS NOT NULL 
-	DROP TABLE dbo.actualGLDetail
+	DROP TABLE actualGLDetail
 
 IF OBJECT_ID('expectedInventoryTransaction') IS NOT NULL 
 	DROP TABLE expectedInventoryTransaction
 
 IF OBJECT_ID('actualInventoryTransaction') IS NOT NULL 
-	DROP TABLE dbo.actualInventoryTransaction
+	DROP TABLE actualInventoryTransaction
 	
 IF OBJECT_ID('expectedItemStock') IS NOT NULL 
 	DROP TABLE expectedItemStock
 
 IF OBJECT_ID('actualItemStock') IS NOT NULL 
-	DROP TABLE dbo.actualItemStock	
+	DROP TABLE actualItemStock	
 	
 IF OBJECT_ID('expectedLIFO') IS NOT NULL 
 	DROP TABLE expectedLIFO
 
 IF OBJECT_ID('actualLIFO') IS NOT NULL 
-	DROP TABLE dbo.actualLIFO
+	DROP TABLE actualLIFO
 

@@ -87,7 +87,7 @@ Declare @tblParentLot table
 		Where pld.intPickListId=@intPickListId And l.intParentLotId=@intParentLotId And l.dblQty > 0 
 		AND l.intStorageLocationId=@intKitStagingLocationId
 
-		If @dblAvailableQty < @dblReqQty
+		If Round(@dblAvailableQty,0) < Round(@dblReqQty,0)
 		Begin
 			Select @strIssuedUOM=um.strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
 			Where iu.intItemUOMId=(Select intItemIssuedUOMId From @tblParentLot Where intRowNo=@intMinParentLot)

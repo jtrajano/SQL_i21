@@ -25,7 +25,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT
-		,@strLocationName AS NVARCHAR(50)
+		,@strLocationName AS NVARCHAR(MAX)
 		,@intItemLocationId AS INT 
 		,@strRelatedTransactionId AS NVARCHAR(50)
 
@@ -42,6 +42,8 @@ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#Found
 CREATE TABLE #FoundErrors (
 	intItemId INT
 	,intItemLocationId INT
+	,intSubLocationId INT
+	,intStorageLocationId INT
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
 	,intTransactionTypeId INT
@@ -53,6 +55,8 @@ CREATE TABLE #FoundErrors (
 INSERT INTO #FoundErrors
 SELECT	Errors.intItemId
 		,Errors.intItemLocationId
+		,Item.intSubLocationId
+		,Item.intStorageLocationId
 		,Errors.strText
 		,Errors.intErrorCode
 		,Item.intTransactionTypeId
@@ -64,14 +68,21 @@ WHERE	ISNULL(@ysnRecap, 0) = 0
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
 BEGIN 
 	SELECT @strItemNo = NULL, @intItemId = NULL 
+
 	SELECT TOP 1 
 			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 			,@intItemId = Item.intItemId
+			,@strLocationName = 
+				dbo.fnFormatMsg80003(
+					Errors.intItemLocationId
+					,Errors.intSubLocationId
+					,Errors.intStorageLocationId
+				)			
 	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 				ON Errors.intItemId = Item.intItemId
 	WHERE	intErrorCode = 80003
 
-	RAISERROR(80003, 11, 1, @strItemNo)
+	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
 	RETURN -1
 END 
 

@@ -15,13 +15,14 @@ BEGIN
 		SET ANSI_WARNINGS OFF
 
 		-- VARIABLES NEEDED 
-		DECLARE @dtmMembershipDate DATETIME,
+		DECLARE @strStockStatus NVARCHAR(50),
 				@intFiscalYear INT
 
-		-- CHECK IF CUSTOMER IS PATRON
-		SET @dtmMembershipDate = (SELECT dtmMembershipDate FROM tblARCustomer where intEntityCustomerId = @intEntityCustomerId)
+			
+		-- GET STOCK STATUS
+		SET @strStockStatus = (SELECT strStockStatus FROM tblARCustomer where intEntityCustomerId = @intEntityCustomerId)
 	
-		IF(ISNULL(@dtmMembershipDate, 0) = 0)
+		IF(@strStockStatus = '' OR @strStockStatus IS NULL)
 		BEGIN -- NOT ELIGIBLE FOR PATRONAGE
 			RETURN;
 		END
@@ -86,6 +87,5 @@ BEGIN
 		END
 		
 END
-
 
 GO

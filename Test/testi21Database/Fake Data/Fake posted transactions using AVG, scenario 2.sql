@@ -411,6 +411,10 @@ BEGIN
 				,ysnIsUnposted
 				,intJournalLineNo
 				,dblExchangeRate
+				,strModuleName
+				,strCode
+				,strTransactionType
+				,strTransactionForm
 		)
 		-- @WetGrains
 		SELECT	dtmDate = '01/01/2014'
@@ -422,6 +426,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 1 
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @InventoryInTransit_Default
@@ -432,6 +440,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 1 
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		-- @StickyGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -443,6 +455,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 2 
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @InventoryInTransit_Default
@@ -453,6 +469,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 2
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		-- @PremiumGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -464,6 +484,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 3
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @InventoryInTransit_Default
@@ -474,6 +498,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 3 
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		-- @ColdGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -485,6 +513,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 4 
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @InventoryInTransit_Default
@@ -495,6 +527,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 4
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		-- @HotGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -506,6 +542,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 5 
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @InventoryInTransit_Default
@@ -516,6 +556,10 @@ BEGIN
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = 5 
 				,dblExchangeRate = 1
+				,strModuleName = 'Inventory'
+				,strCode = 'IC'
+				,strTransactionType = 'Inventory Receipt'
+				,strTransactionForm = 'Inventory Receipt'
 
 		INSERT INTO dbo.tblGLSummary(
 				dtmDate

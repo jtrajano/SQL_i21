@@ -3,7 +3,7 @@ AS
 BEGIN
 	-- Arrange
 	DECLARE @locationId AS INT = 1
-	DECLARE @expected AS INT
+	DECLARE @Expected AS INT
 	DECLARE @result AS INT
 	
 	EXEC [testi21Database].[Fake data company location];
@@ -11,198 +11,198 @@ BEGIN
 	-- Cash Accounts
 	BEGIN 
 		-- Act
-		SET @expected = 2
+		SET @Expected = 2
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Cash Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 	
 	-- Deposit Account
 	BEGIN 
 		-- Act
-		SET @expected = 3
+		SET @Expected = 3
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Deposit Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- AR Account
 	BEGIN 
 		-- Act
-		SET @expected = 4
+		SET @Expected = 4
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'AR Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- AP Account
 	BEGIN 
 		-- Act
-		SET @expected = 5
+		SET @Expected = 5
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'AP Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Sales Adv Account
 	BEGIN 
 		-- Act
-		SET @expected = 6
+		SET @Expected = 6
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Sales Adv Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Purchase Adv Account
 	BEGIN 
 		-- Act
-		SET @expected = 7
+		SET @Expected = 7
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Purchase Adv Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Freight AP Account
 	BEGIN 
 		-- Act
-		SET @expected = 8
+		SET @Expected = 8
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Freight AP Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Freight Expenses
 	BEGIN 
 		-- Act
-		SET @expected = 9
+		SET @Expected = 9
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Freight Expenses');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Freight Income
 	BEGIN 
 		-- Act
-		SET @expected = 10
+		SET @Expected = 10
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Freight Income');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Service Charges
 	BEGIN 
 		-- Act
-		SET @expected = 11
+		SET @Expected = 11
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Service Charges');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Sales Discount
 	BEGIN 
 		-- Act
-		SET @expected = 12
+		SET @Expected = 12
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Sales Discount');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Cash Over/Short
 	BEGIN 
 		-- Act
-		SET @expected = 13
+		SET @Expected = 13
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Cash Over/Short');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Write Off
 	BEGIN 
 		-- Act
-		SET @expected = 14
+		SET @Expected = 14
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Write Off');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Credit Card Fee
 	BEGIN 
 		-- Act
-		SET @expected = 15
+		SET @Expected = 15
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Credit Card Fee');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Sales Account
 	BEGIN 
 		-- Act
-		SET @expected = 16
+		SET @Expected = 16
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Sales Account');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Cost of Goods
 	BEGIN 
 		-- Act
-		SET @expected = 17
+		SET @Expected = 17
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Cost of Goods');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Inventory
 	BEGIN 
 		-- Act
-		SET @expected = 18
+		SET @Expected = 18
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Inventory');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Write-Off Sold
 	BEGIN 
 		-- Act
-		SET @expected = 19
+		SET @Expected = 19
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Write-Off Sold');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Revalue Sold
 	BEGIN 
 		-- Act
-		SET @expected = 20
+		SET @Expected = 20
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Revalue Sold');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Auto-Negative
 	BEGIN 
 		-- Act
-		SET @expected = 21
+		SET @Expected = 21
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Auto-Negative');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- AP Clearing
 	BEGIN 
 		-- Act
-		SET @expected = 22
+		SET @Expected = 22
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'AP Clearing');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Inventory In-Transit
 	BEGIN 
 		-- Act
-		SET @expected = 23
+		SET @Expected = 23
 		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Inventory In-Transit');
 		-- Assert 
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 END

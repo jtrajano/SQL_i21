@@ -1,11 +1,10 @@
 ﻿CREATE PROC uspMFGetRecipeItemByProduct (
 	@intItemId INT
 	,@intLocationId INT
-	,@intWorkOrderId int=0
+	,@intWorkOrderId INT = 0
 	)
 AS
 BEGIN
-
 	--To get all the input item for the selected workorder
 	DECLARE @dtmCurrentDate DATETIME
 		,@dtmCurrentDateTime DATETIME
@@ -16,8 +15,9 @@ BEGIN
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
 	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDateTime)
-If @intWorkOrderId=0
-	Begin
+
+	IF @intWorkOrderId = 0
+	BEGIN
 		SELECT I.strItemNo
 			,I.strDescription
 			,ri.dblCalculatedQuantity
@@ -38,10 +38,12 @@ If @intWorkOrderId=0
 			,ri.dtmCreated
 			,U1.strUserName AS strLastModifiedUserName
 			,ri.dtmLastModified
+			,r.intVersionNo
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
-		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = ri.intUOMId
+		JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
+		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
 		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
 		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
 		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
@@ -62,11 +64,11 @@ If @intWorkOrderId=0
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-		Order by ri.intRecipeItemId
-	End
-	Else
-	Begin
-			SELECT I.strItemNo
+		ORDER BY ri.intRecipeItemId
+	END
+	ELSE
+	BEGIN
+		SELECT I.strItemNo
 			,I.strDescription
 			,ri.dblCalculatedQuantity
 			,UM.strUnitMeasure
@@ -86,10 +88,13 @@ If @intWorkOrderId=0
 			,ri.dtmCreated
 			,U1.strUserName AS strLastModifiedUserName
 			,ri.dtmLastModified
+			,r.intVersionNo
 		FROM dbo.tblMFWorkOrderRecipeItem ri
-		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId and r.intWorkOrderId = ri.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.intWorkOrderId = ri.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
-		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = ri.intUOMId
+		JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
+		JOIN tblICUnitMeasure UM ON iu.intUnitMeasureId = UM.intUnitMeasureId
 		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
 		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
 		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
@@ -110,8 +115,8 @@ If @intWorkOrderId=0
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-		Order by ri.intRecipeItemId
-	End
+		ORDER BY ri.intRecipeItemId
+	END
 END
 GO
 

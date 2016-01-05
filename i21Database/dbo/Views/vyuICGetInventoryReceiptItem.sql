@@ -24,6 +24,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, dblQtyToReceive = ReceiptItem.dblOpenReceive
+	, intLoadToReceive = ReceiptItem.intLoadReceive
 	, ReceiptItem.dblUnitCost
 	, ReceiptItem.dblTax
 	, ReceiptItem.dblLineTotal
@@ -52,6 +53,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, strGrade = Grade.strDescription
 	, Item.intLifeTime
 	, Item.strLifeTimeType
+	, ReceiptItemSource.ysnLoad
+	, ReceiptItemSource.dblAvailableQty
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId

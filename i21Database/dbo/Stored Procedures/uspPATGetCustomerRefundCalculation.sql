@@ -45,7 +45,9 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 				ysnEligibleRefund = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND SUM(RRD.dblRate) < @dblMinimumRefund THEN 1 ELSE 0 END),
 				AC.strStockStatus,
 				PC.strPurchaseSale,
+				PC.intPatronageCategoryId,
 				TC.strTaxCode,
+				RR.intRefundTypeId,
 				RR.strRefundType,
 				RR.strRefundDescription,
 				RR.dblCashPayout,
@@ -104,12 +106,11 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 				CV.dtmLastActivityDate,
 				PC.strPurchaseSale,
 				Total.dblCashRefund,
-				Total.dblRefundAmount
+				Total.dblRefundAmount,
+				RR.intRefundTypeId
 	DROP TABLE #statusTable
 	-- ==================================================================
 	-- End Transaction
 	-- ==================================================================
 END
-
-
 GO

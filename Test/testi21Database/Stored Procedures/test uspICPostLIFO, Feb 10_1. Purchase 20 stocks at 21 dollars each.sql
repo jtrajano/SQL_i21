@@ -115,14 +115,14 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 
-		CREATE TABLE ExpectedInventoryLIFOOut (
+		CREATE TABLE expectedInventoryLIFOOut (
 			intId INT
 			,intInventoryLIFOId INT 
 			,intInventoryTransactionId INT
 			,dblQty NUMERIC(18,6)
 		)
 
-		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
+		-- 1. expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
 			SET @intItemLocationId = @NewHaven
@@ -419,7 +419,7 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryLIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryLIFOOut', 'tblICInventoryLIFOOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryLIFOOut', 'tblICInventoryLIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -427,8 +427,8 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 
-	IF OBJECT_ID('ExpectedInventoryLIFOOut') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryLIFOOut
+	IF OBJECT_ID('expectedInventoryLIFOOut') IS NOT NULL 
+		DROP TABLE expectedInventoryLIFOOut
 END

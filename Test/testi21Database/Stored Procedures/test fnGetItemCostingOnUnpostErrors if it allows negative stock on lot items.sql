@@ -80,7 +80,7 @@ BEGIN
 		DECLARE @WetGrains_DefaultLocation_StorageLocation AS INT
 				
 		-- Setup the expected data
-		-- Expected data is blank 
+		-- expected data is blank 
 		DECLARE @SubLocation AS INT 
 		DECLARE @StorageLocation AS INT 
 		DECLARE @LotId AS INT = 1234

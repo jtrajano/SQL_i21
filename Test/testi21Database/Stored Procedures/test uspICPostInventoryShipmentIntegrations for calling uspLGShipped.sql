@@ -58,12 +58,12 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.AssertObjectExists 'uspLGShipped_SpyProcedureLog'
 		
-		DECLARE @expectedCount AS INT = 1 
+		DECLARE @ExpectedCount AS INT = 1 
 				,@actualCount AS INT
 
 		SELECT @actualCount = COUNT(*) FROM uspLGShipped_SpyProcedureLog
 
-		EXEC tSQLt.AssertEquals @expectedCount, @actualCount
+		EXEC tSQLt.AssertEquals @ExpectedCount, @actualCount
 	END 
 
 
@@ -72,5 +72,5 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 END

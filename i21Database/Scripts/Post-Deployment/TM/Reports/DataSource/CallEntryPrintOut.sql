@@ -32,7 +32,7 @@ SET strQuery = '
 		B.vwcus_phone as agcus_phone ,
 		B.vwcus_key as agcus_key, 
 		B.vwcus_zip as agcus_zip, 
-		B.vwcus_tax_state as agcus_tax_state, 
+		ISNULL(K.vwlcl_tax_state,B.vwcus_tax_state) as agcus_tax_state, 
 		B.vwcus_cred_limit as agcus_cred_limit, 
 		B.vwcus_ar_per1 as agcus_ar_per1, 
 		B.vwcus_last_stmt_bal as agcus_last_stmt_bal, 
@@ -107,11 +107,16 @@ SET strQuery = '
 		I.vwtrm_key_n
 		From tblTMCustomer A Inner Join vwcusmst B On A.intCustomerNumber = B.A4GLIdentity
 		Left Join tblTMSite C On A.intCustomerID = C.intCustomerID
+		INNER JOIN vwlocmst L
+			ON C.intLocationId = L.A4GLIdentity
 		Left Join tblTMDispatch F On C.intSiteID = F.intSiteID 
 		Left Join vwitmmst G On C.intProduct = G.A4GLIdentity 
+			AND G.vwitm_loc_no COLLATE Latin1_General_CI_AS = L.vwloc_loc_no COLLATE Latin1_General_CI_AS
 		Left Join vwtrmmst I On F.intDeliveryTermID = I.vwtrm_key_n
 		Left Join tblTMClock H On H.intClockID = C.intClockID
 		LEFT JOIN vwslsmst J ON J.A4GLIdentity = F.intDriverID 
+		LEFT JOIN vwlclmst K
+			ON C.intTaxStateID = K.A4GLIdentity
 		Where C.intSiteID = F.intSiteID And (H.strCurrentSeason Is Not Null) AND vwcus_active_yn = ''Y'' 
 		AND  (ysnOnHold = 0 OR dtmOnHoldEndDate < GetDate()) AND C.ysnActive = 1
 

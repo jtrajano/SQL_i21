@@ -72,19 +72,19 @@ RETURN (
 
 		-- Check for negative stock and if negative stock is NOT allowed. 
 		-- and do not allow negative stock on items being phased-out. 
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	FORMATMESSAGE(
 								80003
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
-								,(
-									SELECT	tblSMCompanyLocation.strLocationName 
-									FROM	dbo.tblICItemLocation INNER JOIN dbo.tblSMCompanyLocation 
-												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-									WHERE	tblICItemLocation.intItemId = @intItemId
-											AND tblICItemLocation.intItemLocationId = @intItemLocationId
+								,dbo.fnFormatMsg80003(
+									@intItemLocationId
+									,@intSubLocationId
+									,@intStorageLocationId
 								)
+
 							)
 				,intErrorCode = 80003
 		WHERE	EXISTS (
@@ -106,18 +106,17 @@ RETURN (
 
 		-- Check for negative stocks at the lot table. 
 		-- and do not allow negative stock on items being phased-out. 
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	FORMATMESSAGE(
 								80003
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
-								,(
-									SELECT	tblSMCompanyLocation.strLocationName 
-									FROM	dbo.tblICItemLocation INNER JOIN dbo.tblSMCompanyLocation 
-												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-									WHERE	tblICItemLocation.intItemId = @intItemId
-											AND tblICItemLocation.intItemLocationId = @intItemLocationId
+								,dbo.fnFormatMsg80003(
+									@intItemLocationId
+									,@intSubLocationId
+									,@intStorageLocationId
 								)
 							)
 				,intErrorCode = 80003

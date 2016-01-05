@@ -1,6 +1,8 @@
 ﻿
 CREATE PROCEDURE uspCMFindMatchingRecordsForBankRecon
 	@strBankStatementImportId NVARCHAR(40) = NULL,
+	@intBankAccountId INT,
+	@dtmStatementDate DATETIME,
 	@ysnSuccess AS BIT = 0 OUTPUT
 AS
 
@@ -56,21 +58,44 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- 2. The record is with +/- 19 days from the imported record date. 
 -- 3. The record is not a deposit entry transaction. 
 -- 4. The check transaction is printed. Non-printed check transactions are not included. 
+--SELECT	A.intTransactionId
+--		,A.intBankTransactionTypeId
+--		,A.dtmDate
+--		,A.dblAmount
+--		,strPayee = CASE WHEN A.intBankTransactionTypeId IN (@BANK_TRANSACTION) THEN A.strMemo ELSE A.strPayee END
+--		,ysnTagged = CAST(0 AS BIT)
+--INTO	#tmp_list_of_transactions
+--FROM	dbo.tblCMBankTransaction A INNER JOIN dbo.tblCMBankStatementImport B
+--			ON A.intBankAccountId = B.intBankAccountId
+--WHERE	A.dtmDateReconciled IS NULL
+--		AND A.ysnPosted = 1
+--		AND A.ysnCheckVoid = 0
+--		AND A.ysnClr = 0
+--		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) + @BETWEEN_DAYS) AS DATETIME)
+--		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) - @BETWEEN_DAYS) AS DATETIME)
+--		AND dbo.fnIsDepositEntry(strLink) = 0
+--		AND 1 = (
+--					-- If check transaction is not yet printed, do not include record in the update.
+--			CASE	WHEN intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT) AND dtmCheckPrinted IS NULL THEN 0
+--					-- If record is a non-check, no need to check the date check printed. 
+--					ELSE 1
+--			END 		
+--		)
+
 SELECT	A.intTransactionId
 		,A.intBankTransactionTypeId
 		,A.dtmDate
 		,A.dblAmount
-		,strPayee = CASE WHEN A.intBankTransactionTypeId IN (@BANK_TRANSACTION) THEN A.strMemo ELSE A.strPayee END
+		,strPayee = CASE WHEN A.intBankTransactionTypeId IN (5) THEN A.strMemo ELSE A.strPayee END
 		,ysnTagged = CAST(0 AS BIT)
 INTO	#tmp_list_of_transactions
-FROM	dbo.tblCMBankTransaction A INNER JOIN dbo.tblCMBankStatementImport B
-			ON A.intBankAccountId = B.intBankAccountId
-WHERE	A.dtmDateReconciled IS NULL
+FROM	dbo.tblCMBankTransaction A
+WHERE	 A.intBankAccountId = @intBankAccountId
+		AND A.dtmDateReconciled IS NULL
 		AND A.ysnPosted = 1
 		AND A.ysnCheckVoid = 0
 		AND A.ysnClr = 0
-		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) + @BETWEEN_DAYS) AS DATETIME)
-		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) - @BETWEEN_DAYS) AS DATETIME)
+		AND A.dtmDate <= @dtmStatementDate
 		AND dbo.fnIsDepositEntry(strLink) = 0
 		AND 1 = (
 					-- If check transaction is not yet printed, do not include record in the update.

@@ -54,6 +54,9 @@ SELECT
 	,[dblGrossWt]						= 0.00
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
+	,[strPONumber]						= SO.[strPONumber]
+	,[strBOLNumber]						= SO.[strBOLNumber]
+	,[intSplitId]						= SO.[intSplitId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -62,7 +65,7 @@ INNER JOIN
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
-		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge','Software')
+		AND dbo.fnIsStockTrackingItem(I.[intItemId]) = 0
 INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
@@ -151,6 +154,9 @@ SELECT
 	,[dblGrossWt]						= 0.00
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
+	,[strPONumber]						= SO.[strPONumber]
+	,[strBOLNumber]						= SO.[strBOLNumber]
+	,[intSplitId]						= SO.[intSplitId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -211,7 +217,7 @@ SELECT
 	,[intCompanyLocationId]				= SHP.[intShipFromLocationId]
 	,[strLocationName]					= SHP.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
-	,[intFreightTermId]					= SO.[intFreightTermId]
+	,[intFreightTermId]					= SHP.[intFreightTermId]
 	,[intItemId]						= SOD.[intItemId]	
 	,[strItemNo]						= I.[strItemNo] 
 	,[strItemDescription]				= SOD.[strItemDescription]
@@ -243,9 +249,12 @@ SELECT
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
-	,[dblGrossWt]						= 0.00
-	,[dblTareWt]						= 0.00
-	,[dblNetWt]							= 0.00
+	,[dblGrossWt]						= ISISIL.dblGrossWeight 
+	,[dblTareWt]						= ISISIL.dblTareWeight 
+	,[dblNetWt]							= ISISIL.dblNetWeight
+	,[strPONumber]						= SO.[strPONumber]
+	,[strBOLNumber]						= SO.[strBOLNumber]
+	,[intSplitId]						= SO.[intSplitId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -265,7 +274,7 @@ LEFT OUTER JOIN
 		ON SO.[intShipViaId] = S.[intEntityShipViaId]
 INNER JOIN
 	tblICItem I
-		ON SOD.[intItemId] = I.[intItemId]
+		ON SOD.[intItemId] = I.[intItemId] AND ISNULL(I.strLotTracking, 'No') <> 'No'
 LEFT JOIN
 	tblICItemUOM IU
 		ON SOD.[intItemUOMId] = IU.[intItemUOMId]
@@ -298,7 +307,8 @@ CROSS APPLY
 		,SUM(ISNULL(ISI.dblQuantity,0)) dblShipped
 		,ISH.[intShipFromLocationId]
 		,ISH.[dtmShipDate]
-		,CL.[strLocationName] 
+		,CL.[strLocationName]
+		,ISH.[intFreightTermId]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -335,10 +345,24 @@ CROSS APPLY
 		,ISH.[intShipFromLocationId]
 		,ISH.[dtmShipDate]
 		,CL.[strLocationName]
+		,ISH.[intFreightTermId]
 	) SHP
 LEFT OUTER JOIN
 	tblSCTicket SCT
-		ON SHP.[intSourceId] = SCT.[intTicketId] 
+		ON SHP.[intSourceId] = SCT.[intTicketId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			intInventoryShipmentItemId
+			,SUM([dblGrossWeight]) dblGrossWeight
+			,SUM([dblTareWeight]) dblTareWeight
+			,SUM([dblGrossWeight] - [dblTareWeight]) dblNetWeight
+		FROM
+			tblICInventoryShipmentItemLot
+		GROUP BY
+			intInventoryShipmentItemId
+	) ISISIL
+		ON SHP.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
 	
 UNION ALL
 
@@ -392,9 +416,12 @@ SELECT
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL --ISI.[intTaxCodeId] 
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup] 
-	,[dblGrossWt]						= 0.00
-	,[dblTareWt]						= 0.00
-	,[dblNetWt]							= 0.00
+	,[dblGrossWt]						= ISISIL.dblGrossWeight 
+	,[dblTareWt]						= ISISIL.dblTareWeight 
+	,[dblNetWt]							= ISISIL.dblNetWeight
+	,[strPONumber]						= ''
+	,[strBOLNumber]						= ISH.[strBOLNumber]
+	,[intSplitId]						= NULL
 FROM
 	tblICInventoryShipmentItem ISI
 INNER JOIN
@@ -403,6 +430,19 @@ INNER JOIN
 INNER JOIN
 	tblICInventoryShipment ISH
 		ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
+LEFT OUTER JOIN
+	(
+		SELECT
+			intInventoryShipmentItemId
+			,SUM([dblGrossWeight]) dblGrossWeight
+			,SUM([dblTareWeight]) dblTareWeight
+			,SUM([dblGrossWeight] - [dblTareWeight]) dblNetWeight
+		FROM
+			tblICInventoryShipmentItemLot
+		GROUP BY
+			intInventoryShipmentItemId
+	) ISISIL
+		ON ISI.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
 INNER JOIN
 	tblEntity E
 		ON ISH.[intEntityCustomerId] = E.[intEntityId]
@@ -456,6 +496,7 @@ LEFT OUTER JOIN
 		ISH.[ysnPosted] = 1
 		AND ISH.[intOrderType] <> 2
 		AND IND.[intInventoryShipmentItemId] IS NULL
+		AND ISNULL(I.strLotTracking, 'No') <> 'No'
 													
 																										
 UNION ALL
@@ -513,6 +554,9 @@ SELECT
 	,[dblGrossWt]						= 0.00
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
+	,[strPONumber]						= ''
+	,[strBOLNumber]						= ''
+	,[intSplitId]						= NULL
 FROM
 	vyuLGShipmentHeader LGS		
 INNER JOIN

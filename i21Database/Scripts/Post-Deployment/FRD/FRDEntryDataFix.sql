@@ -379,21 +379,49 @@ UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Hid
 -- 	COLUMN: OFFSET DATE
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+update tblFRColumn set dtmRunDate = GETDATE() WHERE dtmRunDate IS NULL
+
+UPDATE tblFRColumnDesign SET strStartOffset = 'Custom', strEndOffset = 'Custom' WHERE strFilterType = 'Custom' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '0' WHERE strFilterType = 'As Of' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'EOY-1yr' WHERE strFilterType = 'As Of Previous Fiscal Year' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'EOY' WHERE strFilterType = 'As Of Fiscal Year' AND strStartOffset IS NULL
---UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'XXX' WHERE strFilterType = ' As Of Next Fiscal Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '12' WHERE strFilterType = 'As Of Next Fiscal Year' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '-3' WHERE strFilterType = 'As Of Previous Quarter' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '3' WHERE strFilterType = 'As Of Next Quarter' AND strStartOffset IS NULL
-UPDATE tblFRColumnDesign SET strStartOffset = 'BOY-1yr', strEndOffset = 'EOY-1yr' WHERE strFilterType = ' Previous Fiscal Year' AND strStartOffset IS NULL
-UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'EOY' WHERE strFilterType = 'Fiscal Year' AND strStartOffset IS NULL
---UPDATE tblFRColumnDesign SET strStartOffset = 'XXX', strEndOffset = 'XXX' WHERE strFilterType = 'Next Fiscal Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '0' WHERE strFilterType = 'As Of This Quarter' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY-1yr', strEndOffset = 'EOY-1yr' WHERE strFilterType = 'Previous Fiscal Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY', strEndOffset = 'EOY' WHERE strFilterType = 'Fiscal Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '12', strEndOffset = '12' WHERE strFilterType = 'Next Fiscal Year' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '-1' WHERE strFilterType = 'As Of Previous Month' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '0' WHERE strFilterType = 'As Of This Month' AND strStartOffset IS NULL
-UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '+1' WHERE strFilterType = 'As Of Next Month' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '1' WHERE strFilterType = 'As Of Next Month' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'EOY-1yr' WHERE strFilterType = 'As Of Previous Year' AND strStartOffset IS NULL
---UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'XXX' WHERE strFilterType = 'As Of Next Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = 'EOY' WHERE strFilterType = 'As Of This Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOT', strEndOffset = '12' WHERE strFilterType = 'As Of Next Year' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = '-1', strEndOffset = '-1' WHERE strFilterType = 'Previous Month' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'This Month' AND strStartOffset IS NULL
-UPDATE tblFRColumnDesign SET strStartOffset = '+1', strEndOffset = '+1' WHERE strFilterType = 'Next Month' AND strStartOffset IS NULL
-UPDATE tblFRColumnDesign SET strStartOffset = 'BOY', strEndOffset = 'EOY-1yr' WHERE strFilterType = 'Previous Year' AND strStartOffset IS NULL
---UPDATE tblFRColumnDesign SET strStartOffset = 'BOY', strEndOffset = 'XXX' WHERE strFilterType = 'Next Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '1', strEndOffset = '1' WHERE strFilterType = 'Next Month' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY-1yr', strEndOffset = 'EOY-1yr' WHERE strFilterType = 'Previous Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY', strEndOffset = 'EOY' WHERE strFilterType = 'This Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '12', strEndOffset = '12' WHERE strFilterType = 'Next Year' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY-1yr', strEndOffset = '-12' WHERE strFilterType = 'Previous Fiscal Year To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY', strEndOffset = '0' WHERE strFilterType = 'Fiscal Year To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '12', strEndOffset = '12' WHERE strFilterType = 'Next Fiscal Year To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '-12', strEndOffset = '-12' WHERE strFilterType = 'Previous Year Quarter To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Quarter To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '12', strEndOffset = '12' WHERE strFilterType = 'Next Year Quarter To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY-1yr', strEndOffset = '-12' WHERE strFilterType = 'Previous Year To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = 'BOY', strEndOffset = '0' WHERE strFilterType = 'Year To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '12', strEndOffset = '12' WHERE strFilterType = 'Next Year To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '-12', strEndOffset = '-12' WHERE strFilterType = 'Previous Year Month To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Month To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '12', strEndOffset = '12' WHERE strFilterType = 'Next Year Month To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'As Of Previous Period' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'As Of This Period' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'As Of Next Period' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Previous Period' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'This Period' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Next Period' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Previous Year Period To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Period To Date' AND strStartOffset IS NULL
+UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Next Year Period To Date' AND strStartOffset IS NULL

@@ -18,11 +18,14 @@
 			,us.strFirstName
 			,us.strMiddleName
 			,us.strLastName
-			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from tblEntity where intEntityId = us.[intEntityUserSecurityId])
+			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			--,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from tblEntity where intEntityId = us.[intEntityUserSecurityId])
 			,ysni21User = 1
-			,imgPhoto = (select top 1 imgPhoto from tblEntity where intEntityId = us.[intEntityUserSecurityId])
+			,imgPhoto = (select top 1 imgPhoto from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			--,imgPhoto = (select top 1 imgPhoto from tblEntity where intEntityId = us.[intEntityUserSecurityId])
 			,intConcurrencyId = 1
-			,strFullName2 = (select top 1 strName from tblEntity where intEntityId = us.[intEntityUserSecurityId])
+			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
+			--,strFullName2 = (select top 1 strName from tblEntity where intEntityId = us.[intEntityUserSecurityId])
 		from
 			tblSMUserSecurity us,
 			tblSMUserRole ur

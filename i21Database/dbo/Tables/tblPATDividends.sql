@@ -11,6 +11,7 @@
     [ysnProrateDividend] BIT NULL, 
     [dtmCutoffDate] DATETIME NULL, 
     [dblFederalTaxWithholding] NUMERIC(18, 6) NULL, 
+	[ysnPosted] BIT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATDividends] PRIMARY KEY ([intDividendId]) 
 )

@@ -11,8 +11,7 @@ SELECT DISTINCT
 	, dblAmount				= ISNULL(dblInvoiceTotal, 0) * -1
 	, dblUsed				= ISNULL(dblPayment, 0) * -1
 	, dblRemaining			= ISNULL(dblAmountDue, 0) * -1
-	, strContact			= [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
-	, blbCompanyLogo		= [dbo].fnSMGetCompanyLogo('Header')
+	, strContact			= [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)	
     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
     , strCompanyAddress		= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
 FROM tblARInvoice I

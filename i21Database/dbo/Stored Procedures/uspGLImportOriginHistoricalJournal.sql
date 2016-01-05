@@ -1,8 +1,6 @@
 ﻿CREATE PROCEDURE  [dbo].[uspGLImportOriginHistoricalJournal]
 @intEntityId		INT
 AS
-
-
 SET ANSI_WARNINGS OFF
 SET NOCOUNT ON
 DECLARE @result NVARCHAR(MAX)
@@ -142,7 +140,9 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 		glhst_src_id,
 		glhst_src_seq,    
 		GETDATE() as gooddate,
-		A4GLIdentity
+		A4GLIdentity,
+		NULL AS NegativeCreditUnits,
+		NULL AS NegativeDebitUnits 
 	 INTO #iRelyImptblGLJournalDetail
 	 FROM  glhstmst 
 	 INNER JOIN tblGLCOACrossReference ON 
@@ -155,8 +155,10 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	 UPDATE 
 	A SET DebitUnits = 
 	case
-		WHEN B.glhst_units < 0	THEN B.glhst_units * -1
-		ELSE B.glhst_units END
+		WHEN B.glhst_units < 0	THEN 0
+		ELSE B.glhst_units END,
+		NegativeDebitUnits =
+			CASE WHEN B.glhst_units < 0	THEN 1 ELSE 0 END
 
 	FROM
 	#iRelyImptblGLJournalDetail A
@@ -166,13 +168,85 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	UPDATE 
 	A SET CreditUnits = 
 		CASE 
-			WHEN B.glhst_units < 0	THEN B.glhst_units * -1
-			ELSE B.glhst_units END
-
+			WHEN B.glhst_units < 0	THEN 0 --B.glhst_units * -1
+			ELSE B.glhst_units END,
+		NegativeCreditUnits =
+			CASE WHEN B.glhst_units < 0	THEN 1 ELSE 0 END
 	FROM
 	#iRelyImptblGLJournalDetail A
 	JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
 	WHERE A.Credit > 0
+
+	--GL-2040 For Journal entries - if there is a negative credit break into two entries on import
+	IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUnits = 1)
+	BEGIN
+		insert INTO #iRelyImptblGLJournalDetail
+		(intJournalId,glhst_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
+		SELECT 
+		intJournalId,
+		A.glhst_trans_dt,
+		intAccountId,
+		0 AS Debit,
+		0 AS Credit,
+		CreditUnits = CASE WHEN B.glhst_units < 0 THEN glhst_units * -1 ELSE glhst_units END,
+		0 AS DebitUnits,
+		0 AS DebitRate,	
+		0 AS CreditRate,
+		0 AS dblUnitsInlbs,
+		0 as DebitUnitsInlbs,
+		'' AS strCheckbookNo,
+		'' AS strWorkArea,
+		'Negative Units for amount ' + CAST(ISNULL(glhst_amt,0) AS NVARCHAR(50)) AS strDescription,
+		strDocument,
+		strComments,
+		strReference,
+		'N' AS strCorrecting,
+		strSourcePgm,																	-- aptrxu
+		A.glhst_period,
+		A.glhst_jrnl_no,
+		A.glhst_src_id,
+		A.glhst_src_seq,    
+		gooddate,
+		A.A4GLIdentity
+		FROM  #iRelyImptblGLJournalDetail A
+		JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
+		WHERE NegativeDebitUnits = 1
+	END
+	IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeDebitUnits = 1)
+	BEGIN
+
+		INSERT INTO #iRelyImptblGLJournalDetail
+		(intJournalId,glhst_trans_dt,intAccountId,Debit,Credit,CreditUnits, DebitUnits,DebitRate,CreditRate,dblUnitsInlbs, DebitUnitsInlbs,strCheckbookNo, strWorkArea,strDescription,strDocument,strComments,strReference,strCorrecting,strSourcePgm,glhst_period,glhst_jrnl_no,glhst_src_id,glhst_src_seq,gooddate,A4GLIdentity)
+		SELECT 
+		intJournalId,
+		A.glhst_trans_dt,
+		intAccountId,
+		0 AS Debit,
+		0 AS Credit,
+		0 AS CreditUnits,
+		DebitUnits = CASE WHEN B.glhst_units < 0 THEN glhst_units * -1 ELSE glhst_units END,
+		0 AS DebitRate,	
+		0 AS CreditRate,
+		0 AS dblUnitsInlbs,
+		0 as DebitUnitsInlbs,
+		'' AS strCheckbookNo,
+		'' AS strWorkArea,
+		'Negative Units for amount ' + CAST(ISNULL(glhst_amt,0) AS NVARCHAR(50)) AS strDescription,
+		strDocument,
+		strComments,
+		strReference,
+		'N' AS strCorrecting,
+		strSourcePgm,																	-- aptrxu
+		A.glhst_period,
+		A.glhst_jrnl_no,
+		A.glhst_src_id,
+		A.glhst_src_seq,    
+		gooddate,
+		A.A4GLIdentity
+		FROM  #iRelyImptblGLJournalDetail A
+		JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
+		WHERE NegativeCreditUnits = 1
+	END
 
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 	 
@@ -303,9 +377,7 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 ---------------------------------------------------------------------------------------------------------------------------------------
 COMMIT_INSERT:
 	COMMIT TRANSACTION
-	EXEC dbo.uspGLInsertDebitCreditUnitEntry @result
 	GOTO IMPORT_EXIT
-	
 ROLLBACK_INSERT:
 	ROLLBACK TRANSACTION		            
 	SELECT 'Importing Historical Journal error :' + ERROR_MESSAGE()
@@ -314,4 +386,3 @@ ROLLBACK_INSERT:
 IMPORT_EXIT:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
-

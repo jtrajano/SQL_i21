@@ -220,11 +220,11 @@ BEGIN
 		DROP TABLE actualLIFO
 
 	IF OBJECT_ID('expectedLIFO') IS NOT NULL 
-		DROP TABLE dbo.expectedLIFO
+		DROP TABLE expectedLIFO
 
 	IF OBJECT_ID('actualTransactionToReverse') IS NOT NULL 
 		DROP TABLE actualTransactionToReverse
 
 	IF OBJECT_ID('expectedTransactionToReverse') IS NOT NULL 
-		DROP TABLE dbo.expectedTransactionToReverse
+		DROP TABLE expectedTransactionToReverse
 END

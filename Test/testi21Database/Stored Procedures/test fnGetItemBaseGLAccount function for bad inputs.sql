@@ -29,7 +29,7 @@ BEGIN
 		DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
 
 		DECLARE @actual AS INT;
-		DECLARE @expected AS INT;
+		DECLARE @Expected AS INT;
 
 		-- GL Account types used in inventory costing
 		DECLARE @InventoryDescription AS NVARCHAR(50) = 'Inventory';
@@ -69,7 +69,7 @@ BEGIN
 
 		-- Assert
 		-- If item and location is null, expected is also NULL. 
-		SET @expected = NULL;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = NULL;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 	END
 END

@@ -33,6 +33,8 @@ SELECT
 	dblAvailableQty = (CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN (ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserve.dblTotalQty, 0)) ELSE ISNULL(Lot.dblQty, 0) END),
 	dblUnitQty = ItemUOM.dblUnitQty,
 	ysnStockUnit = ItemUOM.ysnStockUnit,
+	dblStockUnitCost = ItemPricing.dblLastCost,
+	dblLastCost = ItemPricing.dblLastCost * ItemUOM.dblUnitQty,
 	Item.intLifeTime,
 	Item.strLifeTimeType
 FROM tblICItemStockUOM StockUOM
@@ -40,6 +42,7 @@ LEFT JOIN tblICItem Item ON Item.intItemId = StockUOM.intItemId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId
+LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = StockUOM.intItemLocationId
 LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = ItemLoc.intCountGroupId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLoc.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = StockUOM.intItemUOMId

@@ -14,7 +14,7 @@ BEGIN
 			,@dblCostingQty AS NUMERIC(38, 20) = 2											-- Add 2 more bags
 			,@dblLotWeightPerQty AS NUMERIC(38,20) = 35.821428571428571428571428571429		-- Each bag is 35.821428571428571428571428571429 Lb. 
 
-			,@expected AS NUMERIC(18,6) = 322.392857										-- Expected result is a change in weight to 322.xxxxxx
+			,@Expected AS NUMERIC(18,6) = 322.392857										-- expected result is a change in weight to 322.xxxxxx
 			,@result AS NUMERIC(18,6)
 	
 	-- Act
@@ -28,5 +28,5 @@ BEGIN
 	);
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

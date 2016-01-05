@@ -4592,4 +4592,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strPaymentOptionType" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="137deba9-f0d1-46c4-a0d8-7b07979c1b4e" ChangeDateTime="12/15/2015 16:01:30">
+    <Property Name="ElementName" Value="[dbo].[tblMFRecipe].[intUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFRecipe]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemUOMId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="461b41bd-17ac-4497-9a8c-eb99ec486ad3" ChangeDateTime="12/15/2015 16:03:58">
+    <Property Name="ElementName" Value="[dbo].[tblMFRecipeItem].[intUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFRecipeItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemUOMId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8df03cb1-e4a2-4d92-92d3-2917d3b91048" ChangeDateTime="12/15/2015 16:12:07">
+    <Property Name="ElementName" Value="[dbo].[tblMFRecipeSubstituteItem].[intUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFRecipeSubstituteItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemUOMId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c5c3915d-269d-4951-9101-999cc429760c" ChangeDateTime="12/15/2015 16:13:47">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrderRecipe].[intUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrderRecipe]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemUOMId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2e120b21-120d-4cfc-89ff-9e18cefae7d3" ChangeDateTime="12/15/2015 16:14:57">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrderRecipeItem].[intUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrderRecipeItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemUOMId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3ce56834-d460-47b4-b901-71a50cf31072" ChangeDateTime="12/15/2015 16:16:37">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrderRecipeSubstituteItem].[intUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrderRecipeSubstituteItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemUOMId]" />
+  </Operation>
 </Operations>

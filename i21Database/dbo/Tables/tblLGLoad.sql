@@ -38,6 +38,7 @@
 [ysnDispatchMailSent] [bit] NULL,
 [dtmDispatchMailSent] DATETIME NULL,
 [dtmCancelDispatchMailSent] DATETIME NULL,
+[intLoadHeaderId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
@@ -55,5 +56,6 @@ CONSTRAINT [FK_tblLGLoad_tblLGGenerateLoad_intGenerateLoadId] FOREIGN KEY ([intG
 CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
 CONSTRAINT [FK_tblLGLoad_tblTRTransportLoad_intTransportLoadId] FOREIGN KEY ([intTransportLoadId]) REFERENCES [tblTRTransportLoad]([intTransportLoadId]),
 CONSTRAINT [FK_tblLGLoad_tblEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES [tblEntity]([intEntityId]),
-CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intDispatcherId] FOREIGN KEY ([intDispatcherId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
+CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intDispatcherId] FOREIGN KEY ([intDispatcherId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
+CONSTRAINT [FK_tblLGLoad_tblTRLoadHeader_intLoadHeaderId] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [tblTRLoadHeader]([intLoadHeaderId])
 )

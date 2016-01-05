@@ -16,38 +16,38 @@ END
 PRINT 'Finished Renaming tblGLTempCOASegment column Location to Location'
 
 PRINT 'Begin Fixing Segment Categories'
-
-IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'tblGLAccount' and type = 'U')
-	AND EXISTS (SELECT 1 FROM sys.objects WHERE name = 'tblGLAccountSegmentMapping' and type = 'U')
-	AND EXISTS (SELECT 1 FROM sys.objects WHERE name = 'tblGLAccountSegment' and type = 'U')
-	AND EXISTS (SELECT 1 FROM sys.objects WHERE name = 'tblGLAccountCategory' and type = 'U')
+IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblSMBuildNumber' and type = 'U')
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo > 15.1)
 	BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountSegment where intAccountCategoryId NOT IN (SELECT intAccountCategoryId FROM tblGLAccountCategory))
-	BEGIN
-		--not used in category but used in account table
-	
-			IF EXISTS(SELECT 1 FROM sys.columns 
-			WHERE [name] = N'intAccountCategoryId' AND [object_id] = OBJECT_ID(N'tblGLAccount'))
-			BEGIN
-				declare @sqlStmt NVARCHAR(MAX) =
-				'UPDATE t SET intAccountCategoryId =(
-				select TOP 1 intAccountCategoryId FROM tblGLAccount where intAccountId =
-				 (SELECT TOP 1  intAccountId from tblGLAccountSegmentMapping WHERE intAccountSegmentId = t.intAccountSegmentId ))
-				FROM tblGLAccountSegment t
-				WHERE intAccountCategoryId NOT IN (SELECT intAccountCategoryId FROM tblGLAccountCategory)
-				AND intAccountSegmentId IN (SELECT intAccountSegmentId FROM tblGLAccountSegmentMapping)'
-				EXEC sp_executesql @sqlStmt
-			END
+		DECLARE @sqlStmt NVARCHAR(MAX) =
+		'UPDATE t SET intAccountCategoryId =(
+		select TOP 1 intAccountCategoryId FROM tblGLAccount where intAccountId =
+			(SELECT TOP 1  intAccountId from tblGLAccountSegmentMapping WHERE intAccountSegmentId = t.intAccountSegmentId ))
+		FROM tblGLAccountSegment t
+		WHERE intAccountCategoryId NOT IN (SELECT intAccountCategoryId FROM tblGLAccountCategory)
+		AND intAccountSegmentId IN (SELECT intAccountSegmentId FROM tblGLAccountSegmentMapping)'
+		EXEC sp_executesql @sqlStmt
+			
+		--not used in category and account table
+		DECLARE @GeneralCategoryId INT
+		SELECT @GeneralCategoryId = intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'General'
 
-			--not used in category and account table
-			DECLARE @GeneralCategoryId INT
-			SELECT @GeneralCategoryId = intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'General'
-			UPDATE tblGLAccountSegment SET intAccountCategoryId = @GeneralCategoryId
-			WHERE intAccountCategoryId NOT IN (SELECT intAccountCategoryId FROM tblGLAccountCategory)
-			AND intAccountSegmentId NOT IN (SELECT intAccountSegmentId FROM tblGLAccountSegmentMapping)
-	
-	
+		SELECT @sqlStmt ='UPDATE tblGLAccountSegment SET intAccountCategoryId = ' + CAST( @GeneralCategoryId AS VARCHAR(3)) +
+		' WHERE intAccountCategoryId NOT IN (SELECT intAccountCategoryId FROM tblGLAccountCategory) AND intAccountSegmentId NOT IN (SELECT intAccountSegmentId FROM tblGLAccountSegmentMapping)'
+		EXEC sp_executesql @sqlStmt
 	END
 END
 PRINT 'Finish Fixing Segment Categories'
+GO
+
+PRINT 'Begin updating tblGLDetail null strTransactionType'
+IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblGLDetail' and type = 'U')
+BEGIN
+		DECLARE @sqlStmt NVARCHAR(MAX)  = 'UPDATE tblGLDetail SET strTransactionType = ''Paycheck'' WHERE strTransactionForm = ''Paychecks'' AND strModuleName = ''Payroll'' AND strTransactionType IS NULL'
+		EXEC sp_executesql @sqlStmt
+		SELECT @sqlStmt = 'UPDATE tblGLDetail SET strTransactionType = strTransactionForm  WHERE strTransactionType IS NULL'
+		EXEC sp_executesql @sqlStmt
+END
+PRINT 'Finished updating tblGLDetail null strTransactionType'
 GO

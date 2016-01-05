@@ -4,11 +4,13 @@
 )
 AS
 BEGIN TRY
+
 	DECLARE @idoc INT
 		,@strErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
 		,@intItemId int
 		,@dblQtyToProduce NUMERIC(18, 6)
+		,@dblWOQty NUMERIC(18, 6)
 		,@intItemUOMId INT
 		,@intUserId INT
 		,@strRetBatchId nVarchar(40)
@@ -40,7 +42,7 @@ BEGIN TRY
 			,intLocationId int
 			)
 
-	Select @intStatusId=intStatusId,@strWONo=strWorkOrderNo,@intManufacturingProcessId=ISNULL(intManufacturingProcessId,0) 
+	Select @intStatusId=intStatusId,@strWONo=strWorkOrderNo,@intManufacturingProcessId=ISNULL(intManufacturingProcessId,0),@dblWOQty=dblQuantity 
 		From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 	
 	If @intManufacturingProcessId=0
@@ -71,6 +73,19 @@ BEGIN TRY
 		Select @ysnIsNegativeQuantityAllowed=1
 	End
 
+	--intSalesOrderLineItemId = 0 implies WOs are created from Blend Managemnet Screen And Lots are already attached
+	If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId)=0
+	Begin
+		--If Recipe Contains Bulk Items(By Location or FIFO Use dblPlannedQuantity)
+		If Exists (Select 1 
+		From tblMFWorkOrderRecipeItem ri 
+		Join tblMFWorkOrderRecipe r on r.intWorkOrderId=ri.intWorkOrderId AND r.intRecipeId=ri.intRecipeId 
+		where r.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1 and ri.intConsumptionMethodId in (2,3))
+		Begin	
+			Select @dblWOQty = dblPlannedQuantity From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+		End
+	End
+
 	Begin Transaction
 
 	Exec uspMFUpdateBlendProductionDetail @strXml=@strXml
@@ -90,9 +105,17 @@ BEGIN TRY
 		Set @strConsumeXml=@strConsumeXml + '<ysnNegativeQtyAllowed>' + convert(varchar,@ysnIsNegativeQuantityAllowed) + '</ysnNegativeQtyAllowed>'
 		--Set @strConsumeXml=@strConsumeXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
 		Set @strConsumeXml=@strConsumeXml + '<intProductionTypeId>' + convert(varchar,1) + '</intProductionTypeId>'
+		Set @strConsumeXml=@strConsumeXml + '<dblProduceQty>' + convert(varchar,@dblWOQty) + '</dblProduceQty>'
+		Set @strConsumeXml=@strConsumeXml + '<intProduceUnitMeasureId>' + convert(varchar,@intItemUOMId) + '</intProduceUnitMeasureId>'
 		Set @strConsumeXml=@strConsumeXml + '</root>'
 
 		Exec uspMFCompleteWorkOrder @strXML=@strConsumeXml,@strOutputLotNumber=@strOutputLotNumber OUT
+
+		Update tblMFWorkOrder 
+		Set dblQuantity=(Select sum(dblQuantity) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
+		Where intWorkOrderId=@intWorkOrderId
+
+		Update tblMFWorkOrderConsumedLot Set ysnStaged=1 Where intWorkOrderId=@intWorkOrderId
 
 		Exec [uspMFDeleteLotReservation] @intWorkOrderId=@intWorkOrderId
 	End

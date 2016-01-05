@@ -28,11 +28,4 @@ BEGIN
 			,@strBatchId 
 			,@intEntityUserSecurityId
 	END 
-
-	-- Clean-up: remove the tables used in the unit test
-	IF OBJECT_ID('actual') IS NOT NULL 
-		DROP TABLE actual
-
-	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
 END 

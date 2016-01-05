@@ -128,7 +128,7 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 		
-		CREATE TABLE ExpectedInventoryFIFOOut (
+		CREATE TABLE expectedInventoryFIFOOut (
 			intId INT
 			,intInventoryFIFOId INT 
 			,intInventoryTransactionId INT
@@ -264,7 +264,7 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -272,8 +272,8 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryFIFOOut
+	IF OBJECT_ID('expectedInventoryFIFOOut') IS NOT NULL 
+		DROP TABLE expectedInventoryFIFOOut
 END

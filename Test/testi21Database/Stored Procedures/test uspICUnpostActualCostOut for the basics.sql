@@ -68,9 +68,9 @@ BEGIN
 			,intTransactionTypeId INT NOT NULL 
 		)
 
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryActualCost', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryActualCostOut', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryActualCost', @Identity = 1
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryActualCostOut', @Identity = 1
 	END 
 	
 	-- Act
@@ -87,8 +87,8 @@ BEGIN
 
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedActualCost', 'actualActualCost';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
+		EXEC tSQLt.AssertEqualsTable 'expectedActualCost', 'actualActualCost'
+		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse'
 	END
 
 	-- Clean-up: remove the tables used in the unit test
@@ -96,11 +96,11 @@ BEGIN
 		DROP TABLE actualActualCost
 
 	IF OBJECT_ID('expectedActualCost') IS NOT NULL 
-		DROP TABLE dbo.expectedActualCost
+		DROP TABLE expectedActualCost
 
 	IF OBJECT_ID('actualTransactionToReverse') IS NOT NULL 
 		DROP TABLE actualTransactionToReverse
 
 	IF OBJECT_ID('expectedTransactionToReverse') IS NOT NULL 
-		DROP TABLE dbo.expectedTransactionToReverse
+		DROP TABLE expectedTransactionToReverse
 END

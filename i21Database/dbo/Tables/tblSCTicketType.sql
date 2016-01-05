@@ -1,9 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblSCTicketType]
 (
 	[intTicketTypeId] INT NOT NULL  IDENTITY, 
-    [intTicketType] INT NOT NULL, 
     [intTicketPoolId] INT NOT NULL, 
-    [strInOutIndicator] NVARCHAR(1) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intListTicketTypeId] INT NULL, 
     [ysnTicketAllowed] BIT NOT NULL, 
     [intNextTicketNumber] INT NOT NULL, 
     [intDiscountSchedule] INT NULL, 
@@ -18,9 +17,9 @@
     [ysnOverrideSingleTicketSeries] BIT NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCTicketType_intTicketTypeId] PRIMARY KEY ([intTicketTypeId]), 
-    CONSTRAINT [UK_tblSCTicketType_intTicketType_strInOutIndicator] UNIQUE ([intTicketType],[intTicketPoolId],[strInOutIndicator]), 
     CONSTRAINT [FK_tblSCTicketType_tblSCTicketPool_intTicketPoolId] FOREIGN KEY (intTicketPoolId) REFERENCES tblSCTicketPool(intTicketPoolId),
-    CONSTRAINT [FK_tblSCTicketType_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
+    CONSTRAINT [FK_tblSCTicketType_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+    CONSTRAINT [FK_tblSCTicketType_tblSCListTicketType_intListTicketTypeId] FOREIGN KEY ([intListTicketTypeId]) REFERENCES [tblSCListTicketTypes]([intTicketTypeId])
 )
 
 GO
@@ -34,13 +33,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intTicketTypeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Ticket Type',
+    @value = N'Ticket Type ID',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicketType',
     @level2type = N'COLUMN',
-    @level2name = N'intTicketType'
+    @level2name = N'intListTicketTypeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Ticket Pool',
@@ -160,15 +159,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketType',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'In Out Indicator',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketType',
-    @level2type = N'COLUMN',
-    @level2name = N'strInOutIndicator'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Discount Location',

@@ -1,8 +1,8 @@
-﻿
-CREATE PROCEDURE [dbo].[uspPATGetDividendsCustomer]
+﻿CREATE PROCEDURE [dbo].[uspPATGetDividendsCustomer]
 	@intCustomerId INT = NULL,
 	@dblProcessingDays NUMERIC(18,6) = NULL,
 	@ysnProrateDividend BIT = NULL,
+	@dtmProcessingDateFrom DATETIME = NULL,
 	@dtmProcessingDateTo DATETIME = NULL, 
 	@dtmCutoffDate DATETIME = NULL
 AS
@@ -10,6 +10,7 @@ BEGIN
 		SELECT DISTINCT CS.intCustomerPatronId,
 			   CS.intStockId,
 			   SC.strStockName,
+			   CS.strCertificateNo,
 			   SC.dblParValue,
 			   CS.dblSharesNo,
 			   SC.intDividendsPerShare,
@@ -29,7 +30,9 @@ BEGIN
 			ON ARC.intEntityCustomerId = ENT.intEntityId
 	 LEFT JOIN tblSMTaxCode TC
 			ON TC.intTaxCodeId = ARC.intTaxCodeId
-		 WHERE CS.intCustomerPatronId = @intCustomerId
+		 WHERE (CS.intCustomerPatronId = @intCustomerId
+		    OR @intCustomerId = 0)
+		   AND CS.dtmIssueDate BETWEEN @dtmProcessingDateFrom AND @dtmProcessingDateTo
+		   
 END
-
 GO

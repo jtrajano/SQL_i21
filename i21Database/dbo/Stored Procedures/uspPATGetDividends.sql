@@ -55,6 +55,7 @@ BEGIN
 						 GROUP BY B.intCustomerPatronId
 			) Total
 		    WHERE CS.strActivityStatus <> 'Retired'
+			  AND CS.dtmIssueDate BETWEEN @dtmProcessingDateFrom AND @dtmProcessingDateTo
          GROUP BY CS.intCustomerPatronId,
 				  ENT.strName, 
 				  ARC.strStockStatus, 
@@ -66,6 +67,4 @@ BEGIN
 				  Total.dblDividendAmount,
 				  CS.dblCheckAmount
 END
-
-
 GO

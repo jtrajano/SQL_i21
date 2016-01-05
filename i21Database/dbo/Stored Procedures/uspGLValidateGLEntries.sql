@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspGLValidateGLEntries
+﻿CREATE PROCEDURE [dbo].[uspGLValidateGLEntries]
 	@GLEntriesToValidate RecapTableType READONLY
 AS
 
@@ -15,12 +15,14 @@ CREATE TABLE #FoundErrors (
 	strTransactionId NVARCHAR(40)
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
+	,strModuleName NVARCHAR(50)
 );
 
 INSERT INTO #FoundErrors
 SELECT	Errors.strTransactionId
 		,Errors.strText
 		,Errors.intErrorCode
+		,Errors.strModuleName
 FROM	dbo.fnGetGLEntriesErrors(@GLEntriesToValidate) Errors;
 
 -- Failed. Invalid G/L account id found.
@@ -48,6 +50,14 @@ END
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50032)
 BEGIN 
 	RAISERROR(50032, 11, 1)
+	GOTO _Exit
+END 
+
+-- Unable to find an open fiscal year period to match the transaction date for a particular module .
+IF EXISTS(SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 51189)
+BEGIN 
+	DECLARE @strModuleName NVARCHAR(50) = (SELECT TOP 1 strModuleName FROM #FoundErrors WHERE intErrorCode = 51189)
+	RAISERROR(51189, 11, 1,@strModuleName)
 	GOTO _Exit
 END 
 

@@ -14,6 +14,9 @@
     [dblCheckAmount] NUMERIC(18, 6) NULL, 
     [intTransferredFrom] INT NULL, 
     [dtmTransferredDate] DATETIME NULL, 
+	[dblParValue] NUMERIC(18,6) NULL,
+	[dblFaceValue] NUMERIC(18,6) NULL,
+	[ysnPosted] BIT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblPATIssueStock] PRIMARY KEY ([intCustomerStockId]), 
     CONSTRAINT [FK_tblPATIssueStock_StockClassification] FOREIGN KEY ([intStockId]) REFERENCES [tblPATStockClassification]([intStockId])

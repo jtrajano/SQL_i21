@@ -11,6 +11,8 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@dblQty NUMERIC(18, 6)
 		,@ErrMsg NVARCHAR(MAX)
+		,@intAttributeId INT
+		,@strAttributeValue NVARCHAR(50)
 
 	IF @strLotNumber = ''
 		OR @strLotNumber IS NULL
@@ -91,7 +93,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @intLotStatusId =1
+	IF @intLotStatusId = 1
 		OR (
 			@strSecondaryStatus = 'In_Warehouse'
 			AND @strPrimaryStatus = 'On_Hold'
@@ -132,25 +134,42 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT W.intWorkOrderId
-		,W.strWorkOrderNo
-		,L.intLocationId
-		,L.intLotId
-		,L.strLotNumber
-		,I.strItemNo
-		,I.strDescription
-		,L.dblQty
-		,IU.intItemUOMId
-		,U.strUnitMeasure
-		,U.intUnitMeasureId
-		,W.intManufacturingProcessId
-	FROM tblICLot L
-	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
-	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
-	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-	WHERE L.intLotId = @intLotId
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Warehouse Release Lot By Batch'
+
+	SELECT @strAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @strAttributeValue = 'False'
+	BEGIN
+		SELECT W.intWorkOrderId
+			,W.strWorkOrderNo
+			,L.intLocationId
+			,L.intParentLotId
+			,PL.strParentLotNumber
+			,L.intLotId
+			,L.strLotNumber
+			,I.strItemNo
+			,I.strDescription
+			,L.dblQty
+			,IU.intItemUOMId
+			,U.strUnitMeasure
+			,U.intUnitMeasureId
+			,W.intManufacturingProcessId
+			,@strAttributeValue as strWarehouseReleaseLotByBatch
+		FROM tblICLot L
+		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		JOIN dbo.tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+		WHERE L.intLotId = @intLotId
+	END
 END TRY
 
 BEGIN CATCH

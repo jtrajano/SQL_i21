@@ -70,7 +70,7 @@ BEGIN
 			,@intEntityUserSecurityId AS INT
 
 		-- Declare the variables to check the average cost. 
-		DECLARE @dblAverageCost_Expected AS NUMERIC(18,6)
+		DECLARE @dblAverageCost_expected AS NUMERIC(18,6)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(18,6)
 
 		CREATE TABLE expected (
@@ -123,14 +123,14 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 		
-		CREATE TABLE ExpectedInventoryFIFOOut (
+		CREATE TABLE expectedInventoryFIFOOut (
 			intId INT IDENTITY 
 			,intInventoryFIFOId INT 
 			,intInventoryTransactionId INT
 			,dblQty NUMERIC(18,6)
 		)
 
-		-- 1. Expected data for Jan 1. Purchase 20 stocks @ 20 dollars each
+		-- 1. expected data for Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
 			SET @intItemLocationId = @NewHaven
@@ -149,7 +149,7 @@ BEGIN
 			SET @intTransactionTypeId = @PurchaseTransactionType
 			SET @intEntityUserSecurityId = 1
 
-			SET @dblAverageCost_Expected = @dblCost		
+			SET @dblAverageCost_expected = @dblCost		
 		
 			INSERT INTO expected (
 					[intInventoryTransactionId]
@@ -281,7 +281,7 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -289,8 +289,8 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryFIFOOut
+	IF OBJECT_ID('expectedInventoryFIFOOut') IS NOT NULL 
+		DROP TABLE expectedInventoryFIFOOut
 END

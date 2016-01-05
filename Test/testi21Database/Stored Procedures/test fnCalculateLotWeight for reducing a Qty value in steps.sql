@@ -16,7 +16,7 @@ BEGIN
 				,@dblCostingQty AS NUMERIC(38, 20) = -2											-- Take away 2 bags
 				,@dblLotWeightPerQty AS NUMERIC(38,20) = 35.821428571428571428571428571429		-- Each bag is 35.821428571428571428571428571429 Lb. 
 
-				,@expected AS NUMERIC(18,6) = 179.107143										-- Expected result is a change in weight to 179.xxxxxx
+				,@Expected AS NUMERIC(18,6) = 179.107143										-- expected result is a change in weight to 179.xxxxxx
 				,@result AS NUMERIC(18,6)
 	
 		-- Act 1
@@ -30,7 +30,7 @@ BEGIN
 		);
 
 		-- Assert  1
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END
 
 	-- Step 2
@@ -43,7 +43,7 @@ BEGIN
 				,@dblCostingQty = -2										-- Take away 2 bags
 				,@dblLotWeightPerQty = 35.821428571428571428571428571429	-- Each bag is 35.821428571428571428571428571429 Lb. 
 
-				,@expected = 107.464286										-- Expected result is a change in weight to 179.xxxxxx
+				,@Expected = 107.464286										-- expected result is a change in weight to 179.xxxxxx
 				,@result = NULL 
 	
 		-- Act 2
@@ -57,7 +57,7 @@ BEGIN
 		);
 
 		-- Assert  2
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END 
 
 	-- Step 3
@@ -70,7 +70,7 @@ BEGIN
 				,@dblCostingQty = -3										-- Take away the remaining bags
 				,@dblLotWeightPerQty = 35.821428571428571428571428571429	-- Each bag is 35.821428571428571428571428571429 Lb. 
 
-				,@expected = 0												-- Expected result is a change in weight to 0.00
+				,@Expected = 0												-- expected result is a change in weight to 0.00
 				,@result = NULL 
 	
 		-- Act 3
@@ -84,6 +84,6 @@ BEGIN
 		);
 
 		-- Assert  3
-		EXEC tSQLt.AssertEquals @expected, @result;
+		EXEC tSQLt.AssertEquals @Expected, @result;
 	END 
 END

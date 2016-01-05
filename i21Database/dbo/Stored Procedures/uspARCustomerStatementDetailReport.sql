@@ -52,6 +52,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dblCreditLimit]			NUMERIC(18,6)
 	,[dblTotalAR]				NUMERIC(18,6)
 	,[dblFuture]				NUMERIC(18,6)
+	,[dbl0Days]					NUMERIC(18,6)
 	,[dbl10Days]				NUMERIC(18,6)
 	,[dbl30Days]				NUMERIC(18,6)
 	,[dbl60Days]				NUMERIC(18,6)
@@ -61,8 +62,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dblAmountPaid]			NUMERIC(18,6)
 	,[dblCredits]				NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME
-	,[strSalespersonName]		NVARCHAR(100)
+	,[dtmAsOfDate]				DATETIME	
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -89,8 +89,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strBOLNumber]			 NVARCHAR(100)
 	,[dblCreditLimit]		 NUMERIC(18,6)
 	,[strFullAddress]		 NVARCHAR(MAX)
-	,[strStatementFooterComment] NVARCHAR(MAX)
-	,[blbCompanyLogo]		 VARBINARY(MAX)
+	,[strStatementFooterComment] NVARCHAR(MAX)	
 	,[strCompanyName]		 NVARCHAR(MAX)
 	,[strCompanyAddress]	 NVARCHAR(MAX)
 )
@@ -114,14 +113,8 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
-SELECT  @dtmDateFrom = CASE WHEN UPPER([condition]) = UPPER('As Of')
-						 THEN CAST(-53690 AS DATETIME)
-						 ELSE CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME) 
-					   END
-	   ,@dtmDateTo   = CASE WHEN UPPER([condition]) = UPPER('As Of') 
-						 THEN CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE GETDATE() END AS DATETIME)
-						 ELSE CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
-					   END
+SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
+ 	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
        ,@condition	 = [condition]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
@@ -150,7 +143,7 @@ ELSE
 	END
 
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
+EXEC [uspARCustomerAgingAsOfDateWithCurrentReport] @dtmDateFrom, @dtmDateTo
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 
@@ -196,8 +189,7 @@ SET @query = 'SELECT * FROM
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
-	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')
-	 , blbCompanyLogo = [dbo].fnSMGetCompanyLogo(''Header'')
+	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
 FROM tblARInvoice I
@@ -242,6 +234,7 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.strBOLNumber
 	  ,STATEMENTREPORT.dblCreditLimit
 	  ,dblCreditAvailable = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+	  ,dbl0Days = ISNULL(AGINGREPORT.dbl0Days, 0)
 	  ,dbl10Days = ISNULL(AGINGREPORT.dbl10Days, 0)
 	  ,dbl30Days = ISNULL(AGINGREPORT.dbl30Days, 0)
 	  ,dbl60Days = ISNULL(AGINGREPORT.dbl60Days, 0)
@@ -249,8 +242,7 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
 	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,STATEMENTREPORT.strFullAddress
-	  ,STATEMENTREPORT.strStatementFooterComment
-	  ,STATEMENTREPORT.blbCompanyLogo
+	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
 	  ,STATEMENTREPORT.strCompanyAddress	  
 	  ,dtmAsOfDate = @dtmDateTo

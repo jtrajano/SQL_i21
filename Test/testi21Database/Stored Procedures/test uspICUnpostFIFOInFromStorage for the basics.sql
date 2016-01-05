@@ -84,8 +84,8 @@ BEGIN
 
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
+		EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO'
+		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse'
 	END
 
 	-- Clean-up: remove the tables used in the unit test
@@ -93,11 +93,11 @@ BEGIN
 		DROP TABLE actualFIFO
 
 	IF OBJECT_ID('expectedFIFO') IS NOT NULL 
-		DROP TABLE dbo.expectedFIFO
+		DROP TABLE expectedFIFO
 
 	IF OBJECT_ID('actualTransactionToReverse') IS NOT NULL 
 		DROP TABLE actualTransactionToReverse
 
 	IF OBJECT_ID('expectedTransactionToReverse') IS NOT NULL 
-		DROP TABLE dbo.expectedTransactionToReverse
+		DROP TABLE expectedTransactionToReverse
 END

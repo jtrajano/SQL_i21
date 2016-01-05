@@ -74,7 +74,7 @@ BEGIN
 			strTransactionId
 		) 
 		SELECT	strTransactionId
-		FROM	dbo.uspICCreateLotNumberOnInventoryReceipt_SpyProcedureLog	
+		FROM	uspICCreateLotNumberOnInventoryReceipt_SpyProcedureLog	
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END 
@@ -85,5 +85,5 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 END 

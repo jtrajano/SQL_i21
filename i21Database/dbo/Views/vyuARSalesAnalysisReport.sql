@@ -3,7 +3,7 @@ AS
 SELECT strRecordNumber
 	 , intTransactionId
 	 , A.intAccountId	 
-	 , dtmDate
+	 , DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) AS dtmDate
 	 , A.intCompanyLocationId
 	 , A.intEntityCustomerId	 
 	 , IC.intItemId
@@ -28,6 +28,7 @@ SELECT strRecordNumber
 	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
 	 , ISNULL(A.dblTotal, 0)		  AS dblTotal
 	 , C.strCustomerNumber
+	 , GA.strAccountId				  AS strAccountId
 	 , GA.strDescription			  AS strAccountName
 	 , L.strLocationName
 	 , IC.strItemNo					  AS strItemName
@@ -42,6 +43,8 @@ SELECT strRecordNumber
 	 , ESP.strName					  AS strSalespersonName	 
 	 , RTRIM(A.strBillToLocationName) AS strBillTo
 	 , RTRIM(A.strShipToLocationName) AS strShipTo
+	 , REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0') AS strSiteNumber
+	 , TMS.strDescription			  AS strSiteDescription
 FROM
 (SELECT I.strInvoiceNumber			  AS strRecordNumber
 	  , I.intInvoiceId				  AS intTransactionId
@@ -55,24 +58,31 @@ FROM
 	  , I.strTransactionType
 	  , I.strType
 	  , ID.strItemDescription
+	  , intItemAccountId			  = (CASE WHEN dbo.fnIsStockTrackingItem(ID.intItemId) = 1 
+												THEN IA.intSalesAccountId 
+											  WHEN IA.strType = 'Other Charge'
+												THEN IA.intOtherChargeIncomeAccountId
+											ELSE IA.intGeneralAccountId 
+										 END)
 	  , ID.dblQtyOrdered
 	  , ID.dblQtyShipped
-	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 THEN ICIT.dblCost ELSE ICIT1.dblCost END) --CASE WHEN I.intDistributionHeaderId IS NULL THEN ISNULL(ICP.dblStandardCost, 0) ELSE ISNULL(TR.dblUnitCost, 0) END
+	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 
+											THEN (SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
+												AND intTransactionId = I.intInvoiceId
+												AND strTransactionId = I.strInvoiceNumber
+												AND intItemId		 = ID.intItemId
+												AND intItemUOMId	 = ID.intItemUOMId) 
+											ELSE ICIT1.dblCost 
+										END)
 	  , dblPrice
 	  , ID.dblTotalTax				  AS dblTax
 	  , ID.dblTotal					  AS dblLineTotal
 	  , I.dblInvoiceTotal			  AS dblTotal
 	  , I.strBillToLocationName
 	  , I.strShipToLocationName
+	  , intSiteId
 FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
---LEFT JOIN tblICItemUOM SU ON ID.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
-LEFT OUTER JOIN 
-	tblICInventoryTransaction ICIT 
-		ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-		AND I.intInvoiceId = ICIT.intTransactionId 
-		AND I.strInvoiceNumber = ICIT.strTransactionId 
-		AND ID.intItemId = ICIT.intItemId 
-		AND ID.intItemUOMId = ICIT.intItemUOMId
+LEFT JOIN vyuARGetItemAccount IA ON ID.intItemId = IA.intItemId AND I.intCompanyLocationId = IA.intLocationId
 LEFT OUTER JOIN
 	(
 		SELECT
@@ -96,12 +106,6 @@ LEFT OUTER JOIN
 		ON  ID.intInventoryShipmentItemId = ICIT1.intInventoryShipmentItemId 
 		AND ID.intItemId = ICIT1.intItemId 
 		AND ID.intItemUOMId = ICIT1.intItemUOMId
-
---LEFT JOIN (tblICItemLocation ICL 
---		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON I.intCompanyLocationId = ICL.intLocationId AND ID.intItemId = ICL.intItemId AND ID.intItemId = ICP.intItemId	
---LEFT JOIN (tblTRTransportLoad TL 
---		INNER JOIN tblTRTransportReceipt TR ON TL.intTransportLoadId = TR.intTransportLoadId) ON I.strInvoiceOriginId = TL.strTransaction AND ID.intItemId = TR.intItemId AND I.intCompanyLocationId = TR.intCompanyLocationId
-
 WHERE I.ysnPosted = 1 
   AND I.strTransactionType IN ('Invoice', 'Credit Memo')
 
@@ -119,22 +123,29 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.strTransactionType
 	 , SO.strType
 	 , SOD.strItemDescription
+	 , intItemAccountId				= (CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 
+												THEN IA.intSalesAccountId 
+											WHEN IA.strType = 'Other Charge'
+												THEN IA.intOtherChargeIncomeAccountId
+											ELSE IA.intGeneralAccountId 
+									   END)
 	 , SOD.dblQtyOrdered
 	 , SOD.dblQtyShipped
-	 , dblStandardCost				  = ICP.dblStandardCost
+	 , ICP.dblStandardCost			  AS dblStandardCost				  
 	 , dblPrice
 	 , SOD.dblTotalTax				  AS dblTax
 	 , SOD.dblTotal					  AS dblLineTotal
 	 , SO.dblSalesOrderTotal		  AS dblTotal 
 	 , SO.strBillToLocationName
 	 , SO.strShipToLocationName
+	 , NULL							  AS intSiteId
 FROM tblSOSalesOrder SO INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 LEFT JOIN tblICItemUOM SU ON SOD.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
 LEFT JOIN (tblICItemLocation ICL 
 		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
-
+LEFT JOIN vyuARGetItemAccount IA ON SOD.intItemId = IA.intItemId AND SO.intCompanyLocationId = IA.intLocationId
 WHERE SO.ysnProcessed = 1) AS A
-	INNER JOIN tblGLAccount GA ON A.intAccountId = GA.intAccountId
+	LEFT JOIN tblGLAccount GA ON A.intItemAccountId = GA.intAccountId
 	INNER JOIN tblSMCompanyLocation L ON A.intCompanyLocationId = L.intCompanyLocationId
 	INNER JOIN (tblARCustomer C 
 		INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON A.intEntityCustomerId = C.intEntityCustomerId
@@ -146,3 +157,4 @@ WHERE SO.ysnProcessed = 1) AS A
 		LEFT JOIN tblICCategory CAT ON IC.intCategoryId = CAT.intCategoryId		
 		LEFT JOIN tblICBrand ICB ON IC.intBrandId = ICB.intBrandId) ON A.intItemId = IC.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON A.intItemUOMId = UOM.intItemUOMId		
+	LEFT JOIN tblTMSite TMS ON A.intSiteId = TMS.intSiteID	

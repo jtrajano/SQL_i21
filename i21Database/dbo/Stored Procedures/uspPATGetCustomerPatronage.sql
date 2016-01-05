@@ -4,6 +4,7 @@
 AS
 BEGIN
 				SELECT DISTINCT RRD.intPatronageCategoryId,
+					   PC.strDescription,
 					   PC.strCategoryCode,
 					   RRD.dblRate,
 					   dblVolume = SUM(CV.dblVolume),
@@ -18,6 +19,7 @@ BEGIN
 			     WHERE CV.intCustomerPatronId = @intCustomerPatronId
 			  GROUP BY RRD.intPatronageCategoryId,
 					   PC.strCategoryCode,
+					   PC.strDescription,
 					   RRD.dblRate
 END
 GO

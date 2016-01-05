@@ -43,7 +43,9 @@ BEGIN
 				intLineNo,
 				intItemId,
 				intItemUOMId,
-				dblQuantity)
+				dblQuantity,
+				ysnLoad,
+				intLoadReceive)
 			SELECT 'Inventory Receipt',
 				ReceiptItem.intInventoryReceiptId, 
 				ReceiptItem.intInventoryReceiptItemId,
@@ -59,9 +61,12 @@ BEGIN
 				ReceiptItem.intLineNo,
 				ReceiptItem.intItemId,
 				ReceiptItem.intUnitMeasureId,
-				ReceiptItem.dblOpenReceive
+				ReceiptItem.dblOpenReceive,
+				ReceiptItemSource.ysnLoad,
+				ReceiptItem.intLoadReceive
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId
 		END
 	END

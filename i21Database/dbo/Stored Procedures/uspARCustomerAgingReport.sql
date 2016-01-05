@@ -31,7 +31,6 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 			,[dblPrepaids]				NUMERIC(18,6)
 			,[dtmAsOfDate]				DATETIME
 			,[strSalespersonName]		NVARCHAR(100)
-			,[blbCompanyLogo]		    VARBINARY(MAX)
 			,[strCompanyName]		    NVARCHAR(MAX)
 			,[strCompanyAddress]	    NVARCHAR(MAX)
 		)
@@ -92,8 +91,8 @@ SELECT  @strSalesperson = ISNULL([from], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
 
-SELECT	@strAsOfDateFrom = CASE WHEN UPPER([condition]) = UPPER('As Of') THEN '01/01/1900' ELSE ISNULL([from], '') END
-       ,@strAsOfDateTo	 = CASE WHEN UPPER([condition]) = UPPER('As Of') THEN ISNULL([from], '') ELSE ISNULL([to], '') END
+SELECT	@strAsOfDateFrom = ISNULL([from], '')
+       ,@strAsOfDateTo   = ISNULL([to], '')
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 
@@ -157,8 +156,7 @@ ELSE
 INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson
 
-SELECT blbCompanyLogo		= [dbo].fnSMGetCompanyLogo(''Header'')
-     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
      , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
      , * 
 FROM @temp_aging_table'

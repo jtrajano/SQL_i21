@@ -17,6 +17,6 @@ BEGIN
 	FROM dbo.fnGetInventoryTransactionId(@strId, @intId, @WetGrains, @WetGrains_NewHaven);
 
 	-- Assert the null dates are not equal dates
-	DECLARE @expected AS INT = 5
-	EXEC tSQLt.AssertEquals @expected, @result;
+	DECLARE @Expected AS INT = 5
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

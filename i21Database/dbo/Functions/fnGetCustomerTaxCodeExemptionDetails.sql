@@ -1,13 +1,14 @@
 ﻿CREATE FUNCTION [dbo].[fnGetCustomerTaxCodeExemptionDetails]
 ( 
-	 @CustomerId		INT
-	,@TransactionDate	DATETIME
-	,@TaxCodeId			INT
-	,@TaxClassId		INT
-	,@TaxState			NVARCHAR(100)
-	,@ItemId			INT
-	,@ItemCategoryId	INT
-	,@ShipToLocationId	INT
+	 @CustomerId			INT
+	,@TransactionDate		DATETIME
+	,@TaxCodeId				INT
+	,@TaxClassId			INT
+	,@TaxState				NVARCHAR(100)
+	,@ItemId				INT
+	,@ItemCategoryId		INT
+	,@ShipToLocationId		INT
+	,@IsCustomerSiteTaxable	BIT
 )
 RETURNS @returntable TABLE
 (
@@ -18,7 +19,7 @@ AS
 BEGIN
 	DECLARE @TaxCodeExemption	NVARCHAR(500)
 	
-	SET @TaxCodeExemption = [dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, @TaxCodeId, @TaxClassId, @TaxState, @ItemId, @ItemCategoryId, @ShipToLocationId)	
+	SET @TaxCodeExemption = [dbo].[fnGetCustomerTaxCodeExemption](@CustomerId, @TransactionDate, @TaxCodeId, @TaxClassId, @TaxState, @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable)	
 	
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0

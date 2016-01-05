@@ -151,7 +151,7 @@ BEGIN
 		FROM @temp_params where [fieldname] = 'strDriverId'
 		IF (ISNULL(@FromDriverID,'') <> '')
 		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + ' (strDriverId ''' + @FromDriverID + ''' AND ''' + @ToDriverID + ''')'
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + ' (strDriverId BETWEEN ''' + @FromDriverID + ''' AND ''' + @ToDriverID + ''')'
 		END
 		
 		
@@ -227,7 +227,7 @@ BEGIN
 		FROM @temp_params where [fieldname] = 'strFillMethod'
 		IF (ISNULL(@FromFillMethod,'') <> '')
 		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + ' (strFillMethod BETWEEN ''' + @FromFillMethod + ''' AND ''' + @ToFillMethod + ''')'
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + ' (strFillMethod = ''' + @FromFillMethod + ''')'
 		END
 		
 		--Quantity
@@ -269,7 +269,7 @@ BEGIN
 		FROM @temp_params where [fieldname] = 'dtmForecastedDelivery'
 		IF (ISNULL(@FromForecastedDelivery,'') <> '')
 		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + '(DATEADD(dd, DATEDIFF(dd, 0, C.dtmForecastedDelivery), 0) BETWEEN ''' + @FromForecastedDelivery + ''' AND ''' + @ToForecastedDelivery + ''')'
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + '(DATEADD(dd, DATEDIFF(dd, 0, dtmForecastedDelivery), 0) BETWEEN ''' + @FromForecastedDelivery + ''' AND ''' + @ToForecastedDelivery + ''')'
 		END
 		
 		--On Hold
@@ -331,6 +331,7 @@ BEGIN
 									,(CASE WHEN dblCallEntryMinimumQuantity IS NULL THEN COALESCE(dblQuantity,1.00) ELSE dblCallEntryMinimumQuantity END)
 									,NULL,intSiteID))) AS dblProductCost
 		FROM #tmpDeliveryFill
+		OPTION (RECOMPILE)
 		')
 		
 	END

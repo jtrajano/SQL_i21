@@ -232,7 +232,7 @@ BEGIN
       ,CL.[strCity]     --[agloc_city]  
       ,CL.[strStateProvince]   --[agloc_state]  
       ,CL.[strZipPostalCode]   --[agloc_zip]  
-      ,C.[strCountryCode]    --[agloc_country]  
+      ,SUBSTRING(C.[strCountryCode], 0, 4)    --[agloc_country]  
       ,CL.[strPhone]     --[agloc_phone]  
       ,''N''       --[agloc_inv_by_loc_ynd]  
       ,(CASE CL.[strSalesTaxByLocation]  
@@ -540,7 +540,7 @@ BEGIN
       ,[agloc_city] = CL.[strCity]   
       ,[agloc_state] = CL.[strStateProvince]  
       ,[agloc_zip] = CL.[strZipPostalCode]  
-      ,[agloc_country] = C.[strCountryCode]  
+      ,[agloc_country] = SUBSTRING(C.[strCountryCode], 0, 4)
       ,[agloc_phone] = CL.[strPhone]  
       ,[agloc_inv_by_loc_ynd] = [agloc_inv_by_loc_ynd]  
       ,[agloc_tax_by_loc_only_ynv] =   

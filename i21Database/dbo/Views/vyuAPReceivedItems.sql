@@ -227,7 +227,8 @@ FROM
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
 	UNION ALL
-	--CHARGES
+
+	--OTHER CHARGES
 	SELECT
 		[intEntityVendorId]							=	A.intEntityVendorId
 		,[dtmDate]									=	A.dtmDate
@@ -269,7 +270,7 @@ FROM
 		,[dblNetWeight]								=	0      
 		,[strCostUOM]								=	NULL
 		,[strgrossNetUOM]							=	NULL
-		,[dblUnitQty]								=	NULL   
+		,[dblUnitQty]								=	0   
 	FROM [vyuAPChargesForBilling] A
 
 	UNION ALL
@@ -286,15 +287,15 @@ FROM
 		,[strItemNo]								=	A.strItemNo
 		,[strDescription]							=	A.strItemDescription
 		,[intPurchaseTaxGroupId]					=	NULL
-		,[dblOrderQty]								=	A.dblNetWt
+		,[dblOrderQty]								=	A.dblQuantity
 		,[dblPOOpenReceive]							=	0
-		,[dblOpenReceive]							=	A.dblNetWt
-		,[dblQuantityToBill]						=	A.dblNetWt
+		,[dblOpenReceive]							=	A.dblQuantity
+		,[dblQuantityToBill]						=	A.dblQuantity
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	A.intShipmentContractQtyId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
-		,[dblUnitCost]								=	A.dblCashPriceInWeightUOM
+		,[dblUnitCost]								=	A.dblCashPrice
 		,[dblTax]									=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -309,15 +310,15 @@ FROM
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
-		,[intUnitMeasureId]							=	NULL
-		,[intWeightUOMId]							=	NULL
-		,[intCostUOMId]								=	NULL
-		,[dblNetWeight]								=	0      
-		,[strCostUOM]								=	NULL
-		,[strgrossNetUOM]							=	NULL
-		,[dblUnitQty]								=	NULL
+		,[intUnitMeasureId]							=	A.intItemUOMId
+		,[intWeightUOMId]							=	A.intWeightItemUOMId
+		,[intCostUOMId]								=	A.intPriceItemUOMId
+		,[dblNetWeight]								=	ISNULL(A.dblNetWt,0)      
+		,[strCostUOM]								=	A.strPriceUOM
+		,[strgrossNetUOM]							=	A.strWeightUOM
+		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
-	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT intShipmentContractQtyId FROM tblAPBillDetail)
+	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
 ) Items
 GO

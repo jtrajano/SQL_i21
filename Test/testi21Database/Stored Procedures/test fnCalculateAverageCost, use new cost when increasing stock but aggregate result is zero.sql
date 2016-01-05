@@ -7,12 +7,12 @@ BEGIN
 	DECLARE @OnHandQty AS FLOAT = -20
 	DECLARE @CurrentAverageCost AS FLOAT = 11.00
 	DECLARE @result AS NUMERIC(18,6)
-	DECLARE @expected AS NUMERIC(18,6) = 10.00
+	DECLARE @Expected AS NUMERIC(18,6) = 10.00
 
 	-- Act
 	SELECT @result = dbo.fnCalculateAverageCost(@Qty, @NewCost, @OnHandQty, @CurrentAverageCost);
 
 	-- Assert 
 	-- Use the same cost from purchase (@NewCost) when on-hand qty + new qty is zero. 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

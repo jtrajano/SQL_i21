@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerPaymentHistoryReport]
 AS 
-SELECT blbCompanyLogo		= [dbo].fnSMGetCompanyLogo('Header')
-     , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
      , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
      , * 
 FROM (

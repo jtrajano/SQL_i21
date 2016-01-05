@@ -516,6 +516,7 @@ SET @batchIdUsed = @batchId
 						AND D.intContractDetailId = CT.intContractDetailId 		 				
 				WHERE
 					D.dblPrice = @ZeroDecimal
+					AND CT.strPricingType <> 'Index'
 					
 				--Contract Item Price not Equal to Contract Sequence Cash Price
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -543,6 +544,7 @@ SET @batchIdUsed = @batchId
 				WHERE
 					D.dblPrice <> @ZeroDecimal				
 					AND ISNULL(CT.dblCashPrice,0.00) <> D.dblPrice 
+					AND CT.strPricingType <> 'Index'
 					
 					
 				BEGIN TRY
@@ -755,7 +757,8 @@ IF @post = 1
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
-				,intTransactionId  
+				,intTransactionId 
+				,intTransactionDetailId
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -775,6 +778,7 @@ IF @post = 1
 				,Header.intCurrencyId
 				,1.00
 				,Header.intInvoiceId
+				,Detail.intInvoiceDetailId
 				,Header.strInvoiceNumber 
 				,@INVENTORY_SHIPMENT_TYPE
 				,NULL 
@@ -895,8 +899,64 @@ IF @post = 1
 				,intAccountId				= A.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice'	THEN  
+																								(
+																								SELECT
+																									SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																								FROM
+																									tblARInvoice ARI 
+																								LEFT JOIN
+																									tblARInvoiceDetail ARID
+																										ON ARI.intInvoiceId = ARID.intInvoiceId	
+																								INNER JOIN
+																									tblICItem I
+																										ON ARID.intItemId = I.intItemId
+																								LEFT OUTER JOIN
+																									vyuARGetItemAccount IST
+																										ON ARID.intItemId = IST.intItemId 
+																										AND ARI.intCompanyLocationId = IST.intLocationId 
+																								LEFT OUTER JOIN
+																									vyuICGetItemStock ICIS
+																										ON ARID.intItemId = ICIS.intItemId 
+																										AND ARI.intCompanyLocationId = ICIS.intLocationId 
+																								WHERE
+																									ARI.intInvoiceId = A.intInvoiceId
+																									AND ARID.dblTotal <> @ZeroDecimal  
+																									AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
+																									AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+																								)
+																							ELSE 
+																								0
+																							END
+				,dblCreditUnit				=  CASE WHEN A.strTransactionType = 'Invoice'	THEN  
+																								0
+																							ELSE 
+																								(
+																								SELECT
+																									SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																								FROM
+																									tblARInvoice ARI 
+																								LEFT JOIN
+																									tblARInvoiceDetail ARID
+																										ON ARI.intInvoiceId = ARID.intInvoiceId	
+																								INNER JOIN
+																									tblICItem I
+																										ON ARID.intItemId = I.intItemId
+																								LEFT OUTER JOIN
+																									vyuARGetItemAccount IST
+																										ON ARID.intItemId = IST.intItemId 
+																										AND ARI.intCompanyLocationId = IST.intLocationId 
+																								LEFT OUTER JOIN
+																									vyuICGetItemStock ICIS
+																										ON ARID.intItemId = ICIS.intItemId 
+																										AND ARI.intCompanyLocationId = ICIS.intLocationId 
+																								WHERE
+																									ARI.intInvoiceId = A.intInvoiceId
+																									AND ARID.dblTotal <> @ZeroDecimal  
+																									AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
+																									AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+																								)
+																							END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -940,8 +1000,8 @@ IF @post = 1
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblQtyShipped, 0.00) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblQtyShipped, 0.00) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -949,8 +1009,8 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,strJournalLineDescription	= B.strItemDescription 
+				,intJournalLineNo			= B.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -988,8 +1048,8 @@ IF @post = 1
 				,intAccountId				= IST.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -997,8 +1057,8 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,strJournalLineDescription	= B.strItemDescription 
+				,intJournalLineNo			= B.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -1026,10 +1086,15 @@ IF @post = 1
 				vyuARGetItemAccount IST
 					ON B.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
+			LEFT OUTER JOIN
+				vyuICGetItemStock ICIS
+					ON B.intItemId = ICIS.intItemId 
+					AND A.intCompanyLocationId = ICIS.intLocationId 
 			WHERE
 				B.dblTotal <> @ZeroDecimal  
 				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+
 			--CREDIT Shipping
 			UNION ALL 
 			SELECT
@@ -1090,7 +1155,7 @@ IF @post = 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,intJournalLineNo			= DT.intInvoiceDetailTaxId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -1138,7 +1203,7 @@ IF @post = 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,intJournalLineNo			= D.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -1175,8 +1240,8 @@ IF @post = 1
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblUOMQty) ELSE 0 END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblUOMQty) END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1184,8 +1249,8 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,strJournalLineDescription	= D.strItemDescription
+				,intJournalLineNo			= D.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -1240,8 +1305,8 @@ IF @post = 1
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblUOMQty) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblUOMQty) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1249,8 +1314,8 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,strJournalLineDescription	= D.strItemDescription
+				,intJournalLineNo			= D.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -1305,8 +1370,8 @@ IF @post = 1
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1314,8 +1379,8 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,strJournalLineDescription	= D.strItemDescription
+				,intJournalLineNo			= D.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -1352,6 +1417,10 @@ IF @post = 1
 			INNER JOIN
 				vyuCTContractDetailView ICT
 					ON ISD.intPContractDetailId = ICT.intContractDetailId  
+			LEFT OUTER JOIN
+				vyuICGetItemStock ICIS
+					ON D.intItemId = ICIS.intItemId 
+					AND A.intCompanyLocationId = ICIS.intLocationId 
 			WHERE
 				D.dblTotal <> @ZeroDecimal
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
@@ -1367,8 +1436,8 @@ IF @post = 1
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1376,8 +1445,8 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= GETDATE()
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
+				,strJournalLineDescription	= D.strItemDescription
+				,intJournalLineNo			= D.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
 				,intEntityId				= @UserEntityID				
@@ -1414,6 +1483,10 @@ IF @post = 1
 			INNER JOIN
 				vyuCTContractDetailView ICT
 					ON ISD.intPContractDetailId = ICT.intContractDetailId  
+			LEFT OUTER JOIN
+				vyuICGetItemStock ICIS
+					ON D.intItemId = ICIS.intItemId 
+					AND A.intCompanyLocationId = ICIS.intLocationId 
 			WHERE
 				D.dblTotal <> @ZeroDecimal
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0

@@ -44,11 +44,11 @@ BEGIN
 	
 	-- Arrange
 	DECLARE @result AS INT 
-			,@expected AS INT = @WetGrains_PoundUOM
+			,@Expected AS INT = @WetGrains_PoundUOM
 
 	-- Act
 	SELECT @result = dbo.fnGetMatchingItemUOMId(@WetGrains, @ColdGrains_PoundUOM);
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

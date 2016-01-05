@@ -94,3 +94,15 @@ IF EXISTS(select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 't
 		END	
 	END
 GO
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSCTicketType' AND [COLUMN_NAME] = 'intListTicketTypeId') 
+	BEGIN
+		PRINT 'DROPPING CONSTRAINT TO tblSCTicketType'
+		declare @constraint varchar(500)
+		set @constraint = ''
+		select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblSCTicketType' and OBJECT_NAME(referenced_object_id) = 'tblSCListTicketTypes' 
+
+		if(@constraint <> '')
+		exec('ALTER TABLE tblSCTicketType DROP CONSTRAINT [' + @constraint +']' )
+	END
+GO 

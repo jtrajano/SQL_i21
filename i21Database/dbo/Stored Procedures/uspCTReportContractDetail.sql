@@ -13,8 +13,8 @@ BEGIN TRY
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
 			LTRIM(CD.dblQuantity) + ' ' + UM.strUnitMeasure strQunatity,
 			CD.dblQuantity,
-			CASE	WHEN	CD.intPricingTypeId = 1 THEN LTRIM(CD.dblCashPrice) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
-					WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CD.dblCashPrice) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' ' + MO.strFutureMonth +' ('+ LTRIM(CD.dblNoOfLots) +')'  	
+			CASE	WHEN	CD.intPricingTypeId = 1 THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18,4))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
+					WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18,4))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' ' + MO.strFutureMonth +' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)'  	
 			END	AS	strPrice,
 			IM.strDescription,
 			BM.strBagMark,
