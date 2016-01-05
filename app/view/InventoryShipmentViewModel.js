@@ -22,6 +22,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.ContractHeaderViewBuffered'
     ],
 
+    data: {
+        triggerAddRemoveLineItem: false
+    },
+
     stores: {
         orderTypes: {
             autoLoad: true,
@@ -308,6 +312,27 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                         condition: 'noteq'
                     }];
                     break;
+            }
+        },
+        checkReadOnlyWithLineItem: function (get) {
+            get('triggerAddRemoveLineItem');
+
+            if (get('current.ysnPosted') === true) {
+                return true
+            }
+            else {
+                if (get('current.tblICInventoryShipmentItems').data.items.length > 0) {
+                    var current = get('current.tblICInventoryShipmentItems').data.items[0];
+                    if (current.dummy) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    return false;
+                }
             }
         }
     }

@@ -129,12 +129,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             cboOrderType: {
                 value: '{current.intOrderType}',
                 store: '{orderTypes}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{checkReadOnlyWithLineItem}'
             },
             cboSourceType: {
                 value: '{current.intSourceType}',
                 store: '{sourceTypes}',
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{checkReadOnlyWithLineItem}',
                 defaultFilters: '{filterSourceByType}'
             },
             txtReferenceNumber: {
@@ -552,6 +552,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             ]
         });
 
+        win.context.data.on({
+            currentrecordchanged: me.currentRecordChanged,
+            scope: win
+        });
+
         return win.context;
     },
 
@@ -600,6 +605,18 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
         record.set('dblQuantityShipped', config.dummy.get('dblQuantityShipped'));
         action(record);
+    },
+
+    currentRecordChanged: function(current) {
+        current.tblICInventoryShipmentItems().on({
+            add: this.controller.triggerAddRemoveLineItem,
+            remove: this.controller.triggerAddRemoveLineItem,
+            scope: this
+        });
+    },
+
+    triggerAddRemoveLineItem: function(config, record, e) {
+        this.viewModel.set('triggerAddRemoveLineItem', !this.viewModel.get('triggerAddRemoveLineItem'));
     },
 
     onShipLocationSelect: function(combo, records, eOpts) {
