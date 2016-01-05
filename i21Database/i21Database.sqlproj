@@ -3164,6 +3164,7 @@
     <Build Include="dbo\Views\vyuCFInvoiceMiscReport.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceCardReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
+    <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

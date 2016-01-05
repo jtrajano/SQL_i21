@@ -292,7 +292,7 @@ Begin
 	Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
 	Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
+	Join tblICItemUOM iu1 on pld.intItemIssuedUOMId=iu1.intItemUOMId
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join @tblReservedQty rq on pld.intLotId=rq.intLotId
 	Where pld.intPickListId=@intPickListId
