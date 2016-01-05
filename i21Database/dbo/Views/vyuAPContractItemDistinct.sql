@@ -33,16 +33,11 @@ AND A.intItemId = MinimumCashPrice.intItemId
 AND A.dblCashPrice = MinimumCashPrice.dblCashPriceMin
 CROSS APPLY
 (
-	SELECT intContractHeaderId, 
-		   SUM(dblBalance) AS dblTotalBalance, 
-		   intItemId 
-	FROM vyuCTContractDetailView B
+	SELECT SUM(dblBalance) AS dblTotalBalance
+	FROM dbo.tblCTContractDetail B 
 	WHERE B.intContractHeaderId = A.intContractHeaderId  
 		  AND B.intItemId = A.intItemId
-	GROUP BY 
-			intContractHeaderId, 
-			dblBalance, 
-			intItemId	
 ) Total 
+WHERE A.intContractStatusId != 5 --Completed contracts are not included on the list.
 
 GO
