@@ -17,7 +17,7 @@ AS
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	UH.intExternalId 
 	JOIN	tblICInventoryReceipt		IR	ON	IR.intInventoryReceiptId		=	RI.intInventoryReceiptId
-	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Inventory Receipt'
 
 	UNION ALL
@@ -38,7 +38,7 @@ AS
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblARInvoiceDetail			DL	ON	DL.intInvoiceDetailId			=	UH.intExternalId 
 	JOIN	tblARInvoice				HR	ON	HR.intInvoiceId					=	DL.intInvoiceId
-	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Invoice'
 
 	UNION ALL
@@ -58,7 +58,7 @@ AS
 	FROM	tblCTSequenceUsageHistory	UH
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblLGLoad					DL	ON	DL.intLoadId					=	UH.intExternalId 
-	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Load Schedule'
 
 	UNION ALL
@@ -163,9 +163,9 @@ AS
 			UH.dblNewValue,
 			US.strUserName
 	FROM	tblCTSequenceUsageHistory	UH
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	UH.intContractDetailId
-	JOIN	tblSCTicket					DL	ON	DL.intTicketId				=	UH.intExternalId 
-	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]		=	UH.intUserId
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
+	JOIN	tblSCTicket					DL	ON	DL.intTicketId					=	UH.intExternalId 
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Scale'
 
 	UNION ALL
@@ -183,10 +183,10 @@ AS
 			UH.dblNewValue,
 			US.strUserName
 	 FROM	tblCTSequenceUsageHistory	UH
-	 JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	UH.intContractDetailId
-	 JOIN	tblPOPurchaseDetail			DL	ON	DL.intPurchaseDetailId		=	UH.intExternalId 
-	 JOIN	tblPOPurchase				HR	ON	HR.intPurchaseId			=	DL.intPurchaseId
-	 JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]		=	UH.intUserId
+	 JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
+	 JOIN	tblPOPurchaseDetail			DL	ON	DL.intPurchaseDetailId			=	UH.intExternalId 
+	 JOIN	tblPOPurchase				HR	ON	HR.intPurchaseId				=	DL.intPurchaseId
+	 JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	 WHERE	UH.strScreenName	=	'Purchase Order'
 
 	UNION ALL
@@ -204,7 +204,28 @@ AS
 			UH.dblNewValue,
 			US.strUserName
 	FROM	tblCTSequenceUsageHistory	UH
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	UH.intContractDetailId
-	JOIN	tblGRCustomerStorage		DL	ON	DL.intCustomerStorageId		=	UH.intExternalId 
-	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]		=	UH.intUserId
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
+	JOIN	tblGRCustomerStorage		DL	ON	DL.intCustomerStorageId			=	UH.intExternalId 
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Settle Storage'
+
+	UNION ALL
+
+	SELECT	UH.intSequenceUsageHistoryId,
+			UH.intContractDetailId,
+			CD.intContractHeaderId,
+			CD.intContractSeq,
+			UH.dtmTransactionDate,
+			UH.strScreenName,
+			LTRIM(IR.strShipmentNumber)	AS	strNumber,
+			UH.strFieldName,
+			UH.dblOldValue,
+			UH.dblTransactionQuantity,
+			UH.dblNewValue,
+			US.strUserName
+	FROM	tblCTSequenceUsageHistory	UH
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
+	JOIN	tblICInventoryShipmentItem	RI	ON	RI.intInventoryShipmentItemId	=	UH.intExternalId 
+	JOIN	tblICInventoryShipment		IR	ON	IR.intInventoryShipmentId		=	RI.intInventoryShipmentId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]	=	UH.intUserId
+	WHERE	UH.strScreenName	=	'Inventory Shipment'
