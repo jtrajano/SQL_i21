@@ -43,33 +43,38 @@ Declare @intNoOfSheetOrig int
 Declare @strWorkOrderNoOrig nVarchar(50)
 Declare @ysnRequireCustomerApproval bit
 Declare @strLotTracking nvarchar(50)
+Declare @intMinWO int
+
+Declare @tblWO As table
+(
+	intRowNo int IDENTITY,
+	dblQuantity numeric(18,6),
+	dtmDueDate datetime,
+	intCellId int
+)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
- Select @intSalesOrderDetailId=intSalesOrderDetailId,@intLocationId=intLocationId,@intRecipeId=intRecipeId,@strWorkOrderNo=strWorkOrderNo,
- @intItemId=intItemId,@dblQuantity=dblQuantity,@intItemUOMId=intItemUOMId,@dtmDueDate=dtmDueDate,@intCellId=intCellId,@intUserId=intUserId
+ Select @intSalesOrderDetailId=intSalesOrderDetailId,@intLocationId=intLocationId,@intRecipeId=intRecipeId,
+ @intItemId=intItemId,@intItemUOMId=intItemUOMId,@intUserId=intUserId
  FROM OPENXML(@idoc, 'root', 2)  
  WITH ( 
 	intSalesOrderDetailId int, 
 	intLocationId int,
 	intRecipeId int,
-	strWorkOrderNo nVarchar(50),
 	intItemId int,
-	dblQuantity numeric(18,6),
 	intItemUOMId int,
-	dtmDueDate DateTime,
-	intCellId int,
 	intUserId int
 	)
 
-If ISNULL(@strWorkOrderNo,'') <> ''
-Begin
-If Exists (Select 1 From tblMFWorkOrder Where strWorkOrderNo=@strWorkOrderNo)
-	Begin
-		Set @ErrMsg='Work Order No ' + @strWorkOrderNo + ' already exists.'
-		RaisError(@ErrMsg,16,1)
-	End
-End
+Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId)
+ Select dblQuantity,dtmDueDate,intCellId
+ FROM OPENXML(@idoc, 'root/wo', 2)  
+ WITH ( 
+	dblQuantity numeric(18,6), 
+	dtmDueDate datetime,
+	intCellId int
+	)
 
 Select @intManufacturingProcessId=r.intManufacturingProcessId,@intAttributeTypeId=mp.intAttributeTypeId 
 From tblMFRecipe r Join  tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 
@@ -79,6 +84,33 @@ Begin Tran
 
 If @intAttributeTypeId=2 --Blending
 Begin
+
+	--Validation
+	Select @intMinWO=Min(intRowNo) From @tblWO
+
+	While(@intMinWO is not null)
+	Begin
+		Select @dblQuantity=dblQuantity,@intCellId=intCellId From @tblWO Where intRowNo=@intMinWO
+
+		Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
+		From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
+		Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
+		Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
+		Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
+		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
+		And mc.intManufacturingCellId=@intCellId
+
+		If ISNULL(@intMachineId,0) =0
+			RaisError('Machine is not defined for the Manufacturing Cell',16,1)
+
+		If ISNULL(@dblBlendBinSize,0) =0
+			RaisError('Blend Bin Size is zero for the machine',16,1)
+
+		If @dblQuantity > @dblBlendBinSize 
+			RaisError('Quantity cannot be greater than blend bin size',16,1)
+
+		Select @intMinWO=Min(intRowNo) From @tblWO Where intRowNo > @intMinWO
+	End
 
 	Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
 	Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
@@ -101,22 +133,7 @@ Begin
 			End
 	End
 
-	--Get Demand No
-	EXEC dbo.uspSMGetStartingNumber 46
-		,@strDemandNo OUTPUT
-
 	Select @intUOMId=intUnitMeasureId From tblICItemUOM Where intItemUOMId=@intItemUOMId And intItemId=@intItemId
-
-	Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
-	From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
-	Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
-	Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
-	Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
-	Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
-	And mc.intManufacturingCellId=@intCellId
-
-	If ISNULL(@intMachineId,0) =0
-		RaisError('Machine is not defined for the Manufacturing Cell',16,1)
 
 	Select @ysnKittingEnabled=CASE When UPPER(pa.strAttributeValue) = 'TRUE' then 1 Else 0 End 
 	From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
@@ -136,9 +153,11 @@ Begin
 			Set @intKitStatusId=null
 	End
 
-	Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
-	And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
-	And intStatusId Not in (2,13)
+	--Get Demand No
+	EXEC dbo.uspSMGetStartingNumber 46
+		,@strDemandNo OUTPUT
+
+	Select @dtmDueDate=Min(dtmDueDate) From @tblWO
 
 	Insert Into tblMFBlendRequirement(strDemandNo,intItemId,dblQuantity,intUOMId,dtmDueDate,intLocationId,intStatusId,dblIssuedQty,
 	intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified,intMachineId)
@@ -151,41 +170,36 @@ Begin
 	SELECT @intBlendRequirementId,a.intBlendSheetRuleId,b.strValue,a.intSequenceNo 
 	FROM tblMFBlendSheetRule a JOIN tblMFBlendSheetRuleValue b on a.intBlendSheetRuleId=b.intBlendSheetRuleId AND b.ysnDefault=1
 
-	Set @intNoOfSheet=Ceiling(@dblQuantity/@dblBlendBinSize)
+	Select @intMinWO=Min(intRowNo) From @tblWO
 
-	Set @intNoOfSheetOrig=@intNoOfSheet
-	Set @strWorkOrderNoOrig=@strWorkOrderNo
-
-	While(@intNoOfSheet > 0)
+	While(@intMinWO is not null)
 	Begin
-		Select @intWokrOrderId=null
+		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@dtmDueDate=dtmDueDate From @tblWO Where intRowNo=@intMinWO
 
-		if (@dblQuantity<@dblBlendBinSize)
-			select @dblBlendBinSize=@dblQuantity
+		Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
+		From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
+		Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
+		Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
+		Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
+		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
+		And mc.intManufacturingCellId=@intCellId
 
-		If ISNULL(@strWorkOrderNoOrig,'') = ''
-		Begin
-			If (select count(1) from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%') = 0
+		Select @strWorkOrderNo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  
+		from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
+
+		if ISNULL(@strWorkOrderNo,'')=''
 			Set @strWorkOrderNo=convert(varchar,@strDemandNo) + '01'
-			else
-			Select @strWorkOrderNo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  
-			from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
-		End
-		Else
-		Begin
-			If @intNoOfSheetOrig>1
-				Begin
-					Set @intNoOfSheetCounter=@intNoOfSheetCounter+1
-					Set @strWorkOrderNo = @strWorkOrderNoOrig + Convert(varchar,@intNoOfSheetCounter)
-				End
-		End
+
+		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
+		And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
+		And intStatusId Not in (2,13)
 
 		Set @intExecutionOrder=@intExecutionOrder+1
 
 		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
 		intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId,intSalesOrderLineItemId,intConcurrencyId)
-		Select @strWorkOrderNo,@intItemId,@dblBlendBinSize,@intItemUOMId,@intWorkOrderStatusId,@intCellId,@intMachineId,@intLocationId,@dblBlendBinSize,@dtmDueDate,@intExecutionOrder,1,
-		@dblBlendBinSize,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,1
+		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,@intWorkOrderStatusId,@intCellId,@intMachineId,@intLocationId,@dblBlendBinSize,@dtmDueDate,@intExecutionOrder,1,
+		@dblQuantity,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,1
 
 		Select @intWokrOrderId=SCOPE_IDENTITY()
 
@@ -193,31 +207,44 @@ Begin
 		If @ysnKittingEnabled=0
 			Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWokrOrderId
 
-		Select @dblQuantity=@dblQuantity-@dblBlendBinSize
-
-		Set @intNoOfSheet=@intNoOfSheet - 1
+		Select @intMinWO=Min(intRowNo) From @tblWO Where intRowNo > @intMinWO
 	End
 End
 
 If @intAttributeTypeId>=3 --Packaging
 Begin
 
-	--Get Work Order No
-	If ISNULL(@strWorkOrderNo,'') = ''
-		EXEC dbo.uspSMGetStartingNumber 34
-			,@strWorkOrderNo OUTPUT
-
-	Select @intSubLocationId=intSubLocationId From tblMFManufacturingCell where intManufacturingCellId=@intCellId
-
 	Select TOP 1 @intCustomerId=sh.intEntityCustomerId,@strSalesOrderNo=sh.strSalesOrderNumber 
 	From tblSOSalesOrder sh Join tblSOSalesOrderDetail sd on sh.intSalesOrderId=sd.intSalesOrderId Where sd.intSalesOrderDetailId=@intSalesOrderDetailId
 
-	insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dtmExpectedDate,intExecutionOrder,
-	intProductionTypeId,dblPlannedQuantity,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intManufacturingProcessId,intSalesOrderLineItemId,
-	dtmOrderDate,dtmPlannedDate,intSupervisorId,intSubLocationId,intCustomerId,strSalesOrderNo,intConcurrencyId)
-	Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,1,@intCellId,null,@intLocationId,@dtmDueDate,1,1,
-	@dblQuantity,0,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@intManufacturingProcessId,@intSalesOrderDetailId,
-	@dtmCurrentDate,@dtmDueDate,@intUserId,@intSubLocationId,@intCustomerId,@strSalesOrderNo,1
+	Select @intMinWO=Min(intRowNo) From @tblWO
+
+	While(@intMinWO is not null)
+	Begin
+		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@dtmDueDate=dtmDueDate From @tblWO Where intRowNo=@intMinWO
+
+		--Get Work Order No
+		If ISNULL(@strWorkOrderNo,'') = ''
+			EXEC dbo.uspSMGetStartingNumber 34
+				,@strWorkOrderNo OUTPUT
+
+		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
+		And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate)
+		And intStatusId Not in (2,13)
+
+		Set @intExecutionOrder=@intExecutionOrder+1
+
+		Select @intSubLocationId=intSubLocationId From tblMFManufacturingCell where intManufacturingCellId=@intCellId
+
+		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dtmExpectedDate,intExecutionOrder,
+		intProductionTypeId,dblPlannedQuantity,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intManufacturingProcessId,intSalesOrderLineItemId,
+		dtmOrderDate,dtmPlannedDate,intSupervisorId,intSubLocationId,intCustomerId,strSalesOrderNo,intConcurrencyId)
+		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,1,@intCellId,null,@intLocationId,@dtmDueDate,1,1,
+		null,0,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@intManufacturingProcessId,@intSalesOrderDetailId,
+		@dtmCurrentDate,@dtmDueDate,@intUserId,@intSubLocationId,@intCustomerId,@strSalesOrderNo,1
+
+		Select @intMinWO=Min(intRowNo) From @tblWO Where intRowNo > @intMinWO
+	End
 
 End
 

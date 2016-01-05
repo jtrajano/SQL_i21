@@ -12,7 +12,7 @@ RETURN
 	SELECT  
 			strAccountId,
 			SUM( 
-			CASE WHEN D.dtmDateFrom IS NOT NULL AND B.strAccountType IN ('Revenue','Expense') THEN 0 
+			CASE WHEN  D.dtmDate IS NOT NULL  AND B.strAccountType IN ('Revenue','Expense') THEN 0 
 			     WHEN B.strAccountType in ('Asset', 'Expense','Cost of Goods Sold') THEN dblDebit - dblCredit
 					ELSE dblCredit - dblDebit
 			END)  beginBalance,
@@ -24,7 +24,7 @@ RETURN
 	FROM tblGLAccount A
 		LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 		LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
-		LEFT JOIN tblGLFiscalYear D ON C.dtmDate = D.dtmDateFrom
-	WHERE strAccountId = @strAccountId and dtmDate < @dtmDate and strCode <> ''
+		CROSS APPLY (SELECT dtmDate from tblGLFiscalYear where dtmDateFrom = @dtmDate) D
+	WHERE strAccountId = @strAccountId and C.dtmDate < @dtmDate and strCode <> ''
 	GROUP BY strAccountId
 )

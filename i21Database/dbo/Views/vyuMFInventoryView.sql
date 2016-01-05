@@ -39,7 +39,6 @@ AS
 			l.intCreatedUserId,
 			l.intConcurrencyId,
 
-
 			i.strItemNo,         
 			i.strDescription strItemDescription,         
 			i.strType strItemType,         
@@ -64,8 +63,11 @@ AS
 		    '' AS strCostUOM,    
 		    0 AS intContainerId,    
 		    '' AS strContainerNo,
-			re.dblQty dblReservedQty, 
-			rum.strUnitMeasure strReservedQtyUOM    
+			ISNULL((SELECT SUM(dblQty) FROM tblICStockReservation WHERE intLotId = l.intLotId),0) dblReservedQty,
+			ISNULL(((SELECT SUM(dblQty) FROM tblICStockReservation WHERE intLotId = l.intLotId)/CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END),0) dblReservedNoOfPacks,
+			l.dblWeight-ISNULL((SELECT SUM(dblQty) FROM tblICStockReservation WHERE intLotId = l.intLotId),0) dblAvailableQty,
+			((l.dblWeight-ISNULL((SELECT SUM(dblQty) FROM tblICStockReservation WHERE intLotId = l.intLotId),0))/CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END) dblAvailableNoOfPacks,
+			'' strReservedQtyUOM
 	FROM tblICLot l
 	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 	LEFT JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -82,6 +84,3 @@ AS
 	LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId
 	LEFT JOIN tblARCustomer c1 ON c1. intEntityCustomerId = ito.intOwnerId
 	LEFT JOIN tblEntity e ON e.intEntityId = l.intEntityVendorId
-	LEFT JOIN tblICStockReservation re ON re.intLotId=l.intLotId
-	LEFT JOIN tblICItemUOM ru  ON ru.intItemUOMId = re.intItemUOMId
-	LEFT JOIN tblICUnitMeasure rum ON rum.intUnitMeasureId = ru.intUnitMeasureId

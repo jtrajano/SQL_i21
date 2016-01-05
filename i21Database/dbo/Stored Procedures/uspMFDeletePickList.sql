@@ -41,6 +41,34 @@ Begin Tran
 
 	If @intKitStatusId = 7
 	Begin
+		--Move the Staged (Kitting Area) Lots back to Storage Location
+		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity)
+		Select PL.intPickListDetailId,PL.intStageLotId,PL.intStorageLocationId,
+		CASE WHEN PL.intItemUOMId = PL.intItemIssuedUOMId THEN PL.dblPickQuantity / L.dblWeightPerQty ELSE PL.dblPickQuantity END 
+		From tblMFPickListDetail PL
+		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
+		Where intPickListId=@intPickListId AND PL.intLotId <> PL.intStageLotId
+
+		Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail
+
+		While(@intMinPickDetail is not null) --Pick List Detail Loop
+		Begin
+			Select @intPickListDetailId = pld.intPickListDetailId, @intStageLotId=pld.intStageLotId,
+			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity 
+			From @tblPickListDetail pld
+			where intRowNo=@intMinPickDetail
+
+			Select @intNewSubLocationId=intSubLocationId from tblICStorageLocation Where intStorageLocationId=@intStorageLocationId
+
+			Exec [uspMFLotMove] @intLotId=@intStageLotId,
+					@intNewSubLocationId=@intNewSubLocationId,
+					@intNewStorageLocationId=@intStorageLocationId,
+					@dblMoveQty=@dblPickQuantity,
+					@intUserId=@intUserId
+
+			Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail where intRowNo>@intMinPickDetail
+		End
+
 		Delete From tblMFPickListDetail Where intPickListId=@intPickListId
 
 		Delete From tblMFPickList Where intPickListId=@intPickListId

@@ -3,7 +3,7 @@
 	,@dtmBeginDate			DATETIME
 	,@dtmEndDate			DATETIME
 	,@dtmPayDate			DATETIME
-	,@intPayGroupId			INT = NULL
+	,@strPayGroupIds		NVARCHAR(MAX) = ''
 	,@strDepartmentIds		NVARCHAR(MAX) = ''
 	,@ysnUseStandardHours	BIT = 1
 	,@intUserId				INT = NULL
@@ -16,7 +16,7 @@ DECLARE @intEmployee INT
 	   ,@dtmBegin DATETIME
 	   ,@dtmEnd DATETIME
 	   ,@dtmPay DATETIME
-	   ,@intPayGroup INT
+	   ,@xmlPayGroups XML
 	   ,@ysnUseStandard BIT
 	   ,@xmlDepartments XML
 
@@ -25,8 +25,8 @@ SELECT @intEmployee		= @intEmployeeId
 	  ,@dtmBegin		= @dtmBeginDate
 	  ,@dtmEnd			= @dtmEndDate
 	  ,@dtmPay			= @dtmPayDate
-	  ,@intPayGroup		= @intPayGroupId
 	  ,@ysnUseStandard	= @ysnUseStandardHours
+	  ,@xmlPayGroups	= CAST('<A>'+ REPLACE(@strPayGroupIds, ',', '</A><A>')+ '</A>' AS XML) 
 	  ,@xmlDepartments  = CAST('<A>'+ REPLACE(@strDepartmentIds, ',', '</A><A>')+ '</A>' AS XML) 
 
 --Parse the Departments Parameter to Temporary Table
@@ -38,6 +38,17 @@ WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpDepartments) 
 BEGIN
 	INSERT INTO #tmpDepartments (intDepartmentId) SELECT intDepartmentId FROM tblPRDepartment
+END
+
+--Parse the Pay Groups Parameter to Temporary Table
+SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intPayGroupId
+INTO #tmpPayGroups
+FROM @xmlPayGroups.nodes('/A') AS X(T) 
+WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpPayGroups) 
+BEGIN
+	INSERT INTO #tmpPayGroups (intPayGroupId) SELECT intPayGroupId FROM tblPRPayGroup
 END
 
 /* Get Paycheck Starting Number */
@@ -78,7 +89,7 @@ SELECT
 	,tblPREmployee.strPayPeriod
 	,@dtmBegin
 	,@dtmEnd
-	,(SELECT intBankAccountId FROM tblPRPayGroup WHERE intPayGroupId = @intPayGroup)
+	,(SELECT TOP 1 intBankAccountId FROM tblPRPayGroup WHERE intPayGroupId IN (SELECT intPayGroupId FROM #tmpPayGroups))
 	,''
 	,0
 	,0
@@ -208,7 +219,8 @@ intEmployeeEarningId = CASE WHEN (intEmployeeEarningLinkId IS NULL)
 FROM tblPREmployeeEarning E
 WHERE [intEntityEmployeeId] = @intEmployee
 	AND (E.ysnDefault = 1 OR E.dblHoursToProcess > 0)
-	AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END) E
+	AND intPayGroupId IN (SELECT intPayGroupId FROM #tmpPayGroups)
+) E
 LEFT JOIN 
 (SELECT intEmployeeEarningId, intEmployeeDepartmentId 
  FROM tblPRTimecard
@@ -261,8 +273,9 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,@strCalculationType
 			,CASE 
 				--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
-				WHEN (@intPayGroup IS NOT NULL AND ((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = @intTypeEarningId) LIKE '%holiday%'))
-					THEN ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup WHERE intPayGroupId = @intPayGroup), 0)
+				WHEN (((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = @intTypeEarningId) LIKE '%holiday%')
+				AND ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup P LEFT JOIN tblPREmployeeEarning E ON P.intPayGroupId = E.intPayGroupId WHERE E.intTypeEarningId = @intTypeEarningId), 0) > 0)
+					THEN ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup P LEFT JOIN tblPREmployeeEarning E ON P.intPayGroupId = E.intPayGroupId WHERE E.intTypeEarningId = @intTypeEarningId), 0)
 			    --If Use Standard Hours, get hours based on Default in Employee Setup
 				WHEN (@ysnUseStandard = 1) 
 					THEN @dblDefaultHours 
@@ -286,8 +299,9 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				-- If Calculation is Hourly Based
 				CASE 
 					--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
-					WHEN (@intPayGroup IS NOT NULL AND ((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = @intTypeEarningId) LIKE '%holiday%'))
-						THEN ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup WHERE intPayGroupId = @intPayGroup), 0)
+					WHEN (((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = @intTypeEarningId) LIKE '%holiday%')
+					AND ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup P LEFT JOIN tblPREmployeeEarning E ON P.intPayGroupId = E.intPayGroupId WHERE E.intTypeEarningId = @intTypeEarningId), 0) > 0)
+						THEN ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup P LEFT JOIN tblPREmployeeEarning E ON P.intPayGroupId = E.intPayGroupId WHERE E.intTypeEarningId = @intTypeEarningId), 0)
 					--If Use Standard Hours, get hours based on Default in Employee Setup
 					WHEN (@ysnUseStandard = 1) 
 						THEN @dblDefaultHours 
@@ -447,7 +461,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 						END
 	WHERE intEntityEmployeeId = @intEmployee
 
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpDepartments')) DROP TABLE #tmpDepartments
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpEarnings')) DROP TABLE #tmpEarnings
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDepartments')) DROP TABLE #tmpDepartments
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayGroups')) DROP TABLE #tmpPayGroups
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarnings')) DROP TABLE #tmpEarnings
 END
 GO

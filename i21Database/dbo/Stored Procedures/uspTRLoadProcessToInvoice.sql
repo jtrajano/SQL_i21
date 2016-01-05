@@ -18,6 +18,8 @@ DECLARE @InventoryReceiptId AS INT;
 DECLARE @ErrMsg                    NVARCHAR(MAX);
 
 DECLARE @InvoiceStagingTable AS InvoiceStagingTable,
+        @strReceiptLink AS NVARCHAR(100),
+		@strBOL AS NVARCHAR(50),
         @total as int;
 
 DECLARE @InvoiceOutputTable TABLE
@@ -26,7 +28,11 @@ DECLARE @InvoiceOutputTable TABLE
     intSourceId int,
 	intInvoiceId int
     )
-
+DECLARE @InvoicePostOutputTable TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+	intInvoiceId int
+    )
 BEGIN TRY
 
 if @ysnPostOrUnPost = 0 and @ysnRecap = 0
@@ -81,7 +87,7 @@ END
 		,intInvoiceId
 		,strSourceScreenName
 	 )	 
-	 select     
+	 	 select     
        DH.intEntityCustomerId,     
 	   DH.intCompanyLocationId,
        DD.intItemId,	  
@@ -109,14 +115,14 @@ END
 	   1, -- Need to check this	  
 	   DD.dblFreightRate,	   
 	   strComments = CASE
-                            WHEN TR.intSupplyPointId is NULL and TL.intLoadId is NULL
+                            WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NULL and TL.intLoadId is NULL
 	                           THEN RTRIM(DH.strComments)
-							WHEN TR.intSupplyPointId is NOT NULL and TL.intLoadId is NULL 
-							   THEN	'Origin:' + RTRIM(SP.strSupplyPoint) + ' ' + RTRIM(DH.strComments)
-							WHEN TR.intSupplyPointId is NULL and TL.intLoadId is NOT NULL 
+							WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NOT NULL and TL.intLoadId is NULL 
+							   THEN	'Origin:' + RTRIM((select top 1 strSupplyPoint from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId))) + ' ' + RTRIM(DH.strComments)
+							WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NULL and TL.intLoadId is NOT NULL 
 							   THEN	'Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
-							WHEN TR.intSupplyPointId is NOT NULL and TL.intLoadId is NOT NULL 
-							   THEN	'Origin:' + RTRIM(SP.strSupplyPoint) + ' Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
+							WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NOT NULL and TL.intLoadId is NOT NULL 
+							   THEN	'Origin:' + RTRIM((select top 1 strSupplyPoint from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)))  + ' Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
 							   END, 
 	   TL.strTransaction,
 	   DH.intLoadDistributionHeaderId,
@@ -133,14 +139,12 @@ END
 			         and HH.strDestination = 'Customer' 
 			         and HH.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId ) as strActualCostId,
 		DH.intShipToLocationId,
-		TR.strBillOfLading,
+		NULL,
 		DH.intInvoiceId,
 		'Transport Loads' 
-	   from tblTRLoadHeader TL
-            JOIN tblTRLoadReceipt TR on TR.intLoadHeaderId = TL.intLoadHeaderId
+	   from tblTRLoadHeader TL           
 			JOIN tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
-			JOIN tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-			LEFT JOIN vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
+			JOIN tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId			
 			LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
             where TL.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer';
 
@@ -190,39 +194,62 @@ BEGIN
        set intInvoiceId = @InvoiceId
          where @SouceId = intLoadDistributionHeaderId 
 
-   if @ysnRecap = 0
-   BEGIN		
-        EXEC	 [dbo].[uspARPostInvoice]
-             				@batchId = NULL,
-             				@post = @ysnPostOrUnPost,
-             				@recap = 0,
-             				@param = NULL,
-             				@userId = @intUserId,
-             				@beginDate = NULL,
-             				@endDate = NULL,
-             				@beginTransaction = @InvoiceId,
-             				@endTransaction = @InvoiceId,
-             				@exclude = NULL,
-             				@successfulCount = @SuccessCount OUTPUT,
-             				@invalidCount = @InvCount OUTPUT,
-             				@success = @IsSuccess OUTPUT,
-             				@batchIdUsed = @batchId OUTPUT,
-             				@recapId = NULL,
-             				@transType = N'Invoice',
-                            @raiseError = 1
-             if @IsSuccess = 0
-             BEGIN
-                RAISERROR('Invoice did not Post/UnPost', 16, 1);
-             END
-   END
+   set @strReceiptLink = (select dbo.fnTRConcatString('',@InvoiceId,',','strReceiptLink'))
+   set @strBOL = (select dbo.fnTRConcatString(@strReceiptLink,@intLoadHeaderId,',','strBillOfLading'))
 
+    update tblARInvoice 
+       set strBOLNumber = @strBOL
+         where intInvoiceId = @InvoiceId 
 
    SET @incval = @incval + 1;
 
 END;
 
+ if @ysnRecap = 0
+    BEGIN
+        INSERT INTO @InvoicePostOutputTable
+        select Distinct IV.intInvoiceId              
+        FROM
+            @InvoiceStagingTable IE  
+            JOIN tblARInvoice IV
+                on IE.intSourceId = IV.intLoadDistributionHeaderId
+        select @total = count(*) from @InvoicePostOutputTable;
+        set @incval = 1 
+        WHILE @incval <=@total 
+        BEGIN
+           select @InvoiceId =intInvoiceId  from @InvoicePostOutputTable where @incval = intId
+        
+          		
+                EXEC	 [dbo].[uspARPostInvoice]
+                     				@batchId = NULL,
+                     				@post = @ysnPostOrUnPost,
+                     				@recap = 0,
+                     				@param = NULL,
+                     				@userId = @intUserId,
+                     				@beginDate = NULL,
+                     				@endDate = NULL,
+                     				@beginTransaction = @InvoiceId,
+                     				@endTransaction = @InvoiceId,
+                     				@exclude = NULL,
+                     				@successfulCount = @SuccessCount OUTPUT,
+                     				@invalidCount = @InvCount OUTPUT,
+                     				@success = @IsSuccess OUTPUT,
+                     				@batchIdUsed = @batchId OUTPUT,
+                     				@recapId = NULL,
+                     				@transType = N'Invoice',
+                                    @raiseError = 1
+                     if @IsSuccess = 0
+                     BEGIN
+                        RAISERROR('Invoice did not Post/UnPost', 16, 1);
+                     END
+           
+        
+        
+           SET @incval = @incval + 1;
+        
+        END;
 --Post the invoice that was created
-
+    END
 
 END TRY
 BEGIN CATCH

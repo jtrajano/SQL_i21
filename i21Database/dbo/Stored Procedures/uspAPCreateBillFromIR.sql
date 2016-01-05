@@ -191,7 +191,7 @@ BEGIN
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]					=	B.dblUnitCost,
-		[dblNetWeight]				=	B.dblNet,
+		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
 											ELSE NULL END,

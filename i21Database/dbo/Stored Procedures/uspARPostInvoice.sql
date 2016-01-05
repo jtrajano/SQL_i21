@@ -516,6 +516,7 @@ SET @batchIdUsed = @batchId
 						AND D.intContractDetailId = CT.intContractDetailId 		 				
 				WHERE
 					D.dblPrice = @ZeroDecimal
+					AND CT.strPricingType <> 'Index'
 					
 				--Contract Item Price not Equal to Contract Sequence Cash Price
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -543,6 +544,7 @@ SET @batchIdUsed = @batchId
 				WHERE
 					D.dblPrice <> @ZeroDecimal				
 					AND ISNULL(CT.dblCashPrice,0.00) <> D.dblPrice 
+					AND CT.strPricingType <> 'Index'
 					
 					
 				BEGIN TRY

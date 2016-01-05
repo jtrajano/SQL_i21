@@ -141,36 +141,36 @@ Declare @dblRecipeQuantity numeric(18,6)
 
 Select @dblRecipeQuantity = dblQuantity from tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId
 
-Insert into @tblItem(intItemId,dblReqQty,ysnSubstituteItem)
-Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/@dblRecipeQuantity)) AS RequiredQty,0
-From tblMFWorkOrderRecipeItem ri 
-where ri.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1
-UNION
-Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblQtyToProduce/@dblRecipeQuantity)) AS RequiredQty,1
-From tblMFWorkOrderRecipeSubstituteItem rs 
-where rs.intWorkOrderId=@intWorkOrderId and rs.intRecipeItemTypeId=1
+--Insert into @tblItem(intItemId,dblReqQty,ysnSubstituteItem)
+--Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/@dblRecipeQuantity)) AS RequiredQty,0
+--From tblMFWorkOrderRecipeItem ri 
+--where ri.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1
+--UNION
+--Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblQtyToProduce/@dblRecipeQuantity)) AS RequiredQty,1
+--From tblMFWorkOrderRecipeSubstituteItem rs 
+--where rs.intWorkOrderId=@intWorkOrderId and rs.intRecipeItemTypeId=1
 
-Insert into @tblReservedQty
-Select cl.intLotId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-where w.intStatusId<>13
-group by cl.intLotId
+--Insert into @tblReservedQty
+--Select cl.intLotId,Sum(cl.dblQuantity) AS dblReservedQty 
+--From tblMFWorkOrderConsumedLot cl 
+--Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
+--join tblICLot l on l.intLotId=cl.intLotId
+--where w.intStatusId<>13
+--group by cl.intLotId
 
-Insert Into @tblAvailableQty(intLotId,intItemId,strLotNo,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM)
-Select l.intLotId,l.intItemId,icl.strLotNumber,i.strItemNo,
-ISNULL((ISNULL(icl.dblWeight,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
-l.dblQty,
-(l.dblQty % l.dblWeightPerUnit) AS dblOverCommitQty,
-l.dblWeightPerUnit,
-um.strUnitMeasure
-from @tblLot l
-Left Join @tblReservedQty r on l.intLotId=r.intLotId
-Join tblICLot icl on l.intLotId=icl.intLotId 
-Join tblICItem i on l.intItemId=i.intItemId
-Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
-Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+--Insert Into @tblAvailableQty(intLotId,intItemId,strLotNo,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM)
+--Select l.intLotId,l.intItemId,icl.strLotNumber,i.strItemNo,
+--ISNULL((ISNULL(icl.dblWeight,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
+--l.dblQty,
+--(l.dblQty % l.dblWeightPerUnit) AS dblOverCommitQty,
+--l.dblWeightPerUnit,
+--um.strUnitMeasure
+--from @tblLot l
+--Left Join @tblReservedQty r on l.intLotId=r.intLotId
+--Join tblICLot icl on l.intLotId=icl.intLotId 
+--Join tblICItem i on l.intItemId=i.intItemId
+--Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
+--Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 
 --Validation #1
 If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=1 AND intTypeId=2)

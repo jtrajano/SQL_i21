@@ -44,10 +44,10 @@ SELECT
 	(select  top 1 CS.strName from dbo.vyuEMEntity CS where CS.intEntityId = DH.intEntityCustomerId) as strCustomer,
 	(select  top 1 EL.strLocationName from dbo.tblEntityLocation EL where EL.intEntityLocationId = DH.intShipToLocationId) as strCustomerLocation,
 	(select top 1 SM.strLocationName from dbo.tblSMCompanyLocation SM where SM.intCompanyLocationId = DH.intCompanyLocationId) as strCustomerCompanyLocation,
-	(select top 1 strFuelSupplier from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) as strFuelSupplier,
-	(select top 1 strSupplyPoint from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) as strSupplyPoint,
-	(select top 1 strBillOfLading from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) as strBOL,
-	(select top 1 strReceiptCompanyLocation from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) as strReceiptCompanyLocation,
+	(select dbo.fnTRConcatString(DD.strReceiptLink,DH.intLoadHeaderId,',','strFuelSupplier')) as strFuelSupplier,
+	(select dbo.fnTRConcatString(DD.strReceiptLink,DH.intLoadHeaderId,',','strSupplyPoint')) as strSupplyPoint,
+	(select dbo.fnTRConcatString(DD.strReceiptLink,DH.intLoadHeaderId,',','strBillOfLading')) as strBOL,
+	(select dbo.fnTRConcatString(DD.strReceiptLink,DH.intLoadHeaderId,',','strReceiptCompanyLocation'))  as strReceiptCompanyLocation,
 	(select top 1 IC.strItemNo from dbo.vyuICGetItemStock IC where IC.intItemId = DD.intItemId) as strItem,
 	DD.dblUnits as dblQuantity,
 	DD.dblPrice as dblPrice,
@@ -56,9 +56,9 @@ SELECT
 	(select  top 1 AR.strName from dbo.vyuEMEntity AR where AR.intEntityId = TL.intDriverId) as strDriver,
 	DH.dtmInvoiceDateTime as dtmDateTime,
 	TL.ysnPosted,
-	NULL as strInventoryReceiptNo,
-	NULL as strInventoryTransferNo,
-	NULL as strInvoiceNo
+	(select dbo.fnTRConcatString(DD.strReceiptLink,DH.intLoadHeaderId,',','strReceiptNumber')) as strInventoryReceiptNo,
+	(select dbo.fnTRConcatString(DD.strReceiptLink,DH.intLoadHeaderId,',','strTransferNo')) as strInventoryTransferNo,
+	(select strInvoiceNumber from tblARInvoice ARI where ARI.intInvoiceId = DH.intInvoiceId) as strInvoiceNo
 FROM
 	 dbo.tblTRLoadHeader TL
     JOIN dbo.tblTRLoadDistributionHeader DH

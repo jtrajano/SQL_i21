@@ -9,9 +9,9 @@ SELECT R.intRecipeId
 	 , strUnitMeasure			= UM.strUnitMeasure
 	 , RI.dblQuantity
 	 , dblNewQuantity			= RI.dblQuantity
-	 , dblAvailableQuantity		= I.dblAvailable
-	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(RI.intItemId, RI.intItemUOMId, RI.dblQuantity) * I.dblSalePrice
-	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(RI.intItemId, RI.intItemUOMId, RI.dblQuantity) * I.dblSalePrice 
+	 , dblAvailableQuantity		= I.dblAvailable	 
+	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(RI.intItemId, RI.intItemUOMId, 1) * I.dblSalePrice
+	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(RI.intItemId, RI.intItemUOMId, 1) * I.dblSalePrice	 
 	 , strItemType				= I.strType
 	 , strType					= 'Finished Good'
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -32,9 +32,9 @@ SELECT intRecipeId			= NULL
 	 , UOM.strUnitMeasure
 	 , IB.dblQuantity
 	 , dblNewQuantity		= IB.dblQuantity
-	 , dblAvailableQuantity = 0.000000
-	 , dblPrice				= 0
-	 , dblNewPrice			= 0
+	 , dblAvailableQuantity = I.dblAvailable
+	 , dblPrice				= dbo.fnICConvertUOMtoStockUnit(IB.intBundleItemId, IB.intItemUnitMeasureId, 1) * I.dblSalePrice
+	 , dblNewPrice			= dbo.fnICConvertUOMtoStockUnit(IB.intBundleItemId, IB.intItemUnitMeasureId, 1) * I.dblSalePrice
 	 , strItemType			= 'Inventory'
 	 , strType				= 'Bundle'
 	 , ysnAllowNegativeStock = CONVERT(BIT, 0)

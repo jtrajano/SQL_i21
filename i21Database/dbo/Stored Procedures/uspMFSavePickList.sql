@@ -30,6 +30,8 @@ DECLARE @dblPickQtySum numeric(18,6)
 DECLARE @dblPickQty numeric(18,6)
 DECLARE @dblAvailableUnit numeric(18,6)
 Declare @ysnBlendSheetRequired bit
+Declare @intLocationId int
+Declare @intBlendItemId int
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -101,7 +103,10 @@ INSERT INTO @tblPickListDetail(
 	intUserId int
 	)
 
-Select TOP 1 @intPickListId=intPickListId,@strWorkOrderNos=strWorkOrderNo,@intAssignedToId=intAssignedToId,@strPickListNo=strPickListNo From @tblPickList
+Select TOP 1 @intPickListId=intPickListId,@strWorkOrderNos=strWorkOrderNo,@intAssignedToId=intAssignedToId,@strPickListNo=strPickListNo,@intLocationId=intLocationId 
+From @tblPickList
+
+Select TOP 1 @intBlendItemId=intItemId From tblMFWorkOrder Where intPickListId=@intPickListId
 
 --Get the Comma Separated Work Order Nos into a table
 SET @index = CharIndex(',',@strWorkOrderNos)
@@ -123,6 +128,8 @@ If (Select count(1) from @tblWorkOrder)=0
 	Raiserror('No Blend Sheet(s) are selected for picking.',16,1)
 
 Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
+
+Select TOP 1 @intBlendItemId=intItemId From tblMFWorkOrder Where strWorkOrderNo in (Select strWorkOrderNo From @tblWorkOrder)
 
 If @ysnBlendSheetRequired = 1
 Begin
@@ -171,11 +178,21 @@ End
 
 End
 
+If @ysnBlendSheetRequired = 0
+Delete From @tblPickListDetail Where intLotId=0
+
 If ISNULL(@strPickListNo,'') = ''
 	Begin
 		EXEC dbo.uspSMGetStartingNumber 68,@strPickListNo OUTPUT
 		Update @tblPickList Set strPickListNo=@strPickListNo
 	End
+
+--Do not save items if consumption method is not By Lot
+Delete tpl From @tblPickListDetail tpl 
+Join tblMFRecipeItem ri on tpl.intItemId=ri.intItemId 
+Join tblMFRecipe r on ri.intRecipeId=r.intRecipeId 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+
 Begin Tran
 
 If @intPickListId=0
@@ -210,9 +227,19 @@ Begin
 	Update pl Set pl.intAssignedToId=tpl.intAssignedToId,pl.intLastModifiedUserId=tpl.intUserId,pl.dtmLastModified=@dtmCurrentDate,pl.intConcurrencyId=@intConCurrencyId 
 	From tblMFPickList pl Join @tblPickList tpl on pl.intPickListId=tpl.intPickListId
 
-	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId
+	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,
+	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId
 	From tblMFPickListDetail pld Join @tblPickListDetail tpld on pld.intPickListDetailId=tpld.intPickListDetailId 
 	Where pld.intPickListId=@intPickListId
+
+	--insert new picked lots
+	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
+	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intStageLotId,
+	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
+	Select @intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
+	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intLotId,
+	@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1
+	from @tblPickListDetail Where intPickListDetailId=0
 End
 
 SET @intPickListIdOut=@intPickListId

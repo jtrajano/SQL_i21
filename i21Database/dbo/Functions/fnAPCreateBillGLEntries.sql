@@ -197,13 +197,75 @@ BEGIN
 				GROUP BY D.intBillDetailId
 			) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	UNION ALL
+	--CHARGES
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.intAccountId
+												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
+		[dblDebit]						=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
+												ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
+														ELSE D.dblAmount
+													END)
+											END, --Bill Detail
+		[dblCredit]						=	0, -- Bill
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	A.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	B.strMiscDescription,
+		[intJournalLineNo]				=	B.intBillDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
+												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Debit Memo'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	0,
+		[intConcurrencyId]				=	1
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			INNER JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			INNER JOIN tblAPVendor C
+				ON A.intEntityVendorId = C.intEntityVendorId
+			LEFT JOIN tblICInventoryReceiptItemAllocatedCharge D
+				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
+			LEFT JOIN tblICInventoryReceiptItem E
+				ON D.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+			LEFT JOIN tblICItem F
+				ON E.intItemId = F.intItemId
+	WHERE B.intInventoryReceiptChargeId IS NOT NULL
+	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
 	--TAXES
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
+		--[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
+		[dblDebit]						=	(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END)
+											* (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -239,7 +301,7 @@ BEGIN
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND A.intTransactionType = 1
+	AND A.intTransactionType IN (1,3)
 	AND D.dblTax != 0
 	AND 1 = (
 		--create tax only from item receipt if it is adjusted
@@ -252,6 +314,7 @@ BEGIN
 	,C.strVendorId
 	,D.intBillDetailTaxId
 	,A.intCurrencyId
+	,A.intTransactionType
 	,A.strBillId
 	,A.intBillId
 	
