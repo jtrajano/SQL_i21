@@ -3107,6 +3107,7 @@
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostDividend.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
