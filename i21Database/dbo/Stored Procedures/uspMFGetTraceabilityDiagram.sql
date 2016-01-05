@@ -2,7 +2,8 @@
 	--@intLotId int,
 	@strLotNumber nvarchar(50),
 	@intLocationId int,
-	@intDirectionId int
+	@intDirectionId int,
+	@ysnParentLot bit=0
 AS
 SET NOCOUNT ON;
 
@@ -13,7 +14,10 @@ Declare @intId int
 Declare @intParentId int
 Declare @strType nvarchar(1)
 
-Select TOP 1 @intLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intLocationId=@intLocationId
+If @ysnParentLot=0
+	Select TOP 1 @intLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intLocationId=@intLocationId
+Else
+	Select TOP 1 @intLotId=intParentLotId From tblICParentLot where strParentLotNumber=@strLotNumber
 
 Declare @tblTemp AS table
 (
@@ -103,14 +107,14 @@ Begin
 	--Receipt
 	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
-	Exec uspMFGetTraceabilityLotReceiptDetail @intLotId
+	Exec uspMFGetTraceabilityLotReceiptDetail @intLotId,@ysnParentLot
 
 	Update @tblNodeData Set intRecordId=1,intParentId=0
 
 	--Lot Detail
 	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
-	Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId
+	Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId,@ysnParentLot
 
 	Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
 
@@ -138,19 +142,19 @@ Begin
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
-					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId
+					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
 
 				-- WorkOrder Output details
 				If @strType='W'  			
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
-					Exec uspMFGetTraceabilityWorkOrderOutputDetail @intId
+					Exec uspMFGetTraceabilityWorkOrderOutputDetail @intId,@ysnParentLot
 			
 				-- Lot Ship
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
-					Exec uspMFGetTraceabilityLotShipDetail @intId
+					Exec uspMFGetTraceabilityLotShipDetail @intId,@ysnParentLot
 
 				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL        
 
@@ -190,14 +194,14 @@ Begin
 	--Ship
 	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
-	Exec uspMFGetTraceabilityLotShipDetail @intLotId
+	Exec uspMFGetTraceabilityLotShipDetail @intLotId,@ysnParentLot
 
 	Update @tblNodeData Set intRecordId=1,intParentId=0
 
 	--Lot Detail
 	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
-	Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId
+	Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId,@ysnParentLot
 
 	Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
 
@@ -225,19 +229,19 @@ Begin
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
-					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId
+					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
 
-				-- WorkOrder Output details
+				-- WorkOrder Input details
 				If @strType='W'  			
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
-					Exec uspMFGetTraceabilityWorkOrderInputDetail @intId
+					Exec uspMFGetTraceabilityWorkOrderInputDetail @intId,@ysnParentLot
 			
 				-- Lot Receipt
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
-					Exec uspMFGetTraceabilityLotReceiptDetail @intId
+					Exec uspMFGetTraceabilityLotReceiptDetail @intId,@ysnParentLot
 
 				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL        
 
