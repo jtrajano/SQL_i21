@@ -8,7 +8,7 @@ BEGIN
 			,@dblLotWeight AS NUMERIC(18,6)
 			,@dblCostingQty AS NUMERIC(18,6)
 			,@dblLotWeightPerQty AS NUMERIC(38,20)
-			,@expected AS NUMERIC(18,6) 
+			,@Expected AS NUMERIC(18,6) 
 			,@result AS NUMERIC(18,6)
 	
 	-- Act
@@ -22,5 +22,5 @@ BEGIN
 	);
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

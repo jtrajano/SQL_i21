@@ -195,10 +195,12 @@ INNER JOIN (SELECT icfSite.*
 			INNER JOIN tblICItem iicItem
 			ON icfItem.intARItemId = iicItem.intItemId
 			INNER JOIN tblICItemLocation iicItemLoc
-			ON iicItemLoc.intItemLocationId = icfSite.intARLocationId 
-				AND iicItemLoc.intItemId = icfItem.intItemId)
+			ON iicItemLoc.intLocationId = icfSite.intARLocationId 
+				AND iicItemLoc.intItemId = icfItem.intARItemId)
 			AS cfSiteItem
 ON cfTrans.intSiteId = cfSiteItem.intSiteId
+AND cfSiteItem.intARItemId = cfTrans.intARItemId
+AND cfSiteItem.intItemId = cfTrans.intProductId
 INNER JOIN (SELECT * 
 			FROM tblCFTransactionPrice
 			WHERE strTransactionPriceId = 'Net Price')
@@ -209,7 +211,6 @@ ON cfTrans.intNetworkId = cfNetwork.intNetworkId
 LEFT JOIN vyuCTContractDetailView ctContracts
 ON cfTrans.intContractId = ctContracts.intContractDetailId
 WHERE cfTrans.intTransactionId = @TransactionId
-		
 
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries	= @EntriesForInvoice

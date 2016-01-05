@@ -21,6 +21,7 @@ BEGIN
 				,strAccountDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetGLAccountIdFromOriginToi21(gl.apegl_gl_acct))
 				,dblAmount = gl.apegl_gl_amt * -1
 				,uf.strName
+				,intEntityCustomerId = null
 				,uf.dtmDate
 		FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v
 					ON gl.apegl_cbk_no = v.aptrx_cbk_no
@@ -42,6 +43,7 @@ BEGIN
 		strAccountDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intAccountId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId)),
 		dblAmount,
 		strName, 
+		intEntityCustomerId = (SELECT intEntityCustomerId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId),
 		dtmDate
 		FROM tblCMUndepositedFund
 

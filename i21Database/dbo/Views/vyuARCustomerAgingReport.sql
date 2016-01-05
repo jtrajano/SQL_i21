@@ -11,8 +11,9 @@ SELECT A.strCustomerName
 	 , SUM(B.dbl60Days) AS dbl60Days
 	 , SUM(B.dbl90Days) AS dbl90Days
 	 , SUM(B.dbl91Days) AS dbl91Days
-	 , SUM(B.dblTotalDue) AS dblTotalDue
-	 , SUM(A.dblAmountPaid) AS dblAmountPaid	 
+	 , SUM(B.dblTotalDue) AS dblTotalDue	 
+	 , SUM(A.dblAmountPaid) AS dblAmountPaid
+	 , SUM(A.dblInvoiceTotal) AS dblInvoiceTotal
 	 , dblCredits = SUM(B.dblAvailableCredit)
 	 , dblPrepaids = 0	 
 FROM
@@ -101,8 +102,7 @@ SELECT I.dtmPostDate
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '11 - 30 Days'
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=60 THEN '31 - 60 Days'
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=90 THEN '61 - 90 Days'
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>90 THEN 'Over 90'
-				     ELSE '0 - 10 Days' END
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>90 THEN 'Over 90' END
      , ISNULL(I.ysnPosted, 1)
 	 , dblAvailableCredit = 0 
 FROM tblARInvoice I 
@@ -110,8 +110,7 @@ FROM tblARInvoice I
 	 INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
 	 INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId
-WHERE ISNULL(I.ysnPosted, 1) = 1
- AND I.ysnPosted  = 1
+WHERE I.ysnPosted  = 1
  AND I.strTransactionType = 'Invoice'
  AND I.dtmDate <= GETDATE()
  AND P.dtmDatePaid <= GETDATE()

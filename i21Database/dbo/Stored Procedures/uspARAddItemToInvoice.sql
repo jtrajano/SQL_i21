@@ -138,6 +138,68 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			RETURN 0;
 		END CATCH
 	END
+ELSE IF ISNULL(@ItemId, 0) > 0
+	BEGIN
+		BEGIN TRY
+			INSERT INTO tblARInvoiceDetail
+				([intInvoiceId]
+				,[intItemId]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyOrdered]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[intSiteId]
+				,[strBillingBy]
+				,[dblNewMeterReading]
+				,[dblPercentFull]
+				,[intPerformerId]
+				,[intTaxGroupId]
+				,[intSalesOrderDetailId]
+				,[strSalesOrderNumber])
+			SELECT TOP 1
+				 @InvoiceId
+				,intItemId
+				,@ItemDescription
+				,@ItemUOMId
+				,@ItemQtyOrdered
+				,@ItemQtyShipped
+				,@ItemDiscount
+				,@ItemPrice	
+				,@ItemSiteId
+				,@ItemBillingBy
+				,@ItemNewMeterReading
+				,@ItemPercentFull
+				,@ItemPerformerId							
+				,@ItemTaxGroupId					
+				,@ItemSalesOrderDetailId
+				,@ItemSalesOrderNumber
+			FROM tblICItem WHERE intItemId = @ItemId
+
+			SET @NewDetailId = SCOPE_IDENTITY()
+
+			BEGIN TRY
+				EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
+			END TRY
+			BEGIN CATCH
+				IF ISNULL(@RaiseError,0) = 0	
+					ROLLBACK TRANSACTION
+				SET @ErrorMessage = ERROR_MESSAGE();
+				IF ISNULL(@RaiseError,0) = 1
+					RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
+			END CATCH
+		END TRY
+		BEGIN CATCH			
+			IF ISNULL(@RaiseError,0) = 0
+				ROLLBACK TRANSACTION
+			SET @ErrorMessage = ERROR_MESSAGE();
+			IF ISNULL(@RaiseError,0) = 1
+				RAISERROR(@ErrorMessage, 16, 1);
+			RETURN 0;
+		END CATCH
+	END
 ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecimal) <> 0 )
 	BEGIN
 		BEGIN TRY
@@ -150,6 +212,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
+			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			
 			IF LEN(ISNULL(@AddDetailError,'')) > 0

@@ -212,7 +212,7 @@ BEGIN
 		UNION ALL
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_BetterHaven
-				,strText = FORMATMESSAGE(80003, 'WET GRAINS')
+				,strText = FORMATMESSAGE(80003, 'WET GRAINS', 'BETTER HAVEN')
 				,intErrorCode = 80003		
 	END
 

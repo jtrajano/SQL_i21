@@ -14,13 +14,15 @@ BEGIN
 		SET ANSI_WARNINGS OFF
 
 		-- VARIABLES NEEDED 
-		DECLARE @dtmMembershipDate DATETIME,
+		DECLARE @strStockStatus NVARCHAR(50),
 				@intFiscalYear INT
 
-		-- GET MEMBERSHIP DATE
-		SET @dtmMembershipDate = (SELECT dtmMembershipDate FROM tblARCustomer where intEntityCustomerId = @intEntityCustomerId)
+			
+
+		-- GET STOCK STATUS
+		SET @strStockStatus = (SELECT strStockStatus FROM tblARCustomer where intEntityCustomerId = @intEntityCustomerId)
 	
-		IF(ISNULL(@dtmMembershipDate, 0) = 0)
+		IF(@strStockStatus = '' OR @strStockStatus IS NULL)
 		BEGIN -- NOT ELIGIBLE FOR PATRONAGE
 			RETURN;
 		END
@@ -46,6 +48,7 @@ BEGIN
 	       AND ICU.intItemUOMId = ARD.intItemUOMId
 	INNER JOIN tblPATPatronageCategory PC
 			ON PC.intPatronageCategoryId = IC.intPatronageCategoryId
+		   AND PC.strPurchaseSale = 'Sale'
 		 WHERE AR.intInvoiceId = @intInvoiceId
 		   AND IC.intPatronageCategoryId IS NOT NULL
 		   AND ICU.ysnStockUnit = 1 -- Confirm with sir Ajith
@@ -82,6 +85,4 @@ BEGIN
 		END
 
 END
-
-
 GO

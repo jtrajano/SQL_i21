@@ -163,6 +163,12 @@ SELECT
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 23)
 UNION ALL
 SELECT 
+	[intBankTransactionTypeId]		= 24
+	,[strBankTransactionTypeName]	= 'Write Off'
+	,[intConcurrencyId]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 24)
+UNION ALL
+SELECT 
 	[intBankTransactionTypeId]		= 103
 	,[strBankTransactionTypeName]	= 'Void Misc Check'
 	,[intConcurrencyId]				= 1

@@ -170,8 +170,8 @@ BEGIN
 	
 	-- Assert 
 	BEGIN 
-		DECLARE @expected_InventoryAdjustment_Id AS INT = 14
-				,@expected_InventoryAdjustment AS NVARCHAR(50) = 'ADJ-1001'
+		DECLARE @Expected_InventoryAdjustment_Id AS INT = 14
+				,@Expected_InventoryAdjustment AS NVARCHAR(50) = 'ADJ-1001'
 
 		-- Setup the expected data (HEADER)
 		INSERT INTO expected_tblICInventoryAdjustment (
@@ -189,11 +189,11 @@ BEGIN
 				,dtmUnpostedDate				
 		)
 		SELECT
-				intInventoryAdjustmentId	= @expected_InventoryAdjustment_Id	
+				intInventoryAdjustmentId	= @Expected_InventoryAdjustment_Id	
 				,intLocationId				= @Default_Location
 				,dtmAdjustmentDate			= '01/30/2014' 		
 				,intAdjustmentType			= @ADJUSTMENT_TYPE_QuantityChange
-				,strAdjustmentNo			= @expected_InventoryAdjustment
+				,strAdjustmentNo			= @Expected_InventoryAdjustment
 				,strDescription				= ''
 				,intSort					= 1
 				,ysnPosted					= 1
@@ -222,7 +222,7 @@ BEGIN
 		)
 		SELECT 
 				intInventoryAdjustmentDetailId	= 13
-				,intInventoryAdjustmentId		= @expected_InventoryAdjustment_Id
+				,intInventoryAdjustmentId		= @Expected_InventoryAdjustment_Id
 				,intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId			= @StorageSilo_RM_DL
 				,intItemId						= @ManualLotGrains
@@ -351,17 +351,17 @@ BEGIN
 		DROP TABLE expected_tblICInventoryAdjustment
 
 	IF OBJECT_ID('expected_tblICInventoryAdjustmentDetail') IS NOT NULL 
-		DROP TABLE dbo.expected_tblICInventoryAdjustmentDetail
+		DROP TABLE expected_tblICInventoryAdjustmentDetail
 
 	IF OBJECT_ID('expected_tblICLot') IS NOT NULL 
-		DROP TABLE dbo.expected_tblICLot
+		DROP TABLE expected_tblICLot
 
 	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL 
 		DROP TABLE actual_tblICInventoryAdjustment
 
 	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
-		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
+		DROP TABLE actual_tblICInventoryAdjustmentDetail
 
 	IF OBJECT_ID('actual_tblICLot') IS NOT NULL 
-		DROP TABLE dbo.actual_tblICLot
+		DROP TABLE actual_tblICLot
 END 

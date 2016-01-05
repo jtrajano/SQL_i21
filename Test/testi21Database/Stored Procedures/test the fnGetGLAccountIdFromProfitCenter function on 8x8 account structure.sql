@@ -44,7 +44,7 @@ BEGIN
 		DECLARE @intAccounId AS INT
 		DECLARE @intAccountSegmentId AS INT
 
-		DECLARE @expected AS INT
+		DECLARE @Expected AS INT
 		DECLARE @actual AS INT
 		
 		-- Call the fake data SP for simple COA
@@ -54,13 +54,13 @@ BEGIN
 	-- Test case 1:
 	--		1. Base g/l account id is 12040-1000 ('INVENTORY WHEAT-')
 	--		2. Profit center segment id is 101 ('NEW HAVEN')
-	--		3. Expected g/l account id is 12040-1001 ('INVENTORY WHEAT-NEW HAVEN')
+	--		3. expected g/l account id is 12040-1001 ('INVENTORY WHEAT-NEW HAVEN')
 	BEGIN 
 		-- Act 
 		SELECT @actual = [dbo].[fnGetGLAccountIdFromProfitCenter](@Inventory_Default, @SegmentId_NEW_HAVEN_LOCATION);
-		SET @expected = @Inventory_NewHaven;
+		SET @Expected = @Inventory_NewHaven;
 		
 		-- Assert
-		EXEC tSQLt.AssertEquals @expected, @actual;
+		EXEC tSQLt.AssertEquals @Expected, @actual;
 	END
 END

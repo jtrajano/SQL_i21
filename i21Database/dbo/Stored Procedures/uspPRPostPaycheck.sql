@@ -491,6 +491,7 @@ DECLARE
 	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'PCHK'		-- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100) = 'Payroll'		-- Module where this posting code belongs. 
 	,@TRANSACTION_FORM AS NVARCHAR(100) = 'Paychecks'
+	,@TRANSACTION_TYPE AS NVARCHAR(100) = 'Paycheck'
 	
 	-- Local Variables
 	,@dtmDate AS DATETIME
@@ -692,6 +693,7 @@ BEGIN
 			,[intConcurrencyId]
 			,[intUserId]
 			,[strTransactionForm]
+			,[strTransactionType]
 			,[strModuleName]
 			,[intEntityId]
 	)
@@ -717,6 +719,7 @@ BEGIN
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
 			,[strTransactionForm]	= @TRANSACTION_FORM
+			,[strTransactionType]	= @TRANSACTION_TYPE
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
@@ -750,6 +753,7 @@ BEGIN
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
 			,[strTransactionForm]	= @TRANSACTION_FORM
+			,[strTransactionType]	= @TRANSACTION_TYPE
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
@@ -898,7 +902,7 @@ IF (@isSuccessful <> 0)
 						WHERE strPaycheckId = @strTransactionId
 						SET @isSuccessful = 1
 
-						/* Update the Employee Time Off Hours */
+						/* Update the Employee Time Off Hours Used */
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed + A.dblHours
 							FROM tblPRPaycheckEarning A
@@ -917,7 +921,7 @@ IF (@isSuccessful <> 0)
 							,dtmPosted = NULL 
 						WHERE strPaycheckId = @strTransactionId
 
-						/* Update the Employee Time Off Hours */
+						/* Update the Employee Time Off Hours Used */
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed - A.dblHours
 							FROM tblPRPaycheckEarning A
@@ -932,6 +936,28 @@ IF (@isSuccessful <> 0)
 						SET @isSuccessful = 1
 					END
 			END
+
+		/* Update the Employee Time Off Tiers and Accrued Hours */
+		SELECT DISTINCT EE.intEmployeeAccrueTimeOffId
+		INTO #tmpAccrueTimeOff
+		FROM tblPRPaycheckEarning PE
+			INNER JOIN tblPREmployeeEarning EE
+				ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
+				WHERE EE.intEmployeeAccrueTimeOffId IS NOT NULL
+					AND PE.intPaycheckId = @intPaycheckId
+					AND EE.intEntityEmployeeId = @intEmployeeId
+		
+		DECLARE @intAccrueTimeOffId INT
+		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAccrueTimeOff)
+		BEGIN
+			SELECT TOP 1 @intAccrueTimeOffId = intEmployeeAccrueTimeOffId FROM #tmpAccrueTimeOff
+
+			EXEC uspPRUpdateEmployeeTimeOff @intAccrueTimeOffId, @intEmployeeId
+			EXEC uspPRUpdateEmployeeTimeOffHours @intAccrueTimeOffId, @intEmployeeId
+
+			DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
+		END
+
 	END
 ELSE
 	BEGIN
@@ -949,4 +975,7 @@ ELSE
 	END
 
 END
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAccrueTimeOff')) DROP TABLE #tmpAccrueTimeOff
+
 GO

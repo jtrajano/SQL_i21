@@ -260,11 +260,11 @@ BEGIN
 		DROP TABLE actualLot
 
 	IF OBJECT_ID('expectedLot') IS NOT NULL 
-		DROP TABLE dbo.expectedLot
+		DROP TABLE expectedLot
 
 	IF OBJECT_ID('actualTransactionToReverse') IS NOT NULL 
 		DROP TABLE actualTransactionToReverse
 
 	IF OBJECT_ID('expectedTransactionToReverse') IS NOT NULL 
-		DROP TABLE dbo.expectedTransactionToReverse
+		DROP TABLE expectedTransactionToReverse
 END

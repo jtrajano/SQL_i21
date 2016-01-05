@@ -19,18 +19,23 @@ BEGIN TRY
 	 AS 
 	 strTicketStatus 
 	,CASE 
-		WHEN TT.intTicketType=1 THEN 'Load'
-		WHEN TT.intTicketType=2 THEN 'Transfer'
-		WHEN TT.intTicketType=3 THEN 'Memo'
-		WHEN TT.intTicketType=4 THEN 'Storage Take out'
+		WHEN TT.intListTicketTypeId=1 THEN 'Load In'
+		WHEN TT.intListTicketTypeId=2 THEN 'Load Out'
+		WHEN TT.intListTicketTypeId=3 THEN 'Transfer In'
+		WHEN TT.intListTicketTypeId=4 THEN 'Transfer Out'
+		WHEN TT.intListTicketTypeId=5 THEN 'Memo/Weigh'
+		WHEN TT.intListTicketTypeId=6 THEN 'Storage Take Out'
+		WHEN TT.intListTicketTypeId=7 THEN 'AG Outbound'
+		WHEN TT.intListTicketTypeId=8 THEN 'Direct In'
+		WHEN TT.intListTicketTypeId=9 THEN 'Direct Out'
 	END 
 	AS strTicketType
-	,CASE 
-	   WHEN T.strInOutFlag='I' THEN 'In'
-	   WHEN T.strInOutFlag='O' THEN 'Out'
-	 END 
-	 AS 
-	 strInOutFlag  
+	--,CASE 
+	--   WHEN T.strInOutFlag='I' THEN 'In'
+	--   WHEN T.strInOutFlag='O' THEN 'Out'
+	-- END 
+	-- AS 
+	-- strInOutFlag  
 	,Loc.strLocationName
 	,ISNULL(Convert(Nvarchar,T.dtmTicketDateTime,101),'') AS dtmTicketDateTime
 	,ARC.strCustomerNumber
@@ -42,14 +47,14 @@ BEGIN TRY
 	,T.dblGrossUnits As dblGrossUnits
 	,T.dblNetUnits As dblNetUnit
 	FROM tblSCTicket T
-	JOIN tblSCTicketType TT ON TT.intTicketType=T.intTicketType
+	JOIN tblSCTicketType TT ON (SELECT intTicketTypeId FROM tblSCListTicketTypes WHERE intTicketTypeId = TT.intListTicketTypeId)=T.intTicketType
 	LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId=T.intProcessingLocationId
 	LEFT JOIN tblARCustomer ARC ON ARC.intEntityCustomerId=T.intCustomerId
 	LEFT JOIN tblEntity en ON en.intEntityId=ARC.intEntityCustomerId
 	LEFT JOIN tblICItem TI ON TI.intItemId=T.intItemId
 	Where
 	T.dtmTicketTransferDateTime IS  NULL AND T.dtmTicketVoidDateTime IS  NULL
-	Order by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+	--Order by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
 
 END TRY
 

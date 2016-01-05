@@ -38,7 +38,7 @@ INSERT INTO tblAPAppliedPrepaidAndDebit(
 )
 --===================================================
 --PREPAYMENT FOR CONTRACT W/O ITEM (RESTRICTED)--
---===================================================    
+--===================================================   
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
@@ -53,19 +53,7 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	B.dblTotal - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal 
-											ELSE B.dblTotal END
-									WHEN 3 THEN
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal 
-											ELSE B.dblTotal END
-									ELSE 0 END),
-	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -79,8 +67,20 @@ SELECT
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
-									ELSE 0 END,
-	[ysnApplied]			=	1,
+								ELSE 0 END,	
+	[dblAmountApplied]		=	B.dblTotal - (CASE B.intPrepayTypeId 
+									WHEN 1 THEN
+											A.dblAmountDue 
+									WHEN 2 THEN 
+										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+											THEN B.dblTotal 
+											ELSE B.dblTotal END
+									WHEN 3 THEN
+										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN B.dblTotal 
+											ELSE B.dblTotal END
+									ELSE 0 END),
+	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -139,7 +139,22 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblBalance]		=	CASE B.intPrepayTypeId 
+								--STANDARD ALLOCATION COMPUTATION W/ ITEM		
+								WHEN 1 THEN
+										CurrentBill.allocatedAmount * A.dblAmountDue 
+								--UNIT ALLOCATION COMPUTATION W/ ITEM			 
+								WHEN 2 THEN 
+									CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
+										THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
+										ELSE ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+								--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
+								WHEN 3 THEN
+									CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
+										THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+										ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
+							ELSE 0 END,
+	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -151,22 +166,7 @@ SELECT
 											THEN B.dblTotal  
 											ELSE B.dblTotal END
 									ELSE 0 END),
-	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
-									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
-									WHEN 1 THEN
-											CurrentBill.allocatedAmount * A.dblAmountDue 
-									--UNIT ALLOCATION COMPUTATION W/ ITEM			 
-									WHEN 2 THEN 
-										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
-									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
-									WHEN 3 THEN
-										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
-									ELSE 0 END,
-	[ysnApplied]			=	1,
+	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -225,7 +225,22 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+	[dblBalance]		=	CASE B.intPrepayTypeId 
+								--STANDARD ALLOCATION COMPUTATION W/O ITEM
+								WHEN 1 THEN
+										CurrentBill.allocatedAmount * A.dblAmountDue 
+								--UNIT ALLOCATION COMPUTATION W/O ITEM		                                 
+								WHEN 2 THEN 
+									CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
+										THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
+										ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+								--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
+								WHEN 3 THEN
+									CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
+										THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+										ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END                                        
+							ELSE 0 END,
+	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -237,22 +252,7 @@ SELECT
 											THEN B.dblTotal
 											ELSE B.dblTotal END
 									ELSE 0 END),
-	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
-									--STANDARD ALLOCATION COMPUTATION W/O ITEM
-									WHEN 1 THEN
-											CurrentBill.allocatedAmount * A.dblAmountDue 
-									--UNIT ALLOCATION COMPUTATION W/O ITEM		                                 
-									WHEN 2 THEN 
-										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
-									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
-									WHEN 3 THEN
-										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
-											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END                                        
-									ELSE 0 END,
-	[ysnApplied]			=	1,
+	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -311,20 +311,7 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	B.dblTotal - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal
-											ELSE B.dblTotal  END
-									WHEN 3 THEN
-                                    
-										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal
-											ELSE B.dblTotal END
-									ELSE 0 END),
-	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -338,8 +325,21 @@ SELECT
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
 											ELSE (((B.dblPrepayPercentage / 100) * A.dblAmountDue) * CurrentBill.allocatedAmount) END
-									ELSE 0 END,
-	[ysnApplied]			=	1,
+								ELSE 0 END,
+	[dblAmountApplied]		=	B.dblTotal - (CASE B.intPrepayTypeId 
+									WHEN 1 THEN
+											A.dblAmountDue 
+									WHEN 2 THEN 
+										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+											THEN B.dblTotal
+											ELSE B.dblTotal  END
+									WHEN 3 THEN
+                                    
+										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN B.dblTotal
+											ELSE B.dblTotal END
+									ELSE 0 END),
+	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId

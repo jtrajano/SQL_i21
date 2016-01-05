@@ -1,490 +1,509 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertToInvoice]
 	@SalesOrderId	     INT = 0,
 	@UserId			     INT = 0,
-	@HasNonSoftwareItems BIT = 0,
 	@ShipmentId			 INT = 0,
-	@InvoiceId		     INT = 0 OUTPUT
-
+	@FromShipping		 BIT = 0,
+	@NewInvoiceId		 INT = 0 OUTPUT
 AS
 BEGIN
 
-	DECLARE @customerId             INT,
-			@locationId				INT,
-			@DateOnly				DATETIME,
-			@comment				NVARCHAR(MAX),
-			@dblSalesOrderSubtotal	NUMERIC(18, 6),			
-			@dblTax					NUMERIC(18, 6),
-			@dblSalesOrderTotal		NUMERIC(18, 6),
-			@dblDiscount			NUMERIC(18, 6)
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT ON  
+SET ANSI_WARNINGS OFF
 
-	SELECT @DateOnly = CAST(GETDATE() AS DATE)
+--GLOBAL VARIABLES
+DECLARE @DateOnly				DATETIME,
+		@SoftwareInvoiceId		INT,
+		@dblSalesOrderSubtotal	NUMERIC(18, 6),			
+		@dblTax					NUMERIC(18, 6),
+		@dblSalesOrderTotal		NUMERIC(18, 6),
+		@dblDiscount			NUMERIC(18, 6),
+		@dblZeroAmount			NUMERIC(18, 6),
+		@RaiseError				BIT,
+		@ErrorMessage			NVARCHAR(MAX),
+		@CurrentErrorMessage	NVARCHAR(MAX)
 
-	--COMPUTE INVOICE TOTAL AMOUNTS FOR SOFTWARE
-	DECLARE @OrderDetails TABLE(intSalesOrderDetailId	INT,
-								intInventoryShipmentItemId INT,
-								strShipmentNumber		NVARCHAR(50),	 
-								dblDiscount				NUMERIC(18,6), 
-								dblTotalTax				NUMERIC(18,6), 
-								dblPrice				NUMERIC(18,6), 
-								dblTotal				NUMERIC(18,6))
+--VARIABLES FOR INVOICE HEADER
+DECLARE @EntityCustomerId		INT,
+		@CompanyLocationId		INT,
+		@CurrencyId				INT,
+		@TermId					INT,
+		@EntityId				INT,
+		@Date					DATETIME,
+		@DueDate				DATETIME,				
+		@EntitySalespersonId	INT,
+		@FreightTermId			INT,
+		@ShipViaId				INT,
+		@PaymentMethodId		INT,
+		@InvoiceOriginId		INT,
+		@PONumber				NVARCHAR(100),
+		@BOLNumber				NVARCHAR(100),
+		@DeliverPickup			NVARCHAR(100),
+		@InvoiceComment			NVARCHAR(MAX),
+		@SoftwareComment		NVARCHAR(MAX),
+		@SalesOrderNumber		NVARCHAR(100),
+		@ShipToLocationId		INT,
+		@BillToLocationId		INT,
+		@SplitId				INT
 
-	INSERT INTO @OrderDetails (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
-	SELECT intSalesOrderDetailId
-		 , 0
-		 , 0
-		 , dblMaintenanceAmount
-		 , dblMaintenanceAmount * dblQtyOrdered
-	FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId
-		WHERE intSalesOrderId = @SalesOrderId AND ICI.strType = 'Software'
-		ORDER BY intSalesOrderDetailId
+DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
+							intItemId					INT, 
+							ysnIsInventory				BIT,
+							strItemDescription			NVARCHAR(100),
+							intItemUOMId				INT,
+							dblQtyRemaining				NUMERIC(18,6),
+							dblMaintenanceAmount		NUMERIC(18,6),
+							dblDiscount					NUMERIC(18,6),
+							dblPrice					NUMERIC(18,6),
+							intTaxGroupId				INT,
+							intSalesOrderDetailId		INT,
+							intInventoryShipmentItemId	INT,
+							strItemType					NVARCHAR(100),
+							strSalesOrderNumber			NVARCHAR(100),
+							strShipmentNumber			NVARCHAR(100))
+									
+DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
+							intInventoryShipmentItemId	INT,
+							strShipmentNumber			NVARCHAR(50),	 
+							dblDiscount					NUMERIC(18,6), 
+							dblTotalTax					NUMERIC(18,6), 
+							dblPrice					NUMERIC(18,6), 
+							dblTotal					NUMERIC(18,6))
 
-	SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
-	     , @dblTax				  = SUM(dblTotalTax)
-		 , @dblSalesOrderTotal	  = SUM(dblTotal)
-		 , @dblDiscount			  = SUM(dblDiscount)
-	FROM @OrderDetails
+SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 
-	--GET EXISTING RECURRING INVOICE RECORD OF CUSTOMER
-	SELECT @customerId = intEntityCustomerId
-	     , @locationId = intCompanyLocationId
-	FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+--GET ITEMS FROM SALES ORDER
+INSERT INTO @tblItemsToInvoice
+SELECT SI.intItemId
+	 , dbo.fnIsStockTrackingItem(SI.intItemId)
+	 , SI.strItemDescription
+	 , SI.intItemUOMId
+	 , SI.dblQtyRemaining
+	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
+	 , SI.dblDiscount
+	 , CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , SI.intTaxGroupId
+	 , SI.intSalesOrderDetailId
+	 , NULL
+	 , I.strType
+	 , SI.strSalesOrderNumber
+	 , NULL
+FROM tblSOSalesOrder SO 
+	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
+	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+	LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId
+WHERE ISNULL(I.strLotTracking, 'No') = 'No'
+	AND SO.intSalesOrderId = @SalesOrderId
+	AND SI.dblQtyRemaining > 0
+
+--GET ITEMS FROM POSTED SHIPMENT
+INSERT INTO @tblItemsToInvoice
+SELECT ICSI.intItemId
+	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
+	 , SOD.strItemDescription
+	 , ICSI.intItemUOMId
+	 , ICSI.dblQuantity
+	 , @dblZeroAmount
+	 , SOD.dblDiscount
+	 , ICSI.dblUnitPrice
+	 , SOD.intTaxGroupId
+	 , SOD.intSalesOrderDetailId
+	 , ICSI.intInventoryShipmentItemId
+	 , ICI.strType
+	 , SO.strSalesOrderNumber
+	 , ICS.strShipmentNumber
+FROM tblICInventoryShipmentItem ICSI 
+INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
+INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
+INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
+WHERE ICSI.intOrderId = @SalesOrderId
+AND ICS.ysnPosted = 1
+
+--GET SOFTWARE ITEMS
+IF @FromShipping = 0
+	BEGIN --NON STOCK SOFTWARE
+		INSERT INTO @tblSODSoftware (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
+		SELECT intSalesOrderDetailId
+				, @dblZeroAmount
+				, @dblZeroAmount
+				, dblMaintenanceAmount
+				, dblMaintenanceAmount * dblQtyRemaining
+		FROM @tblItemsToInvoice WHERE strItemType = 'Software'
+			ORDER BY intSalesOrderDetailId
+	END
 	
-	EXEC dbo.[uspARGetDefaultComment] @locationId, @customerId, 'Invoice', 'Software', @comment
+--COMPUTE INVOICE TOTAL AMOUNTS FOR SOFTWARE
+SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
+	    , @dblTax				  = SUM(dblTotalTax)
+		, @dblSalesOrderTotal	  = SUM(dblTotal)
+		, @dblDiscount			  = SUM(dblDiscount)
+FROM @tblSODSoftware
 
-	IF EXISTS(SELECT NULL FROM tblARInvoice WHERE intEntityCustomerId = @customerId AND ysnTemplate = 1 AND strType = 'Software')
-		BEGIN
-			--UPDATE EXISTING RECURRING INVOICE
-			SELECT TOP 1 @InvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @customerId AND ysnTemplate = 1 AND strType = 'Software'
-						
-			UPDATE tblARInvoice 
-			SET dblInvoiceSubtotal = dblInvoiceSubtotal + @dblSalesOrderSubtotal
-			  , dblTax			   = dblTax + @dblTax
-			  , dblInvoiceTotal    = dblInvoiceTotal + @dblSalesOrderTotal
-			  , dblDiscount		   = dblDiscount + @dblDiscount
-			  , dtmDate			   = @DateOnly
-			  , ysnTemplate		   = 1
-			  , strType			   = 'Software'
-			  , ysnPosted		   = 1
-			WHERE intInvoiceId = @InvoiceId
-		END
-	ELSE
-		BEGIN
-			--INSERT TO INVOICE HEADER FOR RECURRING
-			INSERT INTO tblARInvoice
-				([intEntityCustomerId]
-				,[strInvoiceOriginId]
-				,[dtmDate]
-				,[dtmDueDate]
-				,[dtmPostDate]
-				,[intCurrencyId]
-				,[intCompanyLocationId]
-				,[intEntitySalespersonId]
-				,[dtmShipDate]
-				,[intShipViaId]
-				,[strPONumber]
-				,[intTermId]
-				,[dblInvoiceSubtotal]
-				,[dblShipping]
-				,[dblTax]
-				,[dblInvoiceTotal]
-				,[dblDiscount]
-				,[dblAmountDue]
-				,[dblPayment]
-				,[strTransactionType]
-				,[strType]
-				,[intPaymentMethodId]
-				,[intAccountId]
-				,[intFreightTermId]
-				,[intEntityId]
-				,[intShipToLocationId]
-				,[strShipToLocationName]
-				,[strShipToAddress]
-				,[strShipToCity]
-				,[strShipToState]
-				,[strShipToZipCode]
-				,[strShipToCountry]
-				,[intBillToLocationId]
-				,[strBillToLocationName]
-				,[strBillToAddress]
-				,[strBillToCity]
-				,[strBillToState]
-				,[strBillToZipCode]
-				,[strBillToCountry]
-				,[ysnTemplate]
-				,[ysnPosted]
-			)
-			SELECT
-				[intEntityCustomerId]
-				,[strSalesOrderNumber] --origin Id
-				,@DateOnly --Date		
-				,[dbo].fnGetDueDateBasedOnTerm(@DateOnly,intTermId) --Due Date
-				,@DateOnly --Post Date
-				,[intCurrencyId]
-				,[intCompanyLocationId]
-				,[intEntitySalespersonId]
-				,@DateOnly --Ship Date
-				,[intShipViaId]
-				,[strPONumber]
-				,[intTermId]
-				,@dblSalesOrderSubtotal --ROUND([dblSalesOrderSubtotal],2)
-				,[dblShipping]
-				,@dblTax--ROUND([dblTax],2)
-				,@dblSalesOrderTotal--ROUND([dblSalesOrderTotal],2)
-				,@dblDiscount--ROUND([dblDiscount],2)
-				,[dblAmountDue]
-				,[dblPayment]
-				,'Invoice'
-				,'Software'
-				,0 --Payment Method
-				,[intAccountId]
-				,[intFreightTermId]
-				,@UserId
-				,[intShipToLocationId]
-				,[strShipToLocationName]
-				,[strShipToAddress]
-				,[strShipToCity]
-				,[strShipToState]
-				,[strShipToZipCode]
-				,[strShipToCountry]
-				,[intBillToLocationId]
-				,[strBillToLocationName]
-				,[strBillToAddress]
-				,[strBillToCity]
-				,[strBillToState]
-				,[strBillToZipCode]
-				,[strBillToCountry]
-				,1
-				,1
-			FROM
-			tblSOSalesOrder
-			WHERE intSalesOrderId = @SalesOrderId
-
-			SET @InvoiceId = SCOPE_IDENTITY()
-		END		
+--GET EXISTING RECURRING INVOICE RECORD OF CUSTOMER
+SELECT TOP 1
+		@EntityCustomerId		=	intEntityCustomerId,
+		@CompanyLocationId		=	intCompanyLocationId,
+		@CurrencyId				=	intCurrencyId,
+		@TermId					=	intTermId,
+		@EntityId				=	@UserId,
+		@Date					=	dtmDate,
+		@DueDate				=	dtmDueDate,
+		@EntitySalespersonId	=	intEntitySalespersonId,
+		@FreightTermId			=	intFreightTermId,
+		@ShipViaId				=	intShipViaId,  	   
+		@PONumber				=	strPONumber,
+		@BOLNumber				=	strBOLNumber,
+		@DeliverPickup			=	'',
+		@SalesOrderNumber		=	strSalesOrderNumber,
+		@ShipToLocationId		=	intShipToLocationId,
+		@BillToLocationId		=	intBillToLocationId,
+		@SplitId				=	intSplitId
+FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
-	--INSERT TO RECURRING INVOICE DETAIL AND INVOICE DETAIL TAX						
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderDetails)
-		BEGIN
-			DECLARE @SalesOrderDetailId INT
-					,@InvoiceDetailId INT
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
+
+--GET NEW COMMENT FOR NEW INVOICE
+SET @InvoiceComment = 'ORIGIN: ' + @SalesOrderNumber + '; ' + @InvoiceComment
+
+--BEGIN TRANSACTION
+IF ISNULL(@RaiseError,0) = 0
+	BEGIN TRANSACTION
+
+--CHECK IF THERE IS SOFTWARE ITEMS (NON-STOCK / STOCK ITEMS)
+IF EXISTS(SELECT NULL FROM @tblSODSoftware)
+	BEGIN
+		SELECT TOP 1 @SoftwareInvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @EntityCustomerId AND ysnTemplate = 1 AND strType = 'Software'
+		
+		IF ISNULL(@SoftwareInvoiceId, 0) <> 0
+			BEGIN
+				--UPDATE EXISTING RECURRING INVOICE
+				UPDATE tblARInvoice 
+				SET dblInvoiceSubtotal	= dblInvoiceSubtotal + @dblSalesOrderSubtotal
+				  , dblTax				= dblTax + @dblTax
+				  , dblInvoiceTotal		= dblInvoiceTotal + @dblSalesOrderTotal
+				  , dblDiscount			= dblDiscount + @dblDiscount
+				  , dtmDate				= @DateOnly
+				  , ysnTemplate			= 1
+				  , strType				= 'Software'
+				  , ysnPosted			= 1
+				WHERE intInvoiceId = @SoftwareInvoiceId
+			END
+		ELSE
+			BEGIN
+				--INSERT TO INVOICE HEADER FOR RECURRING
+				INSERT INTO tblARInvoice
+					([intEntityCustomerId]
+					,[strInvoiceOriginId]
+					,[dtmDate]
+					,[dtmDueDate]
+					,[dtmPostDate]
+					,[intCurrencyId]
+					,[intCompanyLocationId]
+					,[intEntitySalespersonId]
+					,[dtmShipDate]
+					,[intShipViaId]
+					,[strPONumber]
+					,[intTermId]
+					,[dblInvoiceSubtotal]
+					,[dblShipping]
+					,[dblTax]
+					,[dblInvoiceTotal]
+					,[dblDiscount]
+					,[dblAmountDue]
+					,[dblPayment]
+					,[strTransactionType]
+					,[strType]
+					,[intPaymentMethodId]
+					,[intAccountId]
+					,[intFreightTermId]
+					,[intEntityId]
+					,[intShipToLocationId]
+					,[strShipToLocationName]
+					,[strShipToAddress]
+					,[strShipToCity]
+					,[strShipToState]
+					,[strShipToZipCode]
+					,[strShipToCountry]
+					,[intBillToLocationId]
+					,[strBillToLocationName]
+					,[strBillToAddress]
+					,[strBillToCity]
+					,[strBillToState]
+					,[strBillToZipCode]
+					,[strBillToCountry]
+					,[ysnTemplate]
+					,[ysnPosted]
+				)
+				SELECT
+					[intEntityCustomerId]
+					,[strSalesOrderNumber] --origin Id
+					,@DateOnly --Date		
+					,[dbo].fnGetDueDateBasedOnTerm(@DateOnly,intTermId) --Due Date
+					,@DateOnly --Post Date
+					,[intCurrencyId]
+					,[intCompanyLocationId]
+					,[intEntitySalespersonId]
+					,@DateOnly --Ship Date
+					,[intShipViaId]
+					,[strPONumber]
+					,[intTermId]
+					,@dblSalesOrderSubtotal --ROUND([dblSalesOrderSubtotal],2)
+					,[dblShipping]
+					,@dblTax--ROUND([dblTax],2)
+					,@dblSalesOrderTotal--ROUND([dblSalesOrderTotal],2)
+					,@dblDiscount--ROUND([dblDiscount],2)
+					,[dblAmountDue]
+					,[dblPayment]
+					,'Invoice'
+					,'Software'
+					,0 --Payment Method
+					,[intAccountId]
+					,[intFreightTermId]
+					,@UserId
+					,[intShipToLocationId]
+					,[strShipToLocationName]
+					,[strShipToAddress]
+					,[strShipToCity]
+					,[strShipToState]
+					,[strShipToZipCode]
+					,[strShipToCountry]
+					,[intBillToLocationId]
+					,[strBillToLocationName]
+					,[strBillToAddress]
+					,[strBillToCity]
+					,[strBillToState]
+					,[strBillToZipCode]
+					,[strBillToCountry]
+					,1
+					,1
+				FROM
+				tblSOSalesOrder
+				WHERE intSalesOrderId = @SalesOrderId
+
+				SET @SoftwareInvoiceId = SCOPE_IDENTITY()
+			END		
+	
+		--INSERT TO RECURRING INVOICE DETAIL AND INVOICE DETAIL TAX						
+		WHILE EXISTS(SELECT TOP 1 NULL FROM @tblSODSoftware)
+			BEGIN
+				DECLARE @SalesOrderDetailId INT
+					   ,@SoftwareInvoiceDetailId INT
 					
-			SELECT TOP 1 @SalesOrderDetailId = [intSalesOrderDetailId] FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
+				SELECT TOP 1 @SalesOrderDetailId = [intSalesOrderDetailId] FROM @tblSODSoftware ORDER BY [intSalesOrderDetailId]
 			
-			INSERT INTO [tblARInvoiceDetail]
-				([intInvoiceId]
-				,[intItemId]
-				,[strItemDescription]
-				,[intItemUOMId]
-				,[dblQtyOrdered]
-				,[dblQtyShipped]
-				,[dblDiscount]
-				,[dblPrice]
-				,[dblTotalTax]
-				,[dblTotal]
-				,[intAccountId]
-				,[intCOGSAccountId]
-				,[intSalesAccountId]
-				,[intInventoryAccountId]
-				,[intSalesOrderDetailId]
-				,[intContractHeaderId]
-				,[intContractDetailId]
-				,[strMaintenanceType]
-				,[strFrequency]
-				,[dblMaintenanceAmount]
-				,[dblLicenseAmount]
-				,[dtmMaintenanceDate]
-				,[intTaxGroupId]
-				,[intConcurrencyId])
-			SELECT 	
-				 @InvoiceId					--[intInvoiceId]
-				,[intItemId]				--[intItemId]
-				,[strItemDescription]		--[strItemDescription]
-				,[intItemUOMId]				--[intItemUOMId]
-				,[dblQtyOrdered]			--[dblQtyOrdered]
-				,[dblQtyOrdered]			--[dblQtyShipped]
-				,0							--[dblDiscount]
-				,[dblMaintenanceAmount]		--[dblPrice]
-				,0							--[dblTotalTax]
-				,[dblMaintenanceAmount] * [dblQtyOrdered] --[dblTotal]
-				,[intAccountId]				--[intAccountId]
-				,[intCOGSAccountId]			--[intCOGSAccountId]
-				,[intSalesAccountId]		--[intSalesAccountId]
-				,[intInventoryAccountId]	--[intInventoryAccountId]
-				,[intSalesOrderDetailId]    --[intSalesOrderDetailId]
-				,[intContractHeaderId]		--[intContractHeaderId]
-				,[intContractDetailId]		--[intContractDetailId]
-				,[strMaintenanceType]		--[strMaintenanceType]
-				,[strFrequency]		        --[strFrequency]
-				,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
-				,0							--[dblLicenseAmount]
-				,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
-				,[intTaxGroupId]			--[intTaxGroupId]
-				,0							--[intConcurrencyId]
-			FROM
-				tblSOSalesOrderDetail
-			WHERE
-				[intSalesOrderDetailId] = @SalesOrderDetailId
+				INSERT INTO [tblARInvoiceDetail]
+					([intInvoiceId]
+					,[intItemId]
+					,[strItemDescription]
+					,[intItemUOMId]
+					,[dblQtyOrdered]
+					,[dblQtyShipped]
+					,[dblDiscount]
+					,[dblPrice]
+					,[dblTotalTax]
+					,[dblTotal]
+					,[intAccountId]
+					,[intCOGSAccountId]
+					,[intSalesAccountId]
+					,[intInventoryAccountId]
+					,[intSalesOrderDetailId]
+					,[intContractHeaderId]
+					,[intContractDetailId]
+					,[strMaintenanceType]
+					,[strFrequency]
+					,[dblMaintenanceAmount]
+					,[dblLicenseAmount]
+					,[dtmMaintenanceDate]
+					,[intTaxGroupId]
+					,[intConcurrencyId])
+				SELECT 	
+					 @SoftwareInvoiceId			--[intInvoiceId]
+					,[intItemId]				--[intItemId]
+					,[strItemDescription]		--[strItemDescription]
+					,[intItemUOMId]				--[intItemUOMId]
+					,[dblQtyOrdered]			--[dblQtyOrdered]
+					,[dblQtyOrdered]			--[dblQtyShipped]
+					,0							--[dblDiscount]
+					,[dblMaintenanceAmount]		--[dblPrice]
+					,0							--[dblTotalTax]
+					,[dblMaintenanceAmount] * [dblQtyOrdered] --[dblTotal]
+					,[intAccountId]				--[intAccountId]
+					,[intCOGSAccountId]			--[intCOGSAccountId]
+					,[intSalesAccountId]		--[intSalesAccountId]
+					,[intInventoryAccountId]	--[intInventoryAccountId]
+					,[intSalesOrderDetailId]    --[intSalesOrderDetailId]
+					,[intContractHeaderId]		--[intContractHeaderId]
+					,[intContractDetailId]		--[intContractDetailId]
+					,[strMaintenanceType]		--[strMaintenanceType]
+					,[strFrequency]		        --[strFrequency]
+					,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
+					,0							--[dblLicenseAmount]
+					,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
+					,[intTaxGroupId]			--[intTaxGroupId]
+					,0							--[intConcurrencyId]
+				FROM
+					tblSOSalesOrderDetail
+				WHERE
+					[intSalesOrderDetailId] = @SalesOrderDetailId
 												
-			SET @InvoiceDetailId = SCOPE_IDENTITY()
+				SET @SoftwareInvoiceDetailId = SCOPE_IDENTITY()
 				
-			DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
-		END
-			
-	IF (@HasNonSoftwareItems = 0)
-		BEGIN
-			UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
-		END
-	
-	--INSERT NEW INVOICE FOR NON-SOFTWARE ITEMS
-	DECLARE @NewInvoiceId			INT			
-	DELETE FROM @OrderDetails
-	SELECT @dblSalesOrderSubtotal = 0.000000
-			, @dblTax				  = 0.000000
-			, @dblSalesOrderTotal	  = 0.000000
-			, @dblDiscount			  = 0.000000
+				DELETE FROM @tblSODSoftware WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
+			END
+	END
 
-	INSERT INTO @OrderDetails(intSalesOrderDetailId, intInventoryShipmentItemId, strShipmentNumber, dblDiscount, dblTotalTax, dblPrice, dblTotal)
-	SELECT intSalesOrderDetailId
-			, CASE WHEN ICI.strType = 'Inventory'
-				THEN (SELECT intInventoryShipmentItemId FROM tblICInventoryShipmentItem 
-				 	WHERE intOrderId = @SalesOrderId
-						AND intLineNo = SOD.intSalesOrderDetailId
-						AND intItemId = SOD.intItemId)
-				ELSE NULL END
-			, CASE WHEN ICI.strType = 'Inventory' 
-				THEN (SELECT strShipmentNumber FROM tblICInventoryShipment 
-					WHERE intInventoryShipmentId = @ShipmentId) 
-				ELSE NULL END
-			, (dblPrice * dblQtyOrdered) * (CONVERT(NUMERIC(18,6), dblDiscount) / 100)
-			, dblTotalTax
-			, dblPrice
-			, dblPrice * dblQtyOrdered - (dblPrice * dblQtyOrdered) * (CONVERT(NUMERIC(18,6), dblDiscount) / 100)
-	FROM tblSOSalesOrderDetail SOD LEFT JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId 
-		WHERE SOD.intSalesOrderId = @SalesOrderId
-		ORDER BY intSalesOrderDetailId
+--CHECK IF THERE IS NON STOCK ITEMS
+IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
+	BEGIN
+		--INSERT INVOICE HEADER
+		BEGIN TRY
+			EXEC uspARCreateCustomerInvoice
+					 @EntityCustomerId				= @EntityCustomerId
+					,@CompanyLocationId				= @CompanyLocationId
+					,@CurrencyId					= @CurrencyId
+					,@TermId						= @TermId
+					,@EntityId						= @EntityId
+					,@InvoiceDate					= @Date
+					,@DueDate						= @DueDate
+					,@ShipDate						= @Date
+					,@PostDate						= NULL
+					,@TransactionType				= 'Invoice'
+					,@Type							= 'Standard'
+					,@NewInvoiceId					= @NewInvoiceId			OUTPUT 
+					,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
+					,@RaiseError					= @RaiseError
+					,@EntitySalespersonId			= @EntitySalespersonId
+					,@FreightTermId					= @FreightTermId
+					,@ShipViaId						= @ShipViaId
+					,@PaymentMethodId				= @PaymentMethodId
+					,@InvoiceOriginId				= @InvoiceOriginId
+					,@PONumber						= @PONumber
+					,@BOLNumber						= @BOLNumber
+					,@DeliverPickUp					= @DeliverPickup
+					,@Comment						= @InvoiceComment
+					,@ShipToLocationId				= @ShipToLocationId
+					,@BillToLocationId				= @BillToLocationId
+					,@SplitId						= @SplitId
 
-	SELECT    @dblSalesOrderSubtotal  = SUM(dblTotal)
-			, @dblTax				  = SUM(dblTotalTax)
-			, @dblSalesOrderTotal	  = SUM(dblTotal) + SUM(dblTotalTax)
-			, @dblDiscount			  = SUM(dblDiscount)
-	FROM @OrderDetails
-
-	INSERT INTO tblARInvoice
-		([intEntityCustomerId]
-		,[strInvoiceOriginId]
-		,[dtmDate]
-		,[dtmDueDate]
-		,[dtmPostDate]
-		,[intCurrencyId]
-		,[intCompanyLocationId]
-		,[intEntitySalespersonId]
-		,[dtmShipDate]
-		,[intShipViaId]
-		,[strPONumber]
-		,[intTermId]
-		,[dblInvoiceSubtotal]
-		,[dblShipping]
-		,[dblTax]
-		,[dblInvoiceTotal]
-		,[dblDiscount]
-		,[dblAmountDue]
-		,[dblPayment]
-		,[strTransactionType]
-		,[strType]
-		,[intPaymentMethodId]
-		,[intAccountId]
-		,[intFreightTermId]
-		,[intEntityId]
-		,[intShipToLocationId]
-		,[strShipToLocationName]
-		,[strShipToAddress]
-		,[strShipToCity]
-		,[strShipToState]
-		,[strShipToZipCode]
-		,[strShipToCountry]
-		,[intBillToLocationId]
-		,[strBillToLocationName]
-		,[strBillToAddress]
-		,[strBillToCity]
-		,[strBillToState]
-		,[strBillToZipCode]
-		,[strBillToCountry]
-		,[ysnTemplate]
-		,[strComments]
-		,[strDeliverPickup]
-	)
-	SELECT
-		[intEntityCustomerId]
-		,[strSalesOrderNumber]
-		,@DateOnly
-		,[dbo].fnGetDueDateBasedOnTerm(@DateOnly,intTermId)
-		,@DateOnly
-		,[intCurrencyId]
-		,[intCompanyLocationId]
-		,[intEntitySalespersonId]
-		,@DateOnly
-		,[intShipViaId]
-		,[strPONumber]
-		,[intTermId]
-		,@dblSalesOrderSubtotal
-		,[dblShipping]
-		,@dblTax
-		,@dblSalesOrderTotal
-		,@dblDiscount
-		,[dblAmountDue]
-		,[dblPayment]
-		,'Invoice'
-		,'Software'
-		,0
-		,[intAccountId]
-		,[intFreightTermId]
-		,@UserId
-		,[intShipToLocationId]
-		,[strShipToLocationName]
-		,[strShipToAddress]
-		,[strShipToCity]
-		,[strShipToState]
-		,[strShipToZipCode]
-		,[strShipToCountry]
-		,[intBillToLocationId]
-		,[strBillToLocationName]
-		,[strBillToAddress]
-		,[strBillToCity]
-		,[strBillToState]
-		,[strBillToZipCode]
-		,[strBillToCountry]
-		,0
-		,@comment
-		,''
-	FROM
-	tblSOSalesOrder
-	WHERE intSalesOrderId = @SalesOrderId
-
-	SET @NewInvoiceId = SCOPE_IDENTITY()
-
-	--INSERT TO RECURRING INVOICE DETAIL AND INVOICE DETAIL TAX						
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderDetails)
-		BEGIN
-			DECLARE @intSODetailId		INT
-				  , @intInvoiceDetailId	INT
-				  , @intInventoryShipmentItemId INT
-				  , @strShipmentNumber  NVARCHAR(50)
-					
-			SELECT TOP 1 @intSODetailId = [intSalesOrderDetailId]
-			           , @intInventoryShipmentItemId = [intInventoryShipmentItemId]
-					   , @strShipmentNumber = [strShipmentNumber] 
-		    FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
-			
-			INSERT INTO [tblARInvoiceDetail]
-				([intInvoiceId]
-				,[intItemId]
-				,[strItemDescription]
-				,[intItemUOMId]
-				,[dblQtyOrdered]
-				,[dblQtyShipped]
-				,[dblDiscount]
-				,[dblPrice]
-				,[dblTotalTax]
-				,[dblTotal]
-				,[intAccountId]
-				,[intCOGSAccountId]
-				,[intSalesAccountId]
-				,[intInventoryAccountId]
-				,[intSalesOrderDetailId]
-				,[intContractHeaderId]
-				,[intContractDetailId]
-				,[intInventoryShipmentItemId]
-				,[strShipmentNumber]
-				,[strMaintenanceType]
-				,[strFrequency]
-				,[dblMaintenanceAmount]
-				,[dblLicenseAmount]
-				,[dtmMaintenanceDate]
-				,[intTaxGroupId]
-				,[intConcurrencyId])
-			SELECT 	
-				  @NewInvoiceId				--[intInvoiceId]
-				,SOD.[intItemId]			--[intItemId]
-				,[strItemDescription]		--[strItemDescription]
-				,[intItemUOMId]				--[intItemUOMId]
-				,[dblQtyOrdered]			--[dblQtyOrdered]
-				,[dblQtyOrdered]			--[dblQtyShipped]
-				,[dblDiscount]              --[dblDiscount]
-				,[dblPrice]					--[dblPrice]
-				,[dblTotalTax]				--[dblTotalTax]
-				,[dblTotal]				    --[dblTotal]
-				,[intAccountId]				--[intAccountId]
-				,[intCOGSAccountId]			--[intCOGSAccountId]
-				,[intSalesAccountId]		--[intSalesAccountId]
-				,[intInventoryAccountId]	--[intInventoryAccountId]
-				,[intSalesOrderDetailId]    --[intSalesOrderDetailId]
-				,[intContractHeaderId]		--[intContractHeaderId]
-				,[intContractDetailId]		--[intContractDetailId]
-				,@intInventoryShipmentItemId --[intInventoryShipmentItemId]
-				,@strShipmentNumber		    --[strShipmentNumber]
-				,[strMaintenanceType]		--[strMaintenanceType]
-				,[strFrequency]		        --[strFrequency]
-				,0							--[dblMaintenanceAmount]
-				,[dblLicenseAmount]			--[dblLicenseAmount]
-				,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
-				,[intTaxGroupId]			--[intTaxGroupId]
-				,0							--[intConcurrencyId]
-			FROM
-				tblSOSalesOrderDetail SOD
-					LEFT JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId
-			WHERE
-				[intSalesOrderDetailId] = @intSODetailId
-												
-			SET @intInvoiceDetailId = SCOPE_IDENTITY()
-						
-			INSERT INTO [tblARInvoiceDetailTax]
-				([intInvoiceDetailId]
-				,[intTaxGroupId]
-				,[intTaxCodeId]
-				,[intTaxClassId]
-				,[strTaxableByOtherTaxes]
-				,[strCalculationMethod]
-				,[numRate]
-				,[intSalesTaxAccountId]
-				,[dblTax]
-				,[dblAdjustedTax]
-				,[ysnTaxAdjusted]
-				,[ysnSeparateOnInvoice]
-				,[ysnCheckoffTax]
-				,[strNotes] 
-				,[intConcurrencyId])
-			SELECT
-				@intInvoiceDetailId
-				,[intTaxGroupId]
-				,[intTaxCodeId]
-				,[intTaxClassId]
-				,[strTaxableByOtherTaxes]
-				,[strCalculationMethod]
-				,[numRate]
-				,[intSalesTaxAccountId]
-				,[dblTax]
-				,[dblAdjustedTax]
-				,[ysnTaxAdjusted]
-				,[ysnSeparateOnInvoice]
-				,[ysnCheckoffTax]
-				,[strNotes] 
-				,0
-			FROM 
-				[tblSOSalesOrderDetailTax]
-			WHERE
-				[intSalesOrderDetailId] = @intSODetailId			   	
-           			
-			DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @intSODetailId
-		END
-	
-	--INSERT TO RECURRING TRANSACTION
-	IF @InvoiceId > 0
-		BEGIN
-			IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMRecurringTransaction WHERE intTransactionId = @InvoiceId)
+			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0 
 				BEGIN
-					EXEC dbo.uspARInsertRecurringInvoice @InvoiceId, @UserId
-				END			
-		END
+					IF ISNULL(@RaiseError,0) = 0
+						ROLLBACK TRANSACTION
+					SET @ErrorMessage = @CurrentErrorMessage;
+					IF ISNULL(@RaiseError,0) = 1
+						RAISERROR(@ErrorMessage, 16, 1);
+					RETURN 0;
+				END
+		END TRY
+		BEGIN CATCH
+			IF ISNULL(@RaiseError,0) = 0
+				ROLLBACK TRANSACTION
+			SET @ErrorMessage = ERROR_MESSAGE();
+			IF ISNULL(@RaiseError,0) = 1
+				RAISERROR(@ErrorMessage, 16, 1);
+			RETURN 0;
+		END CATCH
 
-	SET @InvoiceId = @NewInvoiceId
+		--INSERT TO INVOICE DETAIL
+		WHILE EXISTS(SELECT NULL FROM @tblItemsToInvoice)
+			BEGIN
+				DECLARE @intItemToInvoiceId		INT,
+						@ItemId					INT,
+						@ItemIsInventory		BIT,
+						@NewDetailId			INT,
+						@ItemDescription		NVARCHAR(100),
+						@ItemUOMId				INT,
+						@ItemQtyShipped			NUMERIC(18,6),
+						@ItemDiscount			NUMERIC(18,6),
+						@ItemPrice				NUMERIC(18,6),
+						@ItemTaxGroupId			INT,		
+						@ItemSalesOrderDetailId	INT,
+						@ItemShipmentDetailId	INT,
+						@ItemSalesOrderNumber	NVARCHAR(100),
+						@ItemShipmentNumber		NVARCHAR(100)
+
+				SELECT TOP 1
+						@intItemToInvoiceId		= intItemToInvoiceId,
+						@ItemId					= intItemId,
+						@ItemIsInventory		= ysnIsInventory,
+						@ItemDescription		= strItemDescription,
+						@ItemUOMId				= intItemUOMId,
+						@ItemQtyShipped			= dblQtyRemaining,
+						@ItemDiscount			= dblDiscount,
+						@ItemPrice				= dblPrice,
+						@ItemTaxGroupId			= intTaxGroupId,
+						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
+						@ItemShipmentDetailId	= intInventoryShipmentItemId,
+						@ItemSalesOrderNumber	= strSalesOrderNumber,
+						@ItemShipmentNumber		= strShipmentNumber
+				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
+
+				EXEC [dbo].[uspARAddItemToInvoice]
+							 @InvoiceId						= @NewInvoiceId	
+							,@ItemId						= @ItemId
+							,@ItemIsInventory				= @ItemIsInventory
+							,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
+							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
+							,@RaiseError					= @RaiseError
+							,@ItemDescription				= @ItemDescription
+							,@ItemUOMId						= @ItemUOMId
+							,@ItemQtyOrdered				= @ItemQtyShipped
+							,@ItemQtyShipped				= @ItemQtyShipped
+							,@ItemDiscount					= @ItemDiscount
+							,@ItemPrice						= @ItemPrice
+							,@RefreshPrice					= 0
+							,@ItemTaxGroupId				= @ItemTaxGroupId
+							,@RecomputeTax					= 0
+							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId							
+							,@ItemInventoryShipmentItemId	= @ItemShipmentDetailId
+							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+							,@ItemShipmentNumber			= @ItemShipmentNumber
+
+				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+					BEGIN
+						IF ISNULL(@RaiseError,0) = 0
+							ROLLBACK TRANSACTION
+						SET @ErrorMessage = @CurrentErrorMessage;
+						IF ISNULL(@RaiseError,0) = 1
+							RAISERROR(@ErrorMessage, 16, 1);
+						RETURN 0;
+					END
+				ELSE
+					DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId				
+			END	
+	END
+
+--UPDATE OTHER TABLE INTEGRATIONS
+IF ISNULL(@RaiseError,0) = 0
+	BEGIN
+		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
+		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
+
+		UPDATE
+			tblSOSalesOrder
+		SET
+			dtmProcessDate = GETDATE()
+			, ysnProcessed = 1
+		WHERE
+			intSalesOrderId = @SalesOrderId
+	END
+
+--INSERT TO RECURRING TRANSACTION
+IF ISNULL(@SoftwareInvoiceId, 0) > 0
+	BEGIN
+		IF NOT EXISTS (SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @SoftwareInvoiceId AND strTransactionType = 'Invoice')
+			BEGIN
+				EXEC dbo.uspARInsertRecurringInvoice @SoftwareInvoiceId, @UserId
+			END			
+	END
+
+--COMMIT TRANSACTION
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION 
+
 END

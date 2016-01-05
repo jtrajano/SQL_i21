@@ -15,11 +15,11 @@ BEGIN
 	DECLARE @dblQty AS NUMERIC(18,6) = 15.25
 
 	DECLARE @result AS NUMERIC(18,6) 
-	DECLARE @expected AS NUMERIC(18,6) = 15.25
+	DECLARE @Expected AS NUMERIC(18,6) = 15.25
 
 	-- Act
 	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@intItemUOMIdFrom, @intItemUOMIdTo, @dblQty)
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

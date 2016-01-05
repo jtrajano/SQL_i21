@@ -296,6 +296,13 @@ BEGIN
 					SET @dblTransferCost = 0
 					SET @strPriceMethod = 'Standard Pricing'
 		END
+		IF (@strPriceMethod = 'Import File Price')
+		BEGIN
+					SET @intContractId = null
+					SET @strPrcPriceBasis = null
+					SET @dblTransferCost = 0
+					SET @strPriceMethod = 'Import File Price'
+		END
 		ELSE IF (@strPriceMethod = 'Special Pricing')
 		BEGIN
 					SET @intContractId = null
@@ -360,8 +367,10 @@ BEGIN
 		FROM tblSMCompanyLocation 
 		WHERE intCompanyLocationId = @intARItemLocationId
 
-		SELECT @intTaxGroupId = [dbo].[fnGetTaxGroupForLocation]
-		(@intTaxMasterId, @strCountry, @strCounty, @strCity, @strState)
+		--SELECT @intTaxGroupId = [dbo].[fnGetTaxGroupForLocation]
+		--(@intTaxMasterId, @strCountry, @strCounty, @strCity, @strState)
+		
+		SELECT @intTaxGroupId = @intTaxMasterId
 
 		INSERT INTO @tblTaxTable
 		SELECT
@@ -384,7 +393,7 @@ BEGIN
 		,[strTaxGroup]
 		FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer]
-		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId, NULL, 0)
+		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId, NULL, 0, NULL)
 		INSERT INTO @tblTaxRateTable
 		SELECT 
 		 [intTransactionDetailTaxId]
@@ -532,7 +541,9 @@ BEGIN
 		DECLARE @QxCP				NUMERIC(18,6) = 0
 		DECLARE @QxT				NUMERIC(18,6) = 0
 		DECLARE @OPTax				NUMERIC(18,6) = 0		
-		DECLARE @CPTax				NUMERIC(18,6) = 0		
+		DECLARE @CPTax				NUMERIC(18,6) = 0	
+		DECLARE @Rate				NUMERIC(18,6)
+		DECLARE @CalculationMethod  NVARCHAR(MAX)
 
 		
 		SET @QxOP = @dblQuantity * @dblPrcOriginalPrice
@@ -551,6 +562,8 @@ BEGIN
 			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * numRate),6)
 			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  numRate,6)
 			,@strLoopTaxCode = strTaxCode
+			,@Rate = numRate
+			,@CalculationMethod = strCalculationMethod
 			FROM @tblTaxUnitTable
 
 			INSERT INTO tblCFTransactionTax(
@@ -558,6 +571,8 @@ BEGIN
 				,[strTransactionTaxId]
 				,[dblTaxOriginalAmount]
 				,[dblTaxCalculatedAmount]
+				,[strCalculationMethod]
+				,[dblTaxRate]
 			)
 			VALUES(
 				@Pk
@@ -568,6 +583,8 @@ BEGIN
 				,(CASE WHEN(@dblPrcPriceOut = 0 OR @dblPrcPriceOut IS NULL) 
 					THEN 0 
 					ELSE @QxT END)
+				,@CalculationMethod
+				,@Rate
 			)
 
 			DELETE FROM @tblTaxUnitTable 
@@ -591,6 +608,8 @@ BEGIN
 			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (numRate/100 +1 )) * (numRate/100)),6)
 			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (numRate/100)),6)
 			,@strLoopTaxCode = strTaxCode
+			,@Rate = numRate
+			,@CalculationMethod = strCalculationMethod
 			FROM @tblTaxRateTable
 
 			INSERT INTO tblCFTransactionTax(
@@ -598,12 +617,16 @@ BEGIN
 				,[strTransactionTaxId]
 				,[dblTaxOriginalAmount]
 				,[dblTaxCalculatedAmount]
+				,[strCalculationMethod]
+				,[dblTaxRate]
 			)
 			VALUES(
 				@Pk
 				,@strLoopTaxCode
 				,@OPTax
 				,@CPTax
+				,@CalculationMethod
+				,@Rate
 			)
 
 			DELETE FROM @tblTaxRateTable 

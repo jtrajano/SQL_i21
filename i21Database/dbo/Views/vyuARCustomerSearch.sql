@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuARCustomerSearch]
+﻿	CREATE VIEW [dbo].[vyuARCustomerSearch]
 AS
 SELECT     
  Entity.intEntityId
@@ -43,6 +43,7 @@ SELECT
 ,Cus.dblCreditLimit
 ,Cus.dblARBalance
 ,Cus.dtmLastActivityDate
+,Cus.strStockStatus
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1

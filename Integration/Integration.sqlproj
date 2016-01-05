@@ -286,7 +286,9 @@
     <Build Include="dbo\Tables\tblAPaphglmst.sql" />
     <Build Include="dbo\Tables\tblAPapivcmst.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPIVCMST.sql" />
-    <Build Include="dbo\Functions\fnValidateBillsImport.sql" />
+    <Build Include="dbo\Functions\fnValidateBillsImport.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblAPImportBillError.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPTRXMST.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql" />
@@ -303,5 +305,10 @@
     <None Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateSiteCustomerView.sql" />
     <None Include="dbo\Views\vyuGLglhstmstDifference.sql" />
+    <None Include="dbo\Views\vyuTMDeliveryFillReport.sql" />
+    <None Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateItemUsedBySiteView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateLocationUsedBySiteView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateDriverUsedBySiteView.sql" />
   </ItemGroup>
 </Project>

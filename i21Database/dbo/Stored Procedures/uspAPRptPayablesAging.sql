@@ -45,17 +45,26 @@ DECLARE @count INT = 0;
 DECLARE @fieldname NVARCHAR(50)
 DECLARE @condition NVARCHAR(20)     
 DECLARE @id INT 
+DECLARE @strBillId NVARCHAR(50) 
+DECLARE @strAccountId NVARCHAR(50) 
+DECLARE @strVendorIdName NVARCHAR(150) 
+DECLARE @strVendorId NVARCHAR(50)
+DECLARE @strVendorOrderNumber NVARCHAR(50)
+DECLARE @strTerm NVARCHAR(50)
+DECLARE @dtmDate DATETIME 
 DECLARE @from NVARCHAR(50)
 DECLARE @to NVARCHAR(50)
 DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)
 DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
+
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 	SET @xmlParam = NULL 
 
 DECLARE @xmlDocumentId AS INT;
+
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
 	id INT IDENTITY(1,1)
@@ -76,7 +85,7 @@ INSERT INTO @temp_xml_table
 SELECT *
 FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (
-	[fieldname] nvarchar(50)
+	  [fieldname] nvarchar(50)
 	, condition nvarchar(20)
 	, [from] nvarchar(50)
 	, [to] nvarchar(50)
@@ -88,53 +97,117 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SET @innerQuery = 'SELECT 
-			intBillId
-			,dblTotal
-			,dblAmountDue
-			,dblAmountPaid
-			,dblDiscount
-			,dblInterest
-			,dtmDate
-		FROM dbo.vyuAPPayables'
+					intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+				  FROM dbo.vyuAPPayables'
 
 IF @dateFrom IS NOT NULL
-BEGIN
-	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+BEGIN	
+	IF @condition = 'Equal To'
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+	END
+    ELSE 
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+	END  
 END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate'
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
-	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
+	SELECT @id = id, 
+		   @fieldname = [fieldname], 
+		   @condition = [condition], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table
 	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
+	
 	DELETE FROM @temp_xml_table WHERE id = @id
+	
 	IF EXISTS(SELECT 1 FROM @temp_xml_table)
 	BEGIN
 		SET @filter = @filter + ' AND '
 	END
 END
 
-----CREATE vendor filter
---SELECT @vendorId = [fieldname], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table WHERE [fieldname] = 'intEntityVendorId';
---IF @vendorId IS NOT NULL
---BEGIN
---	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @from, @to, @join, @datatype)
---END
+-- Gather the variables values from the xml table.
+	SELECT @strVendorId = [fieldname], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table WHERE [fieldname] = 'strVendorId';
+	IF @strVendorId IS NOT NULL
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strVendorId, @condition, @from, @to, @join, null, null, @datatype)				  
+	END
+    
+	SELECT @strVendorIdName = [fieldname], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table WHERE [fieldname] = 'strVendorIdName';
+	IF @strVendorIdName IS NOT NULL
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strVendorIdName, @condition, @from, @to, @join, null, null, @datatype)				  
+	END
+  
+   SELECT @strBillId = [fieldname], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table WHERE [fieldname] = 'strBillId';
+	IF @strBillId IS NOT NULL
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strBillId, @condition, @from, @to, @join, null, null, @datatype)				  
+	END  
 
---SELECT @accountId = [fieldname], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table WHERE [fieldname] = 'intAccountId';
---IF @accountId IS NOT NULL
---BEGIN
---	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@accountId, @from, @to, @join, @datatype)
---END
+	 SELECT @strAccountId = [fieldname], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
+	IF @strAccountId IS NOT NULL
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strAccountId, @condition, @from, @to, @join, null, null, @datatype)				  
+	END  
 
---SELECT @billId = [fieldname], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table WHERE [fieldname] = 'intBillId';
---IF @billId IS NOT NULL
---BEGIN
---	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@billId, @from, @to, @join, @datatype)
---END
+	SELECT @strVendorOrderNumber = [fieldname], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table WHERE [fieldname] = 'strVendorOrderNumber';
+	IF @strVendorOrderNumber IS NOT NULL
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strVendorOrderNumber, @condition, @from, @to, @join, null, null, @datatype)				  
+	END  
+
+	SELECT @strTerm = [fieldname], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table WHERE [fieldname] = 'strTerm';
+	IF @strTerm IS NOT NULL
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strTerm, @condition, @from, @to, @join, null, null, @datatype)				  
+	END  
 
 SET @query = '
 	SELECT * FROM (
@@ -210,3 +283,4 @@ END
 --PRINT @query
 
 EXEC sp_executesql @query
+GO

@@ -57,6 +57,7 @@ BEGIN
 			,strModuleName 
 			,strCode 
 			,strTransactionType 
+			,strTransactionForm
 		)
 		SELECT 
 			dtmDate = GETDATE()
@@ -71,6 +72,8 @@ BEGIN
 			,strModuleName = 'Inventory'
 			,strCode = 'IC'
 			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
+
 		UNION ALL 
 		SELECT 
 			dtmDate = GETDATE()
@@ -85,6 +88,8 @@ BEGIN
 			,strModuleName = 'Inventory'
 			,strCode = 'IC'
 			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
+
 		UNION ALL 
 		SELECT 
 			dtmDate = GETDATE()
@@ -99,6 +104,8 @@ BEGIN
 			,strModuleName = 'Inventory'
 			,strCode = 'IC'
 			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
+
 		UNION ALL 
 		SELECT 
 			dtmDate = GETDATE()
@@ -113,6 +120,7 @@ BEGIN
 			,strModuleName = 'Inventory'
 			,strCode = 'IC'
 			,strTransactionType = 'Inventory Receipt'
+			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
 		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period to match the transaction date.', 50005)

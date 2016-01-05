@@ -294,6 +294,8 @@ GO
 										and vyuHDSMModuleMap.strApplicationName = tblHDTicketProduct.strProduct
 										and tblHDTicketProduct.intTicketProductId = tblHDModule.intTicketProductId
 									)
+	where
+		tblHDModule.intSMModuleId is null
 
 GO
 	PRINT N'End updating HD modules with SM modules.'

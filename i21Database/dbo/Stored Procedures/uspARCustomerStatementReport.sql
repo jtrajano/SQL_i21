@@ -82,8 +82,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strBOLNumber]			 NVARCHAR(100)
 	,[dblCreditLimit]		 NUMERIC(18,6)
 	,[strFullAddress]		 NVARCHAR(MAX)
-	,[strStatementFooterComment] NVARCHAR(MAX)
-	,[blbCompanyLogo]		 VARBINARY(MAX)
+	,[strStatementFooterComment] NVARCHAR(MAX)	
 	,[strCompanyName]		 NVARCHAR(MAX)
 	,[strCompanyAddress]	 NVARCHAR(MAX)
 )
@@ -108,7 +107,7 @@ WITH (
 
 -- Gather the variables values from the xml table.
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
-	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
+ 	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
        ,@condition	 = [condition]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmDate'
@@ -127,7 +126,7 @@ ELSE
 SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
-IF @condition = 'As Of'
+IF UPPER(@condition) = UPPER('As Of')
 	BEGIN		
 		SET @innerQuery = 'AND I.dtmDate <= '+ @strDateTo +''
 	END
@@ -176,8 +175,7 @@ SET @query = 'SELECT * FROM
 	 , I.strBOLNumber
 	 , C.dblCreditLimit
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
-	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')
-	 , blbCompanyLogo = [dbo].fnSMGetCompanyLogo(''Header'')
+	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
 FROM tblARInvoice I
@@ -219,8 +217,7 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
 	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,STATEMENTREPORT.strFullAddress
-	  ,STATEMENTREPORT.strStatementFooterComment
-	  ,STATEMENTREPORT.blbCompanyLogo
+	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
 	  ,STATEMENTREPORT.strCompanyAddress	  
 	  ,dtmAsOfDate = @dtmDateTo

@@ -573,6 +573,7 @@ DEALLOCATE loopItems;
 BEGIN 
 	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
 			,@intInventoryTransactionId AS INT 
+			,@intIdAutoNegative AS INT 
 
 	-- Get the qualified items for auto-negative. 
 	INSERT INTO @ItemsForAutoNegative (
@@ -617,19 +618,23 @@ BEGIN
 	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
 			AND dblQty > 0 
 
-	SET @intInventoryTransactionId = NULL 
+	SET	@intInventoryTransactionId = NULL 
+	SET @strTransactionForm = NULL 
 
 	SELECT	TOP 1 
 			@intInventoryTransactionId = intInventoryTransactionId
+			,@strTransactionForm = strTransactionForm
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	strBatchId = @strBatchId
 			AND ISNULL(ysnIsUnposted, 0) = 0 
+			AND dblQty > 0
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
 	BEGIN 
 		SELECT TOP 1 
 				@intItemId			= intItemId 
 				,@intItemLocationId = intItemLocationId
+				,@intIdAutoNegative	= intId 
 		FROM	@ItemsForAutoNegative
 
 		INSERT INTO dbo.tblICInventoryTransaction (
@@ -661,39 +666,41 @@ BEGIN
 					,[intConcurrencyId]
 			)			
 		SELECT	
-				[intItemId]								= InvTrans.intItemId
-				,[intItemLocationId]					= InvTrans.intItemLocationId
-				,[intItemUOMId]							= InvTrans.intItemUOMId
-				,[intSubLocationId]						= InvTrans.intSubLocationId
-				,[intStorageLocationId]					= InvTrans.intStorageLocationId
-				,[dtmDate]								= InvTrans.dtmDate
+				[intItemId]								= AutoNegative.intItemId
+				,[intItemLocationId]					= AutoNegative.intItemLocationId
+				,[intItemUOMId]							= AutoNegative.intItemUOMId
+				,[intSubLocationId]						= AutoNegative.intSubLocationId
+				,[intStorageLocationId]					= AutoNegative.intStorageLocationId
+				,[dtmDate]								= AutoNegative.dtmDate
 				,[dblQty]								= 0
 				,[dblUOMQty]							= 0
 				,[dblCost]								= 0
 				,[dblValue]								= (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= InvTrans.intCurrencyId
-				,[dblExchangeRate]						= InvTrans.dblExchangeRate
-				,[intTransactionId]						= InvTrans.intTransactionId
-				,[strTransactionId]						= InvTrans.strTransactionId
+				,[intCurrencyId]						= AutoNegative.intCurrencyId
+				,[dblExchangeRate]						= AutoNegative.dblExchangeRate
+				,[intTransactionId]						= AutoNegative.intTransactionId
+				,[strTransactionId]						= AutoNegative.strTransactionId
 				,[strBatchId]							= @strBatchId
 				,[intTransactionTypeId]					= @AUTO_NEGATIVE
-				,[intLotId]								= InvTrans.intLotId
+				,[intLotId]								= AutoNegative.intLotId
 				,[ysnIsUnposted]						= 0
 				,[intRelatedInventoryTransactionId]		= NULL 
 				,[intRelatedTransactionId]				= NULL 
 				,[strRelatedTransactionId]				= NULL 
-				,[strTransactionForm]					= InvTrans.strTransactionForm
+				,[strTransactionForm]					= @strTransactionForm
 				,[dtmCreated]							= GETDATE()
 				,[intCreatedUserId]						= @intUserId
 				,[intConcurrencyId]						= 1
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+				INNER JOIN @ItemsForAutoNegative AutoNegative
+					ON AutoNegative.intItemId = ItemPricing.intItemId
+					AND AutoNegative.intItemLocationId = ItemPricing.intItemLocationId
 				INNER JOIN dbo.tblICInventoryTransaction InvTrans
 					ON InvTrans.intInventoryTransactionId = @intInventoryTransactionId
-		WHERE	ItemPricing.intItemId = @intItemId
-				AND ItemPricing.intItemLocationId = @intItemLocationId			
+		WHERE	AutoNegative.intId = @intIdAutoNegative
 				AND (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
 
 		-- Delete the item and item-location from the table variable. 

@@ -4,7 +4,7 @@
     [ysnPosted]          BIT             DEFAULT ((0)) NULL,
 	[dtmBatchDate]		DATETIME NULL ,
     [strBillBatchNumber] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
-    [strReference]       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [strReference]       NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL,
     [dblTotal]           DECIMAL (18, 2) NOT NULL,
     [intUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 

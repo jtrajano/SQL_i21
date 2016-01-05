@@ -87,7 +87,7 @@ BEGIN
 		SELECT	intLotId
 				,intInventoryReceiptItemId
 				,strLotNumber
-		FROM	dbo.actualReceiptItemLot
+		FROM	actualReceiptItemLot
 	END 
 
 	-- Assert
@@ -101,5 +101,5 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 END

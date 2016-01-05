@@ -3,7 +3,7 @@
 --BEGIN
 --	-- Arrange
 --	DECLARE @result AS NUMERIC(18,6)
---	DECLARE @expected AS NUMERIC(18,6)
+--	DECLARE @Expected AS NUMERIC(18,6)
 
 --	-- Setup the fake data
 --	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
@@ -142,9 +142,9 @@
 --			,dblCost = 2.25
 
 --	-- Act
---	SET @expected = ( ((90 - 10) * 2.50) + (26 * 2.25) ) / (90 - 10 + 26)
+--	SET @Expected = ( ((90 - 10) * 2.50) + (26 * 2.25) ) / (90 - 10 + 26)
 --	SELECT @result = dbo.fnRecalculateAverageCost(@WetGrains, @Default_Location);
 
 --	-- Assert the null dates are not equal dates
---	EXEC tSQLt.AssertEquals @expected, @result 
+--	EXEC tSQLt.AssertEquals @Expected, @result 
 --END

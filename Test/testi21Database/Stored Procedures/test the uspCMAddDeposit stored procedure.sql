@@ -69,7 +69,7 @@ BEGIN
 		)
 
 		-- Create the expected detail table 
-		CREATE TABLE dbo.expectedDetail (
+		CREATE TABLE expectedDetail (
 			[intGLAccountId]	INT              NOT NULL,
 			[dblDebit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
 			[dblCredit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL
@@ -114,8 +114,8 @@ BEGIN
 		DROP TABLE actualDetail
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 	
 	IF OBJECT_ID('expectedDetail') IS NOT NULL 
-		DROP TABLE dbo.expectedDetail
+		DROP TABLE expectedDetail
 END

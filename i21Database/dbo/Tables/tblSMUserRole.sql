@@ -5,6 +5,7 @@
     [strMenu]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strMenuPermission] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strForm]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strRoleType]       NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
     [ysnAdmin]          BIT            DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]  INT            DEFAULT (1) NOT NULL,
     CONSTRAINT [PK_Role] PRIMARY KEY CLUSTERED ([intUserRoleID] ASC), 
@@ -66,6 +67,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMUserRole',
     @level2type = N'COLUMN',
     @level2name = N'strForm'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Enable Administrator Rights',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserRole',
+    @level2type = N'COLUMN',
+    @level2name = N'strRoleType'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Enable Administrator Rights',

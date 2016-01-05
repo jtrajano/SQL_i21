@@ -172,7 +172,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		DEALLOCATE cursor_tbl
 
     		DECLARE @postdate DATE,@intJournalId INT,@strJournalId VARCHAR(10),
-    				@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
+    				@glije_date VARCHAR(20),@intAccountId INT, @strDescription VARCHAR(50),@headerDescription VARCHAR(50),@dtmDate DATE,
     				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(16,4),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
     				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),
 					--@totalDebit DECIMAL(18,2),
@@ -188,11 +188,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		BEGIN
 
     			EXEC  dbo.uspGLGetNewID 2, @strJournalId  OUTPUT
-
+				SET @headerDescription = ''Imported from '' + REPLACE(@glije_src_sys,'' '','''') +  '' '' + REPLACE(@glije_src_no,'' '' ,'''') + '' on '' + CONVERT (varchar(10), GETDATE(), 101) 
 				INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
     			strSourceId, strSourceType)
     			SELECT @strJournalId,@postdate
-    				,''Imported from '' + REPLACE(@glije_src_sys,'' '','''') +  '' '' + REPLACE(@glije_src_no,'' '' ,'''') + '' on '' + CONVERT (varchar(10), GETDATE(), 101) 
+    				,@headerDescription
     				,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0,@glije_src_no,@glije_src_sys
 
     			SELECT @intJournalId = @@IDENTITY
@@ -257,14 +257,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     					SET @isValid = 0
     				END
-    				SELECT @intAccountId = NULL
-    				SELECT @intAccountId= b.intAccountId, @strDescription=b.strDescription FROM tblGLCOACrossReference a
+    				SELECT @intAccountId= b.intAccountId FROM tblGLCOACrossReference a
     				JOIN tblGLAccount b ON a.inti21Id = b.intAccountId WHERE a.strExternalId = @glije_acct_no
-    				IF @intAccountId IS NULL
-    					SELECT @strDescription1 =REPLACE(@glije_acct_no,''.'',''''),@intAccountId1 = NULL
-    				ELSE
-    					SELECT @strDescription1 = @strDescription,@intAccountId1 =@intAccountId
-
 					
 
     				SELECT @dtmDate =CONVERT(DATE, SUBSTRING(@glije_date,1,4) + ''/'' + SUBSTRING(@glije_date,5,2) + ''/'' + SUBSTRING(@glije_date,7,2))
@@ -294,7 +288,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     				INSERT INTO tblGLJournalDetail (intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
     				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument, strSourceKey)
-    				SELECT @intAccountId1,@strDescription1,@dtmDate,@intJournalId,@debit,@credit,@debitUnit,@creditUnit,
+    				SELECT @intAccountId,@headerDescription,@dtmDate,@intJournalId,@debit,@credit,@debitUnit,@creditUnit,
     				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc, A4GLIdentity
     				 FROM tblGLIjemst WHERE glije_id=@id
 

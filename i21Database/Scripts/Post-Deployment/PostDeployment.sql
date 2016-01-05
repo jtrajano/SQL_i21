@@ -90,6 +90,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\DataSource\EfficiencyReport.sql
 :r .\TM\Reports\Layout\EfficiencyReport.sql
 :r .\TM\Reports\Layout\WorkOrder.sql
+:r .\TM\Reports\DataSource\CallEntryPrintOut.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
@@ -120,7 +121,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Views\vyuTMLeaseSearch.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
-:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
+--:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
 
 
@@ -141,7 +142,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql
 :r .\GL\DefaultData\7_FiscalYearPeriod.sql
 :r .\GL\DefaultData\8_AccountCurrency.sql
-:r .\GL\DefaultData\9_UpdateAccountSegmentWithNoMatchingCategory.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
@@ -174,6 +174,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql
 :r .\AR\DefaultData\8_UpdateInvoiceType.sql
 :r .\AR\DefaultData\9_FixServiceChargeStartingNumber.sql
+:r .\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -226,6 +227,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Grain
 :R .\GR\1_MasterTables.sql
+:R .\GR\TicketTypes.sql
 :R .\GR\GRDataMigrations.sql
 
 --Manufacturing
@@ -234,6 +236,9 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
+:r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
+:r .\PR\DataFixes\ResetEaningHoursToProcess.sql
+:r .\PR\DataFixes\UpdateEarningDeductionTaxId.sql
 
 -- Version Update
 :r .\VersionUpdate.sql
@@ -256,6 +261,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\015_UpdateEntityTariffType.sql
 :r .\EM\016_MoveCustomerAccountStatusToNewTable.sql
 :r .\EM\017_MoveSplitCategoryToNewTable.sql
+:r .\EM\018_UpdateRoleId_ForEntityCredential.sql
+:r .\EM\019_RemoveEmailToParentEntity.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
@@ -266,6 +273,17 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\3_FileFieldMapping_PromotionCombo.sql
 :r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
 :r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
+
+-- Motor Fuel Tax
+:r .\TF\DefaultData\_CompanyPreference.sql
+:r .\TF\DefaultData\_TaxAuthority.sql
+:r .\TF\DefaultData\_Frequency.sql
+:r .\TF\DefaultData\_ReportingComponent.sql
+:r .\TF\DefaultData\_ProductCode.sql
+:r .\TF\DefaultData\_TerminalControlNumber.sql
+:r .\TF\DefaultData\_ConfigurationType.sql
+:r .\TF\DefaultData\_ConfigurationTemplate.sql
+:r .\TF\DefaultData\_Transaction.sql
 
 -- Common
 :r .\Common\ErrorMessages.sql 

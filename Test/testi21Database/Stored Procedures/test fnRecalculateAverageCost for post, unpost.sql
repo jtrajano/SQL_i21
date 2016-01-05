@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange
 	BEGIN 
 		DECLARE @result AS NUMERIC(18,6)
-		DECLARE @expected AS NUMERIC(18,6)
+		DECLARE @Expected AS NUMERIC(18,6)
 
 		-- Setup the fake data
 		EXEC [testi21Database].[Fake inventory items]
@@ -284,8 +284,8 @@ BEGIN
 
 	-- Assert 
 	BEGIN 
-		SET @expected = NULL
+		SET @Expected = NULL
 
-		EXEC tSQLt.AssertEquals @expected, @result, 'When stock Qty is zero or negative, it should return NULL.'
+		EXEC tSQLt.AssertEquals @Expected, @result, 'When stock Qty is zero or negative, it should return NULL.'
 	END 
 END

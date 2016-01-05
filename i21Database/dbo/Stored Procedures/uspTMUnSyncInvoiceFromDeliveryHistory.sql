@@ -454,7 +454,8 @@ BEGIN
 						,dblDegreeDayBetweenDelivery = A.dblSiteDegreeDayBetweenDelivery
 						,intNextDeliveryDegreeDay = A.intSiteNextDeliveryDegreeDay
 						,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
-
+						,dtmForecastedDelivery = NULL
+						,dtmRunOutDate = NULL
 					FROM(
 						SELECT TOP 1 * FROM tblTMDeliveryHistory
 						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
@@ -490,7 +491,8 @@ BEGIN
 
 					-- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
-					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+					-- No calculation for forecast since this is the start/setup state of site 
+					---EXEC uspTMUpdateForecastedValuesBySite @intSiteId
 				END
 			END
 		END

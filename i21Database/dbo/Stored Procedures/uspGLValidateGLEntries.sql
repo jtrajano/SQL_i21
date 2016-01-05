@@ -51,6 +51,13 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- Unable to find an open fiscal year period to match the transaction date for a particular module .
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 51189)
+BEGIN 
+	RAISERROR(51189, 11, 1)
+	GOTO _Exit
+END 
+
 _Exit: 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors

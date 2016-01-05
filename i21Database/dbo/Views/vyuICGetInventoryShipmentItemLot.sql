@@ -39,6 +39,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.dblLineTotal
 	, ShipmentItem.intGradeId
 	, ShipmentItem.strGrade
+	, Lot.intLotId
 	, Lot.strLotNumber
 	, Lot.strLotAlias
 	, Lot.intSubLocationId

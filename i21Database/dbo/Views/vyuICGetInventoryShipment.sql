@@ -46,10 +46,11 @@ SELECT Shipment.intInventoryShipmentId
 , Shipment.strReceivedBy
 , Shipment.strComment
 , Shipment.ysnPosted
-
+, WarehouseInstruction.intWarehouseInstructionHeaderId
 FROM tblICInventoryShipment Shipment
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shipment.intShipFromLocationId
 	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Shipment.intEntityCustomerId
 	LEFT JOIN tblEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Shipment.intShipToLocationId
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Shipment.intShipViaId
 	LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
+	LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId

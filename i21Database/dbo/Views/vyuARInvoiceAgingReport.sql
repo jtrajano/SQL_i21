@@ -16,10 +16,14 @@ SELECT A.strInvoiceNumber
 	 , SUM(B.dblTotalDue) AS dblTotalDue
 	 , SUM(A.dblAmountPaid) AS dblAmountPaid	 
 	 , dblCredits = SUM(B.dblAvailableCredit)
-	 , dblPrepaids = 0.000000	 
+	 , dblPrepaids = 0.000000
+	 , dtmDate
+	 , dtmDueDate
+	 , intCompanyLocationId	 
 FROM
 (SELECT I.dtmDate AS dtmDate
 	 , I.strInvoiceNumber
+	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
 	 , 0 AS dblAmountPaid   
@@ -52,8 +56,9 @@ WHERE I.ysnPosted = 1
 
 UNION ALL
 						
-SELECT I.dtmPostDate
+SELECT I.dtmDate
 	 , I.strInvoiceNumber
+	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
      , dblAmountPaid = 0
@@ -87,8 +92,9 @@ WHERE I.ysnPosted = 1
       
 UNION ALL      
       
-SELECT I.dtmPostDate      
+SELECT I.dtmDate      
      , I.strInvoiceNumber
+	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
 	 , dblAmountPaid = ISNULL(I.dblPayment,0)
@@ -97,7 +103,7 @@ SELECT I.dtmPostDate
 	 , ISNULL(I.dblDiscount, 0) AS dblDiscount    
 	 , ISNULL(I.strTransactionType, 'Invoice')    
 	 , ISNULL(I.intEntityCustomerId, '')    
-	 , ISNULL(I.dtmDueDate, GETDATE())    
+	 , I.dtmDueDate
 	 , ISNULL(T.intTermID, '')
      , ISNULL(T.intBalanceDue, 0)    
      , ISNULL(E.strName, '') AS strCustomerName	 
@@ -214,4 +220,4 @@ AND A.dblInvoiceTotal = B.dblInvoiceTotal
 AND A.dblAmountPaid =B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
 
-GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.strCustomerName
+GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.strCustomerName, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId

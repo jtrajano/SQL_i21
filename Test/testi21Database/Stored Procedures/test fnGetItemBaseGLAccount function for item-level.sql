@@ -41,7 +41,7 @@ BEGIN
 				,@BetterHaven AS INT = 3
 
 		DECLARE @actual AS INT;
-		DECLARE @expected AS INT;
+		DECLARE @Expected AS INT;
 
 		-- GL Account types used in inventory costing
 		DECLARE @InventoryDescription AS NVARCHAR(50) = 'Inventory';
@@ -80,8 +80,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @InventoryDescription);
 
 		-- Assert
-		SET @expected = @Inventory_Default;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @Inventory_Default;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END 
 	
@@ -90,8 +90,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
-		SET @expected = @CostOfGoods_Default;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @CostOfGoods_Default;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END 	
 	
@@ -100,8 +100,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @PurchasesDescription);
 
 		-- Assert
-		SET @expected = @APClearing_Default;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @APClearing_Default;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END
 
@@ -110,8 +110,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @InventoryDescription);
 
 		-- Assert
-		SET @expected = @Inventory_NewHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @Inventory_NewHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END
 
@@ -120,8 +120,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
-		SET @expected = @CostOfGoods_NewHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @CostOfGoods_NewHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END
 
@@ -130,8 +130,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @PurchasesDescription);
 
 		-- Assert
-		SET @expected = @APClearing_NewHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @APClearing_NewHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END
 
@@ -140,8 +140,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @InventoryDescription);
 
 		-- Assert
-		SET @expected = @Inventory_BetterHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @Inventory_BetterHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END
 
@@ -150,8 +150,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
-		SET @expected = @CostOfGoods_BetterHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @CostOfGoods_BetterHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END
 
@@ -160,8 +160,8 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @PurchasesDescription);
 
 		-- Assert
-		SET @expected = @APClearing_BetterHaven;
-		EXEC tSQLt.AssertEquals @expected, @actual; 
+		SET @Expected = @APClearing_BetterHaven;
+		EXEC tSQLt.AssertEquals @Expected, @actual; 
 
 	END
 END

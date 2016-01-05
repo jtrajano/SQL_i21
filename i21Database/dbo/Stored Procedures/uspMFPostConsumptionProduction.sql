@@ -230,6 +230,8 @@ BEGIN
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
 
+	SELECT @dtmDate = GETDATE()
+
 	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
 		,@strParentLotAlias = ''
 		,@intItemId = @intItemId

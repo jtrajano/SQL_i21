@@ -42,7 +42,7 @@ SELECT
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 				THEN CAST(ISNULL(LogisticsView.intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50))
 			WHEN Receipt.intSourceType = 3 -- Transport
-				THEN (SELECT CAST(ISNULL(strTransaction, 'Transport not found!')AS NVARCHAR(50)) FROM vyuTRTransportReceipt WHERE intTransportReceiptId = ReceiptItem.intSourceId)
+				THEN ISNULL(TransportView.strTransaction, 'Transport not found!')
 			ELSE NULL
 			END
 		),
@@ -102,16 +102,16 @@ SELECT
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
 						THEN (
-							CASE WHEN ContractView.ysnLoad = 1 THEN ISNULL(ContractView.intNoOfLoad, 0)
+							CASE WHEN (ContractView.ysnLoad = 1) THEN ISNULL(ContractView.intNoOfLoad, 0)
 								ELSE ISNULL(ContractView.dblDetailQuantity, 0) END
 						)
+						 
 					WHEN Receipt.intSourceType = 1 -- Scale
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblQuantity, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN (SELECT ISNULL(dblOrderedQuantity, 0) FROM vyuTRTransportReceipt
-						WHERE intTransportReceiptId = ReceiptItem.intSourceId)
+						THEN ISNULL(TransportView.dblOrderedQuantity, 0)
 					ELSE NULL
 					END
 				)
@@ -130,7 +130,7 @@ SELECT
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
 						THEN (
-							CASE WHEN ContractView.ysnLoad = 1 THEN ISNULL(ContractView.intNoOfLoad, 0) - ISNULL(ContractView.dblBalance, 0)
+							CASE WHEN (ContractView.ysnLoad = 1) THEN ISNULL(ContractView.intLoadReceived, 0)
 								ELSE ISNULL(ContractView.dblDetailQuantity, 0) - ISNULL(ContractView.dblBalance, 0) END
 						)
 					WHEN Receipt.intSourceType = 1 -- Scale
@@ -138,8 +138,7 @@ SELECT
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblReceivedQty, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN (SELECT ISNULL(dblReceivedQuantity, 0) FROM vyuTRTransportReceipt
-						WHERE intTransportReceiptId = ReceiptItem.intSourceId)
+						THEN ISNULL(TransportView.dblReceivedQuantity, 0)
 					ELSE NULL
 					END
 				)
@@ -167,6 +166,8 @@ SELECT
 				)
 			END
 		)
+	, ContractView.ysnLoad
+	, ContractView.dblAvailableQty
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN vyuCTContractDetailView ContractView
@@ -177,6 +178,9 @@ LEFT JOIN vyuLGShipmentContainerReceiptContracts LogisticsView
 		AND intShipmentBLContainerId = ReceiptItem.intContainerId
 		AND strReceiptType = 'Purchase Contract'
 		AND intSourceType = 2
+LEFT JOIN vyuTRTransportReceipt TransportView
+	ON TransportView.intTransportReceiptId = ReceiptItem.intSourceId
+		AND intSourceType = 3
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Order'

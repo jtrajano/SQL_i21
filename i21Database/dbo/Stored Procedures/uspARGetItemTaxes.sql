@@ -1,15 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemTaxes]
-	 @ItemId			INT			= NULL
-	,@LocationId		INT
-	,@CustomerId		INT			= NULL	
-	,@CustomerShipToId	INT			= NULL	
-	,@TransactionDate	DATETIME
-	,@TaxGroupId		INT			= NULL		
+	 @ItemId				INT			= NULL
+	,@LocationId			INT
+	,@CustomerId			INT			= NULL	
+	,@CustomerLocationId	INT			= NULL	
+	,@TransactionDate		DATETIME
+	,@TaxGroupId			INT			= NULL		
 AS
 
 
 	IF(ISNULL(@TaxGroupId,0) = 0)
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerShipToId)			
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId)			
 	
 	IF @TaxGroupId IS NOT NULL AND @TaxGroupId <> 0
 		BEGIN						
@@ -33,7 +33,7 @@ AS
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerShipToId, 1)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, NULL)
 				
 			RETURN 1
 		END

@@ -5,8 +5,8 @@ BEGIN
 	DECLARE @value AS NVARCHAR(20); 
 	SET @value = '39588'
 
-	DECLARE @expected AS NVARCHAR(20);
-	SET @expected = '00039588'
+	DECLARE @Expected AS NVARCHAR(20);
+	SET @Expected = '00039588'
 
 	DECLARE @actual AS NVARCHAR(20);
 
@@ -14,5 +14,5 @@ BEGIN
 	SELECT @actual = dbo.fnAddZeroPrefixes(@value);
 
 	-- Assert
-	EXEC tSQLt.AssertEquals @expected, @actual;
+	EXEC tSQLt.AssertEquals @Expected, @actual;
 END

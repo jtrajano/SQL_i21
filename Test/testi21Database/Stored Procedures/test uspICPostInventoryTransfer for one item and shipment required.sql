@@ -252,8 +252,8 @@ BEGIN
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('expected_tblGLDetail') IS NOT NULL 
-		DROP TABLE dbo.expected_tblGLDetail
+		DROP TABLE expected_tblGLDetail
 
 	IF OBJECT_ID('actual_tblGLDetail') IS NOT NULL 
-		DROP TABLE dbo.actual_tblGLDetail
+		DROP TABLE actual_tblGLDetail
 END 

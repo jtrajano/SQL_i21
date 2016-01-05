@@ -274,7 +274,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
-		FROM	dbo.tblICInventoryTransaction
+		FROM	tblICInventoryTransaction
 		WHERE	intTransactionId = @intTransactionId
 	END 
 
@@ -282,11 +282,4 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END 	
-
-	-- Clean-up: remove the tables used in the unit test
-	IF OBJECT_ID('actual') IS NOT NULL 
-		DROP TABLE actual
-
-	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
 END 

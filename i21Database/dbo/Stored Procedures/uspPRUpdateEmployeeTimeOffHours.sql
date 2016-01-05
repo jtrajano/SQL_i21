@@ -33,7 +33,8 @@ BEGIN
 								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmDateHired), E.dtmDateHired)
 							 ELSE NULL 
 						END
-		,dblAccruedHours = 0
+		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
+		,dblEarnedHours = CAST(0 AS NUMERIC(18, 6))
 		,dblRate
 		,dblPerPeriod
 		,strPeriod
@@ -62,34 +63,65 @@ BEGIN
 								dtmNextAward
 							END
 
-	--Calculate Total Accrued Hours
 	UPDATE #tmpEmployees 
+		--Calculate Total Accrued Hours
 		SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour') THEN 
-								ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
-										FROM tblPRPaycheck P 
-											LEFT JOIN tblPRPaycheckEarning PE 
-												ON P.intPaycheckId = PE.intPaycheckId
-											INNER JOIN tblPREmployeeEarning EE 
-												ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
-											INNER JOIN tblPREmployeeTimeOff ET 
-												ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
-													AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
-											WHERE P.ysnPosted = 1
-												  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
-												  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
-												  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
-							WHEN (strPeriod = 'Day') THEN 
-								DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-							WHEN (strPeriod = 'Week') THEN 
-								DATEDIFF(WK, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-							WHEN (strPeriod = 'Month') THEN
-								DATEDIFF(MM, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-							WHEN (strPeriod = 'Quarter') THEN
-								DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-							WHEN (strPeriod = 'Year') THEN
-								DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-							ELSE 0
-						END * dblRate * dblRateFactor
+									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
+											FROM tblPRPaycheck P 
+												LEFT JOIN tblPRPaycheckEarning PE 
+													ON P.intPaycheckId = PE.intPaycheckId
+												INNER JOIN tblPREmployeeEarning EE 
+													ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
+												INNER JOIN tblPREmployeeTimeOff ET 
+													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
+														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
+												WHERE P.ysnPosted = 1
+													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
+													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= GETDATE() 
+													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
+								WHEN (strPeriod = 'Day') THEN 
+									DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Week') THEN 
+									DATEDIFF(WK, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Month') THEN
+									DATEDIFF(MM, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Quarter') THEN
+									DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Year') THEN
+									DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								ELSE 0
+							END * dblRate * dblRateFactor
+		--Calculate Total Earned Hours
+		,dblEarnedHours = CASE WHEN (GETDATE() >= dtmNextAward) THEN
+								CASE WHEN (strPeriod = 'Hour') THEN 
+									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
+											FROM tblPRPaycheck P 
+												LEFT JOIN tblPRPaycheckEarning PE 
+													ON P.intPaycheckId = PE.intPaycheckId
+												INNER JOIN tblPREmployeeEarning EE 
+													ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
+												INNER JOIN tblPREmployeeTimeOff ET 
+													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
+														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
+												WHERE P.ysnPosted = 1
+													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
+													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
+													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
+								WHEN (strPeriod = 'Day') THEN 
+									DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Week') THEN 
+									DATEDIFF(WK, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Month') THEN
+									DATEDIFF(MM, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Quarter') THEN
+									DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								WHEN (strPeriod = 'Year') THEN
+									DATEDIFF(YY, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+								ELSE 0
+							END * dblRate * dblRateFactor
+						ELSE 0
+						END
+		
 
 	--Update Each Employee Hours
 	DECLARE @intEmployeeId INT
@@ -110,12 +142,12 @@ BEGIN
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN ((dblHoursEarned + dblAccruedHours) > dblMaxEarned) THEN
+			SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
 									dblMaxEarned
 								 ELSE
-									(dblHoursEarned + dblAccruedHours)
+									(dblHoursEarned + T.dblEarnedHours)
 								END
-				,dblHoursAccrued = 0
+				,dblHoursAccrued = dblHoursAccrued - T.dblEarnedHours
 				,dtmLastAward = T.dtmNextAward
 		FROM
 		#tmpEmployees T

@@ -166,6 +166,7 @@ BEGIN
 				, 0 [intWarningDays]
 				, CASE 
 						WHEN main.strRecurringPeriod IS NULL THEN 'Monthly'
+						WHEN main.strRecurringPeriod = 'Daily' THEN 'Daily'
 						WHEN main.strRecurringPeriod = 'Weekly' THEN 'Weekly'
 						WHEN main.strRecurringPeriod = 'MonthlyEnd' THEN 'Monthly'
 				  END [strFrequency] 

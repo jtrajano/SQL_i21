@@ -288,7 +288,7 @@ BEGIN
 		
 		-- Simulate a billed other charge
 		BEGIN 
-			UPDATE	dbo.tblICInventoryReceiptChargePerItem
+			UPDATE	dbo.tblICInventoryReceiptCharge
 			SET		dblAmountBilled = 10
 			WHERE	intInventoryReceiptId = @intInventoryReceiptId
 
@@ -347,5 +347,5 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE dbo.expected
+		DROP TABLE expected
 END

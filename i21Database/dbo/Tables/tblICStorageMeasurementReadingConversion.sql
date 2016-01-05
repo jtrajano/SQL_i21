@@ -10,7 +10,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStorageMeasurementReadingConversion] PRIMARY KEY ([intStorageMeasurementReadingConversionId]), 
-    CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICStorageMeasurementReading] FOREIGN KEY ([intStorageMeasurementReadingId]) REFERENCES [tblICStorageMeasurementReading]([intStorageMeasurementReadingId]), 
+    CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICStorageMeasurementReading] FOREIGN KEY ([intStorageMeasurementReadingId]) REFERENCES [tblICStorageMeasurementReading]([intStorageMeasurementReadingId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
     CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 

@@ -88,18 +88,17 @@ RETURN (
 
 		-- Check for negative stock and if negative stock is NOT allowed. 
 		-- and do not allow negative stock on items being phased-out. 
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = FORMATMESSAGE(
 								80003
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
-								,(
-									SELECT	tblSMCompanyLocation.strLocationName 
-									FROM	dbo.tblICItemLocation INNER JOIN dbo.tblSMCompanyLocation 
-												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-									WHERE	tblICItemLocation.intItemId = @intItemId
-											AND tblICItemLocation.intItemLocationId = @intItemLocationId
+								,dbo.fnFormatMsg80003(
+									@intItemLocationId
+									,@intSubLocationId
+									,@intStorageLocationId
 								)
 							)
 				,intErrorCode = 80003
@@ -123,18 +122,17 @@ RETURN (
 
 		-- Check for negative stocks at the lot table. 
 		-- and do not allow negative stock on items being phased-out. 
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	FORMATMESSAGE(
 								80003
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
-								,(
-									SELECT	tblSMCompanyLocation.strLocationName 
-									FROM	dbo.tblICItemLocation INNER JOIN dbo.tblSMCompanyLocation 
-												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-									WHERE	tblICItemLocation.intItemId = @intItemId
-											AND tblICItemLocation.intItemLocationId = @intItemLocationId
+								,dbo.fnFormatMsg80003(
+									@intItemLocationId
+									,@intSubLocationId
+									,@intStorageLocationId
 								)
 							)
 				,intErrorCode = 80003
@@ -147,6 +145,56 @@ RETURN (
 								ON Lot.intItemLocationId = Location.intItemLocationId 
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)								
 								AND Lot.intItemUOMId = @intItemUOMId
+					WHERE	Item.intItemId = @intItemId
+							AND Lot.intLotId IS NOT NULL
+							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
+							AND (							
+								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
+								OR Item.strStatus = 'Phased Out'
+							)		
+				)
+
+		-- Check for negative stocks at the lot table. 
+		-- and do not allow negative stock on items being phased-out. 
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText =	FORMATMESSAGE(
+								80003
+								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
+								,dbo.fnFormatMsg80003(
+									@intItemLocationId
+									,@intSubLocationId
+									,@intStorageLocationId
+								)
+								,ISNULL(
+									(
+										SELECT	strSubLocationName
+										FROM	dbo.tblSMCompanyLocationSubLocation
+										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
+									)
+									, '(Blank Sub Location)'
+								)
+								,ISNULL(
+									(
+										SELECT	strName
+										FROM	dbo.tblICStorageLocation
+										WHERE	intStorageLocationId = @intStorageLocationId
+									)
+									, '(Blank Storage Location)'
+								)
+							)
+				,intErrorCode = 80003
+		WHERE	EXISTS (
+					SELECT	TOP 1 1
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+								ON Item.intItemId = @intItemId
+								AND Location.intItemLocationId = @intItemLocationId
+							LEFT JOIN dbo.tblICLot Lot
+								ON Lot.intItemLocationId = Location.intItemLocationId 
+								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)								
+								AND Lot.intWeightUOMId = @intItemUOMId
 					WHERE	Item.intItemId = @intItemId
 							AND Lot.intLotId IS NOT NULL
 							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0

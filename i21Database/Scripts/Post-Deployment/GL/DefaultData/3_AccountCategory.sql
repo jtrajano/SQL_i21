@@ -22,8 +22,9 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 
 	IF @needFix =1
 	BEGIN
-		INSERT INTO @tblSegment(intAccountSegmentId,strAccountCategory)SELECT B.intAccountSegmentId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountSegment B
-		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+		INSERT INTO @tblSegment(intAccountSegmentId,strAccountCategory)SELECT B.intAccountSegmentId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountSegment B, tblGLAccountStructure C
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId 
+		AND B.intAccountStructureId = C.intAccountStructureId AND C.strType = 'Primary'
 		INSERT INTO @tblCategoryGroup(intAccountCategoryGroupId,strAccountCategory)SELECT B.intAccountCategoryGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountCategoryGroup B
 		WHERE A.intAccountCategoryId = B.intAccountCategoryId
 		INSERT INTO @tblCTCostType(intCostTypeId,strAccountCategory)SELECT B.intCostTypeId, strAccountCategory FROM tblGLAccountCategory A, tblCTCostType B

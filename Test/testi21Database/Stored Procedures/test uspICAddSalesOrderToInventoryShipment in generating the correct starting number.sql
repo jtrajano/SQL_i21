@@ -5,7 +5,7 @@ BEGIN
 	BEGIN 	
 		DECLARE @StartingNumberId_InventoryShipment AS INT = 31;
 		DECLARE @actual AS NVARCHAR(20)
-		DECLARE @expected AS NVARCHAR(20) = '(Test)INVSHIP-1'
+		DECLARE @Expected AS NVARCHAR(20) = '(Test)INVSHIP-1'
 
 		-- Modify the starting number table to perform the test. 
 		UPDATE dbo.tblSMStartingNumber 
@@ -22,6 +22,6 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEquals @expected, @actual 
+		EXEC tSQLt.AssertEquals @Expected, @actual 
 	END
 END

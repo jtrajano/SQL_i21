@@ -18,11 +18,11 @@ BEGIN
 	DECLARE @dblCost AS NUMERIC(18,6) = 25.00
 
 	DECLARE @result AS NUMERIC(18,6) 
-	DECLARE @expected AS NUMERIC(18,6) = (@dblCost / @KGS_UnitQty * @LBS_UnitQty) -- Equals 55.11561050459444. Rounded to 6 decimal places: 55.115611
+	DECLARE @Expected AS NUMERIC(18,6) = (@dblCost / @KGS_UnitQty * @LBS_UnitQty) -- Equals 55.11561050459444. Rounded to 6 decimal places: 55.115611
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostBetweenUOM(@KGS, @LBS, @dblCost)
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END

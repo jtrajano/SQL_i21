@@ -5,11 +5,11 @@
 
 AS
 
-	--SET QUOTED_IDENTIFIER OFF  
-	--SET ANSI_NULLS ON  
-	--SET NOCOUNT ON  
-	--SET XACT_ABORT ON  
-	--SET ANSI_WARNINGS OFF  
+	SET QUOTED_IDENTIFIER OFF  
+	SET ANSI_NULLS ON  
+	SET NOCOUNT ON  
+	SET XACT_ABORT ON  
+	SET ANSI_WARNINGS OFF  
 
 BEGIN
 	
@@ -29,13 +29,27 @@ BEGIN
 
 	BEGIN TRY
 
-		SELECT @ReceiptType = (
-			CASE WHEN strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
-				WHEN strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
-				WHEN strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
-				WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
-			END) FROM tblICInventoryReceipt
-		WHERE intInventoryReceiptId = @ReceiptId
+		IF (@ForDelete = 1)
+		BEGIN
+			SELECT @ReceiptType = (
+				CASE WHEN intOrderType = 1 THEN @ReceiptType_PurchaseContract
+					WHEN intOrderType = 2 THEN @ReceiptType_PurchaseOrder
+					WHEN intOrderType = 3 THEN @ReceiptType_TransferOrder
+					WHEN intOrderType = 4 THEN @ReceiptType_Direct
+				END) FROM tblICTransactionDetailLog
+			WHERE intTransactionId = @ReceiptId
+			AND strTransactionType = 'Inventory Receipt'
+		END
+		ELSE
+		BEGIN
+			SELECT @ReceiptType = (
+				CASE WHEN strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
+					WHEN strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
+					WHEN strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
+					WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
+				END) FROM tblICInventoryReceipt
+			WHERE intInventoryReceiptId = @ReceiptId
+		END
 	
 		-- Purchase Contracts
 		IF (@ReceiptType = @ReceiptType_PurchaseContract)
@@ -46,10 +60,10 @@ BEGIN
 				ReceiptItem.intInventoryReceiptId,
 				ReceiptItem.intInventoryReceiptItemId,
 				intOrderType = (
-					CASE WHEN strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
-						WHEN strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
-						WHEN strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
-						WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
+					CASE WHEN Receipt.strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
+						WHEN Receipt.strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
+						WHEN Receipt.strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
+						WHEN Receipt.strReceiptType = 'Direct' THEN @ReceiptType_Direct
 					END),
 				ReceiptItem.intOrderId,
 				Receipt.intSourceType,
@@ -57,10 +71,13 @@ BEGIN
 				ReceiptItem.intLineNo,
 				ReceiptItem.intItemId,
 				intItemUOMId = ReceiptItem.intUnitMeasureId,
-				ReceiptItem.dblOpenReceive
+				ReceiptItem.dblOpenReceive,
+				ReceiptItemSource.ysnLoad,
+				ReceiptItem.intLoadReceive
 			INTO #tmpReceiptItems
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 			WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId
 			-- Create snapshot of Receipt Items before Save
 			SELECT 
@@ -73,7 +90,9 @@ BEGIN
 				intLineNo,
 				intItemId,
 				intItemUOMId,
-				dblOpenReceive = dblQuantity
+				dblOpenReceive = dblQuantity,
+				ysnLoad,
+				intLoadReceive
 			INTO #tmpLogReceiptItems
 			FROM tblICTransactionDetailLog
 			WHERE intTransactionId = @ReceiptId
@@ -100,7 +119,8 @@ BEGIN
 				currentSnapshot.intInventoryReceiptItemId,
 				currentSnapshot.intLineNo,
 				currentSnapshot.intItemUOMId,
-				dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END))
+				CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END))
+					ELSE currentSnapshot.intLoadReceive END 
 			FROM #tmpReceiptItems currentSnapshot
 			INNER JOIN #tmpLogReceiptItems previousSnapshot
 				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
@@ -120,7 +140,8 @@ BEGIN
 				currentSnapshot.intInventoryReceiptItemId
 				,currentSnapshot.intLineNo
 				,currentSnapshot.intItemUOMId
-				,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive)
+				,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive)
+					ELSE currentSnapshot.intLoadReceive END
 			FROM #tmpReceiptItems currentSnapshot
 			INNER JOIN #tmpLogReceiptItems previousSnapshot
 				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
@@ -139,7 +160,8 @@ BEGIN
 				currentSnapshot.intInventoryReceiptItemId
 				,previousSnapshot.intLineNo
 				,previousSnapshot.intItemUOMId
-				,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+				,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+					ELSE previousSnapshot.intLoadReceive END
 			FROM #tmpReceiptItems currentSnapshot
 			INNER JOIN #tmpLogReceiptItems previousSnapshot
 				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
@@ -158,7 +180,8 @@ BEGIN
 				currentSnapshot.intInventoryReceiptItemId
 				,previousSnapshot.intLineNo
 				,previousSnapshot.intItemUOMId
-				,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+				,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+					ELSE previousSnapshot.intLoadReceive END
 			FROM #tmpReceiptItems currentSnapshot
 			INNER JOIN #tmpLogReceiptItems previousSnapshot
 				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
@@ -176,7 +199,8 @@ BEGIN
 				previousSnapshot.intInventoryReceiptItemId
 				,previousSnapshot.intLineNo
 				,previousSnapshot.intItemUOMId
-				,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+				,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+					ELSE previousSnapshot.intLoadReceive END
 			FROM #tmpLogReceiptItems previousSnapshot
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = previousSnapshot.intLineNo
@@ -191,7 +215,8 @@ BEGIN
 				currentSnapshot.intInventoryReceiptItemId
 				,currentSnapshot.intLineNo
 				,currentSnapshot.intItemUOMId
-				,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive)
+				,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive)
+					ELSE currentSnapshot.intLoadReceive END
 			FROM #tmpReceiptItems currentSnapshot
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
@@ -213,7 +238,7 @@ BEGIN
 			BEGIN
 				SELECT	@intContractDetailId		=	intContractDetailId,
 						@intFromItemUOMId			=	intItemUOMId,
-						@dblQty						=	dblQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
+						@dblQty						=	dblQty,
 						@intInventoryReceiptItemId	=	intInventoryReceiptItemId
 				FROM	@tblToProcess 
 				WHERE	intKeyId				=	 @Id

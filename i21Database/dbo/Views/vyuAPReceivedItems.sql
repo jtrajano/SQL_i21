@@ -41,8 +41,15 @@ FROM
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
-		,[intScaleTicketNumber]		=	NULL
+		,[strScaleTicketNumber]		=	NULL
 		,[intShipmentContractQtyId]	=	NULL
+		,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
+		,[intWeightUOMId]			=	tblReceived.intWeightUOMId
+		,[intCostUOMId]				=	tblReceived.intCostUOMId
+		,[dblNetWeight]				=	tblReceived.dblNetWeight
+		,[strCostUOM]				=	tblReceived.costUOM
+		,[strgrossNetUOM]			=	tblReceived.grossNetUOM
+		,[dblUnitQty]				=	tblReceived.dblUnitQty
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -61,11 +68,24 @@ FROM
 				,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
 				,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
 				,B1.dblTax
+				,B1.intUnitMeasureId
+				,B1.intWeightUOMId
+				,B1.intCostUOMId
+				,dblNet AS dblNetWeight
+				,CostUOM.strUnitMeasure AS costUOM
+				,WeightUOM.strUnitMeasure AS grossNetUOM
+				,ItemCostUOM.dblUnitQty
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
+				--INNER JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intInventoryReceiptItemId = B1.intInventoryReceiptItemId
+				LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B1.intWeightUOMId
+				LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+				LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B1.intCostUOMId
+				LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty
 			AND B.intPurchaseDetailId = B1.intLineNo
+			AND A1.strReceiptType = 'Purchase Order'
 			GROUP BY
 				A1.strReceiptNumber
 				,A1.strBillOfLading
@@ -77,7 +97,12 @@ FROM
 				,loc.intItemLocationId
 				,B1.dblTax
 				,B1.intUnitMeasureId
-
+				,B1.intWeightUOMId
+				,B1.intCostUOMId
+				,B1.dblNet
+				,CostUOM.strUnitMeasure	
+				,WeightUOM.strUnitMeasure
+				,ItemCostUOM.dblUnitQty
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -121,8 +146,15 @@ FROM
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
-	,[intScaleTicketNumber]		=	NULL
+	,[strScaleTicketNumber]		=	NULL
 	,[intShipmentContractQtyId]	=	NULL
+	,[intUnitMeasureId]			=	NULL
+	,[intWeightUOMId]			=	NULL
+	,[intCostUOMId]				=	NULL
+	,[dblNetWeight]				=	NULL
+	,[strCostUOM]				=	NULL
+	,[strgrossNetUOM]			=	NULL
+	,[dblUnitQty]				=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -167,14 +199,25 @@ FROM
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
-	,[intScaleTicketNumber]		=	G.strTicketNumber
+	,[strScaleTicketNumber]		=	G.strTicketNumber
 	,[intShipmentContractQtyId]	=	NULL
+  	,[intUnitMeasureId]			=	B.intUnitMeasureId
+	,[intWeightUOMId]			=	B.intWeightUOMId
+	,[intCostUOMId]				=	B.intCostUOMId
+	,[dblNetWeight]				=	B.dblNet
+	,[strCostUOM]				=	CostUOM.strUnitMeasure
+	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
+	,[dblUnitQty]				=	ItemCostUOM.dblUnitQty
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
 		ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = F2.intContractDetailId
@@ -184,7 +227,8 @@ FROM
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
 	UNION ALL
-	--CHARGES
+
+	--OTHER CHARGES
 	SELECT
 		[intEntityVendorId]							=	A.intEntityVendorId
 		,[dtmDate]									=	A.dtmDate
@@ -217,9 +261,16 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	NULL
 		,[intScaleTicketId]							=	NULL
-		,[intScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
 		,[intShipmentContractQtyId]					=	NULL
+  		,[intUnitMeasureId]							=	NULL
+		,[intWeightUOMId]							=	NULL
+		,[intCostUOMId]								=	NULL
+		,[dblNetWeight]								=	0      
+		,[strCostUOM]								=	NULL
+		,[strgrossNetUOM]							=	NULL
+		,[dblUnitQty]								=	0   
 	FROM [vyuAPChargesForBilling] A
 
 	UNION ALL
@@ -236,15 +287,15 @@ FROM
 		,[strItemNo]								=	A.strItemNo
 		,[strDescription]							=	A.strItemDescription
 		,[intPurchaseTaxGroupId]					=	NULL
-		,[dblOrderQty]								=	A.dblNetWt
+		,[dblOrderQty]								=	A.dblQuantity
 		,[dblPOOpenReceive]							=	0
-		,[dblOpenReceive]							=	A.dblNetWt
-		,[dblQuantityToBill]						=	A.dblNetWt
+		,[dblOpenReceive]							=	A.dblQuantity
+		,[dblQuantityToBill]						=	A.dblQuantity
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	A.intShipmentContractQtyId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
-		,[dblUnitCost]								=	A.dblCashPriceInWeightUOM
+		,[dblUnitCost]								=	A.dblCashPrice
 		,[dblTax]									=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -257,9 +308,17 @@ FROM
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[intScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	NULL
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
+		,[intUnitMeasureId]							=	A.intItemUOMId
+		,[intWeightUOMId]							=	A.intWeightItemUOMId
+		,[intCostUOMId]								=	A.intPriceItemUOMId
+		,[dblNetWeight]								=	ISNULL(A.dblNetWt,0)      
+		,[strCostUOM]								=	A.strPriceUOM
+		,[strgrossNetUOM]							=	A.strWeightUOM
+		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
-	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT intShipmentContractQtyId FROM tblAPBillDetail)
+	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
 ) Items
+GO

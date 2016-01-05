@@ -18,11 +18,11 @@ BEGIN
 	DECLARE @dblCost AS NUMERIC(18,6) = 25.00
 
 	DECLARE @result AS NUMERIC(18,6) 
-	DECLARE @expected AS NUMERIC(18,6) = (@dblCost / @LBS_UnitQty * @50LBBag_UnitQty) -- Equals 1,250
+	DECLARE @Expected AS NUMERIC(18,6) = (@dblCost / @LBS_UnitQty * @50LBBag_UnitQty) -- Equals 1,250
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostBetweenUOM(@LBS, @50LB_BAG, @dblCost)
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @expected, @result;
+	EXEC tSQLt.AssertEquals @Expected, @result;
 END
