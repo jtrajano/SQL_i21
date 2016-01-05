@@ -8,6 +8,7 @@ BEGIN TRY
 		,@intUserId int
 		,@intConcurrencyId int
 		,@intManufacturingCellId int
+		,@intLocationId int
 		
 	SELECT @dtmCurrentDate = GetDate()	
 	
@@ -44,18 +45,34 @@ BEGIN TRY
 		,intDemandRatio int
 		)
 
+	DECLARE @tblMFScheduleConstraint TABLE (
+		intScheduleConstraintId INT identity(1, 1)
+		,intScheduleRuleId INT
+		,intPriorityNo int
+		)
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
+
+	INSERT INTO @tblMFScheduleConstraint(intScheduleRuleId,intPriorityNo)
+	SELECT intScheduleRuleId,intPriorityNo
+	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+			intScheduleRuleId INT
+			,intPriorityNo int
+			)
+	ORDER BY intPriorityNo
 
 	SELECT @intManufacturingCellId = intManufacturingCellId
 		,@intScheduleId = intScheduleId
 		,@intConcurrencyId = intConcurrencyId
 		,@intUserId = intUserId
+		,@intLocationId=intLocationId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingCellId INT
 			,intScheduleId INT
 			,intConcurrencyId INT
 			,intUserId INT
+			,intLocationId int
 			)
 					
 	INSERT INTO @tblMFScheduleWorkOrder (
@@ -318,6 +335,23 @@ BEGIN TRY
 		AND R.ysnActive = 1
 	ORDER BY WS.intSequenceNo DESC
 		,SL.intExecutionOrder
+
+	SELECT R.intScheduleRuleId
+		,R.strName AS strScheduleRuleName
+		,R.intScheduleRuleTypeId
+		,RT.strName AS strScheduleRuleTypeName
+		,R.ysnActive
+		,R.intPriorityNo
+		,R.strComments
+		,Convert(BIT, CASE 
+				WHEN SC.intScheduleConstraintId IS NULL
+					THEN 0
+				ELSE 1
+				END) AS ysnSelect
+	FROM dbo.tblMFScheduleRule R
+	JOIN dbo.tblMFScheduleRuleType RT ON RT.intScheduleRuleTypeId = R.intScheduleRuleTypeId
+	LEFT JOIN @tblMFScheduleConstraint SC ON SC.intScheduleRuleId = R.intScheduleRuleId
+	WHERE R.intLocationId = @intLocationId AND R.ysnActive = 1
 
 	EXEC sp_xml_removedocument @idoc
 END TRY

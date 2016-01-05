@@ -101,9 +101,22 @@ BEGIN TRY
 		,dtmChangeoverEndDate DATETIME
 		,intDuration INT
 		)
+	DECLARE @tblMFScheduleConstraint TABLE (
+		intScheduleConstraintId INT identity(1, 1)
+		,intScheduleRuleId INT
+		,intPriorityNo int
+		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
+
+	INSERT INTO @tblMFScheduleConstraint(intScheduleRuleId,intPriorityNo)
+	SELECT intScheduleRuleId,intPriorityNo
+	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+			intScheduleRuleId INT
+			,intPriorityNo int
+			)
+	ORDER BY intPriorityNo
 
 	SELECT @intManufacturingCellId = intManufacturingCellId
 		,@intCalendarId = intCalendarId
@@ -575,19 +588,22 @@ BEGIN TRY
 					SELECT @intRemainingDuration = DATEDIFF(MINUTE, @dtmPlannedStartDate, @dtmShiftEndTime)
 				END
 
-				DECLARE @intScheduleRuleId INT
+				DECLARE @intScheduleConstraintId int
+					,@intScheduleRuleId INT
 					,@strColumnName NVARCHAR(50)
 					,@strColumnValue NVARCHAR(50)
 					,@strPreviousColumnValue NVARCHAR(50)
 					,@intChangeoverTime INT
 
-				SELECT @intScheduleRuleId = MIN(R.intScheduleRuleId)
-				FROM dbo.tblMFScheduleRule R
-				WHERE R.ysnActive = 1
-					AND R.intScheduleRuleTypeId = 1
+				SELECT @intScheduleConstraintId = MIN(intScheduleConstraintId)
+				FROM @tblMFScheduleConstraint
 
-				WHILE @intScheduleRuleId IS NOT NULL
+				WHILE @intScheduleConstraintId IS NOT NULL
 				BEGIN
+					SELECT @intScheduleRuleId = intScheduleRuleId
+					FROM @tblMFScheduleConstraint
+					Where intScheduleConstraintId=@intScheduleConstraintId
+
 					SELECT @strColumnName = NULL
 
 					SELECT @strColumnName = A.strColumnName
@@ -682,11 +698,9 @@ BEGIN TRY
 						END
 					END
 
-					SELECT @intScheduleRuleId = MIN(R.intScheduleRuleId)
-					FROM dbo.tblMFScheduleRule R
-					WHERE R.ysnActive = 1
-						AND R.intScheduleRuleTypeId = 1
-						AND R.intScheduleRuleId > @intScheduleRuleId
+					SELECT @intScheduleConstraintId = MIN(intScheduleConstraintId)
+					FROM @tblMFScheduleConstraint
+					WHERE intScheduleConstraintId > @intScheduleConstraintId
 				END
 
 				IF @ysnConsiderSumOfChangeoverTime = 0
@@ -1294,6 +1308,23 @@ BEGIN TRY
 		AND SC.dtmChangeoverStartDate >= @dtmFromDate
 		AND SC.dtmChangeoverEndDate <= @dtmToDate
 	ORDER BY SL.intExecutionOrder
+
+	SELECT R.intScheduleRuleId
+		,R.strName AS strScheduleRuleName
+		,R.intScheduleRuleTypeId
+		,RT.strName AS strScheduleRuleTypeName
+		,R.ysnActive
+		,R.intPriorityNo
+		,R.strComments
+		,Convert(BIT, CASE 
+				WHEN SC.intScheduleConstraintId IS NULL
+					THEN 0
+				ELSE 1
+				END) AS ysnSelect
+	FROM dbo.tblMFScheduleRule R
+	JOIN dbo.tblMFScheduleRuleType RT ON RT.intScheduleRuleTypeId = R.intScheduleRuleTypeId
+	LEFT JOIN @tblMFScheduleConstraint SC ON SC.intScheduleRuleId = R.intScheduleRuleId
+	WHERE R.intLocationId = @intLocationId AND R.ysnActive = 1
 
 	EXEC sp_xml_removedocument @idoc
 END TRY

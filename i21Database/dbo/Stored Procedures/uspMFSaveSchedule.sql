@@ -302,6 +302,12 @@ BEGIN TRY
 	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
 	WHERE W.intScheduleId = @intScheduleId
 
+	INSERT INTO dbo.tblMFScheduleConstraint(intScheduleId,intScheduleRuleId)
+	SELECT @intScheduleId,intScheduleRuleId
+	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+			intScheduleRuleId INT
+			)
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 

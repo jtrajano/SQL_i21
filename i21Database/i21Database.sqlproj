@@ -3157,6 +3157,7 @@
     <Build Include="dbo\Tables\tblMFScheduledMaintenanceDetail.sql" />
     <Build Include="dbo\Triggers\trgAfterInsertScheduledMaintenance.sql" />
     <Build Include="dbo\Tables\tblWHItemNMFC.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleConstraint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
