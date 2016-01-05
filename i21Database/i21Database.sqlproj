@@ -3111,6 +3111,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostDividend.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfMISC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
