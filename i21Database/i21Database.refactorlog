@@ -4648,4 +4648,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId " />
   </Operation>
+  <Operation Name="Rename Refactor" Key="740dfa76-97e2-49c7-adee-db7ce51c704d" ChangeDateTime="01/05/2016 15:52:06">
+    <Property Name="ElementName" Value="[dbo].[tblWHItemNMFC].[intMaterialNMFCId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblWHItemNMFC]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemNMFCId]" />
+  </Operation>
 </Operations>
