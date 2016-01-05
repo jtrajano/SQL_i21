@@ -121,18 +121,28 @@ Ext.define('iRely.TestEngine', {
                 var win = me.getComponentByQuery('#Login'),
                     btnLogin = win.down('#btnLogin');
                 t.click(btnLogin, next);
-            }, function(next) {
-                t.waitForCQVisible('viewport', 
-                    function () { 
-                        t.ok(true, 'Viewport Shown'); 
-                        next(); 
-                    }, this, 60000);        
-            }, function (next) {
-                t.diag("Waiting for Menu");
-                t.waitForRowsVisible('#tplMenu', function (){
+            },
+            {
+                action: 'wait',
+                delay: 300
+            },
+            function(next) {
+                var win = Ext.WindowManager.getActive();
+                if(win && win.xtype === 'messagebox') {
                     next();
-                });
-            });
+                }
+                else {
+                    t.waitForCQVisible('viewport',
+                        function () {
+                            t.ok(true, 'Viewport Shown');
+                            t.diag("Waiting for Menu");
+                            t.waitForRowsVisible('#tplMenu', function () {
+                                next();
+                            });
+                        }, this, 60000);
+                }
+            }
+        );
 
         return me;
     },
@@ -165,7 +175,7 @@ Ext.define('iRely.TestEngine', {
             
         chain.push(
             function(next){
-                var win = Ext.WindowManager.getActive(),
+                var win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard'),
                     actual = typeof config.actual === 'function' ? config.actual(win) : config.actual,
                     expected = typeof config.expected === 'function' ? config.expected(win) : config.expected,
                     assertTrue = expected === actual;
@@ -230,7 +240,7 @@ Ext.define('iRely.TestEngine', {
 
         chain.push({
             action : function(next, fn) {
-                fn.call(me, next);
+                fn.call(me.t || me, next);
             },
             timeout : 360000
         });
@@ -276,20 +286,23 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} folderName Folder name to expand in the menu.
      *
+	 * @param {String} type Type of menu ('Folder', 'Screen', 'Report', 'Favorites').
+     *
      * @returns {iRely.TestEngine}
      */
-    expandMenu: function(folderName) {
+    expandMenu: function(folderName, type) {
         var me = this,
             t = me.t,
             chain = me.chain;
 
         var fn = function(next) {
-            var record = me.getRecordFromMenu('folder', folderName),
-                node = me.getNodeFromMenu('folder', folderName);
+            var folder = type !== undefined ? type : 'folder',
+				record = me.getRecordFromMenu(folder, folderName),
+                node = me.getNodeFromMenu(folder, folderName);
 
             if(!record.data.expanded) {
                 t.diag('Expanding Folder ' + folderName);
-                t.doubleClick(node, next);
+                t.click(node, next);
             }
             else {
                 t.diag('Folder ' + folderName + ' is already Expanded');
@@ -319,10 +332,10 @@ Ext.define('iRely.TestEngine', {
 
             if(record.data.expanded) {
                 t.diag('Collapsing Folder ' + folderName);
-                t.doubleClick(node, next);
+                t.click(node, next);
             }
             else {
-                t.diag('Folder ' + folderName + ' is already Collapased');
+                t.diag('Folder ' + folderName + ' is already Collapsed');
                 next();
             }
         };
@@ -336,20 +349,23 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} screenName Screen to open in the menu.
      *
+     * @param {String} type Type of menu ('Folder', 'Screen', 'Report', 'Favorites', 'Home').
+     *
      * @returns {iRely.TestEngine}
      */
-    openScreen: function(screenName) {
+    openScreen: function(screenName, type) {
         var me = this,
             t = me.t,
             chain = me.chain;
 
         var fn = function(next) {
-            var node = me.getNodeFromMenu('screen', screenName);
+            var menu = type !== undefined ? type : 'screen',
+                node = me.getNodeFromMenu(menu, screenName);
 
             t.diag('Opening Screen ' + screenName);
 
             if (node) {
-                t.doubleClick(node, next);
+                t.click(node, next);
             } else {
                 next();
             }
@@ -362,7 +378,7 @@ Ext.define('iRely.TestEngine', {
     /**
      * Clicks a message box button.
      *
-     * @param {String} item Name of the button. ('yes', 'no', 'cancel', 'ok').
+     * @param {String} item Name of the button. ('yes', 'no', 'cancel', 'ok', 'x').
      *
      * @returns {iRely.TestEngine}
      */
@@ -374,7 +390,7 @@ Ext.define('iRely.TestEngine', {
                 win = Ext.WindowManager.getActive();
             if (win) {
                 if (win.xtype === 'messagebox') {
-                    var button = win.msgButtons[item];
+                    var button = item !== 'x' ? win.msgButtons[item] : win.down('tool');
                     if (button) {
                         t.click(button, next);
                     } else {
@@ -405,7 +421,8 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
             if (win) {
                 var button = win.down(item);
                 if (button) {
@@ -432,12 +449,51 @@ Ext.define('iRely.TestEngine', {
                         next
                     ]);
                 } else {
+                    t.ok(false, item + ' is not found.');
                     next();
                 }
             } else {
                 next();
             }
         };
+
+        chain.push(fn);
+        return this;
+    },
+    
+    /**
+     * Clicks any button on title bar area
+     *
+     * @param {String} button name ex. collapse, minimize, maximize, restore, close.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    clickTitleBarButton: function(button) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive();
+            if (win) {
+                var btn = null;
+                for (var i=0;i<win.tools.length;i++){
+                    btn = win.tools[i];
+                    if (btn.type === button){
+                        break;
+                    }
+                }
+                if (btn){
+                    t.diag('Clicking button ' + button);
+                    t.click(btn, next);                
+                } else {
+                    this.ok(false, button + ' button is not found.');
+                    next();
+                }                               
+            } else {
+                next();
+            }
+        };      
 
         chain.push(fn);
         return this;
@@ -456,11 +512,11 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
             if (win) {
                 var combo = win.down(item);
                 if (combo) {
-                    var ellipsis = combo.el.query('.x-trigger-cell')[0];
+                    var ellipsis = combo.triggerEl.elements[0];
 
                     t.diag('Clicking ellipsis button ' + item);
                     t.click(ellipsis, next);
@@ -489,17 +545,26 @@ Ext.define('iRely.TestEngine', {
         var fn = function(next) {
             var t = this,
                 win = Ext.WindowManager.getActive();
+				
             if (win) {
-                var tab = win.down(item);
-                if (tab) {
-                    t.click(tab, next);
-                } else {
-                    tab = win.down('tabpanel [text='+ item  +']');
-                    if (tab) {
-                        t.click(tab, next);
-                    } else {
-                        next();
+                var tab = win.down(item) || win.down('tabpanel [text='+ item  +']');
+
+                if (tab) {  
+				
+					if(tab.xtype == 'panel')
+                    {
+                        tab = tab.tab;
                     }
+
+                    if(tab.active === false ){                       
+                        t.click(tab, next);
+                    }
+					else{
+						next();
+					}                    
+                } else {
+                    this.ok(false, item + ' tab is not found.');
+                    next();
                 }
             } else {
                 next();
@@ -531,7 +596,7 @@ Ext.define('iRely.TestEngine', {
                 if (chkBox) {
                     if(typeof checked !== 'undefined') {
                         if(typeof checked !== 'boolean') {
-                            this.ok(false, 'checked value should be of type boolean found:' + typeof checked)
+                            this.ok(false, 'checked value should be of type boolean found:' + typeof checked);
                             next();
                         }
 
@@ -598,7 +663,7 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             if(typeof checked !== 'boolean') {
-                this.ok(false, 'checked value should be of type boolean found:' + typeof checked)
+                this.ok(false, 'checked value should be of type boolean found:' + typeof checked);
                 next();
             }
 
@@ -620,7 +685,65 @@ Ext.define('iRely.TestEngine', {
             }
 
             next();
-        }
+        };
+
+        chain.push({action:fn,timeout:120000});
+        return this;
+    },
+    
+    /**
+     * Clicks a check box in the grid
+     *
+     * @param {String} item Item Id of the grid.
+     *
+     * @param {String} column data index of the column you want to filter
+     *
+     * @param {String} filter search keyword
+     *
+     * @param {String} checkbox data index of check box column
+     *
+     * @param {Boolean} checked Expected value of the check box (true or false)
+     *
+     * @returns {iRely.TestEngine}
+     */
+    clickGridCheckBox:function(item, column, filter, checkbox, checked) {
+        var chain = this.chain;
+
+        var fn = function(next) {
+            if(typeof checked !== 'boolean') {
+                this.ok(false, 'checked value should be of type boolean found:' + typeof checked);
+                next();
+            }
+
+            var t = this,
+                win = Ext.WindowManager.getActive(),
+                grid = win.down(item),
+                gridRow = grid.getStore().findRecord(column, filter),
+                gridColumn = Ext.Array.findBy(grid.columnManager.getColumns(), function(col) {
+                        if(col.dataIndex === checkbox){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                );
+
+            if(gridRow && gridColumn){
+
+                if (gridRow.get(checkbox) !== checked){
+                    var  cell = grid.down('tableview').getCell(gridRow, gridColumn);
+
+                    t.diag('Selecting ' + checkbox);
+                    t.click(cell, next);
+                } else {
+                    next();
+                }
+            } else {
+                this.ok(false, 'Cell is not existing.');
+                next();
+            }
+
+        };
 
         chain.push({action:fn,timeout:120000});
         return this;
@@ -649,8 +772,8 @@ Ext.define('iRely.TestEngine', {
 
                     t.diag('Entering data on control ' + item);
 
-                    start = start || 0;
-                    end = end || value.length;
+                    start = start || 0;                    
+					end = value !== null ? (end || value.length) : (end || 0);
 
                     t.click(input);
                     t.selectText(input, start, end);
@@ -662,11 +785,11 @@ Ext.define('iRely.TestEngine', {
                         t.type(input, data, next);
                     }
                 } else {
-                    t.ok(false, 'Control is not existing.')
+                    t.ok(false, 'Control is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Control is not existing.')
+                t.ok(false, 'Control is not existing.');
                 next();
             }
         };
@@ -737,19 +860,19 @@ Ext.define('iRely.TestEngine', {
                                 next();
                             });
                         } else {
-                            t.ok(false, 'Editor is not existing.')
+                            t.ok(false, 'Editor is not existing.');
                             next();
                         }
                     } else {
-                        t.ok(false, 'Cell is not existing.')
+                        t.ok(false, 'Cell is not existing.');
                         next();
                     }
                 } else {
-                    t.ok(false, 'Cell is not existing.')
+                    t.ok(false, 'Cell is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Cell is not existing.')
+                t.ok(false, 'Cell is not existing.');
                 next();
             }
         };
@@ -766,16 +889,17 @@ Ext.define('iRely.TestEngine', {
      * @returns {iRely.TestEngine}
      */
     selectSearchRowByIndex: function(index){
-        var chain = this.chain;
+        var me = this,
+            chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 
             t.diag('Selecting Search Record.');
 
             if (win) {
-                if (win.xtype === 'search') {
+                if (win.xtype === 'search' || 'frmintegrateddashboard') {
                     var grid = win.down('#grdSearch'),
                         sm = grid.getSelectionModel(),
                         store = grid.getStore(),
@@ -807,12 +931,12 @@ Ext.define('iRely.TestEngine', {
                     });
                 }
                 else {
-                    t.ok(false, 'Grid is not existing.')
+                    t.ok(false, 'Grid is not existing.');
                     next();
                 }
             }
             else {
-                t.ok(false, 'Grid is not existing.')
+                t.ok(false, 'Grid is not existing.');
                 next();
             }
         };
@@ -842,11 +966,11 @@ Ext.define('iRely.TestEngine', {
                         next();
                     });
                 } else {
-                    t.ok(false, 'Grid is not existing.')
+                    t.ok(false, 'Grid is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Grid is not existing.')
+                t.ok(false, 'Grid is not existing.');
                 next();
             }
         };
@@ -860,19 +984,22 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} filter All column filter to apply.
      *
+     * @param {String} gridColumn Data Index of the column to be filtered
+     *
      * @returns {iRely.TestEngine}
      */
-    selectSearchRowByFilter: function(filter) {
-        var chain = this.chain;
+    selectSearchRowByFilter: function(filter, gridColumn) {
+        var me = this,
+            chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 
             t.diag('Selecting Search Record.');
 
             if (win) {
-                if (win.xtype === 'search') {
+                if (win.xtype === 'search' || 'frmintegrateddashboard') {
                     var filterGrid = win.down('#txtFilterGrid');
 
                     if (filterGrid) {
@@ -882,6 +1009,10 @@ Ext.define('iRely.TestEngine', {
                                 target: filterGrid
                             },
                             function(next) {
+                                t.selectText(filterGrid, 0, 20);
+                                next();
+                            },
+                            function(next) {
                                 t.type(filterGrid, filter, next);
                             },
                             function(next) {
@@ -889,28 +1020,46 @@ Ext.define('iRely.TestEngine', {
                             },
                             {
                                 action: 'wait',
-                                delay: 500
+                                delay: 1000
                             },
-                            function(next) {
-                                var grid =  win.down('#grdSearch');
-                                if (typeof(grid.getView) == "function") {
-                                    t.waitForRowsVisible(grid, function(){
-                                        var node = grid.getView().getNode(0);
-                                        t.click(node, next);
-                                    });
+                            function(next){
+                                var grid =  win.down('#grdSearch'),
+                                    store = grid.store,
+                                    storeCount = store.getCount();
+
+                                if (storeCount === 1){
+                                    if (typeof(grid.getView) == "function") {
+                                        t.waitForRowsVisible(grid, function(){
+                                            var node = grid.getView().getNode(0);
+                                            t.click(node, next);
+                                        });
+                                    } else {
+                                        next();
+                                    }
                                 } else {
-                                    next();
+                                    var filterRec = store.findExact(gridColumn, filter),
+                                        record = store.getAt(filterRec);
+
+                                    if (typeof(grid.getView) == "function") {
+                                        t.waitForRowsVisible(grid, function(){
+                                            var node1 = grid.getView().getNode(record);
+                                            t.click(node1, next);
+                                        });
+                                    } else {
+                                        next();
+                                    }
                                 }
                             },
+
                             next
                         ]);
                     }
                 } else {
-                    t.ok(true, 'Grid is not existing.')
+                    t.ok(false, 'Grid is not existing.');
                     next();
                 }
             } else {
-                t.ok(true, 'Grid is not existing.')
+                t.ok(false, 'Grid is not existing.');
                 next();
             }
         };
@@ -929,11 +1078,12 @@ Ext.define('iRely.TestEngine', {
      * @returns {iRely.TestEngine}
      */
      selectGridRow: function(item, index){
-        var chain = this.chain;
+        var me = this,
+            chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 
             t.diag('Selecting Grid Record.');
 
@@ -969,10 +1119,10 @@ Ext.define('iRely.TestEngine', {
 
                     t.ok(true, 'Record has been successfully selected.')
                 } else {
-                    t.ok(true, 'Grid is not existing.')
+                    t.ok(false, 'Grid is not existing.')
                 }
             } else {
-                t.ok(true, 'Grid is not existing.')
+                t.ok(false, 'Grid is not existing.')
             }
 
             next();
@@ -1055,10 +1205,10 @@ Ext.define('iRely.TestEngine', {
 
                     t.ok(true, 'Record has been successfully selected.')
                 } else {
-                    t.ok(true, 'Grid is not existing.')
+                    t.ok(false, 'Grid is not existing.')
                 }
             } else {
-                t.ok(true, 'Grid is not existing.')
+                t.ok(false, 'Grid is not existing.')
             }
 
             next();
@@ -1077,7 +1227,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
-    selectComboRowByIndex: function(item, index) {
+    selectComboRowByIndex: function(item, index, delay) {
         var me = this,
             chain = me.chain;
 
@@ -1086,9 +1236,16 @@ Ext.define('iRely.TestEngine', {
                 win = Ext.WindowManager.getActive();
             if (win) {
                 var combo = item.value ? item : win.down(item);
+
                 if (combo) {
-                    var length = combo.el.query('.x-trigger-cell').length,
-                        trigger = combo.el.query('.x-trigger-cell')[length - 1];
+                    var els = (function() {
+                                var cell = combo.el.query('.x-trigger-cell'),
+                                    form = combo.el.query('.x-form-trigger');
+
+                                    return (cell.length && cell) || (form.length && form);
+                              })(),
+                        length = els.length,
+                        trigger = els[length - 1];
 
                     t.diag('Selecting item on ' + item + ' index: ' + index);
 
@@ -1097,8 +1254,13 @@ Ext.define('iRely.TestEngine', {
                             action: 'click',
                             target: trigger
                         },
+                        {
+                            action: 'wait',
+                            target: delay
+                        },
                         function(next) {
                             var panel = Ext.WindowManager.getActive(),
+//                                grid = combo.picker.getView() || combo.getPicker(),
                                 grid;
 
                             if (panel.getView) {
@@ -1111,18 +1273,18 @@ Ext.define('iRely.TestEngine', {
                                 var node = grid.getNode(index);
                                 t.click(node, next);
                             } else {
-                                t.ok(false, 'Combo Box is not existing.')
+                                t.ok(false, 'Combo Box is not existing.');
                                 next();
                             }
                         },
                         next
                     ]);
                 } else {
-                    t.ok(false, 'Combo Box is not existing.')
+                    t.ok(false, 'Combo Box is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Combo Box  is not existing.')
+                t.ok(false, 'Combo Box  is not existing.');
                 next();
             }
         };
@@ -1155,11 +1317,15 @@ Ext.define('iRely.TestEngine', {
      *         conjuction: 'and'
      *     }])
      *
+	 * {String} comboColumn Data Index of the combo grid to be filtered
+	 *
      * @returns {iRely.TestEngine}
      */
-    selectComboRowByFilter: function(item, filter) {
+    selectComboRowByFilter: function(item, filter, delay, comboColumn) {
         var me = this,
             chain = this.chain;
+			
+			delay = delay ? delay : 0;
 
         var fn = function(next) {
             var t = this,
@@ -1167,8 +1333,14 @@ Ext.define('iRely.TestEngine', {
             if (win) {
                 var combo = item.value ? item : win.down(item);
                 if (combo) {
-                    var length = combo.el.query('.x-trigger-cell').length,
-                        trigger = combo.el.query('.x-trigger-cell')[length - 1],
+                    var els = (function() {
+                                    var cell = combo.el.query('.x-trigger-cell'),
+                                        form = combo.el.query('.x-form-trigger');
+
+                                        return (cell.length && cell) || (form.length && form);
+                              })(),
+                        length = els.length,
+                        trigger = els[length - 1],
                         store = combo.store;
 
                     t.diag('Selecting item on ' + item + ' filtered by: ' + filter);
@@ -1182,7 +1354,7 @@ Ext.define('iRely.TestEngine', {
                                 target: trigger
                             },
                             function(next) {
-                                var comboGrid =  Ext.WindowManager.getActive();
+                                var comboGrid =  combo.picker;
                                 if (typeof(comboGrid.getView) == "function") {
                                     var node = comboGrid.getView().getNode(0);
                                     t.click(node, next);
@@ -1192,62 +1364,59 @@ Ext.define('iRely.TestEngine', {
                             },
                             next
                         ]);
-
                         return;
                     }
 
                     t.chain([
                         {
                             action: 'click',
-                            target: trigger
+                            target: combo
+                        },
+                        function(next){
+                            t.selectText(combo, 0, 30);
+                            next();
                         },
                         function(next) {
-                            var grid = Ext.WindowManager.getActive(),
-                                filterGrid = grid.down('#txtFilterGrid');
+                            t.type(combo, filter, next);
+                        },
+                        {
+                            action: 'wait',
+                            delay: delay
+                        },
+                        function(next){
+                            var store = combo.store,
+                                storeCount = store.getCount();
 
-                            if (filterGrid) {
-                                t.chain([
-                                    {
-                                        action: 'click',
-                                        target: filterGrid
-                                    },
-                                    function(next) {
-                                        t.type(filterGrid, filter.value || filter, next);
-                                    },
-                                    function(next) {
-                                        t.type(filterGrid, '[RETURN]', next);
-                                    },
-                                    {
-                                        action: 'wait',
-                                        delay: 500
-                                    },
-                                    function(next) {
-                                        var comboGrid =  Ext.WindowManager.getActive();
-                                        if (typeof(comboGrid.getView) == "function") {
-                                            var node = comboGrid.getView().getNode(0);
-                                            t.click(node, next);
-                                        } else {
-                                            next();
-                                        }
-                                    },
-                                    next
-                                ]);
+                            if (storeCount === 1){
+                                var comboGrid =  combo.picker;
+
+                                if (typeof(comboGrid.getView) == "function") {
+                                    var node = comboGrid.getView().getNode(0);
+                                    t.click(node, next);
+                                } else {
+                                    next();
+                                }
                             } else {
-                                var idx = store.findExact('field1', filter),
-                                    picker = combo.getPicker(),
-                                    node = picker.getNode(idx);
+                                var filterRec = store.findExact(comboColumn, filter),
+                                    record = store.getAt(filterRec),
+                                    comboGrid1 =  combo.picker;
 
-                                t.click(node, next);
+                                if (typeof(comboGrid1.getView) == "function") {
+                                    var node1 = comboGrid1.getView().getNode(record);
+                                    t.click(node1, next);
+                                } else {
+                                    next();
+                                }
                             }
                         },
                         next
                     ]);
                 } else {
-                    t.ok(false, 'Combo Box is not existing.')
+                    t.ok(false, 'Combo Box is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Combo Box  is not existing.')
+                t.ok(false, 'Combo Box  is not existing.');
                 next();
             }
         };
@@ -1300,8 +1469,14 @@ Ext.define('iRely.TestEngine', {
 
                         if (plugin.activeEditor) {
                             var editor = plugin.activeEditor,
-                                length = editor.el.query('.x-trigger-cell').length,
-                                trigger = editor.el.query('.x-trigger-cell')[length - 1];
+                                els = (function() {
+                                    var cell = editor.field.el.query('.x-trigger-cell'),
+                                        form = editor.field.el.query('.x-form-trigger');
+
+                                        return (cell.length && cell) || (form.length && form);
+                                })(),
+                                length = els.length,
+                                trigger = els[length - 1];
 
                             t.diag('Entering data on grid ' + item);
 
@@ -1327,26 +1502,26 @@ Ext.define('iRely.TestEngine', {
                                             next();
                                         });
                                     } else {
-                                        t.ok(false, 'Combo Box is not existing.')
+                                        t.ok(false, 'Combo Box is not existing.');
                                         next();
                                     }
                                 },
                                 next
                             ]);
                         } else {
-                            t.ok(false, 'Combo Box is not existing.')
+                            t.ok(false, 'Combo Box is not existing.');
                             next();
                         }
                     } else {
-                        t.ok(false, 'Cell is not existing.')
+                        t.ok(false, 'Cell is not existing.');
                         next();
                     }
                 } else {
-                    t.ok(false, 'Cell is not existing.')
+                    t.ok(false, 'Cell is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Cell is not existing.')
+                t.ok(false, 'Cell is not existing.');
                 next();
             }
         };
@@ -1383,9 +1558,11 @@ Ext.define('iRely.TestEngine', {
      *         conjuction: 'and'
      *     }])
      *
+	 * {String} comboColumn Data Index of the combo grid to be filtered
+     *
      * @returns {iRely.TestEngine}
      */
-    selectGridComboRowByFilter: function(item, row, column, filter) {
+    selectGridComboRowByFilter: function(item, row, column, filter, delay, comboColumn) {
         var me = this,
             chain = me.chain;
 
@@ -1396,9 +1573,9 @@ Ext.define('iRely.TestEngine', {
                 var grid = item.editingPlugin ? item : win.down(item);
                 if (grid) {
                     var store = grid.store;
-                    if (store.indexOf(row) === -1) {
-                        row = store.getAt(row);
-                    }
+                    //if (store.indexOf(row) === -1) {
+                    row = store.getAt(row);
+                    //}
 
                     if (Ext.Array.indexOf(grid.columns, column) === -1) {
                         column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
@@ -1416,8 +1593,14 @@ Ext.define('iRely.TestEngine', {
 
                         if (plugin.activeEditor) {
                             var editor = plugin.activeEditor,
-                                length = editor.el.query('.x-trigger-cell').length,
-                                trigger = editor.el.query('.x-trigger-cell')[length - 1];
+                                els = (function() {
+                                    var cell = editor.field.el.query('.x-trigger-cell'),
+                                        form = editor.field.el.query('.x-form-trigger');
+
+                                        return (cell.length && cell) || (form.length && form);
+                                })(),
+                                length = els.length,
+                                trigger = els[length - 1];
 
                             t.diag('Entering data on grid ' + item);
 
@@ -1426,11 +1609,15 @@ Ext.define('iRely.TestEngine', {
 
                                 t.chain([
                                     {
-                                        action: 'click',
-                                        target: trigger
+                                        action: 'wait',
+                                        delay: 100
                                     },
                                     function(next) {
-                                        var comboGrid =  Ext.WindowManager.getActive();
+                                        editor.field.expand();
+                                        next();
+                                    },
+                                    function(next) {
+                                        var comboGrid =  editor.field.getPicker();
                                         if (typeof(comboGrid.getView) == "function") {
                                             var node = comboGrid.getView().getNode(0);
                                             t.click(node, function() {
@@ -1449,70 +1636,130 @@ Ext.define('iRely.TestEngine', {
 
                             t.chain([
                                 {
-                                    action: 'click',
-                                    target: trigger
+                                    action: 'wait',
+                                    delay: 100
                                 },
-                                function(next) {
-                                    var grid = Ext.WindowManager.getActive(),
-                                        filterGrid = grid.down('#txtFilterGrid');
+                                function(next){
+                                    t.selectText(editor, 0, 30);
+                                    next();
+                                },
+                                function(next){
+                                    t.type(editor, filter, next);
+                                },
+                                {
+                                    action: 'wait',
+                                    delay: delay
+                                },
+                                function(next){
+                                    if (editor.field.isExpanded === true){
+                                        var comboGrid =  editor.field.getPicker(),
+                                            store1 = comboGrid.store,
+                                            storeCount = store1.getCount();
 
-                                    if (filterGrid) {
-                                        t.chain([
-                                            {
-                                                action: 'click',
-                                                target: filterGrid
-                                            },
-                                            function(next) {
-                                                t.type(filterGrid, filter, next);
-                                            },
-                                            function(next) {
-                                                t.type(filterGrid, '[RETURN]', next);
-                                            },
-                                            {
-                                                action: 'wait',
-                                                delay: 500
-                                            },
-                                            function(next) {
-                                                var comboGrid =  Ext.WindowManager.getActive();
-                                                if (typeof(comboGrid.getView) == "function") {
-                                                    var node = comboGrid.getView().getNode(0);
-                                                    t.click(node, function() {
-                                                        editor.completeEdit();
-                                                        next();
-                                                    });
-                                                } else {
+                                        if (storeCount === 1){
+                                            if (typeof(comboGrid.getView) == "function") {
+                                                var node = comboGrid.getView().getNode(0);
+                                                t.click(node, function() {
+                                                    editor.completeEdit();
                                                     next();
-                                                }
-                                            },
-                                            next
-                                        ]);
-                                    } else {
-                                        var idx = editor.field.store.findExact('field1', filter),
-                                            picker = editor.field.getPicker(),
-                                            node = picker.getNode(idx);
+                                                });
+                                            } else {
+                                                next();
+                                            }
+                                        } else {
+                                            var filterRec = store1.findExact(comboColumn, filter),
+                                                record = store1.getAt(filterRec);
 
-                                        t.click(node, function() {
-                                            editor.completeEdit();
-                                            next();
-                                        });
+                                            if (typeof(comboGrid.getView) == "function") {
+                                                var node1 = comboGrid.getView().getNode(record);
+                                                t.click(node1, next);
+                                            } else {
+                                                next();
+                                            }
+                                        }
+                                    } else {
+                                        next();
                                     }
                                 },
                                 next
                             ]);
                         } else {
-                            t.ok(false, 'Combo Box is not existing.')
+                            t.ok(false, 'Combo Box is not existing.');
                             next();
                         }
                     } else {
-                        t.ok(false, 'Cell is not existing.')
+                        t.ok(false, 'Cell is not existing.');
                         next();
                     }
                 } else {
-                    t.ok(false, 'Cell is not existing.')
+                    t.ok(false, 'Cell is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Cell is not existing.')
+                t.ok(false, 'Cell is not existing.');
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Filters the grid with the specified filter.
+     *
+     * @param {String} grid item Id of the grid.
+     *
+     * @param {String} item item Id of the filter field.
+     *
+     * @param {String} filter All column filter to apply.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    filterGrid: function(grid, item, filter) {
+        var me = this,
+            chain = this.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
+            t.diag('Searching For Record:' + filter);
+
+            if (win) {
+                var grd = win.down(grid);
+
+                if (grd) {
+                    var filterGrid = win.down(item);
+
+                    if (filterGrid) {
+                        t.chain([
+                            {
+                                action: 'click',
+                                target: filterGrid
+                            },
+                            function(next) {
+                                t.selectText(filterGrid, 0, 20);
+                                next();
+                            },
+                            function(next) {
+                                t.type(filterGrid, filter, next);
+                            },
+                            function(next) {
+                                t.type(filterGrid, '[RETURN]', next);
+                            },
+                            next
+                        ]);
+                    } else {
+                        t.ok(false, item + ' Filter field is not existing.');
+						next();
+                    }
+                } else {
+                    t.ok(false, grid + ' Grid is not existing.');
+                    next();
+                }
+            } else {
+                t.ok(false, 'No active screen.');
                 next();
             }
         };
@@ -1672,6 +1919,11 @@ Ext.define('iRely.TestEngine', {
 
             items = Ext.isArray(items) ? items : [items];
 
+            if (win.xtype === 'quicktip') {
+                win.close();
+                win = Ext.WindowManager.getActive();
+            }
+
             t.diag('Checking control ' + msg);
 
             for (var i in items) {
@@ -1767,7 +2019,11 @@ Ext.define('iRely.TestEngine', {
                     control = win.down(item);
 
                 if (control) {
-                    var result = control.xtype === 'htmleditor' ?
+                    if(control.xtype === 'numericfield' || control.xtype ===  'numeric' || control.xtype ===  'numberfield'){
+                        value = ' ' + value;
+                    }
+
+                    var result = control.xtype === 'htmleditor' || control.xtype === 'moneynumber' ?
                         control.getValue() === value :
                         control.rawValue === value;
 
@@ -1776,7 +2032,6 @@ Ext.define('iRely.TestEngine', {
                     t.ok(false, item + ' is not existing.');
                 }
             }
-
             next();
         };
 
@@ -1785,9 +2040,67 @@ Ext.define('iRely.TestEngine', {
     },
 
     /**
+     * Checks the columns available in the grid.
+     *
+     * @param {String} item Item Id of the grid.
+     *
+     * @param {Object[]} columns object definition for the column
+     *
+     * @param {String} columns.dataIndex Data Index or Column Name
+     *
+     * @param {String} columns.text the text display of the column
+     *
+     * @returns {iRely.TestEngine}
+     */
+    checkGridColumns: function(item, columns) {
+        var me = this,
+            chain = me.chain;
+
+        columns.forEach(function(column) {
+            chain.push(function(next) {
+                var win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard'),
+                    grid = win.down(item), cols, col;
+
+                if(win) {
+                    if(grid) {
+                        cols = grid.columns;
+
+                        col = Ext.Array.findBy(cols, function(gridCol) {
+                            return gridCol.dataIndex === column.dataIndex;
+                        });
+
+                        if(col) {
+                            if(col.text === column.text) {
+                                this.ok(true, 'Column \'' + column.text + '\' is in the grid');
+                            }
+                            else {
+                                this.ok(false, 'Column \'' + column.text + '\' text is incorrect');
+                            }
+                        }
+                        else {
+                            this.ok(false, 'Column \'' + column.dataIndex + '\' is not present in the grid');
+                        }
+                        next();
+                    }
+                    else {
+                        this.ok(false, 'Grid ' + item + ' does not exist.');
+                        next();
+                    }
+                }
+                 else {
+                    this.ok(false, 'There is no Active Window Open.');
+                    next();
+                }
+            });
+        });
+
+        return me;
+    },
+
+    /**
      * Checks the grid's data if it matches the expected result.
      *
-     * @param {String} items Item Id of the grid.
+     * @param {String} item Item Id of the grid.
      *
      * @param {Integer} row Index of the row in the grid.
      *
@@ -1798,21 +2111,21 @@ Ext.define('iRely.TestEngine', {
      * @returns {iRely.TestEngine}
      */
     checkGridData: function(item, row, column, data) {
-        var chain = this.chain;
+        var me = this,
+            chain = this.chain;
+        var row1 = row;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 
             t.diag('Grid data checking.');
 
             if (win) {
                 var grid = item.editingPlugin ? item : win.down(item);
                 if (grid) {
-                    var store = grid.store;
-                    if (store.indexOf(row) === -1) {
-                        row = store.getAt(row);
-                    }
+                    var store = grid.store,
+						row = store.getAt(row1);
 
                     if (Ext.Array.indexOf(grid.columns, column) === -1) {
                         column = grid.columns[column] || grid.columnManager.getHeaderById(column) || grid.down('[dataIndex=' + column + ']');
@@ -1820,7 +2133,13 @@ Ext.define('iRely.TestEngine', {
 
                     if (row && column) {
                         var value = row.get(column.dataIndex),
-                            result = value === data;
+                            result = (function() {
+                                if(column.dataType === 'date') {
+                                    value = new Date(value).toLocaleDateString();
+                                    data = new Date(data).toLocaleDateString();
+                                }
+                                return value === data;
+                            });
                         t.ok(result, result ? 'Cell data is correct.' : 'Cell data is incorrect.');
 
                         next();
@@ -1845,18 +2164,19 @@ Ext.define('iRely.TestEngine', {
     /**
      * Checks the grid's record count against the expected count.
      *
-     * @param {String} items Item Id of the grid.
+     * @param {String} item Item Id of the grid.
      *
      * @param {Integer} expectedCount Record count to expect.
      *
      * @returns {iRely.TestEngine}
      */
     checkGridRecordCount: function(item, expectedCount) {
-        var chain = this.chain;
+        var me = this,
+            chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 
             t.diag('Grid ' + item + ' count checking.');
 
@@ -1881,7 +2201,6 @@ Ext.define('iRely.TestEngine', {
             } else {
                 t.ok(false, 'Grid is not existing.');
             }
-
             next();
         };
 
@@ -1903,6 +2222,8 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Boolean} [options.search] False to exclude search button from checking. Defaults to true.
      *
+     * @param {Boolean} [options.refresh] False to exclude refresh button from checking. Defaults to true.
+     *
      * @param {Boolean} [options.undo] False to exclude undo button from checking. Defaults to true.
      *
      * @param {Boolean} [options.close] False to exclude close button from checking. Defaults to true.
@@ -1921,6 +2242,7 @@ Ext.define('iRely.TestEngine', {
                 newButton = options.new === undefined ? true : options.new,
                 saveButton = options.save === undefined ? true : options.save,
                 searchButton = options.search === undefined ? true : options.search,
+                refreshButton = options.refresh === undefined ? true : options.refresh,
                 deleteButton = options.delete === undefined ? true : options.delete,
                 undoButton = options.undo === undefined ? true : options.undo,
                 closeButton = options.close === undefined ? true : options.close;
@@ -1931,12 +2253,10 @@ Ext.define('iRely.TestEngine', {
                 var button = win.down('#btnNew');
                 if (button) {
                     var visible = button.hidden === false,
-                        icon = button.iconCls === 'large-new',
                         text = button.text === 'New';
 
                     if (visible) {
                         t.ok(true, 'New button is visible.');
-                        t.ok(icon, icon ? 'New button icon is correct.' : 'New button icon is incorrect.');
                         t.ok(text, text ? 'New button text is correct.' : 'New button text is incorrect.');
                     } else {
                         t.ok(false, 'New button is not visible.');
@@ -1950,12 +2270,10 @@ Ext.define('iRely.TestEngine', {
                 var button = win.down('#btnSave');
                 if (button) {
                     var visible = button.hidden === false,
-                        icon = button.iconCls === 'large-save',
                         text = button.text === 'Save';
 
                     if (visible) {
                         t.ok(true, 'Save button is visible.');
-                        t.ok(icon, icon ? 'Save button icon is correct.' : 'Save button icon is incorrect.');
                         t.ok(text, text ? 'Save button text is correct.' : 'Save button text is incorrect.');
                     } else {
                         t.ok(false, 'Save button is not visible.');
@@ -1969,12 +2287,10 @@ Ext.define('iRely.TestEngine', {
                 var button = win.down('#btnSearch') || win.down('#btnFind');
                 if (button) {
                     var visible = button.hidden === false,
-                        icon = button.iconCls === 'large-search',
                         text = button.text === 'Search';
 
                     if (visible) {
                         t.ok(true, 'Search button is visible.');
-                        t.ok(icon, icon ? 'Search button icon is correct.' : 'Search button icon is incorrect.');
                         t.ok(text, text ? 'Search button text is correct.' : 'Search button text is incorrect.');
                     } else {
                         t.ok(false, 'Search button is not visible.');
@@ -1984,16 +2300,31 @@ Ext.define('iRely.TestEngine', {
                 }
             }
 
+            if (refreshButton) {
+                var button = win.down('#btnRefresh');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'Refresh';
+
+                    if (visible) {
+                        t.ok(true, 'Refresh button is visible.');
+                        t.ok(text, text ? 'Refresh button text is correct.' : 'Refresh button text is incorrect.');
+                    } else {
+                        t.ok(false, 'Refresh button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'Refresh button is not existing.');
+                }
+            }
+
             if (deleteButton) {
                 var button = win.down('#btnDelete');
                 if (button) {
                     var visible = button.hidden === false,
-                        icon = button.iconCls === 'large-delete',
                         text = button.text === 'Delete';
 
                     if (visible) {
                         t.ok(true, 'Delete button is visible.');
-                        t.ok(icon, icon ? 'Delete button icon is correct.' : 'Delete button icon is incorrect.');
                         t.ok(text, text ? 'Delete button text is correct.' : 'Delete button text is incorrect.');
                     } else {
                         t.ok(false, 'Delete button is not visible.');
@@ -2007,12 +2338,10 @@ Ext.define('iRely.TestEngine', {
                 var button = win.down('#btnUndo');
                 if (button) {
                     var visible = button.hidden === false,
-                        icon = button.iconCls === 'large-undo',
                         text = button.text === 'Undo';
 
                     if (visible) {
                         t.ok(true, 'Undo button is visible.');
-                        t.ok(icon, icon ? 'Undo button icon is correct.' : 'Undo button icon is incorrect.');
                         t.ok(text, text ? 'Undo button text is correct.' : 'Undo button text is incorrect.');
                     } else {
                         t.ok(false, 'Undo button is not visible.');
@@ -2026,12 +2355,10 @@ Ext.define('iRely.TestEngine', {
                 var button = win.down('#btnClose');
                 if (button) {
                     var visible = button.hidden === false,
-                        icon = button.iconCls === 'large-close',
                         text = button.text === 'Close';
 
                     if (visible) {
                         t.ok(true, 'Close button is visible.');
-                        t.ok(icon, icon ? 'Close button icon is correct.' : 'Close button icon is incorrect.');
                         t.ok(text, text ? 'Close button text is correct.' : 'Close button text is incorrect.');
                     } else {
                         t.ok(false, 'Close button is not visible.');
@@ -2041,6 +2368,172 @@ Ext.define('iRely.TestEngine', {
                 }
             }
 
+            next();
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Checks the Search Screen's toolbar buttons.
+     * Note: Without passing a parameter means it will checks all basic buttons (new, save, delete, search, undo, close)
+     *
+     * @param {Object} [options] Object.
+     *
+     * @param {Boolean} [options.new] False to exclude new button from checking. Defaults to true.
+     *
+     * @param {Boolean} [options.view] False to exclude open button from checking. Defaults to true.
+     *
+     * @param {Boolean} [options.openselected] False to exclude openselected button from checking. Defaults to true.
+     *
+     * @param {Boolean} [options.openall] False to exclude openall button from checking. Defaults to true.
+     *
+     * @param {Boolean} [options.refresh] False to exclude refresh button from checking. Defaults to true.
+     *
+     * * @param {Boolean} [options.export] False to exclude export button from checking. Defaults to true.
+     *
+     * @param {Boolean} [options.close] False to exclude close button from checking. Defaults to true.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    checkSearchToolbarButton: function(options) {
+        options = options || {};
+
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard'),
+                newButton = options.new === undefined ? true : options.new,
+                openButton = options.open === undefined ? true : options.open,
+                openselectedButton = options.openselected === undefined ? true : options.openselected,
+                openallButton = options.openall === undefined ? true : options.openall,
+                refreshButton = options.refresh === undefined ? true : options.refresh,
+                exportButton = options.export === undefined ? true : options.export,
+                closeButton = options.close === undefined ? true : options.close;
+
+            t.diag('Checking toolbar buttons');
+
+            if (newButton) {
+                var button = win.down('#btnNew');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'New';
+
+                    if (visible) {
+                        t.ok(true, 'New button is visible.');
+                        t.ok(text, text ? 'New button text is correct.' : 'New button text is incorrect.');
+                    } else {
+                        t.ok(false, 'New button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'New button is not existing.');
+                }
+            }
+
+            if (openButton) {
+                var button = win.down('#btnOpenSelected');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'Open';
+
+                    if (visible) {
+                        t.ok(true, 'Open button is visible.');
+                        t.ok(text, text ? 'Open button text is correct.' : 'Open button text is incorrect.');
+                    } else {
+                        t.ok(false, 'Open button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'Open button is not existing.');
+                }
+            }
+
+            if (openselectedButton) {
+                var button = win.down('#btnOpenSelected');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'Open Selected';
+
+                    if (visible) {
+                        t.ok(true, 'Open Selected button is visible.');
+                        t.ok(text, text ? 'Open Selected button text is correct.' : 'Open Selected button text is incorrect.');
+                    } else {
+                        t.ok(false, 'Open Selected button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'Open Selected button is not existing.');
+                }
+            }
+
+            if (openallButton) {
+                var button = win.down('#btnOpenAll');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'Open All';
+
+                    if (visible) {
+                        t.ok(true, 'Open All button is visible.');
+                        t.ok(text, text ? 'Open All button text is correct.' : 'Open All button text is incorrect.');
+                    } else {
+                        t.ok(false, 'Open All button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'Open All button is not existing.');
+                }
+            }
+
+            if (refreshButton) {
+                var button = win.down('#btnRefresh');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'Refresh';
+
+                    if (visible) {
+                        t.ok(true, 'Refresh button is visible.');
+                        t.ok(text, text ? 'Refresh button text is correct.' : 'Refresh button text is incorrect.');
+                    } else {
+                        t.ok(false, 'Refresh button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'Refresh button is not existing.');
+                }
+            }
+
+            if (exportButton) {
+                var button = win.down('#btnExport');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'Export';
+
+                    if (visible) {
+                        t.ok(true, 'Export button is visible.');
+                        t.ok(text, text ? 'Export button text is correct.' : 'Export button text is incorrect.');
+                    } else {
+                        t.ok(false, 'Export button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'Export button is not existing.');
+                }
+            }
+
+            if (closeButton) {
+                var button = win.down('#btnClose');
+                if (button) {
+                    var visible = button.hidden === false,
+                        text = button.text === 'Close';
+
+                    if (visible) {
+                        t.ok(true, 'Close button is visible.');
+                        t.ok(text, text ? 'Close button text is correct.' : 'Close button text is incorrect.');
+                    } else {
+                        t.ok(false, 'Close button is not visible.');
+                    }
+                } else {
+                    t.ok(false, 'Close button is not existing.');
+                }
+            }
             next();
         };
 
@@ -2152,7 +2645,7 @@ Ext.define('iRely.TestEngine', {
             }
 
             next();
-        }
+        };
 
         chain.push(fn);
         return this;
@@ -2186,6 +2679,8 @@ Ext.define('iRely.TestEngine', {
                 end = d.end;
 
             chain.push(function(next) {
+
+
                 var t = this,
                     win = Ext.WindowManager.getActive();
 
@@ -2209,8 +2704,11 @@ Ext.define('iRely.TestEngine', {
 
                         row = store.indexOf(selected[0]);
 
-                        if (store.indexOf(row) === -1) {
+                        if (row !== -1) {
                             row = store.getAt(row);
+                        }
+                        else {
+                            next();
                         }
 
                         if (Ext.Array.indexOf(grid.columns, column) === -1) {
@@ -2242,19 +2740,19 @@ Ext.define('iRely.TestEngine', {
                                     next();
                                 });
                             } else {
-                                t.ok(false, 'Editor is not existing.')
+                                t.ok(false, 'Editor is not existing.');
                                 next();
                             }
                         } else {
-                            t.ok(false, 'Cell is not existing.')
+                            t.ok(false, 'Cell is not existing.');
                             next();
                         }
                     } else {
-                        t.ok(false, 'Cell is not existing.')
+                        t.ok(false, 'Cell is not existing.');
                         next();
                     }
                 } else {
-                    t.ok(false, 'Cell is not existing.')
+                    t.ok(false, 'Cell is not existing.');
                     next();
                 }
             });
@@ -2355,6 +2853,42 @@ Ext.define('iRely.TestEngine', {
     },
 
     /**
+     * Checks the Screen title of integrated Search.
+     *
+     * @param {String} title Title of the screen.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    checkScreenTitle_intSearch : function(title) {
+        var me = this,
+            chain = this.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
+            if (win) {
+                t.diag('Checking Screen Title of the integrated search');
+
+                var intGrid = win.down('#pnlIntegratedDashboardGridPanel');
+
+                if (intGrid.title === title) {
+                    t.ok(true, title + ' is correct.');
+                } else {
+                    t.ok(false, title + ' is incorrect.');
+                }
+                next();
+            } else {
+                t.ok(false, 'Screen is not shown.');
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
      * Checks if the screen is properly closed
      *
      * @param {String} item Item Id or alias of the window
@@ -2366,18 +2900,22 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
+			win = Ext.WindowManager.getActive(),
                 com = Ext.ComponentQuery.query(item)[0];
 
-            if(com) {
-                t.ok(false, item + ' screen is not closed');
-                
+            if (win === null || win === undefined) {
+                t.ok(true, item + ' screen is closed.');
+                next();
+            } else {
+                if(!com) {
+                    t.ok(true, item + ' screen is closed');
+                }
+                else {
+                    t.ok(false, item + ' screen is not closed');
+                }
+                next();
             }
-            else {
-                t.ok(true, item + ' screen is closed');
-            }
-
-            next();
-        }
+        };
 
         chain.push(fn);
         return this;
@@ -2390,7 +2928,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} message Message of the message box.
      *
-     * @param {String} buttons Buttons of the message box. ('ok','yesno','yesnocancel').
+     * @param {String} buttons Buttons of the message box. ('ok', 'okcancel', 'yesno','yesnocancel').
      *
      * @param {String} icon Icon of the message box. ('error','information', 'question', 'warning')
      *
@@ -2410,7 +2948,9 @@ Ext.define('iRely.TestEngine', {
 
             if (win) {
                 if (win.xtype === 'messagebox') {
-                    var iconCls = '',
+                    var xBtn = win.down('tool'),
+                        iconCls = '',
+                        xResult,
                         titleResult,
                         msgResult,
                         buttonResult,
@@ -2418,12 +2958,16 @@ Ext.define('iRely.TestEngine', {
 
                     t.ok(true, 'Message box is shown.');
 
+                    t.ok(xResult = (xBtn.type === 'close'), xResult ? 'x button is displayed.' : 'x button is not displayed.');
                     t.ok(titleResult = (win.title === title), titleResult ? 'Title is correct.' : 'Title is incorrect.');
                     t.ok(msgResult = (win.msg.value === message), msgResult ?  'Message is correct.' : 'Message is incorrect.');
 
                     switch (buttons) {
                         case 'ok':
                             buttonResult = win.msgButtons.yes.hidden && win.msgButtons.no.hidden && win.msgButtons.cancel.hidden;
+                            break;
+						case 'okcancel':
+                            buttonResult = win.msgButtons.yes.hidden && win.msgButtons.no.hidden;
                             break;
                         case 'yesno':
                             buttonResult = win.msgButtons.ok.hidden && win.msgButtons.cancel.hidden;
@@ -2506,14 +3050,18 @@ Ext.define('iRely.TestEngine', {
             if (win) {
                 var combo = item.value ? item : win.down(item);
                 if (combo) {
-                    var length = combo.el.query('.x-trigger-cell').length,
-                        trigger = combo.el.query('.x-trigger-cell')[length - 1];
+                    var length = combo.triggerEl.elements.length,
+                        trigger = combo.triggerEl.elements[length - 1];
 
                     t.chain([
                         // toggle the combobox
                         {
                             action: 'click',
                             target: trigger
+                        },
+                        {
+                            action: 'wait',
+                            delay: 300
                         },
                         function(next) {
                             var panel = Ext.WindowManager.getActive(),
@@ -2528,7 +3076,7 @@ Ext.define('iRely.TestEngine', {
                             if (grid) {
                                 checker(next, win, grid, grid.getStore());
                             } else {
-                                t.ok(false, 'Combo Box is not existing.')
+                                t.ok(false, 'Combo Box is not existing.');
                                 next();
                             }
                         },
@@ -2540,11 +3088,11 @@ Ext.define('iRely.TestEngine', {
                         next
                     ]);
                 } else {
-                    t.ok(false, 'Combo Box is not existing.')
+                    t.ok(false, 'Combo Box is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Combo Box  is not existing.')
+                t.ok(false, 'Combo Box  is not existing.');
                 next();
             }
         };
@@ -2555,40 +3103,60 @@ Ext.define('iRely.TestEngine', {
 
     /**
      * Checks if a component has a field label
+     *     var engine = new iRely.TestEngine();
+                  engine.start(t)
+                        .login('AGADMIN','AGADMIN','AG').wait(1500)
+                        .expandMenu('Tank Management').wait(100)
+                        .expandMenu('Maintenance').wait(100)
+                        .openScreen('Devices').wait(1000)
+                        .selectSearchRowByIndex(0)
+                        .clickButton('#btnOpenSelected').wait(100)
+                        .checkFieldLabel([
+                              {
+                                    itemId : '#txtDescription',
+                                    label: 'Description'
+                              },
+                              {
+                                    itemId : '#txtPurchasePrice',
+                                    label: 'Purchase Price'
+                              }
+                        ])
+                        .done();
      *
-     * @param {String} item Item Id or alias of the window
+     * @param {Object/Object[]} item
      *
-     * @param {Boolean} hasLabel Defaults to True. Determines if the field lable exists
+     * @param {String} item.itemId ItemId of the component
+     *
+     * @param {String} item.label Label name for the component
      *
      * @returns {iRely.TestEngine}
      */
-    checkFieldLabel: function(item, hasLabel) {
+    checkFieldLabel: function(item) {
         var me = this,
-            chain = me.chain;
+            chain = me.chain,
+            items = Ext.isArray(item) ? item : [item];
 
-        var fn = function(next) {
-            var win = Ext.WindowManager.getActive(),
-                el = win.down(item),
-                hl = typeof hasLabel === 'undefined' ? true : hasLabel;
+        items.forEach(function(i){
+            chain.push(
+                function (next) {
 
-            var result = !!el.fieldLabel;
+                    this.diag('Checking Field Label for component ' + i.itemId);
 
-            t.diag('Checking Field Label for component ' + item);
-          
-            if(hl && result) {
-                t.ok(true, 'Field label Exists.')
-            }
-            else if((hl && !result) || (!hl && result)) {
-                t.ok(false, 'Components label does not exist; expected: ' + hl + ' got: ' + result);
-            }
-            else {
-                t.ok(true, 'Field Label does not exist');
-            }
-                    
-            next();
-        }
+                    var win = Ext.WindowManager.getActive(),
+                        el = win.down(i.itemId);
+                    if (el) {
+                        if (el.fieldLabel === i.label) {
+                            this.ok(true, el.fieldLabel + ' label is displayed in the screen');
+                        }
+                        else {
+                            this.ok(false, el.fieldLabel + ' label is displayed in the screen');
+                        }
+                    }
+                    next();
+                }
+            );
+        });
 
-        chain.push(fn);
         return this;
     },
 
@@ -2654,7 +3222,6 @@ Ext.define('iRely.TestEngine', {
     selectDummyRow : function(item) {
         var me = this,
             chain = me.chain,
-
             fn = function (next) {
                 var w = Ext.WindowManager.getActive(),
                     grid = w.down(!item ? 'grid' : item),
@@ -2662,17 +3229,20 @@ Ext.define('iRely.TestEngine', {
                     sm = grid.getSelectionModel(),
                     idx;
 
-                for (var i = 0; i < store.data.items.length; i++) {
-                    if (store.data.items[i].dummy) {
-                        idx = i;
-                        break;
+                var storeLoadCheck = setInterval(function() {
+                    if(store.isLoaded()) {
+                        clearInterval(storeLoadCheck);
+                        for (var i = 0; i < store.data.items.length; i++) {
+                            if (store.data.items[i].dummy) {
+                                idx = i;
+                                break;
+                            }
+                        }
+                        sm.select(idx);
+                        next();
                     }
-                }
-                sm.select(idx);
-
-                next();
+                }, 30);
             };
-
         chain.push(fn);
         return this;
     },
