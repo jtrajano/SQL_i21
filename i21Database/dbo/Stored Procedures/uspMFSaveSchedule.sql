@@ -306,7 +306,9 @@ BEGIN TRY
 	SELECT @intScheduleId,intScheduleRuleId
 	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
 			intScheduleRuleId INT
+			,ysnSelect INT
 			)
+	WHERE ysnSelect=1
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

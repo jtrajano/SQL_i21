@@ -115,7 +115,9 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
 			intScheduleRuleId INT
 			,intPriorityNo int
+			,ysnSelect INT
 			)
+	WHERE ysnSelect=1
 	ORDER BY intPriorityNo
 
 	SELECT @intManufacturingCellId = intManufacturingCellId
