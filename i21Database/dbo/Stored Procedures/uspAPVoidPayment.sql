@@ -19,6 +19,10 @@ BEGIN
 		[intPaymentId] INT,
 		[intNewPaymentId] INT);
 
+	CREATE TABLE #tmpPayablesDetail (
+		[intPaymentDetailId] INT,
+		[intNewPaymentDetailId] INT);
+
 	INSERT INTO #tmpPayables(intPaymentId)
 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
@@ -135,17 +139,49 @@ BEGIN
 	WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayment)
 
 	--Update foreign key
-	ALTER TABLE #tmpPaymentDetail DROP COLUMN intPaymentDetailId
+	--ALTER TABLE #tmpPaymentDetail DROP COLUMN intPaymentDetailId
+
 	UPDATE A
 		SET A.intPaymentId  = B.intNewPaymentId
 		,A.dblPayment = A.dblPayment * -1
 	FROM #tmpPaymentDetail A
 		INNER JOIN #tmpPayables B
 			ON A.intPaymentId = B.intPaymentId
+		INNER JOIN tblAPBill C
+			ON A.intBillId = C.intBillId
 
 	--Insert new payment detail records
-	INSERT INTO tblAPPaymentDetail
-	SELECT * FROM #tmpPaymentDetail
+	MERGE INTO tblAPPaymentDetail
+	USING #tmpPaymentDetail p
+	ON 1 = 0
+	WHEN NOT MATCHED THEN
+	INSERT (
+		[intPaymentId]			,
+		[intBillId]				,
+		[intAccountId]      	,
+		[dblDiscount]       	,
+		[dblAmountDue]      	,
+		[dblPayment]        	,
+		[dblInterest]       	,
+		[dblTotal]				,
+		[intConcurrencyId]		,
+		[dblWithheld]			
+	)
+	VALUES(
+		p.[intPaymentId]		,
+		p.[intBillId]			,
+		p.[intAccountId]      	,
+		p.[dblDiscount]       	,
+		p.[dblAmountDue]      	,
+		p.[dblPayment]        	,
+		p.[dblInterest]       	,
+		p.[dblTotal]			,
+		p.[intConcurrencyId]	,
+		p.[dblWithheld]			
+	)
+	OUTPUT p.intPaymentDetailId, inserted.intPaymentDetailId INTO #tmpPayablesDetail(intPaymentDetailId, intNewPaymentDetailId); --get the new and old payment id
+	--INSERT INTO tblAPPaymentDetail
+	--SELECT * FROM #tmpPaymentDetail
 
 	--Reverse bank transaction
 	DECLARE @isSuccessful BIT
@@ -173,15 +209,31 @@ BEGIN
 	SELECT @createdPayments = COALESCE(@createdPayments + ',', '') +  CONVERT(VARCHAR(12),intNewPaymentId)
 	FROM #tmpPayables WHERE intNewPaymentId IS NOT NULL
 	ORDER BY intNewPaymentId
-	INSERT INTO @GLEntries
-	SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
-	--SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
+
+	--INSERT INTO @GLEntries
+	--SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
+	SELECT * INTO #tmpGLEntries FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
 
 	--Reversed gl entries of void check should be posted
 	UPDATE A
 		SET A.ysnIsUnposted = 0,
-		A.dtmDate = @voidDate
-	FROM @GLEntries A
+		A.dtmDate = @voidDate,
+		A.intTransactionId = B.intNewPaymentId,
+		A.strTransactionId = C.strPaymentRecordNum
+	FROM #tmpGLEntries A
+	INNER JOIN #tmpPayables B
+		ON A.intTransactionId = B.intPaymentId
+	INNER JOIN tblAPPayment C
+		ON B.intNewPaymentId = C.intPaymentId
+
+	UPDATE A
+		SET A.intJournalLineNo = D.intNewPaymentDetailId
+	FROM #tmpGLEntries A
+	INNER JOIN #tmpPayablesDetail D
+		ON A.intJournalLineNo = D.intPaymentDetailId
+
+	INSERT INTO @GLEntries
+	SELECT * FROM #tmpGLEntries
 
 	EXEC uspGLBookEntries @GLEntries, 1
 
