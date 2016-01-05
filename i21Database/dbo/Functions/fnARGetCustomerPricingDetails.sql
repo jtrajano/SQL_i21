@@ -387,6 +387,7 @@ BEGIN
 				ON vyuTRRackPrice.intItemId = A.intRackItemId
 			WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
 				AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@RackPriceSupplyPointId,0) AND ISNULL(@RackPriceSupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = A.intRackItemLocationId)
+				AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 				ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) > 0
 		BEGIN
 			UPDATE
@@ -400,6 +401,7 @@ BEGIN
 									WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
 										AND vyuTRRackPrice.intItemId = intRackItemId
 										AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@RackPriceSupplyPointId,0) AND ISNULL(@RackPriceSupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
+										AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 										ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation									
 			WHERE
 				strPriceBasis = 'R'
