@@ -3153,6 +3153,9 @@
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
     <Build Include="dbo\Tables\tblSCListTicketTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostDividend.sql" />
+    <Build Include="dbo\Tables\tblMFScheduledMaintenance.sql" />
+    <Build Include="dbo\Tables\tblMFScheduledMaintenanceDetail.sql" />
+    <Build Include="dbo\Triggers\trgAfterInsertScheduledMaintenance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
