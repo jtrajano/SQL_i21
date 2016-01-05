@@ -1,13 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityLotDetail]
 	@intLotId int,
-	@intDirectionId int
+	@intDirectionId int,
+	@ysnParentLot bit=0
 AS
 
 SET NOCOUNT ON;
 
 if @intDirectionId=1
 Begin
-	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId=@intLotId)
+	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId=@intLotId) AND @ysnParentLot=0
 		Select 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,2 AS intImageTypeId
@@ -24,6 +25,26 @@ Begin
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Where wi.intLotId=@intLotId) t
+		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
+
+	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId in (Select TOP 1 intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
+		Select 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
+		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
+		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,2 AS intImageTypeId
+		FROM (  
+		Select DISTINCT '' AS strTransactionName,@intLotId intLotId,pl.strParentLotNumber AS strLotNumber,pl.strParentLotAlias AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
+		mt.intCategoryId,mt.strCategoryCode,wi.dblQuantity,um.strUnitMeasure AS strUOM,
+		wi.dtmCreated AS dtmTransactionDate,l.intParentLotId
+		from tblMFWorkOrder w 
+		Join tblMFWorkOrderConsumedLot wi on w.intWorkOrderId=wi.intWorkOrderId
+		Join tblICLot l on wi.intLotId=l.intLotId
+		Join tblMFManufacturingProcess ps on ps.intManufacturingProcessId=w.intManufacturingProcessId
+		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
+		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
+		Where l.intParentLotId=@intLotId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 	--ELSE
 	--	Select 'Receipt' AS strTransactionName,l.intLotId,l.strLotNumber,l.strLotAlias,i.strItemNo,i.strDescription,
@@ -44,7 +65,7 @@ End
 
 if @intDirectionId=2
 Begin
-	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId=@intLotId)
+	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId=@intLotId) AND @ysnParentLot=0
 		Select 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,6 AS intImageTypeId
@@ -61,5 +82,25 @@ Begin
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Where wi.intLotId=@intLotId) t
+		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
+
+	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId in (Select TOP 1 intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
+		Select 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
+		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
+		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,6 AS intImageTypeId
+		FROM (  
+		Select DISTINCT '' AS strTransactionName,@intLotId intLotId,pl.strParentLotNumber AS strLotNumber,pl.strParentLotAlias AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
+		mt.intCategoryId,mt.strCategoryCode,wi.dblQuantity,um.strUnitMeasure AS strUOM,
+		wi.dtmCreated AS dtmTransactionDate,l.intParentLotId
+		from tblMFWorkOrder w 
+		Join tblMFWorkOrderProducedLot wi on w.intWorkOrderId=wi.intWorkOrderId
+		Join tblICLot l on wi.intLotId=l.intLotId
+		Join tblMFManufacturingProcess ps on ps.intManufacturingProcessId=w.intManufacturingProcessId
+		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
+		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
+		Where l.intParentLotId=@intLotId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 End
