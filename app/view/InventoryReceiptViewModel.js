@@ -315,6 +315,53 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return false;
             }
         },
+        checkHiddenAddOrders: function(get) {
+            var isHidden = false;
+            if (get('current.ysnPosted')) {
+                isHidden = true;
+            }
+            else {
+                switch (get('current.strReceiptType')) {
+                    case 'Purchase Contract':
+                        switch (get('current.intSourceType')) {
+                            case 0:
+                            case 2:
+                                if (iRely.Functions.isEmpty(get('current.intEntityVendorId'))) {
+                                    isHidden = true;
+                                }
+                                else {
+                                    isHidden = false;
+                                }
+                                break;
+                            default:
+                                isHidden = true;
+                                break;
+                        }
+                        break;
+                    case 'Purchase Order':
+                        if (iRely.Functions.isEmpty(get('current.intEntityVendorId'))) {
+                            isHidden = true;
+                        }
+                        else {
+                            isHidden = false;
+                        }
+                        break;
+                    case 'Transfer Order':
+                        if (iRely.Functions.isEmpty(get('current.intTransferorId'))) {
+                            isHidden = true;
+                        }
+                        else {
+                            isHidden = false;
+                        }
+                        break;
+                    default :
+                        isHidden = true;
+                        break;
+                }
+            }
+
+            return isHidden;
+        },
         checkHiddenInInvoicePaid: function (get) {
             var isEnabled = false;
             if (get('current.ysnPosted')) {
@@ -331,13 +378,13 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
 
             return isEnabled;
         },
-        checkHiddenInTransferReceipt: function (get) {
-            var isTransferReceipt = (get('current.strReceiptType') === 'Transfer Receipt')
-            return isTransferReceipt;
+        checkHiddenInTransferOrder: function (get) {
+            var isTransferOrder = (get('current.strReceiptType') === 'Transfer Order')
+            return isTransferOrder;
         },
-        checkHiddenIfNotTransferReceipt: function (get) {
-            var isTransferReceipt = (get('current.strReceiptType') !== 'Transfer Receipt')
-            return isTransferReceipt;
+        checkHiddenIfNotTransferOrder: function (get) {
+            var isTransferOrder = (get('current.strReceiptType') !== 'Transfer Order')
+            return isTransferOrder;
         },
         checkReadOnlyIfDirect: function (get) {
             if (get('current.ysnPosted') === true) {

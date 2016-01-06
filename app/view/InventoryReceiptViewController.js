@@ -127,6 +127,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 text: '{getReceiveButtonText}',
                 hidden: '{checkTransportPosting}'
             },
+            btnAddOrders: {
+                hidden: '{checkHiddenAddOrders}'
+            },
 
             cboReceiptType: {
                 value: '{current.strReceiptType}',
@@ -142,16 +145,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.intEntityVendorId}',
                 store: '{vendor}',
                 readOnly: '{checkReadOnlyWithOrder}',
-                hidden: '{checkHiddenInTransferReceipt}'
-            },
-            txtVendorName: {
-                value: '{current.strVendorName}',
-                hidden: '{checkHiddenInTransferReceipt}'
+                hidden: '{checkHiddenInTransferOrder}'
             },
             cboTransferor: {
                 value: '{current.intTransferorId}',
                 store: '{transferor}',
-                hidden: '{checkHiddenIfNotTransferReceipt}'
+                hidden: '{checkHiddenIfNotTransferOrder}'
             },
             cboLocation: {
                 value: '{current.intLocationId}',
@@ -667,7 +666,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colOnCostType: 'strOnCostType',
                 colCostVendor: {
-                    dataIndex: 'strVendorId',
+                    dataIndex: 'strVendorName',
                     editor: {
                         readOnly: '{readOnlyAccrue}',
                         origValueField: 'intEntityVendorId',
@@ -3288,6 +3287,81 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             ],
             directPrint: true
         });
+    },
+
+    showAddOrders: function(config) {
+        var showAddScreen = function() {
+            var search = i21.ModuleMgr.Search;
+            search.scope = me;
+            search.url = '../i21/api/CompanyLocation/SearchCompanyLocations';
+            search.columns = [
+                { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
+                { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
+                { dataIndex : 'strLocationType',text: 'Location Type', dataType: 'string', flex: 1 }
+            ];
+            search.title = "Add Item Locations";
+            search.showNew = false;
+            search.on({
+                scope: me,
+                openselectedclick: function(button, e, result) {
+                    var currentVM = this.getViewModel().data.current;
+                    var win = this.getView();
+
+                    Ext.each(result, function(location) {
+                        var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
+                            if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
+                                return true;
+                            }
+                        });
+                        if (!exists) {
+                            var defaultUOMId = null;
+                            if (win.defaultUOM) {
+                                defaultUOMId = win.defaultUOM.get('intItemUOMId');
+                            }
+                            var newRecord = {
+                                intItemId: location.data.intItemId,
+                                intLocationId: location.data.intCompanyLocationId,
+                                intIssueUOMId: defaultUOMId,
+                                intReceiveUOMId: defaultUOMId,
+                                strLocationName: location.data.strLocationName
+                            };
+                            currentVM.tblICItemLocations().add(newRecord);
+
+                            var prices = currentVM.tblICItemPricings().data.items;
+                            var exists = Ext.Array.findBy(prices, function (row) {
+                                if (newRecord.intItemLocationId === row.get('intItemLocationId')) {
+                                    return true;
+                                }
+                            });
+                            if (!exists) {
+                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
+                                    intItemId: newRecord.intItemId,
+                                    intItemLocationId: newRecord.intItemLocationId,
+                                    strLocationName: newRecord.strLocationName,
+                                    dblAmountPercent: 0.00,
+                                    dblSalePrice: 0.00,
+                                    dblMSRPPrice: 0.00,
+                                    strPricingMethod: 'None',
+                                    dblLastCost: 0.00,
+                                    dblStandardCost: 0.00,
+                                    dblAverageCost: 0.00,
+                                    dblEndMonthCost: 0.00,
+                                    intSort: newRecord.intSort
+                                });
+                                currentVM.tblICItemPricings().add(newPrice);
+                            }
+                        }
+                    });
+                    search.close();
+                    win.context.data.saveRecord();
+                },
+                openallclick: function() {
+                    search.close();
+                }
+            });
+            search.show();
+        }
+        showAddScreen();
     },
 
     init: function (application) {

@@ -942,6 +942,25 @@ namespace iRely.Inventory.Model
                 _vendorId = value;
             }
         }
+        private string _vendorName;
+        [NotMapped]
+        public string strVendorName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorName))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strVendorName;
+                    else
+                        return null;
+                else
+                    return _vendorName;
+            }
+            set
+            {
+                _vendorName = value;
+            }
+        }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
@@ -963,6 +982,7 @@ namespace iRely.Inventory.Model
         public int? intOnCostTypeId { get; set; }
         public string strOnCostType { get; set; }
         public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
         public decimal? dblAmount { get; set; }
         public string strAllocateCostBy { get; set; }
         public bool? ysnAccrue { get; set; }

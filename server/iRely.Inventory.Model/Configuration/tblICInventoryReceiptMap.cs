@@ -274,6 +274,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strOnCostType).HasColumnName("strOnCostType");
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
+            this.Property(t => t.strVendorName).HasColumnName("strVendorName");
             this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
             this.Property(t => t.strAllocateCostBy).HasColumnName("strAllocateCostBy");
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
