@@ -51,3 +51,14 @@ BEGIN
 END
 PRINT 'Finished updating tblGLDetail null strTransactionType'
 GO
+
+PRINT 'Begin updating tblGLFiscalYearPeriod'
+IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblGLFiscalYearPeriod' and type = 'U')
+BEGIN
+	  UPDATE tblGLFiscalYearPeriod SET ysnAPOpen = ysnOpen WHERE ysnAPOpen IS NULL 
+	  UPDATE tblGLFiscalYearPeriod SET ysnAROpen = ysnOpen WHERE ysnAROpen IS NULL 
+	  UPDATE tblGLFiscalYearPeriod SET ysnCMOpen = ysnOpen WHERE ysnCMOpen IS NULL 
+	  UPDATE tblGLFiscalYearPeriod SET ysnINVOpen = ysnOpen WHERE ysnINVOpen IS NULL 
+	  UPDATE tblGLFiscalYearPeriod SET ysnPROpen = ysnOpen WHERE ysnPROpen IS NULL 
+END
+PRINT 'Finished updating tblGLFiscalYearPeriod'
