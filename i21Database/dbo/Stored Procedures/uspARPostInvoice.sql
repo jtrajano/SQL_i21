@@ -1257,8 +1257,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
+				,strTransactionType			= ICT.strTransactionForm
+				,strTransactionForm			= ICT.strTransactionForm
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1322,8 +1322,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
+				,strTransactionType			= ICT.strTransactionForm
+				,strTransactionForm			= ICT.strTransactionForm
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
