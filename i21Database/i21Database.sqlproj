@@ -2393,10 +2393,10 @@
     <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
-    <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\Do Stock Repost.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICDetectBadOnHand.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
