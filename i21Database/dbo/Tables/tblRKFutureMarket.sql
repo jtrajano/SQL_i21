@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
 	[intFutureMarketId] [int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[strFutMarketName] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strFutSymbol] [nvarchar](5) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strFutSymbol] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intFutMonthsToOpen] [int] NOT NULL,
 	[ysnOptions] [bit] NULL,
 	[ysnActive] [bit] NULL,
@@ -42,7 +42,7 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
     [dblConversionRate] NUMERIC(18, 6) NULL DEFAULT 1, 
     [intReturnCurrency] INT NULL, 
     [intDisplayCurrency] INT NULL, 
-    [strMarketSymbolCode] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
+    [strMarketSymbolCode] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED ([intFutureMarketId] ASC),
 	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
