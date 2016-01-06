@@ -52,7 +52,7 @@ SELECT
 	DD.dblUnits as dblQuantity,
 	DD.dblPrice as dblPrice,
 	(select AVG(dblUnitCost) from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) as dblCost,
-	(select AVG(dblUnitCost) from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) - DD.dblPrice as dblMargin,
+	DD.dblPrice - (select AVG(dblUnitCost) from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) as dblMargin,
 	(select  top 1 AR.strName from dbo.vyuEMEntity AR where AR.intEntityId = TL.intDriverId) as strDriver,
 	DH.dtmInvoiceDateTime as dtmDateTime,
 	TL.ysnPosted,
