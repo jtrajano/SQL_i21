@@ -3159,6 +3159,10 @@
     <Build Include="dbo\Tables\tblWHItemNMFC.sql" />
     <Build Include="dbo\Tables\tblMFScheduleConstraint.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetUnscheduledLine.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReport.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceProductReport.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceMiscReport.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceCardReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
