@@ -1,37 +1,54 @@
 /**
  * Created by RQuidato on 10/23/14.
  */
-var Harness = Siesta.Harness.Browser.ExtJS
+var Harness = Siesta.Harness.Browser.ExtJS,
+    testEnginePath = '../../TestEngine/TestEngine.js';
 
 
 Harness.configure({
     title: 'i21 Test Suite',
-    preload: [
-        "../resources/extjs/ext-4.2.1.883/resources/css/ext-all.css",
-        "../resources/extjs/ext-4.2.1.883/ext.js",
-
-
-    ],
-    hostPageUrl: '../../SystemManager/app.html',
+//    preload: [
+//        "../resources/extjs/ext-4.2.1.883/resources/css/ext-all.css",
+//        "../resources/extjs/ext-4.2.1.883/ext.js",
+//
+//
+//    ],
+    hostPageUrl: '../../i21',
     forceDOMVisible: false,
-    waitForExtReady: false
+    waitForExtReady: false,
+    sandbox: false
     //runCore: 'sequential',
     //autoRun: true
 });
 Harness.start(
-
+    { group: 'Item',
+        items: [
+            {
+                url: 'Item/AddItem.js',
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'FuelCategory/DeleteFuelCategory.js',
+                preload: [
+                    testEnginePath
+                ]
+            }
+        ]
+    },
     { group: 'InventoryUOM',
         items: [
             {
                 url: 'InventoryUOM/AddInventoryUOM.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'InventoryUOM/DeleteInventoryUOM.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -41,13 +58,19 @@ Harness.start(
             {
                 url: 'FuelCategory/AddFuelCategory.js',
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'FuelCategory/AddFuelCategory.js',
+                preload: [
+                    testEnginePath
                 ]
             },
             {
                 url: 'FuelCategory/DeleteFuelCategory.js',
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -57,13 +80,13 @@ Harness.start(
             {
                 url: 'FuelCode/AddFuelCode.js',
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'FuelCode/DeleteFuelCode.js',
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -74,13 +97,13 @@ Harness.start(
             {
                 url: 'ProductionProcess/AddProductionProcess.js',
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'ProductionProcess/DeleteProductionProcess.js',
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -90,13 +113,13 @@ Harness.start(
             {
                 url: 'FeedStockCode/AddFeedStock.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'FeedStockCode/DeleteFeedStock.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -106,13 +129,13 @@ Harness.start(
             {
                 url: 'FeedStockUOM/AddFeedStockUOM.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'FeedStockUOM/DeleteFeedStockUOM.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -122,13 +145,13 @@ Harness.start(
             {
                 url: 'FuelType/AddFuelType.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'FuelType/DeleteFuelType.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -138,13 +161,13 @@ Harness.start(
             {
                 url: 'FuelTaxClass/AddFuelTaxClass.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'FuelTaxClass/DeleteFuelTaxClass.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -154,13 +177,13 @@ Harness.start(
             {
                 url: 'InventoryTag/AddInventoryTag.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'InventoryTag/DeleteInventoryTag.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -170,13 +193,13 @@ Harness.start(
             {
                 url: 'PatronageCategory/AddPatronageCategory.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'PatronageCategory/DeletePatronageCategory.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -186,13 +209,13 @@ Harness.start(
             {
                 url: 'Manufacturer/AddManufacturer.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'Manufacturer/DeleteManufacturer.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -202,13 +225,13 @@ Harness.start(
             {
                 url: 'ManufacturingCell/AddManufacturingCell.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'ManufacturingCell/DeleteManufacturingCell.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -218,13 +241,13 @@ Harness.start(
             {
                 url: 'Reason/AddReason.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'Reason/DeleteReason.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -234,13 +257,13 @@ Harness.start(
             {
                 url: 'StorageUnitType/AddStorageUnitType.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'StorageUnitType/DeleteStorageUnitType.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -250,13 +273,13 @@ Harness.start(
             {
                 url: 'ItemSubstitution/AddItemSubstitution.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'ItemSubstitution/DeleteItemSubstitution.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -266,13 +289,13 @@ Harness.start(
             {
                 url: 'Warehouse/AddWarehouse.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'Warehouse/DeleteWarehouse.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -282,13 +305,13 @@ Harness.start(
             {
                 url: 'CertificationPrograms/AddCertificationPrograms.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'CertificationPrograms/DeleteCertificationPrograms.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -298,13 +321,13 @@ Harness.start(
             {
                 url: 'ContractDocument/AddContractDocument.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'ContractDocument/DeleteContractDocument.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -314,13 +337,13 @@ Harness.start(
             {
                 url: 'LotStatus/AddLotStatus.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'LotStatus/DeleteLotStatus.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -330,13 +353,13 @@ Harness.start(
             {
                 url: 'Brand/AddBrand.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'Brand/DeleteBrand.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -346,13 +369,13 @@ Harness.start(
             {
                 url: 'PackType/AddPackType.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'PackType/DeletePackType.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -362,13 +385,13 @@ Harness.start(
             {
                 url: 'InventoryCountGroup/AddInventoryCountGroup.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'InventoryCountGroup/DeleteInventoryCountGroup.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]
@@ -378,13 +401,13 @@ Harness.start(
             {
                 url: 'LineOfBusiness/AddLineOfBusiness.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             },
             {
                 url: 'LineOfBusiness/DeleteLineOfBusiness.js',  // url of the js file, containing actual test code
                 preload: [
-                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                    testEnginePath
                 ]
             }
         ]

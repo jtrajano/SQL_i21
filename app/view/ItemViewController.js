@@ -2147,8 +2147,12 @@ Ext.define('Inventory.view.ItemViewController', {
 
             case "Non-Inventory":
             case "Service":
+                me.addAccountCategory(current, 'General', accountCategoryList);
+                break;
+
             case "Software":
                 me.addAccountCategory(current, 'General', accountCategoryList);
+                me.addAccountCategory(current, 'Maintenance Sales', accountCategoryList);
                 break;
 
             case "Bundle":
