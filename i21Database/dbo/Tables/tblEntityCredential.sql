@@ -7,7 +7,8 @@
     [strApiSecret]			NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
     [ysnApiDisabled]		BIT NULL, 
 	[strTFASecretKey]		NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
-	[strTFACurrentCode]     NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
+	[strTFACurrentCode]     NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strTFACodeNotifMedium] NVARCHAR(50)   COLLATE Latin1_General_CI_AS NULL,
 	[ysnTFAEnabled]			BIT            DEFAULT ((0)) NULL, 
 	[intEntityRoleId]		INT				NULL,
     [intConcurrencyId]      INT            DEFAULT ((1)) NOT NULL
