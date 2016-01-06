@@ -96,7 +96,7 @@ LEFT OUTER JOIN
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-		WHERE tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
+		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
 	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	
 UNION ALL
@@ -194,7 +194,7 @@ LEFT OUTER JOIN
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-		WHERE tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
+		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
 	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	
 UNION ALL
