@@ -1882,6 +1882,7 @@ IF @recap = 0
 						tblARInvoice
 					SET
 						ysnPosted = 1
+						,ysnPaid = (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 THEN 1 ELSE 0 END)
 						,dblInvoiceTotal = dblInvoiceTotal
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
