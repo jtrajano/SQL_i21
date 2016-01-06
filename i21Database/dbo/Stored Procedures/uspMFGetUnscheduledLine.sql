@@ -22,10 +22,10 @@ BEGIN
 		AND MC.ysnIncludeEfficiency = 1
 		AND NOT EXISTS (
 			SELECT *
-			FROM tblMFShiftActivity AH
-			WHERE CONVERT(CHAR, AH.dtmShiftDate, 101) = CONVERT(CHAR, @dtmShiftDate, 101)
-				AND AH.intShiftId = @intShiftId
-				AND AH.intManufacturingCellId = MC.intManufacturingCellId
+			FROM tblMFShiftActivity SA
+			WHERE CONVERT(CHAR, SA.dtmShiftDate, 101) = CONVERT(CHAR, @dtmShiftDate, 101)
+				AND SA.intShiftId = @intShiftId
+				AND SA.intManufacturingCellId = MC.intManufacturingCellId
 			)
 		AND MC.strCellName LIKE @strCellName + '%'
 		AND MC.intManufacturingCellId = (

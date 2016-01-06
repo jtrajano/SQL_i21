@@ -11,8 +11,6 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
-	DECLARE @intManufacturingCellId INT
-
 	IF @intShiftActivityStatusId = 1
 	BEGIN
 		CREATE TABLE #tmp_ActualTable (
@@ -52,54 +50,14 @@ BEGIN
 			AND CONVERT(DATETIME, CONVERT(CHAR, SCD.dtmCalendarDate, 101)) BETWEEN CONVERT(DATETIME, CONVERT(CHAR, @dtmFromDate, 101))
 				AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
 			AND SCD.intNoOfMachine > 0
-		ORDER BY SCD.intCalendarDetailId
-
-		DECLARE curCell CURSOR
-		FOR
-		SELECT DISTINCT (SA.intManufacturingCellId)
-		FROM dbo.tblMFShiftActivity SA
-		JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = SA.intManufacturingCellId
-		WHERE SA.intShiftActivityStatusId IN (
-				2
-				,3
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFShiftActivity SA
+				WHERE CONVERT(DATETIME, CONVERT(CHAR, SA.dtmShiftDate, 101)) = CONVERT(DATETIME, CONVERT(CHAR, SCD.dtmCalendarDate, 101))
+					AND SA.intManufacturingCellId = MC.intManufacturingCellId
+					AND SA.intShiftId = SCD.intShiftId
 				)
-			AND CONVERT(DATETIME, CONVERT(CHAR, SA.dtmShiftDate, 101)) BETWEEN CONVERT(DATETIME, CONVERT(CHAR, @dtmFromDate, 101))
-				AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
-			AND MC.intLocationId = @intLocationId
-
-		OPEN curCell
-
-		FETCH NEXT
-		FROM curCell
-		INTO @intManufacturingCellId
-
-		WHILE (@@FETCH_STATUS = 0)
-		BEGIN
-			DELETE
-			FROM #tmp_ActualTable
-			WHERE intManufacturingCellId = @intManufacturingCellId
-				AND intShiftId IN (
-					SELECT intShiftId
-					FROM dbo.tblMFShiftActivity
-					WHERE intManufacturingCellId = @intManufacturingCellId
-						AND intShiftActivityStatusId IN (
-							2
-							,3
-							)
-						AND CONVERT(DATETIME, CONVERT(CHAR, dtmShiftDate, 101)) BETWEEN CONVERT(DATETIME, CONVERT(CHAR, @dtmFromDate, 101))
-							AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
-					)
-				AND CONVERT(DATETIME, CONVERT(CHAR, dtmShiftDate, 101)) BETWEEN CONVERT(DATETIME, CONVERT(CHAR, @dtmFromDate, 101))
-					AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
-
-			FETCH NEXT
-			FROM curCell
-			INTO @intManufacturingCellId
-		END
-
-		CLOSE curCell
-
-		DEALLOCATE curCell
+		ORDER BY SCD.intCalendarDetailId
 
 		SELECT AT.intShiftActivityId
 			,MC.strCellName
