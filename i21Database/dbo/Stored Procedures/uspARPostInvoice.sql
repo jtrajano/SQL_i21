@@ -429,6 +429,7 @@ SET @batchIdUsed = @batchId
 					(D.intAccountId IS NULL OR D.intAccountId = 0)
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
+					AND D.dblTotal <> @ZeroDecimal
 								
 				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
