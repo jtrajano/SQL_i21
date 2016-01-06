@@ -266,7 +266,7 @@ BEGIN
 			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND B.intInventoryReceiptChargeId IS NULL
 
 		--UPDATE CHARGES (Accrue)
 		UPDATE	Charge
@@ -344,7 +344,7 @@ BEGIN
 			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)  AND B.intInventoryReceiptChargeId IS NULL
 
 		--UPDATE CHARGES (Accrue)
 		UPDATE	Charge
