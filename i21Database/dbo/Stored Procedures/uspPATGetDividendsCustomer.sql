@@ -29,8 +29,7 @@ BEGIN
 			ON ARC.intEntityCustomerId = ENT.intEntityId
 	 LEFT JOIN tblSMTaxCode TC
 			ON TC.intTaxCodeId = ARC.intTaxCodeId
-		 WHERE (CS.intCustomerPatronId = @intCustomerId
-		    OR @intCustomerId = 0)
+		 WHERE CS.intCustomerPatronId = @intCustomerId
 		   AND CS.dtmIssueDate BETWEEN @dtmProcessingDateFrom AND @dtmProcessingDateTo
 		   
 END
