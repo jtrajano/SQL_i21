@@ -222,7 +222,7 @@
 		Select intHDModuleId = 402, intSMModuleId = 104 Union All
 		Select intHDModuleId = 429, intSMModuleId = 104 Union All
 		--This can be change
-		Select intHDModuleId = 440, intSMModuleId = 98 Union All
+		Select intHDModuleId = 440, intSMModuleId = 95 Union All
 		Select intHDModuleId = 441, intSMModuleId = 19
 
 /*
