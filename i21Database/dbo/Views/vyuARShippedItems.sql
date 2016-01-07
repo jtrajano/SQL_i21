@@ -29,9 +29,9 @@ SELECT
 	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
 	,[dblQtyShipped]					= SOD.[dblQtyShipped]	
 	,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
-	,[dblShipmentQuantity]				= SOD.[dblQtyOrdered] - SOD.[dblQtyShipped]	
+	,[dblShipmentQuantity]				= SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000)	
 	,[dblShipmentQtyShippedTotal]		= SOD.[dblQtyShipped]
-	,[dblQtyRemaining]					= SOD.[dblQtyOrdered] - SOD.[dblQtyShipped]
+	,[dblQtyRemaining]					= SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000)
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
 	,[dblShipmentUnitPrice]				= SOD.[dblPrice]
@@ -92,12 +92,15 @@ LEFT OUTER JOIN
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
 LEFT OUTER JOIN
 	tblSMTaxGroup TG
-		ON SOD.[intTaxGroupId] = TG.intTaxGroupId 				
+		ON SOD.[intTaxGroupId] = TG.intTaxGroupId
+LEFT JOIN (SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS ID
+		ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
 	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+	AND SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000) > 0.000000
 	
 UNION ALL
 
@@ -129,9 +132,9 @@ SELECT
 	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
 	,[dblQtyShipped]					= SOD.[dblQtyShipped]
 	,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
-	,[dblShipmentQuantity]				= SOD.[dblQtyOrdered] - SOD.[dblQtyShipped]	
+	,[dblShipmentQuantity]				= SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000)
 	,[dblShipmentQtyShippedTotal]		= SOD.[dblQtyShipped]
-	,[dblQtyRemaining]					= SOD.[dblQtyOrdered] - SOD.[dblQtyShipped]
+	,[dblQtyRemaining]					= SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000)
 	,[dblDiscount]						= SOD.[dblDiscount]
 	,[dblPrice]							= SOD.[dblPrice]
 	,[dblShipmentUnitPrice]				= SOD.[dblPrice]
@@ -190,12 +193,15 @@ LEFT OUTER JOIN
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
 LEFT OUTER JOIN
 	tblSMTaxGroup TG
-		ON SOD.[intTaxGroupId] = TG.intTaxGroupId				
+		ON SOD.[intTaxGroupId] = TG.intTaxGroupId
+LEFT JOIN (SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS ID
+		ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
 	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+	AND SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000) > 0.000000
 	
 UNION ALL
 

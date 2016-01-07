@@ -209,6 +209,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ErrorMessage					= @AddDetailError	OUTPUT
 			,@RaiseError					= @RaiseError
 			,@ItemDescription				= @ItemDescription
+			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
