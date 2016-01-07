@@ -3113,6 +3113,8 @@
     <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerTotalAR.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRPaycheckEFTDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
