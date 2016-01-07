@@ -136,7 +136,7 @@ DECLARE @tblFinalDetail TABLE (
 	,dblContractPrice 
 	,dblResultCash 
 	,dblResultBasis) 
-SELECT  intContractDetailId 
+SELECT distinct intContractDetailId 
 	,strContractOrInventoryType 
 	,strContractSeq 
 	,strEntityName 
@@ -223,7 +223,7 @@ CONVERT(DECIMAL(24,6),
         -convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblShipQty else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intQuantityUOMId,intCommodityUnitMeasureId),dblShipQty) end))
              as dblOpenQty
   FROM
-(SELECT           cd.intContractDetailId,
+(SELECT   distinct        cd.intContractDetailId,
                   'Contract'+'('+LEFT(ch.strContractType,1)+')' as strContractOrInventoryType,
                   cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
                   cd.strEntityName strEntityName,
@@ -364,7 +364,7 @@ LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId
 WHERE  intContractStatusId<>3 and convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t
 )t)t1
 
----select * from @tblFinalDetail
+
 INSERT INTO @tblFinalDetail (
      intContractDetailId 
 	,strContractOrInventoryType 
@@ -419,7 +419,7 @@ INSERT INTO @tblFinalDetail (
 	,dblContractPrice 
 	,dblResultCash 
 	,dblResultBasis)
-SELECT intContractDetailId 
+SELECT distinct intContractDetailId 
 	,strContractOrInventoryType 
 	,strContractSeq 
 	,strEntityName 
@@ -676,7 +676,7 @@ INSERT INTO @tblFinalDetail (
 	,dblResultCash 
 	,dblResultBasis)
 
-SELECT intContractDetailId 
+SELECT distinct intContractDetailId 
 	,strContractOrInventoryType 
 	,strContractSeq 
 	,strEntityName 
@@ -760,9 +760,9 @@ convert(decimal(24,6),
 
         (convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblOpenQty1 else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intQuantityUOMId,intCommodityUnitMeasureId),isnull(dblOpenQty1,0))end)) -
         (isnull(convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblShipQty else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intQuantityUOMId,intCommodityUnitMeasureId),isnull(dblShipQty,0))end),0))
-        as dblOpenQty
+         as dblOpenQty
   FROM
-(SELECT           cd.intContractDetailId,
+(SELECT  distinct         cd.intContractDetailId,
                   'In-transit' as strContractOrInventoryType,
                   cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
                   cd.strEntityName strEntityName,
@@ -856,7 +856,7 @@ convert(decimal(24,6),
                 dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,                              
                   convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
 
-                  sum(iv.dblPurchaseContractShippedQty) OVER (PARTITION BY cd.intContractDetailId) dblOpenQty1,
+                  (select sum(cc.dblPurchaseContractShippedQty) from vyuLGInboundShipmentView cc where cc.intContractDetailId=cd.intContractDetailId)  dblOpenQty1,
 				  cd.dblRate,
                       cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId ,null as intltemPrice,
@@ -878,7 +878,6 @@ JOIN vyuCTContractHeaderView ch on cd.intContractHeaderId= ch.intContractHeaderI
             AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
             AND isnull(cd.intMarketZoneId,0)= case when isnull(@intMarketZoneId,0)=0 then isnull(cd.intMarketZoneId,0) else @intMarketZoneId end       
 JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId
-JOIN vyuLGInboundShipmentView iv on iv.intContractDetailId=cd.intContractDetailId 
 LEFT JOIN vyuCTContractCostView CC on CC.intContractDetailId=cd.intContractDetailId
 LEFT JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId=@intQuantityUOMId
 LEFT JOIN tblICCommodityUnitMeasure cuc3 on cd.intCommodityId=cuc3.intCommodityId and cuc3.intUnitMeasureId=cd.intPriceUnitMeasureId
@@ -1081,7 +1080,7 @@ group by  strContractOrInventoryType,strCommodityCode,intCommodityId, strItemNo,
 --select dblContractBasis,PriceSourceUOMId,intPriceUOMId,intCurrencyId,@intCurrencyUOMId from @tblFinalDetail
 IF (@strRateType='Exchange')
 BEGIN
-SELECT Convert(int,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,
+SELECT 
     convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblFuturePrice)) as dblFuturePrice,
 	intContractDetailId,strContractOrInventoryType,
       strContractSeq,strEntityName,intEntityId,strFutMarketName,
@@ -1119,7 +1118,7 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
 		convert(decimal(24,2),((round(isnull(dblFutures,0),4)- round(isnull(dblFuturePrice,0),4))*round(isnull(dblMarketFuturesResult1,0),4))) dblMarketFuturesResult,
 	 isnull(dblResultCash1,0) as dblResultCash   into #Temp   
  FROM(
-      SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,
+      SELECT 
       convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblFuturePrice)) as dblFuturePrice
                   ,intContractDetailId,strContractOrInventoryType,
             strContractSeq,strEntityName,intEntityId,strFutMarketName,
@@ -1190,4 +1189,5 @@ END
                END 
 		
 --------------END ---------------
-select * from #Temp 
+SELECT DISTINCT * INTO #TempFinal from #Temp where dblOpenQty > 0 
+SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,* from #TempFinal
