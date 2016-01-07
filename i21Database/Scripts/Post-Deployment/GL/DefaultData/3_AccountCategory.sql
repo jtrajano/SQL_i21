@@ -164,7 +164,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
 		--REMOVE EXCESS
-		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 56
+		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 57
 	END
 	COMMIT TRANSACTION
 END TRY
