@@ -3112,6 +3112,7 @@
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerBudget.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerTotalAR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

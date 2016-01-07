@@ -2163,11 +2163,14 @@ IF @raiseError = 0
 
 	WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
 		BEGIN
-			DECLARE @paymentToUpdate INT
+			DECLARE @paymentToUpdate INT,
+					@customerId		 INT
 
 			SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
-
+			SELECT @customerId = intEntityCustomerId FROM tblARPayment WHERE intPaymentId = @paymentToUpdate
+			
 			EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @post
+			EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
 
 			DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
 		END
