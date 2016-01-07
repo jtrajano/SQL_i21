@@ -115,7 +115,7 @@ BEGIN
 		+ ' '
 		+ A.strPayeeName + SPACE(40 - LEN(A.strPayeeName))
 		+ SPACE(40) -- 288-327
-		+ ' '
+		+ SPACE(40) -- 328-367
 		+ ISNULL(A.strAddress,'') + SPACE(40 - LEN(ISNULL(A.strAddress,'')))
 		+ SPACE(40)
 		+ ISNULL(A.strCity,'') + SPACE(40 - LEN(ISNULL(A.strCity,'')))

@@ -3112,6 +3112,7 @@
     <Build Include="dbo\Stored Procedures\uspPATPostDividend.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfMISC.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfTransmitter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

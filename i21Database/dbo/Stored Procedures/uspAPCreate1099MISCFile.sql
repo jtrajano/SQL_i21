@@ -17,6 +17,7 @@ DECLARE @transmitter AS TABLE(strTransmitter NVARCHAR(1500))
 DECLARE @payer AS TABLE(strPayer NVARCHAR(1500))
 DECLARE @payee AS TABLE(strPayee NVARCHAR(MAX))
 DECLARE @endOfMISC AS TABLE(strEndOfMISC NVARCHAR(1500))
+DECLARE @endOfTransmitter AS TABLE(strEndOfTransmitter NVARCHAR(1500))
 DECLARE @totalPayee NVARCHAR(16)
 
 
@@ -32,6 +33,9 @@ SELECT * FROM dbo.fnAP1099EFileMISCPayee(@year, @reprint, @corrected, @vendorFro
 INSERT INTO @endOfMISC
 SELECT dbo.fnAP1099EFileEndOfMISC(@year, @reprint, @corrected, @vendorFrom, @vendorTo)
 
+INSERT INTO @endOfTransmitter
+SELECT [dbo].[fnAP1099EFileEndOfTransmitter](1)
+
 SET @totalPayee = REPLICATE('0', 8 - LEN(CAST((SELECT COUNT(*) FROM @payee) AS NVARCHAR(100)))) + CAST((SELECT COUNT(*) FROM @payee) AS NVARCHAR(100))
 
 UPDATE A
@@ -45,6 +49,8 @@ UNION ALL
 SELECT * FROM @payee
 UNION ALL
 SELECT * FROM @endOfMISC
+UNION ALL 
+SELECT * FROM @endOfTransmitter
 
 --SELECT 
 --	'T' --1
