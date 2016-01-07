@@ -565,6 +565,19 @@ END
 update @List set strFutureMonth=@strFutureMonth where Selection='Switch position' and strFutureMonth='Previous'
 update @List set strFutureMonth=@strFutureMonth where Selection='9.Net market risk' and strFutureMonth='Previous'
   
+ IF NOT EXISTS ( SELECT *
+	FROM tblRKFutOptTransaction ft  
+	JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
+	JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
+	JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
+	WHERE  intCommodityId=@intCommodityId AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end AND ft.intFutureMarketId=@intFutureMarketId   
+	and dtmFutureMonthsDate >= @dtmFutureMonthsDate 
+	and intFutOptTransactionId not in(select intFutOptTransactionId from tblRKOptionsPnSExercisedAssigned) 
+	 and intFutOptTransactionId not in(select intFutOptTransactionId from tblRKOptionsPnSExpired))
+	 BEGIN
+		DELETE FROM @List where Selection like '%F&O%'
+	END
+
 SELECT intRowNumber,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity  FROM @List    
     WHERE dblQuantity <> 0  
