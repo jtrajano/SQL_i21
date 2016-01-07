@@ -358,3 +358,15 @@ EXEC sp_addmessage 80069,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80070) EXEC sp_dropmessage 80070, 'us_english'	
 SET @strmessage = 'Delete is not allowed. %s is posted.'
 EXEC sp_addmessage 80070,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80071) EXEC sp_dropmessage 80071, 'us_english'	
+SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
+EXEC sp_addmessage 80071,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80072) EXEC sp_dropmessage 80072, 'us_english'	
+SET @strmessage = 'Lot merge of %s is not allowed because it will be merged to the same lot number, location, sub location, and storage location.'
+EXEC sp_addmessage 80072,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80073) EXEC sp_dropmessage 80073, 'us_english'	
+SET @strmessage = 'Split Lot for %s is not allowed because it will be a split to the same lot number, location, sub location, and storage location.'
+EXEC sp_addmessage 80073,11,@strmessage,'us_english','False'

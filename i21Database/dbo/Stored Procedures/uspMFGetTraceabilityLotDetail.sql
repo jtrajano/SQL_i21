@@ -27,7 +27,7 @@ Begin
 		Where wi.intLotId=@intLotId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
-	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId in (Select TOP 1 intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
+	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
 		Select 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,2 AS intImageTypeId
@@ -84,7 +84,7 @@ Begin
 		Where wi.intLotId=@intLotId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
-	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId in (Select TOP 1 intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
+	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
 		Select 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,6 AS intImageTypeId

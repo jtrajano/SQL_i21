@@ -429,6 +429,7 @@ SET @batchIdUsed = @batchId
 					(D.intAccountId IS NULL OR D.intAccountId = 0)
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
+					AND D.dblTotal <> @ZeroDecimal
 								
 				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1256,8 +1257,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
+				,strTransactionType			= ICT.strTransactionForm
+				,strTransactionForm			= ICT.strTransactionForm
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1321,8 +1322,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
+				,strTransactionType			= ICT.strTransactionForm
+				,strTransactionForm			= ICT.strTransactionForm
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1882,6 +1883,7 @@ IF @recap = 0
 						tblARInvoice
 					SET
 						ysnPosted = 1
+						,ysnPaid = (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 THEN 1 ELSE 0 END)
 						,dblInvoiceTotal = dblInvoiceTotal
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
