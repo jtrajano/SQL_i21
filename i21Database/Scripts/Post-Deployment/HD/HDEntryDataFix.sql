@@ -278,6 +278,12 @@ GO
 	PRINT N'Start updating HD modules with SM modules.'
 GO
 
+	Update tblHDModule set tblHDModule.intSMModuleId = (select top 1 vyuHDSMModuleMap.intSMModuleId
+														from vyuHDSMModuleMap
+														where vyuHDSMModuleMap.intHDModuleId = tblHDModule.intModuleId)
+	where tblHDModule.intSMModuleId is null
+
+	/*
 	Update
 		tblHDModule 
 	set
@@ -296,6 +302,7 @@ GO
 									)
 	where
 		tblHDModule.intSMModuleId is null
+		*/
 
 GO
 	PRINT N'End updating HD modules with SM modules.'
