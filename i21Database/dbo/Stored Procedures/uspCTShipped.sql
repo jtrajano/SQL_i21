@@ -56,7 +56,7 @@ BEGIN TRY
 
 		SELECT	@intContractDetailId			=	intContractDetailId,
 				@intFromItemUOMId				=	intItemUOMId,
-				@dblQty							=	dblQty,
+				@dblQty							=	dblQty * -1,
 				@intInventoryShipmentItemId		=	intInventoryShipmentItemId
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
