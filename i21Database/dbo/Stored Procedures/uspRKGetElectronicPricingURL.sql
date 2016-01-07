@@ -15,8 +15,9 @@ BEGIN TRY
 	DECLARE @MarketExchangeCode NVARCHAR(10)
 	DECLARE @Commoditycode NVARCHAR(10)
 	DECLARE @URL NVARCHAR(1000)
+	DECLARE @SymbolPrefix NVARCHAR(5)
 
-	SELECT @Commoditycode = strFutSymbol
+	SELECT @Commoditycode = strFutSymbol,@SymbolPrefix=strSymbolPrefix
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId
 
@@ -108,11 +109,11 @@ BEGIN TRY
 			
 		IF ISNULL(@MarketExchangeCode,'')=''
 		BEGIN
-			SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword + '&Symbol=@' + @Commoditycode + @StrTradedMonthSymbol
+			SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword + '&Symbol='+@SymbolPrefix + @Commoditycode + @StrTradedMonthSymbol
 		END
 		ELSE
 		BEGIN
-		SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword +'&Market='+@MarketExchangeCode+'&Symbol=@' + @Commoditycode + @StrTradedMonthSymbol			
+		SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword +'&Market='+@MarketExchangeCode+'&Symbol='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol			
 		END
 		
 	END
@@ -120,11 +121,11 @@ BEGIN TRY
 	BEGIN
 		IF ISNULL(@MarketExchangeCode,'')=''
 		BEGIN
-			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword + '&symbols=Z' + @Commoditycode + @StrTradedMonthSymbol
+			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword + '&symbols='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol
 		END
 		ELSE
 		BEGIN
-			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword +'&Market='+@MarketExchangeCode+ '&symbols=Z' + @Commoditycode + @StrTradedMonthSymbol
+			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword +'&Market='+@MarketExchangeCode+ '&symbols='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol
 		END
 		
 	END
