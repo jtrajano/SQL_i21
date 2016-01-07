@@ -31,7 +31,7 @@ BEGIN
     
 	SET @SQLString =N'INSERT INTO #tempCSV
 	SELECT NULL as _year, null as period , c.strExternalId,a.strSourceType,a.strSourceId,b.intLineNo,b.dtmDate,b.strReference,b.strDocument,
-	b.strComments,CASE WHEN b.dblCredit > b.dblDebit THEN ''C'' ELSE ''D'' END,   b.dblDebit + b.dblCredit,b.dblUnitsInLBS,ISNULL(b.strCorrecting,''N'') from tblGLJournal a 
+	b.strComments,CASE WHEN b.dblCredit > b.dblDebit THEN ''C'' ELSE ''D'' END,   b.dblDebit + b.dblCredit,CASE WHEN b.dblDebit > b.dblCredit THEN b.dblDebitUnit ELSE b.dblCreditUnit END,ISNULL(b.strCorrecting,''N'') from tblGLJournal a 
 	INNER JOIN tblGLJournalDetail b on a.intJournalId= b.intJournalId 
 	left join tblGLCOACrossReference c on b.intAccountId = c.inti21Id 
 	WHERE b.intJournalId = @_intJournalId'
