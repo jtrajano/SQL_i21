@@ -515,48 +515,7 @@ SELECT @intCommodityIdentity= min(intCommodityIdentity) from @Commodity Where in
 END
 
 ----------------------  DONE FOR ALL..........
-----------Wt Avg --------------
-INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber)
 
-SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Price' as strSecondSubHeading,strContractEndMonth,
-		dblBalance*dblFuturesPrice / sum(dblBalance) over (partition by strContractEndMonth,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
-WHERE strSubHeading ='Futures - Long' OR  strSubHeading ='Futures - Short' 
-)t 
--------RK Module 
-
-
-INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber)
-
-SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Futures' as strSecondSubHeading,strContractEndMonth,
-		dblBalance*dblFuturesPrice / sum(dblBalance) over (partition by strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
-WHERE strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity'
-)t 
-UNION
-SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Basis' as strSecondSubHeading,strContractEndMonth,
-		dblBalance*dblBasisPrice / sum(dblBalance) over (partition by strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
-WHERE strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity' 
-)t 
-UNION
-SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Cash' as strSecondSubHeading,strContractEndMonth,
-		dblBalance*dblCashPrice / sum(dblBalance) over (partition by strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
-WHERE strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity' 
-)t 
-UNION
-SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Freight' as strSecondSubHeading,strContractEndMonth,
-		dblBalance*dblRate / sum(dblBalance) over (partition by strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
-WHERE strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity'
-)t 
--- end
 ----------Cumulative Calculation
 
 DECLARE @strCommodityCumulative Nvarchar(100)
@@ -567,16 +526,54 @@ DECLARE @intMinRowNumberCumulative int
 SELECT @intCommodityIdentityCumulative= min(intCommodityIdentity) from @Commodity
 WHILE @intCommodityIdentityCumulative >0
 BEGIN
-	SELECT @intCommodityIdCumulative =intCommodity FROM @Commodity where intCommodityIdentity=@intCommodityIdentityCumulative
-	select @strCommodityCumulative=strCommodityCode from tblICCommodity Where intCommodityId=@intCommodityIdCumulative
+	SELECT @intCommodityIdCumulative =intCommodity FROM @Commodity WHERE intCommodityIdentity=@intCommodityIdentityCumulative
+	SELECT @strCommodityCumulative=strCommodityCode FROM tblICCommodity WHERE intCommodityId=@intCommodityIdCumulative
 	  IF @intCommodityIdCumulative >0
-	  BEGIN
+BEGIN
+
+----------Wt Avg --------------
+INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber)
+
+SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Price' as strSecondSubHeading,strContractEndMonth,
+		dblBalance*dblFuturesPrice / sum(dblBalance) over (partition by strCommodity,strContractEndMonth,strSubHeading) ,
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
+WHERE (strSubHeading ='Futures - Long' OR  strSubHeading ='Futures - Short')  and strCommodity= @strCommodityCumulative
+)t 
+-------RK Module 
+INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber)
+
+SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Futures' as strSecondSubHeading,strContractEndMonth,
+		dblBalance*dblFuturesPrice / sum(dblBalance) over (partition by strCommodity,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
+WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative
+)t 
+UNION
+SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Basis' as strSecondSubHeading,strContractEndMonth,
+		dblBalance*dblBasisPrice / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
+WHERE strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity' and strCommodity= @strCommodityCumulative
+)t 
+UNION
+SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Cash' as strSecondSubHeading,strContractEndMonth,
+		dblBalance*dblCashPrice / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
+WHERE strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity' and strCommodity= @strCommodityCumulative
+)t 
+UNION
+SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Freight' as strSecondSubHeading,strContractEndMonth,
+		dblBalance*dblRate / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber from  @FinalList
+WHERE strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity' and strCommodity= @strCommodityCumulative
+)t 
+-- end
 
 
-
-
-	  
-		if exists(select * from @FinalList where strContractEndMonth='Previous')
+	  if exists(select * from @FinalList where strContractEndMonth='Previous')
 			BEGIN
 				 INSERT INTO @FinalList(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance)
 				 SELECT  strCommodity, 'Cumulative physical position',  'Cumulative physical position','Previous',dblBalance FROM @FinalList where strSubHeading='Net Physical Position' and strContractEndMonth='Previous' and strCommodity= @strCommodityCumulative
