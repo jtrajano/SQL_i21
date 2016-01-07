@@ -65,7 +65,7 @@ INNER JOIN
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
-		AND dbo.fnIsStockTrackingItem(I.[intItemId]) = 0
+		AND (dbo.fnIsStockTrackingItem(I.[intItemId]) = 0 OR ISNULL(I.strLotTracking, 'No') = 'No')
 INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
