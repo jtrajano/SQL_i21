@@ -909,6 +909,11 @@ IF (@isSuccessful <> 0)
 							WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
 								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 								AND A.intPaycheckId = @intPaycheckId
+
+						/* Update Paycheck Direct Deposit Distribution */
+						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
+							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
+
 					END
 			END
 		ELSE
@@ -932,6 +937,10 @@ IF (@isSuccessful <> 0)
 						SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
 						DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
 						DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
+
+						/* Delete Any Direct Deposit Entry */
+						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
+							DELETE FROM tblPRPaycheckDirectDeposit WHERE intPaycheckId = @intPaycheckId
 
 						SET @isSuccessful = 1
 					END
