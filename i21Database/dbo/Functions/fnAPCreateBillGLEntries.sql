@@ -152,14 +152,10 @@ BEGIN
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) 
 												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 														ELSE 
-															B.dblTotal 
-															- (CASE WHEN B.dblCost != B.dblOldCost AND E.dblUnitCost IS NOT NULL --RECEIPT ITEM
-																	THEN (B.dblCost - E.dblUnitCost) * B.dblQtyReceived
-																	WHEN B.dblCost != B.dblOldCost AND F.dblAmount IS NOT NULL --OTHER CHARGE
-																	THEN (B.dblCost - F.dblAmount) * B.dblQtyReceived
-																ELSE 0 END)
-															+ ISNULL(Taxes.dblTotalICTax, 0) END
-													 ) --IC Tax
+															(CASE WHEN B.dblCost != 0 THEN CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) --COST ADJUSTMENT
+																ELSE B.dblTotal END)
+															+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
+														END) --IC Tax
 												END), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -192,14 +188,10 @@ BEGIN
 		[dblForeignRate]				=	0,
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A 
-			INNER JOIN [dbo].tblAPBillDetail B
+			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblAPVendor C
+			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-			LEFT JOIN tblICInventoryReceiptItem E
-				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
-			LEFT JOIN tblICInventoryReceiptCharge F
-				ON B.intInventoryReceiptChargeId = F.intInventoryReceiptChargeId
 			OUTER APPLY (
 				--Add the tax from IR
 				SELECT 
@@ -209,19 +201,14 @@ BEGIN
 				GROUP BY D.intBillDetailId
 			) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
 	--COST ADJUSTMENT
 	UNION ALL 
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Cost Adjustment'),
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN 
-													(CASE WHEN E.dblUnitCost IS NOT NULL  THEN
-															 ((B.dblCost - E.dblUnitCost) * B.dblQtyReceived)
-														WHEN F.dblAmount IS NOT NULL THEN
-															 ((B.dblCost - F.dblAmount) * B.dblQtyReceived)
-													ELSE 0 END)
-												ELSE 0 END), 
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN ((B.dblCost - B.dblOldCost) * B.dblQtyReceived) ELSE 0 END), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -264,8 +251,7 @@ BEGIN
 			LEFT JOIN tblICInventoryReceiptCharge F
 				ON B.intInventoryReceiptChargeId = F.intInventoryReceiptChargeId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND B.dblCost != B.dblOldCost AND (B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL)
-	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	AND B.dblOldCost != 0 AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL
 	UNION ALL
 	--CHARGES
 	SELECT	
