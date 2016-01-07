@@ -3111,6 +3111,7 @@
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerBudget.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

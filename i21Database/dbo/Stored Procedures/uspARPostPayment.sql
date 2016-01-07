@@ -2154,6 +2154,23 @@ SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
 IF @raiseError = 0
 	COMMIT TRANSACTION
+
+	--Update Customer's Budget 
+	DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)
+	
+	INSERT INTO @tblPaymentsToUpdateBudget
+	SELECT intPaymentId FROM @ARReceivablePostData
+
+	WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
+		BEGIN
+			DECLARE @paymentToUpdate INT
+
+			SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
+
+			EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @post
+
+			DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
+		END
 RETURN 1;
 
 Do_Rollback:
