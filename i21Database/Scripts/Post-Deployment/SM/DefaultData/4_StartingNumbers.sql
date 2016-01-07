@@ -842,6 +842,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bag Mark')
+	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 91
+			,[strTransactionType]	= N'CRM Number'
+			,[strPrefix]			= N'CRMN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Help Desk'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'CRM Number')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
