@@ -477,3 +477,9 @@ UPDATE tblCTReportAttribute SET intDisplayOrder = 12 WHERE intReportAttributeID 
 UPDATE tblCTReportAttribute SET intDisplayOrder = 13 WHERE intReportAttributeID = 11
 UPDATE tblCTReportAttribute SET intDisplayOrder = 14 WHERE intReportAttributeID = 12
 GO
+
+GO
+UPDATE tblCTCompanyPreference
+SET strDemandItemType = 'Finished Good'
+WHERE strDemandItemType IS NULL
+GO
