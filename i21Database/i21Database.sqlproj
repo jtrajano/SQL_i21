@@ -3114,6 +3114,7 @@
     <Build Include="dbo\Tables\tblPRPaycheckDirectDeposit.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPaycheckEFTDistribution.sql" />
     <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
+    <Build Include="dbo\Views\vyuGLAccountDetailReportParameter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
