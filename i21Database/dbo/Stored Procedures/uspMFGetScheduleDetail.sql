@@ -57,8 +57,9 @@ FROM tblMFScheduleConstraintDetail SC
 JOIN tblMFWorkOrder W ON W.intWorkOrderId = SC.intWorkOrderId
 JOIN dbo.tblMFScheduleRule SR ON SR.intScheduleRuleId = SC.intScheduleRuleId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
-WHERE SC.dtmChangeoverStartDate >= @dtmPlannedStartDate
-	AND SC.dtmChangeoverEndDate <= @dtmPlannedEndDate
+WHERE ((SC.dtmChangeoverStartDate >= @dtmPlannedStartDate
+    AND SC.dtmChangeoverEndDate <= @dtmPlannedEndDate)
+	OR @dtmPlannedStartDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate OR @dtmPlannedEndDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate)
 	AND SC.intScheduleId = (
 		CASE 
 			WHEN @intScheduleId = 0
@@ -150,8 +151,10 @@ WHERE W.intLocationId = @intLocationId
 			ELSE @intManufacturingCellId
 			END
 		)
-	AND SL.dtmPlannedStartDate >= @dtmPlannedStartDate
-	AND SL.dtmPlannedEndDate <= @dtmPlannedEndDate
+	AND (@dtmPlannedStartDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate 
+		OR @dtmPlannedEndDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate
+		    OR (SL.dtmPlannedStartDate >= @dtmPlannedStartDate
+			AND SL.dtmPlannedEndDate <= @dtmPlannedEndDate))
 
 UNION
 
