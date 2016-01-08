@@ -15,6 +15,10 @@ strPayeeBankRoutingNumber = (
 		SELECT TOP 1 strRTN FROM tblEntityEFTInformation EFTInfo 
 		INNER JOIN tblCMBank BANK ON EFTInfo.intBankId = BANK.intBankId
 		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
+),
+strEntityNo = (
+		SELECT strEntityNo FROM tblEntity
+		WHERE intEntityId = intPayeeId
 )
 FROM tblCMBankTransaction
 WHERE dbo.fnIsDepositEntry(strLink) = 0
