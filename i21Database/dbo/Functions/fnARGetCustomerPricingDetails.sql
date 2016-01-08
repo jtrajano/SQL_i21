@@ -68,7 +68,6 @@ BEGIN
 		,strCostToUse NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,dblDeviation NUMERIC(18,6)
 		,strLineNote NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		--,ysnConsignable BIT
 		,intRackVendorId INT
 		,intRackItemId INT
 		,intRackItemLocationId INT
@@ -91,7 +90,6 @@ BEGIN
 		,strCostToUse
 		,dblDeviation
 		,strLineNote
-		--,ysnConsignable
 		,intRackVendorId
 		,intRackItemId
 		,intRackItemLocationId
@@ -112,7 +110,6 @@ BEGIN
 		,SP.strCostToUse
 		,SP.dblDeviation
 		,SP.strLineNote
-		--,SP.ysnConsignable
 		,SP.intRackVendorId
 		,SP.intRackItemId
 		,SP.intRackLocationId 
@@ -354,7 +351,7 @@ BEGIN
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
 								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
+									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
 								WHERE tblTRSupplyPoint.intEntityLocationId = intVendorLocationId 
 									AND vyuTRRackPrice.intItemId = intRackItemId
 									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
@@ -364,7 +361,7 @@ BEGIN
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
 								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
+									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId)
 								WHERE tblTRSupplyPoint.intEntityLocationId = intVendorLocationId 
 									AND vyuTRRackPrice.intItemId = intRackItemId
 									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
@@ -372,44 +369,7 @@ BEGIN
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'R'
-			
-		--DECLARE @RackPriceSupplyPointId	INT
-
-		--SELECT
-		--	@RackPriceSupplyPointId = intRackPriceSupplyPointId
-		--FROM
-		--	tblTRSupplyPoint
-		--WHERE
-		--	intSupplyPointId = @SupplyPointId
-			
-		--IF (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
-		--	    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
-		--				  END 
-		--	FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint
-		--		ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId
-		--		INNER JOIN @CustomerSpecialPricing A
-		--		ON vyuTRRackPrice.intItemId = A.intRackItemId
-		--	WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
-		--		AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@RackPriceSupplyPointId,0) AND ISNULL(@RackPriceSupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = A.intRackItemLocationId)
-		--		AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
-		--		ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) > 0
-		--BEGIN
-		--	UPDATE
-		--		@CustomerSpecialPricing
-		--	SET
-		--		dblCustomerPrice = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
-		--						    				   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
-		--										  END 
-		--							FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-		--								ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
-		--							WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
-		--								AND vyuTRRackPrice.intItemId = intRackItemId
-		--								AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@RackPriceSupplyPointId,0) AND ISNULL(@RackPriceSupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
-		--								AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
-		--								ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation									
-		--	WHERE
-		--		strPriceBasis = 'R'
-		--END	
+					
 		
 		--(O)Origin Rack			
 		UPDATE
@@ -419,8 +379,8 @@ BEGIN
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
 								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
-								WHERE (vyuTRRackPrice.intItemId = intItemId OR vyuTRRackPrice.intItemId = intRackItemId)
+									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
+								WHERE (vyuTRRackPrice.intItemId = intItemId OR vyuTRRackPrice.intItemId = intItemId)
 									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
 									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
@@ -428,8 +388,8 @@ BEGIN
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
 								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
-								WHERE (vyuTRRackPrice.intItemId = intItemId OR vyuTRRackPrice.intItemId = intRackItemId)
+									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
+								WHERE (vyuTRRackPrice.intItemId = intItemId OR vyuTRRackPrice.intItemId = intItemId)
 									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
 									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
@@ -447,7 +407,6 @@ BEGIN
 			,strCostToUse NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			,dblDeviation NUMERIC(18,6)
 			,strLineNote NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			--,ysnConsignable BIT
 			,intRackVendorId INT
 			,intRackItemId INT
 			,intRackItemLocationId INT
@@ -507,7 +466,6 @@ BEGIN
 			,strCostToUse
 			,dblDeviation
 			,strLineNote
-			--,ysnConsignable
 			,intRackVendorId
 			,intRackItemId
 			,intRackItemLocationId
@@ -528,7 +486,6 @@ BEGIN
 			,SP.strCostToUse
 			,SP.dblDeviation
 			,SP.strLineNote
-			--,SP.ysnConsignable
 			,SP.intRackVendorId
 			,SP.intRackItemId
 			,SP.intRackItemLocationId
@@ -545,7 +502,7 @@ BEGIN
 				ON SP.strCustomerGroup = CG.strGroupName					
 		
 		--Customer Group - Rack Vendor No + Rack Item No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR SP.intItemId = @ItemId) AND (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity)
@@ -565,7 +522,7 @@ BEGIN
 			END
 
 		--Customer Group - Rack Vendor No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE SP.intRackItemId = @ItemId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR SP.intItemId = @ItemId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity)
@@ -585,7 +542,7 @@ BEGIN
 			END
 
 		--Customer Group - Rack Item No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE SP.intRackVendorId = @ItemVendorId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity)
@@ -615,7 +572,6 @@ BEGIN
 			,strCostToUse NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			,dblDeviation NUMERIC(18,6)
 			,strLineNote NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			--,ysnConsignable BIT
 			,intRackVendorId INT
 			,intRackItemLocationId INT
 			,intRackItemId INT
@@ -638,7 +594,6 @@ BEGIN
 			,strCostToUse
 			,dblDeviation
 			,strLineNote
-			--,ysnConsignable
 			,intRackVendorId
 			,intRackItemId
 			,intRackItemLocationId
@@ -659,7 +614,6 @@ BEGIN
 			,SP.strCostToUse
 			,SP.dblDeviation
 			,SP.strLineNote
-			--,SP.ysnConsignable
 			,SP.intRackVendorId
 			,SP.intRackItemId
 			,SP.intRackItemLocationId 
@@ -679,7 +633,7 @@ BEGIN
 			
 
 		--Customer - Rack Vendor No + Rack Item No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR SP.intItemId = @ItemId) AND (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity)
@@ -699,7 +653,7 @@ BEGIN
 			END
 
 		--Customer - Vendor + Rack Vendor No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL)) WHERE SP.intRackVendorId = @ItemVendorId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL)) WHERE (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity)
@@ -719,7 +673,7 @@ BEGIN
 			END
 
 		--Customer - Rack Item No
-		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE SP.intRackItemId = @ItemId AND ISNULL(dblCustomerPrice,0) <> 0)
+		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR SP.intItemId = @ItemId) AND ISNULL(dblCustomerPrice,0) <> 0)
 		IF(ISNULL(@SpecialPriceId,0) <> 0)
 			BEGIN
 				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity)
