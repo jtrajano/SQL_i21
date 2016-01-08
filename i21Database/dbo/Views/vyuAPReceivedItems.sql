@@ -83,7 +83,8 @@ FROM
 				LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 				LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B1.intCostUOMId
 				LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
-			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty
+			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
+			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
 			AND A1.strReceiptType = 'Purchase Order'
 			GROUP BY
@@ -226,6 +227,7 @@ FROM
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
+	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	UNION ALL
 
 	--OTHER CHARGES
