@@ -3167,6 +3167,13 @@
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
     <Build Include="dbo\Views\vyuTRLinkedReceipts.sql" />
+    <Build Include="dbo\Views\vyuTMETExportConsumptionSite.sql" />
+    <Build Include="dbo\Views\vyuTMETExportConsumptionSiteInstruction.sql" />
+    <Build Include="dbo\Views\vyuTMETExportTankManagementSite.sql" />
+    <Build Include="dbo\Views\vyuTMETExportTankManagementAppliance.sql" />
+    <Build Include="dbo\Views\vyuTMETExportTankManagementDeliveryHistory.sql" />
+    <Build Include="dbo\Views\vyuTMETExportTankManagementDevice.sql" />
+    <Build Include="dbo\Views\vyuTMETExportTankManagementEventHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
