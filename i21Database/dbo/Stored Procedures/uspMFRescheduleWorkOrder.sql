@@ -115,7 +115,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
 			intScheduleRuleId INT
 			,intPriorityNo int
-			,ysnSelect INT
+			,ysnSelect bit
 			)
 	WHERE ysnSelect=1
 	ORDER BY intPriorityNo
@@ -1323,6 +1323,8 @@ BEGIN TRY
 					THEN 0
 				ELSE 1
 				END) AS ysnSelect
+		,@intScheduleId AS intScheduleId
+		,R.intConcurrencyId
 	FROM dbo.tblMFScheduleRule R
 	JOIN dbo.tblMFScheduleRuleType RT ON RT.intScheduleRuleTypeId = R.intScheduleRuleTypeId
 	LEFT JOIN @tblMFScheduleConstraint SC ON SC.intScheduleRuleId = R.intScheduleRuleId

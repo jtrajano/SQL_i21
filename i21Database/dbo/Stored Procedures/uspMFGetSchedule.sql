@@ -488,6 +488,8 @@ SELECT R.intScheduleRuleId
 				THEN 0
 			ELSE 1
 			END) AS ysnSelect
+	,@intScheduleId AS intScheduleId
+	,R.intConcurrencyId
 FROM dbo.tblMFScheduleRule R
 JOIN dbo.tblMFScheduleRuleType RT ON RT.intScheduleRuleTypeId = R.intScheduleRuleTypeId
 LEFT JOIN dbo.tblMFScheduleConstraint SC ON SC.intScheduleRuleId = R.intScheduleRuleId
