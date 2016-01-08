@@ -763,7 +763,7 @@ convert(decimal(24,6),
          as dblOpenQty
   FROM
 (SELECT  distinct         cd.intContractDetailId,
-                  'In-transit' as strContractOrInventoryType,
+                  'In-transit'+'('+LEFT(ch.strContractType,1)+')' as strContractOrInventoryType,
                   cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
                   cd.strEntityName strEntityName,
                   cd.intEntityId,
@@ -1124,7 +1124,7 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
             strContractSeq,strEntityName,intEntityId,strFutMarketName,
             intFutureMarketId,intFutureMonthId,strFutureMonth,
             strCommodityCode,intCommodityId,strItemNo,intItemId,intOriginId,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,
-			dblOpenQty,			 
+			case when intContractTypeId =1 then  dblOpenQty else -dblOpenQty end dblOpenQty ,			 
             intPricingTypeId,strPricingType,
             convert(decimal(24,6),
             case when isnull(dblRate,0)=0 then 
@@ -1189,5 +1189,5 @@ END
                END 
 		
 --------------END ---------------
-SELECT DISTINCT * INTO #TempFinal from #Temp where dblOpenQty > 0 
+SELECT DISTINCT * INTO #TempFinal from #Temp where dblOpenQty <> 0 
 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,* from #TempFinal
