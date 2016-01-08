@@ -470,6 +470,8 @@ BEGIN
 END
 ELSE
 	BEGIN
+
+		ROLLBACK TRANSACTION; --ROLLBACK CHANGES MADE FROM OTHER STORED PROCEDURE e.g. cost adjustment
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLDetailRecap
@@ -536,7 +538,10 @@ ELSE
 		
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
-		GOTO Post_Commit;
+		SET @success = 1
+		SET @successfulCount = @totalRecords
+		RETURN;
+
 	END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
