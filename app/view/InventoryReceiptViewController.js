@@ -2898,7 +2898,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store: win.viewModel.storeInfo.inboundShipment,
                 defaultFilters: [
                     {
-                        column: 'dblBalanceToReceived',
+                        column: 'dblBalanceToReceive',
                         value: '0',
                         conjunction: 'and',
                         condition: 'gt'
