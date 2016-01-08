@@ -48,6 +48,20 @@ GO
 			SET strTableName = N'tblLGLoad'
 			WHERE strNamespace = 'Logistics.view.LoadSchedule'
 		END
+
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.EntityContact') 
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId]) 
+			VALUES (N'Entity Contact', N'Entity Contact', N'EntityManagement.view.EntityContact', N'Entity Management', N'tblEntity', 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET strTableName = N'tblEntity', strScreenId = N'Entity Contact', strScreenName = 'Entity Contact'
+			WHERE strNamespace = 'EntityManagement.view.EntityContact'
+		END
+
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO

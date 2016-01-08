@@ -55,5 +55,19 @@ BEGIN
     print('/*******************  END Creating Load Custom Table *******************/')
 END
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('cstEntityContact'))
+BEGIN
+	print('/*******************  BEGIN Creating Entity Contact Custom Table *******************/')
+	EXEC('
+		CREATE TABLE [dbo].[cstEntityContact]
+		(
+			[intId] INT NOT NULL,
+			CONSTRAINT [PK_cstEntityContact] PRIMARY KEY CLUSTERED ([intId] ASC),
+			CONSTRAINT [FK_cstEntityContact_tblEntity] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
+		);
+	')
+	print('/*******************  END Creating Entity Contact Custom Table *******************/')
+END
+
 GO
 print('/*******************  END Creating Custom Field Tables *******************/')
