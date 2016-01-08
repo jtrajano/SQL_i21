@@ -149,6 +149,7 @@ BEGIN
 				,A.intCustomerID
 				,intClockLocation = A.intClockID
 				,intSitePriceLevel = A.intCompanyLocationPricingLevelId
+				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID

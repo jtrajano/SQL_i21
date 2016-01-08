@@ -3174,6 +3174,7 @@
     <Build Include="dbo\Views\vyuTMETExportTankManagementDeliveryHistory.sql" />
     <Build Include="dbo\Views\vyuTMETExportTankManagementDevice.sql" />
     <Build Include="dbo\Views\vyuTMETExportTankManagementEventHistory.sql" />
+    <Build Include="dbo\Views\vyuTMSiteOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
