@@ -257,9 +257,9 @@ FROM
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
-		,[strContractNumber]						=	NULL
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
-		,[intContractHeaderId]						=	NULL
+		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
