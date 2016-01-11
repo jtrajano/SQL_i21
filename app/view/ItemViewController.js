@@ -152,10 +152,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colDetailShortUPC: 'strUpcCode',
                 colDetailUpcCode: {
-                    dataIndex: 'strLongUPCCode',
-                    editor: {
-                        readOnly: '{readOnlyLongUPC}'
-                    }
+                    dataIndex: 'strLongUPCCode'
                 },
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
@@ -2770,10 +2767,19 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepDetailUOM');
         var record = plugin.getActiveRecord();
 
-        if (!iRely.Functions.isEmpty(newValue))
-        {
-            return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(newValue))
+        if (obj.itemId === 'txtShortUPCCode') {
+            if (!iRely.Functions.isEmpty(newValue))
+            {
+                return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(newValue))
+            }
         }
+        else if (obj.itemId === 'txtFullUPCCode') {
+            if (!iRely.Functions.isEmpty(newValue))
+            {
+                return record.set('strUpcCode', i21.ModuleMgr.Inventory.getShortUPCString(newValue))
+            }
+        }
+
     },
 
     onDuplicateClick: function(button) {
@@ -3023,6 +3029,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 change: this.onSpecialPricingDiscountChange
             },
             "#txtShortUPCCode": {
+                change: this.onUpcChange
+            },
+            "#txtFullUPCCode": {
                 change: this.onUpcChange
             },
             "#btnDuplicate": {

@@ -519,15 +519,13 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
                                                         itemId: 'colDetailShortUPC',
                                                         width: 70,
-                                                        dataIndex: 'string',
                                                         text: 'Short UPC',
                                                         editor: {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtShortUPCCode',
-                                                            allowDecimals: false,
-                                                            allowExponential: false
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtShortUPCCode'
                                                         }
                                                     },
                                                     {
@@ -538,7 +536,8 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'UPC Code',
                                                         flex: 2,
                                                         editor: {
-                                                            xtype: 'textfield'
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtFullUPCCode'
                                                         }
                                                     },
                                                     {

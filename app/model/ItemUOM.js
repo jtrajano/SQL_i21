@@ -48,8 +48,8 @@ Ext.define('Inventory.model.ItemUOM', {
         { name: 'dblWeight', type: 'float' },
         { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'strDescription', type: 'string' },
-        { name: 'strUpcCode', type: 'string' },
-        { name: 'strLongUPCCode', type: 'string'
+        { name: 'strUpcCode', type: 'string', allowNull: true },
+        { name: 'strLongUPCCode', type: 'string', allowNull: true
 //            persist: true,
 //            convert: function(value, record){
 //                var shortUPC = record.get('strUpcCode');

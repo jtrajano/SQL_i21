@@ -120,6 +120,7 @@ Ext.define('Inventory.controller.Inventory', {
 
     getFullUPCString: function(shortUPC) {
         if (iRely.Functions.isEmpty(shortUPC)) return null;
+        shortUPC = shortUPC.toString();
         if (shortUPC.length < 6) return null;
         var lastDigit = parseInt(shortUPC.toString().substring(shortUPC.length - 1));
         var fullUPC = "";
@@ -171,6 +172,61 @@ Ext.define('Inventory.controller.Inventory', {
         }
 
         return fullUPC;
+    },
+
+    validateFullUPC: function(fullUPC) {
+        if (iRely.Functions.isEmpty(fullUPC)) return null;
+        fullUPC = fullUPC.toString();
+        var finalUPC = fullUPC;
+        if (fullUPC.length < 13) {
+            finalUPC = Ext.String.repeat('0', 13 - fullUPC.length) + fullUPC + '0';
+        }
+
+        return finalUPC;
+    },
+
+    getShortUPCString: function(fullUPC) {
+        if (iRely.Functions.isEmpty(fullUPC)) return null;
+        fullUPC = fullUPC.toString();
+        var shortUPC = '';
+
+        if (fullUPC.length < 13) {
+            fullUPC = this.validateFullUPC(fullUPC);
+        }
+
+        if (fullUPC.substring(8, 12) === '0000' && fullUPC.substring(12, 13) > 4) {
+            shortUPC = fullUPC.substring(3, 8) + fullUPC.substring(12, 13);
+        }
+        if (fullUPC.substring(7, 12) === '00000') {
+            shortUPC = fullUPC.substring(3, 7) + fullUPC.substring(12, 13) + '4';
+        }
+        if (fullUPC.substring(6, 11) === '00000') {
+            shortUPC = fullUPC.substring(3, 6) + fullUPC.substring(11, 13) + '3';
+        }
+        if (fullUPC.substring(5, 10) === '00000') {
+            shortUPC = fullUPC.substring(3, 5) + fullUPC.substring(10, 13) + '2';
+        }
+        if (fullUPC.substring(5, 10) === '10000') {
+            shortUPC = fullUPC.substring(3, 5) + fullUPC.substring(10, 13) + '1';
+        }
+        if (fullUPC.substring(5, 10) === '00000') {
+            shortUPC = fullUPC.substring(3, 5) + fullUPC.substring(10, 13) + '0';
+        }
+
+        var temp = this.trimNumber(fullUPC);
+        temp = temp.toString().substring(0, 6);
+        if (parseFloat(temp) > 99999) {
+            
+        }
+
+        return shortUPC;
+    },
+
+    trimNumber: function (s) {
+        while (s.substr(0, 1) == '0' && s.length > 1) {
+            s = s.substr(1, s.length);
+        }
+        return s;
     },
 
     checkEmptyStore: function(arrayItems) {
