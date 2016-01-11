@@ -11,7 +11,9 @@ SELECT
         e.strState,  
         e.strZipCode,
         ysnActive = ~c.ysnDisabled,
-		c.strUserName
+		c.strUserName,
+		h.intUserRoleID,
+		strDefaultUserRole = h.strDescription
     FROM         
             tblEntity a
         join tblEntityType b
@@ -24,5 +26,5 @@ SELECT
             on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
         left join tblEntity g  
             on f.intEntityContactId = g.intEntityId  
-
-
+		left join tblSMUserRole h
+			on h.intUserRoleID = c.intUserRoleID
