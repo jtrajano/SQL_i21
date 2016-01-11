@@ -28,7 +28,7 @@
 	[intUserSecurityIdOld]	INT NULL,
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intEntityUserSecurityId] ASC),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
-	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]), 
     CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName])
 );
