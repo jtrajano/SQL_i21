@@ -5,7 +5,8 @@ CREATE TABLE [dbo].[tblRKElectronicPricingValue]
 	,[dblLow]  NUMERIC(18, 6) NULL
 	,[dblOpen] NUMERIC(18, 6) NULL
 	,[dblLast] NUMERIC(18, 6) NULL
-	,[strURL] NVARCHAR(Max) COLLATE Latin1_General_CI_AS NULL 
+	,[strURL] NVARCHAR(Max) COLLATE Latin1_General_CI_AS NULL
+	,[strMessage] NVARCHAR(Max) COLLATE Latin1_General_CI_AS NULL  
 	,[intFutureMarketId] INT NULL, 
     CONSTRAINT [PK_tblRKElectronicPricingValue_intElectronicPricingValueId] PRIMARY KEY ([intElectronicPricingValueId])
 )
