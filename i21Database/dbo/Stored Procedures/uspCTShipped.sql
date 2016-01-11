@@ -84,15 +84,15 @@ BEGIN TRY
 
 		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-		IF @intSourceType IN (0,1,2,3)
-		BEGIN					
-			EXEC	uspCTUpdateScheduleQuantity
-					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-					@intUserId				=	@intUserId,
-					@intExternalId			=	@intInventoryShipmentItemId,
-					@strScreenName			=	'Inventory Shipment' 
-		END
+		--IF @intSourceType IN (0,1,2,3)
+		--BEGIN					
+		--	EXEC	uspCTUpdateScheduleQuantity
+		--			@intContractDetailId	=	@intContractDetailId,
+		--			@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+		--			@intUserId				=	@intUserId,
+		--			@intExternalId			=	@intInventoryShipmentItemId,
+		--			@strScreenName			=	'Inventory Shipment' 
+		--END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
