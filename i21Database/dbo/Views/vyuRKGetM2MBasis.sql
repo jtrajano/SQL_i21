@@ -70,7 +70,7 @@ AS
 				,0 as intConcurrencyId,
 				i.strMarketValuation
 			FROM tblICItemStock iis		
-			JOIN tblICItem i on i.intItemId=iis.intItemId	
+			JOIN tblICItem i on i.intItemId=iis.intItemId and strLotTracking = 'No'
 			LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId
 			LEFT JOIN vyuCTContractDetailView cd on iis.intItemId=cd.intItemId 
 			LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
