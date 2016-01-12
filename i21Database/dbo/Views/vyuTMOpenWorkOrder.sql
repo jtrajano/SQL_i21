@@ -15,6 +15,11 @@ AS
 		,strPerformerName = I.strName
 		,A.strDescription
 		,intWorkOrderID = B.intWorkOrderID
+		,strEnteredBy = K.strUserName
+		,B.strComments
+		,B.strAdditionalInfo
+		,L.strItemNo
+		,strItemDescription = L.strDescription
 		,intSiteID = A.intSiteID
 		,A.intCustomerID
 		,A.intConcurrencyId
@@ -35,6 +40,12 @@ AS
 		ON B.intCloseReasonID = H.intCloseReasonID
 	LEFT JOIN tblEntity I
 		ON B.intPerformerID = I.intEntityId
+	LEFT JOIN tblEntity J
+		ON B.intEnteredByID = J.intEntityId
+	LEFT JOIN tblSMUserSecurity K
+		ON J.intEntityId = K.intEntityUserSecurityId
+	LEFT JOIN tblICItem L
+		ON A.intProduct = L.intItemId
 	
 
 GO

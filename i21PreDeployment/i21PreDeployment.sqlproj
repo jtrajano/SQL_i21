@@ -252,4 +252,7 @@
     <None Include="Scripts\Pre-Deployment\17_TR\01_Drop_Column.sql" />
     <None Include="Scripts\Pre-Deployment\6_GL\3_1440_to_1510.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\17_TR\02_OldTransportLoadConversion.sql" />
+  </ItemGroup>
 </Project>

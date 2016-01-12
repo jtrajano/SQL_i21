@@ -3176,6 +3176,7 @@
     <Build Include="dbo\Views\vyuTMETExportTankManagementEventHistory.sql" />
     <Build Include="dbo\Views\vyuTMSiteOrder.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptAddOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemRequirement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
