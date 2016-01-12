@@ -197,11 +197,18 @@ BEGIN
 			GROUP BY intCommodityId
 				,strCommodityCode
 			) t
-	
+
+	INSERT INTO @tblFinalDetail(strSummary,dblQty,dblTotal, dblFutures,dblBasis,dblCash)
+	SELECT 'Total',sum(isnull(dblQty,0)),sum(isnull(dblTotal,0)), sum(isnull(dblFutures,0)),sum(isnull(dblBasis,0)),sum(isnull(dblCash,0)) FROM @tblFinalDetail
+	WHERE intCommodityId = @intCommodityId1
+
 	SELECT @mRowNumber = MIN(RowNumber)
 	FROM @tblRow
 	WHERE RowNumber > @mRowNumber
 END
 
-SELECT *,0 as intConcurrencyId  
+	INSERT INTO @tblFinalDetail(strSummary,dblQty,dblTotal, dblFutures,dblBasis,dblCash)
+	SELECT 'Total Summary',sum(isnull(dblQty,0)),sum(isnull(dblTotal,0)), sum(isnull(dblFutures,0)),sum(isnull(dblBasis,0)),sum(isnull(dblCash,0)) FROM @tblFinalDetail
+	
+SELECT RowNumber,strSummary,intCommodityId,strCommodityCode,strContractOrInventoryType,dblQty,dblTotal,convert(decimal,dblFutures) as dblFutures,dblBasis,dblCash,0 as intConcurrencyId  
 FROM @tblFinalDetail	
