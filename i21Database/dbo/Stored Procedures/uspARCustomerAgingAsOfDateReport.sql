@@ -52,6 +52,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -87,6 +88,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
@@ -166,6 +168,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -187,6 +190,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo

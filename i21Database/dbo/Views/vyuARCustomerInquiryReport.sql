@@ -16,13 +16,15 @@ SELECT A.strCustomerName
 	 , dtmLastPaymentDate = (SELECT TOP 1 dtmDatePaid FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 1 ORDER BY dtmDatePaid DESC, intPaymentId DESC)
 	 , dblLastStatement = ISNULL((SELECT TOP 1 ISNULL(I.dblPayment, 0) FROM tblARInvoice I 
 									INNER JOIN tblARPayment P ON I.intEntityCustomerId = P.intEntityCustomerId
-								WHERE I.ysnPosted = 1 
+								WHERE I.ysnPosted = 1
+								  AND I.ysnForgiven = 0 
 								  AND I.ysnPaid = 1
 								  AND I.intEntityCustomerId = A.intEntityCustomerId 
 								ORDER BY P.dtmDatePaid DESC, P.intPaymentId DESC), 0)
 	 , dtmLastStatementDate = (SELECT TOP 1 P.dtmDatePaid FROM tblARInvoice I 
 									INNER JOIN tblARPayment P ON I.intEntityCustomerId = P.intEntityCustomerId
 								WHERE I.ysnPosted = 1
+								  AND I.ysnForgiven = 0
 								  AND I.ysnPaid = 1
 								  AND I.intEntityCustomerId = A.intEntityCustomerId 
 								ORDER BY P.dtmDatePaid DESC, P.intPaymentId DESC)
@@ -63,6 +65,7 @@ FROM tblARInvoice I
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
 WHERE I.ysnPosted = 1
+  AND I.ysnForgiven = 0
   AND I.strTransactionType = 'Invoice'
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -97,6 +100,7 @@ FROM tblARInvoice I
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 WHERE I.ysnPosted = 1
+ AND I.ysnForgiven = 0
  AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE())
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -131,6 +135,7 @@ FROM tblARInvoice I
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 WHERE I.ysnPosted = 1
+ AND I.ysnForgiven = 0
  AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE()) - 1
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -166,6 +171,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 WHERE I.ysnPosted = 1
  AND I.ysnPaid = 0
+ AND I.ysnForgiven = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -240,6 +246,7 @@ FROM
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 WHERE I.ysnPosted = 1
+ AND I.ysnForgiven = 0
  AND I.strTransactionType = 'Invoice'
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -260,6 +267,7 @@ SELECT I.strInvoiceNumber
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 WHERE I.ysnPosted = 1
+ AND I.ysnForgiven = 0
  AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE())
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -280,6 +288,7 @@ SELECT I.strInvoiceNumber
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 WHERE I.ysnPosted = 1
+ AND I.ysnForgiven = 0
  AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE()) - 1
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -300,6 +309,7 @@ SELECT I.strInvoiceNumber
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 WHERE I.ysnPosted = 1
+ AND I.ysnForgiven = 0
  AND I.ysnPaid = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A

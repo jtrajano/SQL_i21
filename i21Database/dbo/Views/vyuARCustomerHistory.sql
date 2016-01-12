@@ -40,7 +40,8 @@ INNER JOIN
 		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
 	tblEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId] 				
+		ON C.[intEntityCustomerId] = E.[intEntityId]
+WHERE I.ysnForgiven = 0
 	
 	
 UNION	
