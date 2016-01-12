@@ -112,6 +112,9 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) 
 				ON G1.intEntityId = D1.intEntityVendorId AND B.intItemId = G2.intItemId AND B.intContractDetailId = G2.intContractDetailId
+		WHERE NOT EXISTS(
+			SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = tblReceived.intInventoryReceiptItemId AND H.intPurchaseDetailId = B.intPurchaseDetailId
+		)
 	UNION ALL
 	--Miscellaneous items
 	SELECT
@@ -165,6 +168,9 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 	WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 	AND B.dblQtyOrdered != B.dblQtyReceived
+	AND NOT EXISTS(
+		SELECT 1 FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
+	)
 	UNION ALL
 	--DIRECT TYPE
 	SELECT
@@ -228,6 +234,9 @@ FROM
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
+	AND NOT EXISTS(
+		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+	)
 	UNION ALL
 
 	--OTHER CHARGES
@@ -274,6 +283,9 @@ FROM
 		,[strgrossNetUOM]							=	NULL
 		,[dblUnitQty]								=	0   
 	FROM [vyuAPChargesForBilling] A
+	WHERE NOT EXISTS(
+		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	)
 
 	UNION ALL
 
