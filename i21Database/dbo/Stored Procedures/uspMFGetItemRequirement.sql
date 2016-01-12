@@ -4,20 +4,25 @@
 	,@intLocationId INT
 AS
 BEGIN
-	SELECT W.strSalesOrderNo
+	SELECT W.intWorkOrderId
+		,W.strWorkOrderNo
+		,W.strSalesOrderNo
 		,W.strCustomerOrderNo
 		,E.strName AS strCustomerName
 		,'' AS strAdditive
+		,I.intItemId 
 		,I.strItemNo
 		,I.strShortName
 		,I.strDescription
 		,SUM(SWD.dblPlannedQty) dblPlannedQty
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 		,W.dtmExpectedDate
 		,W.dtmEarliestDate
 		,W.dtmLatestDate
 		,SW.dtmPlannedStartDate
 		,SW.dtmPlannedEndDate
+		,0 as intConcurrencyId
 	FROM dbo.tblMFSchedule S
 	JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
 		AND S.ysnStandard = 1
@@ -37,12 +42,16 @@ BEGIN
 			SELECT Item
 			FROM dbo.fnSplitString(@strManufacturingCellId, ',')
 			)
-	GROUP BY W.strSalesOrderNo
+	GROUP BY W.intWorkOrderId
+		,W.strWorkOrderNo
+		,W.strSalesOrderNo
 		,W.strCustomerOrderNo
 		,E.strName
+		,I.intItemId 
 		,I.strItemNo
 		,I.strShortName
 		,I.strDescription
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 		,W.dtmExpectedDate
 		,W.dtmEarliestDate
@@ -51,11 +60,15 @@ BEGIN
 		,SW.dtmPlannedEndDate
 	ORDER BY W.strSalesOrderNo
 
-	SELECT I.strItemNo
+	SELECT 
+		I.intItemId 
+		,I.strItemNo
 		,I.strShortName
 		,I.strDescription
 		,SUM(SWD.dblPlannedQty * RI.dblCalculatedQuantity / R.dblQuantity) dblPlannedQty
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
+		,0 AS intConcurrencyId
 	FROM dbo.tblMFSchedule S
 	JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
 		AND S.ysnStandard = 1
@@ -76,9 +89,11 @@ BEGIN
 			SELECT Item
 			FROM dbo.fnSplitString(@strManufacturingCellId, ',')
 			)
-	GROUP BY I.strItemNo
+	GROUP BY I.intItemId 
+		,I.strItemNo
 		,I.strShortName
 		,I.strDescription
+		,UM.intUnitMeasureId 
 		,UM.strUnitMeasure
 	ORDER BY I.strItemNo
 END
