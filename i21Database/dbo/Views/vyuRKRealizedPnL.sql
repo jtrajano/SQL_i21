@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKRealizedPnL  
 AS  
-SELECT *,(dblGrossPL-dblFutCommission) AS dblNetPL FROM(  
+SELECT *,(dblGrossPL-dblFutCommission1) AS dblNetPL,-dblFutCommission1 as dblFutCommission FROM(  
 SELECT   
 ((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize) as dblGrossPL,* FROM  
 (  
@@ -17,7 +17,7 @@ SELECT psh.intMatchFuturesPSHeaderId,
     ot.strInternalTradeNo strLBrokerTradeNo,  
     ot1.strInternalTradeNo strSBrokerTradeNo,  
     fm.dblContractSize dblContractSize,0 as intConcurrencyId,  
-    CASE WHEN bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end as dblFutCommission,  
+    CASE WHEN bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end as dblFutCommission1,  
     fm.strFutMarketName,  
     om.strFutureMonth,  
     psh.intMatchNo,  
