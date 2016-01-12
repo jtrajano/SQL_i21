@@ -13,7 +13,7 @@ SELECT
         ysnActive = ~c.ysnDisabled,
 		c.strUserName,
 		h.intUserRoleID,
-		strDefaultUserRole = h.strDescription
+		strDefaultUserRole = h.strName
     FROM         
             tblEntity a
         join tblEntityType b
