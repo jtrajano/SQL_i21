@@ -208,7 +208,8 @@ BEGIN
 END
 
 	INSERT INTO @tblFinalDetail(strSummary,dblQty,dblTotal, dblFutures,dblBasis,dblCash)
-	SELECT 'Total Summary',sum(isnull(dblQty,0)),sum(isnull(dblTotal,0)), sum(isnull(dblFutures,0)),sum(isnull(dblBasis,0)),sum(isnull(dblCash,0)) FROM @tblFinalDetail
+	SELECT 'Total Summary',sum(isnull(dblQty,0)),sum(isnull(dblTotal,0)), sum(isnull(dblFutures,0)),sum(isnull(dblBasis,0)),sum(isnull(dblCash,0)) FROM @tblFinalDetail where 
+	strSummary = 'Total'
 	
 SELECT RowNumber,strSummary,intCommodityId,strCommodityCode,strContractOrInventoryType,dblQty,dblTotal,convert(decimal,dblFutures) as dblFutures,dblBasis,dblCash,0 as intConcurrencyId  
 FROM @tblFinalDetail	
