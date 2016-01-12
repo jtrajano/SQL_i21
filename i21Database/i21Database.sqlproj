@@ -3110,6 +3110,8 @@
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
     <Build Include="dbo\Views\vyuTRLinkedReceipts.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRPaycheckEFTDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
