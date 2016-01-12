@@ -5,11 +5,12 @@
 	,@CustomerLocationId	INT			= NULL	
 	,@TransactionDate		DATETIME
 	,@TaxGroupId			INT			= NULL		
+	,@SiteId				INT			= NULL
 AS
 
 
 	IF(ISNULL(@TaxGroupId,0) = 0)
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId)			
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId)			
 	
 	IF @TaxGroupId IS NOT NULL AND @TaxGroupId <> 0
 		BEGIN						

@@ -10,6 +10,7 @@
 	,@CustomerLocationId	INT	
 	,@IncludeExemptedCodes	BIT
 	,@IsCustomerSiteTaxable	BIT
+	,@SiteId				INT
 )
 RETURNS @returntable TABLE
 (
@@ -63,8 +64,13 @@ BEGIN
 			
 			
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @CustomerLocationId)			
-			
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @CustomerLocationId, @SiteId)		
+		
+	IF ISNULL(@SiteId,0) <> 0 AND  ISNULL(@TaxGroupId, 0) <> 0
+		SELECT 	@IsCustomerSiteTaxable = ysnTaxable FROM tblTMSite WHERE intSiteID = @SiteId
+	ELSE
+		SELECT 	@IsCustomerSiteTaxable = NULL
+
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
 		,[intTransactionDetailId]
