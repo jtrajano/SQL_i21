@@ -237,7 +237,7 @@ BEGIN
 		[dblCost]					=	A.dblUnitCost,
 		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
-		[intContractHeaderId]		=	NULL,
+		[intContractHeaderId]		=	A.intContractHeaderId,
 		[intCostUOMId]				=	NULL,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1
