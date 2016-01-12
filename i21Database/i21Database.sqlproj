@@ -3119,6 +3119,7 @@
     <Build Include="dbo\Views\vyuGLAccountDetailReportParameter.sql" />
     <Build Include="dbo\Views\vyuAPContractDistinct.sql" />
     <Build Include="dbo\Functions\fnPOIsProcessed.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
