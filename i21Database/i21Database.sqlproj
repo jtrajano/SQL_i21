@@ -3118,6 +3118,7 @@
     <Build Include="dbo\Stored Procedures\uspPRPaycheckEFTDistribution.sql" />
     <Build Include="dbo\Views\vyuGLAccountDetailReportParameter.sql" />
     <Build Include="dbo\Views\vyuAPContractDistinct.sql" />
+    <Build Include="dbo\Functions\fnPOIsProcessed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
