@@ -31,6 +31,24 @@ SET XACT_ABORT ON
 
 BEGIN
 
+DECLARE @AccountsType NVARCHAR(50) = ''
+DECLARE @Hidden BIT = 0
+
+IF(@strBalanceSide = 'Debit')
+BEGIN
+	SET @AccountsType = 'BS'
+END
+ELSE IF(@strBalanceSide = 'Credit')
+BEGIN
+	SET @AccountsType = 'IS'
+END
+
+IF(@strRowType = 'Hidden')
+BEGIN
+	SET @Hidden = 1
+	SET @strRowType = 'Filter Accounts'
+END
+
 	INSERT INTO tblFRRowDesign (intRowId,
 								intRefNo,
 								strDescription,
@@ -39,10 +57,12 @@ BEGIN
 								strSource,
 								strRelatedRows,
 								strAccountsUsed,
+								strAccountsType,
 								ysnShowCredit,
 								ysnShowDebit,
 								ysnShowOthers,
 								ysnLinktoGL,
+								ysnHidden,
 								dblHeight,
 								strFontName,
 								strFontStyle,
@@ -61,10 +81,12 @@ BEGIN
 								@strSource,
 								@strRelatedRows,
 								@strAccountsUsed,
+								@AccountsType,
 								@ysnShowCredit,
 								@ysnShowDebit,
 								@ysnShowOthers,
 								@ysnLinktoGL,
+								@Hidden,
 								@dblHeight,
 								@strFontName,
 								@strFontStyle,
