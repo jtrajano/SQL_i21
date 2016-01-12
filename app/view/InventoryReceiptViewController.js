@@ -242,6 +242,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRemoveLot: {
                 hidden: '{current.ysnPosted}'
             },
+            btnReplicateBalanceLots: {
+                hidden: '{current.ysnPosted}'
+            },
             btnPrintLabel: {
                 hidden: '{!current.ysnPosted}'
             },
@@ -3468,6 +3471,92 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         showAddScreen();
     },
 
+    onReplicateBalanceLotClick: function(button) {
+        var win = button.up('window');
+        var currentReceiptItem = win.viewModel.data.currentReceiptItem;
+        var lineItemQty = currentReceiptItem.get('dblOpenReceive');
+
+        if (currentReceiptItem) {
+            var grdLotTracking = win.down('#grdLotTracking');
+            var selectedLot = grdLotTracking.getSelectionModel().getSelection();
+
+            if (selectedLot.length > 0) {
+                var currentLot = selectedLot[0];
+                var lotQty = currentLot.get('dblQuantity');
+
+                if (currentLot.get('dblQuantity') <= 0) {
+                    iRely.Functions.showErrorDialog('Cannot replicate zero(0) quantity lot.');
+                    return;
+                }
+
+                var lastQty = (lineItemQty % lotQty) > 0 ? lineItemQty % lotQty : currentLot.get('dblQuantity');
+                var replicaCount = (lineItemQty - lastQty) / lotQty;
+                var lastGrossWgt = currentLot.get('dblGrossWeight');
+                var lastTareWgt = currentLot.get('dblTareWeight');
+                var lastNetWgt = currentLot.get('dblNetWeight');
+                if ((replicaCount * lotQty) < lineItemQty ) {
+                    if (lastGrossWgt > 0) {
+                        lastGrossWgt = (lotQty / lastGrossWgt) * lastQty;
+                    }
+                    if (lastTareWgt > 0) {
+                        lastTareWgt = (lotQty / lastTareWgt) * lastQty;
+                    }
+                    if (lastNetWgt > 0) {
+                        lastNetWgt = (lotQty / lastNetWgt) * lastQty;
+                    }
+                }
+                else {
+                    replicaCount -= 1;
+                }
+
+                for (var ctr = 0; ctr <= replicaCount - 1; ctr++) {
+                    var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                        strUnitMeasure: currentLot.get('strUnitMeasure'),
+                        intItemUnitMeasureId: currentLot.get('intItemUnitMeasureId'),
+                        dblNetWeight: ctr === replicaCount - 1 ? lastNetWgt : currentLot.get('dblNetWeight'),
+                        dblStatedNetPerUnit: currentLot.get('dblStatedNetPerUnit'),
+                        dblPhyVsStated: currentLot.get('dblPhyVsStated'),
+                        strOrigin: currentLot.get('strOrigin'),
+                        intSubLocationId: currentLot.get('intSubLocationId'),
+                        intStorageLocationId: currentLot.get('intStorageLocationId'),
+                        dblQuantity: ctr === replicaCount - 1 ? lastQty : currentLot.get('dblQuantity'),
+                        dblGrossWeight: ctr === replicaCount - 1 ? lastGrossWgt : currentLot.get('dblGrossWeight'),
+                        dblTareWeight: ctr === replicaCount - 1 ? lastTareWgt : currentLot.get('dblTareWeight'),
+                        dblCost: currentLot.get('dblCost'),
+                        intUnitPallet: currentLot.get('intUnitPallet'),
+                        dblStatedGrossPerUnit: currentLot.get('dblStatedGrossPerUnit'),
+                        dblStatedTarePerUnit: currentLot.get('dblStatedTarePerUnit'),
+                        strContainerNo: currentLot.get('strContainerNo'),
+                        intEntityVendorId: currentLot.get('intEntityVendorId'),
+                        strGarden: currentLot.get('strGarden'),
+                        strMarkings: currentLot.get('strMarkings'),
+                        strGrade: currentLot.get('strGrade'),
+                        intOriginId: currentLot.get('intOriginId'),
+                        intSeasonCropYear: currentLot.get('intSeasonCropYear'),
+                        strVendorLotId: currentLot.get('strVendorLotId:'),
+                        dtmManufacturedDate: currentLot.get('dtmManufacturedDate'),
+                        strRemarks: currentLot.get('strRemarks'),
+                        strCondition: currentLot.get('strCondition'),
+                        dtmCertified: currentLot.get('dtmCertified'),
+                        dtmExpiryDate: currentLot.get('dtmExpiryDate'),
+                        intSort: currentLot.get('intSor:'),
+                        dblNetWeight: currentLot.get('dblNetWeight'),
+                        strWeightUOM: currentLot.get('strWeightUOM'),
+                        intParentLotId: currentLot.get('intParentLotId'),
+                        strParentLotNumber: currentLot.get('strParentLotNumber'),
+                        strParentLotAlias: currentLot.get('strParentLotAlias'),
+                        strStorageLocation: currentLot.get('strStorageLocation'),
+                        strSubLocationName: currentLot.get('strSubLocationName')
+                    });
+                    currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                }
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select a lot to replicate.');
+            }
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -3596,6 +3685,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colAccrue": {
                 beforecheckchange: this.onAccrueCheckChange
+            },
+            "#btnReplicateBalanceLots": {
+                click: this.onReplicateBalanceLotClick
             }
         })
     }
