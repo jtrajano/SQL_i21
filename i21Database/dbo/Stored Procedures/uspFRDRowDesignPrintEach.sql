@@ -14,11 +14,13 @@ DECLARE @strBalanceSide NVARCHAR(MAX)
 DECLARE @strSource NVARCHAR(MAX)
 DECLARE @strRelatedRows NVARCHAR(MAX)
 DECLARE @strAccountsUsed NVARCHAR(MAX)
+DECLARE @strAccountsType NVARCHAR(MAX)
 DECLARE @ysnShowCredit BIT
 DECLARE @ysnShowDebit BIT
 DECLARE @ysnShowOthers BIT
 DECLARE @ysnLinktoGL BIT
 DECLARE @ysnPrintEach BIT
+DECLARE @ysnHidden BIT
 DECLARE @dblHeight NUMERIC(18, 6)
 DECLARE @strFontName NVARCHAR(MAX)
 DECLARE @strFontStyle NVARCHAR(MAX)
@@ -62,11 +64,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 					@strSource					= [strSource],
 					@strRelatedRows				= [strRelatedRows],
 					@strAccountsUsed			= [strAccountsUsed],
+					@strAccountsType			= [strAccountsType],
 					@ysnShowCredit				= [ysnShowCredit],
 					@ysnShowDebit				= [ysnShowDebit],
 					@ysnShowOthers				= [ysnShowOthers],
 					@ysnLinktoGL				= [ysnLinktoGL],
 					@ysnPrintEach				= [ysnPrintEach],
+					@ysnHidden					= [ysnHidden],
 					@dblHeight					= [dblHeight],
 					@strFontName				= [strFontName],
 					@strFontStyle				= [strFontStyle],
@@ -97,8 +101,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 						 @strAccountType		= [strAccountType],
 						 @strAccountDescription = [strDescription] FROM #tempGLAccount ORDER BY [strAccountId]
 
-			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId)
-								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,0,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1)
+			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId)
+								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,0,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1)
 
 			DELETE #tempGLAccount WHERE [intAccountId] = @intAccountId
 		END
@@ -108,7 +112,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 	
 	INSERT INTO tblFRRowDesignPrintEach
 	SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,
-			strAccountsUsed,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,dblHeight,strFontName,
+			strAccountsUsed,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,
 			strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,GETDATE() as dtmEntered,@ConcurrencyId as intConcurrencyId 
 	FROM #tempRowDesign
 
