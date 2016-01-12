@@ -283,8 +283,8 @@ BEGIN
 
 		EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailId_CY, @intRowId, @intRefNo, @intRefNo_CY, '+', 1	
 
-		INSERT INTO #tmpRelatedRowsCashFlow (intRefNo, strAction) VALUES (@intRefNo, '+')
-		SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
+		--INSERT INTO #tmpRelatedRowsCashFlow (intRefNo, strAction) VALUES (@intRefNo, '+')
+		SET @strRelatedRows =  'SUM(' + @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
 
 	END
 	ELSE IF(@strAccountType = 'Investments')
