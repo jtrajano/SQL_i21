@@ -17,7 +17,7 @@
     [dblTax]						NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblInvoiceTotal]				NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblDiscount]					NUMERIC(18, 6)									NULL DEFAULT 0,
-	[dblDiscountTaken]				NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblDiscountAvailable]			NUMERIC(18, 6)									NULL DEFAULT 0,	
 	[dblInterest]					NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblAmountDue]					NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblPayment]					NUMERIC(18, 6)									NULL DEFAULT 0,
