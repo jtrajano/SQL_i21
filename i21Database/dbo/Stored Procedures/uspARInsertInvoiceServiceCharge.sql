@@ -136,23 +136,29 @@ AS
 						,[intSCInvoiceId]
 						,[strSCInvoiceNumber]
 						,[intServiceChargeAccountId]
+						,[dblQtyOrdered]
+						,[dblQtyShipped]
 						,[dblPrice]
 						,[dblTotal]
 						,[intConcurrencyId])
 					SELECT 	
 						 @NewInvoiceId
 						,[intInvoiceId]
-						,[strInvoiceNumber]				
+						,[strInvoiceNumber]
 						,@intSCAccountId
+						,1.000000
+						,1.000000
 						,[dblTotalAmount]
 						,[dblTotalAmount]
 						,0
 					FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
 
 					DELETE FROM @tempServiceChargeTable WHERE intServiceChargeId = @intServiceChargeId
-
-					UPDATE tblARInvoice SET ysnCalculated = 1 WHERE intInvoiceId = @intInvoiceIdToUpdate
+										
+					UPDATE tblARInvoice SET ysnCalculated = 1 WHERE intInvoiceId = @intInvoiceIdToUpdate					
 			END
+
+			EXEC dbo.uspARReComputeInvoiceAmounts @NewInvoiceId
 		END
 	ELSE
 		BEGIN
