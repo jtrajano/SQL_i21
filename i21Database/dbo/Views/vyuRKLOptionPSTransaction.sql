@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuRKLOptionPSTransaction  
 AS  
 SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strOptionMonth,strName,strAccountNumber,isnull(intTotalLot,0) intTotalLot,isnull(dblOpenLots,0) dblOpenLots,  
-  strOptionType,dblStrike,dblPremium,dblPremiumValue,dblCommission,intFutOptTransactionId  
+  strOptionType,dblStrike,-dblPremium as dblPremium,-dblPremiumValue as dblPremiumValue,dblCommission,intFutOptTransactionId  
  ,dblPremiumValue+dblCommission as dblNetPremium,  
  dblMarketPremium,  
  dblMarketValue,  
