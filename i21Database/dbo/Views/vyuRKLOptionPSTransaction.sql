@@ -2,7 +2,7 @@
 AS  
 SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strOptionMonth,strName,strAccountNumber,isnull(intTotalLot,0) intTotalLot,isnull(dblOpenLots,0) dblOpenLots,  
   strOptionType,dblStrike,-dblPremium as dblPremium,-dblPremiumValue as dblPremiumValue,dblCommission,intFutOptTransactionId  
- ,dblPremiumValue+dblCommission as dblNetPremium,  
+ ,((-dblPremiumValue)+(dblCommission)) as dblNetPremium,  
  dblMarketPremium,  
  dblMarketValue,  
  case when strBuySell='B' then  dblMarketValue-dblPremiumValue else  dblPremiumValue-dblMarketValue end as dblMTM,  
@@ -66,3 +66,5 @@ JOIN tblEntity e on e.intEntityId=ba.intEntityId
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId  
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId  
  )t)t1  where dblOpenLots > 0 and strBuySell='B'
+
+ 
