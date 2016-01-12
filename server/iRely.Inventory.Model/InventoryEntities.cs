@@ -315,6 +315,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemFactoryManufacturingCellMap());
             modelBuilder.Configurations.Add(new vyuICGetCategoryTaxMap());
 
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddOrderMap());
+
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingMap());
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageMeasurementReadingConversionMap());

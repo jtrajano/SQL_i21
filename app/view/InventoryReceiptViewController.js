@@ -1105,6 +1105,48 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intTaxGroupId', vendorLocation.get('intTaxGroupId'));
             }
         }
+
+        var isHidden = true;
+        switch (current.get('strReceiptType')) {
+            case 'Purchase Contract':
+                switch (current.get('intSourceType')) {
+                    case 0:
+                    case 2:
+                        if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
+                            isHidden = true;
+                        }
+                        else {
+                            isHidden = false;
+                        }
+                        break;
+                    default:
+                        isHidden = true;
+                        break;
+                }
+                break;
+            case 'Purchase Order':
+                if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
+                    isHidden = true;
+                }
+                else {
+                    isHidden = false;
+                }
+                break;
+            case 'Transfer Order':
+                if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
+                    isHidden = true;
+                }
+                else {
+                    isHidden = false;
+                }
+                break;
+            default :
+                isHidden = true;
+                break;
+        }
+        if (isHidden === false) {
+            this.showAddOrders(win);
+        }
     },
 
     onFreightTermSelect: function (combo, records, eOpts) {
@@ -3289,73 +3331,135 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
-    showAddOrders: function(config) {
+    onAddOrderClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        this.showAddOrders(win);
+    },
+
+    showAddOrders: function(win) {
+        var currentRecord = win.viewModel.data.current;
+        var me = this;
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
-            search.url = '../i21/api/CompanyLocation/SearchCompanyLocations';
+            search.url = '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + currentRecord.get('intEntityVendorId').toString() + '&ReceiptType=' + currentRecord.get('strReceiptType') + '&SourceType=' + currentRecord.get('intSourceType').toString();
             search.columns = [
-                { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
-                { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
-                { dataIndex : 'strLocationType',text: 'Location Type', dataType: 'string', flex: 1 }
+                {dataIndex: 'intKey', text: "Key", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
+                {dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string'},
+                { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
+                { xtype: 'numbercolumn', dataIndex: 'dblOrdered', text: 'Ordered Qty', width: 100, dataType: 'float'},
+                { xtype: 'numbercolumn', dataIndex: 'dblReceived', text: 'Received Qty', width: 100, dataType: 'float'},
+                {dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string'},
+                {dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string'},
+                {dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string'},
+                { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', width: 100, dataType: 'float'},
+                { xtype: 'numbercolumn', dataIndex: 'intLoadToReceive', text: 'Load to Receive', width: 100, dataType: 'numeric'},
+                { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', width: 100, dataType: 'float'},
+                { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float'},
+                { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', width: 100, dataType: 'float'},
+
+                {dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string'},
+                {dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string'},
+                {dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string'},
+
+                {dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string'},
+                {dataIndex: 'strUnitType', text: 'Item UOM Type', width: 100, dataType: 'string', hidden: true},
+                { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConvFactor', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
+                {dataIndex: 'strWeightUOM', text: 'Weight UOM', width: 100, dataType: 'string'},
+                { xtype: 'numbercolumn', dataIndex: 'dblWeightUOMConvFactor', text: 'Weight UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
+                {dataIndex: 'strCostUOM', text: 'Cost UOM', width: 100, dataType: 'string'},
+                { xtype: 'numbercolumn', dataIndex: 'dblCostUOMConvFactor', text: 'Cost UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
+                {dataIndex: 'intLifeTime', text: 'Lifetime', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'strLifeTimeType', text: 'Lifetime Type', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'ysnLoad', text: 'Load Contract', width: 100, dataType: 'boolean', xtype: 'checkcolumn' },
+                { xtype: 'numbercolumn', dataIndex: 'dblAvailableQty', text: 'Available Qty', width: 100, dataType: 'float'},
+
+                {dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intEntityVendorId', text: 'Vendor Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'strVendorId', text: 'Vendor', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'strReceiptType', text: 'Transaction Type', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'intLineNo', text: 'Line No', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intOrderId', text: 'Order Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intSourceType', text: 'Source Type', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intSourceId', text: 'Source Id', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'intContainerId', text: 'Container Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'intCostUOMId', text: 'Cost UOM Id', width: 100, dataType: 'numeric', hidden: true}
+
             ];
-            search.title = "Add Item Locations";
+            search.title = "Add Orders";
             search.showNew = false;
             search.on({
                 scope: me,
-                openselectedclick: function(button, e, result) {
-                    var currentVM = this.getViewModel().data.current;
+                openselectedclick: function (button, e, result) {
                     var win = this.getView();
+                    var currentVM = this.getViewModel().data.current;
 
-                    Ext.each(result, function(location) {
-                        var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
-                            if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
-                                return true;
-                            }
-                        });
-                        if (!exists) {
-                            var defaultUOMId = null;
-                            if (win.defaultUOM) {
-                                defaultUOMId = win.defaultUOM.get('intItemUOMId');
-                            }
-                            var newRecord = {
-                                intItemId: location.data.intItemId,
-                                intLocationId: location.data.intCompanyLocationId,
-                                intIssueUOMId: defaultUOMId,
-                                intReceiveUOMId: defaultUOMId,
-                                strLocationName: location.data.strLocationName
-                            };
-                            currentVM.tblICItemLocations().add(newRecord);
-
-                            var prices = currentVM.tblICItemPricings().data.items;
-                            var exists = Ext.Array.findBy(prices, function (row) {
-                                if (newRecord.intItemLocationId === row.get('intItemLocationId')) {
-                                    return true;
-                                }
-                            });
-                            if (!exists) {
-                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
-                                    intItemId: newRecord.intItemId,
-                                    intItemLocationId: newRecord.intItemLocationId,
-                                    strLocationName: newRecord.strLocationName,
-                                    dblAmountPercent: 0.00,
-                                    dblSalePrice: 0.00,
-                                    dblMSRPPrice: 0.00,
-                                    strPricingMethod: 'None',
-                                    dblLastCost: 0.00,
-                                    dblStandardCost: 0.00,
-                                    dblAverageCost: 0.00,
-                                    dblEndMonthCost: 0.00,
-                                    intSort: newRecord.intSort
-                                });
-                                currentVM.tblICItemPricings().add(newPrice);
-                            }
-                        }
+                    Ext.each(result, function (order) {
+                        var newRecord = {
+                            intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
+                            intLineNo: order.get('intLineNo'),
+                            intOrderId: order.get('intOrderId'),
+                            strOrderNumber: order.get('strOrderNumber'),
+                            dtmDate: order.get('dtmDate'),
+                            dblOrderQty: order.get('dblOrdered'),
+                            dblReceived: order.get('dblReceived'),
+                            intSourceId: order.get('intSourceId'),
+                            strSourceNumber: order.get('strSourceNumber'),
+                            intItemId: order.get('intItemId'),
+                            strItemNo: order.get('strItemNo'),
+                            strItemDescription: order.get('strItemDescription'),
+                            dblOpenReceive: order.get('dblQtyToReceive'),
+                            intLoadReceive: order.get('intLoadToReceive'),
+                            dblUnitCost: order.get('dblUnitCost'),
+                            dblUnitRetail: order.get('dblUnitCost'),
+                            dblTax: order.get('dblTax'),
+                            dblLineTotal: order.get('dblLineTotal'),
+                            strLotTracking: order.get('strLotTracking'),
+                            intCommodityId: order.get('intCommodityId'),
+                            intContainerId: order.get('intContainerId'),
+                            strContainer: order.get('strContainer'),
+                            intSubLocationId: order.get('intSubLocationId'),
+                            strSubLocationName: order.get('strSubLocationName'),
+                            intStorageLocationId: order.get('intStorageLocationId'),
+                            strStorageLocationName: order.get('strStorageLocationName'),
+                            strOrderUOM: order.get('strOrderUOM'),
+                            dblOrderUOMConvFactor: order.get('dblOrderUOMConvFactor'),
+                            intUnitMeasureId: order.get('intItemUOMId'),
+                            strUnitMeasure: order.get('strUnitMeasure'),
+                            strUnitType: order.get('strUnitType'),
+                            strWeightUOM: order.get('strWeightUOM'),
+                            intWeightUOMId: order.get('intWeightUOMId'),
+                            dblItemUOMConvFactor: order.get('dblItemUOMConvFactor'),
+                            dblWeightUOMConvFactor: order.get('dblWeightUOMConvFactor'),
+                            intCostUOMId: order.get('intCostUOMId'),
+                            strCostUOM: order.get('strCostUOM'),
+                            dblCostUOMConvFactor: order.get('dblCostUOMConvFactor'),
+                            dblGrossMargin: order.get('dblGrossMargin'),
+                            intGradeId: order.get('intGradeId'),
+                            strGrade: order.get('strGrade'),
+                            intLifeTime: order.get('intLifeTime'),
+                            strLifeTimeType: order.get('strLifeTimeType'),
+                            ysnLoad: order.get('ysnLoad'),
+                            dblAvailableQty: order.get('dblAvailableQty'),
+                            intOwnershipType: 1,
+                            strOwnershipType: 'Own'
+                        };
+                        currentVM.tblICInventoryReceiptItems().add(newRecord);
                     });
                     search.close();
                     win.context.data.saveRecord();
                 },
-                openallclick: function() {
+                openallclick: function () {
                     search.close();
                 }
             });
@@ -3420,6 +3524,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnInsertInventoryReceipt": {
                 click: this.onInsertChargeClick
+            },
+            "#btnAddOrders": {
+                click: this.onAddOrderClick
             },
             "#btnInsertLot": {
                 click: this.onInsertChargeClick

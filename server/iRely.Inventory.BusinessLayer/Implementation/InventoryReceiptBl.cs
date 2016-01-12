@@ -278,5 +278,19 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public async Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType)
+        {
+            var query = _db.GetQuery<vyuICGetReceiptAddOrder>()
+                .Where(p => p.intEntityVendorId == VendorId && p.strReceiptType == ReceiptType && p.intSourceType == SourceType)
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }
