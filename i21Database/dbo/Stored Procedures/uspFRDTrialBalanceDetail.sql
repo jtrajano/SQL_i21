@@ -100,6 +100,8 @@ BEGIN
 
 		END
 
+	UPDATE tblFRRowDesign SET strBalanceSide = 'Debit' WHERE strRowType = 'Filter Accounts' AND intRowId = @intRowId
+
 END
 
 DROP TABLE #TempGLAccount
