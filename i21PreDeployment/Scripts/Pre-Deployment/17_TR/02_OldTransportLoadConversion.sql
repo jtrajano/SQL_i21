@@ -4,30 +4,26 @@ GO
 DECLARE @OldTransportTable TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-        intTransportLoadId int,
-        intLoadHeaderId int null	
+        intTransportLoadId int	
     );
 
 DECLARE @OldReceiptTable TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
         intTransportLoadId int,	
-	intTransportReceiptId int,
-	intLoadReceiptId int null
+	intTransportReceiptId int
     );
 DECLARE @OldDistributionTable TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-        intDistributionHeaderId int,
-        intLoadDitributionHeaderId int null	
+        intDistributionHeaderId int
     );
 
 DECLARE @OldDistributionDetailTable TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
         intDistributionHeaderId int,
-	intDistributionDetailId int,
-        intLoadDistributionDetailId int null		
+	intDistributionDetailId int		
     );
 
 DECLARE @NewDistributionTable TABLE
