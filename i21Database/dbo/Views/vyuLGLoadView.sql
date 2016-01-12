@@ -1,16 +1,56 @@
 CREATE VIEW vyuLGLoadView
 AS
-SELECT Load.intLoadId
+SELECT LoadDetail.intLoadDetailId
+		,LoadDetail.intItemId
+		,strItemNo = Item.strDescription
+		,LoadDetail.dblQuantity
+		,LoadDetail.intItemUOMId
+		,strItemUOM = UOM.strUnitMeasure
+		,LoadDetail.dblGross
+		,LoadDetail.dblTare
+		,LoadDetail.dblNet
+		,LoadDetail.intWeightItemUOMId
+		,LoadDetail.dblDeliveredQuantity
+		,LoadDetail.dblDeliveredGross
+		,LoadDetail.dblDeliveredTare
+		,LoadDetail.dblDeliveredNet
+		,strWeightItemUOM = WeightUOM.strUnitMeasure
+		,LoadDetail.intVendorEntityId
+        ,strVendor = VEN.strName
+		,LoadDetail.intVendorEntityLocationId
+        ,strShipFrom = VEL.strLocationName
+		,strShipFromAddress = VEL.strAddress
+		,LoadDetail.intPContractDetailId
+        ,strPContractNumber = PDetail.strContractNumber
+        ,intPContractSeq = PDetail.intContractSeq
+		,strVendorContract = PDetail.strCustomerContract
+		,dblPCashPrice = PDetail.dblCashPrice
+		,LoadDetail.intPCompanyLocationId
+        ,strPLocationName = PCL.strLocationName
+		,LoadDetail.intCustomerEntityId
+        ,strCustomer = CEN.strName
+		,LoadDetail.intCustomerEntityLocationId
+        ,strShipTo = CEL.strLocationName
+		,strShipToAddress = CEL.strAddress
+		,LoadDetail.intSContractDetailId
+        ,strSContractNumber = SDetail.strContractNumber
+        ,intSContractSeq = SDetail.intContractSeq
+		,strCustomerContract = SDetail.strCustomerContract
+		,dblSCashPrice = PDetail.dblCashPrice
+		,LoadDetail.intSCompanyLocationId
+        ,strSLocationName = SCL.strLocationName
+		,LoadDetail.strScheduleInfoMsg
+		,LoadDetail.ysnUpdateScheduleInfo
+		,LoadDetail.ysnPrintScheduleInfo
+		,LoadDetail.strLoadDirectionMsg
+		,LoadDetail.ysnUpdateLoadDirections
+		,LoadDetail.ysnPrintLoadDirections
+
+		,Load.intLoadId
 		,Load.intConcurrencyId
 		,Load.intLoadNumber
-		,Load.intCompanyLocationId
 		,Load.intPurchaseSale
-		,Load.intItemId
-		,Load.intUnitMeasureId
 		,Load.intEquipmentTypeId
-		,Load.intEntityId
-		,Load.intEntityLocationId
-		,Load.intContractDetailId
 		,Load.intHaulerEntityId
 		,Load.intTicketId
 		,Load.intGenerateLoadId
@@ -20,21 +60,20 @@ SELECT Load.intLoadId
 		,Load.intDriverEntityId
 		,Load.intDispatcherId
         ,Load.strExternalLoadNumber
-        ,strType = CASE WHEN Load.intPurchaseSale = 1 THEN 'Inbound' ELSE 'Outbound' END
-        ,ysnDirectShip = CASE WHEN GLoad.intType = 3 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
+        ,strType = CASE WHEN Load.intPurchaseSale = 1 THEN 
+						'Inbound' 
+						ELSE 
+							CASE WHEN Load.intPurchaseSale = 2 THEN 
+							'Outbound' 
+							ELSE
+							'Drop Ship'
+							END
+						END
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
         ,intGenerateSequence = Load.intGenerateSequence
         ,intNumberOfLoads = GLoad.intNumberOfLoads
-        ,strLocationName = CL.strLocationName
-        ,stCommodityCode = CDetail.strCommodityCode
-        ,strCustomer = EN.strName
         ,strHauler = Hauler.strName
-        ,strContractNumber = CDetail.strContractNumber
-        ,intContractSeq = CDetail.intContractSeq
-		,dblCashPrice = CDetail.dblCashPrice
-		,strItemNo = CDetail.strItemNo
         ,Load.dtmScheduledDate
-        ,Load.dblQuantity
         ,ysnInProgress = IsNull(Load.ysnInProgress, 0)
         ,strScaleTicketNo = CASE WHEN IsNull(Load.intTicketId, 0) <> 0 
 								 THEN 
@@ -52,13 +91,11 @@ SELECT Load.intLoadId
 												END 
 										END 
 								 END
-        ,Load.dblDeliveredQuantity
         ,Load.dtmDeliveredDate
         ,strEquipmentType = EQ.strEquipmentType
-        ,Load.strCustomerReference
-        ,strShipFromTo = EL.strLocationName
-		,strShipFromToAddress = EL.strAddress
         ,strDriver = Driver.strName
+		,strDispatcher = US.strUserName 
+        ,Load.strCustomerReference
         ,Load.strTruckNo
         ,Load.strTrailerNo1
         ,Load.strTrailerNo2
@@ -69,41 +106,24 @@ SELECT Load.intLoadId
 		,Load.ysnDispatchMailSent
 		,Load.dtmDispatchMailSent
 		,Load.dtmCancelDispatchMailSent
-		,strDispatcher = US.strUserName 
-		,CDetail.strCustomerContract
-		,Load.strScheduleInfoMsg
-		,Load.ysnUpdateScheduleInfo
-		,Load.ysnPrintScheduleInfo
-		,Load.strLoadDirectionMsg
-		,Load.ysnUpdateLoadDirections
-		,Load.ysnPrintLoadDirections
-        ,strCounterPartyName = (SELECT Entity1.strName From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-        ,strCounterPartyAddress = (SELECT EL1.strAddress From tblLGLoad L LEFT JOIN tblEntityLocation EL1 ON EL1.intEntityLocationId = L.intEntityLocationId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-        ,dtmCounterPartyScheduleDate = (SELECT L.dtmScheduledDate FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
-        ,strCounterPartyContractSeq = (SELECT CAST (CT.strContractNumber AS VARCHAR(100)) + '/' + CAST (CT.intContractSeq AS VARCHAR(100)) FROM tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-        ,strCounterPartyExternalLoadNumber = (SELECT L.strExternalLoadNumber FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyEntityId = (SELECT Entity1.intEntityId From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyEntityLocationId = (SELECT EL.intEntityLocationId From tblLGLoad L LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = L.intEntityLocationId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,strCounterPartyShipFromTo = (SELECT EL.strLocationName From tblLGLoad L LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = L.intEntityLocationId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyContractDetailId = (SELECT CT.intContractDetailId From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,strCounterPartyContractNumber = (SELECT CT.strContractNumber From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyContractSeq = (SELECT CT.intContractSeq From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,dblCounterPartyCashPrice = (SELECT CT.dblCashPrice From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyItemId = (SELECT L.intItemId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyLoadId = (SELECT L.intLoadId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyCompanyLocationId = (SELECT L.intCompanyLocationId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
-		,strCounterPartyLocationName = (SELECT CL.strLocationName FROM tblLGLoad L LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intCompanyLocationId  WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
-        ,strCounterPartyDriver = (SELECT Entity1.strName From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intDriverEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-        ,intCounterPartyDriverId = (SELECT Entity1.intEntityId From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intDriverEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-
-FROM tblLGLoad Load
+FROM tblLGLoadDetail LoadDetail
+JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
+LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
+LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
-LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Load.intCompanyLocationId
-LEFT JOIN tblEntity EN ON EN.intEntityId = Load.intEntityId
-LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = Load.intEntityLocationId
+LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
+LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
+LEFT JOIN tblEntity VEN ON VEN.intEntityId = LoadDetail.intVendorEntityId
+LEFT JOIN tblEntityLocation VEL ON VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId
+LEFT JOIN tblEntity CEN ON CEN.intEntityId = LoadDetail.intCustomerEntityId
+LEFT JOIN tblEntityLocation CEL ON CEL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
 LEFT JOIN tblEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId
 LEFT JOIN tblEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
-LEFT JOIN vyuCTContractDetailView CDetail ON CDetail.intContractDetailId = Load.intContractDetailId
+LEFT JOIN vyuCTContractDetailView PDetail ON PDetail.intContractDetailId = LoadDetail.intPContractDetailId
+LEFT JOIN vyuCTContractDetailView SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId

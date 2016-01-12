@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGUpdateLoadDetails]
-	 @intLoadId INT
+	 @intLoadDetailId INT
 	,@ysnInProgress BIT = NULL
 	,@intTicketId INT  = NULL
 	,@dtmDeliveredDate DATETIME  = NULL
@@ -8,8 +8,12 @@ AS
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @dblQuantity DECIMAL(18, 6) = 0
 DECLARE @intContractDetailId INT
+DECLARE @intLoadId INT
 
 BEGIN TRY
+
+	SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId
+
 	IF NOT EXISTS(SELECT 1 FROM tblSCTicket WHERE intTicketId=@intTicketId) AND @intTicketId IS NOT NULL
 	BEGIN
 		IF NOT EXISTS(SELECT 1 FROM tblTRTransportLoad WHERE intTransportLoadId=@intTicketId) AND @intTicketId IS NOT NULL
@@ -43,16 +47,13 @@ BEGIN TRY
 	UPDATE tblLGLoad SET 
 		ysnInProgress=@ysnInProgress,
 		dtmDeliveredDate=@dtmDeliveredDate,
-		dblDeliveredQuantity=@dblDeliveredQuantity,
 		intConcurrencyId	=	intConcurrencyId + 1
 	WHERE intLoadId=@intLoadId
-	
---	IF @dblDeliveredQuantity > 0
---	BEGIN
---		SET @dblQuantity = -1
---		SELECT @intContractDetailId = intContractDetailId, @dblQuantity = @dblQuantity * dblQuantity from tblLGLoad WHERE intLoadId=@intLoadId
---		exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity
---	END
+
+	UPDATE tblLGLoadDetail SET 
+		dblDeliveredQuantity=@dblDeliveredQuantity,
+		intConcurrencyId	=	intConcurrencyId + 1
+	WHERE intLoadDetailId=@intLoadDetailId
 END TRY
 
 BEGIN CATCH

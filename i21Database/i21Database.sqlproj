@@ -3177,6 +3177,7 @@
     <Build Include="dbo\Views\vyuTMSiteOrder.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptAddOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemRequirement.sql" />
+    <Build Include="dbo\Tables\tblLGLoadDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
