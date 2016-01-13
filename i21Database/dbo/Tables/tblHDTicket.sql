@@ -19,6 +19,7 @@
 	[intCreatedUserEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
 	[dtmDueDate] [datetime] Null,
+	[dtmCompleted] [datetime] NULL,
 	[intLastModifiedUserId] [int] NULL,
 	[intLastModifiedUserEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,

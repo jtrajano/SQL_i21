@@ -306,4 +306,12 @@ GO
 
 GO
 	PRINT N'End updating HD modules with SM modules.'
+	PRINT N'Start updating HD ticket closed date.'
+GO
+
+	Update tblHDTicket set tblHDTicket.dtmCompleted = tblHDTicket.dtmLastModified
+	where tblHDTicket.dtmCompleted is null and tblHDTicket.intTicketStatusId = 2
+
+GO
+	PRINT N'End updating HD ticket closed date.'
 GO
