@@ -1005,6 +1005,7 @@ namespace iRely.Inventory.Model
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
         public decimal? dblCost { get; set; }
+        public int? intNoPallet { get; set; }
         public int? intUnitPallet { get; set; }
         public decimal? dblStatedGrossPerUnit { get; set; }
         public decimal? dblStatedTarePerUnit { get; set; }
@@ -1021,10 +1022,10 @@ namespace iRely.Inventory.Model
         public string strCondition { get; set; }
         public DateTime? dtmCertified { get; set; }
         public DateTime? dtmExpiryDate { get; set; }
-        public int? intSort { get; set; }
         public int? intParentLotId { get; set; }
         public string strParentLotNumber { get; set; }
         public string strParentLotAlias { get; set; }
+        public int? intSort { get; set; }
 
         [NotMapped]
         public decimal dblNetWeight

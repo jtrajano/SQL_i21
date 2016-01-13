@@ -1824,6 +1824,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
+                                                                                hidden: true,
                                                                                 itemId: 'colLotUnitsPallet',
                                                                                 width: 81,
                                                                                 align: 'right',

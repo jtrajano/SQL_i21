@@ -3692,6 +3692,7 @@
                                                                         "dataIndex": "string",
                                                                         "dataType": "numeric",
                                                                         "format": "0,000.##",
+                                                                        "hidden": true,
                                                                         "itemId": "colLotUnitsPallet",
                                                                         "text": "Units/Pallet",
                                                                         "width": 81
