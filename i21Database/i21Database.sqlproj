@@ -168,6 +168,7 @@
     <Folder Include="Scripts\Utility\IC\Query tools" />
     <Folder Include="Scripts\Post-Deployment\TF" />
     <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\TR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3120,6 +3121,7 @@
     <Build Include="dbo\Views\vyuAPContractDistinct.sql" />
     <Build Include="dbo\Functions\fnPOIsProcessed.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
+    <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
