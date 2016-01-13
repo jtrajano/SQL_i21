@@ -28,6 +28,7 @@
 	[dtmInitialUserGroupDuesInvoice] [datetime] null,
 	[ysnReceivedDownPayment] [bit] null,
 	[ysnGenerateTicket] [bit] null,
+	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
