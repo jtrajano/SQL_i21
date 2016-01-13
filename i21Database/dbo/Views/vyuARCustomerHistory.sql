@@ -15,7 +15,7 @@ INNER JOIN tblARCustomer C ON SO.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId
 	
 UNION	
-	
+
 SELECT dtmDate				= ISNULL(I.dtmPostDate, I.dtmDate)
 	 , strTransactionNumber	= I.strInvoiceNumber
 	 , strTransactionType	= I.strTransactionType
@@ -29,6 +29,7 @@ SELECT dtmDate				= ISNULL(I.dtmPostDate, I.dtmDate)
 FROM tblARInvoice I
 INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId 
 INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId
+WHERE I.ysnForgiven = 0
 	
 UNION	
 	
