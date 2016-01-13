@@ -220,9 +220,14 @@ GO
 	PRINT N'Start updating tblHDTicket Customer Id.'
 GO
 
+	/*
 	update tblHDTicket set intCustomerId = (
 		select top 1 tblARCustomer.intEntityCustomerId from tblARCustomer where strCustomerNumber = tblHDTicket.strCustomerNumber
 	)
+	*/
+
+	Update tblHDTicket set tblHDTicket.strType = 'HD' where tblHDTicket.strType is null and SUBSTRING(tblHDTicket.strTicketNumber,1,4) = 'HDTN';
+	Update tblHDTicket set tblHDTicket.strType = 'CRM' where tblHDTicket.strType is null and SUBSTRING(tblHDTicket.strTicketNumber,1,4) = 'CRMN';
 
 GO
 	PRINT N'End updating tblHDTicket Customer Id.'
