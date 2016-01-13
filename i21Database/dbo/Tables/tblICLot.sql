@@ -62,6 +62,8 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[ysnStorage]				BIT DEFAULT((0)),
 		[intOwnershipType]			INT NOT NULL DEFAULT ((1)),
 		[intGradeId]				INT NULL,
+		[intNoPallet]				INT NULL DEFAULT ((0)),
+		[intUnitPallet]				INT NULL DEFAULT ((0)),
 		[dtmDateCreated]			DATETIME NULL,
 		[intCreatedUserId]			INT NULL,
 		[intCreatedEntityId]		INT NULL,

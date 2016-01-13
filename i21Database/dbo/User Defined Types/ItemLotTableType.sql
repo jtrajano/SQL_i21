@@ -238,5 +238,6 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intOwnershipType]			INT NULL DEFAULT ((1))
 	,[intGradeId]				INT NULL
 	,[intDetailId]				INT NOT NULL
-
+	,[intNoPallet]				INT NULL DEFAULT ((0))
+	,[intUnitPallet]			INT NULL DEFAULT ((0))
 )

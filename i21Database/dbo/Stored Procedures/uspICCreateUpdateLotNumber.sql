@@ -84,6 +84,8 @@ DECLARE
 	,@strParentLotAlias			AS NVARCHAR(50) 
 	,@intLotStatusId_ItemLotTable AS INT 
 	,@intSplitFromLotId			AS INT 
+	,@intNoPallet				AS INT
+	,@intUnitPallet				AS INT
 
 DECLARE @OwnerShipType_Own AS INT = 1
 
@@ -151,6 +153,8 @@ SELECT  intId
 		,strParentLotAlias
 		,intLotStatusId
 		,intSplitFromLotId
+		,intNoPallet
+		,intUnitPallet
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -191,6 +195,8 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strParentLotAlias
 		,@intLotStatusId_ItemLotTable
 		,@intSplitFromLotId
+		,@intNoPallet
+		,@intUnitPallet
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -348,6 +354,8 @@ BEGIN
 				,strContractNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContractNo ELSE LotMaster.strContractNo END 
 				,dtmManufacturedDate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
 				,intSplitFromLotId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSplitFromLotId ELSE LotMaster.intSplitFromLotId END 
+				,intNoPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intNoPallet ELSE LotMaster.intNoPallet END 
+				,intUnitPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intUnitPallet ELSE LotMaster.intUnitPallet END 
 								
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
@@ -463,9 +471,6 @@ BEGIN
 											END
 
 
-				
-
-
 		-- If none found, insert a new lot record. 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -503,6 +508,8 @@ BEGIN
 				,intOwnershipType
 				,dblGrossWeight
 				,intSplitFromLotId
+				,intNoPallet
+				,intUnitPallet
 
 			) VALUES (
 				@intItemId
@@ -543,6 +550,8 @@ BEGIN
 				,@intOwnershipType
 				,@dblGrossWeight
 				,@intSplitFromLotId
+				,@intNoPallet
+				,@intUnitPallet
 			)
 		;
 	
@@ -699,6 +708,8 @@ BEGIN
 		,@strParentLotAlias
 		,@intLotStatusId_ItemLotTable
 		,@intSplitFromLotId
+		,@intNoPallet
+		,@intUnitPallet
 	;
 END
 
