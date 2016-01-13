@@ -5,7 +5,7 @@
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 		SELECT [strReminder]        =        N'Process',
 			   [strType]        	=        N'Invoice',
-			   [strMessage]			=        N'{0} {1} {2} {3}',
+			   [strMessage]			=        N'{0} {1} {2} unprocessed.',
 			   [strQuery]  			=        N'SELECT intRecurringId ' +
 											  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Invoice'' ' +
 											  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
@@ -27,7 +27,7 @@
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 		SELECT [strReminder]        =        N'Process',
 			   [strType]        	=        N'General Journal',
-			   [strMessage]			=        N'{0} {1} {2} {3}',
+			   [strMessage]			=        N'{0} {1} {2} unprocessed.',
 			   [strQuery]  			=        N'SELECT intRecurringId ' +
 											  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''General Journal'' ' +
 											  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
@@ -49,7 +49,7 @@
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 		SELECT [strReminder]        =        N'Process',
 			   [strType]        	=        N'Voucher',
-			   [strMessage]			=        N'{0} {1} {2} {3}',
+			   [strMessage]			=        N'{0} {1} {2} unprocessed.',
 			   [strQuery]  			=        N'SELECT intRecurringId ' +
 											  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Voucher'' ' +
 											  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
@@ -70,7 +70,7 @@
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 		SELECT [strReminder]        =        N'Process',
 			   [strType]        	=        N'Purchase Order',
-			   [strMessage]			=        N'{0} {1} {2} {3}',
+			   [strMessage]			=        N'{0} {1} {2} unprocessed.',
 			   [strQuery]  			=        N'SELECT intRecurringId ' +
 											  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Purchase Order'' ' +
 											  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
@@ -91,7 +91,7 @@
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 		SELECT [strReminder]        =        N'Process',
 			   [strType]        	=        N'Bill Template',
-			   [strMessage]			=        N'{0} {1} {2} {3}',
+			   [strMessage]			=        N'{0} {1} {2} unprocessed.',
 			   [strQuery]  			=        N'SELECT intRecurringId ' +
 											  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bill Template'' ' +
 											  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
@@ -112,7 +112,7 @@
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
 		SELECT [strReminder]        =        N'Approve',
 			   [strType]        	=        N'Voucher',
-			   [strMessage]			=        N'{0} {1} {2} {3}',
+			   [strMessage]			=        N'{0} {1} {2} unapproved.',
 			   [strQuery]  			=        N'SELECT * FROM vyuAPBillForApproval WHERE intEntityApproverId = {0} AND ysnApproved = 0',
 			   [strNamespace]       =        N'AccountsPayable.view.VendorExpenseApproval', 
 			   [intSort]            =        6
