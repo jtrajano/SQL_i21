@@ -285,6 +285,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
 :r .\TF\DefaultData\_Transaction.sql
 
+--Transports
+:R .\TR\01_OldTransportLoadConversion.sql
+
 -- Common
 :r .\Common\ErrorMessages.sql 
 
