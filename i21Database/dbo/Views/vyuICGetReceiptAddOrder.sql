@@ -148,13 +148,65 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strWeightUOM = strWeightUOM
 		, dblItemUOMConvFactor = dblItemUOMCF
 		, dblWeightUOMConvFactor = dblItemUOMCF
-		, intCostUOMId = NULL --intCostUOMId
-		, strCostUOM = NULL --strCostUOM
-		, dblCostUOMConvFactor = NULL --dblCostUOMCF
+		, intCostUOMId = intItemUOMId
+		, strCostUOM = strUnitMeasure
+		, dblCostUOMConvFactor = dblItemUOMCF
 		, intLifeTime
 		, strLifeTimeType
 		, ysnLoad = 0
 		, dblAvailableQty = 0
 	FROM vyuLGShipmentContainerReceiptContracts LogisticsView
-	WHERE LogisticsView.dblBalanceToReceive > 0)
+	WHERE LogisticsView.dblBalanceToReceive > 0
+	
+	UNION ALL
+
+	SELECT
+		intLocationId = TransferView.intToLocationId
+		, intEntityVendorId = TransferView.intFromLocationId
+		, NULL
+		, NULL
+		, strReceiptType = 'Transfer Order'
+		, intLineNo = intInventoryTransferDetailId
+		, intOrderId = intInventoryTransferId
+		, strOrderNumber = strTransferNo
+		, dblOrdered = dblQuantity
+		, dblReceived = NULL
+		, intSourceType = 0
+		, intSourceId = NULL
+		, strSourceNumber = NULL
+		, intItemId
+		, strItemNo
+		, strItemDescription
+		, dblQtyToReceive = dblQuantity
+		, intLoadToReceive = 0
+		, dblCost = dblLastCost
+		, 0
+		, dblLineTotal = 0
+		, strLotTracking
+		, intCommodityId
+		, intContainerId = NULL
+		, strContainer = NULL
+		, intSubLocationId = intToSubLocationId
+		, strSubLocationName = strToSubLocationName
+		, intStorageLocationId = intToStorageLocationId
+		, strStorageLocationName = strToStorageLocationName
+		, intOrderUOMId = intItemUOMId
+		, strOrderUOM = strUnitMeasure
+		, dblOrderUOMConvFactor = dblItemUOMCF
+		, intItemUOMId = intItemUOMId
+		, strUnitMeasure = strUnitMeasure
+		, strUnitType = NULL
+		, intWeightUOMId = intWeightUOMId
+		, strWeightUOM = strWeightUOM
+		, dblItemUOMConvFactor = dblItemUOMCF
+		, dblWeightUOMConvFactor = dblWeightUOMCF
+		, intCostUOMId = intItemUOMId
+		, strCostUOM = strUnitMeasure
+		, dblCostUOMConvFactor = dblItemUOMCF
+		, intLifeTime
+		, strLifeTimeType
+		, ysnLoad = 0
+		, dblAvailableQty = 0
+	FROM vyuICGetInventoryTransferDetail TransferView
+	WHERE TransferView.ysnPosted = 1)
 tblAddOrders

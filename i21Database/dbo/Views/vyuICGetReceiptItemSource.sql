@@ -11,10 +11,8 @@ SELECT
 				THEN ISNULL(ContractView.strContractNumber, 'Contract No not found!')
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN ISNULL(POView.strPurchaseOrderNumber, 'PO Number not found!')
-			WHEN Receipt.strReceiptType = 'Transfer Receipt'
-				THEN NULL
-			WHEN Receipt.strReceiptType = 'Direct Transfer'
-				THEN NULL
+			WHEN Receipt.strReceiptType = 'Transfer Order'
+				THEN ISNULL(TransferView.strTransferNo, 'Transfer No not found!')
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
 			ELSE NULL
@@ -26,9 +24,7 @@ SELECT
 				THEN ContractView.dtmContractDate
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN (SELECT ISNULL(dtmDate, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
-			WHEN Receipt.strReceiptType = 'Transfer Receipt'
-				THEN NULL
-			WHEN Receipt.strReceiptType = 'Direct Transfer'
+			WHEN Receipt.strReceiptType = 'Transfer Order'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
@@ -64,7 +60,7 @@ SELECT
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN POView.strUOM
 			WHEN Receipt.strReceiptType = 'Transfer Order'
-				THEN NULL
+				THEN TransferView.strUnitMeasure
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
 			ELSE NULL
@@ -87,10 +83,8 @@ SELECT
 				)
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN POView.dblItemUOMCF
-			WHEN Receipt.strReceiptType = 'Transfer Receipt'
-				THEN 0
-			WHEN Receipt.strReceiptType = 'Direct Transfer'
-				THEN 0
+			WHEN Receipt.strReceiptType = 'Transfer Order'
+				THEN TransferView.dblItemUOMCF
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
 			ELSE NULL
@@ -118,7 +112,7 @@ SELECT
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN ISNULL(POView.dblQtyOrdered, 0.00)
 			WHEN Receipt.strReceiptType = 'Transfer Order'
-				THEN 0.00
+				THEN ISNULL(TransferView.dblQuantity, 0.00)
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN 0.00
 			ELSE 0.00
@@ -184,3 +178,6 @@ LEFT JOIN vyuTRTransportReceipt TransportView
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Order'
+LEFT JOIN vyuICGetInventoryTransferDetail TransferView
+	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
+		AND strReceiptType = 'Transfer Order'

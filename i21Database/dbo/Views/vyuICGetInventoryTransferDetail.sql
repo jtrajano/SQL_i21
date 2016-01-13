@@ -3,6 +3,9 @@
 
 SELECT TransferDetail.intInventoryTransferId
 	, TransferDetail.intInventoryTransferDetailId
+	, Transfer.intFromLocationId
+	, Transfer.intToLocationId
+	, Transfer.strTransferNo
 	, TransferDetail.intSourceId
 	, strSourceNumber = (
 		CASE WHEN Transfer.intSourceType = 1 -- Scale
@@ -12,21 +15,37 @@ SELECT TransferDetail.intInventoryTransferId
 			ELSE NULL
 			END
 	)
+	, TransferDetail.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
+	, Item.strLotTracking
+	, Item.intCommodityId
 	, Lot.strLotNumber
+	, Item.intLifeTime
+	, Item.strLifeTimeType
+	, TransferDetail.intFromSubLocationId
 	, strFromSubLocationName = FromSubLocation.strSubLocationName
+	, TransferDetail.intToSubLocationId
 	, strToSubLocationName = ToSubLocation.strSubLocationName
+	, TransferDetail.intFromStorageLocationId
 	, strFromStorageLocationName = FromStorageLocation.strName
+	, TransferDetail.intToStorageLocationId
 	, strToStorageLocationName = ToStorageLocation.strName
+	, TransferDetail.intItemUOMId
 	, strUnitMeasure = UOM.strUnitMeasure
+	, dblItemUOMCF = ItemUOM.dblUnitQty
+	, intWeightUOMId = TransferDetail.intItemWeightUOMId
 	, strWeightUOM = WeightUOM.strUnitMeasure
+	, dblWeightUOMCF = ItemWeightUOM.dblUnitQty
 	, TaxCode.strTaxCode
 	, strAvailableUOM = CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN StockFrom.strUnitMeasure ELSE Lot.strItemUOM END
+	, StockFrom.dblLastCost
 	, StockFrom.dblOnHand
 	, StockFrom.dblOnOrder
 	, StockFrom.dblReservedQty
 	, dblAvailableQty = CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN StockFrom.dblAvailableQty ELSE Lot.dblQty END
+	, TransferDetail.dblQuantity
+	, ysnPosted
 FROM tblICInventoryTransferDetail TransferDetail
 	LEFT JOIN tblICInventoryTransfer Transfer ON Transfer.intInventoryTransferId = TransferDetail.intInventoryTransferId
 	LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
