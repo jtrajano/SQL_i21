@@ -7,6 +7,7 @@
     [strQuery] NVARCHAR(max) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strNamespace] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strParameter] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intEntityId] INT NULL,
     [intSort] INT NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
