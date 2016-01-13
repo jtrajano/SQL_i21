@@ -7,11 +7,11 @@ Ext.define('Inventory.view.LotDetailViewController', {
             title: 'Lot Detail',
             url: '../Inventory/api/Lot/Search',
             columns: [
-                { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true },
-                { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string' },
-                { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string' },
+                { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
+                { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
+                { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewLocation' },
                 { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
-                { dataIndex: 'strStorageLocation', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strStorageLocation', text: 'Storage Location', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewStorageLocation' },
                 { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblQty', text: 'Quantity', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblWeight', text: 'Weight', flex: 1, dataType: 'float' },
@@ -60,5 +60,20 @@ Ext.define('Inventory.view.LotDetailViewController', {
 
         win.context = context;
         return context;
+    },
+
+    onViewLocation: function (value, record) {
+        var locationName = record.get('strLocationName');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+    },
+
+    onViewStorageLocation: function (value, record) {
+        var locationName = record.get('strStorageLocation');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'StorageLocation');
+    },
+
+    onViewItem: function (value, record) {
+        var itemNo = record.get('strItemNo');
+        i21.ModuleMgr.Inventory.showScreen(itemNo, 'ItemNo');
     }
 });

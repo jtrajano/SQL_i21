@@ -7,11 +7,11 @@ Ext.define('Inventory.view.StockDetailViewController', {
             title: 'Stock Details',
             url: '../Inventory/api/Item/GetItemStocks',
             columns: [
-                { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true },
-                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string' },
+                { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
+                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                 { dataIndex: 'strType', text: 'Item Type', flex: 1, dataType: 'string' },
-                { dataIndex: 'strCategoryCode', text: 'Category', flex: 1, dataType: 'string' },
-                { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string' },
+                { dataIndex: 'strCategoryCode', text: 'Category', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewCategory' },
+                { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewLocation' },
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblUnitOnHand', text: 'On Hand', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblOnOrder', text: 'On Order', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblOrderCommitted', text: 'Committed', flex: 1, dataType: 'float' },
@@ -69,5 +69,20 @@ Ext.define('Inventory.view.StockDetailViewController', {
 
         win.context = context;
         return context;
-    }
+    },
+
+    onViewCategory: function (value, record) {
+        var locationName = record.get('strCategoryCode');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'Category');
+    },
+
+    onViewLocation: function (value, record) {
+        var locationName = record.get('strLocationName');
+        i21.ModuleMgr.Inventory.showScreen(locationName, 'LocationName');
+    },
+
+    onViewItem: function (value, record) {
+        var itemNo = record.get('strItemNo');
+        i21.ModuleMgr.Inventory.showScreen(itemNo, 'ItemNo');
+    },
 });

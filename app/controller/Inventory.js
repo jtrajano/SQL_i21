@@ -256,13 +256,29 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'Inventory.view.Item';
                 columnName = 'intItemId';
                 break;
+            case 'ItemNo':
+                screenName = 'Inventory.view.Item';
+                columnName = 'strItemNo';
+                break;
             case 'CategoryId':
                 screenName = 'Inventory.view.Category';
                 columnName = 'intCategoryId';
                 break;
+            case 'Category':
+                screenName = 'Inventory.view.Category';
+                columnName = 'strCategoryCode';
+                break;
             case 'Order':
                 screenName = 'AccountsReceivable.view.SalesOrder';
                 columnName = 'intSalesOrderId';
+                break;
+            case 'SONumber':
+                screenName = 'AccountsReceivable.view.SalesOrder';
+                columnName = 'strSalesOrderNumber';
+                break;
+            case 'PONumber':
+                screenName = 'AccountsPayable.view.PurchaseOrder';
+                columnName = 'strPurchaseOrderNumber';
                 break;
             case 'ReceiptNo':
                 screenName = 'Inventory.view.InventoryReceipt';
@@ -270,6 +286,14 @@ Ext.define('Inventory.controller.Inventory', {
                 break;
             case 'ShipmentNo':
                 screenName = 'Inventory.view.InventoryShipment';
+                columnName = 'strShipmentNumber';
+                break;
+            case 'TransferNo':
+                screenName = 'Inventory.view.InventoryTransfer';
+                columnName = 'strTransferNo';
+                break;
+            case 'AdjustmentNo':
+                screenName = 'Inventory.view.InventoryAdjustment';
                 columnName = 'strShipmentNumber';
                 break;
             case 'VendorName':
@@ -280,6 +304,10 @@ Ext.define('Inventory.controller.Inventory', {
             case 'LocationName':
                 screenName = 'i21.view.CompanyLocation';
                 columnName = 'strLocationName';
+                break;
+            case 'StorageLocation':
+                screenName = 'Inventory.view.StorageUnit';
+                columnName = 'strName';
                 break;
         }
 
