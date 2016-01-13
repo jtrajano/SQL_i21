@@ -24,13 +24,13 @@ Harness.start(
     { group: 'Item',
         items: [
             {
-                url: 'Item/AddItem.js',
+                url: 'Item/AddItem_InventoryType.js',
                 preload: [
                     testEnginePath
                 ]
             },
             {
-                url: 'FuelCategory/DeleteFuelCategory.js',
+                url: 'Item/AddItem_RawMaterialType.js',
                 preload: [
                     testEnginePath
                 ]
