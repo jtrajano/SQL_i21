@@ -13,6 +13,7 @@ DECLARE @intRowDetailId INT
 DECLARE @intRefNo INT = 1
 DECLARE @intSort INT = 1
 DECLARE @strRelatedRows NVARCHAR(MAX) = ''
+DECLARE @strREAccount NVARCHAR(MAX) = ''
 
 DECLARE @intRowDetailId_Liability INT
 DECLARE @intRowDetailId_Equity INT
@@ -62,16 +63,23 @@ BEGIN
 
 		DECLARE @strAccountId NVARCHAR(150)
 		DECLARE @strAccountDescription NVARCHAR(500)
+		DECLARE @strAccountGroup NVARCHAR(250)
 
 		DECLARE @strRowDescription NVARCHAR(500)
 		DECLARE @strRowFilter NVARCHAR(500)
+		DECLARE @rowType NVARCHAR(50) = 'Filter Accounts'
 
-		SELECT TOP 1 @strAccountId = strAccountId, @strAccountDescription = strDescription FROM #TempGLAccount ORDER BY strAccountId
+		SELECT TOP 1 @strAccountId = strAccountId, @strAccountDescription = strDescription, @strAccountGroup = strAccountGroup FROM #TempGLAccount ORDER BY strAccountId
 
 		SET @strRowDescription = '     ' + @strAccountId + ' - ' + REPLACE(@strAccountDescription,'''','')
 		SET @strRowFilter = '[ID] = ''' + @strAccountId + ''''
 
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+		IF(@strAccountGroup = 'Retained Earnings')
+		BEGIN
+			SET @rowType = 'Retained Earnings'
+		END
+
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, @rowType, @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 		
 		SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
@@ -170,7 +178,7 @@ BEGIN
 	
 	SET @strRowFilter_Hidden = '[Type] = ''' + @strAccountType_Hidden + ''''
 
-	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType_Hidden, 'Hidden', @BalanceSide_Hidden, 'Column', '', @strRowFilter_Hidden, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort		
+	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType_Hidden, 'Current Year Earnings', @BalanceSide_Hidden, 'Column', '', @strRowFilter_Hidden, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort		
 
 	SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
