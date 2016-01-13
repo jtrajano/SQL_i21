@@ -48,6 +48,11 @@ BEGIN
 	SET @Hidden = 1
 	SET @strRowType = 'Filter Accounts'
 END
+IF(@strRowType = 'Current Year Earnings')
+BEGIN
+	SET @Hidden = 1
+END
+
 
 	INSERT INTO tblFRRowDesign (intRowId,
 								intRefNo,
