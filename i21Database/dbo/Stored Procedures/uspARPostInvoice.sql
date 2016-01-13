@@ -459,7 +459,37 @@ SET @batchIdUsed = @batchId
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					(Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
-					AND I.strType IN ('Non-Inventory','Service','Software')
+					AND I.strType IN ('Non-Inventory','Service')
+					
+				--Software - Maintenance Sales / General Account				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Sales and General Accounts of item - ' + I.strItemNo + ' were not specified.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intCompanyLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN
+					vyuARGetItemAccount Acct
+						ON A.intCompanyLocationId = Acct.intLocationId 
+						AND D.intItemId = Acct.intItemId 		 				
+				WHERE
+					ISNULL(ISNULL(Acct.intMaintenanceSalesAccountId, Acct.intGeneralAccountId), 0) = 0
+					AND I.strType = 'Software'					
 					
 				--Other Charge Income Account	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -990,9 +1020,12 @@ IF @post = 1
 			SELECT
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
-				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Software'))) 
+				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 													THEN
 														IST.intGeneralAccountId
+													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Software')) 
+													THEN
+														ISNULL(IST.intMaintenanceSalesAccountId, IST.intGeneralAccountId)
 													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Other Charge')) 
 													THEN
 														IST.intOtherChargeIncomeAccountId
