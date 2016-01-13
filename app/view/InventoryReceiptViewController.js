@@ -1152,6 +1152,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onTransferorSelect: function (combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        var isHidden = true;
+        switch (current.get('strReceiptType')) {
+            case 'Transfer Order':
+                if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
+                    isHidden = true;
+                }
+                else {
+                    isHidden = false;
+                }
+                break;
+            default :
+                isHidden = true;
+                break;
+        }
+        if (isHidden === false) {
+            this.showAddOrders(win);
+        }
+    },
+
     onFreightTermSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -3341,11 +3366,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     showAddOrders: function(win) {
         var currentRecord = win.viewModel.data.current;
+        var VendorId = null;
+        var ReceiptType = currentRecord.get('strReceiptType');
+        var SourceType = currentRecord.get('intSourceType').toString();
+        if (ReceiptType === 'Transfer Order') {
+            VendorId = currentRecord.get('intTransferorId').toString();
+        }
+        else {
+            VendorId = currentRecord.get('intEntityVendorId').toString();
+        }
         var me = this;
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
-            search.url = '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + currentRecord.get('intEntityVendorId').toString() + '&ReceiptType=' + currentRecord.get('strReceiptType') + '&SourceType=' + currentRecord.get('intSourceType').toString();
+            search.url = '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType;
             search.columns = [
                 {dataIndex: 'intKey', text: "Key", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
@@ -3562,6 +3596,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#cboVendor": {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onVendorSelect
+            },
+            "#cboTransferor": {
+                select: this.onTransferorSelect
             },
             "#cboFreightTerms": {
                 select: this.onFreightTermSelect

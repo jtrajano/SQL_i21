@@ -57,8 +57,28 @@ Ext.define('Inventory.model.Receipt', {
 
     validators: [
         {type: 'presence', field: 'dtmReceiptDate'},
-        {type: 'presence', field: 'intEntityVendorId'},
         {type: 'presence', field: 'strReceiptType'},
         {type: 'presence', field: 'intLocationId'}
-    ]
+    ],
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+        if (this.get('strReceiptType') === 'Transfer Order') {
+            if (iRely.Functions.isEmpty(this.get('intTransferorId'))) {
+                errors.add({
+                    field: 'intTransferorId',
+                    message: 'Transferor must be present.'
+                })
+            }
+        }
+        else {
+            if (iRely.Functions.isEmpty(this.get('intEntityVendorId'))) {
+                errors.add({
+                    field: 'intEntityVendorId',
+                    message: 'Vendor must be present.'
+                })
+            }
+        }
+        return errors;
+    }
 });
