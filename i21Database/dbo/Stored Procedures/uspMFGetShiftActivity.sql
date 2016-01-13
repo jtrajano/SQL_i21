@@ -25,7 +25,6 @@ BEGIN
 			,intTotalDowntime INT
 			,intUnitMeasureId INT
 			,intShiftActivityStatusId INT
-			,intCalendarDetailId INT
 			)
 
 		INSERT INTO #tmp_ActualTable
@@ -39,7 +38,6 @@ BEGIN
 			,0
 			,0 AS intUnitMeasureId
 			,1
-			,SCD.intCalendarDetailId
 		FROM dbo.tblMFScheduleCalendarDetail SCD
 		JOIN dbo.tblMFScheduleCalendar SC ON SC.intCalendarId = SCD.intCalendarId
 			AND SC.ysnStandard = 1
@@ -57,7 +55,7 @@ BEGIN
 					AND SA.intManufacturingCellId = MC.intManufacturingCellId
 					AND SA.intShiftId = SCD.intShiftId
 				)
-		ORDER BY SCD.intCalendarDetailId
+		ORDER BY SCD.dtmCalendarDate
 
 		SELECT AT.intShiftActivityId
 			,MC.strCellName
