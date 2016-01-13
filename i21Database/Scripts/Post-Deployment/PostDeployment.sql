@@ -263,6 +263,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\017_MoveSplitCategoryToNewTable.sql
 :r .\EM\018_UpdateRoleId_ForEntityCredential.sql
 :r .\EM\019_RemoveEmailToParentEntity.sql
+:r .\EM\020_DefaultDataForEntityImportSchemaCSV.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

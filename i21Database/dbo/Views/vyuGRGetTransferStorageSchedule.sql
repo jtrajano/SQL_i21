@@ -4,4 +4,7 @@ SELECT  0 AS intStorageScheduleRuleId,-1 AS intStorageType,'Keep As Is' AS strSc
 UNION    
 SELECT S.intStorageScheduleRuleId,S.intStorageType,S.strScheduleId,SL.intCompanyLocationId 
 FROM tblGRStorageScheduleRule S
-JOIN tblGRStorageScheduleLocationUse SL ON SL.intStorageScheduleId=S.intStorageScheduleRuleId AND SL.ysnStorageScheduleLocationActive=1 
+JOIN tblGRStorageScheduleLocationUse SL ON SL.intStorageScheduleId=S.intStorageScheduleRuleId 
+Where SL.ysnStorageScheduleLocationActive=1 
+AND ISNULL(dbo.fnRemoveTimeOnDate(S.dtmEffectiveDate), dbo.fnRemoveTimeOnDate(GETDATE()))<=dbo.fnRemoveTimeOnDate(GETDATE())
+AND ISNULL(dbo.fnRemoveTimeOnDate(S.dtmTerminationDate), dbo.fnRemoveTimeOnDate(GETDATE()))>=dbo.fnRemoveTimeOnDate(GETDATE())
