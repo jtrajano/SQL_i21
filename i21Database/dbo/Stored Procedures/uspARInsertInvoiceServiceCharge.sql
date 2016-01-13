@@ -81,11 +81,11 @@ AS
 				,NULL --[strInvoiceOriginId]
 				,ISNULL(@dtmAsOfDate, @dateNow)
 				,[dbo].fnGetDueDateBasedOnTerm(ISNULL(@dtmAsOfDate, @dateNow), intTermsId)
-				,NULL --[dtmPostDate]
+				,ISNULL(@dtmAsOfDate, @dateNow)
 				,@intCurrencyId
 				,@intCompanyLocationId
 				,[intSalespersonId]
-				,NULL --[dtmShipDate]
+				,ISNULL(@dtmAsOfDate, @dateNow)
 				,[intShipViaId]
 				,NULL --[strPONumber]
 				,[intTermsId]
