@@ -49,4 +49,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90008) EXEC sp_dropmessa
 SET @strmessage = 'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
 EXEC sp_addmessage 90008,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90009) EXEC sp_dropmessage 90009, 'us_english'	
+SET @strmessage = 'Lots with different unit of measure cannot be merged.'
+EXEC sp_addmessage 90009,11,@strmessage,'us_english','False'
 
