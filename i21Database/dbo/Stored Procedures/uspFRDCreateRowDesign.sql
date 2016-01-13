@@ -8,6 +8,7 @@ CREATE PROCEDURE [dbo].[uspFRDCreateRowDesign]
 	@strSource NVARCHAR(20),
 	@strRelatedRows NVARCHAR(MAX),
 	@strAccountsUsed NVARCHAR(MAX),
+	@strAccountsType NVARCHAR(MAX),
 	@ysnShowCredit BIT,
 	@ysnShowDebit BIT,
 	@ysnShowOthers BIT,
@@ -31,17 +32,7 @@ SET XACT_ABORT ON
 
 BEGIN
 
-DECLARE @AccountsType NVARCHAR(50) = ''
 DECLARE @Hidden BIT = 0
-
-IF(@strBalanceSide = 'Debit')
-BEGIN
-	SET @AccountsType = 'BS'
-END
-ELSE IF(@strBalanceSide = 'Credit')
-BEGIN
-	SET @AccountsType = 'IS'
-END
 
 IF(@strRowType = 'Hidden')
 BEGIN
@@ -86,7 +77,7 @@ END
 								@strSource,
 								@strRelatedRows,
 								@strAccountsUsed,
-								@AccountsType,
+								@strAccountsType,
 								@ysnShowCredit,
 								@ysnShowDebit,
 								@ysnShowOthers,
