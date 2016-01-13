@@ -44,18 +44,26 @@ BEGIN
 		--			ON gl.intAccountId = Q.intGLAccountId
 
 		-- Check for missing "Cash Account" group. (ERR)
+		--SELECT @Missing_Cash_Account_Group = 1
+		--WHERE NOT EXISTS (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts'')
 		SELECT @Missing_Cash_Account_Group = 1
-		WHERE NOT EXISTS (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts'')
+		WHERE NOT EXISTS (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''Cash Account'')
 
 		-- Check for invalid GL accounts. It must be moved under the Cash Account Group before import can be done. (ERR)
+		--SELECT	TOP 1 
+		--		@Invalid_GL_Account_Id_Found = 1  
+		--FROM	apcbkmst o INNER JOIN tblGLAccount accnt
+		--			ON dbo.fnGetGLAccountIdFromOriginToi21(o.apcbk_gl_cash) = accnt.intAccountId
+		--		INNER JOIN tblGLAccountGroup grp
+		--			ON accnt.intAccountGroupId = grp.intAccountGroupId
+		--WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
+		--		OR grp.strAccountType <> @ASSET
 		SELECT	TOP 1 
 				@Invalid_GL_Account_Id_Found = 1  
-		FROM	apcbkmst o INNER JOIN tblGLAccount accnt
+		FROM	apcbkmst o INNER JOIN vyuGLAccountDetail accnt
 					ON dbo.fnGetGLAccountIdFromOriginToi21(o.apcbk_gl_cash) = accnt.intAccountId
-				INNER JOIN tblGLAccountGroup grp
-					ON accnt.intAccountGroupId = grp.intAccountGroupId
-		WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
-				OR grp.strAccountType <> @ASSET
+		WHERE	accnt.strAccountCategory <> @CASH_ACCOUNT
+				OR accnt.strAccountType <> @ASSET
 
 		-- Check for missing GL Account from tblGLCOACrossReference. (ERR)
 		SELECT @Missing_GL_Account_Id = 1
