@@ -25,7 +25,7 @@ BEGIN
 			,@Missing_Cash_Account_Group AS BIT OUTPUT
 		AS
 
-		DECLARE @CASH_ACCOUNT AS NVARCHAR(20) = ''Cash Accounts''
+		DECLARE @CASH_ACCOUNT AS NVARCHAR(20) = ''Cash Account''
 		DECLARE @ASSET AS NVARCHAR(20) = ''Asset''
 	
 		-- Check for invalid user id''s (WARN)
@@ -35,13 +35,21 @@ BEGIN
 		WHERE	dbo.fnConvertOriginUserIdtoi21(apcbk_user_id) IS NULL
 
 		-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. 
-		--UPDATE	tblGLAccount
-		--SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts''),
-		--		intAccountCategoryId = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''Cash Account'')
-		--from	tblGLAccount gl INNER JOIN (
-		--			SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
-		--		) Q
-		--			ON gl.intAccountId = Q.intGLAccountId
+		UPDATE	tblGLAccount
+		SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts'')
+		from	tblGLAccount gl INNER JOIN (
+					SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
+				) Q
+					ON gl.intAccountId = Q.intGLAccountId
+		-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" category. 
+		UPDATE	tblGLAccountSegment
+		SET		intAccountCategoryId  = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''Cash Account'')
+		from	tblGLAccount gl INNER JOIN (
+					SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
+				) Q
+					ON gl.intAccountId = Q.intGLAccountId INNER JOIN
+                         dbo.tblGLAccountSegmentMapping ON gl.intAccountId = dbo.tblGLAccountSegmentMapping.intAccountId INNER JOIN
+                         dbo.tblGLAccountSegment ON dbo.tblGLAccountSegmentMapping.intAccountSegmentId = dbo.tblGLAccountSegment.intAccountSegmentId
 
 		-- Check for missing "Cash Account" group. (ERR)
 		--SELECT @Missing_Cash_Account_Group = 1
