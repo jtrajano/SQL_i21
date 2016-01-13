@@ -24,27 +24,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
-            var query = _db.GetQuery<tblICInventoryTransfer>()
-                .Include(p => p.FromLocation)
-                .Include(p => p.ToLocation)
-                .Include(p => p.tblICStatus)
-                .Select(p => new TransferVM
-                {
-                    intInventoryTransferId = p.intInventoryTransferId,
-                    strTransferNo = p.strTransferNo,
-                    dtmTransferDate = p.dtmTransferDate,
-                    strTransferType = p.strTransferType,
-                    strDescription = p.strDescription,
-                    intStatusId = p.intStatusId,
-                    strStatus = p.tblICStatus.strStatus,
-                    intFromLocationId = p.intFromLocationId,
-                    strFromLocation = p.FromLocation.strLocationName,
-                    intToLocationId = p.intToLocationId,
-                    strToLocation = p.ToLocation.strLocationName,
-                    ysnShipmentRequired = p.ysnShipmentRequired,
-                    intSort = p.intSort,
-                    ysnPosted = p.ysnPosted,
-                })
+            var query = _db.GetQuery<vyuICGetInventoryTransfer>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intInventoryTransferId").ToListAsync();
 

@@ -10,15 +10,21 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 read: '../Inventory/api/InventoryTransfer/Search'
             },
             columns: [
-                {dataIndex: 'intInventoryTransferId', text: "Inventory Transfer Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strTransferNo', text: 'Transfer No', flex: 1, dataType: 'string'},
-                {dataIndex: 'dtmTransferDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strTransferType', text: 'Transfer Type', flex: 1, dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
-                {dataIndex: 'strFromLocation', text: 'From Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strToLocation', text: 'To Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string'},
-                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
+
+                {dataIndex: 'intInventoryTransferId', text: 'Inventory Transfer Id', flex: 1, dataType: 'numeric', defaultSort: true, key: true, hidden: true },
+                {dataIndex: 'strTransferNo', text: 'Transfer No', flex: 1, dataType: 'string' },
+                {dataIndex: 'dtmTransferDate', text: 'Transfer Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                {dataIndex: 'strTransferType', text: 'Transfer Type', flex: 1, dataType: 'string' },
+                {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strTransferredBy', text: 'Transferred By', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string' },
+                {dataIndex: 'strFromLocation', text: 'From Location', flex: 1, dataType: 'string' },
+                {dataIndex: 'strToLocation', text: 'To Location', flex: 1, dataType: 'string' },
+                {dataIndex: 'ysnShipmentRequired', text: 'Shipment Required', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string' },
+                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                {dataIndex: 'strName', text: 'User', flex: 1, dataType: 'string', hidden: true },
+                {dataIndex: 'intSort', text: 'Sort', flex: 1, dataType: 'numeric', hidden: true }
             ]
         },
         binding: {

@@ -45,6 +45,38 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetInventoryTransferMap : EntityTypeConfiguration<vyuICGetInventoryTransfer>
+    {
+        public vyuICGetInventoryTransferMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryTransferId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryTransfer");
+            this.Property(t => t.intInventoryTransferId).HasColumnName("intInventoryTransferId");
+            this.Property(t => t.strTransferNo).HasColumnName("strTransferNo");
+            this.Property(t => t.dtmTransferDate).HasColumnName("dtmTransferDate");
+            this.Property(t => t.strTransferType).HasColumnName("strTransferType");
+            this.Property(t => t.intSourceType).HasColumnName("intSourceType");
+            this.Property(t => t.strSourceType).HasColumnName("strSourceType");
+            this.Property(t => t.intTransferredById).HasColumnName("intTransferredById");
+            this.Property(t => t.strTransferredBy).HasColumnName("strTransferredBy");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.intFromLocationId).HasColumnName("intFromLocationId");
+            this.Property(t => t.strFromLocation).HasColumnName("strFromLocation");
+            this.Property(t => t.intToLocationId).HasColumnName("intToLocationId");
+            this.Property(t => t.strToLocation).HasColumnName("strToLocation");
+            this.Property(t => t.ysnShipmentRequired).HasColumnName("ysnShipmentRequired");
+            this.Property(t => t.intStatusId).HasColumnName("intStatusId");
+            this.Property(t => t.strStatus).HasColumnName("strStatus");
+            this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
+            this.Property(t => t.strUser).HasColumnName("strUser");
+            this.Property(t => t.strName).HasColumnName("strName");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+        }
+    }
+
     public class tblICInventoryTransferDetailMap : EntityTypeConfiguration<tblICInventoryTransferDetail>
     {
         public tblICInventoryTransferDetailMap()

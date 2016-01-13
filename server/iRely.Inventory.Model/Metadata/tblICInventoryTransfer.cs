@@ -40,6 +40,30 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
     }
 
+    public class vyuICGetInventoryTransfer
+    {
+        public int intInventoryTransferId { get; set; }
+        public string strTransferNo { get; set; }
+        public DateTime? dtmTransferDate { get; set; }
+        public string strTransferType { get; set; }
+        public int? intSourceType { get; set; }
+        public string strSourceType { get; set; }
+        public int? intTransferredById { get; set; }
+        public string strTransferredBy { get; set; }
+        public string strDescription { get; set; }
+        public int? intFromLocationId { get; set; }
+        public string strFromLocation { get; set; }
+        public int? intToLocationId { get; set; }
+        public string strToLocation { get; set; }
+        public bool? ysnShipmentRequired { get; set; }
+        public int? intStatusId { get; set; }
+        public string strStatus { get; set; }
+        public bool? ysnPosted { get; set; }
+        public int? strUser { get; set; }
+        public string strName { get; set; }
+        public int? intSort { get; set; }
+    }
+
     public class tblICInventoryTransferDetail : BaseEntity
     {
         public int intInventoryTransferDetailId { get; set; }
@@ -337,23 +361,5 @@ namespace iRely.Inventory.Model
         public decimal? dblAvailableQty { get; set; }
 
         public tblICInventoryTransferDetail tblICInventoryTransferDetail { get; set; }
-    }
-
-    public class TransferVM
-    {
-        public int intInventoryTransferId { get; set; }
-        public string strTransferNo { get; set; }
-        public DateTime? dtmTransferDate { get; set; }
-        public string strTransferType { get; set; }
-        public string strDescription { get; set; }
-        public int? intStatusId { get; set; }
-        public string strStatus { get; set; }
-        public int? intFromLocationId { get; set; }
-        public string strFromLocation { get; set; }
-        public int? intToLocationId { get; set; }
-        public string strToLocation { get; set; }
-        public bool? ysnShipmentRequired { get; set; }
-        public int? intSort { get; set; }
-        public bool? ysnPosted { get; set; }
     }
 }
