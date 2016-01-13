@@ -120,6 +120,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnInvoice: {
                 hidden: '{!current.ysnPosted}'
             },
+            btnAddOrders: {
+                hidden: '{current.ysnPosted}'
+            },
 
             txtShipmentNo: '{current.strShipmentNumber}',
             dtmShipDate: {
@@ -155,7 +158,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 store: '{customer}',
                 readOnly: '{current.ysnPosted}'
             },
-            txtCustomerName: '{current.strCustomerName}',
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
                 store: '{shipFromLocation}',
