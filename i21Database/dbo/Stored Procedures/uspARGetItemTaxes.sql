@@ -11,6 +11,13 @@ AS
 
 	IF(ISNULL(@TaxGroupId,0) = 0)
 		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId)			
+
+	DECLARE @IsCustomerSiteTaxable	BIT
+
+	IF ISNULL(@TaxGroupId, 0) <> 0 AND ISNULL(@SiteId, 0) <> 0
+		SELECT @IsCustomerSiteTaxable = ysnTaxable FROM tblTMSite WHERE intSiteID = @SiteId
+	ELSE
+		SET @IsCustomerSiteTaxable = NULL
 	
 	IF @TaxGroupId IS NOT NULL AND @TaxGroupId <> 0
 		BEGIN						
@@ -34,7 +41,7 @@ AS
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, NULL)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, @IsCustomerSiteTaxable)
 				
 			RETURN 1
 		END
