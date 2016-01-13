@@ -2147,6 +2147,42 @@ IF @recap = 0
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
 		END CATCH
+
+		BEGIN TRY			
+			DECLARE @PaymentsToUpdate TABLE (intPaymentId INT);
+			
+			INSERT INTO @PaymentsToUpdate(intPaymentId)
+			SELECT DISTINCT intPaymentId FROM @ARReceivablePostData
+				
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @PaymentsToUpdate ORDER BY intPaymentId)
+				BEGIN
+				
+					DECLARE @intPaymentIntegractionId INT
+							,@actionType AS NVARCHAR(50)
+
+					SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
+					
+					SELECT TOP 1 @intPaymentIntegractionId = intPaymentId FROM @PaymentsToUpdate ORDER BY intPaymentId
+
+					--Audit Log          
+					EXEC dbo.uspSMAuditLog 
+						 @keyValue			= @intPaymentIntegractionId							-- Primary Key Value of the Invoice. 
+						,@screenName		= 'AccountsReceivable.view.ReceivePaymentsDetail'	-- Screen Namespace
+						,@entityId			= @UserEntityID										-- Entity Id.
+						,@actionType		= @actionType										-- Action Type
+						,@changeDescription	= ''												-- Description
+						,@fromValue			= ''												-- Previous Value
+						,@toValue			= ''												-- New Value
+									
+					DELETE FROM @PaymentsToUpdate WHERE intPaymentId = @intPaymentIntegractionId
+												
+				END 
+																
+		END TRY
+		BEGIN CATCH	
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH	
 					
 	END
 
