@@ -6,6 +6,7 @@
 	[dtmBudgetDate]				DATETIME		NULL,    
 	[ysnForgiven]				BIT NULL DEFAULT(0),
 	[ysnCalculated]				BIT NULL DEFAULT(0),
+	[dtmCalculated]				DATETIME NULL,
 
     [intConcurrencyId]			INT				NOT NULL,
     CONSTRAINT [PK_tblARCustomerBudget] PRIMARY KEY CLUSTERED ([intCustomerBudgetId] ASC),
