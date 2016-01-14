@@ -3122,6 +3122,7 @@
     <Build Include="dbo\Functions\fnPOIsProcessed.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
     <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
+    <Build Include="dbo\Views\vyuARBatchPostingTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
