@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRLoadPostingValidation]
 	 @intLoadHeaderId AS INT
 	 ,@ysnPostOrUnPost AS BIT
+	 ,@intUserId AS int 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -17,6 +18,17 @@ BEGIN TRY
 DECLARE @dtmLoadDateTime DATETIME,
         @intShipVia int,
 		@intSeller int,
+		@intInvoiceId int,
+		@InvoiceDeleteCount int,		
+		@incInvoiceDeleteval int,
+		@ReceiptDeleteCount int,
+		@incReceiptDeleteval int,
+		@intInventoryTransferId int,
+		@TransferDeleteCount int,		
+		@incTransferDeleteval int,	
+		@intLoadReceiptId int,
+		@intInventoryReceiptId int,
+		@intEntityUserSecurityId int,
 		@intDriver int,
 		@ReceiptCount int,
 		@incReceiptval int,
@@ -91,6 +103,24 @@ DECLARE @DistributionDetailTable TABLE
 	[dblPrice] DECIMAL(18, 6) NULL DEFAULT 0	
 )
 
+DECLARE @ReceiptDeleteTable TABLE
+(
+    intId INT IDENTITY PRIMARY KEY CLUSTERED,
+	[intLoadReceiptId] INT NULL,
+	[intInventoryReceiptId] INT NULL	
+)
+DECLARE @TransferDeleteTable TABLE
+(
+    intId INT IDENTITY PRIMARY KEY CLUSTERED,
+	[intLoadReceiptId] INT NULL,
+	[intInventoryTransferId] INT NULL	
+)
+DECLARE @InvoiceDeleteTable TABLE
+(
+    intId INT IDENTITY PRIMARY KEY CLUSTERED,
+	[intLoadDistributionHeaderId] INT NULL,
+	[intInvoiceId] INT NULL	
+)
 
 select  @dtmLoadDateTime = TL.dtmLoadDateTime,
         @intShipVia = TL.intShipViaId,
@@ -145,7 +175,7 @@ select TL.intLoadHeaderId,
 	   TR.dblGross,
 	   TR.dblUnitCost
  from dbo.tblTRLoadHeader TL
-      join tblTRLoadReceipt TR on TL.intLoadHeaderId = TR.intLoadHeaderId
+      join dbo.tblTRLoadReceipt TR on TL.intLoadHeaderId = TR.intLoadHeaderId
       where TL.intLoadHeaderId = @intLoadHeaderId
 	  
 INSERT into @DistributionHeaderTable
@@ -170,7 +200,7 @@ select
 	DH.intEntitySalespersonId,	
 	DH.dtmInvoiceDateTime  
  from dbo.tblTRLoadHeader TL
-	  join tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
+	  join dbo.tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
       where TL.intLoadHeaderId = @intLoadHeaderId
 
 
@@ -191,8 +221,8 @@ select
   DD.dblUnits, 
   DD.dblPrice	
  from dbo.tblTRLoadHeader TL    
-	  join tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
-	  join tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	  join dbo.tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
+	  join dbo.tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
       where TL.intLoadHeaderId = @intLoadHeaderId
 
 select @ReceiptCount = count(intReceiptId) from @ReceiptTable
@@ -240,7 +270,7 @@ BEGIN
          BEGIN
              RAISERROR('Invalid Purchase Item', 16, 1);
          END
-	     select @GrossorNet = strGrossOrNet from tblTRSupplyPoint where intSupplyPointId = @intSupplyPoint
+	     select @GrossorNet = strGrossOrNet from dbo.tblTRSupplyPoint where intSupplyPointId = @intSupplyPoint
 	     if (@GrossorNet is null)
          BEGIN
              RAISERROR('Gross or Net is not Setup for Supply Point', 16, 1);
@@ -278,14 +308,14 @@ BEGIN
 	  END
 
 
-    select @dblTotalGross = sum(TR.dblGross) ,@dblTotalNet = sum(TR.dblNet)  from tblTRLoadReceipt TR
+    select @dblTotalGross = sum(TR.dblGross) ,@dblTotalNet = sum(TR.dblNet)  from dbo.tblTRLoadReceipt TR
     where TR.intLoadHeaderId = @intLoadHeaderId
 	      and TR.intItemId = @intItem
 	group by TR.intItemId
 
 
-	select @dblDistributedQuantity = sum(DD.dblUnits) from tblTRLoadDistributionHeader DH
-                                  join tblTRLoadDistributionDetail DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+	select @dblDistributedQuantity = sum(DD.dblUnits) from dbo.tblTRLoadDistributionHeader DH
+                                  join dbo.tblTRLoadDistributionDetail DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
     where intLoadHeaderId = @intLoadHeaderId
 	      and DD.intItemId = @intItem
 	group by DD.intItemId
@@ -362,7 +392,7 @@ BEGIN
     END
 	if(isdate(@dtmInvoiceDateTime) = 0)
 	BEGIN
-       RAISERROR('Invocie Date is Invalid', 16, 1); 
+       RAISERROR('Invoice Date is Invalid', 16, 1); 
     END
 	if(@intDistributionItemId is NULL)
 	BEGIN
@@ -377,7 +407,93 @@ BEGIN
    SET @incDistDetailval = @incDistDetailval + 1;
 END
 
- 
+INSERT into @ReceiptDeleteTable
+(
+  intLoadReceiptId,
+  intInventoryReceiptId
+)
+select intLoadReceiptId,intInventoryReceiptId from dbo.tblTRLoadReceipt TR
+            join vyuICGetItemStock IC on TR.intItemId = IC.intItemId and TR.intCompanyLocationId = IC.intLocationId
+			where (IC.strType = 'Non-Inventory' or (TR.strOrigin ='Terminal' AND (TR.dblUnitCost = 0 or TR.dblFreightRate = 0 or TR.dblPurSurcharge = 0))) and isNull(intInventoryReceiptId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
+Union ALL
+select intLoadReceiptId,intInventoryReceiptId from dbo.tblTRLoadReceipt  TR          
+			where TR.strOrigin = 'Location' and isNull(intInventoryReceiptId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
+
+INSERT into @TransferDeleteTable
+(
+  intLoadReceiptId,
+  intInventoryTransferId
+)
+select intLoadReceiptId,intInventoryTransferId from dbo.tblTRLoadReceipt TR
+            join vyuICGetItemStock IC on TR.intItemId = IC.intItemId and TR.intCompanyLocationId = IC.intLocationId
+			where IC.strType = 'Non-Inventory' and isNull(intInventoryTransferId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
+UNION ALL
+select intLoadReceiptId,TR.intInventoryTransferId FROM		        
+			 dbo.tblTRLoadDistributionHeader DH 					
+			JOIN dbo.tblTRLoadDistributionDetail DD 
+				ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+			JOIN dbo.tblTRLoadReceipt TR 
+				ON TR.intLoadHeaderId = DH.intLoadHeaderId	and TR.strReceiptLine in (select Item from dbo.fnTRSplit(DD.strReceiptLink,',')) 			
+    WHERE ((TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId = DH.intCompanyLocationId)
+      or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId = DH.intCompanyLocationId)
+	  or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId = DH.intCompanyLocationId))
+	  and isNull(TR.intInventoryTransferId,0) != 0 and DH.intLoadHeaderId = @intLoadHeaderId
+
+INSERT into @InvoiceDeleteTable
+(
+  intLoadDistributionHeaderId,
+  intInvoiceId
+)
+select intLoadDistributionHeaderId,intInvoiceId from dbo.tblTRLoadDistributionHeader DH 
+            where strDestination = 'Location' and isNull(intInvoiceId,0) != 0 and DH.intLoadHeaderId = @intLoadHeaderId
+
+
+SELECT	TOP 1 @intEntityUserSecurityId = [intEntityUserSecurityId] 
+		FROM	dbo.tblSMUserSecurity 
+		WHERE	[intEntityUserSecurityId] = @intUserId
+
+select @ReceiptDeleteCount = count(intId) from @ReceiptDeleteTable
+set @incReceiptDeleteval = 1 
+WHILE @incReceiptDeleteval <= @ReceiptDeleteCount 
+BEGIN
+   select @intLoadReceiptId = intLoadReceiptId,@intInventoryReceiptId = intInventoryReceiptId from @ReceiptDeleteTable where intId = @incReceiptDeleteval
+
+   update dbo.tblTRLoadReceipt 
+   set intInventoryReceiptId = null
+   where intLoadReceiptId = @intLoadReceiptId
+   EXEC dbo.uspICDeleteInventoryReceipt @intInventoryReceiptId,@intEntityUserSecurityId
+
+   SET @incReceiptDeleteval = @incReceiptDeleteval + 1;
+END
+
+select @TransferDeleteCount = count(intId) from @TransferDeleteTable
+set @incTransferDeleteval = 1 
+WHILE @incTransferDeleteval <= @TransferDeleteCount 
+BEGIN
+   select @intLoadReceiptId = intLoadReceiptId,@intInventoryTransferId = intInventoryTransferId from @TransferDeleteTable where intId = @incTransferDeleteval
+
+   update dbo.tblTRLoadReceipt 
+   set intInventoryTransferId = null
+   where intLoadReceiptId = @intLoadReceiptId
+   EXEC dbo.uspICDeleteInventoryTransfer @intInventoryTransferId,@intEntityUserSecurityId
+
+   SET @incTransferDeleteval = @incTransferDeleteval + 1;
+END
+
+select @InvoiceDeleteCount = count(intId) from @InvoiceDeleteTable
+set @incInvoiceDeleteval = 1 
+WHILE @incInvoiceDeleteval <= @InvoiceDeleteCount 
+BEGIN
+   select @intLoadDistributionHeaderId = intLoadDistributionHeaderId,@intInvoiceId = intInvoiceId from @InvoiceDeleteTable where intId = @incInvoiceDeleteval
+
+   update dbo.tblTRLoadDistributionHeader 
+   set intInvoiceId = null
+   where intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+
+   EXEC dbo.uspARDeleteInvoice @intInvoiceId,@intUserId
+
+   SET @incInvoiceDeleteval = @incInvoiceDeleteval + 1;
+END
 
 END TRY
 BEGIN CATCH
