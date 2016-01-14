@@ -3190,6 +3190,7 @@
     <Build Include="dbo\Tables\tblHDProjectContactInfo.sql" />
     <Build Include="dbo\Views\vyuHDProjectContactInfo.sql" />
     <Build Include="dbo\Views\vyuHDProjectCustomerContact.sql" />
+    <Build Include="dbo\Tables\tblHDSalesPipeStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
