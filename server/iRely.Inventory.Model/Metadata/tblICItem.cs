@@ -430,7 +430,11 @@ namespace iRely.Inventory.Model
         public int intPricingKey { get; set; }
         public int intKey { get; set; }
         public string strDescription { get; set; }
+        public int? intVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
         public string strUpcCode { get; set; }
+        public string strLongUPCCode { get; set; }
         public int? intItemPricingId { get; set; }
         public int? intItemId { get; set; }
         public int? intLocationId { get; set; }
