@@ -35,9 +35,9 @@ DECLARE @NewDistributionTable TABLE
 
 DECLARE @NewLogisticsTable TABLE
     (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-        intLoadNumber int,
-	intLoadHeaderId int		
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,      
+	intLoadHeaderId int,		
+	 intLoadNumber int
     );
 DECLARE @total int,
         @intLoadHeaderId int,
@@ -68,7 +68,8 @@ set @incval = 1
 set @incDistval = 1 
 set @incDistDetailval = 1
 set @incReceiptval = 1
-
+set @incLogval =1
+set @incIvcval = 1
 -- loop for each Transport Load
 WHILE @incval <=@total 
 BEGIN
@@ -265,7 +266,7 @@ update tblARInvoice
 set intDistributionHeaderId = null 
 
 --Invoice link 
-insert into @NewDistributionTable select intLoadDistributionHeaderId, intInvoiceId from tblTRLoadDistributionHeader where intInvoiceId !=null
+insert into @NewDistributionTable select intLoadDistributionHeaderId, intInvoiceId from tblTRLoadDistributionHeader where isNull(intInvoiceId,0) !=0
 
 select @Ivctotal = count(*) from @NewDistributionTable;
      
