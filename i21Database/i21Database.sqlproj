@@ -169,7 +169,6 @@
     <Folder Include="Scripts\Post-Deployment\TF" />
     <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\TR" />
-    <Folder Include="Scripts\Utility\IC\Repost Costing\WM\" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports\SubReports" />
   </ItemGroup>
@@ -3070,7 +3069,6 @@
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustmentOnLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnActualCosting.sql" />
