@@ -18,8 +18,8 @@ UNION
 SELECT 1103, 'tblEntity.tblEntityToContact.tblEntity', 'strName', 'con_mobile'
 
 UNION
-SELECT 1201, 'tblEntity.tblEntityLocation', 'strLocationName', 'loc_name'
+SELECT 1201, 'tblEntity.tblEntityLocations', 'strLocationName', 'loc_name'
 UNION
-SELECT 1202, 'tblEntity.tblEntityLocation', 'strAddress', 'loc_address'
+SELECT 1202, 'tblEntity.tblEntityLocations', 'strAddress', 'loc_address'
 
 SET IDENTITY_INSERT tblEntityImportSchemaCSV OFF
