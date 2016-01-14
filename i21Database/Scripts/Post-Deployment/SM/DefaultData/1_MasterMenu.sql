@@ -238,7 +238,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (122, N'Vendors', N'Accounts Payable', 112, N'Vendors', N'Maintenance', N'Screen', N'EntityManagement.view.Entity:searchEntityVendor', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (125, N'Open Payables', N'Accounts Payable', 112, N'Open Payables', N'Report', N'Report', N'Open Payables', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+		VALUES (125, N'Open Payables', N'Accounts Payable', 112, N'Open Payables', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=Open Payables&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (126, N'Vendor History', N'Accounts Payable', 112, N'Vendor History', N'Report', N'Report', N'Vendor History', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1089,7 +1089,7 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Process Payments', strDescription = 'P
 /* End of Rename */
 
 /* Start of Moving */
-UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId WHERE strMenuName = 'Open Payables' AND strModuleName = 'Accounts Payable' AND strType = 'Report' AND intParentMenuID = @AccountsPayableParentMenuId
+UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId WHERE strMenuName = 'Open Payables' AND strModuleName = 'Accounts Payable' AND strType = 'Screen' AND intParentMenuID = @AccountsPayableParentMenuId
 UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId WHERE strMenuName = 'Vendor History' AND strModuleName = 'Accounts Payable' AND strType = 'Report' AND intParentMenuID = @AccountsPayableParentMenuId
 UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId WHERE strMenuName = 'Cash Requirements' AND strModuleName = 'Accounts Payable' AND strType = 'Report' AND intParentMenuID = @AccountsPayableParentMenuId
 UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableReportParentMenuId WHERE strMenuName = 'Check Register' AND strModuleName = 'Accounts Payable' AND strType = 'Report' AND intParentMenuID = @AccountsPayableParentMenuId
@@ -1153,8 +1153,8 @@ ELSE
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendors' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.Entity:searchEntityVendor' WHERE strMenuName = N'Vendors' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Payables' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'Open Payables' WHERE strMenuName = N'Open Payables' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Payables' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId)
+UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Purchasing&report=Open Payables&direct=true', strCategory = 'Report', strType = 'Screen' WHERE strMenuName = N'Open Payables' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor History' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'Vendor History' WHERE strMenuName = N'Vendor History' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
@@ -1172,10 +1172,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Paya
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Open Payable Details', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Open Payable Details', N'Activity', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=Open Payables Detail&direct=true', N'small-menu-report', 1, 0, 0, 1, NULL, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=Open Payables Detail&direct=true', strCategory = N'Activity', strType = 'Screen' WHERE strMenuName = 'Open Payable Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=Open Payables Detail&direct=true', strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Open Payable Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 
 /* Start of Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Paid Bills History' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Open Payable Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 /* End of Delete */
 
 /* RENAME COMMAND - ACCOUNTS PAYABLE */
@@ -1237,6 +1238,8 @@ UPDATE tblSMMasterMenu SET strMenuName = N'Comment Maintenance', strDescription 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Invoices from CSV' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = N'Import Transactions from CSV', strDescription = N'Import Transactions from CSV', strCommand = N'AccountsReceivable.view.ImportTransactionsCSV' WHERE strMenuName = 'Import Invoices from CSV' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)	
+UPDATE tblSMMasterMenu SET strMenuName = N'Tax Report Grid', strDescription = N'Tax Report Grid' WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND strCategory = N'Maintenance' AND intParentMenuID = @AccountsReceivableParentMenuId
 /*
 	Rename Menu Name from Sales Analysis Report  to Sales Analysis Reports
 	Rename Command to AccountsReceivable.view.SalesAnalysisReport
@@ -1315,9 +1318,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Batch Posting', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Batch Posting', N'Activity', N'Screen', N'i21.view.BatchPosting?module=Sales', N'small-menu-activity', 1, 0, 0, 1, 7, 1)
+	VALUES (N'Batch Posting', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Batch Posting', N'Activity', N'Screen', N'AccountsReceivable.view.BatchPostingSearch', N'small-menu-activity', 1, 0, 0, 1, 7, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'i21.view.BatchPosting?module=Sales' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'AccountsReceivable.view.BatchPostingSearch' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Printing' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1397,11 +1400,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Commissio
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'AccountsReceivable.view.CommissionSchedule' WHERE strMenuName = 'Commission Schedules' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)	
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Report Grid' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)	
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES ( N'Tax Report', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Tax Report', N'Maintenance', N'Screen', N'AccountsReceivable.view.TaxReport', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
+		VALUES ( N'Tax Report Grid', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Tax Report Grid', N'Maintenance', N'Screen', N'AccountsReceivable.view.TaxReport', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = N'Screen', strCommand = N'AccountsReceivable.view.TaxReport', intSort = 6, strCategory = N'Maintenance', strIcon = 'small-menu-maintenance' WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId	
+	UPDATE tblSMMasterMenu SET strType = N'Screen', strCommand = N'AccountsReceivable.view.TaxReport', intSort = 6, strCategory = N'Maintenance', strIcon = 'small-menu-maintenance' WHERE strMenuName = 'Tax Report Grid' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId	
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Analysis Reports' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -1454,6 +1457,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice H
 ELSE 
 	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Invoice History Report&direct=true' WHERE strMenuName = 'Invoice History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES ( N'Tax Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Tax Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Tax Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Sales&report=Tax Report&direct=true' WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+
 /* Start of Delete */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Memos' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Credit Memos' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
@@ -1466,6 +1475,8 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Payment History Report' AND str
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Unapplied Credits Register Report' AND strModuleName = 'Accounts Receivable' AND strCategory = 'Report' AND intParentMenuID = @AccountsReceivableParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Customer Statements Detail Report' AND strModuleName = 'Accounts Receivable' AND strCategory = 'Report' AND intParentMenuID = @AccountsReceivableParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History Report' AND strModuleName = 'Accounts Receivable' AND strCategory = 'Report' AND intParentMenuID = @AccountsReceivableParentMenuId
+
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 /* End of Delete */
 
 
@@ -2250,105 +2261,132 @@ ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'1098' WHERE strMenuName = '1098' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportParentMenuId
 
 /* SCALE INTERFACE */
-/* Rename Scale Interface to Scale */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Grain' AND intParentMenuID = 0)
-UPDATE tblSMMasterMenu SET strMenuName = N'Scale', strDescription = N'Scale' WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Grain' AND intParentMenuID = 0
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Grain' AND intParentMenuID = 0)
+/* Start of Remodule */
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Grain' AND intParentMenuID = 0)
+BEGIN
+	DECLARE @ScaleInterfaceOldParentMenuId INT
+	SELECT @ScaleInterfaceOldParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Grain' AND intParentMenuID = 0
+
+	UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Scale' AND strModuleName = 'Grain' AND intParentMenuID = 0
+	UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+	UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Ticket Pools' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+	UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+	UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+	UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Physical Scales' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+	UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Grading Equipment' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId)
+	BEGIN
+		DECLARE @ScaleInterfaceReportOldParentMenuId INT
+		SELECT @ScaleInterfaceReportOldParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+
+		UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Reports' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceOldParentMenuId
+		UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Grain' AND strType = 'Report' AND intParentMenuID = @ScaleInterfaceReportOldParentMenuId
+		UPDATE tblSMMasterMenu SET strModuleName = 'Scale' WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Grain' AND strType = 'Report' AND intParentMenuID = @ScaleInterfaceReportOldParentMenuId
+	END
+END
+/* End of Remodule */
+
+/* Rename Scale Interface to Scale */
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Scale' AND intParentMenuID = 0)
+UPDATE tblSMMasterMenu SET strMenuName = N'Scale', strDescription = N'Scale' WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Scale' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Scale', N'Grain', 0, N'Scale', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 16, 0)
+	VALUES (N'Scale', N'Scale', 0, N'Scale', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 16, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 16 WHERE strMenuName = 'Scale' AND strModuleName = 'Grain' AND intParentMenuID = 0
+	UPDATE tblSMMasterMenu SET intSort = 16 WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0
 
 DECLARE @ScaleInterfaceParentMenuId INT
-SELECT @ScaleInterfaceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Grain' AND intParentMenuID = 0
+SELECT @ScaleInterfaceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
     INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-    VALUES (N'Reports', N'Grain', @ScaleInterfaceParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
+    VALUES (N'Reports', N'Scale', @ScaleInterfaceParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
 ELSE
-    UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = NULL WHERE strMenuName = 'Reports' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+    UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = NULL WHERE strMenuName = 'Reports' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
 DECLARE @ScaleInterfaceReportParentMenuId INT
-SELECT @ScaleInterfaceReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+SELECT @ScaleInterfaceReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
 /* Start of Pluralize */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Ticket' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Scale Tickets', strDescription = 'Scale Tickets' WHERE strMenuName = 'Scale Ticket' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Ticket' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Scale Tickets', strDescription = 'Scale Tickets' WHERE strMenuName = 'Scale Ticket' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 /* Start of Pluralize */
 
 /* Start of Re-name */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Scale Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Physical Scales', strDescription = 'Physical Scales' WHERE strMenuName = 'Physical Scale Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Scale Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Physical Scales', strDescription = 'Physical Scales' WHERE strMenuName = 'Physical Scale Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grading Equipment Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Grading Equipment', strDescription = 'Grading Equipment' WHERE strMenuName = 'Grading Equipment Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grading Equipment Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Grading Equipment', strDescription = 'Grading Equipment' WHERE strMenuName = 'Grading Equipment Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Ticket Pools', strDescription = 'Ticket Pools' WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Ticket Pools', strDescription = 'Ticket Pools' WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 /* End of Re-name */
 
 /* Start of moving report */
-UPDATE tblSMMasterMenu SET intParentMenuID = @ScaleInterfaceReportParentMenuId WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Grain' AND strType = 'Report' AND intParentMenuID = @ScaleInterfaceParentMenuId
-UPDATE tblSMMasterMenu SET intParentMenuID = @ScaleInterfaceReportParentMenuId WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Grain' AND strType = 'Report' AND intParentMenuID = @ScaleInterfaceParentMenuId
+UPDATE tblSMMasterMenu SET intParentMenuID = @ScaleInterfaceReportParentMenuId WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Scale' AND strType = 'Report' AND intParentMenuID = @ScaleInterfaceParentMenuId
+UPDATE tblSMMasterMenu SET intParentMenuID = @ScaleInterfaceReportParentMenuId WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Scale' AND strType = 'Report' AND intParentMenuID = @ScaleInterfaceParentMenuId
 /* End of moving report */
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Scale Tickets', N'Grain', @ScaleInterfaceParentMenuId, N'Scale Tickets', N'Activity', N'Screen', N'Grain.view.ScaleStationSelection', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Scale Tickets', N'Scale', @ScaleInterfaceParentMenuId, N'Scale Tickets', N'Activity', N'Screen', N'Grain.view.ScaleStationSelection', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSelection', intSort = 0 WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSelection', intSort = 0 WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Pools' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Pools' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Ticket Pools', N'Grain', @ScaleInterfaceParentMenuId, N'Ticket Pools', N'Maintenance', N'Screen', N'Grain.view.TicketPool', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Ticket Pools', N'Scale', @ScaleInterfaceParentMenuId, N'Ticket Pools', N'Maintenance', N'Screen', N'Grain.view.TicketPool', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.TicketPool', intSort = 4 WHERE strMenuName = 'Ticket Pools' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.TicketPool', intSort = 4 WHERE strMenuName = 'Ticket Pools' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Scale Station Settings', N'Grain', @ScaleInterfaceParentMenuId, N'Scale Station Settings', N'Maintenance', N'Screen', N'Grain.view.ScaleStationSettings', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Scale Station Settings', N'Scale', @ScaleInterfaceParentMenuId, N'Scale Station Settings', N'Maintenance', N'Screen', N'Grain.view.ScaleStationSettings', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSettings', intSort = 5 WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSettings', intSort = 5 WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 --	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
---	VALUES (N'Storage Types', N'Grain', @ScaleInterfaceParentMenuId, N'Storage Type', N'Maintenance', N'Screen', N'Grain.view.StorageType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+--	VALUES (N'Storage Types', N'Scale', @ScaleInterfaceParentMenuId, N'Storage Type', N'Maintenance', N'Screen', N'Grain.view.StorageType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 --ELSE
---	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.StorageType', intSort = 0 WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+--	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.StorageType', intSort = 0 WHERE strMenuName = 'Storage Types' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Ticket Formats', N'Grain', @ScaleInterfaceParentMenuId, N'Ticket Format', N'Maintenance', N'Screen', N'Grain.view.TicketFormats', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Ticket Formats', N'Scale', @ScaleInterfaceParentMenuId, N'Ticket Format', N'Maintenance', N'Screen', N'Grain.view.TicketFormats', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.TicketFormats', intSort = 1 WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.TicketFormats', intSort = 1 WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Scales' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Scales' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Physical Scales', N'Grain', @ScaleInterfaceParentMenuId, N'Physical Scales', N'Maintenance', N'Screen', N'Grain.view.PhysicalScale', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Physical Scales', N'Scale', @ScaleInterfaceParentMenuId, N'Physical Scales', N'Maintenance', N'Screen', N'Grain.view.PhysicalScale', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.PhysicalScale',  intSort = 2 WHERE strMenuName = 'Physical Scales' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.PhysicalScale',  intSort = 2 WHERE strMenuName = 'Physical Scales' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grading Equipment' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grading Equipment' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Grading Equipment', N'Grain', @ScaleInterfaceParentMenuId, N'Grading Equipment', N'Maintenance', N'Screen', N'Grain.view.GradingEquipment', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Grading Equipment', N'Scale', @ScaleInterfaceParentMenuId, N'Grading Equipment', N'Maintenance', N'Screen', N'Grain.view.GradingEquipment', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.GradingEquipment', intSort = 3 WHERE strMenuName = 'Grading Equipment' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.GradingEquipment', intSort = 3 WHERE strMenuName = 'Grading Equipment' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceReportParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Scale Activity', N'Grain', @ScaleInterfaceReportParentMenuId, N'Scale Activity', N'Report', N'Report', N'Scale Activity Report', N'small-menu-report', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Scale Activity', N'Scale', @ScaleInterfaceReportParentMenuId, N'Scale Activity', N'Report', N'Report', N'Scale Activity Report', N'small-menu-report', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Scale Activity Report' WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Scale Activity Report' WHERE strMenuName = 'Scale Activity' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceReportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceReportParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Unsent Tickets', N'Grain', @ScaleInterfaceReportParentMenuId, N'Unsent Tickets', N'Report', N'Report', N'Unsent Tickets Report', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Unsent Tickets', N'Scale', @ScaleInterfaceReportParentMenuId, N'Unsent Tickets', N'Report', N'Report', N'Unsent Tickets Report', N'small-menu-report', 0, 0, 0, 1, 1, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Unsent Tickets Report' WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Unsent Tickets Report' WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceReportParentMenuId
 
 /* GRAINS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grain' AND strModuleName = 'Grain' AND intParentMenuID = 0)

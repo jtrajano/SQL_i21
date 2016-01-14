@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostRefund] 
-	@intRefundId INT = 11,
-	@ysnPosted BIT = 1,
-	@successfulCount INT = 0 OUTPUT ,
+	@intRefundId INT = NULL,
+	@ysnPosted BIT = NULL,
+	@intUserId INT = NULL,
+	@intAPClearingId INT = NULL,
+	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
 	@success BIT = 0 OUTPUT 
 AS
@@ -14,6 +16,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+BEGIN TRANSACTION -- START TRANSACTION
 
 ----=====================================================================================================================================
 ---- 	DECLARE TEMPORARY TABLES
@@ -36,15 +39,6 @@ DECLARE @error NVARCHAR(200)
 
 
 --=====================================================================================================================================
--- 	UPDATE REFUND TABLE
----------------------------------------------------------------------------------------------------------------------------------------
-
-	UPDATE tblPATRefund 
-	   SET ysnPosted = ISNULL(@ysnPosted,0)
-	  FROM tblPATRefund R
-	 WHERE R.intRefundId = @intRefundId
-
---=====================================================================================================================================
 --  GET REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
 	SELECT PR.intRefundId, PR.intFiscalYearId, PR.dtmRefundDate, PR.strRefund, PR.dblMinimumRefund, PR.dblServiceFee,
@@ -61,7 +55,9 @@ INNER JOIN tblPATRefundCategory PRCA
 		ON PRCA.intRefundCustomerId = PRC.intRefundCustomerId
 
 SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	
---COMMIT TRANSACTION --COMMIT inserted transaction
+
+COMMIT TRANSACTION --COMMIT inserted invalid transaction
+
 
 IF(@totalRecords = 0)  
 BEGIN
@@ -74,18 +70,47 @@ BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
---IF ISNULL(@ysnPosted,0) = 1
---BEGIN
---	INSERT INTO @GLEntries
---	SELECT * FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
---END
---ELSE
---BEGIN
---	INSERT INTO @GLEntries
---	SELECT * FROM dbo.fnAPReverseGLEntries(@validBillIds, 'Bill', DEFAULT, @userId, @batchId)
---END
+
+--=====================================================================================================================================
+-- 	UPDATE REFUND TABLE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+	UPDATE tblPATRefund 
+	   SET ysnPosted = ISNULL(@ysnPosted,0)
+	  FROM tblPATRefund R
+	 WHERE R.intRefundId = @intRefundId
+
+
+DECLARE @validRefundIds NVARCHAR(MAX)
+
+--CREATE TEMP GL ENTRIES
+SELECT DISTINCT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
+FROM #tmpRefundData
+ORDER BY 1
+
+IF ISNULL(@ysnPosted,0) = 1
+BEGIN
+	INSERT INTO @GLEntries
+		SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId)
+END
+ELSE
+BEGIN
+	INSERT INTO @GLEntries
+	SELECT * FROM dbo.fnPATReverseGLRefundEntries(@validRefundIds, DEFAULT, @intUserId)
+END
+
+BEGIN TRY
+EXEC uspGLBookEntries @GLEntries, @ysnPosted
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_MESSAGE()
+	RAISERROR(@error, 16, 1);
+	GOTO Post_Rollback
+END CATCH
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
+BEGIN TRANSACTION
+
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER EQUITY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -153,6 +178,4 @@ Post_Exit:
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
-
-
 GO

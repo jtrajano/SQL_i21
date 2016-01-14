@@ -190,10 +190,19 @@ BEGIN
 									'<TD>' + IsNull(@strCompanyName, '') + '<BR>' + IsNull(@strCompanyAddress, '') + '<BR>' + IsNull(@strCompanyCity, '') + ', ' + IsNull(@strCompanyState, '') + ' ' + IsNull(@strCompanyZip, '') + '</TD>' +
 								'</FONT></TR>'
 
+								IF IsNull(@strLocationName, '') <> ''
+								BEGIN
+	SET @strMailMessage =	@strMailMessage + 
+								'<TR><FONT face=tahoma size=2>' +
+									'<TD size=210> <B> Location: </B> </TD>' +
+									'<TD>' + IsNull(@strLocationName, '') + '</TD>' +
+								'</FONT></TR>'
+								END
+
 								IF IsNull(@strVendorName, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
-									'<TR><FONT face=tahoma size=2>' +
+								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Vendor: </B> </TD>' +
 									'<TD>' + IsNull(@strVendorName, '') + '<BR>' + IsNull(@strVendorLocationName, '') + '<BR>' + IsNull(@strVendorAddress, '') + '<BR>' + IsNull(@strVendorCity, '') + ', ' + IsNull(@strVendorState, '') + ' ' + IsNull(@strVendorZipCode, '') + '</TD>' +
 								'</FONT></TR>' +

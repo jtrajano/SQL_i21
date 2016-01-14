@@ -64,6 +64,18 @@ BEGIN
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT TOP 1
+			'Bank account is inactive.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblCMBankAccount B
+			ON A.intBankAccountId = B.intBankAccountId
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		AND B.ysnActive = 0
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT TOP 1
 			'Overpayment requires to have default AP account setup.',
 			'Payable',
 			A.strPaymentRecordNum,

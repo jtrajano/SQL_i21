@@ -425,3 +425,93 @@ UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strF
 UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Previous Year Period To Date' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Period To Date' AND strStartOffset IS NULL
 UPDATE tblFRColumnDesign SET strStartOffset = '0', strEndOffset = '0' WHERE strFilterType = 'Next Year Period To Date' AND strStartOffset IS NULL
+
+
+--=====================================================================================================================================
+-- 	ROW: DEFAULT DATA FOR ROW ACCOUNTS TYPE (strAccountsType)
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'DEFAULT DATA FOR ROW ACCOUNTS TYPE (strAccountsType)'
+GO
+
+CREATE TABLE #tempFRDGLAccount (
+		[strAccountType]	NVARCHAR(MAX)
+	);
+
+SELECT * INTO #tempFRDRowDesign FROM tblFRRowDesign WHERE strAccountsType IS NULL AND LEN(strAccountsUsed) > 3
+
+WHILE EXISTS(SELECT 1 FROM #tempFRDRowDesign)
+	BEGIN
+		DECLARE @RowDetailID INT  = (SELECT TOP 1 intRowDetailId FROM #tempFRDRowDesign)
+		DECLARE @AccountsUsed NVARCHAR(MAX)  = (SELECT TOP 1 strAccountsUsed FROM #tempFRDRowDesign)
+		DECLARE @queryString NVARCHAR(MAX) = ''
+
+		SET @queryString = 'SELECT TOP 1 strAccountType FROM vyuGLAccountView where ' + REPLACE(REPLACE(REPLACE(REPLACE(@AccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ORDER BY strAccountId'
+
+		BEGIN TRY
+			INSERT INTO #tempFRDGLAccount
+			EXEC (@queryString)
+		END TRY
+		BEGIN CATCH
+		END CATCH;
+
+		IF((ISNULL((SELECT TOP 1 1 FROM #tempFRDGLAccount),0) < 1) and (CHARINDEX('strAccountGroup',@queryString) > 0) and (CHARINDEX(' Or ',@queryString) < 1))
+		BEGIN
+			SET @queryString = 'SELECT TOP 1 strAccountType FROM tblGLAccountGroup where ' + REPLACE(REPLACE(REPLACE(REPLACE(@AccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription')
+
+			BEGIN TRY
+				INSERT INTO #tempFRDGLAccount
+				EXEC (@queryString)
+			END TRY
+			BEGIN CATCH
+			END CATCH;
+		END
+		
+		IF(ISNULL((SELECT TOP 1 1 FROM #tempFRDGLAccount),0) < 1)
+		BEGIN
+			UPDATE tblFRRowDesign SET strAccountsType = 'BS' WHERE intRowDetailId = @RowDetailID
+		END
+
+		WHILE EXISTS(SELECT 1 FROM #tempFRDGLAccount)
+		BEGIN
+			DECLARE @strAccountType NVARCHAR(MAX) = ''
+			SELECT TOP 1 @strAccountType = [strAccountType] FROM #tempFRDGLAccount
+
+			IF(@strAccountType = 'Asset')
+			BEGIN
+				UPDATE tblFRRowDesign SET strAccountsType = 'BS' WHERE intRowDetailId = @RowDetailID
+			END
+			ELSE IF(@strAccountType = 'Equity')
+			BEGIN
+				UPDATE tblFRRowDesign SET strAccountsType = 'BS' WHERE intRowDetailId = @RowDetailID
+			END
+			ELSE IF(@strAccountType = 'Expense')
+			BEGIN
+				UPDATE tblFRRowDesign SET strAccountsType = 'IS' WHERE intRowDetailId = @RowDetailID
+			END
+			ELSE IF(@strAccountType = 'Liability')
+			BEGIN
+				UPDATE tblFRRowDesign SET strAccountsType = 'BS' WHERE intRowDetailId = @RowDetailID
+			END
+			ELSE IF(@strAccountType = 'Revenue')
+			BEGIN
+				UPDATE tblFRRowDesign SET strAccountsType = 'IS' WHERE intRowDetailId = @RowDetailID
+			END
+			ELSE
+			BEGIN
+				UPDATE tblFRRowDesign SET strAccountsType = '' WHERE intRowDetailId = @RowDetailID
+			END
+			
+			DELETE #tempFRDGLAccount
+		END
+
+		DELETE #tempFRDRowDesign WHERE intRowDetailId = @RowDetailID
+	END
+	
+DROP TABLE #tempFRDRowDesign
+DROP TABLE #tempFRDGLAccount
+
+GO
+	PRINT N'DEFAULT DATA FOR ROW ACCOUNTS TYPE (strAccountsType)'
+GO

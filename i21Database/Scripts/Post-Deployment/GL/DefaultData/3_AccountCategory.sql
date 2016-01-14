@@ -101,7 +101,8 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 53,name = 'Vendor Prepayments'UNION ALL 
 			SELECT id = 54,name = 'Customer Prepayments'UNION ALL 
 			SELECT id = 55,name = 'Other Charge Expense'UNION ALL 
-			SELECT id = 56,name = 'Other Charge Income'
+			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
+			SELECT id = 57,name = 'Maintenance Sales' 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
 
@@ -163,7 +164,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
 		--REMOVE EXCESS
-		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 56
+		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 57
 	END
 	COMMIT TRANSACTION
 END TRY
@@ -288,6 +289,12 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income'
+	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Maintenance Sales')
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Maintenance Sales'
 	END
 	
 END

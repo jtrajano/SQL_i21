@@ -15,6 +15,7 @@
 	[ysnPrice] BIT NULL DEFAULT ((0)),
 	[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblAmountPriced] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryReceiptCharge] PRIMARY KEY ([intInventoryReceiptChargeId]), 

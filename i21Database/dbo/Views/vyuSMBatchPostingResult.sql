@@ -14,10 +14,10 @@ FROM
 	SELECT intResult as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
 	FROM tblGLPostResult
 	UNION ALL
-	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, strTransactionType, NULL
+	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, CASE WHEN strTransactionType = 'Bill' THEN 'Voucher' ELSE strTransactionType END, NULL
 	FROM tblAPPostResult
 	UNION ALL
 	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, strTransactionType, NULL
 	FROM tblARPostResult
-) BatchPostingResult
+) BatchPostingResult	
 WHERE strDescription IS NOT NULL

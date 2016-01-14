@@ -41,45 +41,19 @@ AS
 			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
 			SELECT E.intEntityCustomerId, C.intServiceChargeId FROM vyuARCustomerSearch E
 				INNER JOIN tblARCustomer C ON E.intEntityCustomerId = C.intEntityCustomerId
-				WHERE E.ysnActive = 1
-				  AND (C.intServiceChargeId <> 0
-				  OR C.intServiceChargeId IS NOT NULL)
+				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
-			DECLARE @customerId INT,
-					@pos INT
-			
-			SELECT @customerIds = @customerIds + ','
-			WHILE CHARINDEX(',', @customerIds) > 0
-			BEGIN
-				SELECT @pos  = CHARINDEX(',', @customerIds)  
-				SELECT @customerId = SUBSTRING(@customerIds, 1, @pos-1)
-
-				INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId = @customerId AND (intServiceChargeId <> 0 OR intServiceChargeId IS NOT NULL)
-
-				SELECT @customerIds = SUBSTRING(@customerIds, @pos + 1, LEN(@customerIds) - @pos)
-			END			
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId)
+			SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
 	IF (@statusIds <> '')
 		BEGIN
-			DECLARE @statusId INT,
-					@pos2 INT
-			
-			SELECT @statusIds = @statusIds + ','
-			WHILE CHARINDEX(',', @statusIds) > 0
-			BEGIN
-				SELECT @pos2  = CHARINDEX(',', @statusIds)  				
-				SELECT @statusId = CONVERT(INT, SUBSTRING(@statusIds, 1, @pos2-1))
-
-				INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intAccountStatusId = @statusId AND (intServiceChargeId <> 0 OR intServiceChargeId IS NOT NULL)
-
-				SELECT @statusIds = SUBSTRING(@statusIds, @pos2 + 1, LEN(@statusIds) - @pos2)
-			END
+			DELETE FROM #tmpCustomers
+			WHERE intEntityId NOT IN (SELECT intEntityCustomerId FROM tblARCustomer WHERE intAccountStatusId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@statusIds)))
 		END
 
 	--PROCESS EACH CUSTOMER
@@ -100,16 +74,18 @@ AS
 							--GET AMOUNT DUE PER INVOICE
 							INSERT INTO @tblTypeServiceCharge
 							SELECT intInvoiceId
+								 , NULL
 								 , @entityId
 								 , strInvoiceNumber
+								 , NULL
 								 , dblAmountDue
 								 , dblTotalAmount = CASE WHEN strCalculationType = 'Percent'
 														THEN
 															CASE WHEN dblServiceChargeAPR > 0
 																THEN
-																	CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue
+																	CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END, @asOfDate) * dblAmountDue
 								  										THEN dblMinimumCharge
-								  										ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue)
+								  										ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END, @asOfDate) * dblAmountDue)
 																	END
 																ELSE 0
 															END
@@ -124,24 +100,59 @@ AS
 							  AND I.strTransactionType = 'Invoice'
 							  AND I.strType = 'Standard'
 							  AND I.intEntityCustomerId = @entityId
-							  AND DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) > intGracePeriod
-							  AND I.ysnCalculated = 0
+							  AND CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END > intGracePeriod
+							  AND (I.ysnCalculated = 0 OR I.ysnForgiven = 1)
+
+							IF ISNULL(@isIncludeBudget, 0) = 1
+								BEGIN
+									INSERT INTO @tblTypeServiceCharge
+									SELECT NULL
+										 , CB.intCustomerBudgetId
+										 , CB.intEntityCustomerId
+										 , NULL
+										 , 'Customer Budget For: ' + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)     
+										 , CB.dblBudgetAmount				
+										 , dblTotalAmount = CASE WHEN strCalculationType = 'Percent'
+																THEN
+																	CASE WHEN dblServiceChargeAPR > 0
+																		THEN
+																			CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) * CB.dblBudgetAmount
+																					THEN dblMinimumCharge
+																					ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) * CB.dblBudgetAmount)
+																			END
+																		ELSE 0
+																	END
+																ELSE 
+																	dblPercentage
+															END
+									FROM tblARCustomerBudget CB
+										INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId	
+										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
+										INNER JOIN tblEntityLocation EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
+									WHERE CB.intEntityCustomerId = @entityId
+										AND dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId) <= @asOfDate
+										AND CB.dblBudgetAmount > 0.000000
+										AND DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) > intGracePeriod
+										AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
+								END
 						END
 					ELSE
 						BEGIN
 							--GET AMOUNT DUE PER CUSTOMER
 							INSERT INTO @tblTypeServiceCharge
 							SELECT NULL
+							     , NULL
 							     , @entityId
 								 , 'Customer Balance'
+								 , NULL
 								 , dblAmountDue = SUM(dblAmountDue)
 								 , dblTotalAmount = SUM(CASE WHEN strCalculationType = 'Percent'
 													    	THEN 
 													    		CASE WHEN dblServiceChargeAPR > 0
 																THEN
-																	CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue
+																	CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END, @asOfDate) * dblAmountDue
 								  										THEN dblMinimumCharge
-								  										ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue)
+								  										ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END, @asOfDate) * dblAmountDue)
 																	END
 																ELSE 0
 															END
@@ -156,9 +167,43 @@ AS
 							  AND I.strTransactionType = 'Invoice'
 							  AND I.strType = 'Standard'
 							  AND I.intEntityCustomerId = @entityId
-							  AND DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) > intGracePeriod
-							  AND I.ysnCalculated = 0
+							  AND CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END > intGracePeriod
+							  AND (I.ysnCalculated = 0 OR I.ysnForgiven = 1)
 							GROUP BY I.intEntityCustomerId
+
+							IF ISNULL(@isIncludeBudget, 0) = 1
+								BEGIN
+									INSERT INTO @tblTypeServiceCharge
+									SELECT NULL
+									     , NULL
+										 , CB.intEntityCustomerId
+										 , NULL
+										 , 'Customer Budget Due As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
+										 , SUM(CB.dblBudgetAmount)
+										 , dblTotalAmount = SUM(CASE WHEN strCalculationType = 'Percent'
+																THEN
+																	CASE WHEN dblServiceChargeAPR > 0
+																		THEN
+																			CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) * CB.dblBudgetAmount
+																					THEN dblMinimumCharge
+																					ELSE (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) * CB.dblBudgetAmount)
+																			END
+																		ELSE 0
+																	END
+																ELSE 
+																	dblPercentage
+															END)
+									FROM tblARCustomerBudget CB
+										INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId	
+										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
+										INNER JOIN tblEntityLocation EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
+									WHERE CB.intEntityCustomerId = @entityId
+										AND dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId) <= @asOfDate
+										AND CB.dblBudgetAmount > 0.000000
+										AND DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId), @asOfDate) > intGracePeriod
+										AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
+									GROUP BY CB.intEntityCustomerId
+								END
 						END
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)

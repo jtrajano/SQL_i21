@@ -13,6 +13,7 @@ DECLARE @intRowDetailId INT
 DECLARE @intRefNo INT = 1
 DECLARE @intSort INT = 1
 DECLARE @strRelatedRows NVARCHAR(MAX) = ''
+DECLARE @strREAccount NVARCHAR(MAX) = ''
 
 DECLARE @intRowDetailId_Liability INT
 DECLARE @intRowDetailId_Equity INT
@@ -30,7 +31,7 @@ CREATE TABLE #tmpRelatedRows (
 	[strAction] [nvarchar](10)
 );
 
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Column Name',	'',	'', '',	'',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Column Name',	'',	'', '',	'',	'',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 SET @intRefNo = @intRefNo + 1
 SET @intSort = @intSort + 1;
@@ -48,30 +49,47 @@ BEGIN
 	
 	DECLARE @BalanceSide NVARCHAR(50)
 	DECLARE @strAccountType NVARCHAR(50)
+	DECLARE @strAccountsType_Row NVARCHAR(50)
 
 	SELECT TOP 1 @strAccountType = AccountType, @BalanceSide = BalanceSide FROM #TempAccountType ORDER BY cntID
 	SELECT * INTO #TempGLAccount FROM vyuGLAccountView where strAccountType = @strAccountType ORDER BY strAccountId
 	
-	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType, 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType, 'Row Name - Left Align', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 	
 	SET @intRefNo = @intRefNo + 1
 	SET @intSort = @intSort + 1
+
+	IF(@strAccountType = 'Asset' OR @strAccountType = 'Liability' OR @strAccountType = 'Equity')
+	BEGIN
+		SET @strAccountsType_Row = 'BS'
+	END
+	ELSE IF(@strAccountType = 'Revenue' OR @strAccountType = 'Expense')
+	BEGIN
+		SET @strAccountsType_Row = 'IS'
+	END
 
 	WHILE EXISTS(SELECT 1 FROM #TempGLAccount)
 	BEGIN
 
 		DECLARE @strAccountId NVARCHAR(150)
 		DECLARE @strAccountDescription NVARCHAR(500)
+		DECLARE @strAccountGroup NVARCHAR(250)
 
 		DECLARE @strRowDescription NVARCHAR(500)
 		DECLARE @strRowFilter NVARCHAR(500)
+		DECLARE @rowType NVARCHAR(50) = 'Filter Accounts'
 
-		SELECT TOP 1 @strAccountId = strAccountId, @strAccountDescription = strDescription FROM #TempGLAccount ORDER BY strAccountId
+		SELECT TOP 1 @strAccountId = strAccountId, @strAccountDescription = strDescription, @strAccountGroup = strAccountGroup FROM #TempGLAccount ORDER BY strAccountId
 
 		SET @strRowDescription = '     ' + @strAccountId + ' - ' + REPLACE(@strAccountDescription,'''','')
 		SET @strRowFilter = '[ID] = ''' + @strAccountId + ''''
 
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+		IF(@strAccountGroup = 'Retained Earnings')
+		BEGIN
+			SET @rowType = 'Retained Earnings'
+		END		
+
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, @rowType, @BalanceSide, 'Column', '', @strRowFilter, @strAccountsType_Row, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 		
 		SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
@@ -96,14 +114,14 @@ BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1			
 
 				SET @strRowDescription = '          Total ' + REPLACE(REPLACE(@strAccountType,'Asset','Assets'),'Liability','Liabilities') + ' :'
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 1, @intSort	
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Row Calculation', '', '', @strRelatedRows, '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 1, @intSort	
 				
 				SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
@@ -123,13 +141,13 @@ BEGIN
 
 				IF(@strAccountType != 'Liability' and @strAccountType != 'Equity')
 				BEGIN
-					EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
+					EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
 				
 					SET @intRefNo = @intRefNo + 1
 					SET @intSort = @intSort + 1
 				END			
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
 								
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1	
@@ -167,10 +185,19 @@ BEGIN
 	DECLARE @strAccountType_Hidden NVARCHAR(50)
 
 	SELECT TOP 1 @strAccountType_Hidden = AccountType, @BalanceSide_Hidden = BalanceSide FROM #TempAccountType_Hidden ORDER BY cntID
+
+	IF(@strAccountType_Hidden = 'Asset' OR @strAccountType_Hidden = 'Liability' OR @strAccountType_Hidden = 'Equity')
+	BEGIN
+		SET @strAccountsType_Row = 'BS'
+	END
+	ELSE IF(@strAccountType_Hidden = 'Revenue' OR @strAccountType_Hidden = 'Expense')
+	BEGIN
+		SET @strAccountsType_Row = 'IS'
+	END	
 	
 	SET @strRowFilter_Hidden = '[Type] = ''' + @strAccountType_Hidden + ''''
 
-	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType_Hidden, 'Hidden', @BalanceSide_Hidden, '', '', @strRowFilter_Hidden, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort		
+	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType_Hidden, 'Current Year Earnings', @BalanceSide_Hidden, 'Column', '', @strRowFilter_Hidden, @strAccountsType_Row, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort		
 
 	SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
@@ -195,13 +222,13 @@ BEGIN
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1
 
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 			
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1			
 
 			-- Current Year Earning
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Current Year Earning :', 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 1, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Current Year Earning :', 'Row Calculation', '', '', @strRelatedRows, '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 1, @intSort
 			
 			SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 			SET @intRowDetailId_CY = @intRowDetailId
@@ -210,14 +237,14 @@ BEGIN
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1
 
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 			
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1
 
 			-- Total Equity
 			SET @strRowFilter_Hidden = 'R' + CAST(@intRefNo_Equity as NVARCHAR(25)) + ' + R' + CAST(@intRefNo_CY as NVARCHAR(25))
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '          Total Equity :', 'Row Calculation', '', '', @strRowFilter_Hidden, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '          Total Equity :', 'Row Calculation', '', '', @strRowFilter_Hidden, '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
 						
 			SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 			SET @intRowDetailId_TotalEquity = @intRowDetailId
@@ -229,14 +256,14 @@ BEGIN
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1	
 
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 			
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1
 			
 			-- Total Liabilities and Equity
 			SET @strRowFilter_Hidden = 'R' + CAST(@intRefNo_Liability as NVARCHAR(25)) + ' + R' + CAST(@intRefNo_TotalEquity as NVARCHAR(25))
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '          Total Liabilities and Equity :', 'Row Calculation', '', '', @strRowFilter_Hidden, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '          Total Liabilities and Equity :', 'Row Calculation', '', '', @strRowFilter_Hidden, '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
 			
 			SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 			
@@ -246,13 +273,13 @@ BEGIN
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1	
 
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1	
 			SET @strRelatedRows = ''
 
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 		END	
 END

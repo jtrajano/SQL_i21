@@ -134,26 +134,7 @@ BEGIN
 		ORDER BY dtmDate ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 		-- ORDER BY intInventoryTransactionId ASC 
 
-		-- Detect if the transaction is posted or not. 
-		BEGIN 
-			SET @ysnPost = 1 
-
-			SELECT	@strTransactionId = 
-						CASE	WHEN RTRIM(LTRIM(ISNULL(@strTransactionId, ''))) <> '' THEN 
-									@strTransactionId 
-								ELSE 
-									ICType.strName + '-' + CAST(@intTransactionId AS NVARCHAR(10))  
-						END
-			FROM	dbo.tblICInventoryTransactionType ICType
-			WHERE	intTransactionTypeId = @intTransactionTypeId
-
-			SELECT	@ysnPost = 0 
-			FROM	#tmpICPostedTransactions
-			WHERE	strTransactionId = @strTransactionId
-		END 
-
 		-- Run the post routine. 
-		IF ISNULL(@ysnPost, 1) = 1
 		BEGIN 
 			PRINT 'Posting ' + @strBatchId
 
@@ -185,7 +166,8 @@ BEGIN
 
 			DELETE FROM @ItemsToPost
 
-			IF @strTransactionForm IN ('Consume', 'Produce') 
+			--IF @strTransactionForm IN ('Consume', 'Produce') 
+			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -227,7 +209,11 @@ BEGIN
 						,strActualCostId = NULL 
 				FROM	#tmpICInventoryTransaction
 				WHERE	strBatchId = @strBatchId
-						AND strTransactionForm = 'Consume'
+						AND (
+							strTransactionForm = 'Consume'
+							OR intTransactionTypeId = 8 
+						)
+
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -282,7 +268,10 @@ BEGIN
 						,strActualCostId = NULL 
 				FROM	#tmpICInventoryTransaction
 				WHERE	strBatchId = @strBatchId
-						AND strTransactionForm = 'Produce'
+						AND (
+							strTransactionForm = 'Produce'
+							OR intTransactionTypeId = 9
+						)
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -371,12 +360,14 @@ BEGIN
 						,dblQty  
 						,dblUOMQty  
 						,dblCost = (
-								SELECT	dblCost 
+								SELECT	TOP 1 dblCost 
 								FROM	dbo.tblICInventoryTransaction 
 								WHERE	strTransactionId = @strTransactionId 
 										AND strBatchId = @strBatchId
+										AND intItemId = #tmpICInventoryTransaction.intItemId
+										AND intTransactionDetailId = #tmpICInventoryTransaction.intTransactionDetailId
 										AND dblQty < 0 
-										AND ysnIsUnposted = 0 
+										AND ISNULL(ysnIsUnposted, 0) = 0 
 						) 
 						,dblSalesPrice  
 						,intCurrencyId  
@@ -531,52 +522,6 @@ BEGIN
 				WHERE	strTransactionType = 'Produce'
 			END 							
 		END 
-
-		ELSE IF @ysnPost = 0 
-		BEGIN 
-			PRINT 'Unposting ' + @strBatchId
-
-			-- Unpost and re-create the Unpost G/L entries. 
-			DELETE FROM @GLEntries
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-			)	
-			EXEC [dbo].[uspICUnpostCosting]
-				@intTransactionId = @intTransactionId 
-				,@strTransactionId = @strTransactionId 
-				,@strBatchId = @strBatchId 
-				,@intEntityUserSecurityId = @intUserId 
-		END 		
 
 		-- Book the G/L Entries
 		BEGIN 

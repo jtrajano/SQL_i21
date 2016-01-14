@@ -20,6 +20,7 @@ BEGIN
 		SET A.dtmDate = @billDate
 		,dtmDueDate = dbo.fnGetDueDateBasedOnTerm(@billDate, A.intTermsId)
 		,intTransactionType = 1
+		,strVendorOrderNumber = A.strBillId
 	FROM tblAPBill A
 	WHERE intBillId = @billCreatedPrimaryKey
 

@@ -39,7 +39,12 @@ UPDATE A
 	,dblWithheld = 0
 	,strVendorOrderNumber = NULL
 	,strBillId = @generatedBillRecordId
+	,strReference = A.strReference + ' Duplicate of ' + A.strBillId
 	,intEntityId = @userId
+	,ysnApproved = 0
+	,ysnForApproval = CASE WHEN A.ysnForApprovalSubmitted = 1 OR dtmApprovalDate IS NOT NULL THEN 1 ELSE 0 END
+	,A.ysnForApprovalSubmitted = 0
+	,dtmApprovalDate = NULL
 FROM #tmpDuplicateBill A
 
 --INSERT INTO tblAPBill(

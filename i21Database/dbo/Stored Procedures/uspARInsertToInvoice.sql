@@ -53,6 +53,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							ysnIsInventory				BIT,
 							strItemDescription			NVARCHAR(100),
 							intItemUOMId				INT,
+							dblQtyOrdered				NUMERIC(18,6),
 							dblQtyRemaining				NUMERIC(18,6),
 							dblMaintenanceAmount		NUMERIC(18,6),
 							dblDiscount					NUMERIC(18,6),
@@ -80,6 +81,7 @@ SELECT SI.intItemId
 	 , dbo.fnIsStockTrackingItem(SI.intItemId)
 	 , SI.strItemDescription
 	 , SI.intItemUOMId
+	 , SI.dblQtyOrdered
 	 , SI.dblQtyRemaining
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , SI.dblDiscount
@@ -104,6 +106,7 @@ SELECT ICSI.intItemId
 	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
 	 , SOD.strItemDescription
 	 , ICSI.intItemUOMId
+	 , ICSI.dblQuantity
 	 , ICSI.dblQuantity
 	 , @dblZeroAmount
 	 , SOD.dblDiscount
@@ -417,6 +420,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@NewDetailId			INT,
 						@ItemDescription		NVARCHAR(100),
 						@ItemUOMId				INT,
+						@ItemQtyOrdered			NUMERIC(18,6),
 						@ItemQtyShipped			NUMERIC(18,6),
 						@ItemDiscount			NUMERIC(18,6),
 						@ItemPrice				NUMERIC(18,6),
@@ -432,6 +436,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@ItemIsInventory		= ysnIsInventory,
 						@ItemDescription		= strItemDescription,
 						@ItemUOMId				= intItemUOMId,
+						@ItemQtyOrdered			= dblQtyOrdered,
 						@ItemQtyShipped			= dblQtyRemaining,
 						@ItemDiscount			= dblDiscount,
 						@ItemPrice				= dblPrice,
@@ -451,7 +456,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 							,@RaiseError					= @RaiseError
 							,@ItemDescription				= @ItemDescription
 							,@ItemUOMId						= @ItemUOMId
-							,@ItemQtyOrdered				= @ItemQtyShipped
+							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice

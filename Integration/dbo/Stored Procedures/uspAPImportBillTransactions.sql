@@ -47,6 +47,16 @@ BEGIN
 		END
 
 		--Validate GL Account
+		IF (EXISTS(
+			SELECT 1 FROM apcbkmst A INNER JOIN aptrxmst B ON A.apcbk_no = B.aptrx_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
+			UNION ALL
+			SELECT 1 FROM apcbkmst A INNER JOIN apivcmst B ON A.apcbk_no = B.apivc_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
+			)
+		)
+		BEGIN
+			RAISERROR(''Invalid AP Account found in origin table apcbkmst. Please call iRely assistance.'', 16, 1);
+		END
+
 		IF EXISTS(SELECT 1 FROM apcbkmst A
 		WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
 		UNION ALL

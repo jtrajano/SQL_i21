@@ -93,8 +93,8 @@ SET strQuery = '
 		J.vwsls_name as strDriverName,
 		J.vwsls_slsmn_id as strDriverID,
 		(Select tt.strFillMethod From tblTMFillMethod tt Where tt.intFillMethodId = C.intFillMethodId) As strFillMethod, 
-		G.vwitm_no as strProductID,
-		G.vwitm_desc as strProductDescription,
+		ISNULL(M.vwitm_no,G.vwitm_no) as strProductID,
+		ISNULL(M.vwitm_desc,G.vwitm_desc) as strProductDescription,
 		(Select r.strRouteId FROM tblTMRoute r WHERE r.intRouteId = C.intRouteId) as strRouteId,
 		(CASE WHEN ISNumeric(C.strLocation) = 1 THEN
 		C.strLocation
@@ -113,6 +113,8 @@ SET strQuery = '
 		Left Join vwitmmst G On C.intProduct = G.A4GLIdentity 
 			AND G.vwitm_loc_no COLLATE Latin1_General_CI_AS = L.vwloc_loc_no COLLATE Latin1_General_CI_AS
 		Left Join vwtrmmst I On F.intDeliveryTermID = I.vwtrm_key_n
+		Left Join vwitmmst M On F.intSubstituteProductID = M.A4GLIdentity 
+			AND M.vwitm_loc_no COLLATE Latin1_General_CI_AS = L.vwloc_loc_no COLLATE Latin1_General_CI_AS
 		Left Join tblTMClock H On H.intClockID = C.intClockID
 		LEFT JOIN vwslsmst J ON J.A4GLIdentity = F.intDriverID 
 		LEFT JOIN vwlclmst K

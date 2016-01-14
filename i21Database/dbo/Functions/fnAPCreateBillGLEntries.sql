@@ -151,7 +151,7 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) 
 												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
-														ELSE B.dblTotal + ISNULL(Taxes.dblTotalICTax, 0) END) --IC Tax
+														ELSE B.dblTotal + CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) END) --IC Tax
 												END), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -203,10 +203,13 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	[dbo].[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'),
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
-												ELSE D.dblAmount
-												END), --Bill Detail
+		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.intAccountId
+												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
+		[dblDebit]						=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
+												ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
+														ELSE D.dblAmount
+													END)
+											END, --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -246,11 +249,11 @@ BEGIN
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-			INNER JOIN tblICInventoryReceiptItemAllocatedCharge D
+			LEFT JOIN tblICInventoryReceiptItemAllocatedCharge D
 				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
-			INNER JOIN tblICInventoryReceiptItem E
+			LEFT JOIN tblICInventoryReceiptItem E
 				ON D.intInventoryReceiptItemId = E.intInventoryReceiptItemId
-			INNER JOIN tblICItem F
+			LEFT JOIN tblICItem F
 				ON E.intItemId = F.intItemId
 	WHERE B.intInventoryReceiptChargeId IS NOT NULL
 	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)

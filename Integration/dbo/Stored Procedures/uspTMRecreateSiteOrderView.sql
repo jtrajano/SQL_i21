@@ -95,6 +95,7 @@ BEGIN
 				ON A.intProduct = F.A4GLIdentity
 			LEFT JOIN tblTMDispatch G
 				ON A.intSiteID = G.intSiteID
+			WHERE A.ysnActive = 1
 			')	
 		END	
 
@@ -167,6 +168,7 @@ BEGIN
 				ON D.intCategoryId = H.intCategoryId	
 			INNER JOIN vwcusmst I
 				ON B.intCustomerNumber = I.A4GLIdentity
+			WHERE A.ysnActive = 1
 			
 		')
 	END
