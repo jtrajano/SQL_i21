@@ -2191,25 +2191,28 @@ SET @invalidCount = @totalInvalid
 IF @raiseError = 0
 	COMMIT TRANSACTION
 
-	--Update Customer's Budget 
-	DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)
-	
-	INSERT INTO @tblPaymentsToUpdateBudget
-	SELECT intPaymentId FROM @ARReceivablePostData
-
-	WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
+	IF @recap = 0
 		BEGIN
-			DECLARE @paymentToUpdate INT,
-					@customerId		 INT
+			--Update Customer's Budget 
+			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)
+	
+			INSERT INTO @tblPaymentsToUpdateBudget
+			SELECT intPaymentId FROM @ARReceivablePostData
 
-			SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
-			SELECT @customerId = intEntityCustomerId FROM tblARPayment WHERE intPaymentId = @paymentToUpdate
+			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
+				BEGIN
+					DECLARE @paymentToUpdate INT,
+							@customerId		 INT
+
+					SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
+					SELECT @customerId = intEntityCustomerId FROM tblARPayment WHERE intPaymentId = @paymentToUpdate
 			
-			EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @post
-			EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
+					EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @post
+					EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
 
-			DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
-		END
+					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
+				END
+		END	
 RETURN 1;
 
 Do_Rollback:
