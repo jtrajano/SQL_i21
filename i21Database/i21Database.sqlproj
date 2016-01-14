@@ -170,6 +170,8 @@
     <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\TR" />
     <Folder Include="Scripts\Utility\IC\Repost Costing\WM\" />
+    <Folder Include="Scripts\Post-Deployment\PR\Reports" />
+    <Folder Include="Scripts\Post-Deployment\PR\Reports\SubReports" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3144,6 +3146,10 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
     <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
     <Build Include="dbo\Views\vyuARBatchPostingTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckDeductionSubReport.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckEarningSubReport.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckTaxSubReport.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckMiddle.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
