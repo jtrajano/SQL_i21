@@ -348,6 +348,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strStorageUnitType",
+                                                "enableDrillDown": true,
                                                 "fieldLabel": "Storage Unit Type",
                                                 "itemId": "cboUnitType",
                                                 "labelWidth": 110,
@@ -359,13 +360,19 @@
                                             },
                                             "name": "MyComboBox23",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "299c94e1-a7c7-470d-9e95-dfbd6ddbcd73",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -408,6 +415,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strLocationName",
+                                                "enableDrillDown": true,
                                                 "fieldLabel": "Location",
                                                 "itemId": "cboLocation",
                                                 "labelWidth": 110,
@@ -420,13 +428,19 @@
                                             },
                                             "name": "MyComboBox26",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "11429a2e-4738-4280-8132-7ce711a02135",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -469,6 +483,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strSubLocationName",
+                                                "enableDrillDown": true,
                                                 "fieldLabel": "Sub Location",
                                                 "itemId": "cboSubLocation",
                                                 "labelWidth": 110,
@@ -481,13 +496,19 @@
                                             },
                                             "name": "MyComboBox21",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "602f6fa5-4e52-443c-b370-5a23713f60ee",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -960,6 +981,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCommodityCode",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Commodity",
                                                         "itemId": "cboCommodity",
                                                         "labelWidth": 105,
@@ -971,13 +993,19 @@
                                                     },
                                                     "name": "MyComboBox7",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "31787237-f06e-4742-903a-0e4c3573d3ce",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -1273,7 +1301,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter154",
+                                                    "name": "filter139",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1551,7 +1579,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter155",
+                                                    "name": "filter140",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1749,7 +1777,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter156",
+                                                    "name": "filter141",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1936,7 +1964,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter157",
+                                                    "name": "filter142",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2106,7 +2134,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging124",
+                    "name": "statusbarpaging17",
                     "designerId": "007a0d4c-2515-4998-91ed-043de4f99d12",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

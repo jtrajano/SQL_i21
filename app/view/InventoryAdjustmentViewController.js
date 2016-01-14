@@ -16,7 +16,39 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
                 //{dataIndex: 'strAdjustmentType', text: 'Adjustment Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'dtmAdjustmentDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'ysnPosted',text: 'Posted', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
+                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
+            ],
+            buttons: [
+                {
+                    text: 'Items',
+                    itemId: 'btnItem',
+                    clickHandler: 'onItemClick',
+                    width: 80
+                },
+                {
+                    text: 'Categories',
+                    itemId: 'btnCategory',
+                    clickHandler: 'onCategoryClick',
+                    width: 100
+                },
+                {
+                    text: 'Commodities',
+                    itemId: 'btnCommodity',
+                    clickHandler: 'onCommodityClick',
+                    width: 100
+                },
+                {
+                    text: 'Locations',
+                    itemId: 'btnLocation',
+                    clickHandler: 'onLocationClick',
+                    width: 100
+                },
+                {
+                    text: 'Storage Locations',
+                    itemId: 'btnStorageLocation',
+                    clickHandler: 'onStorageLocationClick',
+                    width: 110
+                }
             ]
         },
         binding: {
@@ -235,11 +267,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     hidden: '{formulaHideColumn_colWeightUOM}',
                     editor: {
                         store: '{weightUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryAdjustment.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
@@ -248,11 +282,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     hidden: '{formulaHideColumn_colNewWeightUOM}',
                     editor: {
                         store: '{newWeightUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryAdjustment.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
@@ -284,11 +320,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     hidden: '{formulaHideColumn_colNewItemNumber}',
                     editor: {
                         store: '{newItem}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
@@ -386,14 +424,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    setupContext : function(options){
+    setupContext: function (options) {
         var me = this,
             win = options.window,
             store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 });
 
         win.context = Ext.create('iRely.mvvm.Engine', {
-            window : win,
-            store  : store,
+            window: win,
+            store: store,
             include: 'tblICInventoryAdjustmentDetails.tblSMCompanyLocationSubLocation, ' +
                 'tblICInventoryAdjustmentDetails.tblICStorageLocation, ' +
                 'tblICInventoryAdjustmentDetails.Item, ' +
@@ -409,8 +447,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 'tblICInventoryAdjustmentDetails.NewLocation, ' +
                 'tblICInventoryAdjustmentDetails.NewSubLocation, ' +
                 'tblICInventoryAdjustmentDetails.NewStorageLocation',
-            createRecord : me.createRecord,
-            validateRecord : me.validateRecord,
+            createRecord: me.createRecord,
+            validateRecord: me.validateRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.InventoryAdjustment',
@@ -421,7 +459,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     key: 'tblICInventoryAdjustmentDetails',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdInventoryAdjustment'),
-                        deleteButton : win.down('#btnRemoveItem')
+                        deleteButton: win.down('#btnRemoveItem')
                     })
                 }
             ]
@@ -430,7 +468,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         return win.context;
     },
 
-    show : function(config) {
+    show: function (config) {
         "use strict";
 
         var me = this,
@@ -439,16 +477,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( {window : win} );
+            var context = me.setupContext({window: win});
 
             if (config.action === 'new') {
                 context.data.addRecord();
             } else {
                 if (config.id) {
-                    config.filters = [{
-                        column: 'intInventoryAdjustmentId',
-                        value: config.id
-                    }];
+                    config.filters = [
+                        {
+                            column: 'intInventoryAdjustmentId',
+                            value: config.id
+                        }
+                    ];
                 }
                 context.data.load({
                     filters: config.filters
@@ -457,7 +497,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    createRecord: function(config, action) {
+    createRecord: function (config, action) {
         var today = new Date();
         var record = Ext.create('Inventory.model.Adjustment');
         record.set('intAdjustmentType', '1');
@@ -468,7 +508,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         action(record);
     },
 
-    validateRecord: function(config, action) {
+    validateRecord: function (config, action) {
         var win = config.window;
         this.validateRecord(config, function (result) {
             var lineItems = config.viewModel.data.current.tblICInventoryAdjustmentDetails();
@@ -497,7 +537,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         });
     },
 
-    onAdjustmentDetailSelect: function(combo, records, eOpts) {
+    onAdjustmentDetailSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -509,8 +549,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboItemNo')
-        {
+        if (combo.itemId === 'cboItemNo') {
 
             // Populate the default data.
             current.set('intItemId', record.get('intItemId'));
@@ -523,7 +562,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             // Non Lot items will need to use stock UOM.
             var strLotTracking = record.get('strLotTracking');
 
-            if (strLotTracking == 'No'){
+            if (strLotTracking == 'No') {
                 current.set('intItemUOMId', record.get('intStockUOMId'));
                 current.set('strItemUOM', record.get('strStockUOM'));
                 current.set('dblItemUOMUnitQty', record.get('dblStockUnitQty'));
@@ -562,7 +601,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             var cboLotNumber = win.down('#cboLotNumber');
             var cboUOM = win.down('#cboUOM');
 
-            if (strLotTracking == 'No'){
+            if (strLotTracking == 'No') {
                 if (cboLotNumber) cboLotNumber.setReadOnly(true);
                 if (cboUOM) cboUOM.setReadOnly(false);
             }
@@ -572,8 +611,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
         }
-        else if (combo.itemId === 'cboSubLocation')
-        {
+        else if (combo.itemId === 'cboSubLocation') {
             current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
             me.getStockQuantity(current, win);
             current.set('intItemUOMId', null);
@@ -601,8 +639,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewWeightPerQty', null);
             current.set('dblLineTotal', 0.00);
         }
-        else if (combo.itemId === 'cboStorageLocation')
-        {
+        else if (combo.itemId === 'cboStorageLocation') {
             current.set('intStorageLocationId', record.get('intStorageLocationId'));
             me.getStockQuantity(current, win);
             current.set('intItemUOMId', null);
@@ -629,13 +666,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblLineTotal', 0.00);
         }
 
-        else if (combo.itemId === 'cboNewItemNo')
-        {
+        else if (combo.itemId === 'cboNewItemNo') {
             current.set('intNewItemId', record.get('intItemId'));
             current.set('strNewItemDescription', record.get('strDescription'));
         }
-        else if (combo.itemId === 'cboLotNumber')
-        {
+        else if (combo.itemId === 'cboLotNumber') {
             current.set('intLotId', record.get('intLotId'));
             current.set('dblQuantity', record.get('dblQty'));
             current.set('dblWeight', record.get('dblWeight'));
@@ -676,33 +711,29 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intNewStorageLocationId', null);
             current.set('strNewStorageLocation', null);
         }
-        else if (combo.itemId === 'cboNewUOM')
-        {
+        else if (combo.itemId === 'cboNewUOM') {
             // Auto-calculate a new cost.
             var unitCost = current.get('dblCost')
-                ,newUnitCost = current.get('dblNewCost')
-                ,dblNewItemUOMUnitQty = record.get('dblUnitQty');
+                , newUnitCost = current.get('dblNewCost')
+                , dblNewItemUOMUnitQty = record.get('dblUnitQty');
 
-            if (Ext.isNumeric(newUnitCost) && Ext.isNumeric(unitCost) && Ext.isNumeric(dblNewItemUOMUnitQty))
-            {
+            if (Ext.isNumeric(newUnitCost) && Ext.isNumeric(unitCost) && Ext.isNumeric(dblNewItemUOMUnitQty)) {
                 current.set('dblNewCost', unitCost * dblNewItemUOMUnitQty);
             }
             current.set('intNewItemUOMId', record.get('intItemUOMId'));
             current.set('dblNewItemUOMUnitQty', record.get('dblUnitQty'));
         }
-        else if (combo.itemId === 'cboUOM')
-        {
+        else if (combo.itemId === 'cboUOM') {
             // Recalculate the unit cost
             var currentUnitCost = current.get('dblCost')
-                ,currentItemUOMUnitQty = current.get('dblItemUOMUnitQty')
-                ,selectedItemUOMUnitQty = record.get('dblUnitQty')
-                ,selectedOnHandQty = record.get('dblOnHand')
-                ,newUnitCost;
+                , currentItemUOMUnitQty = current.get('dblItemUOMUnitQty')
+                , selectedItemUOMUnitQty = record.get('dblUnitQty')
+                , selectedOnHandQty = record.get('dblOnHand')
+                , newUnitCost;
 
             if (Ext.isNumeric(currentUnitCost)
                 && Ext.isNumeric(selectedItemUOMUnitQty)
-            )
-            {
+                ) {
                 if (Ext.isNumeric(currentItemUOMUnitQty) && currentItemUOMUnitQty != 0) {
                     newUnitCost = (currentUnitCost / currentItemUOMUnitQty) * selectedItemUOMUnitQty;
                 }
@@ -719,39 +750,33 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
             // Recalculate the new quantity
             var adjustByQuantity = current.get('dblAdjustByQuantity')
-                newQty = null;
+            newQty = null;
 
-            if (Ext.isNumeric(selectedOnHandQty) && Ext.isNumeric(adjustByQuantity))
-            {
+            if (Ext.isNumeric(selectedOnHandQty) && Ext.isNumeric(adjustByQuantity)) {
                 newQty = selectedOnHandQty + adjustByQuantity;
             }
 
             current.set('dblNewQuantity', newQty);
         }
 
-        else if (combo.itemId === 'cboNewWeightUOM')
-        {
+        else if (combo.itemId === 'cboNewWeightUOM') {
             current.set('intNewWeightUOMId', record.get('intItemUOMId'));
         }
-        else if (combo.itemId === 'cboNewLotStatus')
-        {
+        else if (combo.itemId === 'cboNewLotStatus') {
             current.set('intNewLotStatusId', record.get('intLotStatusId'));
         }
-        else if (combo.itemId === 'cboNewLocation')
-        {
+        else if (combo.itemId === 'cboNewLocation') {
             current.set('intNewLocationId', record.get('intCompanyLocationId'));
         }
-        else if (combo.itemId === 'cboNewSubLocation')
-        {
+        else if (combo.itemId === 'cboNewSubLocation') {
             current.set('intNewSubLocationId', record.get('intCompanyLocationSubLocationId'));
         }
-        else if (combo.itemId === 'cboNewStorageLocation')
-        {
+        else if (combo.itemId === 'cboNewStorageLocation') {
             current.set('intNewStorageLocationId', record.get('intStorageLocationId'));
         }
     },
 
-    getStockQuantity: function(record, win) {
+    getStockQuantity: function (record, win) {
         var vm = win.viewModel;
         var current = vm.data.current;
         var locationId = current.get('intLocationId'),
@@ -770,7 +795,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             success: function (response) {
                 var jsonData = Ext.decode(response.responseText);
                 if (jsonData.success) {
-                    if (jsonData.data.length > 0){
+                    if (jsonData.data.length > 0) {
                         var stockRecord = jsonData.data[0];
                         qty = stockRecord.dblOnHand;
                     }
@@ -799,7 +824,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
      * @param dataIndex
      * @returns {*}
      */
-    getGridColumnByDataIndex: function(grid, dataIndex) {
+    getGridColumnByDataIndex: function (grid, dataIndex) {
         gridColumns = grid.headerCt.getGridColumns();
         for (var i = 0; i < gridColumns.length; i++) {
             if (gridColumns[i].dataIndex == dataIndex) {
@@ -818,7 +843,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
      * @param record
      * @returns {boolean}
      */
-    onAdjustmentTypeBeforeSelect: function(combo, record){
+    onAdjustmentTypeBeforeSelect: function (combo, record) {
         var QuantityChange = 1;
         var UOMChange = 2;
         var ItemChange = 3;
@@ -830,10 +855,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         var data = record.getData();
         var adjustmentTypeId;
-        if (data && (adjustmentTypeId = data.intAdjustmentTypeId)){
+        if (data && (adjustmentTypeId = data.intAdjustmentTypeId)) {
 
-            switch (adjustmentTypeId)
-            {
+            switch (adjustmentTypeId) {
                 case QuantityChange:
                 case LotStatusChange:
                 case ExpiryDateChange:
@@ -846,7 +870,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     msgBox.showCustomDialog(
                         msgBox.dialogType.ERROR,
                         msgBox.dialogButtonType.OK,
-                        data.strDescription + ' is not yet supported.'
+                            data.strDescription + ' is not yet supported.'
                     );
                     return false;
             }
@@ -855,14 +879,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         return true;
     },
 
-    calculateLineTotal: function(newQuantity, newCost, record){
+    calculateLineTotal: function (newQuantity, newCost, record) {
         var lineTotal = 0.00
-            ,originalQuantity = 0.00
-            ,originalCost = 0.00
-            ,cost;
+            , originalQuantity = 0.00
+            , originalCost = 0.00
+            , cost;
 
 
-        if (record){
+        if (record) {
             // Get the new quantity.
             newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : record.get('dblNewQuantity');
             newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : 0.00;
@@ -888,32 +912,32 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    calculateNewNetWeight: function(quantity, weight, record){
+    calculateNewNetWeight: function (quantity, weight, record) {
         var newWeightPerQty = null;
         var newQty
-            ,newWeight;
+            , newWeight;
 
         // Calculate a new Wgt per Qty if there is a valid new wgt.
-        if (record){
+        if (record) {
 
             // Get the new values
             newQty = Ext.isNumeric(quantity) ? quantity : record.get('dblNewQuantity');
             newWeight = Ext.isNumeric(weight) ? weight : record.get('dblNewWeight');
 
             // If new qty is intentionally set to null, use the original qty
-            if (quantity === false){
+            if (quantity === false) {
                 quantity = record.get('dblQuantity');
                 newQty = null;
             }
 
             // If new weight is intentionally set to null, use the original weight
-            if (weight === false){
+            if (weight === false) {
                 weight = record.get('dblWeight');
                 newWeight = null;
             }
 
             // If new values are both null, set the weight per qty back to null
-            if (newQty === null && newWeight === null){
+            if (newQty === null && newWeight === null) {
                 newWeightPerQty = null;
             }
             else {
@@ -932,7 +956,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 // if new weight is invalid, use the original weight
                 weight = Ext.isNumeric(weight) ? weight : record.get('dblWeight');
 
-                if (Ext.isNumeric(weight) && quantity != 0){
+                if (Ext.isNumeric(weight) && quantity != 0) {
                     newWeightPerQty = weight / quantity;
                 }
             }
@@ -941,22 +965,21 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onNumNewQuantityChange: function(control, newQuantity, oldValue, eOpts ){
+    onNumNewQuantityChange: function (control, newQuantity, oldValue, eOpts) {
         var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        if (current){
+        if (current) {
             me.calculateLineTotal(newQuantity, null, current);
             me.calculateNewNetWeight((newQuantity === null ? false : newQuantity), null, current);
 
             var qty = current.get('dblQuantity'),
                 weightPerQty = current.get('dblWeightPerQty'),
                 newWeight = null,
-                adjustByQty  = null;
+                adjustByQty = null;
 
-            if (Ext.isNumeric(qty) && Ext.isNumeric(newQuantity))
-            {
+            if (Ext.isNumeric(qty) && Ext.isNumeric(newQuantity)) {
                 adjustByQty = newQuantity - qty;
                 newWeight = Ext.isNumeric(weightPerQty) ? weightPerQty * Math.abs(newQuantity) : null;
             }
@@ -965,18 +988,17 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onNumAdjustByQuantityChange: function(control, newAdjustByQty, oldValue, eOpts ){
+    onNumAdjustByQuantityChange: function (control, newAdjustByQty, oldValue, eOpts) {
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        if (current){
+        if (current) {
             var qty = current.get('dblQuantity'),
                 weightPerQty = current.get('dblWeightPerQty'),
                 newWeight = null,
                 newQty = null;
 
-            if (Ext.isNumeric(qty) && Ext.isNumeric(newAdjustByQty))
-            {
+            if (Ext.isNumeric(qty) && Ext.isNumeric(newAdjustByQty)) {
                 newQty = qty + newAdjustByQty;
                 newWeight = Ext.isNumeric(weightPerQty) ? weightPerQty * Math.abs(newQty) : null;
             }
@@ -986,17 +1008,17 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onNumNewUnitCostChange: function(control, newCost, oldValue, eOpts ){
+    onNumNewUnitCostChange: function (control, newCost, oldValue, eOpts) {
         var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        if (current){
+        if (current) {
             me.calculateLineTotal(null, newCost, current);
         }
     },
 
-    onNumNewNetWeightChange: function(control, newNetWeight, oldValue, eOpts ){
+    onNumNewNetWeightChange: function (control, newNetWeight, oldValue, eOpts) {
         var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
@@ -1006,7 +1028,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onAfterPost: function(success, message) {
+    onAfterPost: function (success, message) {
         var me = this;
         var win = me.view;
 
@@ -1018,13 +1040,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 iRely.Functions.dialogType.ERROR,
                 iRely.Functions.dialogButtonType.OK,
                 message,
-                function(){
+                function () {
                     message = message ? message : '';
 
                     var outdatedStock;
 
                     outdatedStock = message.indexOf('The stock on hand is outdated for');
-                    if (outdatedStock == -1){
+                    if (outdatedStock == -1) {
                         outdatedStock = message.indexOf('The lot expiry dates are outdated for');
                     }
 
@@ -1036,48 +1058,48 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    onPostOrUnPostClick: function(button, e, eOpts) {
+    onPostOrUnPostClick: function (button, e, eOpts) {
         var me = this;
         var win = button.up('window');
         var context = win.context;
 
-        var doPost = function() {
+        var doPost = function () {
             var strAdjustmentNo = win.viewModel.data.current.get('strAdjustmentNo');
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/InventoryAdjustment/PostTransaction',
-                strTransactionId    : strAdjustmentNo,
-                isPost              : !posted,
-                isRecap             : false,
-                callback            : me.onAfterPost,
-                scope               : me
+                postURL: '../Inventory/api/InventoryAdjustment/PostTransaction',
+                strTransactionId: strAdjustmentNo,
+                isPost: !posted,
+                isRecap: false,
+                callback: me.onAfterPost,
+                scope: me
             };
 
             CashManagement.common.BusinessRules.callPostRequest(options);
         };
 
         // If there is no data change, do the post.
-        if (!context.data.hasChanges()){
+        if (!context.data.hasChanges()) {
             doPost();
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
-            successFn: function() {
+            successFn: function () {
                 doPost();
             }
         });
     },
 
-    onRecapClick: function(button, e, eOpts) {
+    onRecapClick: function (button, e, eOpts) {
         var me = this;
         var win = button.up('window');
         var cboCurrency = null;
         var context = win.context;
 
-        var doRecap = function(recapButton, currentRecord, currency){
+        var doRecap = function (recapButton, currentRecord, currency) {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
@@ -1085,7 +1107,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 strTransactionId: currentRecord.get('strAdjustmentNo'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
-                success: function(){
+                success: function () {
                     // If data is generated, show the recap screen.
                     CashManagement.common.BusinessRules.showRecap({
                         strTransactionId: currentRecord.get('strAdjustmentNo'),
@@ -1094,15 +1116,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         strCurrencyId: currency,
                         dblExchangeRate: 1,
                         scope: me,
-                        postCallback: function(){
+                        postCallback: function () {
                             me.onPostOrUnPostClick(recapButton);
                         },
-                        unpostCallback: function(){
+                        unpostCallback: function () {
                             me.onPostOrUnPostClick(recapButton);
                         }
                     });
                 },
-                failure: function(message){
+                failure: function (message) {
                     // Show why recap failed.
                     var msgBox = iRely.Functions;
                     msgBox.showCustomDialog(
@@ -1115,68 +1137,68 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         };
 
         // If there is no data change, do the post.
-        if (!context.data.hasChanges()){
+        if (!context.data.hasChanges()) {
             doRecap(button, win.viewModel.data.current, cboCurrency);
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
-            successFn: function() {
+            successFn: function () {
                 doRecap(button, win.viewModel.data.current, cboCurrency);
             }
         });
     },
 
-    onNewUOMChange: function(control, newUOM, oldValue, eOpts ){
+    onNewUOMChange: function (control, newUOM, oldValue, eOpts) {
         var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        if (current && (newUOM === null || newUOM === '')){
+        if (current && (newUOM === null || newUOM === '')) {
             current.set('intNewItemUOMId', null);
         }
     },
 
-    onUOMChange: function(control, newUOM, oldValue, eOpts ){
+    onUOMChange: function (control, newUOM, oldValue, eOpts) {
         var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        if (current && (newUOM === null || newUOM === '')){
+        if (current && (newUOM === null || newUOM === '')) {
             current.set('intItemUOMId', null);
         }
     },
 
 
-    onNewWeightUOMChange: function(control, newWeightUOM, oldValue, eOpts ){
+    onNewWeightUOMChange: function (control, newWeightUOM, oldValue, eOpts) {
         var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        if (current && (newWeightUOM === null || newWeightUOM === '')){
+        if (current && (newWeightUOM === null || newWeightUOM === '')) {
             current.set('intNewWeightUOMId', null);
         }
     },
 
-    onNewLotStatusChange: function(control, newLotStatus, oldValue, eOpts ){
+    onNewLotStatusChange: function (control, newLotStatus, oldValue, eOpts) {
         var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        if (current && (newLotStatus === null || newLotStatus === '')){
+        if (current && (newLotStatus === null || newLotStatus === '')) {
             current.set('intNewLotStatusId', null);
         }
     },
 
-    onInventoryClick: function(button, e, eOpts) {
+    onInventoryClick: function (button, e, eOpts) {
         var win = button.up('window');
         var grd = win.down('#grdInventoryAdjustment');
 
         var selected = grd.getSelectionModel().getSelection();
 
         if (selected) {
-            if (selected.length > 0){
+            if (selected.length > 0) {
                 var current = selected[0];
                 if (!current.dummy)
                     iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
@@ -1190,7 +1212,27 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
-    init: function(application) {
+    onItemClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCategoryClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCommodityClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onLocationClick: function () {
+        iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onStorageLocationClick: function () {
+        iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    init: function (application) {
         this.control({
             "#cboItemNo": {
                 select: this.onAdjustmentDetailSelect

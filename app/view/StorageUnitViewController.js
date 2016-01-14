@@ -272,6 +272,52 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         }
     },
 
+    onUnitTypeDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.FactoryUnitType', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.FactoryUnitType', combo.getValue());
+        }
+    },
+
+    onLocationDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', combo.getValue());
+        }
+    },
+
+    onSubLocationDrilldown: function(combo) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            if (iRely.Functions.isEmpty(current.get('intLocationId'))) {
+                iRely.Functions.showErrorMessage('Location must be specified.');
+                return;
+            }
+
+            if (iRely.Functions.isEmpty(combo.getValue())) {
+                iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+            }
+            else {
+                iRely.Functions.openScreen('i21.view.CompanyLocation', current.get('intLocationId'));
+            }
+        }
+    },
+
+    onCommodityDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.Commodity', combo.getValue());
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboCategoryAllowed": {
@@ -282,7 +328,18 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             },
             "#cboReadingPoint": {
                 select: this.onMeasurementSelect
-            }
-        });
+            },
+            "#cboUnitType": {
+                drilldown: this.onUnitTypeDrilldown
+            },
+            "#cboLocation": {
+                drilldown: this.onLocationDrilldown
+            },
+            "#cboSubLocation": {
+                drilldown: this.onSubLocationDrilldown
+            },
+            "#cboCommodity": {
+                drilldown: this.onCommodityDrilldown
+            }        });
     }
 });

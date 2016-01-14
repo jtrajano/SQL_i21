@@ -165,6 +165,7 @@ Ext.define('Inventory.view.FuelType', {
                                                     flex: 1
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboFuelCategory',
                                             fieldLabel: 'Fuel Category',
                                             labelWidth: 165,
@@ -193,6 +194,7 @@ Ext.define('Inventory.view.FuelType', {
                                                     flex: 1
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboFeedStock',
                                             fieldLabel: 'Feed Stock',
                                             labelWidth: 165,
@@ -246,6 +248,7 @@ Ext.define('Inventory.view.FuelType', {
                                                     flex: 1
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboFuelCode',
                                             width: 170,
                                             fieldLabel: 'Fuel Code',
@@ -275,6 +278,7 @@ Ext.define('Inventory.view.FuelType', {
                                                     flex: 1
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboProductionProcess',
                                             width: 170,
                                             fieldLabel: 'Production Process',
@@ -310,6 +314,7 @@ Ext.define('Inventory.view.FuelType', {
                                                     flex: 1
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboFeedStockUom',
                                             width: 170,
                                             fieldLabel: 'Feed Stock UOM',

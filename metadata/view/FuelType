@@ -299,6 +299,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "designer|displayName": null,
                                                 "displayField": "strRinFuelCategoryCode",
+                                                "enableDrillDown": true,
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Fuel Category",
                                                 "itemId": "cboFuelCategory",
@@ -315,13 +316,19 @@
                                             },
                                             "name": "MyComboBox63",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "a5e5c5b5-8952-48dd-b15e-a4148ba0371a",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -359,6 +366,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "designer|displayName": null,
                                                 "displayField": "strRinFeedStockCode",
+                                                "enableDrillDown": true,
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Feed Stock",
                                                 "itemId": "cboFeedStock",
@@ -375,13 +383,19 @@
                                             },
                                             "name": "MyComboBox64",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "158e82c0-7bdf-4061-b5e5-c9be997929e4",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -503,6 +517,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "designer|displayName": null,
                                                 "displayField": "strRinFuelCode",
+                                                "enableDrillDown": true,
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Fuel Code",
                                                 "itemId": "cboFuelCode",
@@ -519,13 +534,19 @@
                                             },
                                             "name": "MyComboBox66",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "74f69a76-67b8-437d-aec2-c1f740ea3eda",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -563,6 +584,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "designer|displayName": null,
                                                 "displayField": "strRinProcessCode",
+                                                "enableDrillDown": true,
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Production Process",
                                                 "itemId": "cboProductionProcess",
@@ -579,13 +601,19 @@
                                             },
                                             "name": "MyComboBox67",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "a67ee039-a375-44bc-9291-5cfcb0742753",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -629,6 +657,7 @@
                                                 "designer|createAlias": "gridcombobox",
                                                 "designer|displayName": null,
                                                 "displayField": "strUnitMeasure",
+                                                "enableDrillDown": true,
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Feed Stock UOM",
                                                 "itemId": "cboFeedStockUom",
@@ -645,13 +674,19 @@
                                             },
                                             "name": "MyComboBox68",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "03dc79f4-15f4-4ce2-9001-988db48be2a6",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -766,7 +801,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging19",
+                    "name": "statusbarpaging15",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

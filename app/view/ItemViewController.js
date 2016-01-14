@@ -23,6 +23,26 @@ Ext.define('Inventory.view.ItemViewController', {
                 {dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strBrandCode', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150}
+            ],
+            buttons: [
+                {
+                    text: 'Categories',
+                    itemId: 'btnCategory',
+                    clickHandler: 'onCategoryClick',
+                    width: 100
+                },
+                {
+                    text: 'Commodities',
+                    itemId: 'btnCommodity',
+                    clickHandler: 'onCommodityClick',
+                    width: 100
+                },
+                {
+                    text: 'Inventory UOM',
+                    itemId: 'btnInventoryUOM',
+                    clickHandler: 'onInventoryUOMClick',
+                    width: 100
+                }
             ]
         },
         binding: {
@@ -2912,6 +2932,74 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onInventoryUOMClick: function () {
+        iRely.Functions.openScreen('Inventory.view.InventoryUOM', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCategoryClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCommodityClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onManufacturerDrilldown: function(combo) {
+        iRely.Functions.openScreen('Inventory.view.Manufacturer', {viewConfig: { modal: true }});
+    },
+
+    onBrandDrilldown: function(combo) {
+        iRely.Functions.openScreen('Inventory.view.Brand', {viewConfig: { modal: true }});
+    },
+
+    onCommodityDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.Commodity', combo.getValue());
+        }
+    },
+
+    onCategoryDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.Category', combo.getValue());
+        }
+    },
+
+    onMedicationTaxDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
+        }
+    },
+
+    onIngredientTagDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('Inventory.view.InventoryTag', combo.getValue());
+        }
+    },
+
+    onFuelCategoryDrilldown: function(combo) {
+        iRely.Functions.openScreen('Inventory.view.FuelCategory', {viewConfig: { modal: true }});
+    },
+
+    onPatronageDrilldown: function(combo) {
+        iRely.Functions.openScreen('Patronage.view.PatronageCategory', {viewConfig: { modal: true }});
+    },
+
+    onPatronageDirectDrilldown: function(combo) {
+        iRely.Functions.openScreen('Patronage.view.PatronageCategory', {viewConfig: { modal: true }});
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -3049,9 +3137,6 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboLotTracking": {
                 select: this.onLotTrackingSelect
             },
-            "#cboCopyLocation": {
-                select: this.onCopyLocationSelect
-            },
             "#btnAddLocation": {
                 click: this.onAddLocationClick
             },
@@ -3072,6 +3157,33 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboBundleItem": {
                 select: this.onBundleSelect
+            },
+            "#cboManufacturer": {
+                drilldown: this.onManufacturerDrilldown
+            },
+            "#cboBrand": {
+                drilldown: this.onBrandDrilldown
+            },
+            "#cboCategory": {
+                drilldown: this.onCategoryDrilldown
+            },
+            "#cboCommodity": {
+                drilldown: this.onCommodityDrilldown
+            },
+            "#cboMedicationTag": {
+                drilldown: this.onMedicationTaxDrilldown
+            },
+            "#cboIngredientTag": {
+                drilldown: this.onIngredientTagDrilldown
+            },
+            "#cboFuelCategory": {
+                drilldown: this.onFuelCategoryDrilldown
+            },
+            "#cboPatronage": {
+                drilldown: this.onPatronageDrilldown
+            },
+            "#cboPatronageDirect": {
+                drilldown: this.onPatronageDirectDrilldown
             }
         });
     }

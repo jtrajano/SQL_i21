@@ -614,6 +614,10 @@ Ext.define('Inventory.view.CategoryViewController', {
         }
     },
 
+    onLineOfBusinessDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.LineOfBusiness', {viewConfig: { modal: true }});
+    },
+
     init: function(application) {
         this.control({
             "#cboDetailUnitMeasure": {
@@ -639,6 +643,9 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             "#colDefault": {
                 beforecheckchange: this.onUOMDefaultCheckChange
+            },
+            "#cboLineOfBusiness": {
+                drilldown: this.onLineOfBusinessDrilldown
             }
         });
     }

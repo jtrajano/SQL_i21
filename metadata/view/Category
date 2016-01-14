@@ -356,6 +356,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLineOfBusiness",
+                                                        "enableDrillDown": true,
                                                         "fieldLabel": "Line of Business",
                                                         "forceSelection": true,
                                                         "itemId": "cboLineOfBusiness",
@@ -366,13 +367,19 @@
                                                     },
                                                     "name": "MyComboBox56",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "enableDrillDown": "boolean"
                                                     },
                                                     "designerId": "a52f72ea-715c-4363-9d0b-b602e792186a",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "enableDrillDown",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -788,7 +795,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter134",
                                                                     "designerId": "71ba6869-8472-4cc0-b05f-12081a55f44d",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -979,7 +986,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter18",
+                                                            "name": "filter135",
                                                             "designerId": "53804780-f5bc-480e-aa2f-13d727814dbe",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -1316,7 +1323,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter136",
                                                     "designerId": "15a1d931-71e4-4cbc-8963-0531112b0fe0",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1537,7 +1544,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter110",
+                                                    "name": "filter137",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1829,7 +1836,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter111",
+                                                    "name": "filter138",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3079,7 +3086,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging16",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

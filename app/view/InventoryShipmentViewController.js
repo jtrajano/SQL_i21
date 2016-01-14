@@ -40,6 +40,44 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'strReceivedBy', text: 'Received By', flex: 1, dataType: 'string', hidden: true },
                 {dataIndex: 'strComment', text: 'Comment', flex: 1, dataType: 'string', hidden: true }
             ],
+            buttons: [
+                {
+                    text: 'Items',
+                    itemId: 'btnItem',
+                    clickHandler: 'onItemClick',
+                    width: 80
+                },
+                {
+                    text: 'Categories',
+                    itemId: 'btnCategory',
+                    clickHandler: 'onCategoryClick',
+                    width: 100
+                },
+                {
+                    text: 'Commodities',
+                    itemId: 'btnCommodity',
+                    clickHandler: 'onCommodityClick',
+                    width: 100
+                },
+                {
+                    text: 'Locations',
+                    itemId: 'btnLocation',
+                    clickHandler: 'onLocationClick',
+                    width: 100
+                },
+                {
+                    text: 'Storage Locations',
+                    itemId: 'btnStorageLocation',
+                    clickHandler: 'onStorageLocationClick',
+                    width: 110
+                },
+                {
+                    text: 'Customer',
+                    itemId: 'btnCustomer',
+                    clickHandler: 'onCustomerClick',
+                    width: 80
+                }
+            ],
             searchConfig: [
                 {
                     title: 'Details',
@@ -1788,6 +1826,30 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             intShipFromId: current.get('intShipFromLocationId')
         });
 
+    },
+
+    onItemClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCategoryClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Category', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCommodityClick: function () {
+        iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onLocationClick: function () {
+        iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onStorageLocationClick: function () {
+        iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onCustomerClick: function () {
+        iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer',{ action: 'view' });
     },
 
     init: function(application) {

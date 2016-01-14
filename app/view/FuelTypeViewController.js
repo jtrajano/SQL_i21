@@ -30,6 +30,38 @@ Ext.define('Inventory.view.FuelTypeViewController', {
                 {dataIndex: 'strRinFeedStockId', text: 'Feed Stock', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strRinFuelId', text: 'Fuel Code', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strRinProcessId', text: 'Process Code', flex: 1,  dataType: 'string'}
+            ],
+            buttons: [
+                {
+                    text: 'Fuel Category',
+                    itemId: 'btnFuelCategory',
+                    clickHandler: 'onFuelCategoryDrilldown',
+                    width: 100
+                },
+                {
+                    text: 'Feed Stock',
+                    itemId: 'btnFeedStock',
+                    clickHandler: 'onFeedStockDrilldown',
+                    width: 100
+                },
+                {
+                    text: 'Fuel Code',
+                    itemId: 'btnFuelCode',
+                    clickHandler: 'onFuelCodeDrilldown',
+                    width: 100
+                },
+                {
+                    text: 'Production Process',
+                    itemId: 'btnProductionProcess',
+                    clickHandler: 'onProductionProcessDrilldown',
+                    width: 100
+                },
+                {
+                    text: 'Feed Stock UOM',
+                    itemId: 'btnFeedStockUOM',
+                    clickHandler: 'onFeedStockUomDrilldown',
+                    width: 100
+                }
             ]
         },
         binding: {
@@ -117,10 +149,43 @@ Ext.define('Inventory.view.FuelTypeViewController', {
             current.set('strEquivalenceValue', records[0].get('strEquivalenceValue'));
     },
 
+    onFuelCategoryDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FuelCategory', {viewConfig: { modal: true }});
+    },
+
+    onFeedStockDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FeedStockCode', {viewConfig: { modal: true }});
+    },
+
+    onFuelCodeDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FuelCode', {viewConfig: { modal: true }});
+    },
+
+    onProductionProcessDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.ProcessCode', {viewConfig: { modal: true }});
+    },
+
+    onFeedStockUomDrilldown: function() {
+        iRely.Functions.openScreen('Inventory.view.FeedStockUom', {viewConfig: { modal: true }});
+    },
+
     init: function(application) {
         this.control({
+            "#cboFeedStock": {
+                drilldown: this.onFeedStockDrilldown
+            },
+            "#cboFuelCode": {
+                drilldown: this.onFuelCodeDrilldown
+            },
+            "#cboProductionProcess": {
+                drilldown: this.onProductionProcessDrilldown
+            },
+            "#cboFeedStockUom": {
+                drilldown: this.onFeedStockUomDrilldown
+            },
             "#cboFuelCategory": {
-                select: this.oncboFuelCategorySelect
+                select: this.oncboFuelCategorySelect,
+                drilldown: this.onFuelCategoryDrilldown
             }
         });
     }

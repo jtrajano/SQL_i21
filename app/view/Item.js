@@ -248,6 +248,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboManufacturer',
                                                                 fieldLabel: 'Manufacturer',
                                                                 displayField: 'strManufacturer',
@@ -290,6 +291,7 @@ Ext.define('Inventory.view.Item', {
                                                                         hidden: true
                                                                     }
                                                                 ],
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboCommodity',
                                                                 fieldLabel: 'Commodity',
                                                                 displayField: 'strCommodityCode',
@@ -334,6 +336,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboBrand',
                                                                 fieldLabel: 'Brand',
                                                                 labelWidth: 116,
@@ -383,6 +386,7 @@ Ext.define('Inventory.view.Item', {
                                                                         hidden: true
                                                                     }
                                                                 ],
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboCategory',
                                                                 fieldLabel: 'Category',
                                                                 labelWidth: 116,
@@ -519,9 +523,9 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colDetailShortUPC',
                                                         width: 70,
+                                                        dataIndex: 'string',
                                                         text: 'Short UPC',
                                                         editor: {
                                                             xtype: 'textfield',
@@ -1202,6 +1206,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: true,
                                                                                 itemId: 'cboFuelCategory',
                                                                                 fieldLabel: 'Fuel Category',
                                                                                 labelWidth: 125,
@@ -1287,6 +1292,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: true,
                                                                                 itemId: 'cboMedicationTag',
                                                                                 fieldLabel: 'Medication Tag',
                                                                                 labelWidth: 125,
@@ -1315,6 +1321,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: true,
                                                                                 itemId: 'cboIngredientTag',
                                                                                 fieldLabel: 'Ingredient Tag',
                                                                                 labelWidth: 125,
@@ -3842,6 +3849,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: true,
                                                                                 itemId: 'cboPatronage',
                                                                                 fieldLabel: 'Patronage Category',
                                                                                 labelWidth: 116,
@@ -3870,6 +3878,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: true,
                                                                                 itemId: 'cboPatronageDirect',
                                                                                 fieldLabel: 'Direct Sale',
                                                                                 labelWidth: 116,

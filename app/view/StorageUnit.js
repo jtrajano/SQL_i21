@@ -186,6 +186,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     flex: 1
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboUnitType',
                                             fieldLabel: 'Storage Unit Type',
                                             labelWidth: 110,
@@ -220,6 +221,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     hidden: true
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboLocation',
                                             fieldLabel: 'Location',
                                             labelWidth: 110,
@@ -255,6 +257,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     flex: 1
                                                 }
                                             ],
+                                            enableDrillDown: true,
                                             itemId: 'cboSubLocation',
                                             fieldLabel: 'Sub Location',
                                             labelWidth: 110,
@@ -496,6 +499,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                             flex: 1
                                                         }
                                                     ],
+                                                    enableDrillDown: true,
                                                     itemId: 'cboCommodity',
                                                     fieldLabel: 'Commodity',
                                                     labelWidth: 105,

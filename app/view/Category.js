@@ -195,6 +195,7 @@ Ext.define('Inventory.view.Category', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboLineOfBusiness',
                                                                 fieldLabel: 'Line of Business',
                                                                 labelWidth: 130,
