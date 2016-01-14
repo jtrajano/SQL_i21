@@ -21,7 +21,7 @@ BEGIN TRY
 			CD.strReference,
 			GETDATE() AS dtmETD,
 			CH.dtmContractDate,
-			CD.strGarden,
+			EF.strFieldNumber strGarden,
 			CD.strGrade,
 			CD.dblNetWeight,
 			NU.strUnitMeasure strWeightUOM,
@@ -39,6 +39,7 @@ BEGIN TRY
 	JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT
 	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
 	JOIN	tblICItem			IM	ON	IM.intItemId			=	CD.intItemId			LEFT
+	JOIN	tblEntityFarm		EF	ON	EF.intFarmFieldId		=	CD.intFarmFieldId		LEFT
 	JOIN	tblCTBagMark		BM	ON	BM.intContractDetailId	=	CD.intContractDetailId	
 									AND	BM.ysnDefault			=	1						LEFT
 	JOIN	tblICItemUOM		NM	ON	NM.intWeightUOMId		=	CD.intNetWeightUOMId	LEFT

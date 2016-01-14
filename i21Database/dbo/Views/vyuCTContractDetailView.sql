@@ -16,7 +16,7 @@ AS
 			CD.dblScheduleQty,					CD.strPackingDescription,		CD.intPriceItemUOMId,
 			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
 			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
-			CD.intShipperId,					CD.strGarden,					CD.strVendorLotID,
+			CD.intShipperId,													CD.strVendorLotID,
 			CD.strInvoiceNo,					CD.dblNoOfLots,					CD.intUnitsPerLayer,
 			CD.intLayersPerPallet,				CD.dtmEventStartDate,			CD.dtmPlannedAvailabilityDate,
 			CD.dtmUpdatedAvailabilityDate,		CD.intBookId,					CD.intSubBookId,
@@ -33,7 +33,7 @@ AS
 			FM.strFutMarketName,				MO.strFutureMonth,				U2.strUnitMeasure				AS	strPriceUOM,
 			MZ.strMarketZoneCode,				OH.strContractOptDesc,			U3.strUnitMeasure				AS	strAdjUOM,
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
-			IX.strIndexType,													LP.strCity						AS	strLoadingPoint,	
+			IX.strIndexType,					EF.strFieldNumber,				LP.strCity						AS	strLoadingPoint,	
 																				DP.strCity						AS	strDestinationPoint,
 																				DC.strCity						AS	strDestinationCity,
 																				PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
@@ -77,9 +77,9 @@ AS
 			END		AS strPricingStatus,
 			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)	AS intLoadReceived,
 			CAST(
-				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysPurchase,dtmContractDate) AND CH.intContractTypeId = 1 
+				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysPurchase,CD.dtmStartDate) AND CH.intContractTypeId = 1 
 						THEN	1
-						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysSales,dtmContractDate) AND CH.intContractTypeId = 2
+						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysSales,CD.dtmStartDate) AND CH.intContractTypeId = 2
 						THEN	1
 						ELSE	0
 				END		AS BIT
@@ -145,6 +145,7 @@ AS
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
+	JOIN	tblEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
 	JOIN(
 			SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
 			FROM	tblICItemUOM			IU	LEFT 
