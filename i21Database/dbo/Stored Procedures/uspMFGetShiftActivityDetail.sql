@@ -27,6 +27,7 @@ BEGIN
 		,D.dtmShiftStartTime
 		,D.dtmShiftEndTime
 		,D.intDowntimeId
+		,SA.intShiftActivityId
 	FROM tblMFShiftActivity SA
 	JOIN tblMFDowntime D ON D.intShiftActivityId = SA.intShiftActivityId
 	JOIN tblMFDowntimeMachines DM ON DM.intDowntimeId = D.intDowntimeId
@@ -39,7 +40,9 @@ BEGIN
 	-- Wastage
 	SELECT W.intWastageId
 		,W.intShiftActivityId
+		,WT.intWastageTypeId
 		,WT.strWastageTypeName
+		,B.intBinTypeId
 		,B.strBinTypeName
 		,W.dblGrossWeight
 		,B.dblTareWeight
