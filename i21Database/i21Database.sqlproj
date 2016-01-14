@@ -3187,6 +3187,9 @@
     <None Include="Scripts\Post-Deployment\EM\020_DefaultDataForEntityImportSchemaCSV.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetOptionMonth.sql" />
+    <Build Include="dbo\Tables\tblHDProjectContactInfo.sql" />
+    <Build Include="dbo\Views\vyuHDProjectContactInfo.sql" />
+    <Build Include="dbo\Views\vyuHDProjectCustomerContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
