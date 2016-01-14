@@ -19,7 +19,8 @@ BEGIN TRY
 			@dblBalance				NUMERIC(12,4),
 			@dblNewScheduleQty		NUMERIC(12,4),
 			@dblQuantityToIncrease	NUMERIC(12,4),
-			@ysnUnlimitedQuantity	BIT
+			@ysnUnlimitedQuantity	BIT,
+			@intPricingTypeId		INT
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -31,13 +32,14 @@ BEGIN TRY
 	SELECT	@dblQuantity			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblDetailQuantity,0) ELSE ISNULL(intNoOfLoad,0) END,
 			@dblScheduleQty			=	ISNULL(dblScheduleQty,0),
 			@dblBalance				=	ISNULL(dblBalance,0),
-			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0)
+			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0),
+			@intPricingTypeId		=	intPricingTypeId
 	FROM	vyuCTContractDetailView 
 	WHERE	intContractDetailId = @intContractDetailId
 	
 	IF	@dblScheduleQty + @dblQuantityToUpdate > @dblBalance 
 	BEGIN
-		IF @ysnUnlimitedQuantity = 1
+		IF @ysnUnlimitedQuantity = 1 OR @intPricingTypeId = 5
 		BEGIN
 			SET		@dblQuantityToIncrease	= (@dblBalance - (@dblScheduleQty + @dblQuantityToUpdate)) * -1
 
