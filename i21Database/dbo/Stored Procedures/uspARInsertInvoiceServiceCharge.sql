@@ -21,12 +21,14 @@ AS
 	FROM @tblTypeServiceCharge
 
 	DECLARE @tempServiceChargeTable TABLE (
-		 [intServiceChargeId]  INT
-		,[intInvoiceId]		   INT
-		,[intEntityCustomerId] INT
-		,[strInvoiceNumber]    NVARCHAR(25)
-		,[dblAmountDue]		   NUMERIC(18,6)
-		,[dblTotalAmount]	   NUMERIC(18,6))
+		 [intServiceChargeId]	INT
+		,[intInvoiceId]			INT
+		,[intBudgetId]			INT
+		,[intEntityCustomerId]	INT
+		,[strInvoiceNumber]		NVARCHAR(25)
+		,[strBudgetDescription] NVARCHAR(100)
+		,[dblAmountDue]			NUMERIC(18,6)
+		,[dblTotalAmount]		NUMERIC(18,6))
 
 	INSERT INTO @tempServiceChargeTable
 	SELECT * FROM @tblTypeServiceCharge 
@@ -127,14 +129,20 @@ AS
 			BEGIN
 				SELECT TOP 1 @intServiceChargeId = intServiceChargeId FROM @tempServiceChargeTable ORDER BY intServiceChargeId ASC
 
-				DECLARE @intInvoiceIdToUpdate INT = 0
+				DECLARE @intInvoiceIdToUpdate INT = 0,
+					    @intBudgetIdToUpdate  INT = 0
 
-					SELECT @intInvoiceIdToUpdate = intInvoiceId FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
+					SELECT @intInvoiceIdToUpdate = intInvoiceId
+					     , @intBudgetIdToUpdate  = intBudgetId 
+					FROM @tblTypeServiceCharge 
+					WHERE intServiceChargeId = @intServiceChargeId
 
 					INSERT INTO [tblARInvoiceDetail]
 						([intInvoiceId]
 						,[intSCInvoiceId]
+						,[intSCBudgetId]
 						,[strSCInvoiceNumber]
+						,[strSCBudgetDescription]
 						,[intServiceChargeAccountId]
 						,[dblQtyOrdered]
 						,[dblQtyShipped]
@@ -144,7 +152,9 @@ AS
 					SELECT 	
 						 @NewInvoiceId
 						,[intInvoiceId]
+						,[intBudgetId]
 						,[strInvoiceNumber]
+						,[strBudgetDesciption]
 						,@intSCAccountId
 						,1.000000
 						,1.000000
@@ -155,7 +165,12 @@ AS
 
 					DELETE FROM @tempServiceChargeTable WHERE intServiceChargeId = @intServiceChargeId
 										
-					UPDATE tblARInvoice SET ysnCalculated = 1 WHERE intInvoiceId = @intInvoiceIdToUpdate					
+					IF ISNULL(@intInvoiceIdToUpdate, 0) > 0
+						UPDATE tblARInvoice SET ysnCalculated = 1, dtmCalculated = @dtmAsOfDate WHERE intInvoiceId = @intInvoiceIdToUpdate
+
+					IF ISNULL(@intBudgetIdToUpdate, 0) > 0
+						UPDATE tblARCustomerBudget SET ysnCalculated = 1, dtmCalculated = @dtmAsOfDate WHERE intCustomerBudgetId = @intBudgetIdToUpdate
+
 			END
 
 			EXEC dbo.uspARReComputeInvoiceAmounts @NewInvoiceId
@@ -187,11 +202,13 @@ AS
 				INSERT INTO [tblARServiceChargeRecapDetail]
 					([intSCRecapId]
 					,[strInvoiceNumber]
+					,[strBudgetDescription]
 					,[dblAmount]
 					,[intConcurrencyId])
 				SELECT 	
 					 @newRecapId
-					,[strInvoiceNumber]				
+					,[strInvoiceNumber]
+					,[strBudgetDescription]				
 					,[dblTotalAmount]
 					,0
 				FROM @tempServiceChargeTable 
