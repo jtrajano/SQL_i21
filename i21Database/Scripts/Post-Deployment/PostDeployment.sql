@@ -241,6 +241,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\DataFixes\AddPaycheckDirectDepositEntries.sql
 :r .\PR\DataFixes\ResetEaningHoursToProcess.sql
 :r .\PR\DataFixes\UpdateEarningDeductionTaxId.sql
+:r .\PR\Reports\SubReports\PaycheckEarningSubReport.sql
+:r .\PR\Reports\SubReports\PaycheckTaxSubReport.sql
+:r .\PR\Reports\SubReports\PaycheckDeductionSubReport.sql
+:r .\PR\Reports\PaycheckMiddle.sql
 
 -- Version Update
 :r .\VersionUpdate.sql
