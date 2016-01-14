@@ -1,4 +1,6 @@
 GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'glhstmst') RETURN
+IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'glactmst') RETURN
 
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuGLglhstmstDifference')
 	DROP VIEW vyuGLglhstmstDifference
@@ -61,8 +63,8 @@ EXEC (
                                     THEN ABS (glhst_amt)
                                     ELSE 0
                                 END) AS Credit,
-                            CONVERT( DATETIME, SUBSTRING(CONVERT(VARCHAR(10), A.glhst_date), 1, 4) + ''/'' + SUBSTRING(CONVERT(VARCHAR(10), A.glhst_date), 5, 2) + ''/'' + SUBSTRING(CONVERT(VARCHAR(10), A.glhst_date), 7, 2)) AS glhst_date,
-                            A.glhst_amt,
+                            A.glhst_date,
+							A.glhst_amt,
 					   A.glhst_units,
 					   A.glhst_dr_cr_ind,
 					   A.glhst_period,
@@ -94,7 +96,7 @@ EXEC (
 						
 						ON  A.strSourceKey = B.A4GLIdentity
      WHERE A.strSourceType = B.glhst_src_id COLLATE Latin1_General_CI_AS
-     --AND ( A.dblDebit <> B.Debit OR A.dblCredit <> B.Credit)    	 
+     
 	'
 				
       )

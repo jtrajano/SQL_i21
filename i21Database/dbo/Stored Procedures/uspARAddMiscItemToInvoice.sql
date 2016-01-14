@@ -4,6 +4,7 @@
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0			
 	,@ItemDescription				NVARCHAR(500)	= NULL
+	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
@@ -113,7 +114,7 @@ BEGIN TRY
 		,[intItemId]						= NULL 
 		,[strItemDescription]				= ISNULL(@ItemDescription, '')
 		,[intItemUOMId]						= NULL
-		,[dblQtyOrdered]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
+		,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 		,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 		,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			

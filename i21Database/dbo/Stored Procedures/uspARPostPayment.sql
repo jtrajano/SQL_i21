@@ -1660,7 +1660,7 @@ IF @recap = 0
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount
-				,tblARInvoice.dblDiscountTaken = 0
+				,tblARInvoice.dblDiscountAvailable = 0
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) - P.dblInterest				
 			FROM
 				(
@@ -1913,14 +1913,14 @@ IF @recap = 0
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
 				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount
-				,tblARInvoice.dblDiscountTaken = ISNULL(tblARInvoice.dblDiscountTaken,0.00) + P.dblDiscountTaken
+				,tblARInvoice.dblDiscountAvailable = ISNULL(tblARInvoice.dblDiscountAvailable,0.00) + P.dblDiscountAvailable
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
 						,SUM(A.dblDiscount) dblDiscount
-						,SUM(A.dblDiscountTaken) dblDiscountTaken
+						,SUM(A.dblDiscountAvailable) dblDiscountAvailable
 						,SUM(A.dblInterest) dblInterest
 						,A.intInvoiceId 
 					FROM
@@ -2147,6 +2147,42 @@ IF @recap = 0
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
 		END CATCH
+
+		BEGIN TRY			
+			DECLARE @PaymentsToUpdate TABLE (intPaymentId INT);
+			
+			INSERT INTO @PaymentsToUpdate(intPaymentId)
+			SELECT DISTINCT intPaymentId FROM @ARReceivablePostData
+				
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @PaymentsToUpdate ORDER BY intPaymentId)
+				BEGIN
+				
+					DECLARE @intPaymentIntegractionId INT
+							,@actionType AS NVARCHAR(50)
+
+					SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
+					
+					SELECT TOP 1 @intPaymentIntegractionId = intPaymentId FROM @PaymentsToUpdate ORDER BY intPaymentId
+
+					--Audit Log          
+					EXEC dbo.uspSMAuditLog 
+						 @keyValue			= @intPaymentIntegractionId							-- Primary Key Value of the Invoice. 
+						,@screenName		= 'AccountsReceivable.view.ReceivePaymentsDetail'	-- Screen Namespace
+						,@entityId			= @UserEntityID										-- Entity Id.
+						,@actionType		= @actionType										-- Action Type
+						,@changeDescription	= ''												-- Description
+						,@fromValue			= ''												-- Previous Value
+						,@toValue			= ''												-- New Value
+									
+					DELETE FROM @PaymentsToUpdate WHERE intPaymentId = @intPaymentIntegractionId
+												
+				END 
+																
+		END TRY
+		BEGIN CATCH	
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH	
 					
 	END
 
@@ -2154,6 +2190,29 @@ SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
 IF @raiseError = 0
 	COMMIT TRANSACTION
+
+	IF @recap = 0
+		BEGIN
+			--Update Customer's Budget 
+			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)
+	
+			INSERT INTO @tblPaymentsToUpdateBudget
+			SELECT intPaymentId FROM @ARReceivablePostData
+
+			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
+				BEGIN
+					DECLARE @paymentToUpdate INT,
+							@customerId		 INT
+
+					SELECT TOP 1 @paymentToUpdate = intPaymentId FROM @tblPaymentsToUpdateBudget ORDER BY intPaymentId
+					SELECT @customerId = intEntityCustomerId FROM tblARPayment WHERE intPaymentId = @paymentToUpdate
+			
+					EXEC dbo.uspARUpdateCustomerBudget @paymentToUpdate, @post
+					EXEC dbo.uspARUpdateCustomerTotalAR @InvoiceId = NULL, @CustomerId = @customerId
+
+					DELETE FROM @tblPaymentsToUpdateBudget WHERE intPaymentId = @paymentToUpdate
+				END
+		END	
 RETURN 1;
 
 Do_Rollback:

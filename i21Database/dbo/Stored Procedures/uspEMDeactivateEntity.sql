@@ -17,3 +17,19 @@ AS
 	BEGIN	
 		UPDATE tblARSalesperson SET ysnActive= 0 WHERE intEntitySalespersonId = @Id
 	END	
+
+	IF EXISTS( SELECT TOP 1 1 FROM tblEntityType WHERE intEntityId = @Id and strType = 'User')
+	BEGIN	
+		UPDATE tblSMUserSecurity SET ysnDisabled = 1 WHERE intEntityUserSecurityId = @Id
+	END	
+
+	IF EXISTS( SELECT TOP 1 1 FROM tblEntityType WHERE intEntityId = @Id and strType = 'Employee')
+	BEGIN	
+		UPDATE tblPREmployee SET ysnActive= 0 WHERE intEntityEmployeeId = @Id
+	END	
+
+	UPDATE a set a.ysnActive = 0
+		FROM tblEntity a
+			JOIN tblEntityToContact b
+				on b.intEntityContactId = a.intEntityId
+		WHERE b.intEntityId = @Id

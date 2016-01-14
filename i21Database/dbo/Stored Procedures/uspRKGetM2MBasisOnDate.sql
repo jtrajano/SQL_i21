@@ -8,7 +8,7 @@ SELECT bd.intM2MBasisDetailId, c.strCommodityCode,	i.strItemNo,		ca.strDescripti
 		strContractInventory,		strContractType,strUnitMeasure,
 		bd.intCommodityId,		bd.intItemId, bd.strOriginDest,		bd.intFutureMarketId,		bd.intFutureMonthId,
 		bd.intCompanyLocationId,		bd.intMarketZoneId,		bd.intCurrencyId,	bd.intPricingTypeId,		bd.strContractInventory,
-		bd.intContractTypeId,		bd.dblCashOrFuture,		bd.dblBasisOrDiscount,		bd.intUnitMeasureId	,0 as intConcurrencyId	
+		bd.intContractTypeId,		bd.dblCashOrFuture,		bd.dblBasisOrDiscount,		bd.intUnitMeasureId	,i.strMarketValuation ,0 as intConcurrencyId	
 FROM
  tblRKM2MBasis b
 JOIN tblRKM2MBasisDetail bd on b.intM2MBasisId=bd.intM2MBasisId
@@ -22,5 +22,6 @@ LEFT JOIN tblCTPricingType pt on pt.intPricingTypeId=bd.intPricingTypeId
 LEFT JOIN tblCTContractType ct on ct.intContractTypeId=bd.intContractTypeId
 LEFT JOIN tblARMarketZone mz on mz.intMarketZoneId=bd.intMarketZoneId
 LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=bd.intUnitMeasureId
-WHERE b.intM2MBasisId= @intM2MBasisId and bd.intFutureMarketId is not null and  c.intCommodityId=@intCommodityId
+WHERE b.intM2MBasisId= @intM2MBasisId and bd.intFutureMarketId is not null AND  c.intCommodityId=
+case when @intCommodityId = 0 then c.intCommodityId else @intCommodityId end 
 order by strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)

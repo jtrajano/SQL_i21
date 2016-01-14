@@ -5,6 +5,9 @@ SELECT
     ,D.[intSalesOrderId]
     ,H.[strSalesOrderNumber]  
     ,H.[intCompanyLocationId]
+    ,H.intEntityCustomerId
+    ,H.strCustomerNumber
+    ,H.strCustomerName
     ,L.[strLocationName] 
     ,D.[intItemId]
     ,IC.[strItemNo]
@@ -15,6 +18,7 @@ SELECT
     ,U.[strUnitMeasure] 
     ,D.[dblQtyOrdered]
     ,D.[dblQtyAllocated]
+    ,D.[dblQtyShipped]
     ,D.[dblDiscount]
     ,D.[intTaxId]
     ,D.[dblPrice]
@@ -24,22 +28,25 @@ SELECT
     ,D.[intCOGSAccountId]
     ,D.[intSalesAccountId]
     ,D.[intInventoryAccountId]
+    ,ST.intSubLocationId
+    ,ST.strSubLocationName
     ,D.[intStorageLocationId]
     ,ST.[strName] AS strStorageLocation
-	,D.strMaintenanceType
-	,D.strFrequency
-	,D.dtmMaintenanceDate
-	,D.dblMaintenanceAmount
-	,D.dblLicenseAmount
-	,D.intContractHeaderId
-	,D.intContractDetailId
-	,CH.strContractNumber
-	,CD.intContractSeq
-	,IC.intCommodityId
+    ,D.strMaintenanceType
+    ,D.strFrequency
+    ,D.dtmMaintenanceDate
+    ,D.dblMaintenanceAmount
+    ,D.dblLicenseAmount
+    ,D.intContractHeaderId
+    ,D.intContractDetailId
+    ,CH.strContractNumber
+    ,CD.intContractSeq
+    ,IC.intCommodityId
+    ,H.ysnProcessed
 FROM         
     [tblSOSalesOrderDetail] D
 LEFT JOIN    
-    [tblSOSalesOrder] H
+    [vyuSOSalesOrderSearch] H
         ON H.[intSalesOrderId] = D.[intSalesOrderId] 
 LEFT JOIN
     [tblSMCompanyLocation] L
@@ -54,12 +61,12 @@ LEFT JOIN
     [tblICItem] IC
         ON D.[intItemId] = IC.[intItemId]
 LEFT JOIN
-    [tblICStorageLocation] ST
+    [vyuICGetStorageLocation] ST
         ON D.[intStorageLocationId] = ST.[intStorageLocationId]
 LEFT JOIN
-	[tblCTContractHeader] CH
-		ON D.[intContractHeaderId] = CH.[intContractHeaderId]
+    [tblCTContractHeader] CH
+        ON D.[intContractHeaderId] = CH.[intContractHeaderId]
 LEFT JOIN
-	[tblCTContractDetail] CD
-		ON D.[intContractDetailId] = CD.[intContractDetailId] 
-	  AND CH.[intContractHeaderId] = CD.[intContractHeaderId]
+    [tblCTContractDetail] CD
+        ON D.[intContractDetailId] = CD.[intContractDetailId] 
+      AND CH.[intContractHeaderId] = CD.[intContractHeaderId]

@@ -166,6 +166,7 @@ INSERT INTO [dbo].[tblTRQuoteDetail]
                   ,NULL					--@LastCost
                   ,EL.intEntityLocationId 	--@ShipToLocationId
                   ,NULL					--@VendorLocationId
+				  ,NULL					--@InvoiceType
                   ) as intSpecialPriceId
            ,1 --[intConcurrencyId]
 from @DataForQuote QS

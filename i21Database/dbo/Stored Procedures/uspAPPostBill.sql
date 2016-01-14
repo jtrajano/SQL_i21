@@ -194,14 +194,34 @@ IF ISNULL(@recap, 0) = 0
 BEGIN
 
 	--handel error here as we do not get the error here
-	BEGIN TRY
-	EXEC uspGLBookEntries @GLEntries, @post
-	END TRY
-	BEGIN CATCH
-		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
-		RAISERROR(@error, 16, 1);
-		GOTO Post_Rollback
-	END CATCH
+	IF @totalRecords = 1 AND @isBatch = 0
+	BEGIN
+		BEGIN TRY
+		EXEC uspGLBookEntries @GLEntries, @post
+		END TRY
+		BEGIN CATCH
+			DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+			RAISERROR(@error, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
+	ELSE
+	BEGIN
+		EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
+		DELETE A
+		FROM #tmpPostBillData A
+		INNER JOIN tblGLPostResult B ON A.intBillId = B.intTransactionId
+		WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			A.strDescription
+			,A.strTransactionType
+			,A.strTransactionId
+			,A.intTransactionId
+		FROM tblGLPostResult A
+		WHERE A.strBatchId = @batchId
+	END
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -246,14 +266,35 @@ BEGIN
 			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND B.intInventoryReceiptChargeId IS NULL
 
-		--UPDATE CHARGES
-		UPDATE A
-			SET A.dblAmountBilled = A.dblAmountBilled - B.dblTotal
-		FROM tblICInventoryReceiptCharge A
-			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
-		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		--UPDATE CHARGES (Accrue)
+		UPDATE	Charge
+		SET		Charge.dblAmountBilled = Charge.dblAmountBilled - BillDetail.dblTotal
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryReceiptCharge Charge 
+					ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+					AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	BillDetail.dblTotal > 0 
+
+		--UPDATE CHARGES (Price)
+		UPDATE	Charge
+		SET		Charge.dblAmountPriced = Charge.dblAmountPriced - BillDetail.dblTotal
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryReceiptCharge Charge 
+					ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+				INNER JOIN tblICInventoryReceipt Receipt
+					ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+					AND Receipt.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	ISNULL(Charge.ysnPrice, 0) = 1
+				AND BillDetail.dblTotal < 0 
+				
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -303,15 +344,36 @@ BEGIN
 			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)  AND B.intInventoryReceiptChargeId IS NULL
 
-		--UPDATE CHARGES
-		UPDATE A
-			SET A.dblAmountBilled = A.dblAmountBilled + B.dblTotal
-		FROM tblICInventoryReceiptCharge A
-			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
-		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		--UPDATE CHARGES (Accrue)
+		UPDATE	Charge
+		SET		Charge.dblAmountBilled = Charge.dblAmountBilled + BillDetail.dblTotal
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryReceiptCharge Charge 
+					ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+					AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	BillDetail.dblTotal > 0 
 
+		--UPDATE CHARGES (Price)
+		UPDATE	Charge
+		SET		Charge.dblAmountPriced = Charge.dblAmountPriced + BillDetail.dblTotal
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryReceiptCharge Charge 
+					ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+				INNER JOIN tblICInventoryReceipt Receipt
+					ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+					AND Receipt.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	ISNULL(Charge.ysnPrice, 0) = 1
+				AND BillDetail.dblTotal < 0 
+				
+		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 

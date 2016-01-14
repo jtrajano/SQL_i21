@@ -12,6 +12,7 @@
 	,@LastCost			NUMERIC(18,6)	= NULL
 	,@ShipToLocationId  INT				= NULL
 	,@VendorLocationId  INT				= NULL
+	,@InvoiceType		NVARCHAR(200)	= NULL
 AS		
 	
 	SELECT
@@ -40,6 +41,7 @@ AS
 			,@VendorLocationId
 			,NULL
 			,NULL
+			,@InvoiceType
 		)
 
 RETURN 0

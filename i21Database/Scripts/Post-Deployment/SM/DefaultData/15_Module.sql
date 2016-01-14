@@ -820,6 +820,123 @@
 		   [ysnSupported]					=		1,
 	       [intSort]						=		91
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Scale')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		92,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Scale',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		92
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'System Manager')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		93,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'System Manager',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		93
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Technical Support')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		94,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Technical Support',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		94
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'New/Upgrade System')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		95,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'New/Upgrade System',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		95
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Motor Fuel Tax Forms')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		96,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Motor Fuel Tax Forms',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		96
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Technical Support')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		97,
+		   [strApplicationName]				=		N'Origin',
+		   [strModule]						=		N'Technical Support',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		97
+
+  	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Any')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		98,
+		   [strApplicationName]				=		N'Origin',
+		   [strModule]						=		N'Any',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		98
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'New/Upgrade System')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		99,
+		   [strApplicationName]				=		N'Origin',
+		   [strModule]						=		N'New/Upgrade System',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		99
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Credit Card Recon')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		100,
+		   [strApplicationName]				=		N'Origin',
+		   [strModule]						=		N'Credit Card Recon',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		100
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'ANY' AND strModule = 'Not Supported')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		101,
+		   [strApplicationName]				=		N'ANY',
+		   [strModule]						=		N'Not Supported',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		101
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'ANY' AND strModule = 'Any Product')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		102,
+		   [strApplicationName]				=		N'ANY',
+		   [strModule]						=		N'Any Product',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		102
+
+   	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'iMake' AND strModule = 'iMake')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		103,
+		   [strApplicationName]				=		N'iMake',
+		   [strModule]						=		N'iMake',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		103
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'iTrade' AND strModule = 'iTrade')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		104,
+		   [strApplicationName]				=		N'iTrade',
+		   [strModule]						=		N'iTrade',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		0,
+	       [intSort]						=		104
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO

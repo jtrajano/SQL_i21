@@ -30,6 +30,7 @@
     [ysnShowOutScale] BIT NULL, 
 	[ysnAllowZeroWeights] BIT NULL,
     [strWeightDescription] NVARCHAR(5) COLLATE Latin1_General_CI_AS NOT NULL, 
+	intUnitMeasureId INT NULL, 
     [intGraderDeviceId] INT NULL, 
     [intAlternateGraderDeviceId] INT NULL, 
     [intLEDDeviceId] INT NULL, 
@@ -77,7 +78,8 @@
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMUserSecurity_intLastPurgeUserId] FOREIGN KEY ([intLastPurgeUserId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intDefaultFeeItemId] FOREIGN KEY ([intDefaultFeeItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intFreightItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intFreightItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblSCScaleSetup_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure](intUnitMeasureId)
 	)
 
 GO
@@ -334,6 +336,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCScaleSetup',
     @level2type = N'COLUMN',
     @level2name = N'strWeightDescription'
+	GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Unit of Measure Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCScaleSetup',
+    @level2type = N'COLUMN',
+    @level2name = N'intUnitMeasureId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Grader Device ID',

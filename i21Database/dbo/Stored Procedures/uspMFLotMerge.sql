@@ -31,6 +31,8 @@ BEGIN TRY
 	DECLARE @dblNewLotWeightPerUnit NUMERIC(16,8)
 	DECLARE @strNewLotNumber NVARCHAR(100)
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
+	DECLARE @intSourceLotWeightUOM INT
+	DECLARE @intDestinationLotWeightUOM INT
 	
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -39,7 +41,8 @@ BEGIN TRY
 		   @strLotNumber = strLotNumber,
 		   @intLotStatusId = intLotStatusId,
 		   @intNewLocationId = intLocationId,
-		   @dblLotWeightPerUnit = dblWeightPerQty
+		   @dblLotWeightPerUnit = dblWeightPerQty,
+		   @intSourceLotWeightUOM = intWeightUOMId
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
@@ -50,7 +53,8 @@ BEGIN TRY
 		   @intNewItemUOMId = intItemUOMId,
 		   @strNewLotNumber = strLotNumber,
 		   @intNewLotStatusId = intLotStatusId,
-		   @dblNewLotWeightPerUnit = dblWeightPerQty
+		   @dblNewLotWeightPerUnit = dblWeightPerQty,
+		   @intDestinationLotWeightUOM = intWeightUOMId
 	FROM tblICLot WHERE intLotId = @intNewLotId
 		   
 	SELECT @dtmDate = GETDATE()
@@ -76,7 +80,12 @@ BEGIN TRY
 	BEGIN
 		RAISERROR(90008,11,1)
 	END
-													 
+	
+	IF @intDestinationLotWeightUOM = @intSourceLotWeightUOM
+	BEGIN
+		RAISERROR(90009,11,1)
+	END												 
+
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
 													 @intLocationId	= @intLocationId,

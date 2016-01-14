@@ -11,6 +11,7 @@
 	,@LastCost				NUMERIC(18,6)
 	,@ShipToLocationId      INT
 	,@VendorLocationId		INT
+	,@InvoiceType			NVARCHAR(200)
 )
 RETURNS INT
 AS
@@ -32,6 +33,7 @@ BEGIN
 			,@LastCost
 			,@ShipToLocationId
 			,@VendorLocationId
+			,@InvoiceType
 		);
 
 	RETURN @SpecialPriceId

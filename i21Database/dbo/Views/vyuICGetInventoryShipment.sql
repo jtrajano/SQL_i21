@@ -9,13 +9,13 @@ SELECT Shipment.intInventoryShipmentId
 					WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
 					WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
 					WHEN Shipment.intOrderType = 4 THEN 'Direct'
-				END)
+				END) COLLATE Latin1_General_CI_AS
 , Shipment.intSourceType
 , strSourceType = (CASE WHEN Shipment.intSourceType = 1 THEN 'Scale'
 					WHEN Shipment.intSourceType = 2 THEN 'Inbound Shipment'
 					WHEN Shipment.intSourceType = 3 THEN 'Pick Lot'
 					WHEN Shipment.intSourceType = 0 THEN 'None'
-				END)
+				END) COLLATE Latin1_General_CI_AS
 , Shipment.strReferenceNumber
 , Shipment.dtmRequestedArrivalDate
 , Shipment.intShipFromLocationId
