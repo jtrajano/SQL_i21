@@ -3186,6 +3186,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryTransfer.sql" />
     <None Include="Scripts\Post-Deployment\EM\020_DefaultDataForEntityImportSchemaCSV.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetOptionMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
