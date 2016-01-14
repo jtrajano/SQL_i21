@@ -1,10 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuGLAccountDetailReportParameter] as
-SELECT [dtmDate]
-      ,[strBatchId]
-      ,[dblDebit]
-      ,[dblCredit]
-      ,[dblDebitUnit]
-      ,[dblCreditUnit]
+SELECT  [strBatchId]
       ,d.[strDescription] as strDetailDescription
       ,[strCode]
       ,d.[strReference]
