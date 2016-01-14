@@ -56,6 +56,7 @@ BEGIN
 					AND SA.intShiftId = SCD.intShiftId
 				)
 		ORDER BY SCD.dtmCalendarDate
+			,SCD.dtmShiftStartTime
 
 		SELECT AT.intShiftActivityId
 			,MC.strCellName

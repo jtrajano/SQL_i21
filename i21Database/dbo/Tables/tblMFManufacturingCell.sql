@@ -24,6 +24,7 @@ Type the overview for the table here.
 		[dblStdLineEfficiency] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnIncludeSchedule] BIT NULL DEFAULT ((0)), 
 		[ysnIncludeEfficiency] BIT NOT NULL CONSTRAINT [DF_tblMFManufacturingCell_ysnIncludeEfficiency] DEFAULT 1, 
+		[dblWastageFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intCreatedUserId] [int] NULL,
 		[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblMFManufacturingCell_dtmCreated] DEFAULT GetDate(),
 		[intLastModifiedUserId] [int] NULL,

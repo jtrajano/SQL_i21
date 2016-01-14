@@ -3209,6 +3209,7 @@
     <Build Include="dbo\Stored Procedures\uspTMDuplicateDevice.sql" />
     <Build Include="dbo\Views\vyuCFSiteItem.sql" />
     <Build Include="dbo\Views\vyuCFInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShiftActivityDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
