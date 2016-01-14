@@ -22,6 +22,7 @@
 	,@VendorLocationId			INT				= NULL
 	,@PricingLevelId			INT				= NULL
 	,@AllowQtyToExceedContract	BIT				= 0
+	,@InvoiceType				NVARCHAR(200)	= NULL
 AS	
 	
 	SELECT
@@ -56,6 +57,7 @@ AS
 			,@VendorLocationId
 			,@PricingLevelId
 			,@AllowQtyToExceedContract
+			,@InvoiceType
 		)
 
 RETURN 0

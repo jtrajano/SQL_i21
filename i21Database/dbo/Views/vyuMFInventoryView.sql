@@ -39,7 +39,6 @@ AS
 			l.intCreatedUserId,
 			l.intConcurrencyId,
 
-
 			i.strItemNo,         
 			i.strDescription strItemDescription,         
 			i.strType strItemType,         

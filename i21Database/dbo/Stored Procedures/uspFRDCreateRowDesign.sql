@@ -8,6 +8,7 @@ CREATE PROCEDURE [dbo].[uspFRDCreateRowDesign]
 	@strSource NVARCHAR(20),
 	@strRelatedRows NVARCHAR(MAX),
 	@strAccountsUsed NVARCHAR(MAX),
+	@strAccountsType NVARCHAR(MAX),
 	@ysnShowCredit BIT,
 	@ysnShowDebit BIT,
 	@ysnShowOthers BIT,
@@ -31,6 +32,19 @@ SET XACT_ABORT ON
 
 BEGIN
 
+DECLARE @Hidden BIT = 0
+
+IF(@strRowType = 'Hidden')
+BEGIN
+	SET @Hidden = 1
+	SET @strRowType = 'Filter Accounts'
+END
+IF(@strRowType = 'Current Year Earnings')
+BEGIN
+	SET @Hidden = 1
+END
+
+
 	INSERT INTO tblFRRowDesign (intRowId,
 								intRefNo,
 								strDescription,
@@ -39,10 +53,12 @@ BEGIN
 								strSource,
 								strRelatedRows,
 								strAccountsUsed,
+								strAccountsType,
 								ysnShowCredit,
 								ysnShowDebit,
 								ysnShowOthers,
 								ysnLinktoGL,
+								ysnHidden,
 								dblHeight,
 								strFontName,
 								strFontStyle,
@@ -61,10 +77,12 @@ BEGIN
 								@strSource,
 								@strRelatedRows,
 								@strAccountsUsed,
+								@strAccountsType,
 								@ysnShowCredit,
 								@ysnShowDebit,
 								@ysnShowOthers,
 								@ysnLinktoGL,
+								@Hidden,
 								@dblHeight,
 								@strFontName,
 								@strFontStyle,

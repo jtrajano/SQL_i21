@@ -84,6 +84,9 @@ EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId
 --Sales Order Status
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId
 
+--Update Total AR
+EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @TransactionId, @CustomerId = NULL
+
 --Patronage
 DECLARE	@EntityCustomerId INT
 		,@successfulCount INT

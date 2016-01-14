@@ -1,4 +1,5 @@
 GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'glactmst') RETURN
 
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuGLtblGLIjemstDifference')
 	DROP VIEW vyuGLtblGLIjemstDifference
@@ -61,9 +62,9 @@ EXEC (
                                     WHEN glije_dr_cr_ind = ''C''
                                     THEN glije_amt
                                     ELSE 0
-                                END) AS Credit,
-                            CONVERT( DATETIME, SUBSTRING(CONVERT(VARCHAR(10), glije_date), 1, 4) + ''/'' + SUBSTRING(CONVERT(VARCHAR(10), glije_date), 5, 2) + ''/'' + SUBSTRING(CONVERT(VARCHAR(10), glije_date), 7, 2)) AS glije_date,
-                            A.glije_period,
+                                END) AS Credit,                         
+                            A.glije_date,
+							A.glije_period,
                             A.glije_src_sys,
                             A.glije_src_no,
                             A.A4GLIdentity,

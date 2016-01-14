@@ -27,61 +27,90 @@ DECLARE @MergeLotSource AS ItemCostingTableType
 --------------------------------------------------------------------------------
 -- VALIDATIONS
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- Validate the UOM
---------------------------------------------------------------------------------
-DECLARE @intItemId AS INT 
-DECLARE @strItemNo AS NVARCHAR(50)
-
 BEGIN 
-	SELECT TOP 1 
-			@intItemId = Detail.intItemId			
-	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
-				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
-			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
-			LEFT JOIN dbo.tblICItemUOM WeightUOM
-				ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL 
-	
-	IF @intItemId IS NOT NULL 
-	BEGIN
-		SELECT @strItemNo = strItemNo
-		FROM dbo.tblICItem Item 
-		WHERE intItemId = @intItemId		
+	--------------------------------------------------------------------------------
+	-- Validate the UOM
+	--------------------------------------------------------------------------------
+	DECLARE @intItemId AS INT 
+	DECLARE @strItemNo AS NVARCHAR(50)
+	DECLARE @strLotNumber AS NVARCHAR(50)
+	DECLARE @intLotId AS INT 
 
-		-- 'The UOM is missing on {Item}.'
-		RAISERROR(80039, 11, 1, @strItemNo);
-		RETURN -1
+	BEGIN 
+		SELECT TOP 1 
+				@intItemId = Detail.intItemId			
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				LEFT JOIN dbo.tblICItemUOM ItemUOM
+					ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+				LEFT JOIN dbo.tblICItemUOM WeightUOM
+					ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL 
+	
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			SELECT @strItemNo = strItemNo
+			FROM dbo.tblICItem Item 
+			WHERE intItemId = @intItemId		
+
+			-- 'The UOM is missing on {Item}.'
+			RAISERROR(80039, 11, 1, @strItemNo);
+			RETURN -1
+		END
+
 	END
 
-END
-
---------------------------------------------------------------------------------
--- Validate for non-negative Adjust Qty
--------------------------------------------------------------------------------
-BEGIN 
-	SELECT	TOP 1 
-			@intItemId = Detail.intItemId
-	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
-				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) > 0 
+	--------------------------------------------------------------------------------
+	-- Validate for non-negative Adjust Qty
+	-------------------------------------------------------------------------------
+	BEGIN 
+		SELECT	TOP 1 
+				@intItemId = Detail.intItemId
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) > 0 
 	
-	IF @intItemId IS NOT NULL 
-	BEGIN
-		SELECT @strItemNo = strItemNo
-		FROM dbo.tblICItem Item 
-		WHERE intItemId = @intItemId		
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			SELECT @strItemNo = strItemNo
+			FROM dbo.tblICItem Item 
+			WHERE intItemId = @intItemId		
 
-		-- 'Lot Move requires a negative Adjust Qty on %s as stock for the move.'
-		RAISERROR(80059, 11, 1, @strItemNo);
-		RETURN -1
-	END
+			-- 'Lot Move requires a negative Adjust Qty on %s as stock for the move.'
+			RAISERROR(80059, 11, 1, @strItemNo);
+			RETURN -1
+		END
+	END 
+
+	-------------------------------------------------------------------------------------
+	-- Validate for Lot Move to the same location, sub location, and storage location. 
+	-------------------------------------------------------------------------------------
+	BEGIN 
+		SELECT	TOP 1 
+				@strLotNumber = Lot.strLotNumber
+				,@intLotId = Lot.intLotId
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				INNER JOIN dbo.tblICLot Lot
+					ON Lot.intLotId = Detail.intLotId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND Lot.strLotNumber = ISNULL(Detail.strNewLotNumber, Lot.strLotNumber) 
+				AND Header.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)
+				AND Detail.intSubLocationId = ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
+				AND Detail.intStorageLocationId = ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
+
+	
+		IF @intLotId IS NOT NULL 
+		BEGIN
+			-- 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
+			RAISERROR(80074, 11, 1, @strLotNumber)  
+			RETURN -1
+		END
+	END 
+
 END 
-
 
 --------------------------------------------------------------------------------
 -- REDUCE THE SOURCE LOT NUMBER

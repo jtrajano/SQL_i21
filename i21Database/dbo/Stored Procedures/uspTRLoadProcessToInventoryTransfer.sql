@@ -118,13 +118,13 @@ END
 				,[strSourceId]				= TL.strTransaction
 				,[strSourceScreenName]		= 'Transport Loads'
 
-    FROM	tblTRLoadHeader TL 
-	        JOIN tblTRLoadReceipt TR 
-				ON TR.intLoadHeaderId = TL.intLoadHeaderId	
+    FROM	tblTRLoadHeader TL 	        
 			JOIN tblTRLoadDistributionHeader DH 
 				ON TL.intLoadHeaderId = DH.intLoadHeaderId		
 			JOIN tblTRLoadDistributionDetail DD 
 				ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+			JOIN tblTRLoadReceipt TR 
+				ON TR.intLoadHeaderId = TL.intLoadHeaderId	and TR.strReceiptLine in (select Item from fnTRSplit(DD.strReceiptLink,','))
             LEFT JOIN vyuICGetItemStock IC
 			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId   			
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId

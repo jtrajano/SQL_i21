@@ -100,6 +100,22 @@ RETURN (
 									,@intSubLocationId
 									,@intStorageLocationId
 								)
+								,ISNULL(
+									(
+										SELECT	strSubLocationName
+										FROM	dbo.tblSMCompanyLocationSubLocation
+										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
+									)
+									, '(Blank Sub Location)'
+								)
+								,ISNULL(
+									(
+										SELECT	strName
+										FROM	dbo.tblICStorageLocation
+										WHERE	intStorageLocationId = @intStorageLocationId
+									)
+									, '(Blank Storage Location)'
+								)
 							)
 				,intErrorCode = 80003
 		WHERE	EXISTS (
@@ -133,6 +149,22 @@ RETURN (
 									@intItemLocationId
 									,@intSubLocationId
 									,@intStorageLocationId
+								)
+								,ISNULL(
+									(
+										SELECT	strSubLocationName
+										FROM	dbo.tblSMCompanyLocationSubLocation
+										WHERE	intCompanyLocationSubLocationId = @intSubLocationId
+									)
+									, '(Blank Sub Location)'
+								)
+								,ISNULL(
+									(
+										SELECT	strName
+										FROM	dbo.tblICStorageLocation
+										WHERE	intStorageLocationId = @intStorageLocationId
+									)
+									, '(Blank Storage Location)'
 								)
 							)
 				,intErrorCode = 80003

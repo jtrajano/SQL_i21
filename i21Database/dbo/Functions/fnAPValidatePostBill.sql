@@ -46,16 +46,16 @@ BEGIN
 		AND A.intTransactionType = 1
 		AND ISNULL(A.strVendorOrderNumber,'') = ''
 
-		--Fiscal Year
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'Unable to find an open fiscal year period to match the transaction date.',
-			'Bill',
-			A.strBillId,
-			A.intBillId
-		FROM tblAPBill A 
-		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
-			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
+		----Fiscal Year
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--SELECT 
+		--	'Unable to find an open fiscal year period to match the transaction date.',
+		--	'Bill',
+		--	A.strBillId,
+		--	A.intBillId
+		--FROM tblAPBill A 
+		--WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
+		--	0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
 		--zero amount
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -266,15 +266,15 @@ BEGIN
 				ELSE 1 END
 
 		--NO FISCAL PERIOD
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'Unable to find an open fiscal year period to match the transaction date.',
-			'Bill',
-			A.strBillId,
-			A.intBillId
-		FROM tblAPBill A 
-		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
-			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--SELECT 
+		--	'Unable to find an open fiscal year period to match the transaction date.',
+		--	'Bill',
+		--	A.strBillId,
+		--	A.intBillId
+		--FROM tblAPBill A 
+		--WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
+		--	0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 	END
 
 	RETURN

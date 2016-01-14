@@ -67,4 +67,7 @@ BEGIN
 				  Total.dblDividendAmount,
 				  CS.dblCheckAmount
 END
+
+
+
 GO

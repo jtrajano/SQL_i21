@@ -83,7 +83,8 @@ FROM
 				LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 				LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B1.intCostUOMId
 				LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
-			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty
+			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
+			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
 			AND A1.strReceiptType = 'Purchase Order'
 			GROUP BY
@@ -111,6 +112,9 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) 
 				ON G1.intEntityId = D1.intEntityVendorId AND B.intItemId = G2.intItemId AND B.intContractDetailId = G2.intContractDetailId
+		WHERE NOT EXISTS(
+			SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = tblReceived.intInventoryReceiptItemId AND H.intPurchaseDetailId = B.intPurchaseDetailId
+		)
 	UNION ALL
 	--Miscellaneous items
 	SELECT
@@ -164,6 +168,9 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 	WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 	AND B.dblQtyOrdered != B.dblQtyReceived
+	AND NOT EXISTS(
+		SELECT 1 FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
+	)
 	UNION ALL
 	--DIRECT TYPE
 	SELECT
@@ -226,6 +233,10 @@ FROM
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
+	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
+	AND NOT EXISTS(
+		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+	)
 	UNION ALL
 
 	--OTHER CHARGES
@@ -257,9 +268,9 @@ FROM
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
-		,[strContractNumber]						=	NULL
+		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
-		,[intContractHeaderId]						=	NULL
+		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
@@ -272,6 +283,9 @@ FROM
 		,[strgrossNetUOM]							=	NULL
 		,[dblUnitQty]								=	0   
 	FROM [vyuAPChargesForBilling] A
+	WHERE NOT EXISTS(
+		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	)
 
 	UNION ALL
 
@@ -321,4 +335,6 @@ FROM
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
 ) Items
+
+
 GO

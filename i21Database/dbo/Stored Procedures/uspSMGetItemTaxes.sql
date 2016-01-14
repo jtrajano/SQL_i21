@@ -7,6 +7,7 @@
 	,@TaxGroupId			INT			= NULL
 	,@BillShipToLocationId	INT			= NULL
 	,@IncludeExemptedCodes	BIT			= NULL
+	,@SiteId				INT			= NULL
 AS
 
 BEGIN
@@ -14,7 +15,7 @@ BEGIN
 	IF ISNULL(@TaxGroupId,0) = 0
 		BEGIN				
 			IF (@TransactionType = 'Sale')
-				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId)
+				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @SiteId)
 			ELSE
 				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId)
 		END

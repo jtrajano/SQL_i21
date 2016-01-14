@@ -168,6 +168,7 @@
     <Folder Include="Scripts\Utility\IC\Query tools" />
     <Folder Include="Scripts\Post-Deployment\TF" />
     <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\TR" />
     <Folder Include="Scripts\Utility\IC\Repost Costing\WM\" />
   </ItemGroup>
   <ItemGroup>
@@ -3042,7 +3043,6 @@
     <Build Include="dbo\Tables\tblSMMessage.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
-    <Build Include="uspPATPostRefund.sql" />
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
@@ -3096,14 +3096,12 @@
     <Build Include="dbo\Stored Procedures\uspSOProcessToInvoice.sql" />
     <Build Include="dbo\Views\vyuPRUnpostedTransactions.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLogo.sql" />
+    <Build Include="dbo\Tables\tblSCListTicketTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdatePaycheckReferenceNo.sql" />
     <Build Include="dbo\Functions\fnPATCreateDividendGLEntries.sql" />
     <Build Include="dbo\Functions\fnPATReverseGLDividendEntries.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
-    <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
-    <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
-    <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostRefund.sql" />
+    <Build Include="dbo\Views\vyuSMAccountDetail.sql" />
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
     <Build Include="dbo\Functions\fnTRSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLoadPosting.sql" />
@@ -3115,18 +3113,37 @@
     <Build Include="dbo\Stored Procedures\uspTRLoadProcessToInventoryTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLoadProcessToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLoadProcessTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
+    <Build Include="dbo\Views\vyuARCustomerGroup.sql" />
     <Build Include="dbo\Functions\fnTRConcatString.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
+    <Build Include="dbo\Tables\tblEntityGroup.sql" />
+    <Build Include="dbo\Tables\tblEntityGroupDetail.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\Do Stock Repost.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICDetectBadOnHand.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
-    <Build Include="dbo\Tables\tblSCListTicketTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostDividend.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
-    <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUnpostCostAdjustmentGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
+    <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerBudget.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerTotalAR.sql" />
+    <Build Include="dbo\Views\vyuTRLinkedReceipts.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRPaycheckEFTDistribution.sql" />
+    <Build Include="dbo\Views\vyuGLAccountDetailReportParameter.sql" />
+    <Build Include="dbo\Views\vyuAPContractDistinct.sql" />
+    <Build Include="dbo\Functions\fnPOIsProcessed.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
+    <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
+    <Build Include="dbo\Views\vyuARBatchPostingTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3203,12 +3220,14 @@
     <None Include="Scripts\Post-Deployment\ST\5_FileFieldMapping_PricebookSendSapphire.sql" />
     <None Include="Scripts\Post-Deployment\EM\017_MoveSplitCategoryToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\EM\018_UpdateRoleId_ForEntityCredential.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICRepostCosting.sql" />
-    <None Include="Scripts\Utility\IC\Repost Costing\WM\Do Stock Repost.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
+    <None Include="Scripts\Utility\IC\Repost Costing\Do Stock Repost.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\9_FixServiceChargeStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementReport.sql" />
+    <None Include="Scripts\Post-Deployment\GR\TicketTypes.sql" />
     <None Include="Scripts\Post-Deployment\EM\019_RemoveEmailToParentEntity.sql" />
     <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DataFixes\AddPaycheckDirectDepositEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

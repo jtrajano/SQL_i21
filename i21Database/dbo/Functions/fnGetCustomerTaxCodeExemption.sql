@@ -182,6 +182,39 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
+							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
+	FROM
+		tblARCustomerTaxingTaxException TE
+	LEFT OUTER JOIN
+		tblEntityLocation EL
+			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
+	LEFT OUTER JOIN
+		tblICItem  IC
+			ON TE.[intItemId] = IC.[intItemId]
+	LEFT OUTER JOIN
+		tblICCategory ICC
+			ON TE.[intCategoryId] = ICC.[intCategoryId]
+	WHERE
+		[intEntityCustomerId] = @CustomerId
+		AND TE.[intEntityCustomerLocationId] = @ShipToLocationId
+		AND TE.[intItemId] = @ItemId
+		AND TE.[intCategoryId]  = @ItemCategoryId 
+		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
+	ORDER BY
+		dtmStartDate	
+		
+		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		RETURN @TaxCodeExemption
+
+
+	SELECT TOP 1
+		@TaxCodeExemption = 'Tax Exemption '
+							 + ISNULL('Number: ' + TE.[strException], '') 
+							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
+							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
+							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -194,6 +227,35 @@ BEGIN
 		[intEntityCustomerId] = @CustomerId
 		AND TE.[intEntityCustomerLocationId] = @ShipToLocationId
 		AND TE.[intItemId] = @ItemId
+		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
+	ORDER BY
+		dtmStartDate	
+		
+		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		RETURN @TaxCodeExemption
+
+
+	SELECT TOP 1
+		@TaxCodeExemption = 'Tax Exemption '
+							 + ISNULL('Number: ' + TE.[strException], '') 
+							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
+							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
+							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
+	FROM
+		tblARCustomerTaxingTaxException TE
+	LEFT OUTER JOIN
+		tblEntityLocation EL
+			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
+	LEFT OUTER JOIN
+		tblICCategory ICC
+			ON TE.[intCategoryId] = ICC.[intCategoryId]
+	WHERE
+		[intEntityCustomerId] = @CustomerId
+		AND TE.[intEntityCustomerLocationId] = @ShipToLocationId
+		AND TE.[intItemId] = @ItemId
+		AND TE.[intCategoryId]  = @ItemCategoryId 
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
 		dtmStartDate	
@@ -324,6 +386,29 @@ BEGIN
 		[intEntityCustomerId] = @CustomerId
 		AND ISNULL(TE.intEntityCustomerLocationId,0) = 0
 		AND TE.[intItemId] = @ItemId
+		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
+	ORDER BY
+		dtmStartDate			
+				
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		RETURN @TaxCodeExemption
+		
+		
+	SELECT TOP 1
+		@TaxCodeExemption = 'Tax Exemption '
+							 + ISNULL('Number: ' + TE.[strException], '') 
+							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
+							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
+							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
+	FROM
+		tblARCustomerTaxingTaxException TE
+	LEFT OUTER JOIN
+		tblICCategory  ICC
+			ON TE.[intCategoryId] = ICC.[intCategoryId]
+	WHERE
+		[intEntityCustomerId] = @CustomerId
+		AND ISNULL(TE.intEntityCustomerLocationId,0) = 0
+		AND TE.[intCategoryId] = @ItemCategoryId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
 	ORDER BY
 		dtmStartDate			

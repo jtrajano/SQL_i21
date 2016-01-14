@@ -25,7 +25,7 @@ SELECT
        SCQ.dblGrossWt,
        SCQ.dblTareWt,
        SCQ.dblNetWt,
-       dblCost = CT.dblCashPriceInQtyUOM, 
+       dblCost = CT.dblCashPrice, 
        intWeightUOMId = S.intWeightUnitMeasureId,
        WTUOM.strUnitMeasure as strWeightUOM,
        intEntityVendorId = S.intVendorEntityId,
@@ -49,6 +49,9 @@ SELECT
 	   ,intWeightItemUOMId = (SELECT WeightItem.intItemUOMId FROM tblICItemUOM WeightItem WHERE WeightItem.intItemId=SCQ.intItemId AND WeightItem.intUnitMeasureId=S.intWeightUnitMeasureId)
 	   ,CT.intPriceItemUOMId
 	   ,CT.strPriceUOM
+	   ,intCostUOMId = CT.intPriceItemUOMId
+	   ,strCostUOM = CT.strPriceUOM
+	   ,dblCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId),0)
 
 FROM tblLGShipmentContractQty SCQ
 JOIN tblLGShipment S ON S.intShipmentId = SCQ.intShipmentId

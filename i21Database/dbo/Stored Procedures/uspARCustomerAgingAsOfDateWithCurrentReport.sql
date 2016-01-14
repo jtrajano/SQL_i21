@@ -54,6 +54,7 @@ FROM tblARInvoice I
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 	
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -88,6 +89,7 @@ FROM tblARInvoice I
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	
@@ -165,6 +167,7 @@ FROM
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId	
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.strTransactionType = 'Invoice'
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -184,6 +187,7 @@ SELECT I.intInvoiceId
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId	
 WHERE I.ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	

@@ -179,7 +179,8 @@ BEGIN TRY
 						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 						,dblQty = @dblRemainingUnits 
 						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
+						--,dblCost = dblUnitPrice + ScaleTicket.dblUnitBasis
+						,dblCost = @dblCost
 						,dblSalesPrice = 0
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 

@@ -118,4 +118,13 @@ BEGIN
 	GOTO _Exit;
 END
 
+-- Update the shipped quantities back to Contracts
+IF @OrderType = @INT_ORDER_TYPE_SALES_CONTRACT  
+BEGIN   
+	 EXEC dbo.uspCTShipped 
+		@ItemsFromInventoryShipment
+		, @intEntityUserSecurityId  
+	 GOTO _Exit;  
+END  
+
 _Exit: 
