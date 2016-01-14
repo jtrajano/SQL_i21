@@ -107,45 +107,51 @@ BEGIN
 			,@SurchargeOnSurcharge_BetterHaven AS INT = 33
 			,@SurchargeOnSurchargeOnSurcharge_BetterHaven AS INT = 34
 
-	-- Declare the account ids
-	DECLARE	 @Inventory_Default AS INT = 1000
-			,@CostOfGoods_Default AS INT = 2000
-			,@APClearing_Default AS INT = 3000
-			,@WriteOffSold_Default AS INT = 4000
-			,@RevalueSold_Default AS INT = 5000 
-			,@AutoNegative_Default AS INT = 6000
-			,@InventoryInTransit_Default AS INT = 7000
-			,@AccountReceivable_Default AS INT = 8000
-			,@InventoryAdjustment_Default AS INT = 9000
-			,@OtherChargeExpense_Default AS INT = 10000
-			,@OtherChargeIncome_Default AS INT = 11000
-			,@OtherChargeAsset_Default AS INT = 12000
+		-- Declare the account ids
+		DECLARE	 @Inventory_Default AS INT = 1000
+				,@CostOfGoods_Default AS INT = 2000
+				,@APClearing_Default AS INT = 3000
+				,@WriteOffSold_Default AS INT = 4000
+				,@RevalueSold_Default AS INT = 5000 
+				,@AutoNegative_Default AS INT = 6000
+				,@InventoryInTransit_Default AS INT = 7000
+				,@AccountReceivable_Default AS INT = 8000
+				,@InventoryAdjustment_Default AS INT = 9000
+				,@OtherChargeExpense_Default AS INT = 10000
+				,@OtherChargeIncome_Default AS INT = 11000
+				,@OtherChargeAsset_Default AS INT = 12000
+				,@CostAdjustment_Default AS INT = 13000
+				,@RevalueWIP_Default AS INT = 14000
 
-			,@Inventory_NewHaven AS INT = 1001
-			,@CostOfGoods_NewHaven AS INT = 2001
-			,@APClearing_NewHaven AS INT = 3001
-			,@WriteOffSold_NewHaven AS INT = 4001
-			,@RevalueSold_NewHaven AS INT = 5001
-			,@AutoNegative_NewHaven AS INT = 6001
-			,@InventoryInTransit_NewHaven AS INT = 7001
-			,@AccountReceivable_NewHaven AS INT = 8001
-			,@InventoryAdjustment_NewHaven AS INT = 9001
-			,@OtherChargeExpense_NewHaven AS INT = 10001
-			,@OtherChargeIncome_NewHaven AS INT = 11001
-			,@OtherChargeAsset_NewHaven AS INT = 12001
+				,@Inventory_NewHaven AS INT = 1001
+				,@CostOfGoods_NewHaven AS INT = 2001
+				,@APClearing_NewHaven AS INT = 3001
+				,@WriteOffSold_NewHaven AS INT = 4001
+				,@RevalueSold_NewHaven AS INT = 5001
+				,@AutoNegative_NewHaven AS INT = 6001
+				,@InventoryInTransit_NewHaven AS INT = 7001
+				,@AccountReceivable_NewHaven AS INT = 8001
+				,@InventoryAdjustment_NewHaven AS INT = 9001
+				,@OtherChargeExpense_NewHaven AS INT = 10001
+				,@OtherChargeIncome_NewHaven AS INT = 11001
+				,@OtherChargeAsset_NewHaven AS INT = 12001
+				,@CostAdjustment_NewHaven AS INT = 13001
+				,@RevalueWIP_NewHaven AS INT = 14001
 
-			,@Inventory_BetterHaven AS INT = 1002
-			,@CostOfGoods_BetterHaven AS INT = 2002
-			,@APClearing_BetterHaven AS INT = 3002
-			,@WriteOffSold_BetterHaven AS INT = 4002
-			,@RevalueSold_BetterHaven AS INT = 5002
-			,@AutoNegative_BetterHaven AS INT = 6002
-			,@InventoryInTransit_BetterHaven AS INT = 7002
-			,@AccountReceivable_BetterHaven AS INT = 8002
-			,@InventoryAdjustment_BetterHaven AS INT = 9002
-			,@OtherChargeExpense_BetterHaven AS INT = 10002
-			,@OtherChargeIncome_BetterHaven AS INT = 11002
-			,@OtherChargeAsset_BetterHaven AS INT = 12002
+				,@Inventory_BetterHaven AS INT = 1002
+				,@CostOfGoods_BetterHaven AS INT = 2002
+				,@APClearing_BetterHaven AS INT = 3002
+				,@WriteOffSold_BetterHaven AS INT = 4002
+				,@RevalueSold_BetterHaven AS INT = 5002
+				,@AutoNegative_BetterHaven AS INT = 6002
+				,@InventoryInTransit_BetterHaven AS INT = 7002
+				,@AccountReceivable_BetterHaven AS INT = 8002
+				,@InventoryAdjustment_BetterHaven AS INT = 9002
+				,@OtherChargeExpense_BetterHaven AS INT = 10002
+				,@OtherChargeIncome_BetterHaven AS INT = 11002
+				,@OtherChargeAsset_BetterHaven AS INT = 12002
+				,@CostAdjustment_BetterHaven AS INT = 13002
+				,@RevalueWIP_BetterHaven AS INT = 14002
 
 	DECLARE @SEGMENT_ID_DefaultLocation AS INT = 100
 			,@SEGMENT_ID_NewHavenLocation AS INT = 101
@@ -219,12 +225,18 @@ BEGIN
 	FROM dbo.tblGLAccountCategory
 	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_OtherChargeIncome
 	
-	--DECLARE @ACCOUNT_CATEGORY_NAME_OtherChargeAsset AS NVARCHAR(100) = 'Other Charge (Asset)'	
-	--DECLARE @ACCOUNT_CATEGORY_ID_OtherChargeAsset AS INT
-	--SELECT @ACCOUNT_CATEGORY_ID_OtherChargeAsset = intAccountCategoryId
-	--FROM dbo.tblGLAccountCategory
-	--WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_OtherChargeAsset
+	DECLARE @ACCOUNT_CATEGORY_NAME_CostAdjustment AS NVARCHAR(100) = 'Cost Adjustment'	
+	DECLARE @ACCOUNT_CATEGORY_ID_CostAdjustment  AS INT
+	SELECT @ACCOUNT_CATEGORY_ID_CostAdjustment  = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_CostAdjustment
 	
+	DECLARE @ACCOUNT_CATEGORY_NAME_RevalueWIP AS NVARCHAR(100) = 'Revalue WIP'	
+	DECLARE @ACCOUNT_CATEGORY_ID_RevalueWIP AS INT
+	SELECT @ACCOUNT_CATEGORY_ID_RevalueWIP = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_RevalueWIP
+
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1
 	DECLARE @ColdItems AS INT = 2
@@ -555,6 +567,9 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_AutoNegative, @AutoNegative_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_Default);
+
 
 		-- Add the G/L accounts for STICKY GRAINS
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_Inventory, @Inventory_NewHaven);
@@ -565,6 +580,8 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_AutoNegative, @AutoNegative_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_NewHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_NewHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_NewHaven);
 
 		-- Add the G/L accounts for PREMIUM GRAINS 
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_Inventory, @Inventory_BetterHaven);
@@ -575,6 +592,8 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_AutoNegative, @AutoNegative_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_BetterHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_BetterHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_BetterHaven);
 
 		-- Add the G/L accounts for COLD GRAINS 
 		-- No item level g/l account overrides for cold grains. Use g/l from category
@@ -591,6 +610,10 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_AutoNegative, @AutoNegative_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_Default);
+
+
 
 		-- Add the G/L Account for Commodity items. 
 		-- Corn
@@ -602,6 +625,8 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_AutoNegative, @AutoNegative_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_Default);
 
 		-- Add the G/L Account for Other Charges
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@OtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeExpense, @OtherChargeExpense_Default);

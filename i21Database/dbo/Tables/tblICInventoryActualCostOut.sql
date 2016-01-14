@@ -38,6 +38,7 @@ This table is also used to map the negative ActualCost stock buckets it was able
 		[intInventoryTransactionId] INT NOT NULL,
 		[intRevalueActualCostId] INT NULL,
 		[dblQty] NUMERIC(18, 6) NOT NULL,
+		[dblCostAdjustQty] NUMERIC(18, 6) NULL,
 		CONSTRAINT [PK_tblICInventoryActualCostOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO

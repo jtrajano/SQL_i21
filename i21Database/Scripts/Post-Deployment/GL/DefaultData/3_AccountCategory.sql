@@ -101,8 +101,11 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 53,name = 'Vendor Prepayments'UNION ALL 
 			SELECT id = 54,name = 'Customer Prepayments'UNION ALL 
 			SELECT id = 55,name = 'Other Charge Expense'UNION ALL 
-			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
-			SELECT id = 57,name = 'Maintenance Sales' 
+			SELECT id = 56,name = 'Other Charge Income'UNION ALL 
+			SELECT id = 57,name = 'Maintenance Sales' UNION ALL 
+			SELECT id = 58,name = 'Cost Adjustment'UNION ALL 
+			SELECT id = 59,name = 'Revalue WIP'			
+
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
 
@@ -164,7 +167,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
 		--REMOVE EXCESS
-		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 57
+		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 59
 	END
 	COMMIT TRANSACTION
 END TRY
@@ -219,8 +222,7 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Inventory'
-	END
-	
+	END	
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Sales Account')
 	BEGIN
@@ -295,6 +297,18 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Maintenance Sales'
+	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Cost Adjustment')
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Cost Adjustment'
+	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Revalue WIP')
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Revalue WIP'
 	END
 	
 END

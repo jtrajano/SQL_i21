@@ -20,7 +20,7 @@
     [ysnActive] BIT NULL, 
     [ysnOneTimeuse] BIT NULL, 
     [ysnChangeCost] BIT NULL, 
-    [dblCost] NUMERIC(18, 6) NULL, 
+    [dblCost] NUMERIC(38, 20) NULL, 
     [dtmSalesStartDate] DATETIME NULL, 
     [dtmSalesEndDate] DATETIME NULL, 
 	[ysnPosted] BIT NULL, 

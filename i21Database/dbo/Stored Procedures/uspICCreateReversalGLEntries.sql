@@ -23,13 +23,32 @@ DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 --5	Inventory Shipment
 
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
-DECLARE @AUTO_NEGATIVE_TransactionType AS NVARCHAR(50) = 'Auto-Negative';
-DECLARE @WRITEOFF_SOLD_TransactionType AS NVARCHAR(50) = 'Write-Off Sold';
-DECLARE @REVALUE_SOLD_TransactionType AS NVARCHAR(50) = 'Revalue Sold';
 
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
-DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
-DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto-Negative';
+
+-- Create the variables used by fnGetItemGLAccount
+DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
+		,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
+		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
+		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Negative'
+
+		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Cost Adjustment'
+		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Revalue WIP'
+		,@AccountCategory_Revalue_Produced AS NVARCHAR(30) = 'Revalue Produced'
+		,@AccountCategory_Revalue_Transfer AS NVARCHAR(30) = 'Revalue Inventory Transfer'
+		,@AccountCategory_Revalue_Build_Assembly AS NVARCHAR(30) = 'Revalue Build Assembly'		
+
+-- Create the variables for the internal transaction types used by costing. 
+DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
+		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+
+		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 22
+		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 24
+		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 25
+		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 26
+		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 27
+
 
 -- Get the GL Account ids to use
 BEGIN 
@@ -42,22 +61,27 @@ BEGIN
 	)
 	SELECT	Query.intItemId
 			,Query.intItemLocationId
-			,intInventoryId = Inventory.intAccountId
-			,intAutoNegativeId = AutoNegative.intAccountId
-			,Query.intTransactionTypeId
+			,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
+			,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Negative) 
+			,intTransactionTypeId
 	FROM	(
 				SELECT DISTINCT intItemId, intItemLocationId, intTransactionTypeId 
 				FROM	dbo.tblICInventoryTransaction ItemTransactions 
 				WHERE	ItemTransactions.strBatchId = @strBatchId
 			) Query
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_Inventory) Inventory
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_AutoNegative) AutoNegative;
 END 
 
 -- Check for missing Auto Negative Account Id
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT
 
+IF EXISTS (
+	SELECT	TOP 1 1 
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+	WHERE	TRANS.strBatchId = @strBatchId
+			AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative 
+)
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -67,20 +91,16 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
+			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+				ON TRANS.intItemId = Item.intItemId			
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
-			AND EXISTS (
-				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				WHERE	TRANS.strBatchId = @strBatchId
-						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative 
-						AND TRANS.intItemId = Item.intItemId
-			)
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(80008, 11, 1, @strItemNo, @AUTO_NEGATIVE_TransactionType) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Auto_Negative) 	
 		RETURN;
 	END 
 END 
@@ -108,8 +128,8 @@ BEGIN
 			,strJournalLineDescription	= GLEntries.strJournalLineDescription
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL -- @intUserId 
-			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= GLEntries.strTransactionId
 			,intTransactionId			= GLEntries.intTransactionId
 			,strTransactionType			= GLEntries.strTransactionType
@@ -160,11 +180,11 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL -- @intUserId 
-			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
-			,strTransactionType			= @AUTO_NEGATIVE_TransactionType
+			,strTransactionType			= @AccountCategory_Auto_Negative
 			,strTransactionForm			= ItemTransactions.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
@@ -204,11 +224,11 @@ BEGIN
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
-			,intUserId					= NULL -- @intUserId 
-			,intEntityId				= @intEntityUserSecurityId -- @intUserId 
+			,intUserId					= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
-			,strTransactionType			= @AUTO_NEGATIVE_TransactionType
+			,strTransactionType			= @AccountCategory_Auto_Negative
 			,strTransactionForm			= ItemTransactions.strTransactionForm 
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
@@ -238,7 +258,7 @@ BEGIN
 	FROM	dbo.tblGLDetail GLEntries
 	WHERE	GLEntries.intTransactionId = @intTransactionId
 			AND GLEntries.strTransactionId = @strTransactionId
-			AND strTransactionType <> @AUTO_NEGATIVE_TransactionType
+			AND strTransactionType <> @AccountCategory_Auto_Negative
 	;
 	-- Update the ysnPostedFlag for the related transactions
 	UPDATE	GLEntries
@@ -248,6 +268,6 @@ BEGIN
 				AND GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
 				AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND GLEntries.strTransactionType <> @AUTO_NEGATIVE_TransactionType
+			AND GLEntries.strTransactionType <> @AccountCategory_Auto_Negative
 	;
 END 

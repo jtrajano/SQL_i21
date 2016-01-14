@@ -229,7 +229,7 @@ BEGIN
 			,intTransactionId INT
 			,dblStockIn NUMERIC(18,6)
 			,dblStockOut NUMERIC(18,6)
-			,dblCost NUMERIC(18,6)
+			,dblCost NUMERIC(38, 20)
 			,ysnIsUnposted BIT 
 		)
 
@@ -238,7 +238,7 @@ BEGIN
 			,intTransactionId INT
 			,dblStockIn NUMERIC(18,6)
 			,dblStockOut NUMERIC(18,6)
-			,dblCost NUMERIC(18,6)
+			,dblCost NUMERIC(38, 20)
 			,ysnIsUnposted BIT 
 		)
 

@@ -153,6 +153,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateSiteCustomerView.sql"
+:r "..\dbo\Views\vyuTMDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspTMDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateItemUsedBySiteView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateLocationUsedBySiteView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDriverUsedBySiteView.sql"
@@ -160,8 +162,6 @@
 :r "..\dbo\Stored Procedures\uspTMDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r "..\dbo\Views\vyuTMOriginItemUsedBySite.sql"
-
-
 
 
 

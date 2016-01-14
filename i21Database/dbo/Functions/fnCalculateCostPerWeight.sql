@@ -2,12 +2,12 @@
 -- This function returns the cost per weight. 
 CREATE FUNCTION [dbo].[fnCalculateCostPerWeight] (	
 	@dblItemOverallValue AS NUMERIC(38,20)
-	,@dblWeight AS NUMERIC(18,6)
+	,@dblWeight AS NUMERIC(38,20)
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS
 BEGIN 
-	DECLARE @result AS NUMERIC(18,6)
+	DECLARE @result AS NUMERIC(38,20)
 
 	-- formula is:
 	-- Overall Value / Weight

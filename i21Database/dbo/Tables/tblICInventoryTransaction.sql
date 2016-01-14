@@ -32,7 +32,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[dtmDate] DATETIME NOT NULL, 
 		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 		
-		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblValue] NUMERIC(18, 6) NULL, 
 		[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intCurrencyId] INT NULL,

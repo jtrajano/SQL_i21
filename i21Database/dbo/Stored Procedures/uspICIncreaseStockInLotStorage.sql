@@ -15,9 +15,10 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLotStorage
 	,@intStorageLocationId AS INT
 	,@dtmDate AS DATETIME 
 	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(38, 20)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT 
+	,@intTransactionDetailId AS INT 
 	,@intEntityUserSecurityId AS INT
 	,@NewInventoryLotStorageId AS INT OUTPUT 
 AS
@@ -45,6 +46,7 @@ INSERT dbo.tblICInventoryLotStorage (
 	,[dblCost]
 	,[strTransactionId]
 	,[intTransactionId]
+	,[intTransactionDetailId]
 	,[dtmCreated]
 	,[intCreatedEntityId]
 	,[intConcurrencyId]
@@ -62,6 +64,7 @@ VALUES (
 	,@dblCost
 	,@strTransactionId
 	,@intTransactionId
+	,@intTransactionDetailId
 	,GETDATE()
 	,@intEntityUserSecurityId
 	,1	

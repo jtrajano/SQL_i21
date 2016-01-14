@@ -3,10 +3,10 @@
 	@intItemId INT
 	,@intItemLocationId INT
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
-	DECLARE @Value AS NUMERIC(18,6)
+	DECLARE @Value AS NUMERIC(38,20)
 
 	-- Get the total transaction value of an item per location. 
 	SELECT	@Value = SUM(
