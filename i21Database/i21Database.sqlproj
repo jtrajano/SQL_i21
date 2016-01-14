@@ -3161,9 +3161,6 @@
     <Build Include="dbo\Tables\tblMFScheduleConstraint.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetUnscheduledLine.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReport.sql" />
-    <Build Include="dbo\Views\vyuCFInvoiceProductReport.sql" />
-    <Build Include="dbo\Views\vyuCFInvoiceMiscReport.sql" />
-    <Build Include="dbo\Views\vyuCFInvoiceCardReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
@@ -3208,9 +3205,10 @@
     <Build Include="dbo\Functions\fnPOIsProcessed.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
     <Build Include="dbo\Views\vyuARBatchPostingTransaction.sql" />
-
     <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDuplicateDevice.sql" />
+    <Build Include="dbo\Views\vyuCFSiteItem.sql" />
+    <Build Include="dbo\Views\vyuCFInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
