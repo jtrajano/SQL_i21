@@ -25,4 +25,10 @@ SELECT 1202, 'tblEntity.tblEntityLocations', 'strAddress', 'loc_address'
 UNION
 SELECT 1203, 'tblEntity.tblEntityLocations', 'strTermCodeId', 'loc_termsId'
 
+
+UNION	
+SELECT 1301, 'tblEntity.tblVendor', 'strGLAccountExpenseId', 'ven_expenseId'
+UNION	
+SELECT 1302, 'tblEntity.tblVendor', 'strVendorId', 'ven_vendorId'
+
 SET IDENTITY_INSERT tblEntityImportSchemaCSV OFF
