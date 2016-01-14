@@ -1,4 +1,4 @@
-﻿﻿CREATE NONCLUSTERED INDEX [IX_tblGLDetail_strTransactionId] ON [dbo].[tblGLDetail]
+﻿CREATE NONCLUSTERED INDEX [IX_tblGLDetail_strTransactionId] ON [dbo].[tblGLDetail]
 (
 	[strTransactionId] ASC
 )
