@@ -460,8 +460,12 @@ WHILE EXISTS(SELECT 1 FROM #tempFRDRowDesign)
 		BEGIN
 			SET @queryString = 'SELECT TOP 1 strAccountType FROM tblGLAccountGroup where ' + REPLACE(REPLACE(REPLACE(REPLACE(@AccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription')
 
-			INSERT INTO #tempFRDGLAccount
-			EXEC (@queryString)
+			BEGIN TRY
+				INSERT INTO #tempFRDGLAccount
+				EXEC (@queryString)
+			END TRY
+			BEGIN CATCH
+			END CATCH;
 		END
 		
 		IF(ISNULL((SELECT TOP 1 1 FROM #tempFRDGLAccount),0) < 1)
