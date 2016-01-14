@@ -13,10 +13,14 @@ BEGIN
 		  , @intSplitEntityId	INT
 		  , @dblSplitPercent	NUMERIC(18,6)
 		  , @newInvoiceNumber	NVARCHAR(50)	
-	
+		  , @newTermId			INT
+		  , @newShipToId		INT
+		  , @newBillToId		INT
+		  , @customerId			INT
+
 	SET @dtmDate = GETDATE()
 
-	SELECT @intSplitId = intSplitId	       
+	SELECT @intSplitId = intSplitId, @customerId = intEntityCustomerId
 	FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
 
 	INSERT INTO @splitDetails(intSplitDetailId, intEntityId, dblSplitPercent)
@@ -24,20 +28,42 @@ BEGIN
 
 	WHILE EXISTS(SELECT NULL FROM @splitDetails)
 		BEGIN
-			DECLARE @newInvoiceId INT
+			DECLARE @newInvoiceId	INT
+				  , @newCustomerId	INT
+				  
 			SELECT @intSplitDetailId = NULL
 			     , @newInvoiceNumber = NULL			
-
-			SELECT TOP 1 @intSplitDetailId = intSplitDetailId FROM @splitDetails ORDER BY intSplitDetailId
+			
+			SELECT TOP 1 @intSplitDetailId = intSplitDetailId FROM @splitDetails WHERE intEntityId <> @customerId ORDER BY intSplitDetailId
 
 			IF (SELECT COUNT(*) FROM @splitDetails) = 1
-				GOTO UPDATE_CURRENT_INVOICE;
+				BEGIN
+					SELECT TOP 1 @intSplitDetailId = intSplitDetailId FROM @splitDetails ORDER BY intSplitDetailId
+					GOTO UPDATE_CURRENT_INVOICE;
+				END
 
 			EXEC dbo.uspARDuplicateInvoice @intInvoiceId, @dtmDate, @intUserId, @intSplitDetailId, @newInvoiceNumber OUT
 
 			IF ISNULL(@newInvoiceNumber, '') <> ''
 				BEGIN
-					SELECT @newInvoiceId = intInvoiceId FROM tblARInvoice WHERE strInvoiceNumber = @newInvoiceNumber
+					SELECT @newInvoiceId	= intInvoiceId
+					     , @newCustomerId	= intEntityCustomerId 
+					FROM tblARInvoice 
+					WHERE strInvoiceNumber = @newInvoiceNumber
+
+					SELECT @newShipToId = intShipToId
+					     , @newBillToId = intBillToId
+						 , @newTermId	= intTermsId 
+					FROM vyuARCustomerSearch 
+					WHERE intEntityCustomerId = @newCustomerId
+
+					UPDATE tblARInvoice
+					SET intShipToLocationId	= @newShipToId
+					  , intBillToLocationId	= @newBillToId
+					  , intTermId			= @newTermId
+					  , dtmDueDate			= dbo.fnGetDueDateBasedOnTerm(dtmDate, @newTermId)
+					WHERE intInvoiceId = @newInvoiceId
+
 					SELECT @invoicesToAdd = ISNULL(@invoicesToAdd, '') + CONVERT(NVARCHAR(20), @newInvoiceId) + ','					
 				END
 
@@ -50,11 +76,21 @@ BEGIN
 	FROM tblEntitySplitDetail 
 	WHERE intSplitDetailId = @intSplitDetailId
 
+	SELECT @newShipToId = intShipToId
+		 , @newBillToId = intBillToId
+		 , @newTermId	= intTermsId 
+	FROM vyuARCustomerSearch 
+	WHERE intEntityCustomerId = @intSplitEntityId
+
 	UPDATE tblARInvoice 
 	SET ysnSplitted			= 1
 	  , intSplitId			= NULL
 	  , strInvoiceOriginId  = strInvoiceNumber
 	  , intEntityCustomerId = @intSplitEntityId
+	  , intShipToLocationId	= @newShipToId
+	  , intBillToLocationId	= @newBillToId
+	  , intTermId			= @newTermId
+	  , dtmDueDate			= dbo.fnGetDueDateBasedOnTerm(dtmDate, @newTermId)
 	  , dblAmountDue		= dblAmountDue * @dblSplitPercent	  
 	  , dblInvoiceSubtotal  = dblInvoiceSubtotal * @dblSplitPercent
 	  , dblInvoiceTotal     = dblInvoiceTotal * @dblSplitPercent
@@ -77,7 +113,7 @@ BEGIN
 			  , dblQtyOrdered	= dblQtyShipped * @dblSplitPercent
 			  , dblQtyShipped	= dblQtyShipped * @dblSplitPercent
 			WHERE intInvoiceDetailId = @intInvoiceDetailId
-
+				
 			UPDATE tblARInvoiceDetailTax
 			SET dblTax = dblTax * @dblSplitPercent
 			  , dblAdjustedTax = dblAdjustedTax * @dblSplitPercent

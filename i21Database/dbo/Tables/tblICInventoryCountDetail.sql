@@ -19,7 +19,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryCountDetail] PRIMARY KEY ([intInventoryCountDetailId]), 
-    CONSTRAINT [FK_tblICInventoryCountDetail_tblICInventoryCount] FOREIGN KEY ([intInventoryCountId]) REFERENCES [tblICInventoryCount]([intInventoryCountId]), 
+    CONSTRAINT [FK_tblICInventoryCountDetail_tblICInventoryCount] FOREIGN KEY ([intInventoryCountId]) REFERENCES [tblICInventoryCount]([intInventoryCountId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICInventoryCountDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICInventoryCountDetail_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]), 
     CONSTRAINT [FK_tblICInventoryCountDetail_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 

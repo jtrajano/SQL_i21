@@ -194,14 +194,34 @@ IF ISNULL(@recap, 0) = 0
 BEGIN
 
 	--handel error here as we do not get the error here
-	BEGIN TRY
-	EXEC uspGLBookEntries @GLEntries, @post
-	END TRY
-	BEGIN CATCH
-		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
-		RAISERROR(@error, 16, 1);
-		GOTO Post_Rollback
-	END CATCH
+	IF @totalRecords = 1 AND @isBatch = 0
+	BEGIN
+		BEGIN TRY
+		EXEC uspGLBookEntries @GLEntries, @post
+		END TRY
+		BEGIN CATCH
+			DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+			RAISERROR(@error, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
+	ELSE
+	BEGIN
+		EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
+		DELETE A
+		FROM #tmpPostBillData A
+		INNER JOIN tblGLPostResult B ON A.intBillId = B.intTransactionId
+		WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			A.strDescription
+			,A.strTransactionType
+			,A.strTransactionId
+			,A.intTransactionId
+		FROM tblGLPostResult A
+		WHERE A.strBatchId = @batchId
+	END
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN

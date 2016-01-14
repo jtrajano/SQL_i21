@@ -18,7 +18,6 @@ BEGIN
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1  
 	)
 	BEGIN
-
 		EXEC ('
 				CREATE VIEW [dbo].[vyuTMItemUsedBySite]  
 				AS 

@@ -429,6 +429,7 @@ SET @batchIdUsed = @batchId
 					(D.intAccountId IS NULL OR D.intAccountId = 0)
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
+					AND D.dblTotal <> @ZeroDecimal
 								
 				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -458,7 +459,37 @@ SET @batchIdUsed = @batchId
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					(Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
-					AND I.strType IN ('Non-Inventory','Service','Software')
+					AND I.strType IN ('Non-Inventory','Service')
+					
+				--Software - Maintenance Sales / General Account				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Maintenance Sales and General Accounts of item - ' + I.strItemNo + ' were not specified.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intCompanyLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN
+					vyuARGetItemAccount Acct
+						ON A.intCompanyLocationId = Acct.intLocationId 
+						AND D.intItemId = Acct.intItemId 		 				
+				WHERE
+					ISNULL(ISNULL(Acct.intMaintenanceSalesAccountId, Acct.intGeneralAccountId), 0) = 0
+					AND I.strType = 'Software'					
 					
 				--Other Charge Income Account	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -989,9 +1020,12 @@ IF @post = 1
 			SELECT
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
-				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Software'))) 
+				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 													THEN
 														IST.intGeneralAccountId
+													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Software')) 
+													THEN
+														ISNULL(IST.intMaintenanceSalesAccountId, IST.intGeneralAccountId)
 													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Other Charge')) 
 													THEN
 														IST.intOtherChargeIncomeAccountId
@@ -1256,8 +1290,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
+				,strTransactionType			= ICT.strTransactionForm
+				,strTransactionForm			= ICT.strTransactionForm
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1321,8 +1355,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
+				,strTransactionType			= ICT.strTransactionForm
+				,strTransactionForm			= ICT.strTransactionForm
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1882,6 +1916,7 @@ IF @recap = 0
 						tblARInvoice
 					SET
 						ysnPosted = 1
+						,ysnPaid = (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 THEN 1 ELSE 0 END)
 						,dblInvoiceTotal = dblInvoiceTotal
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)

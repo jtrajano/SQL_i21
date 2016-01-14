@@ -22,7 +22,8 @@ SELECT
 			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Discount Receivable')				
 		ELSE
 			(SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
-	END) AS intDiscountAccountId		
+	END) AS intDiscountAccountId,
+	dbo.fnGetItemBaseGLAccount(I.intItemId, IL.intItemLocationId, N'Maintenance Sales') AS intMaintenanceSalesAccountId
 FROM         
 	dbo.tblICItem AS I 
 LEFT OUTER JOIN

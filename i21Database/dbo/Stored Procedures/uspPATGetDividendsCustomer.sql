@@ -20,7 +20,6 @@ BEGIN
 										CASE WHEN CS.dtmIssueDate > @dtmCutoffDate 
 											THEN DATEDIFF(day, CS.dtmIssueDate, @dtmProcessingDateTo) 
 											ELSE @dblProcessingDays END END
-
 		  FROM tblPATStockClassification SC
 	INNER JOIN tblPATCustomerStock CS
 			ON CS.intStockId = SC.intStockId

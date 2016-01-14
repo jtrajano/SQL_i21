@@ -557,10 +557,10 @@ BEGIN
 			 @intLoopTaxGroupID = intTaxGroupId
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
-			,@QxT = ROUND (@dblQuantity * numRate,6)
-			,@QxOP = ROUND (@QxOP - (@dblQuantity * numRate),6)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * numRate),6)
-			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  numRate,6)
+			,@QxT = ROUND (@dblQuantity * numRate,2)
+			,@QxOP = ROUND (@QxOP - (@dblQuantity * numRate),2)
+			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * numRate),2)
+			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  numRate,2)
 			,@strLoopTaxCode = strTaxCode
 			,@Rate = numRate
 			,@CalculationMethod = strCalculationMethod
@@ -603,10 +603,10 @@ BEGIN
 			 @intLoopTaxGroupID = intTaxGroupId
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
-			,@OPTax = ROUND (((@QxOP / (numRate/100 +1 )) * (numRate/100)),6)
-			,@CPTax = ROUND (@QxCP * (numRate/100),6)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (numRate/100 +1 )) * (numRate/100)),6)
-			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (numRate/100)),6)
+			,@OPTax = ROUND (((@QxOP / (numRate/100 +1 )) * (numRate/100)),2)
+			,@CPTax = ROUND (@QxCP * (numRate/100),2)
+			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (numRate/100 +1 )) * (numRate/100)),2)
+			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (numRate/100)),2)
 			,@strLoopTaxCode = strTaxCode
 			,@Rate = numRate
 			,@CalculationMethod = strCalculationMethod
@@ -650,19 +650,32 @@ BEGIN
 			@Pk
 			,'Gross Price'
 			,@dblPrcOriginalPrice	-- +TAX
-			,@dblPrcPriceOut	  + @dblCPTotalTax-- +TAX
+			--@dblPrcPriceOut + @dblCPTotalTax-- +TAX
+			,(case
+				when @strPriceMethod = 'Import File Price' 
+				then @dblPrcOriginalPrice
+				else @dblPrcPriceOut + @dblCPTotalTax
+			end)
 		),
 		(
 			@Pk
 			,'Net Price'
-			,(((@dblPrcOriginalPrice * @dblQuantity) - @dblOPTotalTax) / @dblQuantity)
-			,@dblPrcPriceOut	 
+			,Round(@dblPrcOriginalPrice - Round((@dblOPTotalTax/@dblQuantity),6),5)
+			,(case
+				when @strPriceMethod = 'Import File Price' 
+				then Round(@dblPrcOriginalPrice - Round((@dblOPTotalTax/@dblQuantity),6),5)
+				else @dblPrcPriceOut
+			end)
 		),
 		(
 			@Pk
 			,'Total Amount'
-			,@dblPrcOriginalPrice * @dblQuantity
-			,(@dblPrcPriceOut + @dblCPTotalTax) * @dblQuantity
+			,Round(@dblPrcOriginalPrice * @dblQuantity,2)
+			,(case
+				when @strPriceMethod = 'Import File Price' 
+				then Round(@dblPrcOriginalPrice * @dblQuantity,2)
+				else Round((@dblPrcPriceOut + @dblCPTotalTax) * @dblQuantity,2)
+			end)
 		)
 		END
 

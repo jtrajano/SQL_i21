@@ -46,6 +46,6 @@
 		dtmDate = dtmQuoteDate,
 		strPaymentInfo = '',
 		intPaymentId = 0,
-		intTransactionId = 0
+		intTransactionId = intQuoteHeaderId
 		--,* 
 	from vyuTRQuoteView

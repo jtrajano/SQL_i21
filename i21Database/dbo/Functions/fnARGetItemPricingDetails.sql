@@ -21,6 +21,7 @@
 	,@VendorLocationId		INT
 	,@PricingLevelId		INT
 	,@AllowQtyToExceed		BIT
+	,@InvoiceType			NVARCHAR(200)
 )
 RETURNS @returntable TABLE
 (
@@ -98,6 +99,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 				,@LastCost
 				,@ShipToLocationId
 				,@VendorLocationId
+				,@InvoiceType
 			);
 			
 			
