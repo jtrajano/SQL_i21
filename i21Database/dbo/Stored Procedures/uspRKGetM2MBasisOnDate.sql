@@ -24,4 +24,4 @@ LEFT JOIN tblARMarketZone mz on mz.intMarketZoneId=bd.intMarketZoneId
 LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=bd.intUnitMeasureId
 WHERE b.intM2MBasisId= @intM2MBasisId and bd.intFutureMarketId is not null AND  c.intCommodityId=
 case when @intCommodityId = 0 then c.intCommodityId else @intCommodityId end 
-order by strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
+order by strMarketValuation,strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
