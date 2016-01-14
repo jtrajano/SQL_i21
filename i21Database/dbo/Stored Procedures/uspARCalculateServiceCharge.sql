@@ -41,45 +41,19 @@ AS
 			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
 			SELECT E.intEntityCustomerId, C.intServiceChargeId FROM vyuARCustomerSearch E
 				INNER JOIN tblARCustomer C ON E.intEntityCustomerId = C.intEntityCustomerId
-				WHERE E.ysnActive = 1
-				  AND (C.intServiceChargeId <> 0
-				  OR C.intServiceChargeId IS NOT NULL)
+				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
-			DECLARE @customerId INT,
-					@pos INT
-			
-			SELECT @customerIds = @customerIds + ','
-			WHILE CHARINDEX(',', @customerIds) > 0
-			BEGIN
-				SELECT @pos  = CHARINDEX(',', @customerIds)  
-				SELECT @customerId = SUBSTRING(@customerIds, 1, @pos-1)
-
-				INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId = @customerId AND (intServiceChargeId <> 0 OR intServiceChargeId IS NOT NULL)
-
-				SELECT @customerIds = SUBSTRING(@customerIds, @pos + 1, LEN(@customerIds) - @pos)
-			END			
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId)
+			SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
 	IF (@statusIds <> '')
 		BEGIN
-			DECLARE @statusId INT,
-					@pos2 INT
-			
-			SELECT @statusIds = @statusIds + ','
-			WHILE CHARINDEX(',', @statusIds) > 0
-			BEGIN
-				SELECT @pos2  = CHARINDEX(',', @statusIds)  				
-				SELECT @statusId = CONVERT(INT, SUBSTRING(@statusIds, 1, @pos2-1))
-
-				INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intAccountStatusId = @statusId AND (intServiceChargeId <> 0 OR intServiceChargeId IS NOT NULL)
-
-				SELECT @statusIds = SUBSTRING(@statusIds, @pos2 + 1, LEN(@statusIds) - @pos2)
-			END
+			DELETE FROM #tmpCustomers
+			WHERE intEntityId NOT IN (SELECT intEntityCustomerId FROM tblARCustomer WHERE intAccountStatusId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@statusIds)))
 		END
 
 	--PROCESS EACH CUSTOMER
