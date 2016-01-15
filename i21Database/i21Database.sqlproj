@@ -3210,6 +3210,7 @@
     <Build Include="dbo\Views\vyuCFSiteItem.sql" />
     <Build Include="dbo\Views\vyuCFInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivityDetail.sql" />
+    <Build Include="dbo\Views\vyuEMExportInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
