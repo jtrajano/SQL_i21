@@ -29,7 +29,7 @@ SELECT dtmDate				= ISNULL(I.dtmPostDate, I.dtmDate)
 FROM tblARInvoice I
 INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId 
 INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId
-WHERE I.ysnForgiven = 0
+WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0))
 	
 UNION	
 	
