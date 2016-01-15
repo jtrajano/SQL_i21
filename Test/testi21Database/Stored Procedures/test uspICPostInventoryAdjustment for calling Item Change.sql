@@ -26,6 +26,11 @@ BEGIN
 		SET intAdjustmentType = @ADJUSTMENT_TYPE_ITEM_CHANGE					
 	END 
 
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectException @ExpectedMessage = 'G/L entries are expected. Cannot continue because it is missing.'
+	END
+
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryAdjustment 
