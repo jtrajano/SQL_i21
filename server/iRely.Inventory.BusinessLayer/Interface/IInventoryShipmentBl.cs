@@ -15,5 +15,6 @@ namespace iRely.Inventory.BusinessLayer
         SaveResult ProcessInvoice(int shipmentId, out int? newInvoice);
         Task<SearchResult> SearchShipmentItems(GetParameter param);
         Task<SearchResult> SearchShipmentItemLots(GetParameter param);
+        Task<SearchResult> GetAddOrders(GetParameter param, int CustomerId, string OrderType, string SourceType);
     }
 }

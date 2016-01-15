@@ -20,6 +20,11 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.dtmPostedDate).HasColumnName("dtmPostedDate");
+            this.Property(t => t.dtmUnpostedDate).HasColumnName("dtmUnpostedDate");
+            this.Property(t => t.intSourceId).HasColumnName("intSourceId");
+            this.Property(t => t.intSourceTransactionTypeId).HasColumnName("intSourceTransactionTypeId");
 
             this.HasOptional(p => p.tblSMCompanyLocation)
                 .WithMany(p => p.tblICInventoryAdjustments)

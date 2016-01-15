@@ -74,5 +74,12 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchShipmentItemLots(param));
         }
 
+        [HttpGet]
+        [ActionName("GetAddOrders")]
+        public async Task<HttpResponseMessage> GetAddOrders(GetParameter param, int CustomerId, string OrderType, string SourceType)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAddOrders(param, CustomerId, OrderType, SourceType));
+        }
+
     }
 }

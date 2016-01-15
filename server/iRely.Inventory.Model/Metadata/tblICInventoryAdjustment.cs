@@ -24,7 +24,12 @@ namespace iRely.Inventory.Model
         public string strAdjustmentNo { get; set; }
         public string strDescription { get; set; }
         public int? intSort { get; set; }
-        public bool ysnPosted { get; set; }
+        public bool? ysnPosted { get; set; }
+        public int? intEntityId { get; set; }
+        public DateTime? dtmPostedDate { get; set; }
+        public DateTime? dtmUnpostedDate { get; set; }
+        public int? intSourceId { get; set; }
+        public int? intSourceTransactionTypeId { get; set; }
 
         private string _location;
         [NotMapped]
@@ -61,7 +66,7 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public int? intSort { get; set; }
         public string strLocationName{ get; set; }
-        public bool ysnPosted { get; set; }
+        public bool? ysnPosted { get; set; }
     
     }
 
