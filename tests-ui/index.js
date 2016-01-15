@@ -34,6 +34,12 @@ Harness.start(
                 preload: [
                     testEnginePath
                 ]
+            },
+            {
+                url: 'Item/AddItem_FinishedGoodType.js',
+                preload: [
+                    testEnginePath
+                ]
             }
         ]
     },
