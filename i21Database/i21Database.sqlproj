@@ -3212,6 +3212,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivityDetail.sql" />
     <Build Include="dbo\Views\vyuEMExportInformation.sql" />
     <Build Include="dbo\Tables\tblEMEntityMessage.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
