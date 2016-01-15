@@ -39,7 +39,7 @@ BEGIN
 	SET @Hidden = 1
 	SET @strRowType = 'Filter Accounts'
 END
-IF(@strRowType = 'Current Year Earnings')
+IF(@strAccountsType = 'CY')
 BEGIN
 	SET @Hidden = 1
 END

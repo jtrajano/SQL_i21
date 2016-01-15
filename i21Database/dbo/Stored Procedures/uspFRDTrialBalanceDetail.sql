@@ -34,10 +34,11 @@ BEGIN
 	DECLARE @strAccountDescription NVARCHAR(500)	
 	DECLARE @strAccountType NVARCHAR(50)
 	DECLARE @strAccountsType_Row NVARCHAR(50)
-	DECLARE @BalanceSide NVARCHAR(50)
+	DECLARE @BalanceSide NVARCHAR(50)	
 	
 	DECLARE @strRowDescription NVARCHAR(500)
 	DECLARE @strRowFilter NVARCHAR(500)
+	DECLARE @REAccount NVARCHAR(50) = ''
 
 	SELECT TOP 1 @strAccountId = strAccountId, @strAccountDescription = strDescription, @strAccountType = strAccountType FROM #TempGLAccount ORDER BY strAccountId
 
@@ -58,6 +59,18 @@ BEGIN
 	BEGIN
 		SET @strAccountsType_Row = 'IS'
 	END
+
+	SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearId = (SELECT TOP 1 intFiscalYearId FROM tblGLCurrentFiscalYear)))
+
+	IF(@REAccount = '')
+	BEGIN
+		SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear))
+	END
+
+	IF(@REAccount = @strAccountId)
+	BEGIN
+		SET @strAccountsType_Row = 'RE'
+	END	
 	
 	SET @strRowDescription = '     ' + @strAccountId + ' - ' + REPLACE(@strAccountDescription,'''','')
 	SET @strRowFilter = '[ID] = ''' + @strAccountId + ''''
