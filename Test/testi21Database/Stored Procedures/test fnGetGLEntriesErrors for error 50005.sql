@@ -125,10 +125,10 @@ BEGIN
 			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
-		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period to match the transaction date.', 50005, 'Inventory')
-		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period to match the transaction date.', 50005, 'Inventory')
-		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189, 'Inventory')
-		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period to match the transaction date.', 60004, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period to match the transaction date.', 60004, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 60009, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 60009, 'Inventory')
 
 
 		-- Call the fake data for GL Account 

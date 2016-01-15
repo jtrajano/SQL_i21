@@ -68,7 +68,7 @@ BEGIN
 		)
 		SELECT	strTransactionId = NULL 
 				,strText = 'G/L entries are expected. Cannot continue because it is missing.'
-				,intErrorCode = 50032
+				,intErrorCode = 60005
 				,strModuleName = NULL 
 	END 
 

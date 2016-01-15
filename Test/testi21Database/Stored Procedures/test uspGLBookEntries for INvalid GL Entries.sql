@@ -136,7 +136,7 @@ BEGIN
 	-- Assert
 	BEGIN 
 		-- Debit and credit amounts are not balanced.
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50003
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 60003
 	END
 
 	-- Act
