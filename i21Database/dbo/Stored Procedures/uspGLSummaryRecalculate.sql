@@ -1,7 +1,11 @@
 CREATE PROCEDURE  [dbo].[uspGLSummaryRecalculate]
 AS
 BEGIN
-
+	IF EXISTS (SELECT TOP 1 1 FROM tblGLDetail GROUP BY strTransactionId, ysnIsUnposted HAVING SUM(dblDebit-dblCredit)<>0 and ysnIsUnposted = 0)
+	BEGIN
+		RAISERROR(60010,16,1)--'Unable to recalculate summary. General Ledger Detail has out of balance transactions'
+		RETURN
+	END
 	DELETE [dbo].[tblGLSummary]
 
 	INSERT INTO tblGLSummary
@@ -35,6 +39,4 @@ BEGIN
 	update tblGLDetail
 	set dblCreditUnit= dblDebitUnit, dblDebitUnit= 0
 	where dblCredit > 0 and dblDebitUnit > 0 and dblCreditUnit =0
-
-	
 END
