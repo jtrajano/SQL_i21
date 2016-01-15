@@ -13,8 +13,8 @@ SELECT A.strCustomerName
      , A.strEntityNo
 	 , A.intEntityCustomerId
 	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
-	 , dblTotalAR			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
-	 , dblFuture			= 0
+	 , dblTotalAR			= SUM(B.dblTotalDue)
+	 , dblFuture			= 0.000000
 	 , dbl0Days				= SUM(B.dbl0Days)
 	 , dbl10Days			= SUM(B.dbl10Days)
 	 , dbl30Days			= SUM(B.dbl30Days)
@@ -24,7 +24,7 @@ SELECT A.strCustomerName
 	 , dblTotalDue			= SUM(B.dblTotalDue)
 	 , dblAmountPaid		= SUM(A.dblAmountPaid)
 	 , dblCredits			= SUM(B.dblAvailableCredit)
-	 , dblPrepaids			= 0
+	 , dblPrepaids			= 0.000000
 	 , dtmAsOfDate			= @dtmDateTo	 
 FROM
 
@@ -56,7 +56,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND I.ysnForgiven = 0
 	AND I.strTransactionType = 'Invoice'
-	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -66,7 +66,7 @@ UNION ALL
 SELECT I.dtmPostDate
 		, I.intInvoiceId
 		, dblAmountPaid = 0
-		, dblInvoiceTotal = 0
+		, dblInvoiceTotal = dblInvoiceTotal* -1
 		, dblAmountDue = 0    
 		, dblDiscount = 0
 		, I.strTransactionType	  
@@ -90,9 +90,8 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 WHERE I.ysnPosted = 1
 	AND I.ysnForgiven = 0
-	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
-	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -126,10 +125,9 @@ FROM tblARInvoice I
 		INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 		LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId		
 WHERE ISNULL(I.ysnPosted, 1) = 1
-	AND I.ysnPosted  = 1
-	AND I.strTransactionType = 'Invoice'
-	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-	AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo	
+	AND I.ysnForgiven = 0
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')) AS A  
@@ -142,6 +140,7 @@ LEFT JOIN
 	, dblInvoiceTotal
 	, dblAmountPaid
 	, (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) AS dblTotalDue
+	, dblDiscount
 	, dblAvailableCredit
 	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <= 0
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid), 0) ELSE 0 END dbl0Days
@@ -169,7 +168,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND I.ysnForgiven = 0
 	AND I.strTransactionType = 'Invoice'
-	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -178,7 +177,7 @@ UNION ALL
 
 SELECT I.intInvoiceId
 		, 0 AS dblAmountPaid
-		, dblInvoiceTotal = 0
+		, dblInvoiceTotal = dblInvoiceTotal* -1
 		, dblAmountDue = 0    
 		, dblDiscount = 0    
 		, I.dtmDueDate    
@@ -188,17 +187,15 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId	
 WHERE I.ysnPosted = 1
 	AND I.ysnForgiven = 0
-	AND I.ysnPaid = 0
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
-	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo	
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
 						      
 UNION ALL      
       
-SELECT DISTINCT 
-	I.intInvoiceId
+SELECT I.intInvoiceId
 	, dblAmountPaid = ISNULL(PD.dblPayment,0)
 	, dblInvoiceTotal = 0
 	, dblAmountDue = 0
@@ -211,9 +208,9 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId		
 WHERE I.ysnPosted  = 1
-	AND I.strTransactionType = 'Invoice'
-	AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-	AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo	
+	AND I.ysnForgiven = 0
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 										WHERE AG.strAccountGroup = 'Receivables')) AS TBL) AS B    
