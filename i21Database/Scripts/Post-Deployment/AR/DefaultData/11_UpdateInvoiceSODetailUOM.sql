@@ -4,16 +4,12 @@ GO
 UPDATE
 	tblARInvoiceDetail
 SET
-	tblARInvoiceDetail.intItemUOMId = ICIU.intItemUOMId
+	tblARInvoiceDetail.intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = ARID.intItemId ORDER BY ISNULL(ysnStockUnit,0) DESC, intItemUOMId)
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
 	tblICItem ICI
 		ON ARID.intItemId = ICI.intItemId
-INNER JOIN
-	tblICItemUOM ICIU
-		ON ICI.intItemId = ICIU.intItemId
-		AND ICIU.ysnStockUnit = 1
 WHERE
 	ISNULL(ARID.intItemUOMId, 0) = 0
 	
@@ -28,16 +24,12 @@ GO
 UPDATE
 	tblSOSalesOrderDetail
 SET
-	tblSOSalesOrderDetail.intItemUOMId = ICIU.intItemUOMId
+	tblSOSalesOrderDetail.intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = SOID.intItemId ORDER BY ISNULL(ysnStockUnit,0) DESC, intItemUOMId)
 FROM
 	tblSOSalesOrderDetail SOID
 INNER JOIN
 	tblICItem ICI
 		ON SOID.intItemId = ICI.intItemId
-INNER JOIN
-	tblICItemUOM ICIU
-		ON ICI.intItemId = ICIU.intItemId
-		AND ICIU.ysnStockUnit = 1
 WHERE
 	ISNULL(SOID.intItemUOMId, 0) = 0
 	
