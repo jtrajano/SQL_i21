@@ -488,7 +488,8 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-
+		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		
 		UPDATE
 			tblSOSalesOrder
 		SET
@@ -504,6 +505,19 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 		IF NOT EXISTS (SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @SoftwareInvoiceId AND strTransactionType = 'Invoice')
 			BEGIN
 				EXEC dbo.uspARInsertRecurringInvoice @SoftwareInvoiceId, @UserId
+			END
+
+		DECLARE @ysnSOSoftwareType BIT
+		SELECT TOP 1 @ysnSOSoftwareType = CASE WHEN strType = 'Software' THEN 1 ELSE 0 END
+		FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+
+		IF @ysnSOSoftwareType = 1 AND ISNULL(@NewInvoiceId, 0) > 0
+			BEGIN
+				DECLARE @invoiceToPost NVARCHAR(MAX)
+				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)
+				UPDATE tblARInvoice SET strType = 'Software' WHERE intInvoiceId = @NewInvoiceId
+
+				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice'
 			END			
 	END
 
