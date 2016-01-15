@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "icinventoryadjustment",
         "designer|userClassName": "InventoryAdjustment",
-        "height": 700,
+        "height": 698,
         "helpURL": null,
         "hidden": false,
         "icon": null,
@@ -1739,7 +1739,7 @@
                                                 "itemId": "colNewItemNumber",
                                                 "tdCls": "blue-text-column",
                                                 "text": "New Item No.",
-                                                "width": 90
+                                                "width": 100
                                             },
                                             "name": "MyColumn14",
                                             "designerId": "de538377-4d37-4fdc-8822-237bad715aa4",
@@ -1818,7 +1818,7 @@
                                                 "itemId": "colNewItemDescription",
                                                 "tdCls": "blue-text-column",
                                                 "text": "New Item Description",
-                                                "width": 150
+                                                "width": 250
                                             },
                                             "name": "MyColumn22",
                                             "designerId": "78e9dbc4-b365-4677-bd9c-9d3ccc84ef88"

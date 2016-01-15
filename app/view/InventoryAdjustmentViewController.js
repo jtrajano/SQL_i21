@@ -864,6 +864,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 case SplitLot:
                 case LotMerge:
                 case LotMove:
+                case ItemChange:
                     break;
                 default:
                     var msgBox = iRely.Functions;

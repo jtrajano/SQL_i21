@@ -193,6 +193,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
 
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.QuantityChange:
@@ -200,7 +201,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotMerge:
                 case me.adjustmentTypes.LotMove:
                 case me.adjustmentTypes.UOMChange:
-                case me.adjustmentTypes.ItemChange:
                 default:
                     return me.show;
             }
@@ -213,6 +213,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             switch (intAdjustmentTypeId) {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
                     return me.hide;
                     break;
 
@@ -221,7 +222,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotMerge:
                 case me.adjustmentTypes.LotMove:
                 case me.adjustmentTypes.UOMChange:
-                case me.adjustmentTypes.ItemChange:
                 default:
                     return me.show;
             }
@@ -234,6 +234,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             switch (intAdjustmentTypeId) {
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
                     return me.hide;
                     break;
                 case me.adjustmentTypes.QuantityChange:
@@ -241,7 +242,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotMerge:
                 case me.adjustmentTypes.LotMove:
                 case me.adjustmentTypes.UOMChange:
-                case me.adjustmentTypes.ItemChange:
                 default:
                     return me.show;
             }
@@ -482,10 +482,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotMove:
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
-                case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
                     return me.hide;
                     break;
+                case me.adjustmentTypes.ItemChange:
                 default:
                     return me.show;
             }
@@ -502,10 +502,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 case me.adjustmentTypes.LotMove:
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.ExpiryDateChange:
-                case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.UOMChange:
                     return me.hide;
                     break;
+                case me.adjustmentTypes.ItemChange:
                 default:
                     return me.show;
             }

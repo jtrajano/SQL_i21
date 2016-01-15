@@ -35,7 +35,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 700,
+    height: 698,
     hidden: false,
     width: 950,
     layout: 'fit',
@@ -857,7 +857,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewItemNumber',
-                                                        width: 90,
+                                                        width: 100,
                                                         dataIndex: 'strNewItemNo',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Item No.',
@@ -903,7 +903,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewItemDescription',
-                                                        width: 150,
+                                                        width: 250,
                                                         dataIndex: 'strNewItemDescription',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Item Description'
