@@ -180,8 +180,7 @@ WHERE I.ysnPosted = 1
 						      
 UNION ALL      
       
-SELECT DISTINCT 
-	I.intInvoiceId
+SELECT I.intInvoiceId
   , dblAmountPaid = ISNULL(PD.dblPayment,0)
   , dblInvoiceTotal = 0
   , dblAmountDue = 0
