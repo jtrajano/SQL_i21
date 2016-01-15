@@ -201,8 +201,7 @@ WHERE I.ysnPosted = 1
 						      
 UNION ALL      
       
-SELECT DISTINCT 
-	I.strInvoiceNumber
+SELECT I.strInvoiceNumber
   , I.intInvoiceId
   , I.strBOLNumber
   , dblAmountPaid = ISNULL(PD.dblPayment,0)
