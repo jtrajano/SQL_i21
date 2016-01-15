@@ -34,6 +34,8 @@ AS
 		,tic.dtmDueDate
 		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101)
 		,tic.intTicketProductId
+		,strTicketType = tic.strType
+		,strCustomerName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerId)
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
