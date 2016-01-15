@@ -7,7 +7,6 @@
 	@success BIT = 0 OUTPUT
 AS
 BEGIN
-
 		SET QUOTED_IDENTIFIER OFF
 		SET ANSI_NULLS ON
 		SET NOCOUNT ON
@@ -18,6 +17,7 @@ BEGIN
 		DECLARE @strStockStatus NVARCHAR(50),
 				@intFiscalYear INT
 
+
 			
 		-- GET STOCK STATUS
 		SET @strStockStatus = (SELECT strStockStatus FROM tblARCustomer where intEntityCustomerId = @intEntityCustomerId)
@@ -27,17 +27,20 @@ BEGIN
 			RETURN;
 		END
 
+		SET @intFiscalYear = (SELECT intFiscalYearId 
+										FROM tblGLFiscalYear 
+										WHERE (SELECT dtmDate 
+												FROM tblAPBill 
+												WHERE intBillId = @intBillId) 
+										BETWEEN dtmDateFrom AND dtmDateTo)
+
 		-- CHECK IF ITEM IS LINKED TO PATRONAGE CATEGORY
 		SELECT AB.intEntityVendorId,
-			   ABD.intItemId,
 			   IC.intPatronageCategoryId,
-			   PC.strUnitAmount,
-			   ABD.dblQtyOrdered,
-			   ABD.dblCost,
-			   ICU.dblUnitQty,
 			   AB.ysnPosted,
-			   dblVolume = CASE WHEN PC.strUnitAmount = 'Amount' THEN (ABD.dblQtyOrdered * ABD.dblCost) 
-						   ELSE (ABD.dblQtyOrdered * ICU.dblUnitQty) END
+			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (ABD.dblQtyOrdered * ABD.dblCost) 
+						   ELSE (ABD.dblQtyOrdered * ICU.dblUnitQty) END),
+						   @intFiscalYear as fiscalYear
 		  INTO #tempItem
 		  FROM tblAPBill AB
 	INNER JOIN tblAPBillDetail ABD
@@ -52,28 +55,24 @@ BEGIN
 		 WHERE AB.intBillId = @intBillId
 		   AND IC.intPatronageCategoryId IS NOT NULL
 		   AND ICU.ysnStockUnit = 1 -- Confirm with sir Ajith
+		   group by AB.intEntityVendorId,
+			   IC.intPatronageCategoryId,
+			   AB.ysnPosted
 
 		IF NOT EXISTS(SELECT * FROM #tempItem)
 		BEGIN
+
 			DROP TABLE #tempItem
 			RETURN;
 		END
 		ELSE
 		BEGIN
+			
 
-			SET @intFiscalYear = (SELECT intFiscalYearId 
-									FROM tblGLFiscalYear 
-									WHERE (SELECT dtmDate 
-											FROM tblAPBill 
-											WHERE intBillId = @intBillId) 
-									BETWEEN dtmDateFrom AND dtmDateTo)
-			
-			
-				
-			
+			--select * from #tempItem
 			MERGE tblPATCustomerVolume AS PAT
 			USING #tempItem AS B
-			   ON (PAT.intCustomerPatronId = B.intEntityVendorId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId)
+			   ON (PAT.intCustomerPatronId = B.intEntityVendorId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.fiscalYear)
 			 WHEN MATCHED AND B.ysnPosted = 0 AND PAT.dblVolume = B.dblVolume
 				  THEN DELETE
 			 WHEN MATCHED
