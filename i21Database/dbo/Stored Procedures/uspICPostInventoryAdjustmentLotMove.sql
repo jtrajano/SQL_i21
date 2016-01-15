@@ -141,7 +141,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Detail.dblCost --* ItemUOM.dblUnitQty-- Cost saved in Adj is expected come from the cost bucket. 
+			,dblCost				= Detail.dblCost -- Cost saved in Adj is expected to come from the cost bucket. 
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
