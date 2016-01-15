@@ -3211,6 +3211,7 @@
     <Build Include="dbo\Views\vyuCFInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivityDetail.sql" />
     <Build Include="dbo\Views\vyuEMExportInformation.sql" />
+    <Build Include="dbo\Tables\tblEMEntityMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3292,6 +3293,7 @@
     <None Include="Scripts\Post-Deployment\EM\019_RemoveEmailToParentEntity.sql" />
     <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddPaycheckDirectDepositEntries.sql" />
+    <None Include="Scripts\Post-Deployment\EM\021_MoveCustomerMessageToEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

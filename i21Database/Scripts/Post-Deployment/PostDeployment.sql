@@ -266,7 +266,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\018_UpdateRoleId_ForEntityCredential.sql
 :r .\EM\019_RemoveEmailToParentEntity.sql
 :r .\EM\020_DefaultDataForEntityImportSchemaCSV.sql
-
+:r .\EM\021_MoveCustomerMessageToEntity.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
