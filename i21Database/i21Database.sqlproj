@@ -3214,6 +3214,7 @@
     <Build Include="dbo\Tables\tblEMEntityMessage.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentAddOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentItemChange.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutItemMovements.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
