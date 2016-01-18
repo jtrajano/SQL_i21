@@ -38,8 +38,8 @@ BEGIN
 		SELECT AB.intEntityVendorId,
 			   IC.intPatronageCategoryId,
 			   AB.ysnPosted,
-			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (ABD.dblQtyOrdered * ABD.dblCost) 
-						   ELSE (ABD.dblQtyOrdered * ICU.dblUnitQty) END),
+			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (ABD.dblQtyReceived * ABD.dblCost) 
+						   ELSE (ABD.dblQtyReceived * ICU.dblUnitQty) END),
 						   @intFiscalYear as fiscalYear
 		  INTO #tempItem
 		  FROM tblAPBill AB
