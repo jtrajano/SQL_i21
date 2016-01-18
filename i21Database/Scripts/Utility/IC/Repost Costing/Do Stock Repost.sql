@@ -457,6 +457,7 @@ BEGIN
 						LEFT JOIN dbo.tblARInvoice Invoice
 							ON Invoice.intInvoiceId = RebuilInvTrans.intTransactionId
 							AND Invoice.strInvoiceNumber = RebuilInvTrans.strTransactionId
+
 				WHERE	strBatchId = @strBatchId
 
 				EXEC dbo.uspICRepostCosting
@@ -556,25 +557,25 @@ BEGIN
 		END 
 
 		-- Monitor the posted status of the transaction 
-		BEGIN 
-			IF ISNULL(@ysnPost, 1) = 1
-			BEGIN 
-				PRINT 'Inserting ' + @strTransactionId + ' on #tmpICPostedTransactions'
+		--BEGIN 
+		--	IF ISNULL(@ysnPost, 1) = 1
+		--	BEGIN 
+		--		PRINT 'Inserting ' + @strTransactionId + ' on #tmpICPostedTransactions'
 
-				INSERT INTO #tmpICPostedTransactions (
-					strTransactionId 
-				)
-				SELECT @strTransactionId
-			END 
+		--		INSERT INTO #tmpICPostedTransactions (
+		--			strTransactionId 
+		--		)
+		--		SELECT @strTransactionId
+		--	END 
 
-			IF ISNULL(@ysnPost, 1) = 0 
-			BEGIN 
-				PRINT 'Removing ' + @strTransactionId + ' on #tmpICPostedTransactions'
+		--	IF ISNULL(@ysnPost, 1) = 0 
+		--	BEGIN 
+		--		PRINT 'Removing ' + @strTransactionId + ' on #tmpICPostedTransactions'
 
-				DELETE	FROM #tmpICPostedTransactions 
-				WHERE	strTransactionId = @strTransactionId
-			END 
-		END 	
+		--		DELETE	FROM #tmpICPostedTransactions 
+		--		WHERE	strTransactionId = @strTransactionId
+		--	END 
+		--END 	
 
 
 		DELETE FROM #tmpICInventoryTransaction
