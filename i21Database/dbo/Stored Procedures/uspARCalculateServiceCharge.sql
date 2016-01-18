@@ -100,6 +100,7 @@ AS
 							  AND I.strTransactionType = 'Invoice'
 							  AND I.strType = 'Standard'
 							  AND I.intEntityCustomerId = @entityId
+							  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDueDate))) <= @asOfDate
 							  AND CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END > intGracePeriod
 							  AND (I.ysnCalculated = 0 OR I.ysnForgiven = 1)
 
@@ -167,6 +168,7 @@ AS
 							  AND I.strTransactionType = 'Invoice'
 							  AND I.strType = 'Standard'
 							  AND I.intEntityCustomerId = @entityId
+							  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDueDate))) <= @asOfDate
 							  AND CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END > intGracePeriod
 							  AND (I.ysnCalculated = 0 OR I.ysnForgiven = 1)
 							GROUP BY I.intEntityCustomerId
