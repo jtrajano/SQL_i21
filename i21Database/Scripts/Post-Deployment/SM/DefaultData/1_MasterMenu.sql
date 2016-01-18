@@ -723,6 +723,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trial Bal
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=General Ledger&report=Trial Balance Detail&direct=true' WHERE strMenuName = 'Trial Balance Detail New' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger By Account ID Detail New' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'General Ledger By Account ID Detail New', N'General Ledger', @GeneralLedgerReportParentMenuId, N'General Ledger By Account ID Detail New', N'Report', N'Screen', N'Reporting.view.ReportManager?group=General Ledger&report=General Ledger By Account ID Detail&direct=true', N'small-menu-report', 1, 0, 0, 1, NULL, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=General Ledger&report=General Ledger By Account ID Detail&direct=true' WHERE strMenuName = 'General Ledger By Account ID Detail New' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
+
 /* Start of delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Account Structure' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Account Groups' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
