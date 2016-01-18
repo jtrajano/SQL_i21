@@ -3150,6 +3150,8 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckMiddle.sql" />
     <Build Include="dbo\Views\vyuHDModule.sql" />
     <None Include="Scripts\Post-Deployment\DB\5_FixUserIdDataEntry.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckTop.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckBottom.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

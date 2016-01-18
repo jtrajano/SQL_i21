@@ -246,7 +246,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\Reports\SubReports\PaycheckEarningSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckTaxSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckDeductionSubReport.sql
+:r .\PR\Reports\PaycheckTop.sql
 :r .\PR\Reports\PaycheckMiddle.sql
+:r .\PR\Reports\PaycheckBottom.sql
 
 -- Version Update
 :r .\VersionUpdate.sql
