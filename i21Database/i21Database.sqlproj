@@ -3123,7 +3123,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql" />
     <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
     <Build Include="dbo\Views\vyuARBatchPostingTransaction.sql" />
-    <Build Include="Scripts\Post-Deployment\DB\5_FixUserIdDataEntry.sql" />
+    <None Include="Scripts\Post-Deployment\DB\5_FixUserIdDataEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
