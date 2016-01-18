@@ -57,7 +57,8 @@ BEGIN
 	ORDER BY B.strBinTypeName
 
 	-- Wastage Total and Percentage
-	SELECT ISNULL(S.dblTotalWeightofProducedQty, 0) AS dblTotalWeightofProducedQty
+	SELECT @intShiftActivityId AS intShiftActivityId
+		,ISNULL(S.dblTotalWeightofProducedQty, 0) AS dblTotalWeightofProducedQty
 		,ISNULL(S.dblTotalSKUProduced, 0) AS dblTotalSKUProduced
 		,ISNULL(SUM(WD.dblNetWeight), 0) AS dblTotalNetWeight
 		,ISNULL(((SUM(WD.dblNetWeight) * MC.dblWastageFactor) / SUM(WD.dblGrossWeight)), 0) AS dblWastagePercentage
