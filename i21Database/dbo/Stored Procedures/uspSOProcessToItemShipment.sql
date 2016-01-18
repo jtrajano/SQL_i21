@@ -63,7 +63,12 @@ IF @Unship = 1
 	END
 
 --VALIDATE IF THERE ARE STOCK ITEMS TO SHIP
-IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND dbo.fnIsStockTrackingItem(intItemId) = 1 AND (dblQtyOrdered - dblQtyShipped > 0))
+IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD WHERE intSalesOrderId = @SalesOrderId 
+		AND dbo.fnIsStockTrackingItem(intItemId) = 1 
+		AND (dblQtyOrdered - dblQtyShipped > 0)
+		AND SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
+				FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
+				WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped))
 	BEGIN
 		RAISERROR('Shipping Failed. There is no shippable item on this sales order', 16, 1);
         RETURN
