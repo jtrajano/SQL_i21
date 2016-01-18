@@ -515,3 +515,18 @@ DROP TABLE #tempFRDGLAccount
 GO
 	PRINT N'DEFAULT DATA FOR ROW ACCOUNTS TYPE (strAccountsType)'
 GO
+
+
+--=====================================================================================================================================
+-- 	ROW: CHANGE Current Year Earnings and  Retained Earnings to  Filter Accounts
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'CHANGE Current Year Earnings and  Retained Earnings to  Filter Accounts'
+GO
+
+UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType IN ('Current Year Earnings','Retained Earnings')
+
+GO
+	PRINT N'CHANGE Current Year Earnings and  Retained Earnings to  Filter Accounts'
+GO
