@@ -40,13 +40,14 @@ BEGIN TRY
 					  join tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId
 		              
 		            
-		IF (isNull(@intContractDetailId,0) != 0)
-		  Begin	      
+		--IF (isNull(@intContractDetailId,0) != 0)
+		--  Begin	      
 	       UPDATE tblLGLoad SET 
 			dblQuantity = @InboundQuantity,
+			intLoadHeaderId = null,
 			intConcurrencyId	=	intConcurrencyId + 1
 		  WHERE intLoadId=@intInboundLoadId
-	   END
+	   --END
 	END
 	IF (isNull(@intOutboundLoadId,0) != 0 and isNull(@intInboundLoadId,0) != isNull(@intOutboundLoadId,0))
 	BEGIN
@@ -57,13 +58,14 @@ BEGIN TRY
 					  join tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
 					  join tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 	  
-	IF (isNull(@intContractDetailId,0) != 0)  
-	   BEGIN
+	--IF (isNull(@intContractDetailId,0) != 0)  
+	--   BEGIN
 	      UPDATE tblLGLoad SET 
 			dblQuantity = @OutboundQuantity,
+			intLoadHeaderId = null,
 			intConcurrencyId	=	intConcurrencyId + 1
 		  WHERE intLoadId=@intOutboundLoadId
-	   END
+	   --END
     END
 END TRY
 BEGIN CATCH
