@@ -271,6 +271,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\017_MoveSplitCategoryToNewTable.sql
 :r .\EM\018_UpdateRoleId_ForEntityCredential.sql
 :r .\EM\019_RemoveEmailToParentEntity.sql
+:r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEntityPreferences
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
