@@ -1,6 +1,7 @@
 ﻿
 CREATE PROCEDURE uspCMCheckPrint_ValidatePrintJobs
 	@intBankAccountId INT = NULL,
+	@intUserId INT = NULL,
 	@ysnPrintJobExists INT = NULL OUTPUT 
 AS
 
@@ -37,5 +38,6 @@ SELECT	TOP 1
 		@ysnPrintJobExists = 1
 FROM	[dbo].[tblCMCheckPrintJobSpool]
 WHERE	intBankAccountId = @intBankAccountId
+		AND intCreatedUserId = @intUserId
 
 SET @ysnPrintJobExists = ISNULL(@ysnPrintJobExists, 0)
