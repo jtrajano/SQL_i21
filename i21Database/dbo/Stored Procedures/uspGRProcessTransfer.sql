@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @TransferTicketNumber Nvarchar(20)
 	DECLARE @intBillBeforeTransfer INT
 	DECLARE @strProcessType Nvarchar(30)
+	DECLARE @strUpdateType NVARCHAR(30)
 
 	DECLARE @ActionCustomer INT
 		,@Percent DECIMAL(24,10)
@@ -90,10 +91,11 @@ BEGIN TRY
 			,strTransferTicketNumber NVARCHAR(20)
 			,intBillBeforeTransfer INT
 	)	
-	IF @intBillBeforeTransfer=0
-		SET @strProcessType='accrue'
-	ELSE
-		SET @strProcessType='Bill'
+	IF @intBillBeforeTransfer=1	
+	BEGIN
+		SET @strProcessType='calculate'
+		SET @strUpdateType='Bill'
+    END
 												
 	SELECT @ItemCustomerName = strName	FROM tblEntity	WHERE intEntityId = @ItemEntityid
 
@@ -209,13 +211,19 @@ BEGIN TRY
 		 RAISERROR(@ErrMsg,16,1)		 
 		END
 		
-		IF @strProcessType='Bill'
+		IF @intBillBeforeTransfer=1	
 		BEGIN
 			--Storage Charge Update
 			EXEC uspGRCalculateStorageCharge
-			  @intCustomerStorageId
-			 ,@strProcessType,NULL
+			  @strProcessType
+			 ,@strUpdateType
+			 ,@intCustomerStorageId
+			 ,NULL
+			 ,NULL
+			 ,NULL
+			 ,NULL
 			 ,@UserKey
+			 ,'Transfer Storage'
 			 ,@dblStorageDuePerUnit OUTPUT
 			 ,@dblStorageDueAmount OUTPUT
 			 ,@dblStorageDueTotalPerUnit OUTPUT
