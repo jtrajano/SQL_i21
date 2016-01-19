@@ -149,8 +149,8 @@ BEGIN
               intCurrencyId,
               intConcurrencyId 
                )    
-            VALUES(@dtmTransactionDate ,
-            @intFutOptTransactionHeaderId,
+            VALUES(CONVERT(DATETIME,CONVERT(CHAR(10),@dtmTransactionDate,110)) ,
+              @intFutOptTransactionHeaderId,
               @intEntityId ,
               @intBrokerageAccountId ,
               @intFutureMarketId ,
@@ -165,7 +165,7 @@ BEGIN
               @intNoOfContract ,
               @dblPrice ,
               @strStatus ,
-              @dtmFilledDate ,
+              CONVERT(DATETIME,CONVERT(CHAR(10),@dtmFilledDate,110)),
               @strReserveForFix ,
               @intBookId ,
               @intSubBookId ,
@@ -196,6 +196,3 @@ BEGIN CATCH
  SET @ErrMsg = ERROR_MESSAGE()    
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
 END CATCH    
-
-
-
