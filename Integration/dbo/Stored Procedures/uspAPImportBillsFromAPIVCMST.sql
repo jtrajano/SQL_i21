@@ -251,7 +251,7 @@ BEGIN
 					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN
 														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
 													ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
-					[dbl1099]				=	(CASE WHEN (A.dblTotal) > 0 
+					[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
 												THEN 
 													(
 														((CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
