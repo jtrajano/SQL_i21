@@ -40,9 +40,15 @@
     [dtmLastModified]             DATETIME        NULL,
     [intConcurrencyId]            INT             CONSTRAINT [DF_tblCFAccount_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFAccount] PRIMARY KEY CLUSTERED ([intAccountId] ASC),
+    CONSTRAINT [FK_tblCFAccount_tblARAccountStatus] FOREIGN KEY ([intAccountStatusCodeId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
+    CONSTRAINT [FK_tblCFAccount_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblCFAccount_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
     CONSTRAINT [FK_tblCFAccount_tblCFDiscountSchedule] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [dbo].[tblCFDiscountSchedule] ([intDiscountScheduleId]),
-    CONSTRAINT [FK_tblCFAccount_tblCFInvoiceCycle] FOREIGN KEY ([intInvoiceCycle]) REFERENCES [dbo].[tblCFInvoiceCycle] ([intInvoiceCycleId])
+    CONSTRAINT [FK_tblCFAccount_tblCFInvoiceCycle] FOREIGN KEY ([intInvoiceCycle]) REFERENCES [dbo].[tblCFInvoiceCycle] ([intInvoiceCycleId]),
+    CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 );
+
+
 
 
 

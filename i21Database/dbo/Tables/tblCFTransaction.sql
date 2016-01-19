@@ -36,8 +36,12 @@
     [strTransactionId]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intInvoiceId]            INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC)
+    CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
+    CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
+    CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 

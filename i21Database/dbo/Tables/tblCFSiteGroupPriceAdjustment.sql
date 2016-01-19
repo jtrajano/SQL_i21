@@ -8,8 +8,11 @@
     [dblRate]                       NUMERIC (18, 6) NULL,
     [intConcurrencyId]              INT             CONSTRAINT [DF_tblCFSiteGroupPriceAdjustment_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFSiteGroupPriceAdjustment] PRIMARY KEY CLUSTERED ([intSiteGroupPriceAdjustmentId] ASC),
-    CONSTRAINT [FK_tblCFSiteGroupPriceAdjustment_tblCFSiteGroup] FOREIGN KEY ([intSiteGroupId]) REFERENCES [dbo].[tblCFSiteGroup] ([intSiteGroupId])
+    CONSTRAINT [FK_tblCFSiteGroupPriceAdjustment_tblCFSiteGroup] FOREIGN KEY ([intSiteGroupId]) REFERENCES [dbo].[tblCFSiteGroup] ([intSiteGroupId]),
+    CONSTRAINT [FK_tblCFSiteGroupPriceAdjustment_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 

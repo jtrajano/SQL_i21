@@ -23,8 +23,11 @@
     [dtmLastModified]         DATETIME       NULL,
     [ysnCardForOwnUse]        BIT            NULL,
     CONSTRAINT [PK_tblCFVehicle] PRIMARY KEY CLUSTERED ([intVehicleId] ASC),
-    CONSTRAINT [FK_tblCFVehicle_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblCFVehicle_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblCFVehicle_tblICItem] FOREIGN KEY ([intExpenseItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 

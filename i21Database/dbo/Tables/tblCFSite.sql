@@ -62,10 +62,14 @@
     [intConcurrencyId]               INT            CONSTRAINT [DF_tblCFSite_intConcurrencyId] DEFAULT ((1)) NULL,
     [intImportMapperId]              INT            NULL,
     CONSTRAINT [PK_tblCFSiteLocation] PRIMARY KEY CLUSTERED ([intSiteId] ASC),
+    CONSTRAINT [FK_tblCFSite_tblARCustomer] FOREIGN KEY ([intCashCustomerID]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblCFSite_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
     CONSTRAINT [FK_tblCFSite_tblCFSiteGroup] FOREIGN KEY ([intAdjustmentSiteGroupId]) REFERENCES [dbo].[tblCFSiteGroup] ([intSiteGroupId]),
+    CONSTRAINT [FK_tblCFSite_tblSMCompanyLocation] FOREIGN KEY ([intARLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCFSite_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );
+
+
 
 
 
