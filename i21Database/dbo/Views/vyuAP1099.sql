@@ -66,4 +66,5 @@ LEFT JOIN (tblAPVendor C INNER JOIN tblEntity C2 ON C.intEntityVendorId = C2.int
 LEFT JOIN tblEntityLocation D
 	ON C.intEntityVendorId = D.intEntityId AND D.ysnDefaultLocation = 1     
 WHERE ((B.ysnPosted = 1 AND B2.dblPayment IS NOT NULL) OR B.intTransactionType = 9) AND A.int1099Form <> 0
+AND C2.ysnPrint1099 = 1
 
