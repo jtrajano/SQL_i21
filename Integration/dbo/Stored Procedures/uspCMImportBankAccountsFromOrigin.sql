@@ -85,7 +85,7 @@ BEGIN
 				,dtmLastModified
 				,intConcurrencyId
 			)
-		SELECT	strBankName				= LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS
+		SELECT	strBankName				= LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) 
 				,strContact				= ''''
 				,strAddress				= ''''
 				,strZipCode				= ''''
@@ -103,7 +103,7 @@ BEGIN
 				,dtmLastModified		= GETDATE()
 				,intConcurrencyId		= 1
 		FROM	(	SELECT	DISTINCT 
-							i.apcbk_desc
+							apcbk_desc = i.apcbk_desc COLLATE Latin1_General_CI_AS
 					FROM	apcbkmst i
 				) QUERY
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)
