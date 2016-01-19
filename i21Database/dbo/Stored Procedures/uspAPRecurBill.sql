@@ -18,9 +18,11 @@ BEGIN
 
 	UPDATE A
 		SET A.dtmDate = @billDate
-		,dtmDueDate = dbo.fnGetDueDateBasedOnTerm(@billDate, A.intTermsId)
-		,intTransactionType = 1
-		,strVendorOrderNumber = A.strBillId
+		,A.dtmDueDate = dbo.fnGetDueDateBasedOnTerm(@billDate, A.intTermsId)
+		,A.intTransactionType = 1
+		,A.strVendorOrderNumber = A.strBillId
+		,A.ysnRecurring = 0
+		,A.strReference = NULL
 	FROM tblAPBill A
 	WHERE intBillId = @billCreatedPrimaryKey
 
