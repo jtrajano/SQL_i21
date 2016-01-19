@@ -10,7 +10,7 @@
 	,@intOdometer					INT				= 0
 	,@intPumpNumber					INT				= 0
 	,@intContractId					INT				= 0
-	,@intSalesPersonId				INT				= 0
+	,@intSalesPersonId				INT				= NULL
 	,@dtmBillingDate				DATETIME		= NULL
 	,@dtmTransactionDate			DATETIME		= NULL
 	,@strSequenceNumber				NVARCHAR(MAX)	= NULL
@@ -35,7 +35,7 @@ BEGIN
 	DECLARE @intCardId				INT = 0
 	DECLARE @intVehicleId			INT	= 0
 	DECLARE @intProductId			INT	= 0
-	DECLARE @intARItemId			INT	= 0
+	DECLARE @intARItemId			INT	= NULL
 	DECLARE @intARItemLocationId	INT	= 0
 	
 	DECLARE @intTaxGroupId			INT = 0
@@ -108,7 +108,10 @@ BEGIN
 
 	DECLARE @ysnInvalid					BIT	= 0
 	DECLARE @ysnPosted					BIT = 0
-
+	IF(@intSalesPersonId = 0)
+		BEGIN
+			SET @intSalesPersonId = NULL
+		END
 	IF(@intSiteId = 0)
 		BEGIN
 			SET @intSiteId =(SELECT TOP 1 intSiteId
