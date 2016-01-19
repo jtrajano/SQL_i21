@@ -445,7 +445,7 @@ BEGIN TRY
 	IF @intDefaultStorageSchedule IS NULL 
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Invalid Storage Schedule - uspSCStorageUpdate', 16, 1);
+		RAISERROR('Invalid Default Schedule Storage in Commodity - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
 

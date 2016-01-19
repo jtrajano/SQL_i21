@@ -141,7 +141,8 @@ BEGIN TRY
 		BEGIN 
 			SELECT	@intTicketUOM = UOM.intUnitMeasureId
 			FROM	dbo.tblSCTicket SC	        
-					JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+					--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+					JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 		END
 
