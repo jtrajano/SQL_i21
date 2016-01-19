@@ -103,8 +103,10 @@ BEGIN
 					[dbl1099]				=	A.apivc_1099_amt,
 					[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
 													ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
-					[dblPayment]			=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
-													ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
+					[dblPayment]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN
+													CASE WHEN (A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'') THEN A.apivc_orig_amt
+														ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
+												ELSE 0 END,
 					[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
 														CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
 															ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
@@ -260,8 +262,8 @@ BEGIN
 														A.dblTotal
 													)
 												ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
-					[int1099Form]			=	1,
-					[int1099Category]		=	8,
+					[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
+					[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
 					[intLineNo]				=	C.aphgl_dist_no,
 					[A4GLIdentity]			=	C.[A4GLIdentity]
 				FROM tblAPBill A
