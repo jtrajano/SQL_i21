@@ -22,8 +22,14 @@ BEGIN
 		,A.intTransactionType = 1
 		,A.strVendorOrderNumber = A.strBillId
 		,A.ysnRecurring = 0
-		,A.strReference = NULL
+		,A.strReference = RecurTran.strReference
 	FROM tblAPBill A
+	OUTER APPLY (
+		SELECT 
+			B.strReference
+		FROM tblSMRecurringTransaction B
+		WHERE intTransactionId = @billId AND strTransactionType = 'Voucher'
+	) RecurTran
 	WHERE intBillId = @billCreatedPrimaryKey
 
 	SET @newBillId = (SELECT strBillId FROM tblAPBill WHERE intBillId = @billCreatedPrimaryKey)
