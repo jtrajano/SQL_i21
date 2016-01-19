@@ -40,6 +40,18 @@ Harness.start(
                 preload: [
                     testEnginePath
                 ]
+            },
+            {
+                url: 'Item/AddItem_SoftwareType.js',
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Item/DeleteItem.js',
+                preload: [
+                    testEnginePath
+                ]
             }
         ]
     },
@@ -370,6 +382,23 @@ Harness.start(
             }
         ]
     },
+    { group: 'Category',
+        items: [
+            {
+                url: 'Category/AddCategory.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Category/DeleteCategory.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            }
+        ]
+    },
+
     { group: 'PackType',
         items: [
             {
