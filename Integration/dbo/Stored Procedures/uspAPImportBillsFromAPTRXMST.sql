@@ -68,8 +68,7 @@ BEGIN
 			WHERE intEntityUserSecurityId = @UserId
 
 			--removed first the constraint
-			--ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
-			ALTER TABLE tblAPBill NOCHECK CONSTRAINT [UK_dbo.tblAPBill_strBillId]
+			ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
 			MERGE INTO tblAPBill AS destination
 			USING (
@@ -192,7 +191,7 @@ BEGIN
 
 			IF @totalInsertedBill <= 0
 			BEGIN
-				ALTER TABLE tblAPBill WITH CHECK CHECK CONSTRAINT [UK_dbo.tblAPBill_strBillId]
+				ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 				SET @totalImported = 0;
 				RETURN;
 			END
@@ -594,8 +593,7 @@ BEGIN
 				DELETE FROM #InsertedUnpostedBill WHERE intBillId = @BillId
 			END;
 
-			--ALTER TABLE tblAPBill ADD CONSTRAINT UK_dbo.tblAPBill_strBillId UNIQUE (strBillId);
-			ALTER TABLE tblAPBill WITH CHECK CHECK CONSTRAINT [UK_dbo.tblAPBill_strBillId]
+			ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
 			IF @transCount = 0 COMMIT TRANSACTION
 
