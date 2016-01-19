@@ -149,6 +149,7 @@ BEGIN
 			@strRecordNo = strTransactionId
 	FROM	#tmpPrintJobSpoolTable
 	WHERE	LTRIM(RTRIM(ISNULL(strCheckNo, ''))) = ''
+	ORDER BY LEN(strTransactionId), strTransactionId
 
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
