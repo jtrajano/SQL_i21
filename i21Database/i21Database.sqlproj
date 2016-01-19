@@ -3152,6 +3152,7 @@
     <None Include="Scripts\Post-Deployment\DB\5_FixUserIdDataEntry.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckTop.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckBottom.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptPurchaseOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
