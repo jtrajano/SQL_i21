@@ -414,7 +414,7 @@ INSERT into @ReceiptDeleteTable
 )
 select intLoadReceiptId,intInventoryReceiptId from dbo.tblTRLoadReceipt TR
             join vyuICGetItemStock IC on TR.intItemId = IC.intItemId and TR.intCompanyLocationId = IC.intLocationId
-			where (IC.strType = 'Non-Inventory' or (TR.strOrigin ='Terminal' AND (TR.dblUnitCost = 0 or TR.dblFreightRate = 0 or TR.dblPurSurcharge = 0))) and isNull(intInventoryReceiptId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
+			where (IC.strType = 'Non-Inventory' or (TR.strOrigin ='Terminal' AND (TR.dblUnitCost = 0 and TR.dblFreightRate = 0 and TR.dblPurSurcharge = 0))) and isNull(intInventoryReceiptId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
 Union ALL
 select intLoadReceiptId,intInventoryReceiptId from dbo.tblTRLoadReceipt  TR          
 			where TR.strOrigin = 'Location' and isNull(intInventoryReceiptId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
@@ -426,7 +426,7 @@ INSERT into @TransferDeleteTable
 )
 select intLoadReceiptId,intInventoryTransferId from dbo.tblTRLoadReceipt TR
             join vyuICGetItemStock IC on TR.intItemId = IC.intItemId and TR.intCompanyLocationId = IC.intLocationId
-			where IC.strType = 'Non-Inventory' and isNull(intInventoryTransferId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
+			where (IC.strType = 'Non-Inventory' or (TR.strOrigin ='Terminal' AND (TR.dblUnitCost = 0 and TR.dblFreightRate = 0 and TR.dblPurSurcharge = 0))) and isNull(intInventoryTransferId,0) != 0 and intLoadHeaderId = @intLoadHeaderId
 UNION ALL
 select intLoadReceiptId,TR.intInventoryTransferId FROM		        
 			 dbo.tblTRLoadDistributionHeader DH 					
