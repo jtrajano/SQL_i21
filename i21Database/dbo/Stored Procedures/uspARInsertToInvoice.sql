@@ -82,7 +82,7 @@ SELECT SI.intItemId
 	 , SI.strItemDescription
 	 , SI.intItemUOMId
 	 , SI.dblQtyOrdered
-	 , SI.dblQtyRemaining
+	 , CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , SI.dblDiscount
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
@@ -96,9 +96,11 @@ FROM tblSOSalesOrder SO
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 	LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId
+	LEFT JOIN tblICInventoryShipmentItem ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
 WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining > 0
+	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
 
 --GET ITEMS FROM POSTED SHIPMENT
 INSERT INTO @tblItemsToInvoice
@@ -106,7 +108,7 @@ SELECT ICSI.intItemId
 	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
 	 , SOD.strItemDescription
 	 , ICSI.intItemUOMId
-	 , ICSI.dblQuantity
+	 , SOD.dblQtyOrdered
 	 , ICSI.dblQuantity
 	 , @dblZeroAmount
 	 , SOD.dblDiscount
