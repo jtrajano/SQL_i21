@@ -1,144 +1,266 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetCarrierShipmentSubReport]
 		@xmlParam NVARCHAR(MAX) = NULL  
 AS
-DECLARE @intPLoadId INT
-DECLARE @intPEntityId INT
-DECLARE @intPEntityLocationId INT
-DECLARE @intSLoadId INT
-DECLARE @intSEntityId INT
-DECLARE @intSEntityLocationId INT
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
+DECLARE @intPurchaseSale INT
+
+DECLARE @incval INT, @total INT
+DECLARE @LoadDetailTable TABLE
+    (
+		intId INT IDENTITY PRIMARY KEY CLUSTERED,
+		strVendor NVARCHAR(MAX),
+		strShipFrom NVARCHAR(MAX),
+		strShipFromAddress NVARCHAR(MAX),
+		strShipFromCity NVARCHAR(MAX),
+		strShipFromCountry NVARCHAR(MAX),
+		strShipFromState NVARCHAR(MAX),
+		strShipFromZipCode NVARCHAR(MAX),
+		strPLocationName NVARCHAR(MAX),
+		strPLocationAddress NVARCHAR(MAX),
+		strPLocationCity NVARCHAR(MAX),
+		strPLocationCountry NVARCHAR(MAX),
+		strPLocationState NVARCHAR(MAX),
+		strPLocationZipCode NVARCHAR(MAX),
+		strCustomer NVARCHAR(MAX),
+		strShipTo NVARCHAR(MAX),
+		strShipToAddress NVARCHAR(MAX),
+		strShipToCity NVARCHAR(MAX),
+		strShipToCountry NVARCHAR(MAX),
+		strShipToState NVARCHAR(MAX),
+		strShipToZipCode NVARCHAR(MAX),
+		strSLocationName NVARCHAR(MAX),
+		strSLocationAddress NVARCHAR(MAX),
+		strSLocationCity NVARCHAR(MAX),
+		strSLocationCountry NVARCHAR(MAX),
+		strSLocationState NVARCHAR(MAX),
+		strSLocationZipCode NVARCHAR(MAX),
+		strScheduleInfoMsg NVARCHAR(MAX),
+		ysnPrintScheduleInfo BIT,
+		strLoadDirectionMsg NVARCHAR(MAX),
+		ysnPrintLoadDirections BIT,
+		strQuantity NVARCHAR(MAX),
+		strItemNo NVARCHAR(MAX),
+		strItemUOM NVARCHAR(MAX),
+		strOriginFullAddress NVARCHAR(MAX),
+		strDestinationFullAddress NVARCHAR(MAX)
+	)
+
+DECLARE @strOriginName NVARCHAR(MAX), @strOriginLocationName NVARCHAR(MAX), @strOriginAddress NVARCHAR(MAX), @strOriginCity NVARCHAR(MAX), @strOriginCountry NVARCHAR(MAX), @strOriginState NVARCHAR(MAX), @strOriginZipCode NVARCHAR(MAX)
+DECLARE @strDestinationName NVARCHAR(MAX), @strDestinationLocationName NVARCHAR(MAX), @strDestinationAddress NVARCHAR(MAX), @strDestinationCity NVARCHAR(MAX), @strDestinationCountry NVARCHAR(MAX), @strDestinationState NVARCHAR(MAX), @strDestinationZipCode NVARCHAR(MAX)
+DECLARE @strItemNo NVARCHAR(MAX), @strItemUOM NVARCHAR(MAX), @strQuantity NVARCHAR(MAX), @strVendor NVARCHAR(MAX), @strCustomer NVARCHAR(MAX), @strScheduleInfo NVARCHAR(MAX), @strLoadDirections NVARCHAR(MAX)
+
+DECLARE @strOriginFullAddress NVARCHAR(MAX), @strDestinationFullAddress NVARCHAR(MAX)
 BEGIN
-	DECLARE @intLoadNumber			INT,
-			@xmlDocumentId			INT 
-			
-	IF	LTRIM(RTRIM(@xmlParam)) = ''   
-		SET @xmlParam = NULL   
-      
-	DECLARE @temp_xml_table TABLE 
-	(  
-			[fieldname]		NVARCHAR(50),  
-			condition		NVARCHAR(20),        
-			[from]			NVARCHAR(50), 
-			[to]			NVARCHAR(50),  
-			[join]			NVARCHAR(10),  
-			[begingroup]	NVARCHAR(50),  
-			[endgroup]		NVARCHAR(50),  
-			[datatype]		NVARCHAR(50) 
-	)  
-  
-	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
-  
-	INSERT INTO @temp_xml_table  
-	SELECT	*  
-	FROM	OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
-	WITH (  
-				[fieldname]		NVARCHAR(50),  
-				condition		NVARCHAR(20),        
-				[from]			NVARCHAR(50), 
-				[to]			NVARCHAR(50),  
-				[join]			NVARCHAR(10),  
-				[begingroup]	NVARCHAR(50),  
-				[endgroup]		NVARCHAR(50),  
-				[datatype]		NVARCHAR(50)  
-	)  
-    
-	SELECT	@intLoadNumber = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intLoadNumber' 
+	SELECT DISTINCT Top(1)
+		@intPurchaseSale = L.intPurchaseSale
+	FROM		vyuLGLoadView L
+	WHERE L.intLoadNumber = @xmlParam
 
-	SELECT TOP(1) @intPLoadId = LP.intLoadId, @intPEntityId = LP.intEntityId, @intPEntityLocationId = LP.intEntityLocationId FROM tblLGLoad LP where LP.intLoadNumber=@intLoadNumber and intPurchaseSale=1
-	SELECT TOP(1) @intSLoadId = LS.intLoadId, @intSEntityId = LS.intEntityId, @intSEntityLocationId = LS.intEntityLocationId FROM tblLGLoad LS where LS.intLoadNumber=@intLoadNumber and intPurchaseSale=2	
+	Insert into @LoadDetailTable
+		SELECT
+			L.strVendor,
+			L.strShipFrom,
+			L.strShipFromAddress,
+			L.strShipFromCity,
+			L.strShipFromCountry,
+			L.strShipFromState,
+			L.strShipFromZipCode,
+			L.strPLocationName,
+			L.strPLocationAddress,
+			L.strPLocationCity,
+			L.strPLocationCountry,
+			L.strPLocationState,
+			L.strPLocationZipCode,
+			L.strCustomer,
+			L.strShipTo,
+			L.strShipToAddress,
+			L.strShipToCity,
+			L.strShipToCountry,
+			L.strShipToState,
+			L.strShipToZipCode,
+			L.strSLocationName,
+			L.strSLocationAddress,
+			L.strSLocationCity,
+			L.strSLocationCountry,
+			L.strSLocationState,
+			L.strSLocationZipCode,
+			L.strScheduleInfoMsg,
+			L.ysnPrintScheduleInfo,
+			L.strLoadDirectionMsg,
+			L.ysnPrintLoadDirections,
+			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) as strQuantity,
+			L.strItemNo,
+			L.strItemUOM,
+			'' as strOrignFullAddress,
+			'' as strDestinationFullAddress
+		FROM vyuLGLoadView L 
+		WHERE L.intLoadNumber = @xmlParam
 
-	SELECT DISTINCT
-		(SELECT TOP(1) C.strCompanyName FROM tblSMCompanySetup C) as strCompanyName,
-		(SELECT TOP(1) C.strAddress FROM tblSMCompanySetup C) as strCompanyAddress,
-		(SELECT TOP(1) C.strCountry FROM tblSMCompanySetup C) as strCompanyCountry,
-		(SELECT TOP(1) C.strCity FROM tblSMCompanySetup C) as strCompanyCity,
-		(SELECT TOP(1) C.strState FROM tblSMCompanySetup C) as strCompanyState,
-		(SELECT TOP(1) C.strZip FROM tblSMCompanySetup C) as strCompanyZip,
-		L.intLoadNumber,
-		CL.strLocationName,
-		CL.strAddress as strLocationAddress,
-		CL.strCity as strLocationCity,
-		CL.strCountry as strLocationCountry,
-		CL.strZipPostalCode as strLocationZipCode,
-		CL.strPhone as strLocationPhone,
-		CL.strFax as strLocationFax,
-		CL.strEmail as strLocationMail,
-		L.intItemId,
-		Item.strItemNo,
-		Item.strDescription,
-		L.dblQuantity,
-		UOM.strUnitMeasure,
-		Equipment.strEquipmentType,
+	SELECT @total = count(*) from @LoadDetailTable;
+	SET @incval = 1 
+	WHILE @incval <= @total 
+	BEGIN
+		SELECT 
+			@strVendor = L1.strVendor
+			,@strCustomer = L1.strCustomer
+			,@strOriginName = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strVendor
+								ELSE
+									''
+								END
+			,@strOriginLocationName = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFrom
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationName
+									ELSE
+										L1.strSLocationName
+									END
+								END
+			,@strOriginAddress = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromAddress
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationAddress
+									ELSE
+										L1.strSLocationAddress
+									END
+								END
+			,@strOriginCity = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromCity
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationCity
+									ELSE
+										L1.strSLocationCity
+									END
+								END
+			,@strOriginState = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromState
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationState
+									ELSE
+										L1.strSLocationState
+									END
+								END
+			,@strOriginZipCode = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromZipCode
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationZipCode
+									ELSE
+										L1.strSLocationZipCode
+									END
+								END
+			,@strOriginCountry = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromCountry
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationCountry
+									ELSE
+										L1.strSLocationCountry
+									END
+								END
+			,@strDestinationName = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strCustomer
+								ELSE
+									''
+								END
+			,@strDestinationLocationName = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipTo
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationName
+									ELSE
+										L1.strPLocationName
+									END
+								END
+			,@strDestinationAddress = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToAddress
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationAddress
+									ELSE
+										L1.strPLocationAddress
+									END
+								END
+			,@strDestinationCity = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToCity
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationCity
+									ELSE
+										L1.strPLocationCity
+									END
+								END
+			,@strDestinationState = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToState
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationState
+									ELSE
+										L1.strPLocationState
+									END
+								END
+			,@strDestinationZipCode = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToZipCode
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationZipCode
+									ELSE
+										L1.strPLocationZipCode
+									END
+								END
+			,@strDestinationCountry = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToCountry
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationCountry
+									ELSE
+										L1.strPLocationCountry
+									END
+								END
+			,@strItemNo = L1.strItemNo
+			,@strQuantity = L1.strQuantity
+			,@strItemUOM = L1.strItemUOM
+			,@strScheduleInfo = CASE WHEN L1.ysnPrintScheduleInfo = 1 THEN
+										L1.strScheduleInfoMsg
+									ELSE
+										''
+									END
+			,@strLoadDirections = CASE WHEN L1.ysnPrintLoadDirections = 1 THEN
+										L1.strLoadDirectionMsg
+									ELSE
+										''
+									END
+		FROM @LoadDetailTable L1 where L1.intId = @incval
 
-		(SELECT L1.dtmScheduledDate FROM tblLGLoad L1 where L1.intLoadId = @intPLoadId) as dtmPickupDate,
-		(SELECT L1.dtmScheduledDate FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId) as dtmDeliveryDate,
-		(SELECT L1.strCustomerReference FROM tblLGLoad L1 where L1.intLoadId = @intPLoadId) as strVendorReference,
-		(SELECT L1.strCustomerReference FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId)  as strCustomerReference,
-		(SELECT L1.strComments FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId) as strInboundComments,
-		(SELECT L1.strComments FROM vyuLGLoadView L1 where L1.intLoadId = @intSLoadId)  as strOutboundComments,
+		SET @strOriginFullAddress = LTRIM(RTRIM(@strOriginName)) + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(@strOriginLocationName)),'') + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(@strOriginAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(@strOriginCity)),'') + 
+									ISNULL(', '+CASE WHEN LTRIM(RTRIM(@strOriginState)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginState)) END,'') + 
+									ISNULL(' '+CASE WHEN LTRIM(RTRIM(@strOriginZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginZipCode)) END,'') + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(''+CASE WHEN LTRIM(RTRIM(@strOriginCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginCountry)) END,'')
+		SET @strDestinationFullAddress = LTRIM(RTRIM(@strDestinationName)) + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(@strDestinationLocationName)),'') + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(@strDestinationAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(@strDestinationCity)),'') + 
+									ISNULL(', '+CASE WHEN LTRIM(RTRIM(@strDestinationState)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationState)) END,'') + 
+									ISNULL(' '+CASE WHEN LTRIM(RTRIM(@strDestinationZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationZipCode)) END,'') + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(''+CASE WHEN LTRIM(RTRIM(@strDestinationCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationCountry)) END,'')
 
-		(SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId) as strPCustomerContract,
-		(SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intSLoadId) as strSCustomerContract,
+		UPDATE @LoadDetailTable SET strOriginFullAddress = @strOriginFullAddress, strDestinationFullAddress = @strDestinationFullAddress WHERE intId=@incval
 
-		(SELECT L1.strExternalLoadNumber FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId) as strSupplierLoadNumber,
+		SET @incval = @incval + 1
+	END
 
-		(SELECT E.strName FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorName,
-		(SELECT E.strEntityNo FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorNo,
-		(SELECT E.strEmail FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorEmail,
-		(SELECT E.strFax FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorFax,
-		(SELECT E.strMobile FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorMobile,
-		(SELECT E.strPhone FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorPhone,
-		
-		(SELECT EL.strLocationName FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorLocationName,
-		(SELECT EL.strAddress FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorAddress,
-		(SELECT EL.strCity  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorCity,
-		(SELECT EL.strCountry  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorCountry,
-		(SELECT EL.strState  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorState,
-		(SELECT EL.strZipCode  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorZipCode,
-
-		(SELECT E.strName FROM tblEntity E WHERE E.intEntityId = @intSEntityId) as strCustomerName,
-		(SELECT E.strEntityNo FROM tblEntity E WHERE E.intEntityId = @intSEntityId) as strCustomerNo,
-		(SELECT E.strEmail FROM tblEntity E WHERE E.intEntityId = @intSEntityId) as strCustomerEmail,
-		(SELECT E.strFax FROM tblEntity E WHERE E.intEntityId = @intSEntityId) as strCustomerFax,
-		(SELECT E.strMobile FROM tblEntity E WHERE E.intEntityId = @intSEntityId) as strCustomerMobile,
-		(SELECT E.strPhone FROM tblEntity E WHERE E.intEntityId = @intSEntityId)as strCustomerPhone,
-
-		(SELECT EL.strLocationName FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerLocationName,
-		(SELECT EL.strAddress FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerAddress,
-		(SELECT EL.strCity FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerCity,
-		(SELECT EL.strCountry FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerCountry,
-		(SELECT EL.strState FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerState,
-		(SELECT EL.strZipCode FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerZipCode,
-		
-		L.intHaulerEntityId,
-		Hauler.strName as strHauler,
-		(SELECT EL.strAddress from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerAddress,
-		(SELECT EL.strCity from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerCity,
-		(SELECT EL.strCountry from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerCountry,
-		(SELECT EL.strState from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerState,
-		(SELECT EL.strZipCode from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerZip,
-		(SELECT EL.strPhone from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerPhone,
-
-		L.intDriverEntityId,
-		Driver.strName as strDriver,
-		L.dtmDispatchedDate,
-		L.intDispatcherId,
-		Dispatcher.strFullName as strDispatcher,
-		L.strTrailerNo1,
-		L.strTrailerNo2,
-		L.strTrailerNo3,
-		L.strTruckNo
-
-	FROM		tblLGLoad L
-	JOIN		tblSMCompanyLocation	CL ON				CL.intCompanyLocationId = L.intCompanyLocationId AND L.intLoadNumber = @intLoadNumber
-	LEFT JOIN		tblICItem				Item ON				Item.intItemId = L.intItemId
-	LEFT JOIN		tblICUnitMeasure		UOM	ON				UOM.intUnitMeasureId = L.intUnitMeasureId
-	LEFT JOIN		tblEntity				E	On				E.intEntityId = L.intEntityId
-	LEFT JOIN		tblEntityLocation		EL	On				EL.intEntityLocationId = L.intEntityLocationId
-	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
-	LEFT JOIN		tblEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
-	LEFT JOIN	tblLGEquipmentType		Equipment On		Equipment.intEquipmentTypeId = L.intEquipmentTypeId
-	LEFT JOIN	tblSMUserSecurity	Dispatcher On					Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
+	SELECT strOriginFullAddress, strDestinationFullAddress, strQuantity, strItemNo, strItemUOM, strScheduleInfoMsg, strLoadDirectionMsg FROM @LoadDetailTable
 END
