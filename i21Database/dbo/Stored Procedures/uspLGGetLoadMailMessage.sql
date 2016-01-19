@@ -2,91 +2,82 @@
 		@intLoadNumber INT,
 		@strMailMessage NVARCHAR(MAX) OUTPUT
 AS
---DECLARE @intLoadNumber INT = 1364
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
+--DECLARE @intLoadNumber INT = 1433
 --DECLARE @strMailMessage NVARCHAR(MAX)
-DECLARE @intPLoadId INT
-DECLARE @intPEntityId INT
-DECLARE @intPEntityLocationId INT
-DECLARE @intSLoadId INT
-DECLARE @intSEntityId INT
-DECLARE @intSEntityLocationId INT
+
 DECLARE @strCompanyName NVARCHAR(MAX), @strCompanyAddress NVARCHAR(MAX), @strCompanyCountry NVARCHAR(MAX), @strCompanyCity NVARCHAR(MAX), @strCompanyState NVARCHAR(MAX), @strCompanyZip NVARCHAR(MAX)
-DECLARE @strLocationName NVARCHAR(MAX), @strLocationAddress NVARCHAR(MAX), @strLocationCity NVARCHAR(MAX), @strLocationCountry NVARCHAR(MAX), @strLocationZipCode NVARCHAR(MAX), @strLocationPhone NVARCHAR(MAX)
-DECLARE @strLocationFax NVARCHAR(MAX), @strLocationMail NVARCHAR(MAX), @strItemNo NVARCHAR(MAX), @strDescription NVARCHAR(MAX), @strUnitMeasure NVARCHAR(MAX), @strEquipmentType NVARCHAR(MAX)
-DECLARE @strVendorReference NVARCHAR(MAX), @strCustomerReference NVARCHAR(MAX), @strInboundComments NVARCHAR(MAX), @strOutboundComments NVARCHAR(MAX), @strPCustomerContract NVARCHAR(MAX), @strSCustomerContract NVARCHAR(MAX)
-DECLARE @strSupplierLoadNumber NVARCHAR(MAX), @strVendorName NVARCHAR(MAX), @strVendorNo NVARCHAR(MAX), @strVendorEmail NVARCHAR(MAX), @strVendorFax NVARCHAR(MAX), @strVendorMobile NVARCHAR(MAX), @strVendorPhone NVARCHAR(MAX)
-DECLARE @strVendorLocationName NVARCHAR(MAX), @strVendorAddress NVARCHAR(MAX), @strVendorFirstLineAddress NVARCHAR(MAX), @strVendorMapLink NVARCHAR(MAX), @strVendorCity NVARCHAR(MAX), @strVendorCountry NVARCHAR(MAX), @strVendorState NVARCHAR(MAX), @strVendorZipCode NVARCHAR(MAX)
-DECLARE @strCustomerName NVARCHAR(MAX), @strCustomerNo NVARCHAR(MAX), @strCustomerEmail NVARCHAR(MAX), @strCustomerFax NVARCHAR(MAX), @strCustomerMobile NVARCHAR(MAX), @strCustomerPhone NVARCHAR(MAX)
-DECLARE @strCustomerLocationName NVARCHAR(MAX), @strCustomerAddress NVARCHAR(MAX), @strCustomerFirstLineAddress NVARCHAR(MAX), @strCustomerMapLink NVARCHAR(MAX), @strCustomerCity NVARCHAR(MAX), @strCustomerCountry NVARCHAR(MAX), @strCustomerState NVARCHAR(MAX), @strCustomerZipCode NVARCHAR(MAX)
+DECLARE @intPurchaseSale INT
+DECLARE @strEquipmentType NVARCHAR(MAX), @strComments NVARCHAR(MAX), @strSupplierLoadNo NVARCHAR(MAX), @strCustomerReferenceNo NVARCHAR(MAX) 
 DECLARE @strHauler NVARCHAR(MAX), @strHaulerAddress NVARCHAR(MAX), @strHaulerCity NVARCHAR(MAX), @strHaulerCountry NVARCHAR(MAX), @strHaulerState NVARCHAR(MAX), @strHaulerZip NVARCHAR(MAX), @strHaulerPhone NVARCHAR(MAX)
 DECLARE @strDriver NVARCHAR(MAX), @strDispatcher NVARCHAR(MAX), @strTrailerNo1 NVARCHAR(MAX), @strTrailerNo2 NVARCHAR(MAX), @strTrailerNo3 NVARCHAR(MAX), @strTruckNo NVARCHAR(MAX)
-DECLARE @dblQuantity NUMERIC(18, 6)
-DECLARE @dtmPickupDate DATETIME, @dtmDeliveryDate DATETIME, @dtmDispatchedDate DATETIME
+DECLARE @dtmScheduledDate DATETIME, @dtmDispatchedDate DATETIME
+
+DECLARE @incval INT, @total INT
+DECLARE @LoadDetailTable TABLE
+    (
+		intId INT IDENTITY PRIMARY KEY CLUSTERED,
+		strVendor NVARCHAR(MAX),
+		strShipFrom NVARCHAR(MAX),
+		strShipFromAddress NVARCHAR(MAX),
+		strShipFromCity NVARCHAR(MAX),
+		strShipFromCountry NVARCHAR(MAX),
+		strShipFromState NVARCHAR(MAX),
+		strShipFromZipCode NVARCHAR(MAX),
+		strPLocationName NVARCHAR(MAX),
+		strPLocationAddress NVARCHAR(MAX),
+		strPLocationCity NVARCHAR(MAX),
+		strPLocationCountry NVARCHAR(MAX),
+		strPLocationState NVARCHAR(MAX),
+		strPLocationZipCode NVARCHAR(MAX),
+		strCustomer NVARCHAR(MAX),
+		strShipTo NVARCHAR(MAX),
+		strShipToAddress NVARCHAR(MAX),
+		strShipToCity NVARCHAR(MAX),
+		strShipToCountry NVARCHAR(MAX),
+		strShipToState NVARCHAR(MAX),
+		strShipToZipCode NVARCHAR(MAX),
+		strSLocationName NVARCHAR(MAX),
+		strSLocationAddress NVARCHAR(MAX),
+		strSLocationCity NVARCHAR(MAX),
+		strSLocationCountry NVARCHAR(MAX),
+		strSLocationState NVARCHAR(MAX),
+		strSLocationZipCode NVARCHAR(MAX),
+		strScheduleInfoMsg NVARCHAR(MAX),
+		ysnPrintScheduleInfo BIT,
+		strLoadDirectionMsg NVARCHAR(MAX),
+		ysnPrintLoadDirections BIT,
+		strQuantity NVARCHAR(MAX),
+		strItemNo NVARCHAR(MAX),
+		strItemUOM NVARCHAR(MAX)
+	)
+
+DECLARE @strOriginName NVARCHAR(MAX), @strOriginLocationName NVARCHAR(MAX), @strOriginAddress NVARCHAR(MAX), @strOriginCity NVARCHAR(MAX), @strOriginCountry NVARCHAR(MAX), @strOriginState NVARCHAR(MAX), @strOriginZipCode NVARCHAR(MAX), @strOriginMapLink NVARCHAR(MAX) 
+DECLARE @strDestinationName NVARCHAR(MAX), @strDestinationLocationName NVARCHAR(MAX), @strDestinationAddress NVARCHAR(MAX), @strDestinationCity NVARCHAR(MAX), @strDestinationCountry NVARCHAR(MAX), @strDestinationState NVARCHAR(MAX), @strDestinationZipCode NVARCHAR(MAX), @strDestinationMapLink NVARCHAR(MAX) 
+DECLARE @strItemNo NVARCHAR(MAX), @strItemUOM NVARCHAR(MAX), @strQuantity NVARCHAR(MAX), @strVendor NVARCHAR(MAX), @strCustomer NVARCHAR(MAX), @strScheduleInfo NVARCHAR(MAX), @strLoadDirections NVARCHAR(MAX)
+
 BEGIN
 
-	SELECT TOP(1) @intPLoadId = LP.intLoadId, @intPEntityId = LP.intEntityId, @intPEntityLocationId = LP.intEntityLocationId FROM tblLGLoad LP where LP.intLoadNumber=@intLoadNumber and intPurchaseSale=1
-	SELECT TOP(1) @intSLoadId = LS.intLoadId, @intSEntityId = LS.intEntityId, @intSEntityLocationId = LS.intEntityLocationId FROM tblLGLoad LS where LS.intLoadNumber=@intLoadNumber and intPurchaseSale=2	
-
-	SELECT DISTINCT
+	SELECT DISTINCT Top(1)
+		@intPurchaseSale = L.intPurchaseSale,
 		@strCompanyName = (SELECT TOP(1) C.strCompanyName FROM tblSMCompanySetup C),
 		@strCompanyAddress = (SELECT TOP(1) C.strAddress FROM tblSMCompanySetup C),
 		@strCompanyCountry = (SELECT TOP(1) C.strCountry FROM tblSMCompanySetup C),
 		@strCompanyCity = (SELECT TOP(1) C.strCity FROM tblSMCompanySetup C),
 		@strCompanyState = (SELECT TOP(1) C.strState FROM tblSMCompanySetup C),
 		@strCompanyZip = (SELECT TOP(1) C.strZip FROM tblSMCompanySetup C),
-		@strLocationName = CL.strLocationName,
-		@strLocationAddress = CL.strAddress,
-		@strLocationCity = CL.strCity,
-		@strLocationCountry = CL.strCountry,
-		@strLocationZipCode = CL.strZipPostalCode,
-		@strLocationPhone = CL.strPhone,
-		@strLocationFax = CL.strFax,
-		@strLocationMail = CL.strEmail,
-		@strItemNo = Item.strItemNo,
-		@strDescription = Item.strDescription,
-		@dblQuantity = L.dblQuantity,
-		@strUnitMeasure = UOM.strUnitMeasure,
-		@strEquipmentType = Equipment.strEquipmentType,
 
-		@dtmPickupDate = (SELECT L1.dtmScheduledDate FROM tblLGLoad L1 where L1.intLoadId = @intPLoadId),
-		@dtmDeliveryDate = (SELECT L1.dtmScheduledDate FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId),
-		@strVendorReference = (SELECT L1.strCustomerReference FROM tblLGLoad L1 where L1.intLoadId = @intPLoadId),
-		@strCustomerReference = (SELECT L1.strCustomerReference FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId),
-		@strInboundComments = (SELECT L1.strComments FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId),
-		@strOutboundComments = (SELECT L1.strComments FROM vyuLGLoadView L1 where L1.intLoadId = @intSLoadId),
-
-		@strPCustomerContract = (SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId),
-		@strSCustomerContract = (SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intSLoadId),
-
-		@strSupplierLoadNumber = (SELECT L1.strExternalLoadNumber FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId),
-
-		@strVendorName = (SELECT E.strName FROM tblEntity E WHERE E.intEntityId = @intPEntityId),
-		@strVendorNo = (SELECT E.strEntityNo FROM tblEntity E WHERE E.intEntityId = @intPEntityId),
-		@strVendorEmail = (SELECT E.strEmail FROM tblEntity E WHERE E.intEntityId = @intPEntityId),
-		@strVendorFax = (SELECT E.strFax FROM tblEntity E WHERE E.intEntityId = @intPEntityId),
-		@strVendorMobile = (SELECT E.strMobile FROM tblEntity E WHERE E.intEntityId = @intPEntityId),
-		@strVendorPhone = (SELECT E.strPhone FROM tblEntity E WHERE E.intEntityId = @intPEntityId),
-		
-		@strVendorLocationName = (SELECT EL.strLocationName FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId),
-		@strVendorAddress = (SELECT EL.strAddress FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId),
-		@strVendorCity = (SELECT EL.strCity  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId),
-		@strVendorCountry = (SELECT EL.strCountry  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId),
-		@strVendorState = (SELECT EL.strState  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId),
-		@strVendorZipCode = (SELECT EL.strZipCode  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId),
-
-		@strCustomerName = (SELECT E.strName FROM tblEntity E WHERE E.intEntityId = @intSEntityId),
-		@strCustomerNo = (SELECT E.strEntityNo FROM tblEntity E WHERE E.intEntityId = @intSEntityId),
-		@strCustomerEmail = (SELECT E.strEmail FROM tblEntity E WHERE E.intEntityId = @intSEntityId),
-		@strCustomerFax = (SELECT E.strFax FROM tblEntity E WHERE E.intEntityId = @intSEntityId),
-		@strCustomerMobile = (SELECT E.strMobile FROM tblEntity E WHERE E.intEntityId = @intSEntityId),
-		@strCustomerPhone = (SELECT E.strPhone FROM tblEntity E WHERE E.intEntityId = @intSEntityId),
-
-		@strCustomerLocationName = (SELECT EL.strLocationName FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId),
-		@strCustomerAddress = (SELECT EL.strAddress FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId),
-		@strCustomerCity = (SELECT EL.strCity FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId),
-		@strCustomerCountry = (SELECT EL.strCountry FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId),
-		@strCustomerState = (SELECT EL.strState FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId),
-		@strCustomerZipCode = (SELECT EL.strZipCode FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId),
+		@strEquipmentType = L.strEquipmentType,
+		@dtmScheduledDate = L.dtmScheduledDate,
+		@strComments = L.strComments,
+		@strSupplierLoadNo = L.strExternalLoadNumber,
+		@strCustomerReferenceNo = L.strCustomerReference,
 		
 		@strHauler = Hauler.strName,
 		@strHaulerAddress = (SELECT EL.strAddress from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
@@ -104,153 +95,92 @@ BEGIN
 		@strTrailerNo3 = L.strTrailerNo3,
 		@strTruckNo = L.strTruckNo
 
-	FROM		tblLGLoad L
-	JOIN		tblSMCompanyLocation	CL ON				CL.intCompanyLocationId = L.intCompanyLocationId AND L.intLoadNumber = @intLoadNumber
-	LEFT JOIN		tblICItem				Item ON				Item.intItemId = L.intItemId
-	LEFT JOIN		tblICUnitMeasure		UOM	ON				UOM.intUnitMeasureId = L.intUnitMeasureId
-	LEFT JOIN		tblEntity				E	On				E.intEntityId = L.intEntityId
-	LEFT JOIN		tblEntityLocation		EL	On				EL.intEntityLocationId = L.intEntityLocationId
+	FROM		vyuLGLoadView L
 	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
 	LEFT JOIN		tblEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
-	LEFT JOIN	tblLGEquipmentType		Equipment On		Equipment.intEquipmentTypeId = L.intEquipmentTypeId
-	LEFT JOIN	tblSMUserSecurity	Dispatcher On					Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
+	LEFT JOIN		tblSMUserSecurity	Dispatcher On				Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
+	WHERE L.intLoadNumber = @intLoadNumber
 
-	SET @strVendorMapLink = 'http://maps.google.com/maps?q='
-	IF IsNull(@strVendorAddress, '') <> ''
-	BEGIN
-		SET @strVendorMapLink =	@strVendorMapLink + REPLACE(REPLACE(@strVendorAddress, ' ', '+'), Char(10), '+')
-	END
-	IF IsNull(@strVendorCity, '') <> ''
-	BEGIN
-		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorCity
-	END
-	IF IsNull(@strVendorState, '') <> ''
-	BEGIN
-		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorState
-	END
-	IF IsNull(@strVendorZipCode, '') <> ''
-	BEGIN
-		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorZipCode
-	END
-	IF IsNull(@strVendorCountry, '') <> ''
-	BEGIN
-		SET @strVendorMapLink =	@strVendorMapLink + '+' + @strVendorCountry
-	END
+	Insert into @LoadDetailTable
+		SELECT
+			L.strVendor,
+			L.strShipFrom,
+			L.strShipFromAddress,
+			L.strShipFromCity,
+			L.strShipFromCountry,
+			L.strShipFromState,
+			L.strShipFromZipCode,
+			L.strPLocationName,
+			L.strPLocationAddress,
+			L.strPLocationCity,
+			L.strPLocationCountry,
+			L.strPLocationState,
+			L.strPLocationZipCode,
+			L.strCustomer,
+			L.strShipTo,
+			L.strShipToAddress,
+			L.strShipToCity,
+			L.strShipToCountry,
+			L.strShipToState,
+			L.strShipToZipCode,
+			L.strSLocationName,
+			L.strSLocationAddress,
+			L.strSLocationCity,
+			L.strSLocationCountry,
+			L.strSLocationState,
+			L.strSLocationZipCode,
+			L.strScheduleInfoMsg,
+			L.ysnPrintScheduleInfo,
+			L.strLoadDirectionMsg,
+			L.ysnPrintLoadDirections,
+			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) as strQuantity,
+			L.strItemNo,
+			L.strItemUOM	
+		FROM vyuLGLoadView L 
+		where L.intLoadNumber = @intLoadNumber
 
-	SET @strCustomerMapLink = 'http://maps.google.com/maps?q='
-	IF IsNull(@strCustomerAddress, '') <> ''
-	BEGIN
-		SET @strCustomerMapLink =	@strCustomerMapLink + REPLACE(REPLACE(@strCustomerAddress, ' ', '+'), Char(10), '+')
-	END
-	IF IsNull(@strCustomerCity, '') <> ''
-	BEGIN
-		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerCity
-	END
-	IF IsNull(@strCustomerState, '') <> ''
-	BEGIN
-		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerState
-	END
-	IF IsNull(@strCustomerZipCode, '') <> ''
-	BEGIN
-		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerZipCode
-	END
-	IF IsNull(@strCustomerCountry, '') <> ''
-	BEGIN
-		SET @strCustomerMapLink =	@strCustomerMapLink + '+' + @strCustomerCountry
-	END
-
-	SET @strVendorFirstLineAddress = @strVendorAddress
-	IF CHARINDEX(Char(10), @strVendorAddress) > 0
-	BEGIN
-		SET @strVendorFirstLineAddress = SUBSTRING(@strVendorAddress, 1, CHARINDEX(Char(10), @strVendorAddress))
-	END
-
-	SET @strCustomerFirstLineAddress = @strCustomerAddress
-	IF CHARINDEX(Char(10), @strCustomerAddress) > 0
-	BEGIN
-		SET @strCustomerFirstLineAddress = SUBSTRING(@strCustomerAddress, 1, CHARINDEX(Char(10), @strCustomerAddress))
-	END
-
-	SET @strMailMessage =	N'<HTML> <BODY> <TABLE cellpadding=2 border=1 >' + 
+	SET @strMailMessage =	N'<HTML> <BODY> <TABLE cellpadding=2 cellspacing=1 border=1>' + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Load #: </B> </TD>' +
-									'<TD>' +  LTRIM(@intLoadNumber) + '</TD>' +
+									'<TD colspan=6>' +  LTRIM(@intLoadNumber) + '</TD>' +
 								'</FONT></TR>'
-								IF IsNull(@strSupplierLoadNumber, '') <> ''
+
+								IF IsNull(@strSupplierLoadNo, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Supplier Load#: </B> </TD>' +
-									'<TD>' + IsNull(@strSupplierLoadNumber, '') + '</TD>' +
+									'<TD colspan=6>' + IsNull(@strSupplierLoadNo, '') + '</TD>' +
+								'</FONT></TR>'
+								END
+								IF IsNull(@strCustomerReferenceNo, '') <> ''
+								BEGIN
+	SET @strMailMessage =	@strMailMessage + 
+								'<TR><FONT face=tahoma size=2>' +
+									'<TD size=210> <B> Customer Reference: </B> </TD>' +
+									'<TD colspan=6>' + IsNull(@strCustomerReferenceNo, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Company: </B> </TD>' +
-									'<TD>' + IsNull(@strCompanyName, '') + '<BR>' + IsNull(@strCompanyAddress, '') + '<BR>' + IsNull(@strCompanyCity, '') + ', ' + IsNull(@strCompanyState, '') + ' ' + IsNull(@strCompanyZip, '') + '</TD>' +
+									'<TD colspan=6>' + IsNull(@strCompanyName, '') + '<BR>' + IsNull(@strCompanyAddress, '') + '<BR>' + IsNull(@strCompanyCity, '') + ', ' + IsNull(@strCompanyState, '') + ' ' + IsNull(@strCompanyZip, '') + '</TD>' +
 								'</FONT></TR>'
 
-								IF IsNull(@strLocationName, '') <> ''
+								IF IsNull(@dtmScheduledDate, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Location: </B> </TD>' +
-									'<TD>' + IsNull(@strLocationName, '') + '</TD>' +
+									'<TD size=210> <B> Scheduled Date: </B> </TD>' +
+									'<TD colspan=6>' +  IsNull(CONVERT(NVARCHAR(20), @dtmScheduledDate, 101), '') + '</TD>' +
 								'</FONT></TR>'
 								END
-
-								IF IsNull(@strVendorName, '') <> ''
-								BEGIN
-	SET @strMailMessage =	@strMailMessage + 
-								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Vendor: </B> </TD>' +
-									'<TD>' + IsNull(@strVendorName, '') + '<BR>' + IsNull(@strVendorLocationName, '') + '<BR>' + IsNull(@strVendorAddress, '') + '<BR>' + IsNull(@strVendorCity, '') + ', ' + IsNull(@strVendorState, '') + ' ' + IsNull(@strVendorZipCode, '') + '</TD>' +
-								'</FONT></TR>' +
-
-									'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Vendor Map Link: </B> </TD>' +
-									'<TD><a href="' + @strVendorMapLink + '">' + @strVendorFirstLineAddress + '</a></TD>' +
-								'</FONT></TR>'
-								END
-
-								IF IsNull(@strCustomerName, '') <> ''
-								BEGIN
-	SET @strMailMessage =	@strMailMessage + 
-								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Customer: </B> </TD>' +
-									'<TD>' + IsNull(@strCustomerName, '') + '<BR>' + IsNull(@strCustomerLocationName, '') + '<BR>' + IsNull(@strCustomerAddress, '') + '<BR>' + IsNull(@strCustomerCity, '') + ', ' + IsNull(@strCustomerState, '') + ' ' + IsNull(@strCustomerZipCode, '') + '</TD>' +
-								'</FONT></TR>' +
-
-									'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Customer Map Link: </B> </TD>' +
-									'<TD><a href="' + @strCustomerMapLink + '">' + @strCustomerFirstLineAddress + '</a></TD>' +
-								'</FONT></TR>'
-								END
-
-								IF IsNull(@dtmPickupDate, '') <> ''
-								BEGIN
-	SET @strMailMessage =	@strMailMessage + 
-								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Pickup Date: </B> </TD>' +
-									'<TD>' +  IsNull(CONVERT(NVARCHAR(20), @dtmPickupDate, 101), '') + '</TD>' +
-								'</FONT></TR>'
-								END
-
-								IF IsNull(@dtmDeliveryDate, '') <> ''
-								BEGIN
-	SET @strMailMessage =	@strMailMessage + 
-								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Delivery Date: </B> </TD>' +
-									'<TD>' + IsNull(CONVERT(NVARCHAR(20), @dtmDeliveryDate, 101), '') + '</TD>' +
-								'</FONT></TR>'
-								END
-
 								IF IsNull(@dtmDispatchedDate, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' + 
 									'<TD size=210> <B> Dispatch Date: </B> </TD>' +
-									'<TD>' + IsNull(CONVERT(NVARCHAR(20), @dtmDispatchedDate, 101), '') + '</TD>' +
+									'<TD colspan=6>' + IsNull(CONVERT(NVARCHAR(20), @dtmDispatchedDate, 101), '') + '</TD>' +
 								'</FONT></TR>'
 								END
 								IF IsNull(@strDispatcher, '') <> ''
@@ -258,61 +188,233 @@ BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Dispatcher: </B> </TD>' +
-									'<TD>' + IsNull(@strDispatcher, '') + '</TD>' +
+									'<TD colspan=6>' + IsNull(@strDispatcher, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Units: </B> </TD>' +
-									'<TD>' + IsNull(LTRIM(@dblQuantity), '') + ' ' +IsNull(@strUnitMeasure, '') + '</TD>' +
-								'</FONT></TR>' +
-								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Commodity: </B> </TD>' +
-									'<TD>' + IsNull(@strDescription, '') + '</TD>' +
-								'</FONT></TR>' +
-								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Driver: </B> </TD>' +
-									'<TD>' + IsNull(@strDriver, '') + '</TD>' +
+									'<TD colspan=6>' + IsNull(@strDriver, '') + '</TD>' +
 								'</FONT></TR>'
-
 								IF IsNull(@strHauler, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Hauler: </B> </TD>' +
-									'<TD>' + IsNull(@strHauler, '') + '<BR>' + IsNull(@strHaulerAddress, '') + '<BR>' + IsNull(@strHaulerCity, '') + ', ' + IsNull(@strHaulerState, '') + ' ' + IsNull(@strHaulerZip, '') + '</TD>' +
+									'<TD colspan=6>' + IsNull(@strHauler, '') + '<BR>' + IsNull(@strHaulerAddress, '') + '<BR>' + IsNull(@strHaulerCity, '') + ', ' + IsNull(@strHaulerState, '') + ' ' + IsNull(@strHaulerZip, '') + '</TD>' +
 								'</FONT></TR>'
 								END
-
 								IF IsNull(@strEquipmentType, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Equipment: </B> </TD>' +
-									'<TD>' + IsNull(@strEquipmentType, '') + '</TD>' +
+									'<TD colspan=6>' + IsNull(@strEquipmentType, '') + '</TD>' +
 								'</FONT></TR>'
 								END
-
-								IF IsNull(@strInboundComments, '') <> ''
+								IF IsNull(@strComments, '') <> ''
 								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Inbound Comments: </B> </TD>' +
-									'<TD>' + IsNull(@strInboundComments, '') + '</TD>' +
+									'<TD size=210> <B> Comments: </B> </TD>' +
+									'<TD colspan=6>' + IsNull(@strComments, '') + '</TD>' +
 								'</FONT></TR>'
 								END
 
-								IF IsNull(@strOutboundComments, '') <> ''
-								BEGIN
 	SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
-									'<TD size=210> <B> Outbound Comments: </B> </TD>' +
-									'<TD>' + IsNull(@strOutboundComments, '') + '</TD>' +
+									'<TD size=210> <B> Origin </B> </TD>' +
+									'<TD size=210> <B> Destination </B> </TD>' +
+									'<TD size=210> <B> Commodity </B> </TD>' +
+									'<TD size=210> <B> Quantity </B> </TD>' +
+									'<TD size=210> <B> UOM </B> </TD>' +
+									'<TD size=210> <B> Schedule Info </B> </TD>' +
+									'<TD size=210> <B> Load Directions </B> </TD>' +
 								'</FONT></TR>'
+
+	SELECT @total = count(*) from @LoadDetailTable;
+	SET @incval = 1 
+	WHILE @incval <= @total 
+	BEGIN
+		SELECT 
+			@strVendor = L1.strVendor
+			,@strCustomer = L1.strCustomer
+			,@strOriginName = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strVendor
+								ELSE
+									''
 								END
+			,@strOriginLocationName = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFrom
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationName
+									ELSE
+										L1.strSLocationName
+									END
+								END
+			,@strOriginAddress = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromAddress
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationAddress
+									ELSE
+										L1.strSLocationAddress
+									END
+								END
+			,@strOriginCity = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromCity
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationCity
+									ELSE
+										L1.strSLocationCity
+									END
+								END
+			,@strOriginState = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromState
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationState
+									ELSE
+										L1.strSLocationState
+									END
+								END
+			,@strOriginZipCode = CASE WHEN IsNull(@strVendor, '') <> '' THEN
+									L1.strShipFromZipCode
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strPLocationName, '') <> '' THEN
+										L1.strPLocationZipCode
+									ELSE
+										L1.strSLocationZipCode
+									END
+								END
+			,@strDestinationName = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strCustomer
+								ELSE
+									''
+								END
+			,@strDestinationLocationName = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipTo
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationName
+									ELSE
+										L1.strPLocationName
+									END
+								END
+			,@strDestinationAddress = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToAddress
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationAddress
+									ELSE
+										L1.strPLocationAddress
+									END
+								END
+			,@strDestinationCity = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToCity
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationCity
+									ELSE
+										L1.strPLocationCity
+									END
+								END
+			,@strDestinationState = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToState
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationState
+									ELSE
+										L1.strPLocationState
+									END
+								END
+			,@strDestinationZipCode = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
+									L1.strShipToZipCode
+								ELSE
+									CASE WHEN @intPurchaseSale = 3 AND IsNull(L1.strSLocationName, '') <> '' THEN
+										L1.strSLocationZipCode
+									ELSE
+										L1.strPLocationZipCode
+									END
+								END
+			,@strItemNo = L1.strItemNo
+			,@strQuantity = L1.strQuantity
+			,@strItemUOM = L1.strItemUOM
+			,@strScheduleInfo = CASE WHEN L1.ysnPrintScheduleInfo = 1 THEN
+										L1.strScheduleInfoMsg
+									ELSE
+										''
+									END
+			,@strLoadDirections = CASE WHEN L1.ysnPrintLoadDirections = 1 THEN
+										L1.strLoadDirectionMsg
+									ELSE
+										''
+									END
+		FROM @LoadDetailTable L1 where L1.intId = @incval
+
+-- Origin Map Link
+		SET @strOriginMapLink = 'http://maps.google.com/maps?q='
+		IF IsNull(@strOriginAddress, '') <> ''
+		BEGIN
+			SET @strOriginMapLink =	@strOriginMapLink + REPLACE(REPLACE(@strOriginAddress, ' ', '+'), Char(10), '+')
+		END
+		IF IsNull(@strOriginCity, '') <> ''
+		BEGIN
+			SET @strOriginMapLink =	@strOriginMapLink + '+' + @strOriginCity
+		END
+		IF IsNull(@strOriginState, '') <> ''
+		BEGIN
+			SET @strOriginMapLink =	@strOriginMapLink + '+' + @strOriginState
+		END
+		IF IsNull(@strOriginZipCode, '') <> ''
+		BEGIN
+			SET @strOriginMapLink =	@strOriginMapLink + '+' + @strOriginZipCode
+		END
+		IF IsNull(@strOriginCountry, '') <> ''
+		BEGIN
+			SET @strOriginMapLink =	@strOriginMapLink + '+' + @strOriginCountry
+		END
+
+-- Destination Map Link
+		SET @strDestinationMapLink = 'http://maps.google.com/maps?q='
+		IF IsNull(@strDestinationAddress, '') <> ''
+		BEGIN
+			SET @strDestinationMapLink =	@strDestinationMapLink + REPLACE(REPLACE(@strDestinationAddress, ' ', '+'), Char(10), '+')
+		END
+		IF IsNull(@strDestinationCity, '') <> ''
+		BEGIN
+			SET @strDestinationMapLink =	@strDestinationMapLink + '+' + @strDestinationCity
+		END
+		IF IsNull(@strDestinationState, '') <> ''
+		BEGIN
+			SET @strDestinationMapLink =	@strDestinationMapLink + '+' + @strDestinationState
+		END
+		IF IsNull(@strDestinationZipCode, '') <> ''
+		BEGIN
+			SET @strDestinationMapLink =	@strDestinationMapLink + '+' + @strDestinationZipCode
+		END
+		IF IsNull(@strDestinationCountry, '') <> ''
+		BEGIN
+			SET @strDestinationMapLink =	@strDestinationMapLink + '+' + @strDestinationCountry
+		END
+
+		SET @strMailMessage =	@strMailMessage + 
+								'<TR><FONT face=tahoma size=2>' +
+									'<TD><B>' + IsNull(@strOriginName, '') + '</B><BR>' + IsNull(@strOriginLocationName, '') + '<BR><a href="' + @strOriginMapLink + '">' + IsNull(@strOriginAddress, '') + '</a><BR>' + IsNull(@strOriginCity, '') + ', ' + IsNull(@strOriginState, '') + ' ' + IsNull(@strOriginZipCode, '') + '</TD>' +
+									'<TD><B>' + IsNull(@strDestinationName, '') + '</B><BR>' + IsNull(@strDestinationLocationName, '') + '<BR><a href="' + @strDestinationMapLink + '">' + IsNull(@strDestinationAddress, '') + '</a><BR>' + IsNull(@strDestinationCity, '') + ', ' + IsNull(@strDestinationState, '') + ' ' + IsNull(@strDestinationZipCode, '') + '</TD>' +
+									'<TD>' + IsNull(@strItemNo, '') + '</TD>' +
+									'<TD>' + IsNull(@strQuantity, '') + '</TD>' +
+									'<TD>' + IsNull(@strItemUOM, '') + '</TD>' +
+									'<TD>' + IsNull(@strScheduleInfo, '') + '</TD>' +
+									'<TD>' + IsNull(@strLoadDirections, '') + '</TD>' +
+								'</FONT></TR>'
+		SET @incval = @incval + 1
+	END
 
 	SET @strMailMessage =	@strMailMessage + 
 							'</TABLE> </BODY> </HTML>'
 
---SELECT @strMailMessage
+--SELECT '16', @strMailMessage
 END
