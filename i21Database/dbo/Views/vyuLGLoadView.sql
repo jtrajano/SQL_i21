@@ -16,29 +16,74 @@ SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.dblDeliveredNet
 		,strWeightItemUOM = WeightUOM.strUnitMeasure
 		,LoadDetail.intVendorEntityId
+
+-- Vendor Info
         ,strVendor = VEN.strName
 		,LoadDetail.intVendorEntityLocationId
         ,strShipFrom = VEL.strLocationName
 		,strShipFromAddress = VEL.strAddress
+		,strShipFromCity = VEL.strCity
+		,strShipFromCountry = VEL.strCountry
+		,strShipFromState = VEL.strState
+		,strShipFromZipCode = VEL.strZipCode
+		,strVendorNo = VEN.strEntityNo
+		,strVendorEmail = VEN.strEmail
+		,strVendorFax = VEN.strFax
+		,strVendorMobile = VEN.strMobile
+		,strVendorPhone = VEN.strPhone
 		,LoadDetail.intPContractDetailId
         ,strPContractNumber = PDetail.strContractNumber
         ,intPContractSeq = PDetail.intContractSeq
 		,strVendorContract = PDetail.strCustomerContract
 		,dblPCashPrice = PDetail.dblCashPrice
+
+-- Inbound Company Location
 		,LoadDetail.intPCompanyLocationId
         ,strPLocationName = PCL.strLocationName
+		,strPLocationAddress = PCL.strAddress
+		,strPLocationCity = PCL.strCity
+		,strPLocationCountry = PCL.strCountry
+		,strPLocationState = PCL.strStateProvince
+		,strPLocationZipCode = PCL.strZipPostalCode
+		,strPLocationMail = PCL.strEmail
+		,strPLocationFax = PCL.strFax
+		,strPLocationPhone = PCL.strPhone
+
+-- Customer Info
 		,LoadDetail.intCustomerEntityId
         ,strCustomer = CEN.strName
 		,LoadDetail.intCustomerEntityLocationId
         ,strShipTo = CEL.strLocationName
 		,strShipToAddress = CEL.strAddress
+		,strShipToCity = CEL.strCity
+		,strShipToCountry = CEL.strCountry
+		,strShipToState = CEL.strState
+		,strShipToZipCode = CEL.strZipCode
+		,strCustomerNo = CEN.strEntityNo
+		,strCustomerEmail = CEN.strEmail
+		,strCustomerFax = CEN.strFax
+		,strCustomerMobile = CEN.strMobile
+		,strCustomerPhone = CEN.strPhone
+
 		,LoadDetail.intSContractDetailId
         ,strSContractNumber = SDetail.strContractNumber
         ,intSContractSeq = SDetail.intContractSeq
 		,strCustomerContract = SDetail.strCustomerContract
 		,dblSCashPrice = PDetail.dblCashPrice
+
+-- Outbound Company Location
 		,LoadDetail.intSCompanyLocationId
         ,strSLocationName = SCL.strLocationName
+		,strSLocationAddress = SCL.strAddress
+		,strSLocationCity = SCL.strCity
+		,strSLocationCountry = SCL.strCountry
+		,strSLocationState = SCL.strStateProvince
+		,strSLocationZipCode = SCL.strZipPostalCode
+		,strSLocationMail = SCL.strEmail
+		,strSLocationFax = SCL.strFax
+		,strSLocationPhone = SCL.strPhone
+
+-- Schedule, Load Directions
 		,LoadDetail.strScheduleInfoMsg
 		,LoadDetail.ysnUpdateScheduleInfo
 		,LoadDetail.ysnPrintScheduleInfo
@@ -46,6 +91,7 @@ SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.ysnUpdateLoadDirections
 		,LoadDetail.ysnPrintLoadDirections
 
+-- Load Header
 		,Load.intLoadId
 		,Load.intConcurrencyId
 		,Load.intLoadNumber
@@ -106,6 +152,7 @@ SELECT LoadDetail.intLoadDetailId
 		,Load.ysnDispatchMailSent
 		,Load.dtmDispatchMailSent
 		,Load.dtmCancelDispatchMailSent
+
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
