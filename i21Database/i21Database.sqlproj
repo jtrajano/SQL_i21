@@ -3219,6 +3219,7 @@
     <Build Include="dbo\Stored Procedures\uspSTGetSalesTaxTotalsPreload.sql" />
     <Build Include="dbo\Views\vyuHDEmailSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessToInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuMFDowntimeMachines.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

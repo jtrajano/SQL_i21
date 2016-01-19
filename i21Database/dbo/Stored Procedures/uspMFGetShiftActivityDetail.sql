@@ -35,7 +35,7 @@ BEGIN
 	JOIN tblMFMachine M ON M.intMachineId = DM.intMachineId
 		AND M.intLocationId = @intLocationId
 	WHERE SA.intShiftActivityId = @intShiftActivityId
-	ORDER BY M.strName
+	ORDER BY DM.intDowntimeMachineId DESC
 
 	-- Wastage
 	SELECT W.intWastageId
@@ -54,7 +54,7 @@ BEGIN
 	JOIN tblMFWastageType WT ON WT.intWastageTypeId = W.intWastageTypeId
 	JOIN tblICUnitMeasure U ON U.intUnitMeasureId = W.intWeightUnitMeasureId
 	WHERE W.intShiftActivityId = @intShiftActivityId
-	ORDER BY B.strBinTypeName
+	ORDER BY W.intWastageId DESC
 
 	-- Wastage Total and Percentage
 	SELECT @intShiftActivityId AS intShiftActivityId
