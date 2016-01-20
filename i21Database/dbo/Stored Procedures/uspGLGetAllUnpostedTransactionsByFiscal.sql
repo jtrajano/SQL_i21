@@ -6,7 +6,10 @@
 -- JIRA Key:	GL-1923
 -- =============================================
 CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
- @intFiscalYearId INT
+ @intFiscalYearId INT,
+ @intEntityId INT,
+ @intFiscalYearPeriodId INT = 0
+ 
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -29,7 +32,13 @@ BEGIN
 	DECLARE @guid UNIQUEIDENTIFIER
 	DECLARE @dtmDateFrom DATETIME
 	DECLARE @dtmDateTo DATETIME
-	SELECT TOP 1 @dtmDateFrom= dtmDateFrom,@dtmDateTo= dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId
+	IF @intFiscalYearPeriodId > 0 
+		BEGIN
+			SELECT TOP 1 @dtmDateFrom= dtmStartDate,@dtmDateTo= dtmEndDate FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalYearPeriodId
+		END
+	ELSE
+		SELECT TOP 1 @dtmDateFrom= dtmDateFrom,@dtmDateTo= dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId
+
 
 	SELECT TOP 1 @blnLegacyIntegration = ISNULL(ysnLegacyIntegration,0) FROM tblSMCompanyPreference 
 	
@@ -86,8 +95,8 @@ BEGIN
 			  
 				FROM tblGLJournal j
 				 WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
-			UNION ALL
-				SELECT intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName,intEntityId, dtmDate from [vyuICGetUnpostedTransactions] --IC
+			--UNION ALL
+				--SELECT intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName,intEntityId, dtmDate from [vyuICGetUnpostedTransactions] --IC
 			UNION ALL
 				SELECT intTransactionId, strTransactionId,strDescription,strTransactionType,strUserName,intEntityId,  dtmDate from [vyuAPUnpostedTransaction] --AP
 			UNION ALL
@@ -100,14 +109,28 @@ BEGIN
 		
 		IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
 		BEGIN
-			SELECT  TransactionType ='NonOrigin' 
+			
 			DELETE FROM tblGLForBatchPosting 
+			
 			SELECT @guid = NEWID()
-		
+			
+			DECLARE @ysnAllowUserSelfPost BIT
+			
+			
+			SELECT  TransactionType ='NonOrigin' 
+
 			INSERT INTO tblGLForBatchPosting (intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName, intEntityId, dtmDate,[guid])
 				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,@guid FROM @tblTransactions
 			SELECT @intAACount = COUNT(1) FROM @tblTransactions WHERE strTransactionType = 'Audit Adjustment'
 			SELECT @intCount = COUNT(1) FROM @tblTransactions
+			
+			SELECT @ysnAllowUserSelfPost= ISNULL(ysnAllowUserSelfPost,0)  FROM [tblSMUserPreference] where intEntityUserSecurityId = @intEntityId
+			
+			IF @ysnAllowUserSelfPost = 1
+			BEGIN
+				IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLForBatchPosting WHERE intEntityId = @intEntityId)
+					SELECT  TransactionType ='OtherUserTransaction' 
+			END
 
 			SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
 			SELECT  @guid as batchGUID
