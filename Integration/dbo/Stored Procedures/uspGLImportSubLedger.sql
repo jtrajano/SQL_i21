@@ -234,7 +234,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 						  ,[strJournalId]
 						  ,[blnCorrection])
 					SELECT @importLogId,
-						''Unable to Post because account id in origin is not on i21 Cross Reference.'',
+						''Unable to Post because Origin account id :'' + CAST ( glije_acct_no AS nvarchar (max)) + ''  ''+ '' is not in i21 Cross Reference table. '' + ''Please check GL Account Detail | Chart Of Accounts - External Id column to verify if the account exists.'',
 						glije_period,
 						glije_src_no,
 						glije_src_sys,
