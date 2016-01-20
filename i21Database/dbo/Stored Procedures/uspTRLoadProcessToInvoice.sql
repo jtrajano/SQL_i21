@@ -42,6 +42,7 @@ BEGIN
  	            		 tblTRLoadDistributionHeader DH            		
                         where DH.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer' and isNull(DH.intInvoiceId,0) !=0;
    
+   
    SELECT @total = COUNT(*) FROM @InvoiceOutputTable;
     IF (@total = 0)
 	   BEGIN
@@ -82,25 +83,25 @@ END
 		,intInvoiceId
 		,strSourceScreenName
 	 )	 
-	 	 select     
-       DH.intEntityCustomerId,     
-	   DH.intCompanyLocationId,
-       DD.intItemId,	  
+	 select   
+       min(DH.intEntityCustomerId),     
+	   min(DH.intCompanyLocationId),
+       min(DD.intItemId),	  
 	   intItemUOMId = CASE
-                            WHEN DD.intContractDetailId is NULL  
+                            WHEN min(DD.intContractDetailId) is NULL  
 	                           THEN (SELECT	TOP 1 
 										IU.intItemUOMId											
 										FROM dbo.tblICItemUOM IU 
-										WHERE	IU.intItemId = DD.intItemId and IU.ysnStockUnit = 1)
-							WHEN DD.intContractDetailId is NOT NULL 
-							   THEN	(select top 1 intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = DD.intContractDetailId)
+										WHERE	IU.intItemId = min(DD.intItemId) and IU.ysnStockUnit = 1)
+							WHEN min(DD.intContractDetailId) is NOT NULL 
+							   THEN	(select top 1 intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = min(DD.intContractDetailId))
 							   END, 	   
-	   DH.dtmInvoiceDateTime,
-	   DD.intContractDetailId,	   
-	   TL.intShipViaId,	  
-	   DH.intEntitySalespersonId, 
-	   DD.dblUnits,
-       DD.dblPrice,
+	   min(DH.dtmInvoiceDateTime),
+	   min(DD.intContractDetailId),	   
+	   min(TL.intShipViaId),	  
+	   min(DH.intEntitySalespersonId), 
+	   min(DD.dblUnits),
+       min(DD.dblPrice),
 	   intCurrencyId = (SELECT	TOP 1 
 										CP.intDefaultCurrencyId		
 										FROM	dbo.tblSMCompanyPreference CP
@@ -108,40 +109,57 @@ END
 												
 						), -- USD default from company Preference 
 	   1, -- Need to check this	  
-	   DD.dblFreightRate,	   
+	   min(DD.dblFreightRate),	   
 	   strComments = CASE
-                            WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NULL and TL.intLoadId is NULL
-	                           THEN RTRIM(DH.strComments)
-							WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NOT NULL and TL.intLoadId is NULL 
-							   THEN	'Origin:' + RTRIM((select top 1 strSupplyPoint from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId))) + ' ' + RTRIM(DH.strComments)
-							WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NULL and TL.intLoadId is NOT NULL 
-							   THEN	'Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
-							WHEN (select top 1 intSupplyPointId from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)) is NOT NULL and TL.intLoadId is NOT NULL 
-							   THEN	'Origin:' + RTRIM((select top 1 strSupplyPoint from dbo.fnTRLinkedReceipt(DD.strReceiptLink,DH.intLoadHeaderId)))  + ' Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
+                            WHEN min(TR.intSupplyPointId) is NULL and min(TL.intLoadId) is NULL
+	                           THEN RTRIM(min(DH.strComments))
+							WHEN min(TR.intSupplyPointId) is NOT NULL and min(TL.intLoadId) is NULL 
+							   THEN	'Origin:' + RTRIM(min(ee.strSupplyPoint)) + ' ' + RTRIM(min(DH.strComments))
+							WHEN (min(TR.intSupplyPointId)) is NULL and min(TL.intLoadId) is NOT NULL 
+							   THEN	'Load #:' + RTRIM(min(LG.strExternalLoadNumber)) + ' ' + RTRIM(min(DH.strComments))
+							WHEN (min(TR.intSupplyPointId)) is NOT NULL and min(TL.intLoadId) is NOT NULL 
+							   THEN	'Origin:' + RTRIM(min(ee.strSupplyPoint))  + ' Load #:' + RTRIM(min(LG.strExternalLoadNumber)) + ' ' + RTRIM(min(DH.strComments))
 							   END, 
-	   TL.strTransaction,
-	   DH.intLoadDistributionHeaderId,
-	   DH.strPurchaseOrder,
+	   min(TL.strTransaction),
+	   min(DH.intLoadDistributionHeaderId),
+	   min(DH.strPurchaseOrder),
 	   'Deliver',   
-	   DD.dblDistSurcharge,
-	   DD.ysnFreightInPrice,
-	   DD.intTaxGroupId,
-	   (select top 1 strTransaction from tblTRLoadHeader TT
-                   join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
-			       join tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
-				   join tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-                   where RR.strOrigin = 'Terminal' 
-			         and HH.strDestination = 'Customer' 
-			         and HH.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId ) as strActualCostId,
-		DH.intShipToLocationId,
+	   min(DD.dblDistSurcharge),
+	   CAST(MIN(CAST(DD.ysnFreightInPrice AS INT)) AS BIT),
+	   min(DD.intTaxGroupId),
+	   strActualCostId = CASE
+                            WHEN min(TR.strOrigin) = 'Terminal' and min(DH.strDestination) = 'Customer'
+	                           THEN min(TL.strTransaction)
+							ELSE
+							    NULL
+							END, 
+		min(DH.intShipToLocationId),
 		NULL,
-		DH.intInvoiceId,
+		min(DH.intInvoiceId),
 		'Transport Loads' 
-	   from tblTRLoadHeader TL           
-			JOIN tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
-			JOIN tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId			
-			LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
-            where TL.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer';
+	   from dbo.tblTRLoadHeader TL           
+			JOIN dbo.tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
+			JOIN dbo.tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId			
+			LEFT JOIN dbo.vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
+			left join dbo.tblTRLoadReceipt TR on TR.intLoadHeaderId = TL.intLoadHeaderId and TR.strReceiptLine in (select Item from dbo.fnTRSplit(DD.strReceiptLink,','))
+			left JOIN(
+		SELECT		DISTINCT intLoadDistributionDetailId,STUFF(															
+								   (
+										SELECT	DISTINCT												
+										', ' + CD.strSupplyPoint 										
+										FROM dbo.vyuTRLinkedReceipts CD																								
+									    WHERE CD.intLoadHeaderId=CH.intLoadHeaderId	 and CD.intLoadDistributionDetailId=CH.intLoadDistributionDetailId																			
+										FOR XML PATH('')
+								   )											
+									,1,2, ''													
+								)strSupplyPoint
+															
+																				
+	FROM dbo.vyuTRLinkedReceipts CH		
+		)ee ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId 
+		
+			where TL.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer'
+			group by DH.intLoadDistributionHeaderId,DD.intLoadDistributionDetailId;
 
 --No Records to process so exit
  select @total = count(*) from @InvoiceStagingTable;
@@ -202,10 +220,10 @@ END;
 
  if @ysnRecap = 0
     BEGIN
-        if @ysnPostOrUnPost = 0 and @ysnRecap = 0
+	    if @ysnPostOrUnPost = 0 and @ysnRecap = 0
 		   BEGIN
 		   INSERT INTO @InvoicePostOutputTable
-               select Distinct DH.intInvoiceId from                                     
+                select Distinct DH.intInvoiceId from                                     
 	            		 tblTRLoadDistributionHeader DH            		
                         where DH.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer' and ISNULL(DH.intInvoiceId,0) != 0
 		   END
@@ -218,6 +236,10 @@ END;
                     JOIN tblARInvoice IV
                         on IE.intSourceId = IV.intLoadDistributionHeaderId
 		    END
+        
+
+		
+
         select @total = count(*) from @InvoicePostOutputTable;
         set @incval = 1 
         WHILE @incval <=@total 
