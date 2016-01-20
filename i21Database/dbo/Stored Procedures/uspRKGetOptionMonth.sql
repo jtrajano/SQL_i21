@@ -7,4 +7,4 @@ SELECT LEFT(strOptionMonth,3) strOptionMonth,replace(strOptionMonth,' ','('+m.st
 	    FROM tblRKOptionsMonth op 
 JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=op.intFutureMonthId
 JOIN tblRKFutureMarket m on m.intFutureMarketId=op.intFutureMarketId 
-WHERE ysnMonthExpired = 0 AND op.intFutureMarketId =@intFutureMarketId  ORDER BY CONVERT(DATETIME,'01 '+strOptionMonth) ASC
+WHERE op.intFutureMarketId =@intFutureMarketId  ORDER BY CONVERT(DATETIME,'01 '+strOptionMonth) ASC
