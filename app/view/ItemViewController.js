@@ -2424,6 +2424,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 var discPrice = current.get('dblUnitAfterDiscount') - discount;
                 current.set('dblDiscountedPrice', discPrice);
             }
+            else if (records[0].get('strDescription') === 'Terms Rate') {
+                var discount = current.get('dblUnitAfterDiscount') * current.get('dblDiscount') / 100;
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
             else { current.set('dblDiscountedPrice', 0.00); }
         }
     },
@@ -2765,6 +2770,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 var discPrice = record.get('dblUnitAfterDiscount') - discount;
                 record.set('dblDiscountedPrice', discPrice);
             }
+            else if (record.get('strDiscountBy') === 'Terms Rate') {
+                var discount = record.get('dblUnitAfterDiscount') * newValue / 100;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
             else { record.set('dblDiscountedPrice', 0.00); }
         }
         else if (obj.itemId === 'txtSpecialPricingUnitPrice') {
@@ -2775,6 +2785,11 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             else if (record.get('strDiscountBy') === 'Amount') {
                 var discount = record.get('dblDiscount');
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Terms Rate') {
+                var discount = newValue * record.get('dblDiscount') / 100;
                 var discPrice = newValue - discount;
                 record.set('dblDiscountedPrice', discPrice);
             }

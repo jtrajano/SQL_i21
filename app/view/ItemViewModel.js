@@ -627,6 +627,8 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strDescription: 'Discount'
                 },{
                     strDescription: 'Vendor Discount'
+                },{
+                    strDescription: 'Terms Discount'
                 }
             ],
             fields: [
@@ -645,6 +647,8 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strDescription: 'Percent'
                 },{
                     strDescription: 'Amount'
+                },{
+                    strDescription: 'Terms Rate'
                 }
             ],
             fields: [
