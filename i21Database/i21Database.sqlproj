@@ -3153,6 +3153,7 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckTop.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckBottom.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPurchaseOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRVoidPaycheck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
