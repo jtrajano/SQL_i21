@@ -146,7 +146,7 @@ SELECT
 	,IE.[intEntityCustomerId]	--[intEntityCustomerId]
 	,IE.dtmDate  				--[dtmDate]
 	,dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
-	,ISNULL(IE.intCurrencyId,min(AC.[intCurrencyId]))									--[intCurrencyId]
+	,ISNULL(MIN(AC.intCurrencyId), IE.intCurrencyId)--[intCurrencyId]
 	,ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
 	,ISNULL(IE.[intSalesPersonId],min(AC.[intSalespersonId]))		--[intEntitySalespersonId]
 	,IE.dtmDate  				--[dtmShipDate]

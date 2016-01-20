@@ -302,6 +302,21 @@ SET @batchIdUsed = @batchId
 					((IST.intDiscountAccountId IS NULL OR IST.intDiscountAccountId = 0) AND  (@DiscountAccountId IS NULL OR @DiscountAccountId = 0)) 
 					AND Detail.dblDiscount <> 0					
 
+				--Currency is required
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					'No currency has been specified.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				WHERE  
+					ISNULL(A.intCurrencyId, 0) = 0
 
 				--No Terms specified
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
