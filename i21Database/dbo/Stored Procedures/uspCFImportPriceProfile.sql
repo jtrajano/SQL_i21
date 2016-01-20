@@ -101,7 +101,10 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 					SELECT @originPriceProfileDetail = cfppd_prc_prf_id FROM #tmpcfppdmst
 
 					SELECT TOP 1
-					@intItemId						= LTRIM(RTRIM(cfppd_ar_itm_no))
+					@intItemId						= (SELECT TOP 1 intItemId 
+															  FROM tblICItem 
+															  WHERE strItemNo = LTRIM(RTRIM(cfppd_ar_itm_no))
+																				 COLLATE Latin1_General_CI_AS)
 					,@intNetworkId					= ISNULL((SELECT intNetworkId 
 															  FROM tblCFNetwork 
 															  WHERE strNetwork = LTRIM(RTRIM(cfppd_netwrok_id))

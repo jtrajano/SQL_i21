@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCFCreditCard] (
     [intCreditCardId]       INT            IDENTITY (1, 1) NOT NULL,
     [intNetworkId]          INT            NULL,
-    [intSiteId]             INT            NULL,
+    [intSiteId]             INT            NOT NULL,
     [strPrefix]             NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [intCardId]             INT            NULL,
     [strCardDescription]    NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
@@ -16,6 +16,8 @@
     CONSTRAINT [FK_tblCFCreditCard_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblCFCreditCard_tblCFSiteLocation] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId])
 );
+
+
 
 
 

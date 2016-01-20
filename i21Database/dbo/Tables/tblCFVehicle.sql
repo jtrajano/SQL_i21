@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCFVehicle] (
     [intVehicleId]            INT            IDENTITY (1, 1) NOT NULL,
-    [intAccountId]            INT            NULL,
+    [intAccountId]            INT            NOT NULL,
     [strVehicleNumber]        NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strCustomerUnitNumber]   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strVehicleDescription]   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
@@ -26,6 +26,8 @@
     CONSTRAINT [FK_tblCFVehicle_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCFVehicle_tblICItem] FOREIGN KEY ([intExpenseItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 

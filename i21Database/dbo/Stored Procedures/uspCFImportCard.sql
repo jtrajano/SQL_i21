@@ -73,10 +73,10 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			BEGIN TRY
 				BEGIN TRANSACTION
 				SELECT TOP 1
-				 @intNetworkId							   = ISNULL((SELECT intNetworkId 
+				 @intNetworkId							   = (SELECT intNetworkId 
 																	FROM tblCFNetwork 
 																	WHERE strNetwork = LTRIM(RTRIM(cfcus_network_id))
-																	COLLATE Latin1_General_CI_AS),0)
+																	COLLATE Latin1_General_CI_AS)
 				,@strCardNumber							   = LTRIM(RTRIM(cfcus_card_no))
 				,@strCardDescription					   = LTRIM(RTRIM(cfcus_card_desc))
 				,@intAccountId							   = ISNULL((SELECT cfAcct.intAccountId 
@@ -86,18 +86,18 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 																    WHERE arAcct.strCustomerNumber = LTRIM(RTRIM(cfcus_ar_cus_no))
 																    COLLATE Latin1_General_CI_AS),0)
 				--,@strCardForOwnUse						   = LTRIM(RTRIM())
-				,@intExpenseItemId						   = ISNULL((SELECT intAccountId 
+				,@intExpenseItemId						   = (SELECT intAccountId 
 																	FROM tblGLAccount 
 																	WHERE strAccountId = LTRIM(RTRIM(cfcus_exp_itm_no))
-																	COLLATE Latin1_General_CI_AS),0)
+																	COLLATE Latin1_General_CI_AS)
 				,@intDefaultFixVehicleNumber			   = ISNULL((SELECT intVehicleId 
 																	FROM tblCFVehicle 
 																	WHERE strVehicleNumber = LTRIM(RTRIM(cfcus_def_fix_veh_no))
 																	COLLATE Latin1_General_CI_AS),0)
-				,@intDepartmentId						   = ISNULL((SELECT intDepartmentId 
+				,@intDepartmentId						   = (SELECT intDepartmentId 
 																	FROM tblCFDepartment 
 																	WHERE strDepartment = LTRIM(RTRIM(cfcus_dept))
-																	COLLATE Latin1_General_CI_AS),0)
+																	COLLATE Latin1_General_CI_AS)
 				,@dtmLastUsedDated						   = (case
 																when LEN(RTRIM(LTRIM(ISNULL(cfcus_date_last_used,0)))) = 8 
 																then CONVERT(datetime, SUBSTRING (RTRIM(LTRIM(cfcus_date_last_used)),1,4) 
@@ -165,82 +165,86 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 
 				FROM cfcusmst
 				WHERE cfcus_card_no = @originCard
-					
+				
+				
 				--================================--
 				--		INSERT MASTER RECORD	  --
 				--================================--
-				INSERT [dbo].[tblCFCard](
-					 [intNetworkId]			
-					,[strCardNumber]			
-					,[strCardDescription]		
-					,[intAccountId]			
-					,[strCardForOwnUse]		
-					,[intExpenseItemId]		
-					,[intDefaultFixVehicleNumber]
-					,[intDepartmentId]		
-					,[dtmLastUsedDated]		
-					,[intCardTypeId]			
-					,[dtmIssueDate]			
-					,[ysnActive]				
-					,[ysnCardLocked]			
-					,[strCardPinNumber]		
-					,[dtmCardExpiratioYearMonth]
-					,[strCardValidationCode]	
-					,[intNumberOfCardsIssued]	
-					,[intCardLimitedCode]		
-					,[intCardFuelCode]		
-					,[strCardTierCode]		
-					,[strCardOdometerCode]	
-					,[strCardWCCode]			
-					,[strSplitNumber]		
-					,[intCardManCode]			
-					,[intCardShipCat]			
-					,[intCardProfileNumber]	
-					,[intCardPositionSite]	
-					,[intCardvehicleControl]	
-					,[intCardCustomPin]		
-					,[intCreatedUserId]		
-					,[dtmCreated]				
-					,[intLastModifiedUserId]	
-					,[dtmLastModified]		
-					,[ysnCardForOwnUse]		
-					,[ysnIgnoreCardTransaction])
-				VALUES(
-					 @intNetworkId			
-					,@strCardNumber			
-					,@strCardDescription		
-					,@intAccountId			
-					,@strCardForOwnUse		
-					,@intExpenseItemId		
-					,@intDefaultFixVehicleNumber
-					,@intDepartmentId		
-					,@dtmLastUsedDated		
-					,@intCardTypeId			
-					,@dtmIssueDate			
-					,@ysnActive				
-					,@ysnCardLocked			
-					,@strCardPinNumber		
-					,@dtmCardExpiratioYearMonth
-					,@strCardValidationCode	
-					,@intNumberOfCardsIssued	
-					,@intCardLimitedCode		
-					,@intCardFuelCode		
-					,@strCardTierCode		
-					,@strCardOdometerCode	
-					,@strCardWCCode			
-					,@strSplitNumber			
-					,@intCardManCode			
-					,@intCardShipCat			
-					,@intCardProfileNumber	
-					,@intCardPositionSite	
-					,@intCardvehicleControl	
-					,@intCardCustomPin		
-					,@intCreatedUserId		
-					,@dtmCreated				
-					,@intLastModifiedUserId	
-					,@dtmLastModified		
-					,@ysnCardForOwnUse		
-					,@ysnIgnoreCardTransaction)
+				If(@intAccountId != 0)
+				BEGIN
+					INSERT [dbo].[tblCFCard](
+						 [intNetworkId]			
+						,[strCardNumber]			
+						,[strCardDescription]		
+						,[intAccountId]			
+						,[strCardForOwnUse]		
+						,[intExpenseItemId]		
+						,[intDefaultFixVehicleNumber]
+						,[intDepartmentId]		
+						,[dtmLastUsedDated]		
+						,[intCardTypeId]			
+						,[dtmIssueDate]			
+						,[ysnActive]				
+						,[ysnCardLocked]			
+						,[strCardPinNumber]		
+						,[dtmCardExpiratioYearMonth]
+						,[strCardValidationCode]	
+						,[intNumberOfCardsIssued]	
+						,[intCardLimitedCode]		
+						,[intCardFuelCode]		
+						,[strCardTierCode]		
+						,[strCardOdometerCode]	
+						,[strCardWCCode]			
+						,[strSplitNumber]		
+						,[intCardManCode]			
+						,[intCardShipCat]			
+						,[intCardProfileNumber]	
+						,[intCardPositionSite]	
+						,[intCardvehicleControl]	
+						,[intCardCustomPin]		
+						,[intCreatedUserId]		
+						,[dtmCreated]				
+						,[intLastModifiedUserId]	
+						,[dtmLastModified]		
+						,[ysnCardForOwnUse]		
+						,[ysnIgnoreCardTransaction])
+					VALUES(
+						 @intNetworkId			
+						,@strCardNumber			
+						,@strCardDescription		
+						,@intAccountId			
+						,@strCardForOwnUse		
+						,@intExpenseItemId		
+						,@intDefaultFixVehicleNumber
+						,@intDepartmentId		
+						,@dtmLastUsedDated		
+						,@intCardTypeId			
+						,@dtmIssueDate			
+						,@ysnActive				
+						,@ysnCardLocked			
+						,@strCardPinNumber		
+						,@dtmCardExpiratioYearMonth
+						,@strCardValidationCode	
+						,@intNumberOfCardsIssued	
+						,@intCardLimitedCode		
+						,@intCardFuelCode		
+						,@strCardTierCode		
+						,@strCardOdometerCode	
+						,@strCardWCCode			
+						,@strSplitNumber			
+						,@intCardManCode			
+						,@intCardShipCat			
+						,@intCardProfileNumber	
+						,@intCardPositionSite	
+						,@intCardvehicleControl	
+						,@intCardCustomPin		
+						,@intCreatedUserId		
+						,@dtmCreated				
+						,@intLastModifiedUserId	
+						,@dtmLastModified		
+						,@ysnCardForOwnUse		
+						,@ysnIgnoreCardTransaction)
+				END
 
 				COMMIT TRANSACTION
 				SET @TotalSuccess += 1;

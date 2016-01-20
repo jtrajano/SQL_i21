@@ -188,41 +188,41 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 					@intLastModifiedUserId = 0,
 					@dtmLastModified = CONVERT(VARCHAR(10), GETDATE(), 120),
 
-					@intCustomerId = (SELECT intEntityCustomerId 
+					@intCustomerId = (SELECT TOP 1 intEntityCustomerId 
 									  FROM tblARCustomer 
 									  WHERE strCustomerNumber = RTRIM(LTRIM(cfact_cus_no)) COLLATE Latin1_General_CI_AS),
 
-					@intInvoiceCycle = (SELECT intInvoiceCycleId 
+					@intInvoiceCycle = (SELECT TOP 1 intInvoiceCycleId 
 										FROM tblCFInvoiceCycle 
 										WHERE strInvoiceCycle = RTRIM(LTRIM(cfact_ivc_cyc)) COLLATE Latin1_General_CI_AS),
 
-					@intDiscountScheduleId = (SELECT intDiscountScheduleId 
+					@intDiscountScheduleId = (SELECT TOP 1 intDiscountScheduleId 
 											  FROM tblCFDiscountSchedule 
 											  WHERE strDiscountSchedule = RTRIM(LTRIM(cfact_dsc_schd)) COLLATE Latin1_General_CI_AS),
 
-					@intSalesPersonId = (SELECT intEntitySalespersonId 
+					@intSalesPersonId = (SELECT TOP 1 intEntitySalespersonId 
 										 FROM tblARSalesperson 
 										 WHERE strSalespersonId = RTRIM(LTRIM(cfact_sls_id)) COLLATE Latin1_General_CI_AS),
 
-					@intTermsCode = (SELECT intTermID 
+					@intTermsCode = (SELECT TOP 1 intTermID 
 									 FROM tblSMTerm 
 									 WHERE strTerm = RTRIM(LTRIM(cfact_terms)) COLLATE Latin1_General_CI_AS),
 
-					@intAccountStatusCodeId = (SELECT intAccountStatusId 
+					@intAccountStatusCodeId = (SELECT TOP 1 intAccountStatusId 
 											FROM tblARAccountStatus 
 											WHERE strAccountStatusCode = RTRIM(LTRIM(cfact_acct_stat)) COLLATE Latin1_General_CI_AS),
 
-					@intRemotePriceProfileId = ISNULL((SELECT intPriceProfileHeaderId 
+					@intRemotePriceProfileId = ISNULL((SELECT TOP 1 intPriceProfileHeaderId 
 												FROM tblCFPriceProfileHeader 
 												WHERE strPriceProfile = RTRIM(LTRIM(cfact_rmt_prc_prf_id)) COLLATE Latin1_General_CI_AS
 												AND strType = 'Remote'),0),
 
-					@intExtRemotePriceProfileId = ISNULL((SELECT intPriceProfileHeaderId 
+					@intExtRemotePriceProfileId = ISNULL((SELECT TOP 1 intPriceProfileHeaderId 
 												   FROM tblCFPriceProfileHeader 
 												   WHERE strPriceProfile = RTRIM(LTRIM(cfact_ext_rmt_prc_prf_id)) COLLATE Latin1_General_CI_AS
 												   AND strType = 'Extended Remote'),0),
 
-					@intLocalPriceProfileId = ISNULL((SELECT intPriceProfileHeaderId 
+					@intLocalPriceProfileId = ISNULL((SELECT TOP 1 intPriceProfileHeaderId 
 												FROM tblCFPriceProfileHeader 
 												WHERE strPriceProfile = RTRIM(LTRIM(cfact_local_prc_prf_id)) COLLATE Latin1_General_CI_AS
 												AND strType = 'Local/Network'),0),
@@ -300,7 +300,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 											else NULL
 										end),
 					@strInvoiceProgramName = RTRIM(LTRIM(cfact_ivc_pgm_name)),
-					@intPriceRuleGroup = (SELECT intPriceRuleGroupId 
+					@intPriceRuleGroup = (SELECT TOP 1 intPriceRuleGroupId 
 									 FROM tblCFPriceRuleGroup 
 									 WHERE strPriceGroup = RTRIM(LTRIM(cfact_price_rule_set)) COLLATE Latin1_General_CI_AS),
 					@strPrintPricePerGallon = (case
@@ -314,7 +314,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 											when RTRIM(LTRIM(cfact_print_misc_auth_yn)) = 'Y' then 'TRUE'
 											else 'FALSE'
 											end),
-					@intFeeProfileId = ISNULL((SELECT intFeeProfileId 
+					@intFeeProfileId = ISNULL((SELECT TOP 1 intFeeProfileId 
 												FROM tblCFFeeProfile 
 												WHERE strFeeProfileId = RTRIM(LTRIM(cfact_fee_prf_id)) COLLATE Latin1_General_CI_AS),0),
 					@strPrintSiteAddress = (case
@@ -530,7 +530,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 					,@strVehicleNoticeMessageLine2				= LTRIM(RTRIM(cfveh_notice_msg2))
 					--,@strVehicleVehicleForOwnUse				= LTRIM(RTRIM(cfveh_vehl_no))
 
-					,@intVehicleExpenseItemId					= (SELECT intItemId 
+					,@intVehicleExpenseItemId					= (SELECT TOP 1 intItemId 
 																   FROM tblICItem 
 																   WHERE strItemNo = LTRIM(RTRIM(cfveh_exp_itm_no)) 
 																   COLLATE Latin1_General_CI_AS)

@@ -2,7 +2,7 @@
     [intItemId]                     INT             IDENTITY (1, 1) NOT NULL,
     [intTaxGroupMaster]             INT             NULL,
     [intNetworkId]                  INT             NULL,
-    [intSiteId]                     INT             NULL,
+    [intSiteId]                     INT             NOT NULL,
     [strProductNumber]              NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intARItemId]                   INT             NULL,
     [strProductDescription]         NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -32,6 +32,8 @@
     CONSTRAINT [FK_tblCFItem_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
     CONSTRAINT [FK_tblCFItem_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupMaster]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId])
 );
+
+
 
 
 

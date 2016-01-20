@@ -145,13 +145,17 @@
 				SELECT TOP 1
 					 @intNetworkId								= (SELECT intNetworkId 
 																   FROM tblCFNetwork 
-																   WHERE strNetwork = RTRIM(LTRIM(cfloc_network_id)) COLLATE Latin1_General_CI_AS)
+																   WHERE strNetwork = RTRIM(LTRIM(cfloc_network_id)) 
+																   COLLATE Latin1_General_CI_AS)
 
 					,@strSiteNumber								= RTRIM(LTRIM(cfloc_site_no))
 
 					,@strSiteName								= RTRIM(LTRIM(cfloc_site_name))
 
-					,@intARLocationId							= RTRIM(LTRIM(cfloc_ar_itm_loc_no))
+					,@intARLocationId							= (SELECT intCompanyLocationId 
+																	FROM tblSMCompanyLocation 
+																	WHERE strLocationNumber = RTRIM(LTRIM(cfloc_ar_itm_loc_no)) 
+																	COLLATE Latin1_General_CI_AS)
 
 					,@strDeliveryPickup							= (case
 																	when RTRIM(LTRIM(cfloc_dlvry_pickup_ind)) = 'P' then 'Pickup'
@@ -374,10 +378,10 @@
 					,@dtmSiteItemLastModified							  = CONVERT(VARCHAR(10), GETDATE(), 120)
 					,@strSiteItemProductNumber							  = RTRIM(LTRIM(cfitm_prod_no))
 
-					,@intSiteItemARItemId								  = ISNULL((SELECT intItemId 
+					,@intSiteItemARItemId								  = (SELECT intItemId 
 																			 FROM tblICItem 
 																			 WHERE strItemNo = RTRIM(LTRIM(cfitm_ar_itm_no)) 
-																			 COLLATE Latin1_General_CI_AS),0)
+																			 COLLATE Latin1_General_CI_AS)
 
 					,@strSiteItemProductDescription						  = RTRIM(LTRIM(cfitm_prod_desc))
 					,@ysnSiteItemCarryNegligibleBalance					  = (case

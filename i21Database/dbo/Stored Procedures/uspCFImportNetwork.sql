@@ -102,19 +102,19 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 					,@intErrorBatchNumber				  =	ISNULL(cfnet_error_batch_no,0)
 					,@intPPhostId						  =	ISNULL(cfnet_pp_host_id,0)
 					,@intPPDistributionSite				  =	ISNULL(cfnet_pp_sub_dist_site,0)
-					,@intCustomerId						  =	ISNULL((SELECT intEntityCustomerId 
+					,@intCustomerId						  =	(SELECT intEntityCustomerId 
 															FROM tblARCustomer 
-															WHERE strCustomerNumber = LTRIM(RTRIM(cfnet_ar_cus_no)) COLLATE Latin1_General_CI_AS),0)
+															WHERE strCustomerNumber = LTRIM(RTRIM(cfnet_ar_cus_no)) COLLATE Latin1_General_CI_AS)
 
-					,@intCACustomerId					  =	ISNULL((SELECT intEntityCustomerId 
+					,@intCACustomerId					  =	(SELECT intEntityCustomerId 
 															FROM tblARCustomer 
-															WHERE strCustomerNumber = LTRIM(RTRIM(cfnet_ca_ar_cus_no)) COLLATE Latin1_General_CI_AS),0)
+															WHERE strCustomerNumber = LTRIM(RTRIM(cfnet_ca_ar_cus_no)) COLLATE Latin1_General_CI_AS)
 
 					,@intDebitMemoGLAccount				  =	ISNULL((SELECT intAccountId 
 															FROM tblGLAccount 
 															WHERE strAccountId = LTRIM(RTRIM(cfnet_db_gl_acct)) COLLATE Latin1_General_CI_AS),0)
 
-					,@intLocationId						  =	0 --LTRIM(RTRIM(cfnet_ft_loc_no))
+					,@intLocationId						  =	null --LTRIM(RTRIM(cfnet_ft_loc_no))
 
 					,@ysnRejectExportCard				  =	(case
 															 when RTRIM(LTRIM(cfnet_export_card_rejects_yn)) = 'N' then 'FALSE'

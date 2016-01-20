@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCFPriceProfileDetail] (
     [intPriceProfileDetailId] INT             IDENTITY (1, 1) NOT NULL,
-    [intPriceProfileHeaderId] INT             NULL,
+    [intPriceProfileHeaderId] INT             NOT NULL,
     [intItemId]               INT             NULL,
     [intNetworkId]            INT             NULL,
     [intSiteGroupId]          INT             NULL,
@@ -13,6 +13,8 @@
     CONSTRAINT [FK_tblCFPriceProfileDetail_tblCFPriceProfileHeader] FOREIGN KEY ([intPriceProfileHeaderId]) REFERENCES [dbo].[tblCFPriceProfileHeader] ([intPriceProfileHeaderId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCFPriceProfileDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 

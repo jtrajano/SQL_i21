@@ -29,6 +29,7 @@ CREATE PROCEDURE [dbo].[uspCFImportInvoiceCycle]
 		SELECT DISTINCT cfact_ivc_cyc INTO #tmpcfactmst
 			FROM cfactmst
 				WHERE cfact_ivc_cyc COLLATE Latin1_General_CI_AS NOT IN (select strInvoiceCycle from tblCFInvoiceCycle) 
+				AND cfact_ivc_cyc IS NOT NULL
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfactmst))
 		BEGIN
