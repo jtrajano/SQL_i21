@@ -10,11 +10,12 @@ AS
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE @ErrorMessage			NVARCHAR(4000);
-	DECLARE @ErrorSeverity			INT;
-	DECLARE @ErrorState				INT;
-	DECLARE @InventoryReceiptId		INT; 
-	DECLARE @ErrMsg					NVARCHAR(MAX);
+	DECLARE @ErrorMessage			NVARCHAR(4000)
+	DECLARE @ErrorSeverity			INT
+	DECLARE @ErrorState				INT
+	DECLARE @InventoryReceiptId		INT
+	DECLARE @ErrMsg					NVARCHAR(MAX)
+	DECLARE	@intInventoryReceiptId	INT
 
 	DECLARE @ReceiptStagingTable	ReceiptStagingTable,
 			@OtherCharges			ReceiptOtherChargesTableType
@@ -140,7 +141,35 @@ AS
 		
 		IF EXISTS(SELECT * FROM #tmpAddItemReceiptResult)
 		BEGIN
-			SELECT TOP 1 intInventoryReceiptId FROM  #tmpAddItemReceiptResult	
+			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM  #tmpAddItemReceiptResult	
+
+			DECLARE @intInventoryReceiptItemId	INT = NULL,
+					@dblQty						NUMERIC(18,6) = 0
+
+			SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
+			FROM	tblICInventoryReceiptItem
+			WHERE	intInventoryReceiptId = @intInventoryReceiptId
+
+			WHILE ISNULL(@intInventoryReceiptItemId,0) > 0
+			BEGIN
+				SELECT	@dblQty						=	dblOpenReceive
+				FROM	tblICInventoryReceiptItem 
+				WHERE	intInventoryReceiptItemId	=	 @intInventoryReceiptItemId
+									
+				EXEC	uspCTUpdateScheduleQuantity
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInventoryReceiptItemId,
+						@strScreenName			=	'Inventory Receipt'
+
+				SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
+				FROM	tblICInventoryReceiptItem
+				WHERE	intInventoryReceiptId = @intInventoryReceiptId	AND
+						intInventoryReceiptItemId > @intInventoryReceiptItemId
+			END
+
+			SELECT	@intInventoryReceiptId
 		END
 		ELSE
 		BEGIN
