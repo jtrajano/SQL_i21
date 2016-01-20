@@ -10,7 +10,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 read: '../Inventory/api/InventoryShipment/Search'
             },
             columns: [
-                {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewShipmentNo'},
                 {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
                 {dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'int'},
@@ -159,7 +159,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 hidden: '{!current.ysnPosted}'
             },
             btnAddOrders: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{checkHiddenAddOrders}',
+                text: '{textAddOrderPickLot}'
             },
 
             txtShipmentNo: '{current.strShipmentNumber}',
@@ -686,6 +687,44 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (current){
             current.set('intEntityCustomerId', records[0].get('intEntityCustomerId'));
             current.set('strCustomerName', records[0].get('strName'));
+        }
+
+        var isHidden = true;
+        switch (current.get('intOrderType')) {
+            case 1:
+                switch (current.get('intSourceType')) {
+                    case 0:
+                    case 2:
+                        if (iRely.Functions.isEmpty(current.get('intEntityCustomerId'))) {
+                            isHidden = true;
+                        }
+                        else {
+                            isHidden = false;
+                        }
+                        break;
+                    default:
+                        isHidden = true;
+                        break;
+
+                }
+                break;
+            case 2:
+                if (iRely.Functions.isEmpty(current.get('intEntityCustomerId'))) {
+                    isHidden = true;
+                }
+                else {
+                    isHidden = false;
+                }
+                break;
+            case 3:
+                isHidden = true;
+                break;
+            default :
+                isHidden = true;
+                break;
+        }
+        if (isHidden === false) {
+            this.showAddOrders(win);
         }
     },
 
@@ -1852,6 +1891,124 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer',{ action: 'view' });
     },
 
+    onAddOrderClick: function(button) {
+        var win = button.up('window');
+        this.showAddOrders(win);
+    },
+
+    showAddOrders: function(win) {
+        var currentRecord = win.viewModel.data.current;
+        var cboOrderType = win.down('#cboOrderType');
+        var cboSourceType = win.down('#cboSourceType');
+
+        var CustomerId = currentRecord.get('intEntityCustomerId').toString();
+        var OrderType = cboOrderType.getRawValue().toString();
+        var SourceType = cboSourceType.getRawValue().toString();
+        var me = this;
+        var showAddScreen = function () {
+            var search = i21.ModuleMgr.Search;
+            search.scope = me;
+            search.url = '../Inventory/api/InventoryShipment/GetAddOrders?CustomerId=' + CustomerId + '&OrderType=' + OrderType + '&SourceType=' + SourceType;
+            search.columns = [
+                { dataIndex: 'intKey', text: 'Key', flex: 1, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
+                { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string' },
+                { dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string' },
+                { dataIndex: 'strShipFromLocation', text: 'Ship From Location', width: 100, dataType: 'string' },
+                { dataIndex: 'strCustomerNumber', text: 'Customer Number', width: 100, dataType: 'string' },
+                { dataIndex: 'strCustomerName', text: 'Customer Name', width: 100, dataType: 'string' },
+
+                { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string' },
+                { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string' },
+                { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strSubLocationName', text: 'SubLocation Name', width: 100, dataType: 'string' },
+                { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strStorageLocationName', text: 'Storage Location Name', width: 100, dataType: 'string' },
+                { dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strItemUOM', text: 'Item UOM', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConv', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                { dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strWeightUOM', text: 'Weight UOM', width: 100, dataType: 'string' },
+                { xtype: 'numbercolumn', dataIndex: 'dblWeightItemUOMConv', text: 'Weight Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                { xtype: 'numbercolumn', dataIndex: 'dblQtyOrdered', text: 'Qty Ordered', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblQtyAllocated', text: 'Qty Allocated', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblQtyShipped', text: 'Qty Shipped', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblUnitPrice', text: 'Unit Price', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblDiscount', text: 'Discount', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblTotal', text: 'Total', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblQtyToShip', text: 'Qty To Ship', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblPrice', text: 'Price', width: 100, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', width: 100, dataType: 'float' },
+                { dataIndex: 'intGradeId', text: 'Grade Id', width: 100, dataType: 'numeric', hidden: true },
+                { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'numeric', hidden: true },
+
+                {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
+                {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
+                {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true }
+            ];
+            search.title = "Add Orders";
+            search.showNew = false;
+            search.on({
+                scope: me,
+                openselectedclick: function (button, e, result) {
+                    var win = this.getView();
+                    var currentVM = this.getViewModel().data.current;
+
+                    Ext.each(result, function (order) {
+                        var newRecord = {
+                            intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
+                            intOrderId: order.get('intOrderId'),
+                            intSourceId: order.get('intSourceId'),
+                            intLineNo: order.get('intLineNo'),
+                            intItemId: order.get('intItemId'),
+                            intSubLocationId: order.get('intSubLocationId'),
+                            intStorageLocationId: order.get('intStorageLocationId'),
+                            dblQuantity: order.get('dblQtyToShip'),
+                            intItemUOMId: order.get('intItemUOMId'),
+                            intWeightUOMId: order.get('intWeightUOMId'),
+                            dblUnitPrice: order.get('dblUnitPrice'),
+                            strItemNo: order.get('strItemNo'),
+                            strUnitMeasure: order.get('strItemUOM'),
+                            strWeightUOM: order.get('strWeightUOM'),
+                            strSubLocationName: order.get('strSubLocationName'),
+                            strStorageLocationName: order.get('strStorageLocationName'),
+                            strOrderNumber: order.get('strOrderNumber'),
+                            strSourceNumber: order.get('strSourceNumber'),
+                            strItemDescription: order.get('strItemDescription'),
+                            strGrade: order.get('strGrade'),
+                            dblQtyOrdered: order.get('dblQtyOrdered'),
+                            strOrderUOM: order.get('strOrderUOM'),
+                            dblLineTotal: order.get('dblLineTotal'),
+                            dblQtyAllocated: order.get('dblQtyAllocated'),
+                            dblOrderUnitPrice: order.get('dblPrice'),
+                            dblOrderDiscount: order.get('dblDiscount'),
+                            dblOrderTotal: order.get('dblTotal'),
+                            strLotTracking: order.get('strLotTracking'),
+                            dblItemUOMConv: order.get('dblItemUOMConv'),
+                            dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
+                            strOwnershipType: 'Own',
+                            intOwnershipType: 1,
+                            intCommodityId: order.get('intCommodityId')
+                        };
+                        currentVM.tblICInventoryShipmentItems().add(newRecord);
+                    });
+                    search.close();
+                    win.context.data.saveRecord();
+                },
+                openallclick: function () {
+                    search.close();
+                }
+            });
+            search.show();
+        }
+        showAddScreen();
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -1910,6 +2067,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnPrintBOL": {
                 click: this.onPrintBOLClick
+            },
+            "#btnAddOrders": {
+                click: this.onAddOrderClick
             }
         })
     }

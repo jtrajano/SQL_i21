@@ -334,6 +334,69 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     return false;
                 }
             }
+        },
+        checkHiddenAddOrders: function(get) {
+            var isHidden = false;
+            if (get('current.ysnPosted')) {
+                isHidden = true;
+            }
+            else {
+                switch (get('current.intOrderType')) {
+                    case 1:
+                        switch (get('current.intSourceType')) {
+                            case 0:
+                            case 2:
+                                if (iRely.Functions.isEmpty(get('current.intEntityCustomerId'))) {
+                                    isHidden = true;
+                                }
+                                else {
+                                    isHidden = false;
+                                }
+                                break;
+                            case 3:
+                                isHidden = false;
+                                break;
+                            default:
+                                isHidden = true;
+                                break;
+
+                        }
+                        break;
+                    case 2:
+                        if (iRely.Functions.isEmpty(get('current.intEntityCustomerId'))) {
+                            isHidden = true;
+                        }
+                        else {
+                            isHidden = false;
+                        }
+                        break;
+                    case 3:
+                        isHidden = true;
+                        break;
+                    default :
+                        isHidden = true;
+                        break;
+                }
+            }
+
+            return isHidden;
+        },
+        textAddOrderPickLot: function(get) {
+            switch (get('current.intOrderType')) {
+                case 1:
+                    switch (get('current.intSourceType')) {
+                        case 3:
+                            return 'Pick Lot';
+                            break;
+                        default:
+                            return 'Add Orders';
+                            break;
+                    }
+                    break;
+                default :
+                    return 'Add Orders';
+                    break;
+            }
         }
     }
 
