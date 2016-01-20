@@ -3227,6 +3227,12 @@
     <Build Include="dbo\Tables\tblMFItemSubstitutionType.sql" />
     <Build Include="dbo\Views\vyuMFGetItemSubstitution.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipesByInputItem.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerSpecialPriceSearch.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerSpecialTaxSearch.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerTaxingTaxExemptionSearch.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerTransportQuoteSearch.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerTransportFreightSearch.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerHelpDeskSearch.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
