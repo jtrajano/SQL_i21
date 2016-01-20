@@ -13,11 +13,11 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @UserEntityID INT
 		,@actionType AS NVARCHAR(50)
+		,@ForDelete BIT = 0
 --THIS IS A HICCUP		
 SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId),@userId) 
 SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
-
-
+SELECT @ForDelete = CASE WHEN @post = 1 THEN 0 ELSE 1 END
 
 -- Get the details from the invoice 
 BEGIN 
@@ -82,7 +82,7 @@ EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId
 
 --Sales Order Status
-EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId
+EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete
 
 --Update Total AR
 EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @TransactionId, @CustomerId = NULL
