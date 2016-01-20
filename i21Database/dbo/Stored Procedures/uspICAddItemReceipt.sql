@@ -355,8 +355,8 @@ BEGIN
 															ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
 												WHERE	tblICItemUOM.intItemId = RawData.intItemId 
 														AND tblICItemUOM.ysnStockUnit = 1 
-														AND tblICUnitMeasure.strUnitType = 'Weight'
-														AND dbo.fnGetItemLotType(RawData.intItemId) IN (1,2)
+														AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
+														--AND dbo.fnGetItemLotType(RawData.intItemId) IN (1,2)
 										)
 				,dblUnitCost			= RawData.dblCost
 				--,dblLineTotal			= RawData.dblQty * RawData.dblCost
