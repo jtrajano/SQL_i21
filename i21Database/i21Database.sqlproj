@@ -3220,6 +3220,13 @@
     <Build Include="dbo\Views\vyuHDEmailSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessToInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuMFDowntimeMachines.sql" />
+    <Build Include="dbo\Tables\tblMFItemSubstitution.sql" />
+    <Build Include="dbo\Tables\tblMFItemSubstitutionDetail.sql" />
+    <Build Include="dbo\Tables\tblMFItemSubstitutionRecipe.sql" />
+    <Build Include="dbo\Tables\tblMFItemSubstitutionRecipeDetail.sql" />
+    <Build Include="dbo\Tables\tblMFItemSubstitutionType.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemSubstitution.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipesByInputItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

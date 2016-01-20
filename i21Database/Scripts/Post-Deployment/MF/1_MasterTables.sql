@@ -1494,6 +1494,18 @@ BEGIN
     VALUES(4,'Efficiency')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFItemSubstitutionType WHERE intItemSubstitutionTypeId = 1)
+BEGIN
+    INSERT INTO tblMFItemSubstitutionType(intItemSubstitutionTypeId,strName)
+    VALUES(1,'Replacement')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFItemSubstitutionType WHERE intItemSubstitutionTypeId = 2)
+BEGIN
+    INSERT INTO tblMFItemSubstitutionType(intItemSubstitutionTypeId,strName)
+    VALUES(2,'Substitute')
+END
+GO
 UPDATE tblMFCompanyPreference
 SET ysnAutoPriorityOrderByDemandRatio = 0
 WHERE ysnAutoPriorityOrderByDemandRatio IS NULL
