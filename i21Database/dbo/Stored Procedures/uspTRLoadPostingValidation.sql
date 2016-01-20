@@ -29,6 +29,9 @@ DECLARE @dtmLoadDateTime DATETIME,
 		@intLoadReceiptId int,
 		@intInventoryReceiptId int,
 		@intEntityUserSecurityId int,
+		@intStockUOMId int,
+		@err nvarchar(150),
+		@strItem nvarchar(50),
 		@intDriver int,
 		@ReceiptCount int,
 		@incReceiptval int,
@@ -270,6 +273,12 @@ BEGIN
          BEGIN
              RAISERROR('Invalid Purchase Item', 16, 1);
          END
+		 select @intStockUOMId = intStockUOMId, @strItem = strItemNo from vyuICGetItemStock where intItemId = @intItem and intLocationId = @intCompanyLocation
+		 if (@intStockUOMId is null)
+         BEGIN
+		     set @err = 'Stock UOM is not setup for item ' + @strItem 
+             RAISERROR(@err , 16, 1);
+         END
 	     select @GrossorNet = strGrossOrNet from dbo.tblTRSupplyPoint where intSupplyPointId = @intSupplyPoint
 	     if (@GrossorNet is null)
          BEGIN
@@ -299,7 +308,13 @@ BEGIN
 	       if (@intItem is null)
            BEGIN
                RAISERROR('Invalid Purchase Item', 16, 1);
-           END	        
+           END	   
+		   select @intStockUOMId = intStockUOMId, @strItem = strItemNo from vyuICGetItemStock where intItemId = @intItem and intLocationId = @intCompanyLocation
+		   if (@intStockUOMId is null)
+           BEGIN
+		       set @err = 'Stock UOM is not setup for item ' + @strItem 
+               RAISERROR(@err , 16, 1);
+           END     
 	       if((@dblGross is null or @dblGross = 0) and (@dblNet is null or @dblNet = 0))
 	       BEGIN	               
 	           RAISERROR('Gross and Net Quantity cannot be 0', 16, 1);	         	    
@@ -398,6 +413,12 @@ BEGIN
 	BEGIN
        RAISERROR('Distribution Item is Invalid', 16, 1); 
     END
+	select @intStockUOMId = intStockUOMId, @strItem = strItemNo from vyuICGetItemStock where intItemId = @intDistributionItemId and intLocationId = @intCompanyLocationId
+	if (@intStockUOMId is null)
+    BEGIN
+	    set @err = 'Stock UOM is not setup for item ' + @strItem 
+        RAISERROR(@err , 16, 1);
+    END 
 	if(@dblUnits = 0)
 	BEGIN
        RAISERROR('Distribution Units cannot be 0', 16, 1); 
