@@ -8,6 +8,7 @@
     [intAccountId]					INT												NOT NULL,
     [intCurrencyId]					INT												NOT NULL,
     [intTermId]						INT												NOT NULL,
+	[intPeriodsToAccrue]			INT												NULL DEFAULT 0,
     [dtmDate]						DATETIME										NOT NULL,
     [dtmDueDate]					DATETIME										NOT NULL,
     [dtmShipDate]					DATETIME										NULL,
