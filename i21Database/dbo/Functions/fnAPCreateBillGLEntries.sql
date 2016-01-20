@@ -152,7 +152,7 @@ BEGIN
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) 
 												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 														ELSE 
-															(CASE WHEN B.dblCost != 0 THEN CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) --COST ADJUSTMENT
+															(CASE WHEN B.dblOldCost != 0 THEN CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) --COST ADJUSTMENT
 																ELSE B.dblTotal END)
 															+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
 														END) --IC Tax
@@ -208,7 +208,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Cost Adjustment'),
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN ((B.dblCost - B.dblOldCost) * B.dblQtyReceived) ELSE 0 END), 
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN CAST(((B.dblCost - B.dblOldCost)  * B.dblQtyReceived) AS DECIMAL(18,2)) ELSE 0 END), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
