@@ -45,12 +45,11 @@ DECLARE @ConcurrencyId AS INT = (SELECT TOP 1 intConcurrencyId FROM tblFRRow WHE
 SELECT * INTO #tempRowDesign FROM tblFRRowDesign WHERE intRowId = @intRowId
 SELECT * INTO #tempRowDesignPrintEach FROM tblFRRowDesign WHERE intRowId = @intRowId AND ysnPrintEach = 1
 
-DELETE tblFRRowDesignPrintEach WHERE dtmEntered < DATEADD(day, -1, GETDATE())
+DELETE tblFRRowDesignPrintEach WHERE intRowId = @intRowId
+UPDATE #tempRowDesign SET ysnHidden = 1 WHERE ysnPrintEach = 1
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intRowId AND intConcurrencyId = @ConcurrencyId)
-	BEGIN
-
-	DELETE tblFRRowDesignPrintEach WHERE intRowId = @intRowId
+	BEGIN	
 
 	WHILE EXISTS(SELECT 1 FROM #tempRowDesignPrintEach)
 	BEGIN
@@ -102,7 +101,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 						 @strAccountDescription = [strDescription] FROM #tempGLAccount ORDER BY [strAccountId]
 
 			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId)
-								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,0,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1)
+								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,1,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1)
 
 			DELETE #tempGLAccount WHERE [intAccountId] = @intAccountId
 		END

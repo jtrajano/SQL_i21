@@ -39,13 +39,8 @@ if @ysnPostOrUnPost = 0 and @ysnRecap = 0
 BEGIN
    INSERT INTO @InvoiceOutputTable
                select DH.intLoadDistributionHeaderId,DH.intInvoiceId from 
-                        tblTRLoadHeader TL
-                        JOIN tblTRLoadReceipt TR on TR.intLoadHeaderId = TL.intLoadHeaderId
-	            		JOIN tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
-	            		JOIN tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId 
-	            		LEFT JOIN vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
-	            		LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
-                        where TL.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer';
+ 	            		 tblTRLoadDistributionHeader DH            		
+                        where DH.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer' and isNull(DH.intInvoiceId,0) !=0;
    
    SELECT @total = COUNT(*) FROM @InvoiceOutputTable;
     IF (@total = 0)
@@ -207,12 +202,22 @@ END;
 
  if @ysnRecap = 0
     BEGIN
-        INSERT INTO @InvoicePostOutputTable
-        select Distinct IV.intInvoiceId              
-        FROM
-            @InvoiceStagingTable IE  
-            JOIN tblARInvoice IV
-                on IE.intSourceId = IV.intLoadDistributionHeaderId
+        if @ysnPostOrUnPost = 0 and @ysnRecap = 0
+		   BEGIN
+		   INSERT INTO @InvoicePostOutputTable
+               select Distinct DH.intInvoiceId from                                     
+	            		 tblTRLoadDistributionHeader DH            		
+                        where DH.intLoadHeaderId = @intLoadHeaderId and DH.strDestination = 'Customer' and ISNULL(DH.intInvoiceId,0) != 0
+		   END
+		ELSE
+		    BEGIN
+			INSERT INTO @InvoicePostOutputTable
+                select Distinct IV.intInvoiceId              
+                FROM
+                    @InvoiceStagingTable IE  
+                    JOIN tblARInvoice IV
+                        on IE.intSourceId = IV.intLoadDistributionHeaderId
+		    END
         select @total = count(*) from @InvoicePostOutputTable;
         set @incval = 1 
         WHILE @incval <=@total 
