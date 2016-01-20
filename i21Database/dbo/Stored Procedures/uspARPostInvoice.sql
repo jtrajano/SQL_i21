@@ -854,6 +854,8 @@ IF @post = 1
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND Header.strType <> 'Debit Memo'
+
 			
 		END TRY
 		BEGIN CATCH
@@ -1088,6 +1090,7 @@ IF @post = 1
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
+				AND A.strType <> 'Debit Memo'
 
 			--CREDIT SALES
 			UNION ALL 
@@ -1143,6 +1146,57 @@ IF @post = 1
 				B.dblTotal <> @ZeroDecimal  
 				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND A.strType <> 'Debit Memo'
+
+			--CREDIT SALES - Debit Memo
+			UNION ALL 
+			SELECT			
+				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				,strBatchID					= @batchId
+				,intAccountId				= B.intSalesAccountId
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,strDescription				= A.strComments
+				,strCode					= @CODE
+				,strReference				= C.strCustomerNumber
+				,intCurrencyId				= A.intCurrencyId 
+				,dblExchangeRate			= 1
+				,dtmDateEntered				= GETDATE()
+				,dtmTransactionDate			= A.dtmDate
+				,strJournalLineDescription	= B.strItemDescription 
+				,intJournalLineNo			= B.intInvoiceDetailId
+				,ysnIsUnposted				= 0
+				,intUserId					= @userId
+				,intEntityId				= @UserEntityID				
+				,strTransactionId			= A.strInvoiceNumber
+				,intTransactionId			= A.intInvoiceId
+				,strTransactionType			= A.strTransactionType
+				,strTransactionForm			= @SCREEN_NAME
+				,strModuleName				= @MODULE_NAME
+				,intConcurrencyId			= 1	
+			FROM
+				tblARInvoice A 
+			LEFT JOIN
+				tblARInvoiceDetail B
+					ON A.intInvoiceId = B.intInvoiceId
+			LEFT JOIN 
+				tblARCustomer C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
+			INNER JOIN 
+				@PostInvoiceData	P
+					ON A.intInvoiceId = P.intInvoiceId
+			LEFT OUTER JOIN
+				tblICItem I
+					ON B.intItemId = I.intItemId
+			LEFT OUTER JOIN
+				vyuICGetItemStock ICIS
+					ON B.intItemId = ICIS.intItemId 
+					AND A.intCompanyLocationId = ICIS.intLocationId 
+			WHERE
+				B.dblTotal <> @ZeroDecimal  
+				AND A.strType = 'Debit Memo'
 
 			--CREDIT Shipping
 			UNION ALL 
@@ -1345,6 +1399,7 @@ IF @post = 1
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND A.strType <> 'Debit Memo'
 				
 			UNION ALL 
 			--CREDIT Inventory In-Transit - SHIPPED
@@ -1409,7 +1464,8 @@ IF @post = 1
 				AND D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')		
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND A.strType <> 'Debit Memo'	
 				
 			UNION ALL 
 			--DEBIT COGS - Inbound Shipment
@@ -1476,6 +1532,7 @@ IF @post = 1
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND A.strType <> 'Debit Memo'
 				
 			UNION ALL 
 			--CREDIT Inventory In-Transit - Inbound Shipment
@@ -1541,7 +1598,9 @@ IF @post = 1
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')		END TRY
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND A.strType <> 'Debit Memo'
+		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
