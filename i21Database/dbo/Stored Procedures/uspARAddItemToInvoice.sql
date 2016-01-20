@@ -146,6 +146,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[intItemId]
 				,[strItemDescription]
 				,[intItemUOMId]
+				,[intContractHeaderId]
+				,[intContractDetailId]
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
 				,[dblDiscount]
@@ -163,6 +165,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,intItemId
 				,@ItemDescription
 				,@ItemUOMId
+				,@ItemContractHeaderId
+				,@ItemContractDetailId
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemDiscount

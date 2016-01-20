@@ -53,6 +53,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							ysnIsInventory				BIT,
 							strItemDescription			NVARCHAR(100),
 							intItemUOMId				INT,
+							intContractHeaderId			INT,
+							intContractDetailId			INT,
 							dblQtyOrdered				NUMERIC(18,6),
 							dblQtyRemaining				NUMERIC(18,6),
 							dblMaintenanceAmount		NUMERIC(18,6),
@@ -81,6 +83,8 @@ SELECT SI.intItemId
 	 , dbo.fnIsStockTrackingItem(SI.intItemId)
 	 , SI.strItemDescription
 	 , SI.intItemUOMId
+	 , SOD.intContractHeaderId
+	 , SOD.intContractDetailId
 	 , SI.dblQtyOrdered
 	 , CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
@@ -108,6 +112,8 @@ SELECT ICSI.intItemId
 	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
 	 , SOD.strItemDescription
 	 , ICSI.intItemUOMId
+	 , SOD.intContractHeaderId
+	 , SOD.intContractDetailId
 	 , SOD.dblQtyOrdered
 	 , ICSI.dblQuantity
 	 , @dblZeroAmount
@@ -422,6 +428,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@NewDetailId			INT,
 						@ItemDescription		NVARCHAR(100),
 						@ItemUOMId				INT,
+						@ItemContractHeaderId	INT,
+						@ItemContractDetailId	INT,
 						@ItemQtyOrdered			NUMERIC(18,6),
 						@ItemQtyShipped			NUMERIC(18,6),
 						@ItemDiscount			NUMERIC(18,6),
@@ -438,6 +446,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@ItemIsInventory		= ysnIsInventory,
 						@ItemDescription		= strItemDescription,
 						@ItemUOMId				= intItemUOMId,
+						@ItemContractHeaderId	= intContractHeaderId,
+						@ItemContractDetailId	= intContractDetailId,
 						@ItemQtyOrdered			= dblQtyOrdered,
 						@ItemQtyShipped			= dblQtyRemaining,
 						@ItemDiscount			= dblDiscount,
@@ -458,6 +468,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 							,@RaiseError					= @RaiseError
 							,@ItemDescription				= @ItemDescription
 							,@ItemUOMId						= @ItemUOMId
+							,@ItemContractHeaderId			= @ItemContractHeaderId
+							,@ItemContractDetailId		    = @ItemContractDetailId
 							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
