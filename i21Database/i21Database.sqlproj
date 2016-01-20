@@ -3234,6 +3234,7 @@
     <Build Include="dbo\Views\vyuEMCustomerTransportFreightSearch.sql" />
     <Build Include="dbo\Views\vyuEMCustomerHelpDeskSearch.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShiftActivityMachines.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
