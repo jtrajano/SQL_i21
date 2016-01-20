@@ -65,12 +65,10 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
         }
         if (this.get('dblRate') <= 0) {
-            if (this.get('strCostMethod') !== 'Amount'){
-                errors.add({
-                    field: 'dblRate',
-                    message: 'Rate must be greater than zero.'
-                })
-            }
+            errors.add({
+                field: 'dblRate',
+                message: 'Rate must be greater than zero.'
+            })
         }
         if (this.get('ysnInventoryCost')) {
             if (iRely.Functions.isEmpty(this.get('strAllocateCostBy'))){
