@@ -235,7 +235,7 @@ FROM
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND NOT EXISTS(
-		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
 	)
 	UNION ALL
 
