@@ -4106,7 +4106,7 @@ BEGIN TRY
 				,NULL
 				,NULL
 				,NULL
-				,NULL
+				,@dblOpenBalance
 				,@StorageChargeDate
 				,@dblStorageDuePerUnit
 				,NULL
@@ -4155,7 +4155,7 @@ BEGIN TRY
 			,NULL
 			,NULL
 			,NULL
-			,NULL
+			,@dblOpenBalance
 			,@StorageChargeDate
 			,(@dblNewStoragePaid - @dblOldStoragePaid)
 			,NULL
