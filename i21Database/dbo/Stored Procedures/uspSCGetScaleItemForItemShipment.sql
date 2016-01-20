@@ -110,8 +110,9 @@ BEGIN TRY
 							ON ScaleTicket.intItemId = ItemLocation.intItemId
 							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
+							--INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
+							INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+						AND ItemUOM.ysnStockUnit = 1
 				WHERE	ScaleTicket.intTicketId = @intTicketId
 			
 			END
