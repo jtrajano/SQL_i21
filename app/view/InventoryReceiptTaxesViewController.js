@@ -79,6 +79,7 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                         itemId: 'colRate',
                         width: 65,
                         align: 'right',
+                        format: '0,000.00####',
                         dataIndex: 'dblRate',
                         text: 'Rate'
                     },
@@ -87,6 +88,7 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                         itemId: 'colTax',
                         width: 65,
                         align: 'right',
+                        format: '0,000.00####',
                         dataIndex: 'dblTax',
                         text: 'Tax Amount'
                     }
