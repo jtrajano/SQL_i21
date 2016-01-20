@@ -11,7 +11,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             columns: [
 
-                {dataIndex: 'intInventoryTransferId', text: 'Inventory Transfer Id', flex: 1, dataType: 'numeric', defaultSort: true, key: true, hidden: true },
+                {dataIndex: 'intInventoryTransferId', text: 'Inventory Transfer Id', flex: 1, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
                 {dataIndex: 'strTransferNo', text: 'Transfer No', flex: 1, dataType: 'string' },
                 {dataIndex: 'dtmTransferDate', text: 'Transfer Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
                 {dataIndex: 'strTransferType', text: 'Transfer Type', flex: 1, dataType: 'string' },
