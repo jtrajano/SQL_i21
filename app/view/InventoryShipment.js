@@ -1350,6 +1350,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colDiscountSchedule',
+                                                                        width: 120,
+                                                                        dataIndex: 'strDockDoor',
+                                                                        text: 'Discount Schedule'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colDockDoor',
                                                                         width: 75,
                                                                         dataIndex: 'strDockDoor',

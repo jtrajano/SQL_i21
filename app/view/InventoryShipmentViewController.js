@@ -364,6 +364,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         ]
                     }
                 },
+                colDiscountSchedule: 'strDiscountSchedule',
                 colOwnershipType: {
                     hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
