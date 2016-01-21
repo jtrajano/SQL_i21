@@ -374,3 +374,7 @@ EXEC sp_addmessage 80073,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80074) EXEC sp_dropmessage 80074, 'us_english'	
 SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
 EXEC sp_addmessage 80074,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80075) EXEC sp_dropmessage 80075, 'us_english'	
+SET @strmessage = 'Unable to update %s. It is posted. Please unpost it first.'
+EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'

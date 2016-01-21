@@ -10,8 +10,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @StartingNumberId_InventoryTransfer AS INT = 41;
-DECLARE @InventoryTransferNumber AS NVARCHAR(50);
-DECLARE @InventoryTransferId AS INT
+DECLARE @inventoryTransferNumber AS NVARCHAR(50);
+DECLARE @inventoryTransferId AS INT
 		,@strSourceId AS NVARCHAR(50)
 		,@strSourceScreenName AS NVARCHAR(50)
 		,@strTransferId AS NVARCHAR(50)		
@@ -84,11 +84,11 @@ BEGIN
 	-- Begin Loop
 	WHILE @@FETCH_STATUS = 0
 	BEGIN 
-		SET @InventoryTransferNumber = NULL 
-		SET @InventoryTransferId = NULL 
+		SET @inventoryTransferNumber = NULL 
+		SET @inventoryTransferId = NULL 
 
 		-- Check if there is an existing Inventory Transfer 
-		SELECT	@InventoryTransferId = RawData.intInventoryTransferId
+		SELECT	@inventoryTransferId = RawData.intInventoryTransferId
 				,@strSourceScreenName = RawData.strSourceScreenName
 				,@strSourceId = RawData.strSourceId
 		FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData
@@ -99,14 +99,26 @@ BEGIN
 					AND RawHeaderData.StatusId = RawData.intStatusId
 					AND ISNULL(RawHeaderData.ShipViaId, 0) = ISNULL(RawData.intShipViaId, 0)
 		WHERE	RawHeaderData.intId = @intId
+
+		-- Block overwrite of a posted inventory transfer record.
+		IF EXISTS (SELECT 1 FROM dbo.tblICInventoryTransfer WHERE intInventoryTransferId = @inventoryTransferId AND ISNULL(ysnPosted, 0) = 1) 
+		BEGIN 
+			SELECT	@inventoryTransferNumber = strTransferNo
+			FROM	dbo.tblICInventoryTransfer 
+			WHERE	intInventoryTransferId = @inventoryTransferId
+
+			-- 'Unable to update %s. It is posted. Please unpost it first.'
+			RAISERROR(80075, 11, 1, @inventoryTransferNumber);	
+			GOTO _Exit;
+		END
 				
-		IF @InventoryTransferId IS NULL 
+		IF @inventoryTransferId IS NULL 
 		BEGIN 
 			-- Generate the transfer starting number
-			-- If @InventoryTransferNumber IS NULL, uspSMGetStartingNumber will throw an error. 
+			-- If @inventoryTransferNumber IS NULL, uspSMGetStartingNumber will throw an error. 
 			-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
-			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryTransfer, @InventoryTransferNumber OUTPUT 
-			IF @@ERROR <> 0 OR @InventoryTransferNumber IS NULL GOTO _BreakLoop;
+			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryTransfer, @inventoryTransferNumber OUTPUT 
+			IF @@ERROR <> 0 OR @inventoryTransferNumber IS NULL GOTO _BreakLoop;
 		END 
 
 		MERGE	
@@ -161,7 +173,7 @@ BEGIN
 				,intEntityId
 			)
 			VALUES (
-				/*strTransferNo*/			@InventoryTransferNumber		
+				/*strTransferNo*/			@inventoryTransferNumber		
 				/*dtmTransferDate*/			,dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmTransferDate, GETDATE())) 
 				/*strTransferType*/			,IntegrationData.strTransferType
 				/*intSourceType*/			,IntegrationData.intSourceType
@@ -179,13 +191,13 @@ BEGIN
 		;
 				
 		-- Get the identity value from tblICInventoryReceipt to check if the insert was successful
-		IF @InventoryTransferId IS NULL 
+		IF @inventoryTransferId IS NULL 
 		BEGIN 
-			SELECT @InventoryTransferId = SCOPE_IDENTITY()
+			SELECT @inventoryTransferId = SCOPE_IDENTITY()
 		END 
 
 		-- Validate the Inventory Transfer id
-		IF @InventoryTransferId IS NULL 
+		IF @inventoryTransferId IS NULL 
 		BEGIN 
 			-- 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
 			RAISERROR(80061, 11, 1);
@@ -195,7 +207,7 @@ BEGIN
 		--  Flush out existing detail detail data for re-insertion
 		BEGIN 
 			DELETE FROM dbo.tblICInventoryTransferDetail
-			WHERE intInventoryTransferId = @InventoryTransferId
+			WHERE intInventoryTransferId = @inventoryTransferId
 		END 
 
 		-- Insert the Inventory Transfer Detail. 
@@ -223,7 +235,7 @@ BEGIN
 				,[intConcurrencyId]		
 		)
 		SELECT
-				[intInventoryTransferId]	= @InventoryTransferId
+				[intInventoryTransferId]	= @inventoryTransferId
 				,[intSourceId]				= RawData.intSourceId
 				,[intItemId]				= RawData.intItemId
 				,[intLotId]					= RawData.intLotId
@@ -270,7 +282,7 @@ BEGIN
 				,InvTransfer.intInventoryTransferId
 		FROM	dbo.tblICInventoryTransfer InvTransfer INNER JOIN dbo.tblICInventoryTransferDetail InvDetail
 					ON InvTransfer.intInventoryTransferId = InvDetail.intInventoryTransferId
-		WHERE	InvTransfer.intInventoryTransferId = @InventoryTransferId
+		WHERE	InvTransfer.intInventoryTransferId = @inventoryTransferId
 
 		-- Create an Audit Log
 		BEGIN 
@@ -278,10 +290,10 @@ BEGIN
 			
 			SELECT	@strTransferId = strTransferNo
 			FROM	dbo.tblICInventoryTransfer 
-			WHERE	intInventoryTransferId = @InventoryTransferId
+			WHERE	intInventoryTransferId = @inventoryTransferId
 			
 			EXEC	dbo.uspSMAuditLog 
-					@keyValue = @InventoryTransferId						-- Primary Key Value of the Inventory Transfer. 
+					@keyValue = @inventoryTransferId						-- Primary Key Value of the Inventory Transfer. 
 					,@screenName = 'Inventory.view.InventoryTransfer'       -- Screen Namespace
 					,@entityId = @intEntityUserSecurityId                   -- Entity Id.
 					,@actionType = 'Processed'                              -- Action Type
