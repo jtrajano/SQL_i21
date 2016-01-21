@@ -52,10 +52,15 @@ AS
 		   iu.intUnitMeasureId AS intItemUOMId,
 		   um1.strUnitMeasure AS strItemUOM,
 		   ISNULL(um.strUnitMeasure,um1.strUnitMeasure) AS strUOM,
-		   c.strCategoryCode
+		   c.strCategoryCode,
+		   e.strName AS strItemOwner,
+		   ac.intEntityCustomerId AS intItemOwnerId
 	FROM tblICItem i
+	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId AND ysnWarehouseTracked = 1
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = i.intWeightUOMId
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId
 	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu.intUnitMeasureId
-	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId AND ysnWarehouseTracked = 1
+	LEFT JOIN tblICItemOwner io ON io.intItemId = i.intItemId 
+	LEFT JOIN tblARCustomer ac ON ac.intEntityCustomerId = io.intOwnerId
+	LEFT JOIN tblEntity e ON e.intEntityId = ac.intEntityCustomerId
 	WHERE iu.ysnStockUnit = 1 
