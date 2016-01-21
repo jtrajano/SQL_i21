@@ -106,7 +106,8 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                 colSubLocation: 'strSubLocationName',
                 colEffectiveDepth: 'dblEffectiveDepth',
                 colAirSpaceReading: 'dblAirSpaceReading',
-                colCashPrice: 'dblCashPrice'
+                colCashPrice: 'dblCashPrice',
+                colDiscountSchedule: 'strDiscountSchedule'
             }
         }
     },

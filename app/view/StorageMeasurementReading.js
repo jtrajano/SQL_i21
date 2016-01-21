@@ -33,9 +33,11 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 441,
+    height: 400,
     hidden: false,
-    width: 839,
+    minHeight: 400,
+    minWidth: 850,
+    width: 850,
     layout: 'fit',
     collapsible: true,
     title: 'Storage Measurement Reading',
@@ -239,9 +241,8 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCommodity',
-                                                        width: 75,
+                                                        width: 100,
                                                         text: 'Commodity',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -271,8 +272,8 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colItem',
+                                                        width: 120,
                                                         text: 'Item',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -313,8 +314,8 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colStorageLocation',
+                                                        width: 120,
                                                         text: 'Storage Location',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -361,21 +362,21 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colSubLocation',
-                                                        text: 'Sub Location',
-                                                        flex: 1
+                                                        width: 120,
+                                                        text: 'Sub Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colEffectiveDepth',
-                                                        text: 'Effective Depth',
-                                                        flex: 1
+                                                        width: 100,
+                                                        text: 'Effective Depth'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colAirSpaceReading',
+                                                        width: 120,
                                                         align: 'right',
                                                         text: 'Air Space Reading',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
@@ -383,12 +384,18 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colCashPrice',
+                                                        width: 100,
                                                         align: 'right',
                                                         text: 'Cash Price',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'numberfield'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDiscountSchedule',
+                                                        width: 120,
+                                                        text: 'Discount Schedule'
                                                     }
                                                 ],
                                                 viewConfig: {

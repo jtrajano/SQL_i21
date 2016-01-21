@@ -10,17 +10,17 @@
         "defaultFocus": null,
         "designer|userAlias": "storagemeasurementreading",
         "designer|userClassName": "StorageMeasurementReading",
-        "height": 441,
+        "height": 400,
         "hidden": false,
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 400,
+        "minWidth": 850,
         "minimizable": null,
         "reference": null,
         "title": "Storage Measurement Reading",
-        "width": 839
+        "width": 850
     },
     "name": "InventoryUOM1",
     "designerId": "de4dfa55-f672-4bb0-b4aa-c1168bd9ca5a",
@@ -445,10 +445,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
                                                 "itemId": "colCommodity",
                                                 "text": "Commodity",
-                                                "width": 75
+                                                "width": 100
                                             },
                                             "name": "MyColumn",
                                             "designerId": "3f1a6600-461c-44eb-b773-fc388f1ab9fe",
@@ -510,9 +509,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
                                                 "itemId": "colItem",
-                                                "text": "Item"
+                                                "text": "Item",
+                                                "width": 120
                                             },
                                             "name": "MyColumn1",
                                             "designerId": "6042099d-4f82-4068-8b81-cecb47dd31ea",
@@ -585,9 +584,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
                                                 "itemId": "colStorageLocation",
-                                                "text": "Storage Location"
+                                                "text": "Storage Location",
+                                                "width": 120
                                             },
                                             "name": "MyColumn3",
                                             "designerId": "f78d987a-8e71-494c-a43c-e55604925798",
@@ -666,9 +665,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
                                                 "itemId": "colSubLocation",
-                                                "text": "Sub Location"
+                                                "text": "Sub Location",
+                                                "width": 120
                                             },
                                             "name": "MyColumn4",
                                             "designerId": "16a55b34-85b9-489a-aeaa-9ad6ef03d80d"
@@ -681,9 +680,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": 1,
                                                 "itemId": "colEffectiveDepth",
-                                                "text": "Effective Depth"
+                                                "text": "Effective Depth",
+                                                "width": 100
                                             },
                                             "name": "MyColumn5",
                                             "designerId": "f3229814-4675-4c59-8bcc-7807ba69b9f0"
@@ -697,9 +696,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
-                                                "flex": 1,
                                                 "itemId": "colAirSpaceReading",
-                                                "text": "Air Space Reading"
+                                                "text": "Air Space Reading",
+                                                "width": 120
                                             },
                                             "name": "MyNumberColumn22",
                                             "designerId": "b467e916-672f-4437-917b-d1716d83a8e9",
@@ -728,9 +727,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
-                                                "flex": 1,
                                                 "itemId": "colCashPrice",
-                                                "text": "Cash Price"
+                                                "text": "Cash Price",
+                                                "width": 100
                                             },
                                             "name": "MyNumberColumn23",
                                             "designerId": "f6c5b626-ec6d-4507-810a-b8d18b5b6c6f",
@@ -749,6 +748,21 @@
                                                     "designerId": "c70110f0-5839-464c-a493-45e069e2d246"
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "colDiscountSchedule",
+                                                "text": "Discount Schedule",
+                                                "width": 120
+                                            },
+                                            "name": "MyColumn48",
+                                            "designerId": "22b7f7c2-04d7-40d3-85b7-13d43f9f33c5"
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -806,7 +820,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging123",
+                    "name": "statusbarpaging13",
                     "designerId": "ac3df6f4-409d-46ea-8bc7-e00669c50ed4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
