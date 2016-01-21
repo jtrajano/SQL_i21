@@ -9,19 +9,22 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@dblQuantity			NUMERIC(12,4),
-			@dblOldBalance			NUMERIC(12,4),
-			@dblNewBalance			NUMERIC(12,4),
+			@dblQuantity			NUMERIC(18,6),
+			@dblOldBalance			NUMERIC(18,6),
+			@dblNewBalance			NUMERIC(18,6),
 			@strAdjustmentNo		NVARCHAR(50),
-			@dblTransactionQuantity	NUMERIC(12,4),
-			@dblQuantityToIncrease	NUMERIC(12,4),
-			@ysnUnlimitedQuantity	BIT
+			@dblTransactionQuantity	NUMERIC(18,6),
+			@dblQuantityToIncrease	NUMERIC(18,6),
+			@ysnUnlimitedQuantity	BIT,
+			@ysnCompleted			BIT	= 0,
+			@intPricingTypeId		INT
 	
 	BEGINING:
 
 	SELECT	@dblQuantity			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblDetailQuantity,0) ELSE ISNULL(intNoOfLoad,0) END,
 			@dblOldBalance			=	ISNULL(dblBalance,0),
-			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0)
+			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0),
+			@intPricingTypeId		=	intPricingTypeId
 	FROM	vyuCTContractDetailView 
 	WHERE	intContractDetailId		=	@intContractDetailId 
 	
@@ -54,18 +57,24 @@ BEGIN TRY
 		RAISERROR('Balance cannot be more than quantity.',16,1)
 	END
 	
+	IF	@ysnUnlimitedQuantity = 1 OR @intPricingTypeId IN (2,3,5)
+	BEGIN
+		SET @ysnCompleted = 0
+	END
+	ELSE IF @intPricingTypeId IN (1,6,7) AND @dblNewBalance = 0 
+	BEGIN
+		SET @ysnCompleted = 1
+	END
+
 	UPDATE	tblCTContractDetail
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
 			dblBalance			=	@dblNewBalance,
-			intContractStatusId	=	CASE	WHEN @ysnUnlimitedQuantity = 0  
-											THEN	CASE	WHEN @dblNewBalance = 0 
-															THEN 5 
-															ELSE	CASE	WHEN intContractStatusId = 5 
-																			THEN 1 
-																			ELSE intContractStatusId 
-																	END 
+			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0  
+											THEN	CASE	WHEN intContractStatusId = 5 
+															THEN 1 
+															ELSE intContractStatusId 
 													END 
-											ELSE intContractStatusId 
+											ELSE 5 
 									END
 	WHERE	intContractDetailId =	@intContractDetailId
 
