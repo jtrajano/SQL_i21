@@ -289,12 +289,22 @@ BEGIN TRY
 						BEGIN
 							BREAK;
 						END
-						EXEC [uspWHCreateSplitAndPickTask] @intOrderHeaderId = @intOrderHeaderId, 
-														   @intSKUId = @intSKUId,
-														   @strUserName = @strUserName, 
-														   @dblSplitAndPickQty = @dblRequiredQty,
-														   @intTaskTypeId = 7
-						--SELECT 3,@intItemId
+						IF (@dblRemainingSKUQty <= @dblRequiredQty)
+						BEGIN
+								EXEC [uspWHCreateSplitAndPickTask] @intOrderHeaderId = @intOrderHeaderId, 
+																   @intSKUId = @intSKUId,
+																   @strUserName = @strUserName, 
+																   @dblSplitAndPickQty = @dblRemainingSKUQty,
+																   @intTaskTypeId = 7
+						END
+						ELSE 
+						BEGIN
+								EXEC [uspWHCreateSplitAndPickTask] @intOrderHeaderId = @intOrderHeaderId, 
+																   @intSKUId = @intSKUId,
+																   @strUserName = @strUserName, 
+																   @dblSplitAndPickQty = @dblRequiredQty,
+																   @intTaskTypeId = 7
+						END--SELECT 3,@intItemId
 						SET @dblRequiredQty = @dblRequiredQty - @dblQty
 						IF @dblRequiredQty <= 0
 						BEGIN
@@ -315,14 +325,10 @@ BEGIN TRY
 						ORDER BY ABS(s.dblQty - @dblRequiredQty) ASC
 					END
 			END
-			
 			SELECT @intItemRecordId = MIN(intItemRecordId)
 			FROM @tblLineItem WHERE intItemRecordId > @intItemRecordId
- 
 		END
  
-
-	
 	IF @intTransactionCount = 0
 	COMMIT TRANSACTION		
 END TRY
@@ -333,11 +339,6 @@ BEGIN CATCH
 		ROLLBACK TRANSACTION
 
 	SET @strErrMsg = ERROR_MESSAGE()
+	RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
 
-	RAISERROR (
-			@strErrMsg
-			,16
-			,1
-			,'WITH NOWAIT'
-			)
 END CATCH
