@@ -20,6 +20,12 @@ AS
 	DECLARE @ReceiptStagingTable	ReceiptStagingTable,
 			@OtherCharges			ReceiptOtherChargesTableType
 
+	
+	IF EXISTS (SELECT 1 FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId AND dblAvailableQty <= 0) 
+	BEGIN 
+		RAISERROR('No quantity is available to process.',16,1)
+	END
+
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 	BEGIN 
 		CREATE TABLE #tmpAddItemReceiptResult 
