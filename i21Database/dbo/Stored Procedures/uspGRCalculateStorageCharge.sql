@@ -200,6 +200,7 @@ BEGIN TRY
 					SELECT 1 FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
 				AND dtmLastStorageAccrueDate IS NOT NULL
 				AND (dtmLastStorageAccrueDate >= @StorageChargeDate)
+				AND (@strProcessType < > 'recalculate')
 			  ) --1.Calculation Date less than or equal to Last Accrue Date.
 			  
 		OR (@StorageChargeDate < @dtmDeliveryDate) --2.Calculation Date less than Delivery Date.
