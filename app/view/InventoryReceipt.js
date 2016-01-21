@@ -1473,6 +1473,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colDiscountSchedule',
+                                                                                width: 120,
+                                                                                dataIndex: 'strDescription',
+                                                                                text: 'Discount Schedule'
+                                                                            },
+                                                                            {
                                                                                 xtype: 'numbercolumn',
                                                                                 itemId: 'colUnitRetail',
                                                                                 width: 85,
