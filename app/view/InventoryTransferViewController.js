@@ -323,6 +323,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             window : win,
             store  : store,
             enableComment: true,
+            enableAudit: true,
             include: 'tblICInventoryTransferDetails.vyuICGetInventoryTransferDetail',
             createRecord : me.createRecord,
             binding: me.config.binding,

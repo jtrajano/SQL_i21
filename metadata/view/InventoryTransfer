@@ -1115,7 +1115,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter1",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2199,6 +2199,50 @@
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "itemId": "pgeAuditLog",
+                                "layout": "fit",
+                                "title": "Audit Log"
+                            },
+                            "name": "MyPanel12",
+                            "designerId": "d9b8f17a-77bc-4935-96a2-65bfecfb63ee",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgAuditLog"
+                                    },
+                                    "name": "TabConfig3",
+                                    "designerId": "a98e5773-4e27-4886-b061-9e89bc2fb193"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "auditlogtree",
+                                        "designer|displayName": "auditlog"
+                                    },
+                                    "name": "MyContainer21",
+                                    "designerId": "fe4ca98c-a821-4096-8358-e3ab5da46183"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -2213,7 +2257,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

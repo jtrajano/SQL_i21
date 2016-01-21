@@ -1074,6 +1074,21 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        itemId: 'pgeAuditLog',
+                                        layout: 'fit',
+                                        title: 'Audit Log',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgAuditLog'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'auditlogtree'
+                                            }
+                                        ]
                                     }
                                 ]
                             }
