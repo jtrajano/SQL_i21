@@ -55,6 +55,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Item.strLifeTimeType
 	, ReceiptItemSource.ysnLoad
 	, ReceiptItemSource.dblAvailableQty
+	, ReceiptItem.intDiscountSchedule
+	, strDiscountSchedule = ''
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
