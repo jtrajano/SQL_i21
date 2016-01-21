@@ -107,7 +107,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intLocationId			= SC.intProcessingLocationId
 		,strVendorRefNo			= SC.strCustomerReference
 		,strBillOfLading		= NULL
-		,intShipViaId			= NULL
+		,intShipViaId			= SC.intFreightCarrierId
 		,intShipFromId			= NULL 
 		,intReceiverId			= @intUserId 
 		,intCurrencyId			= SC.intCurrencyId
@@ -161,6 +161,8 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intSort
     ,intConcurrencyId
 	,intOwnershipType
+	,dblGross
+	,dblNet
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intLineNo				= ISNULL (LI.intTransactionDetailId, 1)
@@ -193,6 +195,8 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 								  WHEN LI.ysnIsStorage = 1
 								  THEN 2
 								  END
+		,dblGros				= SC.dblGross
+		,dblNet					= SC.dblGross - dblShrink
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId

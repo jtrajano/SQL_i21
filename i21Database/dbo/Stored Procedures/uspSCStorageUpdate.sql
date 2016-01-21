@@ -40,6 +40,7 @@ DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 DECLARE @intDefaultStorageSchedule AS INT
 DECLARE @intCommodityId AS INT
 DECLARE @matchStorageType AS INT
+DECLARE @ysnIsStorage AS INT
 
 
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -85,6 +86,10 @@ BEGIN TRY
 	END
 
     BEGIN
+	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+		SET @ysnIsStorage = 0
+	ELSE
+		SET @ysnIsStorage = 1
 	IF @dblNetUnits < 0
 	BEGIN
 		SET @PostShipment = 2
@@ -230,7 +235,7 @@ BEGIN TRY
 									,intLotId = NULL 
 									,intSubLocationId = ScaleTicket.intSubLocationId
 									,intStorageLocationId = ScaleTicket.intStorageLocationId
-									,ysnIsStorage = 0
+									,ysnIsStorage = @ysnIsStorage
 							FROM	dbo.tblSCTicket ScaleTicket
 									INNER JOIN dbo.tblICItemUOM ItemUOM
 										ON ScaleTicket.intItemId = ItemUOM.intItemId

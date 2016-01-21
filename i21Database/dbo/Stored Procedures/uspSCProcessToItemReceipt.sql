@@ -69,7 +69,10 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT @intLoadContractId = LGL.intContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM tblLGLoad LGL WHERE LGL.intLoadId = @intLoadId
+				SELECT @intLoadContractId = LGLD.intPContractDetailId, @dblLoadScheduledUnits = LGLD.dblQuantity FROM tblLGLoad LGL
+				INNER JOIN tblLGLoadDetail LGLD
+				ON LGL.intLoadId = LGLD.intLoadId 
+				WHERE LGL.intLoadId = @intLoadId
 			END
 			IF @intLoadContractId IS NULL
 			BEGIN 
@@ -204,7 +207,7 @@ BEGIN TRY
 		END
 		IF(@dblRemainingUnits > 0)
 		BEGIN
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDummyDistributionOption, NULL
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
 			IF (@dblRemainingUnits = @dblNetUnits)
 			RETURN
 		END
