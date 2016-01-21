@@ -7,6 +7,7 @@
     [intStorageLocationId] INT NOT NULL, 
     [dblAirSpaceReading] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblCashPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[intDiscountSchedule] INT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStorageMeasurementReadingConversion] PRIMARY KEY ([intStorageMeasurementReadingConversionId]), 
