@@ -14,8 +14,23 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 BEGIN TRY
-declare @intTicketId int,@intInboundLoadId int,@intOutboundLoadId int,
+declare @intLoadDetailId int,
+        @total int,
+		@incval int,
     	        @dtmDeliveredDate DATETIME,@dblDeliveredQuantity DECIMAL(18, 6);
+DECLARE @LoadTable TABLE
+(
+    intId INT IDENTITY PRIMARY KEY CLUSTERED,
+	[intLoadDetailId] INT NULL,
+	[dtmDeliveredDate] DATETIME null,
+	[dblDeliveredQuantity] decimal(18,6) null	
+)
+
+INSERT into @LoadTable
+    	select  DD.intLoadDetailId,DH.dtmInvoiceDateTime,dblUnits     
+			    from tblTRLoadDistributionHeader DH
+				     join tblTRLoadDistributionDetail DD on DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+    			    where DH.intLoadHeaderId = @intLoadHeaderId and isNUll(intLoadDetailId ,0 ) !=0
 
 if @ysnPostOrUnPost = 1
     BEGIN
@@ -27,19 +42,20 @@ if @ysnPostOrUnPost = 1
     
     --Update the Logistics Load 
     	
-    
-    	select @intTicketId = TL.intLoadHeaderId ,@intInboundLoadId = LG.intLoadId,@intOutboundLoadId = LG.intOutboundLoadId,@dtmDeliveredDate = TL.dtmLoadDateTime,
-    	       @dblDeliveredQuantity = (select top 1 dblGross from tblTRLoadReceipt TR where TR.intLoadHeaderId = TL.intLoadHeaderId) from tblTRLoadHeader TL
-    	            join vyuTRDispatchedLoad LG on isNull(TL.intLoadId,0) = isNull(LG.intLoadId,0)
-    			    where TL.intLoadHeaderId = @intLoadHeaderId
-        IF (isNull(@intInboundLoadId,0) != 0)
-    	BEGIN
-            Exec dbo.uspLGUpdateLoadDetails @intInboundLoadId,0,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
-    	END
-    	IF (isNull(@intOutboundLoadId,0) != 0 and isNull(@intInboundLoadId,0) != isNull(@intOutboundLoadId,0))
-    	BEGIN
-    	    Exec dbo.uspLGUpdateLoadDetails @intOutboundLoadId,0,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
-        END
+       
+
+		select @total = count(*) from @LoadTable
+        set @incval = 1 
+        WHILE @incval <=@total 
+        BEGIN
+             select @intLoadDetailId =intLoadDetailId,@dtmDeliveredDate = dtmDeliveredDate,@dblDeliveredQuantity = dblDeliveredQuantity from @LoadTable where @incval = intId
+
+             IF (isNull(@intLoadDetailId,0) != 0)
+    	     BEGIN
+                 Exec dbo.uspLGUpdateLoadDetails @intLoadDetailId,0,@intLoadHeaderId,@dtmDeliveredDate,@dblDeliveredQuantity
+    	     END
+    	SET @incval = @incval + 1;
+		END
     END
 ELSE
     BEGIN
@@ -49,19 +65,18 @@ ELSE
     		  FROM	dbo.tblTRLoadHeader TransportLoad 
     		  WHERE	TransportLoad.intLoadHeaderId = @intLoadHeaderId
     
-    --Update the Logistics Load 
-    	select @intTicketId = TL.intLoadHeaderId ,@intInboundLoadId = LG.intLoadId,@intOutboundLoadId = LG.intOutboundLoadId,@dtmDeliveredDate = TL.dtmLoadDateTime,
-    	       @dblDeliveredQuantity = (select top 1 dblGross from tblTRLoadReceipt TR where TR.intLoadHeaderId = TL.intLoadHeaderId) from tblTRLoadHeader TL
-    	            join vyuTRDispatchedLoad LG on isNull(TL.intLoadId,0) = isNull(LG.intLoadId,0)
-    			    where TL.intLoadHeaderId = @intLoadHeaderId
-        IF (isNull(@intInboundLoadId,0) != 0)
-    	BEGIN
-            Exec dbo.uspLGUpdateLoadDetails @intInboundLoadId,1,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
+        select @total = count(*) from @LoadTable
+        set @incval = 1 
+        WHILE @incval <=@total 
+        BEGIN
+             select @intLoadDetailId =intLoadDetailId,@dtmDeliveredDate = dtmDeliveredDate,@dblDeliveredQuantity = dblDeliveredQuantity from @LoadTable where @incval = intId
+
+             IF (isNull(@intLoadDetailId,0) != 0)
+    	     BEGIN
+                 Exec dbo.uspLGUpdateLoadDetails @intLoadDetailId,1,@intLoadHeaderId,@dtmDeliveredDate,@dblDeliveredQuantity
+    	     END
+		   SET @incval = @incval + 1; 
     	END
-    	IF (isNull(@intOutboundLoadId,0) != 0 and isNull(@intInboundLoadId,0) != isNull(@intOutboundLoadId,0))
-    	BEGIN
-    	    Exec dbo.uspLGUpdateLoadDetails @intOutboundLoadId,1,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
-        END
 	END
 END TRY
 BEGIN CATCH

@@ -13,67 +13,70 @@ SET ANSI_WARNINGS OFF
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
-DECLARE  @intLoadHeaderId AS INT;
-DECLARE @intContractDetailId as int,
+DECLARE  @intLoadHeaderId AS INT,
+         @intLoadDetailId as int;
+DECLARE @intPContractDetailId as int,
+        @intSContractDetailId as int,
+		@total int,
+		@incval int,
         @dblQuantity as float;
+
+DECLARE @LoadTable TABLE
+(
+    intId INT IDENTITY PRIMARY KEY CLUSTERED,
+	[intLoadDetailId] INT NULL
+)
+
 BEGIN TRY
   select @intLoadHeaderId = intLoadHeaderId from tblTRLoadHeader where strTransaction = @strTransaction
 
+  insert into @LoadTable select distinct intLoadDetailId from tblTRLoadReceipt where intLoadHeaderId = @intLoadHeaderId and isNUll(intLoadDetailId ,0 ) !=0
 --Update the Logistics Load for InProgress 
-	declare @intTicketId int,@intInboundLoadId int,@intOutboundLoadId int;
-	       
+	
+select @total = count(*) from @LoadTable;
+set @incval = 1 
+WHILE @incval <=@total 
+BEGIN
+     select @intLoadDetailId =intLoadDetailId  from @LoadTable where @incval = intId
 
-	select @intTicketId = TL.intLoadHeaderId ,@intInboundLoadId = LG.intLoadId,@intOutboundLoadId = LG.intOutboundLoadId from tblTRLoadHeader TL
-	            join vyuTRDispatchedLoad LG on isNull(TL.intLoadId,0) = isNull(LG.intLoadId,0)
-			    where TL.intLoadHeaderId = @intLoadHeaderId
-    IF (isNull(@intInboundLoadId,0) != 0)
+    IF (isNull(@intLoadDetailId,0) != 0)
 	BEGIN
 	   if (@action = 'Added')
 	   BEGIN
-        Exec dbo.uspLGUpdateLoadDetails @intInboundLoadId,1,@intTicketId,null,null
+        Exec dbo.uspLGUpdateLoadDetails @intLoadDetailId,1,@intLoadHeaderId,null,null
        END
-		SELECT @intContractDetailId = intContractDetailId, @dblQuantity = dblQuantity from tblLGLoad WHERE intLoadId=@intInboundLoadId
-		IF (isNull(@intContractDetailId,0) != 0)
-		  Begin
-		     if (@action = 'Added')
-		     BEGIN
-		       set @dblQuantity = @dblQuantity * -1
-             END 
-		     exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity,@intUserId,@intInboundLoadId,'Load Schedule'
-		  END
-	   if (@action = 'Delete')
-	   BEGIN
-	      UPDATE tblLGLoad SET 
-			intLoadHeaderId=null,
-			ysnInProgress = 0,
-			intConcurrencyId	=	intConcurrencyId + 1
-		  WHERE intLoadId=@intInboundLoadId
-	   END
-	END
-	IF (isNull(@intOutboundLoadId,0) != 0 and isNull(@intInboundLoadId,0) != isNull(@intOutboundLoadId,0))
-	BEGIN
-	    if (@action = 'Added')
-		BEGIN
-	         Exec dbo.uspLGUpdateLoadDetails @intOutboundLoadId,1,@intTicketId,null,null
-		END
-		SELECT @intContractDetailId = intContractDetailId, @dblQuantity = dblQuantity from tblLGLoad WHERE intLoadId=@intOutboundLoadId
-		IF (isNull(@intContractDetailId,0) != 0)
-		  Begin
-		    if (@action = 'Added')
+		SELECT @intPContractDetailId = intPContractDetailId, @intSContractDetailId = intSContractDetailId,@dblQuantity = dblQuantity from tblLGLoadDetail WHERE intLoadDetailId=@intLoadDetailId
+		if (@action = 'Added')
 		    BEGIN
 		        set @dblQuantity = @dblQuantity * -1
 		    END
-		    exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity,@intUserId,@intOutboundLoadId,'Load Schedule'
+		IF (isNull(@intPContractDetailId,0) != 0)
+		  Begin		    
+		     exec uspCTUpdateScheduleQuantity @intPContractDetailId, @dblQuantity,@intUserId,@intLoadDetailId,'Load Schedule'
 		  END
+
+	   IF (isNull(@intSContractDetailId,0) != 0)
+		  Begin		    
+		    exec uspCTUpdateScheduleQuantity @intSContractDetailId, @dblQuantity,@intUserId,@intLoadDetailId,'Load Schedule'
+		  END
+
 	   if (@action = 'Delete')
 	   BEGIN
 	      UPDATE tblLGLoad SET 
 			intLoadHeaderId=null,
 			ysnInProgress = 0,
 			intConcurrencyId	=	intConcurrencyId + 1
-		  WHERE intLoadId=@intOutboundLoadId
+		  WHERE intLoadId=@intLoadDetailId
+		  UPDATE tblTRLoadReceipt SET 
+			intLoadDetailId = null
+		  WHERE intLoadDetailId=@intLoadDetailId
+		  UPDATE tblTRLoadDistributionDetail SET 
+			intLoadDetailId = null
+		  WHERE intLoadDetailId=@intLoadDetailId
 	   END
-    END
+	END
+	set @incval = @incval + 1;
+END
 END TRY
 BEGIN CATCH
 	SELECT 
