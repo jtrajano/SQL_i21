@@ -44,6 +44,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.dblAirSpaceReading).HasColumnName("dblAirSpaceReading").HasPrecision(18, 6);
             this.Property(t => t.dblCashPrice).HasColumnName("dblCashPrice").HasPrecision(18, 6);
+            this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetStorageMeasurementReadingConversion)
@@ -75,6 +76,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
             this.Property(t => t.dblAirSpaceReading).HasColumnName("dblAirSpaceReading").HasPrecision(18, 6);
             this.Property(t => t.dblCashPrice).HasColumnName("dblCashPrice").HasPrecision(18, 6);
+            this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
+            this.Property(t => t.strDiscountSchedule).HasColumnName("strDiscountSchedule");
         }
     }
 }

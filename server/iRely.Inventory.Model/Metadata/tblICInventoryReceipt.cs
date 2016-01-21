@@ -211,7 +211,7 @@ namespace iRely.Inventory.Model
         public decimal? dblOrderQty { get; set; }
         public decimal? dblBillQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
-        public int intLoadReceive { get; set; }
+        public int? intLoadReceive { get; set; }
         public int? intUnitMeasureId { get; set; }
         public int? intWeightUOMId { get; set; }
         public int? intCostUOMId { get; set; }
@@ -222,6 +222,7 @@ namespace iRely.Inventory.Model
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
         public decimal? dblTax { get; set; }
+        public int? intDiscountSchedule { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
@@ -726,7 +727,25 @@ namespace iRely.Inventory.Model
                 _availableQty = value;
             }
         }
-        
+        private string _discountSchedule;
+        [NotMapped]
+        public string strDiscountSchedule
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_discountSchedule))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strDiscountSchedule;
+                    else
+                        return null;
+                else
+                    return _discountSchedule;
+            }
+            set
+            {
+                _discountSchedule = value;
+            }
+        }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
@@ -761,6 +780,7 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public decimal? dblQtyToReceive { get; set; }
+        public int? intLoadToReceive { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblTax { get; set; }
         public decimal? dblLineTotal { get; set; }
@@ -788,6 +808,8 @@ namespace iRely.Inventory.Model
         public string strLifeTimeType { get; set; }
         public bool? ysnLoad { get; set; }
         public decimal? dblAvailableQty { get; set; }
+        public int? intDiscountSchedule { get; set; }
+        public string strDiscountSchedule { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

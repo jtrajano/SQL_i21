@@ -127,6 +127,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intDockDoorId).HasColumnName("intDockDoorId");
             this.Property(t => t.strNotes).HasColumnName("strNotes");
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
+            this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasMany(p => p.tblICInventoryShipmentItemLots)
@@ -268,6 +269,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
+            this.Property(t => t.strDiscountSchedule).HasColumnName("strDiscountSchedule");
         }
     }
 

@@ -45,6 +45,7 @@ namespace iRely.Inventory.Model
         public int? intStorageLocationId { get; set; }
         public decimal? dblAirSpaceReading { get; set; }
         public decimal? dblCashPrice { get; set; }
+        public int? intDiscountSchedule { get; set; }
         public int? intSort { get; set; }
 
         private string _commodity;
@@ -155,6 +156,25 @@ namespace iRely.Inventory.Model
                 _effectiveDepth = value;
             }
         }
+        private string _discountSchedule;
+        [NotMapped]
+        public string strDiscountSchedule
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_discountSchedule))
+                    if (vyuICGetStorageMeasurementReadingConversion != null)
+                        return vyuICGetStorageMeasurementReadingConversion.strDiscountSchedule;
+                    else
+                        return null;
+                else
+                    return _discountSchedule;
+            }
+            set
+            {
+                _discountSchedule = value;
+            }
+        }
 
         public tblICStorageMeasurementReading tblICStorageMeasurementReading { get; set; }
         public vyuICGetStorageMeasurementReadingConversion vyuICGetStorageMeasurementReadingConversion { get; set; }
@@ -177,6 +197,8 @@ namespace iRely.Inventory.Model
         public string strSubLocationName { get; set; }
         public decimal? dblAirSpaceReading { get; set; }
         public decimal? dblCashPrice { get; set; }
+        public int? intDiscountSchedule { get; set; }
+        public string strDiscountSchedule { get; set; }
 
         public tblICStorageMeasurementReadingConversion tblICStorageMeasurementReadingConversion { get; set; }
     }

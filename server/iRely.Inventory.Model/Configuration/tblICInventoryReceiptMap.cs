@@ -142,6 +142,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOrderQty).HasColumnName("dblOrderQty").HasPrecision(18, 6);
             this.Property(t => t.dblBillQty).HasColumnName("dblBillQty").HasPrecision(18, 6);
             this.Property(t => t.dblOpenReceive).HasColumnName("dblOpenReceive").HasPrecision(18, 6);
+            this.Property(t => t.intLoadReceive).HasColumnName("intLoadReceive");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
@@ -152,6 +153,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblGross).HasColumnName("dblGross").HasPrecision(18, 6);
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(18, 6);
             this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
+            this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptItem)
@@ -194,6 +196,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.dblQtyToReceive).HasColumnName("dblQtyToReceive").HasPrecision(18, 6);
+            this.Property(t => t.intLoadToReceive).HasColumnName("intLoadToReceive");
             this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost").HasPrecision(18, 6);
             this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
@@ -219,6 +222,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
+            this.Property(t => t.ysnLoad).HasColumnName("ysnLoad");
+            this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(18, 6);
+            this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
+            this.Property(t => t.strDiscountSchedule).HasColumnName("strDiscountSchedule");
         }
     }
 
