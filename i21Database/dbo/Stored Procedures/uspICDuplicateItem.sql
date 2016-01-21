@@ -455,13 +455,13 @@ BEGIN
 	SELECT @NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
 		dblAmountPercent,
-		dblSalePrice,
-		dblMSRPPrice,
+		0.00,
+		0.00,
 		strPricingMethod,
-		dblLastCost,
-		dblStandardCost,
-		dblAverageCost,
-		dblEndMonthCost,
+		0.00,
+		0.00,
+		0.00,
+		0.00,
 		intSort 
 	FROM tblICItemPricing
 	WHERE intItemId = @ItemId
