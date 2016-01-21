@@ -76,7 +76,7 @@ AS
 				dtmDate						=	CD.dtmStartDate,
 				intShipViaId				=	CD.intShipViaId,
 				dblQty						=	CD.dblAvailableQty,
-				dblCost						=	CD.dblCashPrice,
+				dblCost						=	ISNULL(CD.dblCashPrice,0),
 				intCostUOMId				=	CD.intPriceItemUOMId,
 				intCurrencyId				=	CD.intCurrencyId,
 				dblExchangeRate				=	1,
