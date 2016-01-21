@@ -8,7 +8,7 @@ StartTest (function (t) {
 engine.start(t)
 
     /* 1. Open screen Inventory UOM Screen>New and check default control's state*/
-    .login('AGADMIN','AGADMIN','AG').wait(1500)
+    .login('irelyadmin','i21by2015','01').wait(1500)
     .addFunction(function(next){t.diag("Scenario 1. Open screen and check default controls' state"); next();}).wait(100)
     .expandMenu('Inventory').wait(100)
     .openScreen('Inventory UOM').wait(200)

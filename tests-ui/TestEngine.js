@@ -387,7 +387,7 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.MessageBox;
             if (win) {
                 if (win.xtype === 'messagebox') {
                     var button = item !== 'x' ? win.msgButtons[item] : win.down('tool');
@@ -1373,7 +1373,7 @@ Ext.define('iRely.TestEngine', {
                             target: combo
                         },
                         function(next){
-                            t.selectText(combo, 0, 30);
+                            t.selectText(combo, 0, 50);
                             next();
                         },
                         function(next) {
@@ -2104,7 +2104,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Integer} row Index of the row in the grid.
      *
-     * @param {String} column Data Index or the Item Id of the column.
+     * @param {Object} column Data Index or the Item Id of the column.
      *
      * @param {Object} data Data to match with the control.
      *
@@ -2139,7 +2139,7 @@ Ext.define('iRely.TestEngine', {
                                     data = new Date(data).toLocaleDateString();
                                 }
                                 return value === data;
-                            });
+                            })();
                         t.ok(result, result ? 'Cell data is correct.' : 'Cell data is incorrect.');
 
                         next();
@@ -2148,11 +2148,11 @@ Ext.define('iRely.TestEngine', {
                         next();
                     }
                 } else {
-                    t.ok(false, 'Cell is not existing.');
+                    t.ok(false, 'Grid is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Cell is not existing.');
+                t.ok(false, 'No active window.');
                 next();
             }
         };
@@ -2816,7 +2816,7 @@ Ext.define('iRely.TestEngine', {
                     }
                 }
 
-                t.ok(icon, icon ? 'Screen icon is correct.' : 'Screen icon is incorrect.');
+                //t.ok(icon, icon ? 'Screen icon is correct.' : 'Screen icon is incorrect.');
                 t.ok(titleResult, titleResult ? 'Screen title is correct.' : 'Screen title is incorrect.');
 
                 if (collapseButton) {
@@ -2942,7 +2942,7 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.MessageBox;
 
             t.diag('Checking Message Box.');
 
