@@ -1,5 +1,5 @@
 ﻿CREATE VIEW vyuAPVendorHistory
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 AS
 SELECT 
 	tblAPVendor.intEntityVendorId as intEntityId

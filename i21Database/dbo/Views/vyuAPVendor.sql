@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPVendor]
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 	AS 
 SELECT 
 	A.intEntityId,
