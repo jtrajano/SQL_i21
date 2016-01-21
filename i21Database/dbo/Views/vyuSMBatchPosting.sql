@@ -21,7 +21,7 @@ FROM
 	UNION ALL
 	SELECT 'Voucher', intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE intTransactionType = 1 AND intTransactionType != 6 AND ysnForApproval != 1 AND ISNULL(ysnPosted, 0) = 0 OR (dtmApprovalDate IS NOT NULL AND ysnApproved = 1)
 	UNION ALL
-	SELECT 'Payable', intPaymentId, strPaymentRecordNum, dblAmountPaid, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDatePaid, strNotes as strReference FROM tblAPPayment WHERE ysnPosted = 0
+	SELECT 'Payable', intPaymentId, strPaymentRecordNum, dblAmountPaid, '' as strVendorInvoiceNumber, intEntityVendorId as intEntityVendorId, intEntityId, dtmDatePaid, strNotes as strReference FROM tblAPPayment WHERE ysnPosted = 0
 	UNION ALL
 	SELECT 'Debit Memo', intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE intTransactionType = 3 AND ISNULL(ysnPosted, 0) = 0 AND intTransactionType != 6 
 	UNION ALL
