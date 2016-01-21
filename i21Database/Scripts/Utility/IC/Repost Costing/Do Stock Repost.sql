@@ -147,7 +147,8 @@ BEGIN
 				,@dblQty = dblQty 
 				,@intTransactionTypeId = intTransactionTypeId
 		FROM	#tmpICInventoryTransaction
-		ORDER BY dtmDate ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
+		ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
+		-- ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 		-- ORDER BY intInventoryTransactionId ASC 
 
 		-- Run the post routine. 
@@ -295,7 +296,8 @@ BEGIN
 					,@strGLDescription
 					,@ItemsToPost
 			END
-			ELSE IF @strTransactionForm = 'Inventory Transfer'
+			--ELSE IF @strTransactionForm = 'Inventory Transfer'
+			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Transfer'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -437,6 +439,8 @@ BEGIN
 						,RebuilInvTrans.dblUOMQty  
 						,dblCost  = CASE WHEN dblQty < 0 THEN 
 											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId) * dblUOMQty  
+										 WHEN (dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0 AND AdjDetail.dblNewCost IS NULL) THEN 
+											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId) * dblUOMQty  
 										 ELSE 
 											RebuilInvTrans.dblCost
 									END 
@@ -457,6 +461,12 @@ BEGIN
 						LEFT JOIN dbo.tblARInvoice Invoice
 							ON Invoice.intInvoiceId = RebuilInvTrans.intTransactionId
 							AND Invoice.strInvoiceNumber = RebuilInvTrans.strTransactionId
+						LEFT JOIN dbo.tblICInventoryAdjustment Adj
+							ON Adj.strAdjustmentNo = RebuilInvTrans.strTransactionId						
+							AND Adj.intInventoryAdjustmentId = RebuilInvTrans.intTransactionId
+						LEFT JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
+							AND AdjDetail.intInventoryAdjustmentDetailId = RebuilInvTrans.intTransactionDetailId 
 
 				WHERE	strBatchId = @strBatchId
 
