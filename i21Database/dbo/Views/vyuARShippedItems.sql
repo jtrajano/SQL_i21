@@ -235,7 +235,7 @@ SELECT
 	,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
 	,[dblShipmentQuantity]				= SHP.[dblQuantity]	
 	,[dblShipmentQtyShippedTotal]		= SOD.[dblQtyShipped]
-	,[dblQtyRemaining]					= SOD.[dblQtyOrdered] - SOD.[dblQtyShipped]
+	,[dblQtyRemaining]					= SOD.[dblQtyOrdered]
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
 	,[dblShipmentUnitPrice]				= SHP.[dblUnitPrice]
@@ -280,7 +280,7 @@ LEFT OUTER JOIN
 		ON SO.[intShipViaId] = S.[intEntityShipViaId]
 INNER JOIN
 	tblICItem I
-		ON SOD.[intItemId] = I.[intItemId] AND ISNULL(I.strLotTracking, 'No') <> 'No'
+		ON SOD.[intItemId] = I.[intItemId]
 LEFT JOIN
 	tblICItemUOM IU
 		ON SOD.[intItemUOMId] = IU.[intItemUOMId]
@@ -370,141 +370,6 @@ LEFT OUTER JOIN
 	) ISISIL
 		ON SHP.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
 	
-UNION ALL
-
-SELECT 
-	 [strTransactionType]				= 'Inventory Shipment'
-	,[strTransactionNumber]				= ISH.[strShipmentNumber]
-	,[strShippedItemId]					= 'icis:' + CAST(ISH.[intInventoryShipmentId] AS NVARCHAR(250))
-	,[intEntityCustomerId]				= ISH.[intEntityCustomerId]
-	,[strCustomerName]					= E.[strName]
-	,[intSalesOrderId]					= NULL
-	,[intSalesOrderDetailId]			= NULL
-	,[strSalesOrderNumber]				= ''
-	,[dtmProcessDate]					= ISH.[dtmShipDate]
-	,[intInventoryShipmentId]			= ISH.[intInventoryShipmentId]
-	,[intInventoryShipmentItemId]		= ISI.[intInventoryShipmentItemId]
-	,[strSInventoryShipmentNumber]		= ISH.[strShipmentNumber] 	
-	,[intShipmentId]					= NULL
-	,[strShipmentNumber]				= NULL	
-	,[intCompanyLocationId]				= ISH.[intShipFromLocationId]
-	,[strLocationName]					= CL.[strLocationName]
-	,[intShipToLocationId]				= ISH.[intShipToLocationId]
-	,[intFreightTermId]					= ISH.[intFreightTermId]
-	,[intItemId]						= ISI.[intItemId]
-	,[strItemNo]						= I.[strItemNo]
-	,[strItemDescription]				= I.[strDescription]
-	,[intItemUOMId]						= ISI.[intItemUOMId]
-	,[strUnitMeasure]					= U.[strUnitMeasure]
-	,[intShipmentItemUOMId]				= ISI.[intItemUOMId]
-	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
-	,[dblQtyShipped]					= ISI.[dblQuantity]
-	,[dblQtyOrdered]					= ISI.[dblQuantity]
-	,[dblShipmentQuantity]				= ISI.[dblQuantity]	
-	,[dblShipmentQtyShippedTotal]		= ISI.[dblQuantity]
-	,[dblQtyRemaining]					= ISI.[dblQuantity]
-	,[dblDiscount]						= 0.00
-	,[dblPrice]							= ISI.[dblUnitPrice]
-	,[dblShipmentUnitPrice]				= ISI.[dblUnitPrice]
-	,[dblTotalTax]						= 0.00
-	,[dblTotal]							= ISI.[dblQuantity] * ISI.[dblUnitPrice]
-	,[intAccountId]						= A.[intAccountId]
-	,[intCOGSAccountId]					= A.[intCOGSAccountId]
-	,[intSalesAccountId]				= A.[intSalesAccountId]
-	,[intInventoryAccountId]			= A.[intInventoryAccountId]
-	,[intStorageLocationId]				= ISI.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
-	,[intTermID]						= T.[intTermID]
-	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId]
-	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= SCT.[strTicketNumber]
-	,[intTicketId]						= SCT.[intTicketId]
-	,[intTaxGroupId]					= NULL --ISI.[intTaxCodeId] 
-	,[strTaxGroup]						= NULL --TG.[strTaxGroup] 
-	,[dblGrossWt]						= ISISIL.dblGrossWeight 
-	,[dblTareWt]						= ISISIL.dblTareWeight 
-	,[dblNetWt]							= ISISIL.dblNetWeight
-	,[strPONumber]						= ''
-	,[strBOLNumber]						= ISH.[strBOLNumber]
-	,[intSplitId]						= NULL
-FROM
-	tblICInventoryShipmentItem ISI
-INNER JOIN
-	tblICItem I
-		ON ISI.[intItemId] = I.[intItemId]
-INNER JOIN
-	tblICInventoryShipment ISH
-		ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			intInventoryShipmentItemId
-			,SUM([dblGrossWeight]) dblGrossWeight
-			,SUM([dblTareWeight]) dblTareWeight
-			,SUM([dblGrossWeight] - [dblTareWeight]) dblNetWeight
-		FROM
-			tblICInventoryShipmentItemLot
-		GROUP BY
-			intInventoryShipmentItemId
-	) ISISIL
-		ON ISI.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
-INNER JOIN
-	tblEntity E
-		ON ISH.[intEntityCustomerId] = E.[intEntityId]
-LEFT OUTER JOIN
-				(	SELECT TOP 1
-						[intEntityLocationId]
-						,[intEntityId] 
-						,[strCountry]
-						,[strState]
-						,[strCity]
-						,[intTermsId]
-						,[intShipViaId]
-					FROM 
-					tblEntityLocation
-					WHERE
-						ysnDefaultLocation = 1
-				) EL
-					ON ISH.[intEntityCustomerId] = EL.[intEntityId]			
-LEFT OUTER JOIN
-	tblSMCompanyLocation CL
-		ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	tblSMTerm T
-		ON EL.[intTermsId] = T.[intTermID]
-LEFT OUTER JOIN
-	tblSMShipVia S
-		ON EL.[intShipViaId] = S.[intEntityShipViaId]			
-LEFT JOIN
-	[tblICItemUOM] IU
-		ON ISI.[intItemUOMId] = IU.[intItemUOMId]
-LEFT JOIN
-	[tblICUnitMeasure] U
-		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
-LEFT OUTER JOIN
-	tblICStorageLocation SL
-		ON ISI.[intStorageLocationId] = SL.[intStorageLocationId]												
-LEFT OUTER JOIN
-	tblSCTicket SCT
-		ON ISI.[intSourceId] = SCT.[intTicketId]
-LEFT OUTER JOIN
-	vyuARGetItemAccount A
-		ON ISI.[intItemId] = A.[intItemId]
-		AND ISH.[intShipFromLocationId] = A.[intLocationId] 
-LEFT OUTER JOIN
-	 tblARInvoiceDetail IND
-		ON ISI.[intInventoryShipmentItemId] = IND.[intInventoryShipmentItemId]	
---LEFT OUTER JOIN
---	tblSMTaxGroup TG
---		ON ISI.[intTaxCodeId] = TG.intTaxGroupId 											 
-	WHERE
-		ISH.[ysnPosted] = 1
-		AND ISH.[intOrderType] <> 2
-		AND IND.[intInventoryShipmentItemId] IS NULL
-		AND ISNULL(I.strLotTracking, 'No') <> 'No'
-													
-																										
 UNION ALL
 
 SELECT
