@@ -2227,6 +2227,10 @@ ELSE
 
 /* SCALE INTERFACE */
 
+/* Rename Scale Interface to Scale */
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Grain' AND intParentMenuID = 0)
+UPDATE tblSMMasterMenu SET strMenuName = N'Scale', strDescription = N'Scale' WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Grain' AND intParentMenuID = 0
+
 /* Start of Remodule */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Grain' AND intParentMenuID = 0)
 BEGIN
@@ -2252,10 +2256,6 @@ BEGIN
 	END
 END
 /* End of Remodule */
-
-/* Rename Scale Interface to Scale */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Scale' AND intParentMenuID = 0)
-UPDATE tblSMMasterMenu SET strMenuName = N'Scale', strDescription = N'Scale' WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Scale' AND intParentMenuID = 0
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
