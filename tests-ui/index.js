@@ -399,6 +399,24 @@ Harness.start(
         ]
     },
 
+    { group: 'Commodity',
+        items: [
+            {
+                url: 'Commodity/AddCommodity.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Commodity/DeleteCommodity.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            }
+        ]
+    },
+
+
     { group: 'PackType',
         items: [
             {
