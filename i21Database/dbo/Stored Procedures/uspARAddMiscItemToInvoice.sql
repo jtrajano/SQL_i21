@@ -4,6 +4,7 @@
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0			
 	,@ItemDescription				NVARCHAR(500)	= NULL
+	,@ItemDocumentNumber			NVARCHAR(100)	= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
@@ -69,6 +70,7 @@ BEGIN TRY
 		([intInvoiceId]
 		,[intItemId]
 		,[strItemDescription]
+		,[strDocumentNumber]
 		,[intItemUOMId]
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
@@ -113,6 +115,7 @@ BEGIN TRY
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= NULL 
 		,[strItemDescription]				= ISNULL(@ItemDescription, '')
+		,[strDocumentNumber]				= @ItemDocumentNumber
 		,[intItemUOMId]						= NULL
 		,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 		,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)

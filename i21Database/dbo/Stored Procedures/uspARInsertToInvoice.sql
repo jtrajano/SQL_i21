@@ -177,9 +177,6 @@ FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
 
---GET NEW COMMENT FOR NEW INVOICE
-SET @InvoiceComment = 'ORIGIN: ' + @SalesOrderNumber + '; ' + @InvoiceComment
-
 --BEGIN TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
@@ -444,7 +441,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@intItemToInvoiceId		= intItemToInvoiceId,
 						@ItemId					= intItemId,
 						@ItemIsInventory		= ysnIsInventory,
-						@ItemDescription		= strItemDescription,
+						@ItemDescription		= strItemDescription,						
 						@ItemUOMId				= intItemUOMId,
 						@ItemContractHeaderId	= intContractHeaderId,
 						@ItemContractDetailId	= intContractDetailId,
@@ -458,7 +455,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@ItemSalesOrderNumber	= strSalesOrderNumber,
 						@ItemShipmentNumber		= strShipmentNumber
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
-
+				
 				EXEC [dbo].[uspARAddItemToInvoice]
 							 @InvoiceId						= @NewInvoiceId	
 							,@ItemId						= @ItemId
@@ -467,6 +464,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
 							,@RaiseError					= @RaiseError
 							,@ItemDescription				= @ItemDescription
+							,@ItemDocumentNumber			= @ItemSalesOrderNumber
 							,@ItemUOMId						= @ItemUOMId
 							,@ItemContractHeaderId			= @ItemContractHeaderId
 							,@ItemContractDetailId		    = @ItemContractDetailId

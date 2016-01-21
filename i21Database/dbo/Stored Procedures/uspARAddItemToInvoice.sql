@@ -145,6 +145,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				([intInvoiceId]
 				,[intItemId]
 				,[strItemDescription]
+				,[strDocumentNumber]
 				,[intItemUOMId]
 				,[intContractHeaderId]
 				,[intContractDetailId]
@@ -164,6 +165,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				 @InvoiceId
 				,intItemId
 				,@ItemDescription
+				,@ItemDocumentNumber
 				,@ItemUOMId
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
@@ -213,6 +215,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ErrorMessage					= @AddDetailError	OUTPUT
 			,@RaiseError					= @RaiseError
 			,@ItemDescription				= @ItemDescription
+			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
