@@ -20,6 +20,7 @@
 	[intInventoryTransferId] int NULL,
 	[strReceiptLine] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
+	[intLoadDetailId] [int] NULL,
 	CONSTRAINT [PK_tblTRLoadReceipt] PRIMARY KEY ([intLoadReceiptId]),
 	CONSTRAINT [FK_tblTRLoadReceipt_tblTRLoadHeader_intLoadHeaderId] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [dbo].[tblTRLoadHeader] ([intLoadHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRLoadReceipt_tblAPVendor_intTermianlId] FOREIGN KEY ([intTerminalId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]),
@@ -29,5 +30,6 @@
 	CONSTRAINT [FK_tblTRLoadReceipt_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
 	CONSTRAINT [FK_tblTRLoadReceipt_tblICInventoryReceipt_intInventoryReceiptId] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]),
 	CONSTRAINT [FK_tblTRLoadReceipt_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
-	CONSTRAINT [FK_tblTRLoadReceipt_tblICInventoryTransfer_intInventoryTransferId] FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer]([intInventoryTransferId])		
+	CONSTRAINT [FK_tblTRLoadReceipt_tblICInventoryTransfer_intInventoryTransferId] FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer]([intInventoryTransferId]),
+	CONSTRAINT [FK_tblTRLoadReceipt_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId])				
 )
