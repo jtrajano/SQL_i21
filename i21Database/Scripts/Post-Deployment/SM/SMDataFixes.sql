@@ -106,3 +106,13 @@ GO
 	set strCommand = REPLACE(strCommand, ':', '?searchCommand=')
 	where strCommand like '%:%'
 GO
+	DECLARE @ScaleInterfaceParentMenuId INT
+	SELECT TOP 1 @ScaleInterfaceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale'
+
+	DECLARE @ScaleInterfaceReportParentMenuId INT
+	SELECT @ScaleInterfaceReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
+
+	DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Scale' AND intParentMenuID NOT IN (@ScaleInterfaceParentMenuId, @ScaleInterfaceReportParentMenuId, 0)
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intMenuID <> @ScaleInterfaceParentMenuId
+	DELETE FROM tblSMMasterMenu WHERE strMenuName IN ('Scale Activity', 'Unsent Tickets') AND strModuleName = 'Grain'
+GO
