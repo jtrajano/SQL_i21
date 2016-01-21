@@ -3236,6 +3236,7 @@
     <Build Include="dbo\Views\vyuGRGetStorageSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivityMachines.sql" />
     <Build Include="dbo\Views\vyuHDSalesPerson.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateShiftActivityDowntime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
