@@ -42,6 +42,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, dblLineTotal = ISNULL(ShipmentItem.dblQuantity, 0) * ISNULL(ShipmentItem.dblUnitPrice, 0)
 	, ShipmentItem.intGradeId
 	, strGrade = Grade.strDescription
+	, ShipmentItem.intDiscountSchedule
+	, strDiscountSchedule = ''
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
