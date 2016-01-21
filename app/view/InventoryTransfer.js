@@ -768,6 +768,32 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colOwnershipType',
+                                                        width: 110,
+                                                        dataIndex: 'strOwnershipType',
+                                                        text: 'Ownership Type',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intOwnershipType',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strOwnershipType',
+                                                                    dataType: 'string',
+                                                                    text: 'Ownership Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboOwnershipType',
+                                                            displayField: 'strOwnershipType',
+                                                            valueField: 'strOwnershipType'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colLotID',
                                                         width: 100,
                                                         dataIndex: 'strLotID',

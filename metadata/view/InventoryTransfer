@@ -1115,7 +1115,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter11",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1524,6 +1524,65 @@
                                                         "columns": "array"
                                                     },
                                                     "designerId": "268ad645-04ed-4c2b-b847-5ad42221f0d9",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strOwnershipType",
+                                                "itemId": "colOwnershipType",
+                                                "text": "Ownership Type",
+                                                "width": 110
+                                            },
+                                            "name": "MyColumn6",
+                                            "designerId": "c164ce90-2065-4ee0-b123-418e3c0a7606",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intOwnershipType',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'strOwnershipType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Ownership Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strOwnershipType",
+                                                        "itemId": "cboOwnershipType",
+                                                        "valueField": "strOwnershipType"
+                                                    },
+                                                    "name": "MyComboBox4",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "24a4b792-973c-46ad-b4ba-a3a06f512402",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -2154,7 +2213,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

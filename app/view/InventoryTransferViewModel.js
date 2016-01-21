@@ -112,6 +112,27 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         },
         taxCode: {
             type: 'smtaxcodebuffered'
+        },
+        ownershipTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intOwnershipType: 1,
+                    strOwnershipType: 'Own'
+                },
+                {
+                    intOwnershipType: 2,
+                    strOwnershipType: 'Storage'
+                },
+                {
+                    intOwnershipType: 3,
+                    strOwnershipType: 'Consigned Purchase'
+                }
+            ],
+            fields: {
+                name: 'intOwnershipType',
+                name: 'strOwnershipType'
+            }
         }
     },
 

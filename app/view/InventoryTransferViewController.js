@@ -227,6 +227,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                             column: 'intStorageLocationId',
                             value: '{grdInventoryTransfer.selection.intFromStorageLocationId}',
                             conjunction: 'and'
+                        },{
+                            column: 'intOwnershipType',
+                            value: '{grdInventoryTransfer.selection.intOwnershipType}',
+                            conjunction: 'and'
                         }]
                     }
                 },
@@ -262,6 +266,14 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                                 conjunction: 'and'
                             }
                         ]
+                    }
+                },
+                colOwnershipType: {
+                    dataIndex: 'strOwnershipType',
+                    editor: {
+                        origValueField: 'intOwnershipType',
+                        origUpdateField: 'intOwnershipType',
+                        store: '{ownershipTypes}'
                     }
                 },
                 colTransferQty: 'dblQuantity',
@@ -323,7 +335,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     key: 'tblICInventoryTransferDetails',
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdInventoryTransfer,
-                        deleteButton : grdInventoryTransfer.down('#btnRemoveItem')
+                        deleteButton : grdInventoryTransfer.down('#btnRemoveItem'),
+                        createRecord : me.createDetailRecord
                     })
                 }
             ]
@@ -372,6 +385,14 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             record.set('intTransferredById', app.EntityId);
         record.set('dtmTransferDate', today);
         record.set('intStatusId', 1);
+        action(record);
+    },
+
+    createDetailRecord: function(config, action) {
+        var today = new Date();
+        var record = Ext.create('Inventory.model.TransferDetail');
+        record.set('intOwnershipType', 1);
+        record.set('strOwnershipType', 'Own');
         action(record);
     },
 

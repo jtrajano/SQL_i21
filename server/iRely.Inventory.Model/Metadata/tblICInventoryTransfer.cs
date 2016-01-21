@@ -86,6 +86,7 @@ namespace iRely.Inventory.Model
         public int? intTaxCodeId { get; set; }
         public decimal? dblFreightRate { get; set; }
         public decimal? dblFreightAmount { get; set; }
+        public int? intOwnershipType { get; set; }
         public int? intSort { get; set; }
 
         private string _sourceNo;
@@ -333,6 +334,25 @@ namespace iRely.Inventory.Model
                 _availableUOM = value;
             }
         }
+        private string _ownershipType;
+        [NotMapped]
+        public string strOwnershipType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_ownershipType))
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strOwnershipType;
+                    else
+                        return null;
+                else
+                    return _ownershipType;
+            }
+            set
+            {
+                _ownershipType = value;
+            }
+        }
 
         public vyuICGetInventoryTransferDetail vyuICGetInventoryTransferDetail { get; set; }
         public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
@@ -342,23 +362,44 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryTransferId { get; set; }
         public int intInventoryTransferDetailId { get; set; }
+        public int? intFromLocationId { get; set; }
+        public int? intToLocationId { get; set; }
+        public string strTransferNo { get; set; }
         public int? intSourceId { get; set; }
         public string strSourceNumber { get; set; }
+        public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
         public string strLotNumber { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
+        public int? intFromSubLocationId { get; set; }
         public string strFromSubLocationName { get; set; }
+        public int? intToSubLocationId { get; set; }
         public string strToSubLocationName { get; set; }
+        public int? intFromStorageLocationId { get; set; }
         public string strFromStorageLocationName { get; set; }
+        public int? intToStorageLocationId { get; set; }
         public string strToStorageLocationName { get; set; }
+        public int? intItemUOMId { get; set; }
         public string strUnitMeasure { get; set; }
+        public decimal? dblItemUOMCF { get; set; }
+        public int? intWeightUOMId { get; set; }
         public string strWeightUOM { get; set; }
+        public decimal? dblWeightUOMCF { get; set; }
         public string strTaxCode { get; set; }
         public string strAvailableUOM { get; set; }
+        public decimal? dblLastCost { get; set; }
         public decimal? dblOnHand { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblReservedQty { get; set; }
         public decimal? dblAvailableQty { get; set; }
+        public decimal? dblQuantity { get; set; }
+        public int? intOwnershipType { get; set; }
+        public string strOwnershipType { get; set; }
+        public bool? ysnPosted { get; set; }
 
         public tblICInventoryTransferDetail tblICInventoryTransferDetail { get; set; }
     }
