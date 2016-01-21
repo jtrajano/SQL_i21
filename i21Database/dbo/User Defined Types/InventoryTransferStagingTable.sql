@@ -27,11 +27,12 @@ CREATE TYPE [dbo].[InventoryTransferStagingTable] AS TABLE
     ,[intToSubLocationId]		INT NULL										-- Target sub location of the item. 
     ,[intFromStorageLocationId]	INT NULL										-- Source storage location id of the item.
     ,[intToStorageLocationId]	INT NULL										-- Target storage location id of the item.
+	,[intOwnershipType] INT NULL DEFAULT ((1))									-- Ownership Type. Default to 1 (Own)
 
 	-- Integration Field
 	,[intInventoryTransferId] INT NULL											-- Existing id of an Inventory Transfer
 	,[intSourceId] INT NOT NULL													-- PK id of the source transaction. Ex. Transport Load id. 
 	,[strSourceId] NVARCHAR(50) NULL											-- String Id of the source transaction. 
-	,[strSourceScreenName] NVARCHAR(50) NULL									-- Name of the screen name where the transaction is coming from.
+	,[strSourceScreenName] NVARCHAR(50) NULL									-- Name of the screen name where the transaction is coming from.	
 
 )

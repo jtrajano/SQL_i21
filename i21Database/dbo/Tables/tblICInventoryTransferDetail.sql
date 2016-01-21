@@ -20,6 +20,7 @@
     [intTaxCodeId] INT NULL, 
     [dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFreightAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[intOwnershipType] INT NULL DEFAULT ((1)),
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryTransferDetail] PRIMARY KEY ([intInventoryTransferDetailId]), 

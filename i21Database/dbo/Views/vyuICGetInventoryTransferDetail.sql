@@ -45,6 +45,11 @@ SELECT TransferDetail.intInventoryTransferId
 	, StockFrom.dblReservedQty
 	, dblAvailableQty = CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN StockFrom.dblAvailableQty ELSE Lot.dblQty END
 	, TransferDetail.dblQuantity
+	, TransferDetail.intOwnershipType
+	, strOwnershipType = (CASE WHEN TransferDetail.intOwnershipType = 1 THEN 'Own'
+								WHEN TransferDetail.intOwnershipType = 2 THEN 'Storage'
+								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
+								ELSE NULL END)
 	, ysnPosted
 FROM tblICInventoryTransferDetail TransferDetail
 	LEFT JOIN tblICInventoryTransfer Transfer ON Transfer.intInventoryTransferId = TransferDetail.intInventoryTransferId

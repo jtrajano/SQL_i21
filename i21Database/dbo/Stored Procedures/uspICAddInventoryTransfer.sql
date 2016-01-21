@@ -219,6 +219,7 @@ BEGIN
 				,[intTaxCodeId]
 				,[dblFreightRate]
 				,[dblFreightAmount]
+				,[intOwnershipType]
 				,[intSort]
 				,[intConcurrencyId]		
 		)
@@ -242,6 +243,7 @@ BEGIN
 				,[intTaxCodeId]				= NULL 
 				,[dblFreightRate]			= NULL 
 				,[dblFreightAmount]			= NULL 
+				,[intOwnershipType]			= RawData.intOwnershipType
 				,[intSort]					= NULL 
 				,[intConcurrencyId]			= 1
 		FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData
