@@ -3155,6 +3155,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptPurchaseOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPRVoidPaycheck.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\SynchronizePaycheckCheckNumber.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdatePaycheckTotalHours.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
