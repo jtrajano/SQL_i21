@@ -57,5 +57,5 @@ AS
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = i.intWeightUOMId
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId
 	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu.intUnitMeasureId
-	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId-- AND ysnWarehouseTracked = 1
+	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId AND ysnWarehouseTracked = 1
 	WHERE iu.ysnStockUnit = 1 
