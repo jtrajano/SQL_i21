@@ -138,3 +138,6 @@
 
 --MF
 :r .\19_MF\01_Recipe_UOM_Update.sql
+
+--CF
+:r .\20_CF\FixeDataWithContraints.sql
