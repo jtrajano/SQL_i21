@@ -56,7 +56,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.ysnLoad
 	, ReceiptItemSource.dblAvailableQty
 	, ReceiptItem.intDiscountSchedule
-	, strDiscountSchedule = ''
+	, strDiscountSchedule = DiscountSchedule.strDiscountId
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -70,3 +70,4 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = ReceiptItem.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItem.intGradeId
+	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ReceiptItem.intDiscountSchedule
