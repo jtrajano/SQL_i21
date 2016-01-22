@@ -45,6 +45,7 @@ INSERT INTO tblCMUndepositedFund (
 		intBankAccountId
 		,strSourceTransactionId
 		,intSourceTransactionId
+		,intLocationId
 		,dtmDate
 		,dblAmount
 		,strName
@@ -62,6 +63,7 @@ SELECT	@intBankAccountId
 				+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 			) COLLATE Latin1_General_CI_AS
 		,intSourceTransactionId = NULL
+		,NULL
 		,dtmDate = dbo.fnConvertOriginDateToSQLDateTime(v.aptrx_chk_rev_dt) -- Use aptrx_chk_rev_dt because this is the deposit entry date. 
 		,dblAmount = ABS(v.aptrx_net_amt)
 		,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
@@ -88,6 +90,7 @@ UNION SELECT DISTINCT
 	@intBankAccountId,
 	strSourceTransactionId,
 	intSourceTransactionId,
+	intLocationId,
 	dtmDate,
 	dblAmount,
 	strName,
