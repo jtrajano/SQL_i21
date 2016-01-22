@@ -71,7 +71,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         {dataIndex: 'intToLocationId', text: 'ToLocationId', width: 100, dataType: 'numeric', hidden: true },
                         {dataIndex: 'strTransferNo', text: 'TransferNo', width: 100, dataType: 'string', drillDownText: 'View Transfer', drillDownClick: 'onViewTransfer' },
                         {dataIndex: 'intSourceId', text: 'SourceId', width: 100, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strSourceNumber', text: 'SourceNumber', width: 100, dataType: 'string', drillDownText: 'View Transaction', drillDownClick: 'onViewTransaction' },
+                        {dataIndex: 'strSourceNumber', text: 'SourceNumber', width: 100, dataType: 'string' },
                         {dataIndex: 'intItemId', text: 'ItemId', width: 100, dataType: 'numeric', hidden: true },
                         {dataIndex: 'strItemNo', text: 'ItemNo', width: 100, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                         {dataIndex: 'strItemDescription', text: 'ItemDescription', width: 100, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItem' },
@@ -736,7 +736,18 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
     },
 
     onViewTransaction: function (value, record) {
-//        i21.ModuleMgr.Inventory.showScreen(value, 'ReceiptNo');
+        var intSourceType = record.get('intSourceType');
+        switch (intSourceType) {
+            case 1:
+                i21.ModuleMgr.Inventory.showScreen(value, 'Scale');
+                break;
+            case 2:
+                i21.ModuleMgr.Inventory.showScreen(value, 'Inbound Shipment');
+                break;
+            case 3:
+                i21.ModuleMgr.Inventory.showScreen(value, 'Transport');
+                break;
+        }
     },
 
     onViewItem: function (value, record) {
