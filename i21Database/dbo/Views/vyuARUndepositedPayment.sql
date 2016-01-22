@@ -7,7 +7,8 @@ SELECT
 	,[strName]					= E.[strName] 
 	,[dblAmount]				= A.[dblAmountPaid]
 	,[strSourceSystem]			= 'AR'
-	,[intBankAccountId]			= A.[intBankAccountId] 					
+	,[intBankAccountId]			= A.[intBankAccountId]
+	,[intLocationId]			= A.[intLocationId] 					
 
 FROM 
 	tblARPayment A
