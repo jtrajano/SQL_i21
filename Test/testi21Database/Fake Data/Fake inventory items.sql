@@ -592,6 +592,9 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
 
+		-- Add the G/L account for serial lot item 
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SerializedLotGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
+
 		-- Add the G/L Account for Commodity items. 
 		-- Corn
 		--INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_Inventory, @Inventory_Default); -- This account id is retrieved from the Commodity > GL Account setup. 

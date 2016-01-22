@@ -23,11 +23,117 @@ DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
 
 DECLARE @ReduceLotFromSource AS ItemCostingTableType
 		,@MoveLotToNewItem AS ItemCostingTableType
+		,@strNewItemNo AS NVARCHAR(50)
 
 --------------------------------------------------------------------------------
 -- VALIDATIONS
 --------------------------------------------------------------------------------
--- None for now. 
+BEGIN 
+	--------------------------------------------------------------------------------
+	-- Validate the UOM
+	--------------------------------------------------------------------------------
+	DECLARE @intItemId AS INT 
+	DECLARE @strItemNo AS NVARCHAR(50)
+	DECLARE @strLotNumber AS NVARCHAR(50)
+	DECLARE @intLotId AS INT 
+
+	BEGIN 
+		SELECT TOP 1 
+				@intItemId = Detail.intItemId			
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				LEFT JOIN dbo.tblICItemUOM ItemUOM
+					ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+				LEFT JOIN dbo.tblICItemUOM WeightUOM
+					ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL 
+	
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			SELECT @strItemNo = strItemNo
+			FROM dbo.tblICItem Item 
+			WHERE intItemId = @intItemId		
+
+			-- 'The UOM is missing on {Item}.'
+			RAISERROR(80039, 11, 1, @strItemNo);
+			RETURN -1
+		END
+
+	END
+
+	--------------------------------------------------------------------------------
+	-- Validate for non-negative Adjust Qty
+	-------------------------------------------------------------------------------
+	BEGIN 
+		SELECT	TOP 1 
+				@intItemId = Detail.intItemId
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) > 0 
+	
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			SELECT @strItemNo = strItemNo
+			FROM dbo.tblICItem Item 
+			WHERE intItemId = @intItemId		
+
+			-- 'Lot Move requires a negative Adjust Qty on %s as stock for the move.'
+			RAISERROR(80059, 11, 1, @strItemNo);
+			RETURN -1
+		END
+	END 
+
+	--------------------------------------------------------------------------------
+	-- Validate the item id. It should be the different from the original item id. 	
+	--------------------------------------------------------------------------------
+	BEGIN 
+		SET @intLotId = NULL 
+
+		SELECT	TOP 1 
+				@strLotNumber = Lot.strLotNumber
+				,@intLotId = Lot.intLotId
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				INNER JOIN dbo.tblICLot Lot
+					ON Lot.intLotId = Detail.intLotId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND Lot.strLotNumber = ISNULL(Detail.strNewLotNumber, Lot.strLotNumber) 
+				AND Detail.intItemId = Detail.intNewItemId
+
+		IF @intLotId IS NOT NULL 
+		BEGIN
+			-- 'The lot {lot number} is assigned to the same item. Item change requires a different item.'
+			RAISERROR(80074, 11, 1, @strLotNumber)  
+			RETURN -1
+		END
+	END 
+
+	------------------------------------------------------------
+	-- Validate the new item. It should be a lot-tracked item. 
+	------------------------------------------------------------
+	BEGIN 
+		SET @intItemId = NULL 
+
+		SELECT	TOP 1 
+				@strNewItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				INNER JOIN dbo.tblICItem Item 
+					ON Item.intItemId = Detail.intNewItemId
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND dbo.fnGetItemLotType(Detail.intNewItemId) = 0 
+
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			-- 'Item %s is invalid. It must be lot tracked.'
+			RAISERROR(80075, 11, 1, @strNewItemNo); 
+			RETURN -1
+		END
+	END 
+END 
 
 --------------------------------------------------------------------------------
 -- CREATE THE LOT NUMBER RECORD
@@ -69,7 +175,7 @@ BEGIN
 			,intItemLocationId		= Lot.intItemLocationId
 			,intItemUOMId			= Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -1 * Lot.dblQty -- Transfer all the Qty's 
+			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= Lot.dblLastCost
 			,dblSalesPrice			= 0
@@ -145,8 +251,8 @@ BEGIN
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_ItemChange
 			,intLotId				= Detail.intNewLotId
-			,intSubLocationId		= SourceTransaction.intSubLocationId
-			,intStorageLocationId	= SourceTransaction.intStorageLocationId
+			,intSubLocationId		= Detail.intNewSubLocationId
+			,intStorageLocationId	= Detail.intNewStorageLocationId
 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId

@@ -370,3 +370,11 @@ EXEC sp_addmessage 80072,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80073) EXEC sp_dropmessage 80073, 'us_english'	
 SET @strmessage = 'Split Lot for %s is not allowed because it will be a split to the same lot number, location, sub location, and storage location.'
 EXEC sp_addmessage 80073,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80074) EXEC sp_dropmessage 80074, 'us_english'	
+SET @strmessage = 'The lot %s is assigned to the same item. Item change requires a different item.'
+EXEC sp_addmessage 80074,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80075) EXEC sp_dropmessage 80075, 'us_english'	
+SET @strmessage = 'Item %s is invalid. It must be lot tracked.'
+EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'

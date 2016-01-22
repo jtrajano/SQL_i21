@@ -882,6 +882,12 @@
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting LB to 50 LB BAG.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting KG to LB.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting LB to KG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for a successful post.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid company location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid lot id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid source transaction type id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid storage location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid sub location id.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
