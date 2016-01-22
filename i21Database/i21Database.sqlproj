@@ -3243,6 +3243,7 @@
     <Build Include="dbo\Views\vyuGLReallocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostItemChange.sql" />
     <Build Include="dbo\Tables\tblGLReconcileAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveShiftActivityMachines.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

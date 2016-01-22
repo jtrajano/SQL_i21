@@ -16,6 +16,6 @@
 	dtmLastModified datetime NULL CONSTRAINT DF_tblMFDowntime_dtmLastModified DEFAULT GetDate(),
 		
 	CONSTRAINT PK_tblMFDowntime PRIMARY KEY (intDowntimeId), 
-	CONSTRAINT FK_tblMFDowntime_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId),
+	CONSTRAINT FK_tblMFDowntime_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId) ON DELETE CASCADE,
 	CONSTRAINT FK_tblMFDowntime_tblMFReasonCode FOREIGN KEY (intReasonCodeId) REFERENCES tblMFReasonCode(intReasonCodeId)
 )

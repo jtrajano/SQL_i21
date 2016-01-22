@@ -16,7 +16,7 @@
 	dtmLastModified datetime NULL CONSTRAINT DF_tblMFWastage_dtmLastModified DEFAULT GetDate(),
 		
 	CONSTRAINT PK_tblMFWastage PRIMARY KEY (intWastageId), 
-	CONSTRAINT FK_tblMFWastage_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId),
+	CONSTRAINT FK_tblMFWastage_tblMFShiftActivity FOREIGN KEY (intShiftActivityId) REFERENCES tblMFShiftActivity(intShiftActivityId) ON DELETE CASCADE,
 	CONSTRAINT FK_tblMFWastage_tblMFWastageType FOREIGN KEY (intWastageTypeId) REFERENCES tblMFWastageType(intWastageTypeId),
 	CONSTRAINT FK_tblMFWastage_tblMFBinType FOREIGN KEY (intBinTypeId) REFERENCES tblMFBinType(intBinTypeId),
 	CONSTRAINT FK_tblMFWastage_tblICUnitMeasure_intWeightUnitMeasureId FOREIGN KEY (intWeightUnitMeasureId) REFERENCES tblICUnitMeasure(intUnitMeasureId)
