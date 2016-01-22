@@ -1,7 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnGLGetPostErrors] (
 	@JournalIds JournalIDTableType READONLY,
 	@strJournalType NVARCHAR(30) = '',
-	@ysnPost BIT
+	@ysnPost BIT,
+	@ysnPostInactive BIT = 0
 )
 RETURNS TABLE 
 AS
@@ -62,6 +63,7 @@ RETURN (
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND @ysnPost = 1 
 				AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
+				AND @ysnPostInactive = 0
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage
