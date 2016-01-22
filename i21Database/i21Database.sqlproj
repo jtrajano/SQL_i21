@@ -3256,6 +3256,7 @@
     <Build Include="dbo\Views\vyuICGetItemUOM.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustmentDetail.sql" />
+    <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
