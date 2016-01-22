@@ -15,7 +15,8 @@
     CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
     CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
-    CONSTRAINT [AK_tblICStorageMeasurementReadingConversion] UNIQUE ([intStorageMeasurementReadingId], [intCommodityId], [intItemId], [intStorageLocationId]) 
+    CONSTRAINT [AK_tblICStorageMeasurementReadingConversion] UNIQUE ([intStorageMeasurementReadingId], [intCommodityId], [intItemId], [intStorageLocationId]), 
+    CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId]) 
 )
 
 GO
