@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreateVoucherApprover]
-	@voucherId INT
+﻿CREATE PROCEDURE [dbo].[uspPOCreateApprover]
+	@poId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -18,17 +18,17 @@ IF @transCount = 0 BEGIN TRANSACTION
 SELECT
 	@approverListId = ISNULL(A.intApprovalListId, C.intApprovalListId)
 FROM tblAPVendor A
-INNER JOIN tblAPBill B ON A.intEntityVendorId = B.intEntityVendorId
+INNER JOIN tblPOPurchase B ON A.intEntityVendorId = B.intEntityVendorId
 OUTER APPLY tblAPCompanyPreference C
-WHERE B.intBillId = @voucherId AND B.ysnForApproval = 1
+WHERE B.intPurchaseId = @poId AND B.ysnForApproval = 1
 
 IF @approverListId IS NULL OR @approverListId <= 0 RAISERROR('Please setup approver either in vendor or company configuration.', 16, 1);
 
-DELETE FROM tblAPVoucherApprover WHERE intVoucherId = @voucherId;
+DELETE FROM tblPOApprover WHERE intPurchaseId = @poId;
 
-INSERT INTO tblAPVoucherApprover
+INSERT INTO tblPOApprover
 (
-	[intVoucherId]				, 
+	[intPurchaseId]				, 
 	[intApproverId]				,
 	[intAlternateApproverId]	, 
 	[ysnApproved]				, 
@@ -36,15 +36,15 @@ INSERT INTO tblAPVoucherApprover
 	[dtmDateApproved]			
 )
 SELECT DISTINCT
-	[intVoucherId]				=	@voucherId, 
+	[intPurchaseId]				=	@poId, 
 	[intApproverId]				=	A.intEntityUserSecurityId,
 	[intAlternateApprover]		=	A.intAlternateEntityUserSecurityId, 
 	[ysnApproved]				=	0, 
 	[intApproverLevel]			=	A.intApproverLevel,
 	[dtmDateApproved]			=	NULL
 FROM tblSMApprovalListUserSecurity A
-CROSS APPLY tblAPBill B
-WHERE B.intBillId = @voucherId
+CROSS APPLY tblPOPurchase B
+WHERE B.intPurchaseId = @poId
 AND 1 = (CASE WHEN B.dblTotal <= A.dblAmountLessThanEqual OR B.dblTotal > A.dblAmountOver THEN 1 ELSE 0 END)
 AND A.intApprovalListId = @approverListId
 ORDER BY A.intApproverLevel

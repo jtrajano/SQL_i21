@@ -37,7 +37,7 @@ SELECT
 							ELSE NULL END,
 	--strApprover = (SELECT TOP 1 strUserName FROM dbo.tblSMApprovalListUserSecurity F
 	--					INNER JOIN dbo.tblSMUserSecurity G ON F.intUserSecurityId = G.intUserSecurityID WHERE B.intApprovalListId = F.intApprovalListId),
-	G.strApprovalList AS strApprover,
+	CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover,
 	dtmApprovalDate,
 	GL.strBatchId
 FROM
@@ -63,7 +63,7 @@ FROM
 		ORDER BY D.intPaymentId DESC --get only the latest payment
 	) Payment
 	LEFT JOIN dbo.tblEntityCredential F ON A.intEntityId = F.intEntityId
-	LEFT JOIN dbo.tblSMApprovalList G ON B.intApprovalListId = G.intApprovalListId
+	LEFT JOIN dbo.tblSMApprovalList G ON G.intApprovalListId = ISNULL(B.intApprovalListId , (SELECT intApprovalListId FROM dbo.tblAPCompanyPreference))
 	OUTER APPLY 
 	(
 		SELECT TOP 1 strBatchId FROM dbo.tblGLDetail H WHERE A.intBillId = H.intTransactionId AND A.strBillId = H.strTransactionId AND H.ysnIsUnposted = 0
