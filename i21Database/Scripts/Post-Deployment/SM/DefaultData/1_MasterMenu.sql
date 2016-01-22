@@ -1516,11 +1516,11 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunity' 
 UPDATE tblSMMasterMenu SET strMenuName = 'Opportunities' WHERE strMenuName = 'Opportunity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 /* End of Rename */
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Create Activity', N'Help Desk', @CRMParentMenuId, N'CRM Create Activity', N'Activity', N'Screen', N'HelpDesk.view.Ticket', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Ticket' WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Create Activity', N'Help Desk', @CRMParentMenuId, N'CRM Create Activity', N'Activity', N'Screen', N'HelpDesk.view.Ticket', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Ticket' WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1540,6 +1540,9 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pip
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.SalesPipeStatus' WHERE strMenuName = 'Sales Pipe Status' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
+/* Start of delete */
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+/* End of delete */
 
 /* HELP DESK */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0)
