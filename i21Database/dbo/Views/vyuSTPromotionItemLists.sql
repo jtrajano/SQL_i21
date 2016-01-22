@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuSTPromotionItemLists
 AS
 SELECT 
+intKey = CAST(ROW_NUMBER() OVER(ORDER BY adj1.intItemUOMId, adj2.intLocationId) AS INT),
 adj3.strLocationName, 
 adj1.strUpcCode,
 adj1.strLongUPCCode,
@@ -20,3 +21,4 @@ JOIN tblICItem adj5 ON adj5.intItemId = adj1.intItemId
 JOIN tblICCategory adj6 ON adj5.intCategoryId = adj6.intCategoryId
 and adj1.strUpcCode IS NOT NULL 
 and adj5.strType = 'Inventory' and adj5.strStatus = 'Active'
+
