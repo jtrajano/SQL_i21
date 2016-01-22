@@ -50,7 +50,7 @@ BEGIN
 			@changeDescription		= '',
 			@fromValue				= '',
 			@toValue				= '',
-			@child_value			= @cv 
+			@details				= @cv 
 	END
 
 END

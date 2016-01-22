@@ -6,13 +6,14 @@ CREATE PROCEDURE [dbo].[uspSMAuditLog]
 	@keyValue			AS NVARCHAR(50),
 	@entityId			AS INT,
 	@actionType			AS NVARCHAR(50),
-	@actionIcon			AS NVARCHAR(50) = 'small-menu-maintenance', -- 'small-new-plus', 'small-new-minus'
+	@actionIcon			AS NVARCHAR(50) = 'small-menu-maintenance', -- 'small-new-plus', 'small-new-minus',
 	--====================================================================================================
 	-- THIS PART WILL APPEAR AS A CHILD ON THE TREE
 	------------------------------------------------------------------------------------------------------
 	@changeDescription  AS NVARCHAR(255) = '',
 	@fromValue			AS NVARCHAR(255) = '',
-	@toValue			AS NVARCHAR(255) = ''
+	@toValue			AS NVARCHAR(255) = '',
+	@details			AS NVARCHAR(MAX) = ''
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -33,10 +34,15 @@ DECLARE @jsonData AS NVARCHAR(MAX) = ''
 
 IF (ISNULL(@changeDescription, '') <> '')
 BEGIN
-	SET @children = '{"change":"' + @changeDescription + '","iconCls":"small-menu-maintenance","from":"' + @fromValue + '","to":"' + @toValue + '","leaf":true}'
+	SET @children = '{"change":"' + @changeDescription + '","iconCls":"small-menu-maintenance","from":"' + @fromValue + '","to":"' + @toValue + '","leaf":true}'	
 END
 
-SET @jsonData = '{"action":"' + @actionType + '","iconCls":"' + @actionIcon + '","children":['+ @children +']}'
+IF (ISNULL(@details, '') <> '')
+BEGIN
+	SET @children = @details
+END
+
+SET @jsonData = '{"action":"' + @actionType + '","change":"Updated - Record: 1158","iconCls":"' + @actionIcon + '","children":['+ @children +']}'
 
 --=====================================================================================================================================
 -- 	INSERT AUDIT ENTRY
