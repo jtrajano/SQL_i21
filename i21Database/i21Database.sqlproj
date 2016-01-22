@@ -3156,6 +3156,7 @@
     <Build Include="dbo\Stored Procedures\uspPRVoidPaycheck.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\SynchronizePaycheckCheckNumber.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdatePaycheckTotalHours.sql" />
+    <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
