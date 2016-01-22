@@ -2,8 +2,7 @@
 	@Field NVARCHAR(200),
 	@Value NVARCHAR(200),
 	@Id		INT,
-	@EntityId INT, 
-	@View	NVARCHAR(200) = 'TankManagement.view.BudgetCalculations'
+	@EntityId INT
 AS
 BEGIN
 	DECLARE @Com   AS NVARCHAR(MAX)
@@ -15,7 +14,7 @@ BEGIN
 	
 		SET @Param = '@Value AS NVARCHAR(200), @Id	AS INT, @PreviousValue AS NVARCHAR(MAX) OUTPUT'
 		SET @Com = 'SELECT @PreviousValue = CAST(' + @Field + ' as NVARCHAR) FROM tblARCustomer where intEntityCustomerId = @Id'
-	
+		
 		EXECUTE sp_executesql @Com, @Param, @Value, @Id, @PreviousValue OUTPUT
 
 		
@@ -27,16 +26,31 @@ BEGIN
 
 
 
-		EXEC uspSMAuditLog
-        @keyValue = @Id,                                          -- Primary Key Value
-        @screenName = @View,										-- Screen Namespace
-        @entityId = @EntityId,                                              -- Entity Id.
-        @actionType = 'Updated',                                  -- Action Type (Processed, Posted, Unposted and etc.)
+		--EXEC uspSMAuditLog
+  --      @keyValue = @Id,                                          -- Primary Key Value
+  --      @screenName = @View,										-- Screen Namespace
+  --      @entityId = @EntityId,                                              -- Entity Id.
+  --      @actionType = 'Updated',                                  -- Action Type (Processed, Posted, Unposted and etc.)
  
-        --- Below is just optional if you need a tree level information
-        @changeDescription = 'Update customer information', -- Description
-        @fromValue = @PreviousValue,                                        -- Previous Value
-        @toValue = @Value                                     -- New Value
+  --      --- Below is just optional if you need a tree level information
+  --      @changeDescription = 'Update customer information', -- Description
+  --      @fromValue = @PreviousValue,                                        -- Previous Value
+  --      @toValue = @Value                                     -- New Value
+
+		DECLARE @cv as NVARCHAR(MAX)
+
+		SET @cv = '{"change": "tblCustomers","children": [{"action": "Updated","change": "Updated - Record: ' + CAST(@Id as NVARCHAR)+ '","iconCls": "small-tree-modified","children": [{"change": "' + @Field + '","from": "' + @PreviousValue + '","to": "' + @Value + ' ","leaf": true,"iconCls": "small-gear"}]}]}';
+
+		exec uspSMAuditLog 
+			@screenName				= 'EntityManagement.view.Entity',
+			@keyValue				= @Id,
+			@entityId				= @EntityId,
+			@actionType				= 'Updated',
+			@actionIcon				= 'small-tree-modified',
+			@changeDescription		= '',
+			@fromValue				= '',
+			@toValue				= '',
+			@child_value			= @cv 
 	END
 
 END
