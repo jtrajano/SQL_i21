@@ -12,6 +12,8 @@ SELECT TransferDetail.intInventoryTransferId
 				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = TransferDetail.intSourceId)
 			WHEN Transfer.intSourceType = 2 -- Inbound Shipment
 				THEN (SELECT CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50)) FROM tblLGShipment WHERE intShipmentId = TransferDetail.intSourceId)
+			WHEN Transfer.intSourceType = 3 -- Transports
+				THEN (SELECT CAST(ISNULL(TransportView.strTransaction, 'Transport not found!')AS NVARCHAR(50)) FROM vyuTRTransportReceipt TransportView WHERE TransportView.intTransportReceiptId = TransferDetail.intSourceId)
 			ELSE NULL
 			END
 	)
