@@ -22,7 +22,7 @@ INNER JOIN tblAPBill B ON A.intEntityVendorId = B.intEntityVendorId
 OUTER APPLY tblAPCompanyPreference C
 WHERE B.intBillId = @voucherId AND B.ysnForApproval = 1
 
-IF @approverListId IS NULL OR @approverListId <= 0 RAISERROR('Please setup approver for this vendor.', 16, 1);
+IF @approverListId IS NULL OR @approverListId <= 0 RAISERROR('Please setup approver either in vendor or company configuration.', 16, 1);
 
 DELETE FROM tblAPVoucherApprover WHERE intVoucherId = @voucherId;
 
