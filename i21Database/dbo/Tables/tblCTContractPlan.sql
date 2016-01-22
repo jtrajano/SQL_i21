@@ -23,6 +23,7 @@
 	[intAssociationId] INT NULL, 
 	[intCropYearId] INT NULL, 
 	[intCompanyLocationId] INT NULL, 
+	[ysnActive] BIT NULL,
     [intConcurrencyId] INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTContractPlan_intContractPlanId] PRIMARY KEY CLUSTERED ([intContractPlanId] ASC),
