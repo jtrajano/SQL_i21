@@ -12,5 +12,6 @@ CREATE PROCEDURE  [dbo].[uspGLImportSubLedger]
 	 @intCurrencyId		INT, 
 	 @intUserId			INT, 
 	 @version			VARCHAR(20),
+	 @ysnPostInactive	BIT = 0,
 	 @importLogId		INT OUTPUT
 AS
