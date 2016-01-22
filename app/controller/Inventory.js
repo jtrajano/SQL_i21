@@ -268,6 +268,10 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'Inventory.view.Category';
                 columnName = 'strCategoryCode';
                 break;
+            case 'UOM':
+                screenName = 'Inventory.view.InventoryUOM';
+                columnName = 'strUnitMeasure';
+                break;
             case 'Order':
                 screenName = 'AccountsReceivable.view.SalesOrder';
                 columnName = 'intSalesOrderId';

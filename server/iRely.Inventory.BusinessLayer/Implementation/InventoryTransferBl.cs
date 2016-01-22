@@ -76,5 +76,18 @@ namespace iRely.Inventory.BusinessLayer
             }
             return postResult;
         }
+
+        public async Task<SearchResult> SearchTransferDetails(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryTransferDetail>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryTransferDetailId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }
