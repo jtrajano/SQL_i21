@@ -3135,6 +3135,7 @@
     <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\SynchronizePaycheckCheckNumber.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdatePaycheckTotalHours.sql" />
+    <Build Include="dbo\Views\vyuPRReportQuarterlyFUI.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
