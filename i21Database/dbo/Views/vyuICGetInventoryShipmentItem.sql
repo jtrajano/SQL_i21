@@ -43,7 +43,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.intGradeId
 	, strGrade = Grade.strDescription
 	, ShipmentItem.intDiscountSchedule
-	, strDiscountSchedule = ''
+	, strDiscountSchedule = DiscountSchedule.strDiscountId
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -55,3 +55,4 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ShipmentItem.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId    
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId
+	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ShipmentItem.intDiscountSchedule
