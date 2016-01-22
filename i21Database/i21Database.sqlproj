@@ -3244,6 +3244,14 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostItemChange.sql" />
     <Build Include="dbo\Tables\tblGLReconcileAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveShiftActivityMachines.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFApplyItemSubstitution.sql" />
+    <Build Include="dbo\Functions\fnMFCalculateRecipeItemQuantity.sql" />
+    <Build Include="dbo\Functions\fnMFCalculateRecipeItemUpperTolerance.sql" />
+    <Build Include="dbo\Functions\fnMFCalculateRecipeItemLowerTolerance.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCancelItemSubstitution.sql" />
+    <Build Include="dbo\Functions\fnMFCalculateRecipeSubItemQuantity.sql" />
+    <Build Include="dbo\Functions\fnMFCalculateRecipeSubItemUpperTolerance.sql" />
+    <Build Include="dbo\Functions\fnMFCalculateRecipeSubItemLowerTolerance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
