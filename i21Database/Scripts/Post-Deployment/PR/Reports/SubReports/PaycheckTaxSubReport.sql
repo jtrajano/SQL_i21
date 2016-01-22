@@ -114,7 +114,7 @@ SELECT
 	[strName] = NULL, 
 	[intReportId] = @intReportId, 
 	[intConnectionId] = 1, 
-	[strQuery] = N'SELECT * FROM vyuPRPaycheckTax', 
+	[strQuery] = N'SELECT * FROM vyuPRPaycheckTax WHERE strPaidBy = ''Employee''', 
 	[intDataSourceType] = 0, 
 	[intConcurrencyId] = 1
 
