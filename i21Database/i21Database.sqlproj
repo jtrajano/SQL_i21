@@ -3132,6 +3132,7 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckMiddle.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckTop.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\PaycheckBottom.sql" />
+    <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
