@@ -464,6 +464,22 @@ Harness.start(
                 ]
             }
         ]
+    },
+{ group: 'StorageLocation',
+    items: [
+    {
+        url: 'StorageLocation/AddStorageLocation.js',  // url of the js file, containing actual test code
+        preload: [
+            testEnginePath
+        ]
+    },
+    {
+        url: 'StorageLocation/DeleteStorageLocation.js',  // url of the js file, containing actual test code
+        preload: [
+            testEnginePath
+        ]
     }
+]
+}
 
 )
