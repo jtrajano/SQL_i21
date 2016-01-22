@@ -7,6 +7,7 @@
 	[intSalesPipeStatusId] [int] NULL,
 	[intCustomerContactId] [int] NOT NULL,
 	[intTicketTypeId] [int] NOT NULL,
+	[dtmClose] [datetime] NULL,
 	[dtmGoLive] [datetime] NULL,
 	[intPercentComplete] [int] NULL,
 	[ysnCompleted] [bit] NULL,
@@ -326,3 +327,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDProject',
     @level2type = N'COLUMN',
     @level2name = N'strType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Close Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmClose'
