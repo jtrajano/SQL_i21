@@ -89,7 +89,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 41,name = 'Write Off'UNION ALL 
 			SELECT id = 42,name = 'Write-Off Sold'UNION ALL 
 			SELECT id = 43,name = 'Revalue Sold'UNION ALL 
-			SELECT id = 44,name = 'Auto-Negative'UNION ALL 
+			SELECT id = 44,name = 'Auto-Variance'UNION ALL 
 			SELECT id = 45,name = 'AP Clearing'UNION ALL 
 			SELECT id = 46,name = 'Inventory In-Transit'UNION ALL 
 			SELECT id = 47,name = 'General'UNION ALL 
@@ -255,10 +255,10 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Write-Off Sold'
 	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Auto-Negative')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Auto-Variance')
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Negative'
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Variance'
 	END
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Inventory Adjustment')
