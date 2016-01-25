@@ -45,7 +45,7 @@ SELECT DISTINCT
 FROM tblSMApprovalListUserSecurity A
 CROSS APPLY tblAPBill B
 WHERE B.intBillId = @voucherId
-AND 1 = (CASE WHEN B.dblTotal <= A.dblAmountLessThanEqual OR B.dblTotal > A.dblAmountOver THEN 1 ELSE 0 END)
+AND 1 = (CASE WHEN A.dblAmountLessThanEqual <= B.dblTotal OR A.dblAmountOver > B.dblTotal THEN 1 ELSE 0 END)
 AND A.intApprovalListId = @approverListId
 ORDER BY A.intApproverLevel
 
