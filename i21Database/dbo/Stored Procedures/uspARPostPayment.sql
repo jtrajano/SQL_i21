@@ -1257,12 +1257,12 @@ IF @post = 1
 		SELECT
 			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,strBatchID					= @batchId
-			,intAccountId				= @IncomeInterestAccount 
+			,intAccountId				= @ARAccount 
 			,dblDebit					= SUM(B.dblInterest)
 			,dblCredit					= 0 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
-			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount) 
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId  
@@ -1407,12 +1407,12 @@ IF @post = 1
 		SELECT
 			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,strBatchID					= @batchId
-			,intAccountId				= @ARAccount
+			,intAccountId				= @IncomeInterestAccount
 			,dblDebit					= 0
 			,dblCredit					= SUM(B.dblInterest) 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
-			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @IncomeInterestAccount) 
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId  
