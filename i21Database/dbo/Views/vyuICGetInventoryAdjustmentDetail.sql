@@ -22,10 +22,17 @@ SELECT
 	, strStorageLocationName = StorageLocation.strName
 	, AdjDetail.intItemId
 	, Item.strItemNo
+	, strItemDescription = Item.strDescription
+	, Item.strLotTracking
 	, AdjDetail.intNewItemId
 	, strNewItemNo = NewItem.strItemNo
+	, strNewItemDescription = NewItem.strDescription
+	, strNewLotTracking = NewItem.strLotTracking
 	, AdjDetail.intLotId
 	, Lot.strLotNumber
+	, dblLotQty = Lot.dblQty
+	, dblLotUnitCost = Lot.dblLastCost
+	, dblLotWeightPerQty = Lot.dblWeightPerQty 
 	, AdjDetail.intNewLotId
 	, AdjDetail.strNewLotNumber
 	, AdjDetail.dblQuantity
@@ -34,8 +41,10 @@ SELECT
 	, AdjDetail.dblAdjustByQuantity
 	, AdjDetail.intItemUOMId
 	, strItemUOM = ItemUOM.strUnitMeasure
+	, dblItemUOMUnitQty = ItemUOM.dblUnitQty
 	, AdjDetail.intNewItemUOMId
 	, strNewItemUOM = NewItemUOM.strUnitMeasure
+	, dblNewItemUOMUnitQty = NewItemUOM.dblUnitQty
 	, AdjDetail.intWeightUOMId
 	, strWeightUOM = WeightUOM.strUnitMeasure
 	, AdjDetail.intNewWeightUOMId
