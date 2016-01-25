@@ -1,8 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnGLGetPostErrors] (
 	@JournalIds JournalIDTableType READONLY,
-	@strJournalType NVARCHAR(30) = '',
-	@ysnPost BIT,
-	@ysnPostInactive BIT = 0
+	@ysnPost BIT
 )
 RETURNS TABLE 
 AS
@@ -20,15 +18,17 @@ RETURN (
 				FROM tblGLJournal A 
 				WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
 				AND A.strSourceType <> 'AA'
-				AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
+				AND A.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 				UNION 
 				SELECT DISTINCT A.intJournalId,'Unable to post. Account id:' + B.strAccountId + ' is under the ' + C.strAccountCategory + ' category. Please remove it from the transaction detail.' AS strMessage
 					FROM tblGLJournalDetail A JOIN vyuGLAccountDetail B
 					ON A.intAccountId = B.intAccountId
+					JOIN tblGLJournal J
+					ON A.intJournalId = J.intJournalId
 					JOIN tblGLAccountCategory C
 					ON B.intAccountCategoryId = C.intAccountCategoryId
 					WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds)	
-					AND C.strAccountCategory <> 'General'  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
+					AND C.strAccountCategory <> 'General'  AND J.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 					GROUP BY A.intJournalId	,B.strAccountId,C.strAccountCategory
 				--REGION @ysnPost = 1
 				UNION
@@ -59,11 +59,10 @@ RETURN (
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has inactive account id: ' + B.strAccountId + '.' AS strMessage
-				FROM tblGLJournalDetail A 
+				FROM tblGLJournalDetail A JOIN tblGLJournal J ON A.intJournalId = J.intJournalId
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND @ysnPost = 1 
-				AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
-				AND @ysnPostInactive = 0
+				AND J.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal', 'Historical Journal')
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage

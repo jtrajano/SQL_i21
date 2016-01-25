@@ -5,7 +5,6 @@ CREATE PROCEDURE [dbo].[uspGLPostJournal]
 	@strBatchId			AS NVARCHAR(100)	= '',	
 	@strJournalType		AS NVARCHAR(30)		= '',
 	@intEntityId		AS INT				= 1,
-	@ysnPostInactive		AS BIT			= 0,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
 AS
@@ -48,7 +47,7 @@ IF ISNULL(@ysnPost, 0) = 0
 							,GETDATE() as dtmDate
 							,@intEntityId
 							,@strJournalType
-					FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@strJournalType,@ysnPost,@ysnPostInactive)
+					FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@ysnPost)
 					OUTER APPLY(SELECT TOP 1 B.intJournalId,B.strJournalId FROM @tmpPostJournals A JOIN tblGLJournal B ON A.intJournalId = B.intJournalId) j
 			END
 
@@ -86,7 +85,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
 			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intEntityId,@strJournalType
 			FROM 
-			(SELECT * FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@strJournalType,@ysnPost,@ysnPostInactive))tmpBatchResults
+			(SELECT * FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@ysnPost))tmpBatchResults
 			LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalId = tblB.intJournalId
 	END
 

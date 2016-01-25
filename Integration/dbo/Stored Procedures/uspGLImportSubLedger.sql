@@ -6,7 +6,7 @@ EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportSubLedger''
 			DROP PROCEDURE [dbo].[uspGLImportSubLedger];')
 
 EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
-    	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20), @ysnPostInactive BIT = 0, @importLogId INT OUTPUT)
+    	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS
     	BEGIN
     	SET NOCOUNT ON;
@@ -307,7 +307,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 					DECLARE @successfulCount int
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
 
-    				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId, @ysnPostInactive, @successfulCount OUTPUT
+    				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,@successfulCount OUTPUT
 
     				IF @successfulCount = @journalCount
     				BEGIN
