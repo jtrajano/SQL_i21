@@ -19,6 +19,12 @@ strPayeeBankRoutingNumber = (
 strEntityNo = (
 		SELECT strEntityNo FROM tblEntity
 		WHERE intEntityId = intPayeeId
+),
+strSocialSecurity = (
+		SELECT Emp.strSocialSecurity FROM 
+		tblPRPaycheck PayCheck  INNER JOIN
+		tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.intEntityEmployeeId
+		WHERE PayCheck.strPaycheckId = tblCMBankTransaction.strTransactionId 
 )
 FROM tblCMBankTransaction
 WHERE dbo.fnIsDepositEntry(strLink) = 0
