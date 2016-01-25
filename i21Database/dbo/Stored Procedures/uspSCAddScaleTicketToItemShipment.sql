@@ -140,6 +140,7 @@ BEGIN
 			,intSort
 			,intConcurrencyId
 			,intOwnershipType
+			,intStorageLocationId
 	)
 	SELECT			
 			intInventoryShipmentId	= @InventoryShipmentId
@@ -162,6 +163,7 @@ BEGIN
 									  WHEN LI.ysnIsStorage = 1
 									  THEN 2
 									  END
+			,intStorageLocationId	= SC.intStorageLocationId
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
@@ -217,5 +219,3 @@ BEGIN
 	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryShipmentId = @InventoryShipmentId
 END
 GO
-
-
