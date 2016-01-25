@@ -3,7 +3,7 @@
 	[intItemMovementId] INT NOT NULL IDENTITY,
 	[intCheckoutId] INT,
     [intItemUPCId] INT NULL, 
-    [strDescription] NVARCHAR(MAX) NULL, 
+    [strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intVendorId] INT NULL, 
     [intQtySold] INT NULL, 
     [dblCurrentPrice] DECIMAL(18, 6) NULL, 
