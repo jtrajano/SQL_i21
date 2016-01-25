@@ -16,6 +16,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= SOD.[intContractHeaderId]
+	,[intContractDetailId]				= SOD.[intContractDetailId] 
 	,[intCompanyLocationId]				= SO.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -124,6 +126,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= SOD.[intContractHeaderId]
+	,[intContractDetailId]				= SOD.[intContractDetailId] 
 	,[intCompanyLocationId]				= SO.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -230,6 +234,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= SHP.[strShipmentNumber] 	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= SOD.[intContractHeaderId]
+	,[intContractDetailId]				= SOD.[intContractDetailId]
 	,[intCompanyLocationId]				= SHP.[intShipFromLocationId]
 	,[strLocationName]					= SHP.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -388,6 +394,128 @@ LEFT OUTER JOIN
 UNION ALL
 
 SELECT
+	 [strTransactionType]				= 'Inventory Shipment'
+	,[strTransactionNumber]				= ICIS.[strShipmentNumber] 
+	,[strShippedItemId]					= 'icis:' + CAST(ICIS.[intInventoryShipmentId] AS NVARCHAR(250))
+	,[intEntityCustomerId]				= ICIS.[intEntityCustomerId]
+	,[strCustomerName]					= EME.[strName]
+	,[intSalesOrderId]					= NULL
+	,[intSalesOrderDetailId]			= NULL
+	,[strSalesOrderNumber]				= ''
+	,[dtmProcessDate]					= ICIS.[dtmShipDate] 
+	,[intInventoryShipmentId]			= ICIS.[intInventoryShipmentId]
+	,[intInventoryShipmentItemId]		= ICISI.[intInventoryShipmentItemId]
+	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
+	,[intShipmentId]					= NULL
+	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= CTCD.[intContractHeaderId]
+	,[intContractDetailId]				= CTCD.[intContractDetailId]
+	,[intCompanyLocationId]				= ICIS.[intShipFromLocationId]
+	,[strLocationName]					= SMCL.[strLocationName] 
+	,[intShipToLocationId]				= ICIS.[intShipToLocationId]
+	,[intFreightTermId]					= ICIS.[intFreightTermId]
+	,[intItemId]						= ICISI.[intItemId]	
+	,[strItemNo]						= ICI.[strItemNo] 
+	,[strItemDescription]				= ICI.[strDescription] 
+	,[intItemUOMId]						= ICISI.[intItemUOMId]
+	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
+	,[intShipmentItemUOMId]				= ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId])
+	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
+	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
+	,[dblQtyOrdered]					= 0 
+	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQtyShippedTotal]		= 0
+	,[dblQtyRemaining]					= 0
+	,[dblDiscount]						= 0 
+	,[dblPrice]							= ICISI.[dblUnitPrice]
+	,[dblShipmentUnitPrice]				= ICISI.[dblUnitPrice]
+	,[dblTotalTax]						= 0
+	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ICISI.[dblUnitPrice]
+	,[intAccountId]						= ARIA.[intAccountId]
+	,[intCOGSAccountId]					= ARIA.[intCOGSAccountId]
+	,[intSalesAccountId]				= ARIA.[intSalesAccountId]
+	,[intInventoryAccountId]			= ARIA.[intInventoryAccountId]
+	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
+	,[strStorageLocationName]			= ICSL.[strName]
+	,[intTermID]						= NULL
+	,[strTerm]							= ''
+	,[intEntityShipViaId]				= NULL
+	,[strShipVia]						= ''
+	,[strTicketNumber]					= ''
+	,[intTicketId]						= NULL
+	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
+	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblGrossWt]						= ISISIL.dblGrossWeight 
+	,[dblTareWt]						= ISISIL.dblTareWeight 
+	,[dblNetWt]							= ISISIL.dblNetWeight
+	,[strPONumber]						= ''
+	,[strBOLNumber]						= ''
+	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= ''
+FROM
+	tblICInventoryShipmentItem ICISI
+INNER JOIN
+	tblICInventoryShipment ICIS
+		ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
+		AND ICIS.[intOrderType] <> 2
+		AND ICIS.[ysnPosted] = 1
+LEFT OUTER JOIN
+	(
+		SELECT
+			intInventoryShipmentItemId
+			,SUM([dblGrossWeight]) dblGrossWeight
+			,SUM([dblTareWeight]) dblTareWeight
+			,SUM([dblGrossWeight] - [dblTareWeight]) dblNetWeight
+		FROM
+			tblICInventoryShipmentItemLot
+		GROUP BY
+			intInventoryShipmentItemId
+	) ISISIL
+		ON ICISI.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
+LEFT OUTER JOIN 
+	vyuCTContractDetailView CTCD	
+		ON ICISI.[intLineNo] = CTCD.[intContractDetailId]
+		AND ICIS.[intOrderType] = 1 
+INNER JOIN
+	tblARCustomer ARC
+		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN
+	tblICItem ICI
+		ON ICISI.[intItemId] = ICI.[intItemId]
+LEFT JOIN
+	tblICItemUOM ICIU
+		ON ICISI.[intItemUOMId] = ICIU.[intItemUOMId] 
+LEFT JOIN
+	tblICUnitMeasure ICUM
+		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]	
+LEFT JOIN
+	tblICItemUOM ICIU1
+		ON ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]) = ICIU1.[intItemUOMId] 
+LEFT JOIN
+	tblICUnitMeasure ICUM1
+		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]				
+INNER JOIN
+	tblEntity EME
+		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+LEFT OUTER JOIN
+	vyuARGetItemAccount ARIA
+		ON ICISI.[intItemId] = ARIA.[intItemId]
+		AND ICIS.[intShipFromLocationId] = ARIA.[intLocationId]	
+LEFT OUTER JOIN
+	tblICStorageLocation ICSL
+		ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
+LEFT OUTER JOIN
+	tblARInvoiceDetail ARID
+		ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+		AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+LEFT OUTER JOIN
+	[tblSMCompanyLocation] SMCL
+		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
+
+UNION ALL
+
+SELECT
 	 [strTransactionType]				= 'Inbound Shipment'
 	,[strTransactionNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
 	,[strShippedItemId]					= 'lgis:' + CAST(LGS.intShipmentId AS NVARCHAR(250))
@@ -402,6 +530,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= LGS.[intShipmentId]
 	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
+	,[intContractHeaderId]				= NULL
+	,[intContractDetailId]				= NULL
 	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName]
 	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
