@@ -112,6 +112,7 @@ INSERT INTO
 		,[dblAmountDue]
 		,[dblPayment]
 		,[strTransactionType]
+		,[strType]
 		,[intPaymentMethodId]
 		,[strComments]
 		,[intAccountId]
@@ -161,6 +162,7 @@ SELECT
 	,0				            --[[dblAmountDue]] need to check
 	,@ZeroDecimal				--[dblPayment]
 	,'Invoice'					--[strTransactionType]
+	,CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN 'Transport Delivery' ELSE 'Standard' END
 	,0							--[intPaymentMethodId]
 	,IE.strComments        	    --[strComments] 
 	,@ARAccountId				--[intAccountId]
@@ -252,6 +254,7 @@ SET
 	,[dblAmountDue]					= @ZeroDecimal
 	,[dblPayment]					= @ZeroDecimal
 	,[strTransactionType]			= 'Invoice'
+	,[strType]						= CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN 'Transport Delivery' ELSE 'Standard' END
 	,[intPaymentMethodId]			= 0
 	,[strComments]					= IE.strComments
 	,[intAccountId]					= @ARAccountId
@@ -396,6 +399,7 @@ INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
 	,[intItemId]
 	,[strItemDescription]
+	,[strDocumentNumber]
 	,[intItemUOMId]
 	,[dblQtyOrdered]
 	,[dblQtyShipped]
@@ -413,6 +417,7 @@ SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,IE.[intItemId]												--[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
+	,strDocumentNumber = CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN (SELECT TOP 1 strTransaction FROM tblTRLoadHeader WHERE intLoadHeaderId = IE.intSourceId) ELSE NULL END
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]		

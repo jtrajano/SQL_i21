@@ -116,7 +116,7 @@ AS
 						) AS PD ON PD.intInvoiceId = I.intInvoiceId 
 					WHERE I.ysnPosted = 1 							  
 						AND I.strTransactionType = 'Invoice'
-						AND I.strType = 'Standard'
+						AND I.strType IN ('Standard', 'Transport Delivery')
 						AND I.intEntityCustomerId = @entityId
 						AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDueDate))) <= @asOfDate
 						AND CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END > intGracePeriod

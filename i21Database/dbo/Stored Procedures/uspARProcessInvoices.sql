@@ -373,11 +373,12 @@ BEGIN
 	DECLARE @NewInvoiceId INT
 			,@Type NVARCHAR(200)
 	SET @Type = 'Standard'
-	--IF ISNULL(@SourceTransaction,'') = 'Provisional Invoice'
-	--	BEGIN
-	--		SET @Type = 'Provisional Invoice'
-	--	END
 	
+	IF ISNULL(@DistributionHeaderId, 0) > 0
+		BEGIN
+			SET @Type = 'Transport Delivery'
+		END
+
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
 			@EntityCustomerId				= @EntityCustomerId

@@ -222,7 +222,7 @@ BEGIN TRY
 		,[intConcurrencyId])
 	SELECT
 		 [strTransactionType]			= @TransactionType
-		,[strType]						= @Type 
+		,[strType]						= CASE WHEN ISNULL(@DistributionHeaderId, 0) > 0 THEN 'Transport Delivery' ELSE @Type END
 		,[intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
