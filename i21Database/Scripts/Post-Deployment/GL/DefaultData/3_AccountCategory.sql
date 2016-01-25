@@ -104,7 +104,6 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 56,name = 'Other Charge Income'UNION ALL 
 			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
 			SELECT id = 58,name = 'Deferred Revenue' 
-
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
 
