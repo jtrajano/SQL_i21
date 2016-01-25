@@ -479,6 +479,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 							,@ItemInventoryShipmentItemId	= @ItemShipmentDetailId
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 							,@ItemShipmentNumber			= @ItemShipmentNumber
+							,@EntitySalespersonId			= @EntitySalespersonId
 
 				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 					BEGIN

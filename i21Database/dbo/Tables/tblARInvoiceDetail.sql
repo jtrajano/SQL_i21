@@ -43,7 +43,8 @@
 	[dblShipmentNetWt]						NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intTicketId]							INT												NULL, 
 	[intTicketHoursWorkedId]				INT												NULL,
-	[intOriginalInvoiceDetailId]			INT												NULL,	
+	[intOriginalInvoiceDetailId]			INT												NULL,
+	[intEntitySalespersonId]				INT												NULL,
 	[intSiteId]								INT												NULL,
 	[strBillingBy]							NVARCHAR(100)   COLLATE Latin1_General_CI_AS	NULL,
 	[dblPercentFull]						NUMERIC(18, 6)									NULL,
@@ -69,7 +70,8 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblSCTicket] ([intTicketId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblHDTicketHoursWorked_intTicketHoursWorkedId] FOREIGN KEY ([intTicketHoursWorkedId]) REFERENCES [dbo].[tblHDTicketHoursWorked] ([intTicketHoursWorkedId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblTMSite_intSiteId] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId])
+	CONSTRAINT [FK_tblARInvoiceDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId])
 );
 
 GO

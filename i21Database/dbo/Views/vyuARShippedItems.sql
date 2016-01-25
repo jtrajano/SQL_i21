@@ -57,6 +57,8 @@ SELECT
 	,[strPONumber]						= SO.[strPONumber]
 	,[strBOLNumber]						= SO.[strBOLNumber]
 	,[intSplitId]						= SO.[intSplitId]
+	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
+	,[strSalespersonName]				= ESP.[strName]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -71,7 +73,10 @@ INNER JOIN
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
 	tblEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId] 
+		ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT JOIN
+	tblEntity ESP
+		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN
 	tblSMTerm T
 		ON SO.[intTermId] = T.[intTermID] 
@@ -160,6 +165,8 @@ SELECT
 	,[strPONumber]						= SO.[strPONumber]
 	,[strBOLNumber]						= SO.[strBOLNumber]
 	,[intSplitId]						= SO.[intSplitId]
+	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
+	,[strSalespersonName]				= ESP.[strName]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -173,6 +180,9 @@ INNER JOIN
 INNER JOIN
 	tblEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId] 
+LEFT JOIN
+	tblEntity ESP
+		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN
 	tblSMTerm T
 		ON SO.[intTermId] = T.[intTermID] 
@@ -261,6 +271,8 @@ SELECT
 	,[strPONumber]						= SO.[strPONumber]
 	,[strBOLNumber]						= SO.[strBOLNumber]
 	,[intSplitId]						= SO.[intSplitId]
+	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
+	,[strSalespersonName]				= ESP.[strName]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -271,7 +283,10 @@ INNER JOIN
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
 	tblEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId] 
+		ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT JOIN
+	tblEntity ESP
+		ON SO.[intEntitySalespersonId] = ESP.[intEntityId] 
 LEFT OUTER JOIN
 	tblSMTerm T
 		ON SO.[intTermId] = T.[intTermID] 
@@ -428,6 +443,8 @@ SELECT
 	,[strPONumber]						= ''
 	,[strBOLNumber]						= ''
 	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= NULL
 FROM
 	vyuLGShipmentHeader LGS		
 INNER JOIN

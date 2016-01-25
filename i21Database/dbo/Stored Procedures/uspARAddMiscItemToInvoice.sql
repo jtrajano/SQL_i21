@@ -10,7 +10,8 @@
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
 	,@ItemSalesOrderDetailId		INT				= NULL	
-	,@ItemTaxGroupId				INT				= NULL	
+	,@ItemTaxGroupId				INT				= NULL
+	,@EntitySalespersonId			INT				= NULL	
 AS
 
 BEGIN
@@ -110,6 +111,7 @@ BEGIN TRY
 		,[intPerformerId]
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
+		,[intEntitySalespersonId]
 		,[intConcurrencyId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
@@ -155,6 +157,7 @@ BEGIN TRY
 		,[intPerformerId]					= NULL
 		,[ysnLeaseBilling]					= NULL
 		,[ysnVirtualMeterReading]			= NULL
+		,[intEntitySalespersonId]			= @EntitySalespersonId
 		,[intConcurrencyId]					= 0
 			
 END TRY
