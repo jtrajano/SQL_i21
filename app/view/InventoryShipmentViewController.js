@@ -276,7 +276,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 hidden: '{readOnlyOnPickLots}'
             },
             btnPickLots: {
-                hidden: '{!readOnlyOnPickLots}'
+                hidden: true
             },
             btnRemoveItem: {
                 hidden: '{readOnlyOnPickLots}'
@@ -703,6 +703,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             isHidden = false;
                         }
                         break;
+                    case 3:
+                        isHidden = false;
+                        break;
                     default:
                         isHidden = true;
                         break;
@@ -725,7 +728,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 break;
         }
         if (isHidden === false) {
-            this.showAddOrders(win);
+            var btnAddOrders = win.down('#btnAddOrders');
+            this.onAddOrderClick(btnAddOrders);
         }
     },
 
@@ -1894,7 +1898,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onAddOrderClick: function(button) {
         var win = button.up('window');
-        this.showAddOrders(win);
+        if (button.text === 'Add Orders') {
+            this.showAddOrders(win);
+        }
+        else {
+            this.onPickLotsClick(button);
+        }
     },
 
     showAddOrders: function(win) {
