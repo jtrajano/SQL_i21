@@ -68,7 +68,7 @@ BEGIN
 				,@OtherChargeIncome_Default AS INT = 11000
 				,@OtherChargeAsset_Default AS INT = 12000
 				,@CostAdjustment_Default AS INT = 13000
-				,@RevalueWIP_Default AS INT = 14000
+				,@WorkInProgress_Default AS INT = 14000
 
 				,@Inventory_NewHaven AS INT = 1001
 				,@CostOfGoods_NewHaven AS INT = 2001
@@ -83,7 +83,7 @@ BEGIN
 				,@OtherChargeIncome_NewHaven AS INT = 11001
 				,@OtherChargeAsset_NewHaven AS INT = 12001
 				,@CostAdjustment_NewHaven AS INT = 13001
-				,@RevalueWIP_NewHaven AS INT = 14001
+				,@WorkInProgress_NewHaven AS INT = 14001
 
 				,@Inventory_BetterHaven AS INT = 1002
 				,@CostOfGoods_BetterHaven AS INT = 2002
@@ -98,7 +98,7 @@ BEGIN
 				,@OtherChargeIncome_BetterHaven AS INT = 11002
 				,@OtherChargeAsset_BetterHaven AS INT = 12002
 				,@CostAdjustment_BetterHaven AS INT = 13002
-				,@RevalueWIP_BetterHaven AS INT = 14002
+				,@WorkInProgress_BetterHaven AS INT = 14002
 		
 		-- Declare the variables for the Unit of Measure
 		DECLARE @EACH AS INT = 1;		

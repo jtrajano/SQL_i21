@@ -280,7 +280,7 @@ BEGIN
 			dtmDate						= 'November 14, 2014'
 			,strBatchId					= 'BATCH-000001'
 			,intAccountId				= @Inventory_Default
-			,dblDebit					= (18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
+			,dblDebit					= ROUND((18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25), 2)
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
@@ -302,6 +302,7 @@ BEGIN
 			,intConcurrencyId			= 1
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @Inventory_Default
+				AND ROUND((18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25), 2) <> 0
 			
 		UNION ALL 
 		SELECT	
@@ -309,7 +310,7 @@ BEGIN
 			,strBatchId					= 'BATCH-000001'
 			,intAccountId				= @AutoNegative_Default
 			,dblDebit					= 0
-			,dblCredit					= (18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
+			,dblCredit					= ROUND((18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25), 2) 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription
@@ -330,6 +331,7 @@ BEGIN
 			,intConcurrencyId			= 1
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @AutoNegative_Default 
+				AND ROUND((18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25), 2) <> 0
 
 	END 
 	

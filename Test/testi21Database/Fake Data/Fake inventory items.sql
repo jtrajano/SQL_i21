@@ -121,7 +121,7 @@ BEGIN
 				,@OtherChargeIncome_Default AS INT = 11000
 				,@OtherChargeAsset_Default AS INT = 12000
 				,@CostAdjustment_Default AS INT = 13000
-				,@RevalueWIP_Default AS INT = 14000
+				,@WorkInProgress_Default AS INT = 14000
 
 				,@Inventory_NewHaven AS INT = 1001
 				,@CostOfGoods_NewHaven AS INT = 2001
@@ -136,7 +136,7 @@ BEGIN
 				,@OtherChargeIncome_NewHaven AS INT = 11001
 				,@OtherChargeAsset_NewHaven AS INT = 12001
 				,@CostAdjustment_NewHaven AS INT = 13001
-				,@RevalueWIP_NewHaven AS INT = 14001
+				,@WorkInProgress_NewHaven AS INT = 14001
 
 				,@Inventory_BetterHaven AS INT = 1002
 				,@CostOfGoods_BetterHaven AS INT = 2002
@@ -151,7 +151,7 @@ BEGIN
 				,@OtherChargeIncome_BetterHaven AS INT = 11002
 				,@OtherChargeAsset_BetterHaven AS INT = 12002
 				,@CostAdjustment_BetterHaven AS INT = 13002
-				,@RevalueWIP_BetterHaven AS INT = 14002
+				,@WorkInProgress_BetterHaven AS INT = 14002
 
 	DECLARE @SEGMENT_ID_DefaultLocation AS INT = 100
 			,@SEGMENT_ID_NewHavenLocation AS INT = 101
@@ -231,11 +231,11 @@ BEGIN
 	FROM dbo.tblGLAccountCategory
 	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_CostAdjustment
 	
-	DECLARE @ACCOUNT_CATEGORY_NAME_RevalueWIP AS NVARCHAR(100) = 'Revalue WIP'	
-	DECLARE @ACCOUNT_CATEGORY_ID_RevalueWIP AS INT
-	SELECT @ACCOUNT_CATEGORY_ID_RevalueWIP = intAccountCategoryId
+	DECLARE @ACCOUNT_CATEGORY_NAME_WorkInProgress AS NVARCHAR(100) = 'Work In Progress'	
+	DECLARE @ACCOUNT_CATEGORY_ID_WorkInProgress AS INT
+	SELECT @ACCOUNT_CATEGORY_ID_WorkInProgress = intAccountCategoryId
 	FROM dbo.tblGLAccountCategory
-	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_RevalueWIP
+	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_WorkInProgress
 
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1
@@ -568,7 +568,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_Default);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @ACCOUNT_CATEGORY_ID_WorkInProgress, @WorkInProgress_Default);
 
 
 		-- Add the G/L accounts for STICKY GRAINS
@@ -581,7 +581,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_NewHaven);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_NewHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @ACCOUNT_CATEGORY_ID_WorkInProgress, @WorkInProgress_NewHaven);
 
 		-- Add the G/L accounts for PREMIUM GRAINS 
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_Inventory, @Inventory_BetterHaven);
@@ -593,7 +593,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_BetterHaven);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_BetterHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @ACCOUNT_CATEGORY_ID_WorkInProgress, @WorkInProgress_BetterHaven);
 
 		-- Add the G/L accounts for COLD GRAINS 
 		-- No item level g/l account overrides for cold grains. Use g/l from category
@@ -611,7 +611,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_Default);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_WorkInProgress, @WorkInProgress_Default);
 
 
 
@@ -626,7 +626,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_CostAdjustment, @CostAdjustment_Default);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_RevalueWIP, @RevalueWIP_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @ACCOUNT_CATEGORY_ID_WorkInProgress, @WorkInProgress_Default);
 
 		-- Add the G/L Account for Other Charges
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@OtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeExpense, @OtherChargeExpense_Default);

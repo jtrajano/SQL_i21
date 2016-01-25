@@ -46,6 +46,51 @@ BEGIN
 
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
+
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
+
+				,@CornCommodity_DefaultLocation AS INT = 18
+				,@CornCommodity_NewHaven AS INT = 19
+				,@CornCommodity_BetterHaven AS INT = 20
+
+				,@ManualLotGrains_NewHaven AS INT = 21
+				,@SerializedLotGrains_NewHaven AS INT = 22
+
+				,@OtherCharges_DefaultLocation AS INT = 23
+				,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+				,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+				,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
+
+				,@OtherCharges_NewHaven AS INT = 27
+				,@SurchargeOtherCharges_NewHaven AS INT = 28
+				,@SurchargeOnSurcharge_NewHaven AS INT = 29
+				,@SurchargeOnSurchargeOnSurcharge_NewHaven AS INT = 30
+
+				,@OtherCharges_BetterHaven AS INT = 31
+				,@SurchargeOtherCharges_BetterHaven AS INT = 32
+				,@SurchargeOnSurcharge_BetterHaven AS INT = 33
+				,@SurchargeOnSurchargeOnSurcharge_BetterHaven AS INT = 34
+
 		
 		-- Declare the account ids
 		DECLARE	 @Inventory_Default AS INT = 1000
@@ -61,7 +106,7 @@ BEGIN
 				,@OtherChargeIncome_Default AS INT = 11000
 				,@OtherChargeAsset_Default AS INT = 12000
 				,@CostAdjustment_Default AS INT = 13000
-				,@RevalueWIP_Default AS INT = 14000
+				,@WorkInProgress_Default AS INT = 14000
 
 				,@Inventory_NewHaven AS INT = 1001
 				,@CostOfGoods_NewHaven AS INT = 2001
@@ -76,7 +121,7 @@ BEGIN
 				,@OtherChargeIncome_NewHaven AS INT = 11001
 				,@OtherChargeAsset_NewHaven AS INT = 12001
 				,@CostAdjustment_NewHaven AS INT = 13001
-				,@RevalueWIP_NewHaven AS INT = 14001
+				,@WorkInProgress_NewHaven AS INT = 14001
 
 				,@Inventory_BetterHaven AS INT = 1002
 				,@CostOfGoods_BetterHaven AS INT = 2002
@@ -91,7 +136,7 @@ BEGIN
 				,@OtherChargeIncome_BetterHaven AS INT = 11002
 				,@OtherChargeAsset_BetterHaven AS INT = 12002
 				,@CostAdjustment_BetterHaven AS INT = 13002
-				,@RevalueWIP_BetterHaven AS INT = 14002
+				,@WorkInProgress_BetterHaven AS INT = 14002
 		
 		-- Declare the variables for the Unit of Measure
 		DECLARE @EACH AS INT = 1;		
@@ -120,7 +165,7 @@ BEGIN
 				,intConcurrencyId
 		)
 		SELECT 	intItemId = @StickyGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = @StickyGrains_DefaultLocation
 				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dtmDate = 'January 12, 2014'
 				,dblQty = 1
@@ -205,12 +250,12 @@ BEGIN
 		SELECT	
 			dtmDate						= 'January 12, 2014'
 			,strBatchId					= 'BATCH-000001'
-			,intAccountId				= @CostAdjustment_Default
+			,intAccountId				= @AutoNegative_Default
 			,dblDebit					= 0
 			,dblCredit					= 12.00
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= 'COST ADJUSTMENT-DEFAULT'
+			,strDescription				= 'AUTO NEGATIVE WHEAT-DEFAULT'
 			,strCode					= 'ICA'
 			,strReference				= ''
 			,intCurrencyId				= @USD

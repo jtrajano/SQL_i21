@@ -140,7 +140,7 @@ BEGIN
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
 		EXEC tSQLt.ExpectException 
-			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Cost Adjustment account category.'
+			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Auto-Negative account category.'
 			,@ExpectedErrorNumber = 80008 
 	END
 

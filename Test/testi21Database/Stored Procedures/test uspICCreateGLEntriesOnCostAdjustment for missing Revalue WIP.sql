@@ -50,7 +50,51 @@ BEGIN
 				,@StickyGrains_BushelUOMId AS INT = 2
 				,@PremiumGrains_BushelUOMId AS INT = 3
 				,@ColdGrains_BushelUOMId AS INT = 4
-				,@HotGrains_BushelUOMId AS INT = 5				
+				,@HotGrains_BushelUOMId AS INT = 5	
+				
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
+
+				,@CornCommodity_DefaultLocation AS INT = 18
+				,@CornCommodity_NewHaven AS INT = 19
+				,@CornCommodity_BetterHaven AS INT = 20
+
+				,@ManualLotGrains_NewHaven AS INT = 21
+				,@SerializedLotGrains_NewHaven AS INT = 22
+
+				,@OtherCharges_DefaultLocation AS INT = 23
+				,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+				,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+				,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
+
+				,@OtherCharges_NewHaven AS INT = 27
+				,@SurchargeOtherCharges_NewHaven AS INT = 28
+				,@SurchargeOnSurcharge_NewHaven AS INT = 29
+				,@SurchargeOnSurchargeOnSurcharge_NewHaven AS INT = 30
+
+				,@OtherCharges_BetterHaven AS INT = 31
+				,@SurchargeOtherCharges_BetterHaven AS INT = 32
+				,@SurchargeOnSurcharge_BetterHaven AS INT = 33
+				,@SurchargeOnSurchargeOnSurcharge_BetterHaven AS INT = 34							
 
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
@@ -108,9 +152,9 @@ BEGIN
 				,intCreatedUserId
 				,intConcurrencyId
 		)
-		SELECT 	intItemId = @StickyGrains
-				,intItemLocationId = @Default_Location
-				,intItemUOMId = @StickyGrains_BushelUOMId
+		SELECT 	intItemId = @HotGrains
+				,intItemLocationId = @HotGrains_DefaultLocation
+				,intItemUOMId = @HotGrains_BushelUOMId
 				,dtmDate = 'January 17, 2014'
 				,dblQty = -11
 				,dblUOMQty = 1
@@ -140,7 +184,7 @@ BEGIN
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
 		EXEC tSQLt.ExpectException 
-			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Revalue WIP account category.'
+			@ExpectedMessagePattern = 'HOT GRAINS is missing a GL account setup for Work In Progress account category.'
 			,@ExpectedErrorNumber = 80008 
 	END
 
