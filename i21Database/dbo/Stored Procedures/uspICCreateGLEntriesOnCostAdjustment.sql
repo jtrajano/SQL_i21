@@ -16,11 +16,11 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
 		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Negative'
 
-		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Cost Adjustment'
-		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Revalue WIP'
-		,@AccountCategory_Revalue_Produced AS NVARCHAR(30) = 'Revalue Produced'
-		,@AccountCategory_Revalue_Transfer AS NVARCHAR(30) = 'Revalue Inventory Transfer'
-		,@AccountCategory_Revalue_Build_Assembly AS NVARCHAR(30) = 'Revalue Build Assembly'		
+		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Auto-Negative' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
+		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
+		--,@AccountCategory_Revalue_Produced AS NVARCHAR(30) = 'Revalue Produced'
+		--,@AccountCategory_Revalue_Transfer AS NVARCHAR(30) = 'Revalue Inventory Transfer'
+		--,@AccountCategory_Revalue_Build_Assembly AS NVARCHAR(30) = 'Revalue Build Assembly'		
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1

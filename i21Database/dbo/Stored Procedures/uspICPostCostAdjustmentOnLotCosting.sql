@@ -216,6 +216,7 @@ BEGIN
 			FROM	dbo.tblICInventoryLotCostAdjustmentLog
 			WHERE	intInventoryLotId = @CostBucketId
 					AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+					AND ysnIsUnposted = 0 
 		
 			-- If none found, the original cost is the cost bucket cost. 
 			SET @OriginalCost = ISNULL(@OriginalCost, @CostBucketCost) 
@@ -229,6 +230,7 @@ BEGIN
 			FROM	dbo.tblICInventoryLotCostAdjustmentLog
 			WHERE	intInventoryLotId = @CostBucketId
 					AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+					AND ysnIsUnposted = 0 
 
 			-- Determine the stock Qty it can process. 
 			SET @AdjustableQty = @CostBucketStockInQty - ISNULL(@AdjustedQty, 0) 
