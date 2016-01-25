@@ -3253,6 +3253,9 @@
     <Build Include="dbo\Functions\fnMFCalculateRecipeSubItemUpperTolerance.sql" />
     <Build Include="dbo\Functions\fnMFCalculateRecipeSubItemLowerTolerance.sql" />
     <Build Include="dbo\Views\vyuSTVendorList.sql" />
+    <Build Include="dbo\Views\vyuICGetItemUOM.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryAdjustment.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryAdjustmentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
