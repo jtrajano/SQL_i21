@@ -1067,54 +1067,43 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     validateRecord: function (config, action) {
         this.validateRecord(config, function (result) {
             if (result) {
+                var controller = config.window.controller;
                 var vm = config.window.viewModel;
                 var current = vm.data.current;
 
                 if (current) {
-                    //Validate PO Date versus Receipt Date
-                    if (current.get('strReceiptType') === 'Purchase Order') {
-                        var grdInventoryReceipt = config.window.down('#grdInventoryReceipt');
+                    //Validate Unit Cost in not zero
+                    if (current.get('strReceiptType') !== 'Purchase Contract') {
                         var receiptItems = current.tblICInventoryReceiptItems().data.items;
                         Ext.Array.each(receiptItems, function (item) {
-                            if (item.dtmDate !== null) {
-                                if (current.get('dtmReceiptDate') < item.get('dtmOrderDate')) {
-                                    iRely.Functions.showErrorDialog('The Purchase Order Date of ' + item.get('strOrderNumber') + ' must not be later than the Receipt Date');
-                                    action(false);
-                                }
-                            }
-                        });
-                    }
-
-                    //Validate Logged in User's default location against the selected Location for the receipt
-                    if (current.get('strReceiptType') !== 'Direct') {
-                        if (app.DefaultLocation > 0) {
-                            if (app.DefaultLocation !== current.get('intLocationId')) {
+                            if (item.get('dblUnitCost') === 0 && item.dummy !== true) {
                                 var result = function (button) {
                                     if (button === 'yes') {
-                                        action(true);
-                                    }
-                                    else {
-                                        action(false);
+                                        if (controller.validateDate(current)) {
+                                            action(true);
+                                        }
+                                        else {
+                                            action(false);
+                                        }
                                     }
                                 };
                                 var msgBox = iRely.Functions;
                                 msgBox.showCustomDialog(
                                     msgBox.dialogType.WARNING,
                                     msgBox.dialogButtonType.YESNO,
-                                    "The Location is different from the default user location. Do you want to continue?",
+                                        item.get('strItemNo') + " has zero cost. Do you want to continue?",
                                     result
                                 );
                             }
-                            else {
-                                action(true)
-                            }
-                        }
-                        else {
-                            action(true)
-                        }
+                        });
                     }
                     else {
-                        action(true)
+                        if (controller.validateDate(current)) {
+                            action(true);
+                        }
+                        else {
+                            action(false);
+                        }
                     }
                 }
                 else {
@@ -1123,6 +1112,56 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         });
     },
+
+    validateDate: function (current) {
+        //Validate PO Date versus Receipt Date
+        if (current.get('strReceiptType') === 'Purchase Order') {
+            var receiptItems = current.tblICInventoryReceiptItems().data.items;
+            Ext.Array.each(receiptItems, function (item) {
+                if (item.dtmDate !== null) {
+                    if (current.get('dtmReceiptDate') < item.get('dtmOrderDate')) {
+                        iRely.Functions.showErrorDialog('The Purchase Order Date of ' + item.get('strOrderNumber') + ' must not be later than the Receipt Date');
+                        return false;
+                    }
+                }
+            });
+        }
+        return true;
+    },
+
+//    validateLocation: function(current) {
+//        //Validate Logged in User's default location against the selected Location for the receipt
+//        if (current.get('strReceiptType') !== 'Direct') {
+//            if (app.DefaultLocation > 0) {
+//                if (app.DefaultLocation !== current.get('intLocationId')) {
+//                    var result = function (button) {
+//                        if (button === 'yes') {
+//                            return true;
+//                        }
+//                        else {
+//                            return false;
+//                        }
+//                    };
+//                    var msgBox = iRely.Functions;
+//                    msgBox.showCustomDialog(
+//                        msgBox.dialogType.WARNING,
+//                        msgBox.dialogButtonType.YESNO,
+//                        "The Location is different from the default user location. Do you want to continue?",
+//                        result
+//                    );
+//                }
+//                else {
+//                    action(true)
+//                }
+//            }
+//            else {
+//                action(true)
+//            }
+//        }
+//        else {
+//            action(true)
+//        }
+//    },
 
     onVendorSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
@@ -1868,10 +1907,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var me = this;
         var win = button.up('window');
         var context = win.context;
+        var current = win.viewModel.data.current;
 
         var doPost = function () {
-            var strReceiptNumber = win.viewModel.data.current.get('strReceiptNumber');
-            var posted = win.viewModel.data.current.get('ysnPosted');
+            var strReceiptNumber = current.get('strReceiptNumber');
+            var posted = current.get('ysnPosted');
 
             var options = {
                 postURL: '../Inventory/api/InventoryReceipt/Receive',
@@ -1885,6 +1925,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             CashManagement.common.BusinessRules.callPostRequest(options);
         };
 
+        var isValid = true;
+        if (current) {
+            if (current.tblICInventoryReceiptItems()) {
+                if (current.tblICInventoryReceiptItems().data.items) {
+
+                }
+            }
+        }
         // If there is no data change, do the post.
         if (!context.data.hasChanges()) {
             doPost();
