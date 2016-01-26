@@ -548,11 +548,16 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         filterSourceByType: function (get) {
             switch (get('current.strReceiptType')) {
                 case 'Purchase Contract':
-                    return {
-                        property: 'intSourceType',
-                        value: '1',
-                        operator: '!='
-                    };
+                    if (this.getData().current) {
+                        if (this.getData().current.phantom) {
+                            return {
+                                property: 'intSourceType',
+                                value: '1',
+                                operator: '!='
+                            };
+                        }
+                    }
+                    return {};
                     break;
                 default:
                     return {};
