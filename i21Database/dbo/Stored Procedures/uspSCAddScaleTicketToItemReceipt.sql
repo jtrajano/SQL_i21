@@ -24,7 +24,7 @@ DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
 DECLARE @intScaleStationId AS INT
---DECLARE @intFreightItemId AS INT
+DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strTicketNumber AS NVARCHAR(40)
@@ -46,13 +46,13 @@ BEGIN
 	WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
 END
 
---BEGIN
---    SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
---	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @strTicketNumber = ST.strTicketNumber,
---	@dblTicketFees = ST.dblTicketFees, @intFreightVendorId = ST.intFreightCarrierId
---	FROM dbo.tblSCTicket ST WHERE
---	ST.intTicketId = @intTicketId
---END
+BEGIN
+    SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
+	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @strTicketNumber = ST.strTicketNumber,
+	@dblTicketFees = ST.dblTicketFees, @intFreightVendorId = ST.intFreightCarrierId
+	FROM dbo.tblSCTicket ST WHERE
+	ST.intTicketId = @intTicketId
+END
 
 -- Get the transaction id 
 EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
@@ -64,7 +64,7 @@ BEGIN
 	RAISERROR(50030, 11, 1);
 	RETURN;
 END 
-
+/*
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
         @total as int,
@@ -327,7 +327,8 @@ BEGIN
 	RETURN;
 END
 
-/*
+*/
+
 -- Insert the Inventory Receipt header 
 INSERT INTO dbo.tblICInventoryReceipt (
 		strReceiptNumber
@@ -599,7 +600,6 @@ SET		dblInvoiceAmount = (
 		)
 FROM	dbo.tblICInventoryReceipt Receipt 
 WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
-*/
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
