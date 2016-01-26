@@ -33,11 +33,8 @@ SELECT
 											ELSE 0 
 									END
 						ELSE
-							(dblLimit - (dblLimit - ISNULL((SELECT SUM (dblAdjustedGross) FROM tblPRPaycheck PC
-												   WHERE YEAR(PC.dtmPayDate) = tblPRPaycheck.intYear
-												   AND DATEPART(QQ, PC.dtmPayDate) = tblPRPaycheck.intQuarter
-												   AND PC.intEntityEmployeeId = tblPRPaycheck.intEntityEmployeeId), 0)))
-					    END
+							  (dblLimit - (dblLimit - SUM (tblPRPaycheck.dblAdjustedGross)))
+					END
 	,vyuPRPaycheckTax.dblLimit AS dblLimit
 	,SUM(vyuPRPaycheckTax.dblTotal) AS dblTotal
 	,vyuPRPaycheckTax.intTypeTaxId
