@@ -11,7 +11,7 @@ SELECT
 									, B.strCountry
 									, B.strPhone)
 	, B.strCompanyName
-	, strEIN = B.strFederalTaxID
+	, strEIN = B.strEin--B.strFederalTaxID
 	, A.strAddress
 	, A.strVendorCompanyName
 	, A.strVendorId
@@ -26,7 +26,7 @@ CROSS JOIN tblSMCompanySetup B
 CROSS JOIN tblAP1099Threshold C
 WHERE A.int1099Form = 3
 GROUP BY intYear, intEntityVendorId
-,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strFederalTaxID
+,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strEin--B.strFederalTaxID
 ,C.dbl1099B
 , A.strAddress
 , A.strVendorCompanyName

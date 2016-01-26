@@ -42,7 +42,7 @@ AS
 										, B.strCountry
 										, B.strPhone)
 		, B.strCompanyName
-		, strEIN = B.strFederalTaxID
+		, strEIN = B.strEin--B.strFederalTaxID
 		, A.strFederalTaxId
 		, A.strAddress
 		, A.strVendorCompanyName
@@ -52,29 +52,26 @@ AS
 		, A.strState
 		, A.strZipState
 		, A.intYear
-		, CASE WHEN SUM(A.dblBoatsProceeds) >= C.dbl1099MISCFishing THEN SUM(dblBoatsProceeds) ELSE 0 END AS dblBoatsProceeds
-		, CASE WHEN SUM(A.dblCropInsurance) >= C.dbl1099MISCCrop THEN SUM(dblCropInsurance) ELSE 0 END AS dblCropInsurance
-		, CASE WHEN SUM(A.dblFederalIncome) >= C.dbl1099MISCFederalIncome THEN SUM(dblFederalIncome) ELSE 0 END AS dblFederalIncome
-		, CASE WHEN SUM(A.dblGrossProceedsAtty) >= C.dbl1099MISCGrossProceeds THEN SUM(dblGrossProceedsAtty) ELSE 0 END AS dblGrossProceedsAtty
-		, CASE WHEN SUM(A.dblMedicalPayments) >= C.dbl1099MISCMedical THEN SUM(dblMedicalPayments) ELSE 0 END AS dblMedicalPayments
-		, CASE WHEN SUM(A.dblNonemployeeCompensation) >= C.dbl1099MISCNonemployee THEN SUM(dblNonemployeeCompensation) ELSE 0 END AS dblNonemployeeCompensation
-		, CASE WHEN SUM(A.dblOtherIncome) >= C.dbl1099MISCOtherIncome THEN SUM(dblOtherIncome) ELSE 0 END AS dblOtherIncome
-		, CASE WHEN SUM(A.dblParachutePayments) >= C.dbl1099MISCExcessGolden THEN SUM(dblParachutePayments) ELSE 0 END AS dblParachutePayments
-		, CASE WHEN SUM(A.dblRents) >= C.dbl1099MISCRent THEN SUM(dblRents) ELSE 0 END AS dblRents
-		, CASE WHEN SUM(A.dblRoyalties) >= C.dbl1099MISCRoyalties THEN SUM(dblRoyalties) ELSE 0 END AS dblRoyalties
-		, CASE WHEN SUM(A.dblSubstitutePayments) >= C.dbl1099MISCSubstitute THEN SUM(dblSubstitutePayments) ELSE 0 END AS dblSubstitutePayments
-		, CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN SUM(A.dblDirectSales) ELSE 0 END AS dblDirectSales
-		, (CASE WHEN SUM(A.dblDirectSales) >= C.dbl1099MISCDirecSales THEN 'X' ELSE NULL END) AS ysnDirectSales
+		, CASE WHEN SUM(A.dblBoatsProceeds) >= MIN(C.dbl1099MISCFishing) THEN SUM(dblBoatsProceeds) ELSE 0 END AS dblBoatsProceeds
+		, CASE WHEN SUM(A.dblCropInsurance) >= MIN(C.dbl1099MISCCrop) THEN SUM(dblCropInsurance) ELSE 0 END AS dblCropInsurance
+		, CASE WHEN SUM(A.dblFederalIncome) >= MIN(C.dbl1099MISCFederalIncome) THEN SUM(dblFederalIncome) ELSE 0 END AS dblFederalIncome
+		, CASE WHEN SUM(A.dblGrossProceedsAtty) >= MIN(C.dbl1099MISCGrossProceeds) THEN SUM(dblGrossProceedsAtty) ELSE 0 END AS dblGrossProceedsAtty
+		, CASE WHEN SUM(A.dblMedicalPayments) >= MIN(C.dbl1099MISCMedical) THEN SUM(dblMedicalPayments) ELSE 0 END AS dblMedicalPayments
+		, CASE WHEN SUM(A.dblNonemployeeCompensation) >= MIN(C.dbl1099MISCNonemployee) THEN SUM(dblNonemployeeCompensation) ELSE 0 END AS dblNonemployeeCompensation
+		, CASE WHEN SUM(A.dblOtherIncome) >= MIN(C.dbl1099MISCOtherIncome) THEN SUM(dblOtherIncome) ELSE 0 END AS dblOtherIncome
+		, CASE WHEN SUM(A.dblParachutePayments) >= MIN(C.dbl1099MISCExcessGolden) THEN SUM(dblParachutePayments) ELSE 0 END AS dblParachutePayments
+		, CASE WHEN SUM(A.dblRents) >= MIN(C.dbl1099MISCRent) THEN SUM(dblRents) ELSE 0 END AS dblRents
+		, CASE WHEN SUM(A.dblRoyalties) >= MIN(C.dbl1099MISCRoyalties) THEN SUM(dblRoyalties) ELSE 0 END AS dblRoyalties
+		, CASE WHEN SUM(A.dblSubstitutePayments) >= MIN(C.dbl1099MISCSubstitute) THEN SUM(dblSubstitutePayments) ELSE 0 END AS dblSubstitutePayments
+		, CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) THEN SUM(A.dblDirectSales) ELSE 0 END AS dblDirectSales
+		, (CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) THEN 'X' ELSE NULL END) AS ysnDirectSales
 		, A.intEntityVendorId
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
 	CROSS JOIN tblAP1099Threshold C
 	WHERE A.int1099Form = 1
 	GROUP BY intYear, intEntityVendorId
-	,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strFederalTaxID
-	,C.dbl1099MISCFishing, C.dbl1099MISCCrop ,C.dbl1099MISCDirecSales, C.dbl1099MISCFederalIncome, C.dbl1099MISCGrossProceeds
-	,C.dbl1099MISCMedical, C.dbl1099MISCNonemployee, C.dbl1099MISCOtherIncome, C.dbl1099MISCExcessGolden, C.dbl1099MISCRent
-	,C.dbl1099MISCRoyalties, C.dbl1099MISCSubstitute, dblDirectSales
+	,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strEin--B.strFederalTaxID
 	, A.strAddress
 	, A.strVendorCompanyName
 	, A.strVendorId
