@@ -4,6 +4,7 @@ GO
 
 --DO NOT CHANGE THE ID NAME COMBINATION AS OTHER MODULES ARE USING ID AS REFERENCE
 --TOTAL COUNT IS 56 AS OF 10-22-2015
+--TOTAL COUNT IS 59 AS OF 01-26-2015
 BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 	BEGIN TRANSACTION
 	DECLARE @tblSegment TABLE(intAccountSegmentId INT, strAccountCategory VARCHAR(100))
@@ -102,7 +103,9 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 54,name = 'Customer Prepayments'UNION ALL 
 			SELECT id = 55,name = 'Other Charge Expense'UNION ALL 
 			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
-			SELECT id = 57,name = 'Maintenance Sales' 
+			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
+			SELECT id = 58,name = 'Realized Gain or Loss Foreign Currency' UNION ALL
+			SELECT id = 59,name = 'Unrealized Gain or Loss Foreign Currency'
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
 
