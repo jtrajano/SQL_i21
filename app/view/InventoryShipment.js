@@ -1041,6 +1041,11 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'dblIssueSalePrice',
+                                                                                    dataType: 'float',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'dblIssueUOMConvFactor',
                                                                                     dataType: 'float',
                                                                                     hidden: true

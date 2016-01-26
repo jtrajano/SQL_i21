@@ -86,12 +86,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     },
                     columns: [
                         {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
-                        {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewShipmentNo'},
+                        {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Shipment', drillDownClick: 'onViewShipmentNo'},
                         {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
                         {dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'int'},
                         {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'int'},
-                        {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerNo', hidden: true },
-                        {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewCustomerName', hidden: true },
+                        {dataIndex: 'strCustomerNumber', text: 'Customer', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerNo', hidden: true },
+                        {dataIndex: 'strCustomerName', text: 'Customer Name', flex: 1, dataType: 'string', drillDownText: 'View Customer', drillDownClick: 'onViewCustomerName', hidden: true },
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
@@ -834,7 +834,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intCommodityId', records[0].get('intCommodityId'));
             current.set('intItemUOMId', records[0].get('intIssueUOMId'));
             current.set('strUnitMeasure', records[0].get('strIssueUOM'));
-            current.set('dblUnitPrice', records[0].get('dblLastCost'));
+            current.set('dblUnitPrice', records[0].get('dblIssueSalePrice'));
             current.set('dblItemUOMConvFactor', records[0].get('dblIssueUOMConvFactor'));
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
@@ -1080,6 +1080,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onViewCustomerName: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'CustomerName');
+    },
+
+    onViewItemNo: function(value, record) {
+        var itemNo = record.get('strItemNo');
+        i21.ModuleMgr.Inventory.showScreen(itemNo, 'ItemNo');
     },
 
     onViewItemClick: function(button, e, eOpts) {
