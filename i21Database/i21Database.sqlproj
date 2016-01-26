@@ -3257,6 +3257,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
+    <Build Include="dbo\Tables\tblHDLineOfBusiness.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
