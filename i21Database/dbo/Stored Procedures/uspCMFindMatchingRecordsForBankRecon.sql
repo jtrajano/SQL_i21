@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE [dbo].[uspCMFindMatchingRecordsForBankRecon]
+CREATE PROCEDURE [uspCMFindMatchingRecordsForBankRecon]
 	@strBankStatementImportId NVARCHAR(40) = NULL,
 	@intBankAccountId INT,
 	@dtmStatementDate DATETIME,
