@@ -2,13 +2,13 @@
 (
 	[intLineOfBusinessId] [int] IDENTITY(1,1) NOT NULL,
 	[strLineOfBusiness] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intSalesPersonEntityId] [int] NOT NULL,
+	[intEntityId] [int] NOT NULL,
 	[strSICCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnVisibleOnWeb] [bit] NOT NULL DEFAULT 1,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblHDLineOfBusiness] PRIMARY KEY CLUSTERED ([intLineOfBusinessId] ASC),
- CONSTRAINT [FK_tblHDLineOfBusiness_tblEntity] FOREIGN KEY ([intSalesPersonEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
- CONSTRAINT [UNQ_tblHDLineOfBusiness_SalesPersonEntity] UNIQUE ([strLineOfBusiness],[intSalesPersonEntityId])
+ CONSTRAINT [FK_tblHDLineOfBusiness_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+ CONSTRAINT [UNQ_tblHDLineOfBusiness_SalesPersonEntity] UNIQUE ([strLineOfBusiness],[intEntityId])
 )
 
 GO
@@ -37,7 +37,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblHDLineOfBusiness',
     @level2type = N'COLUMN',
-    @level2name = N'intSalesPersonEntityId'
+    @level2name = 'intEntityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Standard Industry Code',
