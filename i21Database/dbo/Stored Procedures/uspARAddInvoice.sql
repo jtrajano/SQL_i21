@@ -416,8 +416,8 @@ INSERT INTO [tblARInvoiceDetail]
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,IE.[intItemId]												--[intItemId]
-	,IC.[strDescription]										--strItemDescription] 
-	,strDocumentNumber = CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN (SELECT TOP 1 strTransaction FROM tblTRLoadHeader WHERE intLoadHeaderId = IE.intSourceId) ELSE NULL END
+	,IC.[strDescription]										--[strItemDescription] 
+	,@strSourceId												--[strDocumentNumber]
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]		
