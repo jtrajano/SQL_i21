@@ -65,8 +65,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         read: '../Inventory/api/InventoryAdjustment/SearchAdjustmentDetails'
                     },
                     columns: [
-                        {dataIndex: 'intInventoryAdjustmentDetailId', text: 'Inventory Adjustment Detail Id', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
-                        {dataIndex: 'intInventoryAdjustmentId', text: 'Inventory Adjustment Id', width: 100, dataType: 'numeric', hidden: true },
+                        {dataIndex: 'intInventoryAdjustmentDetailId', text: 'Inventory Adjustment Detail Id', width: 100, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', hidden: true },
+                        {dataIndex: 'intInventoryAdjustmentId', text: 'Inventory Adjustment Id', width: 100, key: true, dataType: 'numeric', hidden: true },
                         {dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true },
                         {dataIndex: 'strLocationName', text: 'Location Name', width: 100, dataType: 'string', hidden: true },
                         {dataIndex: 'dtmAdjustmentDate', text: 'Adjustment Date', width: 100, dataType: 'date', xtype: 'datecolumn', hidden: true },
@@ -98,7 +98,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         {dataIndex: 'dblLotWeightPerQty', text: 'Lot Weight Per Qty', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
                         {dataIndex: 'intNewLotId', text: 'New Lot Id', width: 100, dataType: 'numeric', hidden: true },
                         {dataIndex: 'strNewLotNumber', text: 'New Lot Number', width: 100, dataType: 'string' },
-                        {dataIndex: 'dblQuantity', text: 'Quantity', width: 100, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblQuantity', text: 'Available Qty', width: 100, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblNewQuantity', text: 'New Quantity', width: 100, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblNewSplitLotQuantity', text: 'New Split Lot Quantity', width: 100, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblAdjustByQuantity', text: 'Adjust By Quantity', width: 100, dataType: 'float', xtype: 'numbercolumn' },
