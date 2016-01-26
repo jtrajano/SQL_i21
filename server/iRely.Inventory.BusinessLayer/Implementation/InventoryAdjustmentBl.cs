@@ -24,22 +24,22 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
-            var query = _db.GetQuery<tblICInventoryAdjustment>()
-                .Include(p => p.tblSMCompanyLocation)
-                .Select(p => new AdjustmentVM
-                {
-                    intInventoryAdjustmentId = p.intInventoryAdjustmentId,
-                    intLocationId = p.intLocationId,
-                    dtmAdjustmentDate = p.dtmAdjustmentDate,
-                    intAdjustmentType = p.intAdjustmentType,
-                    strAdjustmentNo = p.strAdjustmentNo,
-                    strDescription = p.strDescription,
-                    intSort = p.intSort,
-                    strLocationName = p.tblSMCompanyLocation.strLocationName,
-                    ysnPosted = p.ysnPosted
-                })
+            var query = _db.GetQuery<vyuICGetInventoryAdjustment>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intInventoryAdjustmentId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> SearchAdjustmentDetails(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryAdjustmentDetail>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryAdjustmentDetailId").ToListAsync();
 
             return new SearchResult()
             {

@@ -143,11 +143,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         
-        public ICollection<tblICInventoryAdjustmentDetail> OldItemUOMAdjustmentDetails { get; set; }        
-        public ICollection<tblICInventoryAdjustmentDetail> NewItemUOMAdjustmentDetails { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> OldWeightUOMAdjustmentDetails { get; set; }        
-        public ICollection<tblICInventoryAdjustmentDetail> NewWeightUOMAdjustmentDetails { get; set; }
-
     }
 
     public class ItemUOMVM

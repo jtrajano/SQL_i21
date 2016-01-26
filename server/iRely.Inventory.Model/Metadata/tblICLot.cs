@@ -66,8 +66,6 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
 
-        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }
     }
 
     public class vyuICGetPostedLot

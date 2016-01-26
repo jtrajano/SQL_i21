@@ -26,12 +26,37 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.intSourceTransactionTypeId).HasColumnName("intSourceTransactionTypeId");
 
-            this.HasOptional(p => p.tblSMCompanyLocation)
-                .WithMany(p => p.tblICInventoryAdjustments)
-                .HasForeignKey(p => p.intLocationId);
             this.HasMany(p => p.tblICInventoryAdjustmentDetails)
                 .WithRequired(p => p.tblICInventoryAdjustment)
                 .HasForeignKey(p => p.intInventoryAdjustmentId);
+        }
+    }
+
+    public class vyuICGetInventoryAdjustmentMap : EntityTypeConfiguration<vyuICGetInventoryAdjustment>
+    {
+        public vyuICGetInventoryAdjustmentMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryAdjustmentId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryAdjustment");
+            this.Property(t => t.intInventoryAdjustmentId).HasColumnName("intInventoryAdjustmentId");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.dtmAdjustmentDate).HasColumnName("dtmAdjustmentDate");
+            this.Property(t => t.intAdjustmentType).HasColumnName("intAdjustmentType");
+            this.Property(t => t.strAdjustmentType).HasColumnName("strAdjustmentType");
+            this.Property(t => t.strAdjustmentNo).HasColumnName("strAdjustmentNo");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.strUser).HasColumnName("strUser");
+            this.Property(t => t.dtmPostedDate).HasColumnName("dtmPostedDate");
+            this.Property(t => t.dtmUnpostedDate).HasColumnName("dtmUnpostedDate");
+            this.Property(t => t.intSourceId).HasColumnName("intSourceId");
+            this.Property(t => t.intSourceTransactionTypeId).HasColumnName("intSourceTransactionTypeId");
         }
     }
 
@@ -89,60 +114,88 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intNewLocationId).HasColumnName("intNewLocationId");
             this.Property(t => t.intNewSubLocationId).HasColumnName("intNewSubLocationId");
             this.Property(t => t.intNewStorageLocationId).HasColumnName("intNewStorageLocationId");
-            
-            this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
-                .WithMany(p => p.tblICInventoryAdjustmentDetails)
-                .HasForeignKey(p => p.intSubLocationId);
 
-			this.HasOptional(p => p.tblICStorageLocation)
-                .WithMany(p => p.tblICInventoryAdjustmentDetails)
-                .HasForeignKey(p => p.intStorageLocationId);
+            this.HasOptional(p => p.vyuICGetInventoryAdjustmentDetail)
+                .WithRequired(p => p.tblICInventoryAdjustmentDetail);
+        }
+    }
 
-            this.HasOptional(p => p.Item)
-                .WithMany(p => p.tblICInventoryAdjustmentDetails)
-                .HasForeignKey(p => p.intItemId);
-            this.HasOptional(p => p.NewItem)
-                .WithMany(p => p.NewAdjustmentDetails)
-                .HasForeignKey(p => p.intNewItemId);            
-            
-            this.HasOptional(p => p.Lot)
-                .WithMany(p => p.tblICInventoryAdjustmentDetails)
-                .HasForeignKey(p => p.intLotId);
-            this.HasOptional(p => p.NewLot)
-                .WithMany(p => p.NewAdjustmentDetails)
-                .HasForeignKey(p => p.intNewLotId);
+    class vyuICGetInventoryAdjustmentDetailMap : EntityTypeConfiguration<vyuICGetInventoryAdjustmentDetail>
+    {
+        public vyuICGetInventoryAdjustmentDetailMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryAdjustmentDetailId);
 
-            this.HasOptional(p => p.ItemUOM)
-                .WithMany(p => p.OldItemUOMAdjustmentDetails)
-                .HasForeignKey(p => p.intItemUOMId);
-
-            this.HasOptional(p => p.NewItemUOM)
-                .WithMany(p => p.NewItemUOMAdjustmentDetails)
-                .HasForeignKey(p => p.intNewItemUOMId);
-
-            this.HasOptional(p => p.WeightUOM)
-                .WithMany(p => p.OldWeightUOMAdjustmentDetails)
-                .HasForeignKey(p => p.intWeightUOMId);
-            this.HasOptional(p => p.NewWeightUOM)
-                .WithMany(p => p.NewWeightUOMAdjustmentDetails)
-                .HasForeignKey(p => p.intNewWeightUOMId);
-            
-            this.HasOptional(p => p.OldLotStatus)
-                .WithMany(p => p.OldLotStatusAdjustmentDetails)
-                .HasForeignKey(p => p.intLotStatusId);            
-            this.HasOptional(p => p.NewLotStatus)
-                .WithMany(p => p.NewLotStatusAdjustmentDetails)
-                .HasForeignKey(p => p.intNewLotStatusId);
-
-            this.HasOptional(p => p.NewLocation)
-                .WithMany(p => p.InventoryAdjustmentNewLocations)
-                .HasForeignKey(p => p.intNewLocationId);
-            this.HasOptional(p => p.NewSubLocation)
-                .WithMany(p => p.InventoryAdjustmentNewSubLocations)
-                .HasForeignKey(p => p.intNewSubLocationId);
-            this.HasOptional(p => p.NewStorageLocation)
-                .WithMany(p => p.InventoryAdjustmentNewStorageLocations)
-                .HasForeignKey(p => p.intNewStorageLocationId);
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryAdjustmentDetail");
+            this.Property(t => t.intInventoryAdjustmentDetailId).HasColumnName("intInventoryAdjustmentDetailId");
+            this.Property(t => t.intInventoryAdjustmentId).HasColumnName("intInventoryAdjustmentId");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.dtmAdjustmentDate).HasColumnName("dtmAdjustmentDate");
+            this.Property(t => t.intAdjustmentType).HasColumnName("intAdjustmentType");
+            this.Property(t => t.strAdjustmentType).HasColumnName("strAdjustmentType");
+            this.Property(t => t.strAdjustmentNo).HasColumnName("strAdjustmentNo");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.strUser).HasColumnName("strUser");
+            this.Property(t => t.dtmPostedDate).HasColumnName("dtmPostedDate");
+            this.Property(t => t.dtmUnpostedDate).HasColumnName("dtmUnpostedDate");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intNewItemId).HasColumnName("intNewItemId");
+            this.Property(t => t.strNewItemNo).HasColumnName("strNewItemNo");
+            this.Property(t => t.strNewItemDescription).HasColumnName("strNewItemDescription");
+            this.Property(t => t.strNewLotTracking).HasColumnName("strNewLotTracking");
+            this.Property(t => t.intLotId).HasColumnName("intLotId");
+            this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
+            this.Property(t => t.dblLotQty).HasColumnName("dblLotQty").HasPrecision(18, 6);
+            this.Property(t => t.dblLotUnitCost).HasColumnName("dblLotUnitCost").HasPrecision(18, 6);
+            this.Property(t => t.dblLotWeightPerQty).HasColumnName("dblLotWeightPerQty").HasPrecision(18, 6);
+            this.Property(t => t.intNewLotId).HasColumnName("intNewLotId");
+            this.Property(t => t.strNewLotNumber).HasColumnName("strNewLotNumber");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblNewQuantity).HasColumnName("dblNewQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblNewSplitLotQuantity).HasColumnName("dblNewSplitLotQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblAdjustByQuantity).HasColumnName("dblAdjustByQuantity").HasPrecision(18, 6);
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.strItemUOM).HasColumnName("strItemUOM");
+            this.Property(t => t.dblItemUOMUnitQty).HasColumnName("dblItemUOMUnitQty").HasPrecision(18, 6);
+            this.Property(t => t.intNewItemUOMId).HasColumnName("intNewItemUOMId");
+            this.Property(t => t.strNewItemUOM).HasColumnName("strNewItemUOM");
+            this.Property(t => t.dblNewItemUOMUnitQty).HasColumnName("dblNewItemUOMUnitQty").HasPrecision(18, 6);
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
+            this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.intNewWeightUOMId).HasColumnName("intNewWeightUOMId");
+            this.Property(t => t.strNewWeightUOM).HasColumnName("strNewWeightUOM");
+            this.Property(t => t.dblWeight).HasColumnName("dblWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblNewWeight).HasColumnName("dblNewWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblWeightPerQty).HasColumnName("dblWeightPerQty").HasPrecision(18, 6);
+            this.Property(t => t.dblNewWeightPerQty).HasColumnName("dblNewWeightPerQty").HasPrecision(18, 6);
+            this.Property(t => t.dtmExpiryDate).HasColumnName("dtmExpiryDate");
+            this.Property(t => t.dtmNewExpiryDate).HasColumnName("dtmNewExpiryDate");
+            this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
+            this.Property(t => t.strLotStatus).HasColumnName("strLotStatus");
+            this.Property(t => t.intNewLotStatusId).HasColumnName("intNewLotStatusId");
+            this.Property(t => t.strNewLotStatus).HasColumnName("strNewLotStatus");
+            this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
+            this.Property(t => t.dblNewCost).HasColumnName("dblNewCost").HasPrecision(18, 6);
+            this.Property(t => t.intNewLocationId).HasColumnName("intNewLocationId");
+            this.Property(t => t.strNewLocationName).HasColumnName("strNewLocationName");
+            this.Property(t => t.intNewSubLocationId).HasColumnName("intNewSubLocationId");
+            this.Property(t => t.strNewSubLocationName).HasColumnName("strNewSubLocationName");
+            this.Property(t => t.intNewStorageLocationId).HasColumnName("intNewStorageLocationId");
+            this.Property(t => t.strNewStorageLocationName).HasColumnName("strNewStorageLocationName");
+            this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
+            this.Property(t => t.intSort).HasColumnName("intSort");
         }
     }
 }

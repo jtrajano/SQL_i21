@@ -300,6 +300,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetCompactItemMap());
             modelBuilder.Configurations.Add(new vyuICGetItemCommodityMap());
             modelBuilder.Configurations.Add(new vyuICGetOtherChargesMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryAdjustmentMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryAdjustmentDetailMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemLotMap());

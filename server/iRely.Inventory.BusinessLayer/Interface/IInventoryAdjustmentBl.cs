@@ -13,5 +13,6 @@ namespace iRely.Inventory.BusinessLayer
     {
         SaveResult PostTransaction(Common.Posting_RequestModel Adjustment, bool isRecap);
         Task<SearchResult> GetPostedLots(GetParameter param);
+        Task<SearchResult> SearchAdjustmentDetails(GetParameter param);
     }
 }

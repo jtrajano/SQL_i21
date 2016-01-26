@@ -29,13 +29,10 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
 
-        public ICollection<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
 
         public ICollection<tblICInventoryTransfer> FromInventoryTransfers { get; set; }
         public ICollection<tblICInventoryTransfer> ToInventoryTransfers { get; set; }
-
-        public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewLocations { get; set; }
 
         public ICollection<tblICStorageMeasurementReading> tblICStorageMeasurementReadings { get; set; }
     }
@@ -201,11 +198,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICStorageLocation> tblICStorageLocations { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
-
-        public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewSubLocations { get; set; }
     }
 
     public class tblSMTaxCode : BaseEntity

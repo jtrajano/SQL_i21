@@ -74,8 +74,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
         public ICollection<tblICStorageLocationContainer> tblICStorageLocationContainers { get; set; }
         public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewStorageLocations { get; set; }
     }
 
     public class tblICStorageLocationCategory : BaseEntity

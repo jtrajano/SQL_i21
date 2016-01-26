@@ -298,7 +298,7 @@ Ext.define('Inventory.controller.Inventory', {
                 break;
             case 'AdjustmentNo':
                 screenName = 'Inventory.view.InventoryAdjustment';
-                columnName = 'strShipmentNumber';
+                columnName = 'strAdjustmentNo';
                 break;
             case 'VendorName':
             case 'CustomerName':
@@ -312,6 +312,10 @@ Ext.define('Inventory.controller.Inventory', {
             case 'StorageLocation':
                 screenName = 'Inventory.view.StorageUnit';
                 columnName = 'strName';
+                break;
+            case 'LotStatus':
+                screenName = 'Inventory.view.LotStatus';
+                columnName = 'strSecondaryName';
                 break;
         }
 

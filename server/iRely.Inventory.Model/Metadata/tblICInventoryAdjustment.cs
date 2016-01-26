@@ -31,43 +31,27 @@ namespace iRely.Inventory.Model
         public int? intSourceId { get; set; }
         public int? intSourceTransactionTypeId { get; set; }
 
-        private string _location;
-        [NotMapped]
-        public string strLocationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_location))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strLocationName;
-                    else
-                        return null;
-                else
-                    return _location;
-            }
-            set
-            {
-                _location = value;
-            }
-        }
-
-        public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
     }
 
-    public class AdjustmentVM : BaseEntity
+    public class vyuICGetInventoryAdjustment
     {
-        [Key]
         public int intInventoryAdjustmentId { get; set; }
         public int? intLocationId { get; set; }
+        public string strLocationName { get; set; }
         public DateTime? dtmAdjustmentDate { get; set; }
         public int? intAdjustmentType { get; set; }
+        public string strAdjustmentType { get; set; }
         public string strAdjustmentNo { get; set; }
         public string strDescription { get; set; }
         public int? intSort { get; set; }
-        public string strLocationName{ get; set; }
         public bool? ysnPosted { get; set; }
-    
+        public int? intEntityId { get; set; }
+        public string strUser { get; set; }
+        public DateTime? dtmPostedDate { get; set; }
+        public DateTime? dtmUnpostedDate { get; set; }
+        public int? intSourceId { get; set; }
+        public int? intSourceTransactionTypeId { get; set; }
     }
 
     public class tblICInventoryAdjustmentDetail : BaseEntity
@@ -125,8 +109,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_subLocation))
-                    if (tblSMCompanyLocationSubLocation != null)
-                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strSubLocationName;
                     else
                         return null;
                 else
@@ -146,8 +130,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_storageLocation))
-                    if (tblICStorageLocation != null)
-                        return tblICStorageLocation.strName;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strStorageLocationName;
                     else
                         return null;
                 else
@@ -167,8 +151,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemNo))
-                    if (Item != null)
-                        return Item.strItemNo;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strItemNo;
                     else
                         return null;
                 else
@@ -186,8 +170,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newItemNo))
-                    if (NewItem != null)
-                        return NewItem.strItemNo;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewItemNo;
                     else
                         return null;
                 else
@@ -208,8 +192,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemDesc))
-                    if (Item != null)
-                        return Item.strDescription;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strItemDescription;
                     else
                         return null;
                 else
@@ -227,8 +211,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newItemDesc))
-                    if (NewItem != null)
-                        return NewItem.strDescription;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewItemDescription;
                     else
                         return null;
                 else
@@ -249,8 +233,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_lotNumber))
-                    if (Lot != null)
-                        return Lot.strLotNumber;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strLotNumber;
                     else
                         return null;
                 else
@@ -261,25 +245,6 @@ namespace iRely.Inventory.Model
                 _lotNumber = value;
             }
         }
-        //private string _newLotNumber;
-        //[NotMapped]
-        //public string strNewLotNumber
-        //{
-        //    get
-        //    {
-        //        if (string.IsNullOrEmpty(_newLotNumber))
-        //            if (NewLot != null)
-        //                return NewLot.strLotNumber;
-        //            else
-        //                return null;
-        //        else
-        //            return _newLotNumber;
-        //    }
-        //    set
-        //    {
-        //        _newLotNumber = value;
-        //    }
-        //}    
         
         // 6: Lot Qty, Lot Cost, and Weight Per Qty
         private decimal _lotQty;
@@ -288,8 +253,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (Lot != null)
-                    return Lot.dblQty ?? 0;
+                if (vyuICGetInventoryAdjustmentDetail != null)
+                    return vyuICGetInventoryAdjustmentDetail.dblLotQty ?? 0;
                 else
                     return 0;
             }
@@ -304,8 +269,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (Lot != null)
-                    return Lot.dblLastCost ?? 0;
+                if (vyuICGetInventoryAdjustmentDetail != null)
+                    return vyuICGetInventoryAdjustmentDetail.dblLotUnitCost ?? 0;
                 else
                     return 0;
             }
@@ -320,8 +285,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (Lot != null)
-                    return Lot.dblWeightPerQty ?? 0;
+                if (vyuICGetInventoryAdjustmentDetail != null)
+                    return vyuICGetInventoryAdjustmentDetail.dblLotWeightPerQty ?? 0;
                 else
                     return 0;
             }
@@ -340,8 +305,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemUOM))
-                    if (ItemUOM != null)
-                        return ItemUOM.strUnitMeasure;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strItemUOM;
                     else
                         return null;
                 else
@@ -359,8 +324,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newItemUOM))
-                    if (NewItemUOM != null)
-                        return NewItemUOM.strUnitMeasure;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewItemUOM;
                     else
                         return null;
                 else
@@ -380,8 +345,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_weightUOM))
-                    if (Lot != null)
-                        return Lot.strWeightUOM;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strWeightUOM;
                     else
                         return null;
                 else
@@ -399,8 +364,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newWeightUOM))
-                    if (NewWeightUOM != null)
-                        return NewWeightUOM.strUnitMeasure;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewWeightUOM;
                     else
                         return null;
                 else
@@ -420,8 +385,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_lotStatus))
-                    if (OldLotStatus != null)
-                        return OldLotStatus.strSecondaryStatus;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strLotStatus;
                     else
                         return null;
                 else
@@ -440,8 +405,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newLotStatus))
-                    if (NewLotStatus != null)
-                        return NewLotStatus.strSecondaryStatus;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewLotStatus;
                     else
                         return null;
                 else
@@ -461,8 +426,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_strLotTracking))
-                    if (Item != null)
-                        return Item.strLotTracking;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strLotTracking;
                     else
                         return null;
                 else
@@ -483,8 +448,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_strNewLocation))
-                    if (NewLocation != null)
-                        return NewLocation.strLocationName;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewLocationName;
                     else
                         return null;
                 else
@@ -505,8 +470,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_strNewSubLocation))
-                    if (NewSubLocation != null)
-                        return NewSubLocation.strSubLocationName;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewSubLocationName;
                     else
                         return null;
                 else
@@ -526,8 +491,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_strNewStorageLocation))
-                    if (NewStorageLocation != null)
-                        return NewStorageLocation.strName;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strNewStorageLocationName;
                     else
                         return null;
                 else
@@ -547,8 +512,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (_itemUOMUnitQty == null )
-                    if (ItemUOM != null)
-                        return ItemUOM.dblUnitQty;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.dblItemUOMUnitQty;
                     else
                         return null;
                 else
@@ -566,8 +531,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (_newItemUOMUnitQty == null)
-                    if (NewItemUOM != null)
-                        return NewItemUOM.dblUnitQty;
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.dblNewItemUOMUnitQty;
                     else
                         return null;
                 else
@@ -580,22 +545,79 @@ namespace iRely.Inventory.Model
         }
 
         public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
-        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
-        public tblICStorageLocation tblICStorageLocation { get; set; }
+        public vyuICGetInventoryAdjustmentDetail vyuICGetInventoryAdjustmentDetail { get; set; }
+    }
 
-        public tblSMCompanyLocation NewLocation { get; set; }
-        public tblSMCompanyLocationSubLocation NewSubLocation { get; set; }
-        public tblICStorageLocation NewStorageLocation { get; set; }
-        
-        public tblICItem Item { get; set; }
-        public tblICItem NewItem { get; set; }
-        public tblICLot Lot { get; set; }
-        public tblICLot NewLot { get; set; }
-        public tblICItemUOM ItemUOM { get; set; }
-        public tblICItemUOM NewItemUOM { get; set; }
-        public tblICItemUOM WeightUOM { get; set; }
-        public tblICItemUOM NewWeightUOM { get; set; }
-        public tblICLotStatus OldLotStatus { get; set; }
-        public tblICLotStatus NewLotStatus { get; set; }
+    public class vyuICGetInventoryAdjustmentDetail
+    {
+        public int intInventoryAdjustmentDetailId { get; set; }
+        public int intInventoryAdjustmentId { get; set; }
+        public int? intLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public DateTime? dtmAdjustmentDate { get; set; }
+        public int? intAdjustmentType { get; set; }
+        public string strAdjustmentType { get; set; }
+        public string strAdjustmentNo { get; set; }
+        public string strDescription { get; set; }
+        public bool? ysnPosted { get; set; }
+        public int? intEntityId { get; set; }
+        public string strUser { get; set; }
+        public DateTime? dtmPostedDate { get; set; }
+        public DateTime? dtmUnpostedDate { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intNewItemId { get; set; }
+        public string strNewItemNo { get; set; }
+        public string strNewItemDescription { get; set; }
+        public string strNewLotTracking { get; set; }
+        public int? intLotId { get; set; }
+        public string strLotNumber { get; set; }
+        public decimal? dblLotQty { get; set; }
+        public decimal? dblLotUnitCost { get; set; }
+        public decimal? dblLotWeightPerQty { get; set; }
+        public int? intNewLotId { get; set; }
+        public string strNewLotNumber { get; set; }
+        public decimal? dblQuantity { get; set; }
+        public decimal? dblNewQuantity { get; set; }
+        public decimal? dblNewSplitLotQuantity { get; set; }
+        public decimal? dblAdjustByQuantity { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strItemUOM { get; set; }
+        public decimal? dblItemUOMUnitQty { get; set; }
+        public int? intNewItemUOMId { get; set; }
+        public string strNewItemUOM { get; set; }
+        public decimal? dblNewItemUOMUnitQty { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public string strWeightUOM { get; set; }
+        public int? intNewWeightUOMId { get; set; }
+        public string strNewWeightUOM { get; set; }
+        public decimal? dblWeight { get; set; }
+        public decimal? dblNewWeight { get; set; }
+        public decimal? dblWeightPerQty { get; set; }
+        public decimal? dblNewWeightPerQty { get; set; }
+        public DateTime? dtmExpiryDate { get; set; }
+        public DateTime? dtmNewExpiryDate { get; set; }
+        public int? intLotStatusId { get; set; }
+        public string strLotStatus { get; set; }
+        public int? intNewLotStatusId { get; set; }
+        public string strNewLotStatus { get; set; }
+        public decimal? dblCost { get; set; }
+        public decimal? dblNewCost { get; set; }
+        public int? intNewLocationId { get; set; }
+        public string strNewLocationName { get; set; }
+        public int? intNewSubLocationId { get; set; }
+        public string strNewSubLocationName { get; set; }
+        public int? intNewStorageLocationId { get; set; }
+        public string strNewStorageLocationName { get; set; }
+        public decimal? dblLineTotal { get; set; }
+        public int? intSort { get; set; }
+
+        public tblICInventoryAdjustmentDetail tblICInventoryAdjustmentDetail { get; set; }
     }
 }
