@@ -6,7 +6,7 @@
 	[intCustomerId] [int] NOT NULL,
 	[intSalesPipeStatusId] [int] NULL,
 	[intCustomerContactId] [int] NOT NULL,
-	[intTicketTypeId] [int] NOT NULL,
+	[intTicketTypeId] [int] NULL,
 	[dtmClose] [datetime] NULL,
 	[dtmGoLive] [datetime] NULL,
 	[intPercentComplete] [int] NULL,
@@ -30,7 +30,7 @@
 	[dtmInitialUserGroupDuesInvoice] [datetime] null,
 	[ysnReceivedDownPayment] [bit] null,
 	[ysnGenerateTicket] [bit] null,
-	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
