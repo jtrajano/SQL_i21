@@ -44,7 +44,14 @@ BEGIN TRY
 	DECLARE @intLocalTran tinyint
 	DECLARE @intUserId INT
 	DECLARE @dblTaskdblQty NUMERIC(18, 6)
+	DECLARE @intOrderRecordId INT
+	DECLARE @intSKUInOrderId INT
 
+	DECLARE @tblSKUInOrder TABLE 
+	(intOrderRecordId INT Identity(1, 1),
+	intOrderHeaderId INT, 
+	intSKUId INT
+	)
 
 IF @@TRANCOUNT = 0 SET @intLocalTran= 1                
 IF @intLocalTran= 1 BEGIN TRANSACTION                
@@ -133,6 +140,15 @@ IF @intLocalTran= 1 BEGIN TRANSACTION
 	BEGIN
 		RAISERROR ('Split is not allowed when the SKU is associated with load/ship task.', 11, 1)
 	END
+
+	INSERT INTO @tblSKUInOrder
+	SELECT t.intOrderHeaderId,s.intSKUId
+	FROM tblWHSKU s
+	JOIN tblWHTask t ON t.intSKUId = s.intSKUId
+	WHERE s.strSKUNo = @strSKUNo
+		AND t.intTaskTypeId IN (2,7,13)
+		AND t.intTaskStateId IN (1,2,3)
+		AND t.intOrderHeaderId <> @intOrderHeaderId
 
 	SELECT @intTaskId = t.intTaskId, @intTaskTypeId = t.intTaskTypeId, @intAssigneeId = t.intAssigneeId, @dblTaskdblQty = t.dblQty, @strTaskType = tt.strTaskType
 	FROM tblWHTask t
@@ -332,6 +348,21 @@ IF @intLocalTran= 1 BEGIN TRANSACTION
 				WHERE intTaskId = @intTaskId
 			END
 		END
+	END
+	
+	SELECT @intOrderRecordId = MIN(intOrderRecordId)
+	FROM @tblSKUInOrder
+	
+	WHILE (@intOrderRecordId IS NOT NULL)
+	BEGIN
+		SET @intSKUInOrderId = NULL
+		SELECT @intSKUInOrderId = intOrderHeaderId FROM @tblSKUInOrder WHERE intOrderRecordId = @intOrderRecordId
+
+		EXEC uspWHGeneratePickTask @intOrderHeaderId = @intSKUInOrderId, @strUserName = @strUserName
+
+
+		SELECT @intOrderRecordId = MIN(intOrderRecordId)
+		FROM @tblSKUInOrder WHERE intOrderRecordId > @intOrderRecordId
 	END
 
 	IF @intLocalTran= 1 AND @@TRANCOUNT > 0 COMMIT TRANSACTION 
