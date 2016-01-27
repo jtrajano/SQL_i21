@@ -170,7 +170,7 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 				--================================--
 				--		INSERT MASTER RECORD	  --
 				--================================--
-				If(@intAccountId != 0)
+				IF(@intAccountId != 0)
 				BEGIN
 					INSERT [dbo].[tblCFCard](
 						 [intNetworkId]			
@@ -244,20 +244,90 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 						,@dtmLastModified		
 						,@ysnCardForOwnUse		
 						,@ysnIgnoreCardTransaction)
+
+
+					COMMIT TRANSACTION
+					SET @TotalSuccess += 1;
+					INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Card'
+						,1
+						,''
+						,'cfcusmst'
+						,@originCard
+						,'tblCFCard'
+						,null
+						,''
+					)
+				END
+				ELSE
+				BEGIN
+					INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Card'
+						,0
+						,'Uable to find Account for Card'
+						,'cfcusmst'
+						,@originCard
+						,'tblCFCard'
+						,null
+						,''
+					)
 				END
 
-				COMMIT TRANSACTION
-				SET @TotalSuccess += 1;
 				--INSERT INTO tblCFDiscountScheduleSuccessImport(strDiscountScheduleId)					
 				--VALUES(@originCard)			
 			END TRY
 			BEGIN CATCH
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				PRINT 'IMPORTING CARDS' + ERROR_MESSAGE()
-				--INSERT INTO tblCFDiscountScheduleFailedImport(strDiscountScheduleId,strReason)					
-				--VALUES(@originCard,ERROR_MESSAGE())					
-				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
+				--PRINT 'IMPORTING CARDS' + ERROR_MESSAGE()
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Card'
+					,0
+					,ERROR_MESSAGE()
+					,'cfcusmst'
+					,@originCard
+					,'tblCFCard'
+					,null
+					,''
+				)
+
 				GOTO CONTINUELOOP;
 			END CATCH
 			IF(@@ERROR <> 0) 

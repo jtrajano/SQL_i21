@@ -10,8 +10,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 		--================================================
 		--     ONE TIME ACCOUNT SYNCHRONIZATION	
 		--================================================
-		TRUNCATE TABLE tblCFAccountFailedImport
-		TRUNCATE TABLE tblCFAccountSuccessImport
+
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
@@ -170,6 +169,58 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 																	from tblCFAccount cfAcct
 																	INNER JOIN tblARCustomer arAcct
 																	on cfAcct.intCustomerId = arAcct.intEntityCustomerId) 
+
+		-- DUPLICATE OR NOT IN CUSTOMERS LIST--
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Account'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Unable to find customer number on i21 Customers List'
+		,strOriginTable = 'cfactmst'
+		,strOriginIdentityId = cfact_cus_no
+		,strI21Table = 'tblCFAccount'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfactmst
+		WHERE cfact_cus_no COLLATE Latin1_General_CI_AS NOT IN ( select strCustomerNumber from tblARCustomer) 
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Account'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate customer number on i21 Card Fueling accounts list'
+		,strOriginTable = 'cfactmst'
+		,strOriginIdentityId = cfact_cus_no
+		,strI21Table = 'tblCFAccount'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfactmst
+		WHERE cfact_cus_no COLLATE Latin1_General_CI_AS IN (  select strCustomerNumber 
+		from tblCFAccount cfAcct
+		INNER JOIN tblARCustomer arAcct
+		on cfAcct.intCustomerId = arAcct.intEntityCustomerId) 
+		-- DUPLICATE OR NOT IN CUSTOMERS LIST--
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfactmst))
 		BEGIN
@@ -416,220 +467,268 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 
 				SELECT @MasterPk  = SCOPE_IDENTITY();
 
-				--====================================--
-				--		INSERT DETAIL DEPARTMENT	  --
-				--			 REQUIRED FIELDS		  --
-				--									  --
-				--	1. intAccountId					  --
-				--									  --
-				SELECT cfdpt_dept INTO #tmpcfdptmst
-				FROM cfdptmst
-				WHERE cfdpt_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
-				WHILE (EXISTS(SELECT 1 FROM #tmpcfdptmst))
-				BEGIN
+				----====================================--
+				----		INSERT DETAIL DEPARTMENT	  --
+				----			 REQUIRED FIELDS		  --
+				----									  --
+				----	1. intAccountId					  --
+				----									  --
+				--SELECT cfdpt_dept INTO #tmpcfdptmst
+				--FROM cfdptmst
+				--WHERE cfdpt_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
+				--WHILE (EXISTS(SELECT 1 FROM #tmpcfdptmst))
+				--BEGIN
 
-					SELECT @originDepartment = cfdpt_dept FROM #tmpcfdptmst
+				--	SELECT @originDepartment = cfdpt_dept FROM #tmpcfdptmst
 
-					SELECT TOP 1
-					 @strDepartment							= LTRIM(RTRIM(cfdpt_dept))
-					,@strDepartmentDescription				= LTRIM(RTRIM(cfdpt_dept_desc))
+				--	SELECT TOP 1
+				--	 @strDepartment							= LTRIM(RTRIM(cfdpt_dept))
+				--	,@strDepartmentDescription				= LTRIM(RTRIM(cfdpt_dept_desc))
 
-					FROM cfdptmst
-					WHERE cfdpt_dept = @originDepartment
+				--	FROM cfdptmst
+				--	WHERE cfdpt_dept = @originDepartment
 					
-					INSERT [dbo].[tblCFDepartment](
-						[intAccountId]
-						,[strDepartment]				
-						,[strDepartmentDescription]
-					)
-					VALUES(
-						@MasterPk
-						,@strDepartment				
-						,@strDepartmentDescription
-					)
-					DEPARTMENTLOOP:
-					PRINT @originDepartment
-					DELETE FROM #tmpcfdptmst WHERE cfdpt_dept = @originDepartment
-				END
-				DROP TABLE #tmpcfdptmst
-				--====================================--
+				--	INSERT [dbo].[tblCFDepartment](
+				--		[intAccountId]
+				--		,[strDepartment]				
+				--		,[strDepartmentDescription]
+				--	)
+				--	VALUES(
+				--		@MasterPk
+				--		,@strDepartment				
+				--		,@strDepartmentDescription
+				--	)
+				--	DEPARTMENTLOOP:
+				--	--PRINT @originDepartment
+				--	DELETE FROM #tmpcfdptmst WHERE cfdpt_dept = @originDepartment
+				--END
+				--DROP TABLE #tmpcfdptmst
+				----====================================--
 
 
-				--====================================--
-				--	  INSERT DETAIL MISCELLANEOUS     --
-				--			 REQUIRED FIELDS		  --
-				--									  --
-				--	1. intAccountId					  --
-				--									  --
-				SELECT cfmsc_misc INTO #tmpcfmscmst
-				FROM cfmscmst
-				WHERE cfmsc_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
-				WHILE (EXISTS(SELECT 1 FROM #tmpcfmscmst))
-				BEGIN
+				----====================================--
+				----	  INSERT DETAIL MISCELLANEOUS     --
+				----			 REQUIRED FIELDS		  --
+				----									  --
+				----	1. intAccountId					  --
+				----									  --
+				--SELECT cfmsc_misc INTO #tmpcfmscmst
+				--FROM cfmscmst
+				--WHERE cfmsc_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
+				--WHILE (EXISTS(SELECT 1 FROM #tmpcfmscmst))
+				--BEGIN
 
-					SELECT @originMiscellaneous = cfmsc_misc FROM #tmpcfmscmst
+				--	SELECT @originMiscellaneous = cfmsc_misc FROM #tmpcfmscmst
 
-					SELECT TOP 1
-					 @strMiscellaneous							= LTRIM(RTRIM(cfmsc_misc))
-					,@strMiscellaneousDescription				= LTRIM(RTRIM(cfmsc_misc_desc))
+				--	SELECT TOP 1
+				--	 @strMiscellaneous							= LTRIM(RTRIM(cfmsc_misc))
+				--	,@strMiscellaneousDescription				= LTRIM(RTRIM(cfmsc_misc_desc))
 
-					FROM cfmscmst
-					WHERE cfmsc_misc = @originMiscellaneous
+				--	FROM cfmscmst
+				--	WHERE cfmsc_misc = @originMiscellaneous
 					
-					INSERT [dbo].[tblCFMiscellaneous](
-						[intAccountId]
-						,[strMiscellaneous]				
-						,[strMiscellaneousDescription]
-					)
-					VALUES(
-						@MasterPk
-						,@strMiscellaneous				
-						,@strMiscellaneousDescription
-					)
-					MISCELLANEOUSLOOP:
-					PRINT @originMiscellaneous
-					DELETE FROM #tmpcfmscmst WHERE cfmsc_misc = @originMiscellaneous
-				END
-				DROP TABLE #tmpcfmscmst
-				--====================================--
+				--	INSERT [dbo].[tblCFMiscellaneous](
+				--		[intAccountId]
+				--		,[strMiscellaneous]				
+				--		,[strMiscellaneousDescription]
+				--	)
+				--	VALUES(
+				--		@MasterPk
+				--		,@strMiscellaneous				
+				--		,@strMiscellaneousDescription
+				--	)
+				--	MISCELLANEOUSLOOP:
+				--	--PRINT @originMiscellaneous
+				--	DELETE FROM #tmpcfmscmst WHERE cfmsc_misc = @originMiscellaneous
+				--END
+				--DROP TABLE #tmpcfmscmst
+				----====================================--
 
-				--====================================--
-				--		  INSERT DETAIL VEHICLE       --
-				--			 REQUIRED FIELDS		  --
-				--									  --
-				--	1. intAccountId					  --
-				--  2. intItemId					  --
-				--									  --
-				SELECT cfveh_vehl_no INTO #tmpcfvehmst
-				FROM cfvehmst
-				WHERE cfveh_ar_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
-				WHILE (EXISTS(SELECT 1 FROM #tmpcfvehmst))
-				BEGIN
+				----====================================--
+				----		  INSERT DETAIL VEHICLE       --
+				----			 REQUIRED FIELDS		  --
+				----									  --
+				----	1. intAccountId					  --
+				----  2. intItemId					  --
+				----									  --
+				--SELECT cfveh_vehl_no INTO #tmpcfvehmst
+				--FROM cfvehmst
+				--WHERE cfveh_ar_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
+				--WHILE (EXISTS(SELECT 1 FROM #tmpcfvehmst))
+				--BEGIN
 
-					SELECT @originVehicle = cfveh_vehl_no FROM #tmpcfvehmst
+				--	SELECT @originVehicle = cfveh_vehl_no FROM #tmpcfvehmst
 
-					SELECT TOP 1
+				--	SELECT TOP 1
 					
 
-					@strVehicleVehicleNumber					= LTRIM(RTRIM(cfveh_vehl_no))
-					,@strVehicleCustomerUnitNumber				= LTRIM(RTRIM(cfveh_cus_unit_no))
-					,@strVehicleVehicleDescription				= LTRIM(RTRIM(cfveh_vehicle_desc))
-					,@intVehicleDaysBetweenService				= cfveh_days_between_serv
-					,@intVehicleMilesBetweenService				= cfveh_mile_between_serv
-					,@intVehicleLastReminderOdometer			= cfveh_last_serv_odom
-					,@dtmVehicleLastReminderDate				= (case
-																	when LEN(RTRIM(LTRIM(ISNULL(cfveh_last_rmndr_date,0)))) = 8 
-																	then CONVERT(datetime, SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),1,4) 
-																		+ '/' + SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),5,2) + '/' 
-																		+ SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),7,2), 120)
-																	else NULL
-																end) 
-					,@dtmVehicleLastServiceDate					= cfveh_last_serv_rev_dt
-					,@intVehicleLastServiceOdometer				= cfveh_last_serv_odom
-					,@strVehicleNoticeMessageLine1				= LTRIM(RTRIM(cfveh_notice_msg1))
-					,@strVehicleNoticeMessageLine2				= LTRIM(RTRIM(cfveh_notice_msg2))
-					--,@strVehicleVehicleForOwnUse				= LTRIM(RTRIM(cfveh_vehl_no))
+				--	@strVehicleVehicleNumber					= LTRIM(RTRIM(cfveh_vehl_no))
+				--	,@strVehicleCustomerUnitNumber				= LTRIM(RTRIM(cfveh_cus_unit_no))
+				--	,@strVehicleVehicleDescription				= LTRIM(RTRIM(cfveh_vehicle_desc))
+				--	,@intVehicleDaysBetweenService				= cfveh_days_between_serv
+				--	,@intVehicleMilesBetweenService				= cfveh_mile_between_serv
+				--	,@intVehicleLastReminderOdometer			= cfveh_last_serv_odom
+				--	,@dtmVehicleLastReminderDate				= (case
+				--													when LEN(RTRIM(LTRIM(ISNULL(cfveh_last_rmndr_date,0)))) = 8 
+				--													then CONVERT(datetime, SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),1,4) 
+				--														+ '/' + SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),5,2) + '/' 
+				--														+ SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),7,2), 120)
+				--													else NULL
+				--												end) 
+				--	,@dtmVehicleLastServiceDate					= cfveh_last_serv_rev_dt
+				--	,@intVehicleLastServiceOdometer				= cfveh_last_serv_odom
+				--	,@strVehicleNoticeMessageLine1				= LTRIM(RTRIM(cfveh_notice_msg1))
+				--	,@strVehicleNoticeMessageLine2				= LTRIM(RTRIM(cfveh_notice_msg2))
+				--	--,@strVehicleVehicleForOwnUse				= LTRIM(RTRIM(cfveh_vehl_no))
 
-					,@intVehicleExpenseItemId					= (SELECT TOP 1 intItemId 
-																   FROM tblICItem 
-																   WHERE strItemNo = LTRIM(RTRIM(cfveh_exp_itm_no)) 
-																   COLLATE Latin1_General_CI_AS)
+				--	,@intVehicleExpenseItemId					= (SELECT TOP 1 intItemId 
+				--												   FROM tblICItem 
+				--												   WHERE strItemNo = LTRIM(RTRIM(cfveh_exp_itm_no)) 
+				--												   COLLATE Latin1_General_CI_AS)
 
-					,@strVehicleLicencePlateNumber				= LTRIM(RTRIM(cfveh_lic_plate_no))
-					--,@strVehicleDepartment					= LTRIM(RTRIM(cfveh_vehl_no))
-					,@intVehicleCreatedUserId					= 0		
-					,@dtmVehicleCreated							= CONVERT(VARCHAR(10), GETDATE(), 120)				
-					,@intVehicleLastModifiedUserId				= 0
-					,@dtmVehicleLastModified					= CONVERT(VARCHAR(10), GETDATE(), 120)
-					,@ysnVehicleCardForOwnUse					= (case
-																   when RTRIM(LTRIM(cfveh_own_use_yn)) = 'N' then 'FALSE'
-																   when RTRIM(LTRIM(cfveh_own_use_yn)) = 'Y' then 'TRUE'
-																   else 'FALSE'
-																   end)
-					FROM cfvehmst
-					WHERE cfveh_vehl_no = @originVehicle
-					
-					INSERT [dbo].[tblCFVehicle](
-						[intAccountId]
-						,[strVehicleNumber]		
-						,[strCustomerUnitNumber]	
-						,[strVehicleDescription]	
-						,[intDaysBetweenService]	
-						,[intMilesBetweenService]	
-						,[intLastReminderOdometer]	
-						,[dtmLastReminderDate]		
-						,[dtmLastServiceDate]		
-						,[intLastServiceOdometer]	
-						,[strNoticeMessageLine1]	
-						,[strNoticeMessageLine2]	
-						,[strVehicleForOwnUse]		
-						,[intExpenseItemId]		
-						,[strLicencePlateNumber]	
-						,[strDepartment]			
-						,[intCreatedUserId]		
-						,[dtmCreated]			
-						,[intLastModifiedUserId]	
-						,[dtmLastModified]		
-						,[ysnCardForOwnUse]		
-					)
-					VALUES(
-						@MasterPk
-						,@strVehicleVehicleNumber		
-						,@strVehicleCustomerUnitNumber	
-						,@strVehicleVehicleDescription	
-						,@intVehicleDaysBetweenService	
-						,@intVehicleMilesBetweenService	
-						,@intVehicleLastReminderOdometer	
-						,@dtmVehicleLastReminderDate		
-						,@dtmVehicleLastServiceDate		
-						,@intVehicleLastServiceOdometer	
-						,@strVehicleNoticeMessageLine1	
-						,@strVehicleNoticeMessageLine2	
-						,@strVehicleVehicleForOwnUse		
-						,@intVehicleExpenseItemId		
-						,@strVehicleLicencePlateNumber	
-						,@strVehicleDepartment			
-						,@intVehicleCreatedUserId		
-						,@dtmVehicleCreated				
-						,@intVehicleLastModifiedUserId	
-						,@dtmVehicleLastModified			
-						,@ysnVehicleCardForOwnUse		
-					)
-					VEHICLELOOP:
-					PRINT @originVehicle
-					DELETE FROM #tmpcfvehmst WHERE cfveh_vehl_no = @originVehicle
-				END
-				DROP TABLE #tmpcfvehmst
-				--====================================--
+				--	,@strVehicleLicencePlateNumber				= LTRIM(RTRIM(cfveh_lic_plate_no))
+				--	--,@strVehicleDepartment					= LTRIM(RTRIM(cfveh_vehl_no))
+				--	,@intVehicleCreatedUserId					= 0		
+				--	,@dtmVehicleCreated							= CONVERT(VARCHAR(10), GETDATE(), 120)				
+				--	,@intVehicleLastModifiedUserId				= 0
+				--	,@dtmVehicleLastModified					= CONVERT(VARCHAR(10), GETDATE(), 120)
+				--	,@ysnVehicleCardForOwnUse					= (case
+				--												   when RTRIM(LTRIM(cfveh_own_use_yn)) = 'N' then 'FALSE'
+				--												   when RTRIM(LTRIM(cfveh_own_use_yn)) = 'Y' then 'TRUE'
+				--												   else 'FALSE'
+				--												   end)
+				--	FROM cfvehmst
+				--	WHERE cfveh_vehl_no = @originVehicle
+
+				--	INSERT [dbo].[tblCFVehicle](
+				--		[intAccountId]
+				--		,[strVehicleNumber]		
+				--		,[strCustomerUnitNumber]	
+				--		,[strVehicleDescription]	
+				--		,[intDaysBetweenService]	
+				--		,[intMilesBetweenService]	
+				--		,[intLastReminderOdometer]	
+				--		,[dtmLastReminderDate]		
+				--		,[dtmLastServiceDate]		
+				--		,[intLastServiceOdometer]	
+				--		,[strNoticeMessageLine1]	
+				--		,[strNoticeMessageLine2]	
+				--		,[strVehicleForOwnUse]		
+				--		,[intExpenseItemId]		
+				--		,[strLicencePlateNumber]	
+				--		,[strDepartment]			
+				--		,[intCreatedUserId]		
+				--		,[dtmCreated]			
+				--		,[intLastModifiedUserId]	
+				--		,[dtmLastModified]		
+				--		,[ysnCardForOwnUse]		
+				--	)
+				--	VALUES(
+				--		@MasterPk
+				--		,@strVehicleVehicleNumber		
+				--		,@strVehicleCustomerUnitNumber	
+				--		,@strVehicleVehicleDescription	
+				--		,@intVehicleDaysBetweenService	
+				--		,@intVehicleMilesBetweenService	
+				--		,@intVehicleLastReminderOdometer	
+				--		,@dtmVehicleLastReminderDate		
+				--		,@dtmVehicleLastServiceDate		
+				--		,@intVehicleLastServiceOdometer	
+				--		,@strVehicleNoticeMessageLine1	
+				--		,@strVehicleNoticeMessageLine2	
+				--		,@strVehicleVehicleForOwnUse		
+				--		,@intVehicleExpenseItemId		
+				--		,@strVehicleLicencePlateNumber	
+				--		,@strVehicleDepartment			
+				--		,@intVehicleCreatedUserId		
+				--		,@dtmVehicleCreated				
+				--		,@intVehicleLastModifiedUserId	
+				--		,@dtmVehicleLastModified			
+				--		,@ysnVehicleCardForOwnUse		
+				--	)
+				--	VEHICLELOOP:
+				--	--PRINT @originVehicle
+				--	DELETE FROM #tmpcfvehmst WHERE cfveh_vehl_no = @originVehicle
+				--END
+				--DROP TABLE #tmpcfvehmst
+				----====================================--
 
 
 				COMMIT TRANSACTION
-				SET @TotalSuccess += 1;
-				INSERT INTO tblCFAccountSuccessImport(strAccountNumber)					
-				VALUES(@originCustomer)			
+				SET @TotalSuccess += 1;	
+
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+				   ,'Account'
+				   ,1
+				   ,''
+				   ,'cfactmst'
+				   ,@originCustomer
+				   ,'tblCFAccount'
+				   ,@MasterPk
+				   ,''
+				)
+
 			END TRY
 			BEGIN CATCH
 				ROLLBACK TRANSACTION
-				SET @TotalFailed += 1;
-				INSERT INTO tblCFAccountFailedImport(strAccountNumber,strReason)					
-				VALUES(@originCustomer,ERROR_MESSAGE())					
-				PRINT 'IMPORTING ACCOUNTS' + ERROR_MESSAGE()
-				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
+
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+				   ,'Account'
+				   ,0
+				   ,ERROR_MESSAGE()
+				   ,'cfactmst'
+				   ,@originCustomer
+				   ,'tblCFAccount'
+				   ,null
+				   ,''
+				)
+									
 				GOTO CONTINUELOOP;
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
-				PRINT @@ERROR;
+				--PRINT @@ERROR;
 				RETURN;
 			END
 								
 			CONTINUELOOP:
-			PRINT @originCustomer
+			--PRINT @originCustomer
 			DELETE FROM #tmpcfactmst WHERE cfact_cus_no = @originCustomer
 		
 			SET @Counter += 1;
 
 		END
+
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfactmst
+		PRINT @TotalFailed
+
+		
+
 	
 		--SET @Total = @Counter
 

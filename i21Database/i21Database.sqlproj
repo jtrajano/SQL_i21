@@ -3273,6 +3273,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetYieldView.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderProducedLotTransaction.sql" />
     <Build Include="dbo\Tables\tblMFYieldDetail.sql" />
+    <Build Include="dbo\Tables\tblCFImportResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
