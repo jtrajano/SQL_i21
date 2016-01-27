@@ -3137,6 +3137,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdatePaycheckTotalHours.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlyFUI.sql" />
     <Build Include="dbo\Views\vyuHDModule.sql" />
+    <Build Include="dbo\Views\vyuWHTruckOrders.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
