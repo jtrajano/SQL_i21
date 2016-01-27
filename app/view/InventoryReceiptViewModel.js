@@ -219,7 +219,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             ]
         },
         costUOM: {
-            type: 'icbuffereditemunitmeasure'
+            type: 'icbuffereditempricingview'
         },
         vendor: {
             type: 'emvendorbuffered'
@@ -444,8 +444,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         checkHideLoadContract: function (get) {
-            if (get('grdInventoryReceipt.selection.ysnLoad') !== true) {
-                if (get('current.strReceiptType') === 'Purchase Contract' || get('current.strReceiptType') === 'Purchase Order') {
+            if (get('current.strReceiptType') === 'Purchase Contract' || get('current.strReceiptType') === 'Purchase Order') {
+                if (get('grdInventoryReceipt.selection.ysnLoad') !== true) {
                     return false;
                 }
                 else {
@@ -549,7 +549,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             switch (get('current.strReceiptType')) {
                 case 'Purchase Contract':
                     if (this.getData().current) {
-                        if (this.getData().current.phantom) {
+                        if (this.getData().current.phantom) {d
                             return {
                                 property: 'intSourceType',
                                 value: '1',

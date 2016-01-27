@@ -424,11 +424,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'ysnLoad'
                 },
                 colOrderUOM: {
-                    hidden: '{checkHideLoadContract}',
+                    hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderUOM'
                 },
                 colQtyOrdered: {
-                    hidden: '{checkHideLoadContract}',
+                    hidden: '{checkHideOrderNo}',
                     dataIndex: 'dblOrderQty'
                 },
                 colAvailableQty: {
@@ -487,13 +487,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strCostUOM',
                     editor: {
                         readOnly: '{readOnlyUnitCost}',
-                        origValueField: 'intCostUOMId',
+                        origValueField: 'intItemUnitMeasureId',
                         origUpdateField: 'intCostUOMId',
                         store: '{costUOM}',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
                                 value: '{grdInventoryReceipt.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
                                 conjunction: 'and'
                             }
                         ]
@@ -914,7 +919,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var current = win.viewModel.data.current;
 
                 var charges = me.calculateCharges(current);
-                var lineItems = me.calculateLineTotals(current);
+                var lineItems = me.calculateTotalLineItems(current);
                 var finalValue = Ext.util.Format.number((lineItems + charges), '0,000.00');
 
                 return 'Grand Total: ' + finalValue + '';
@@ -1075,27 +1080,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     //Validate Unit Cost in not zero
                     if (current.get('strReceiptType') !== 'Purchase Contract') {
                         var receiptItems = current.tblICInventoryReceiptItems().data.items;
-                        Ext.Array.each(receiptItems, function (item) {
+                        var exists = Ext.Array.findBy(receiptItems, function (item) {
                             if (item.get('dblUnitCost') === 0 && item.dummy !== true) {
-                                var result = function (button) {
-                                    if (button === 'yes') {
-                                        if (controller.validateDate(current)) {
-                                            action(true);
-                                        }
-                                        else {
-                                            action(false);
-                                        }
-                                    }
-                                };
-                                var msgBox = iRely.Functions;
-                                msgBox.showCustomDialog(
-                                    msgBox.dialogType.WARNING,
-                                    msgBox.dialogButtonType.YESNO,
-                                        item.get('strItemNo') + " has zero cost. Do you want to continue?",
-                                    result
-                                );
+                                return true;
                             }
                         });
+
+                        var result = function (button) {
+                            if (button === 'yes') {
+                                if (controller.validateDate(current)) {
+                                    action(true);
+                                }
+                                else {
+                                    action(false);
+                                }
+                            }
+                        };
+
+                        if (exists) {
+                            var msgBox = iRely.Functions;
+                            msgBox.showCustomDialog(
+                                msgBox.dialogType.WARNING,
+                                msgBox.dialogButtonType.YESNO,
+                                    exists.get('strItemNo') + " has zero cost. Do you want to continue?",
+                                result
+                            );
+                        }
+                        else {
+                            action(true);
+                        }
                     }
                     else {
                         if (controller.validateDate(current)) {
@@ -1368,9 +1381,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.itemId === 'cboItemUOM') {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
-            current.set('intCostUOMId', records[0].get('intItemUnitMeasureId'));
-            current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
-            current.set('strCostUOM', records[0].get('strUnitMeasure'));
             current.set('strUnitType', records[0].get('strUnitType'));
 
             var origCF = current.get('dblOrderUOMConvFactor');
@@ -1393,22 +1403,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
 
-            var dblCost = records[0].get('dblLastCost');
-            if (win.viewModel.data.current.get('strReceiptType') === 'Purchase Contract') {
-                dblCost = current.get('dblUnitCost');
-                if (current.get('strOrderUOM') !== records[0].get('strUnitMeasure')) {
-                    var orderUOMCF = current.get('dblOrderUOMConvFactor');
-                    var receiptUOMCF = records[0].get('dblUnitQty');
-                    if (orderUOMCF !== receiptUOMCF) {
-                        var currentCost = current.get('dblUnitCost');
-                        var perUnitCost = currentCost / orderUOMCF;
-                        dblCost = perUnitCost * receiptUOMCF;
+            if (iRely.Functions.isEmpty(current.get('intCostUOMId'))) {
+                current.set('intCostUOMId', records[0].get('intItemUnitMeasureId'));
+                current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
+                current.set('strCostUOM', records[0].get('strUnitMeasure'));
+
+                var dblCost = records[0].get('dblLastCost');
+                if (win.viewModel.data.current.get('strReceiptType') === 'Purchase Contract') {
+                    dblCost = current.get('dblUnitCost');
+                    if (current.get('strOrderUOM') !== records[0].get('strUnitMeasure')) {
+                        var orderUOMCF = current.get('dblOrderUOMConvFactor');
+                        var receiptUOMCF = records[0].get('dblUnitQty');
+                        if (orderUOMCF !== receiptUOMCF) {
+                            var currentCost = current.get('dblUnitCost');
+                            var perUnitCost = currentCost / orderUOMCF;
+                            dblCost = perUnitCost * receiptUOMCF;
+                        }
                     }
                 }
+                current.set('dblUnitCost', dblCost);
+                current.set('dblUnitRetail', dblCost);
             }
-
-            current.set('dblUnitCost', dblCost);
-            current.set('dblUnitRetail', dblCost);
         }
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
@@ -1422,6 +1437,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboCostUOM') {
             current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
+            current.set('dblUnitCost', records[0].get('dblLastCost'));
         }
         else if (combo.itemId === 'cboStorageLocation') {
             if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
@@ -1567,22 +1583,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
 
         currentRecord.set('dblTax', totalItemTax);
-        var unitCost = currentRecord.get('dblUnitCost');
-        var qty = currentRecord.get('dblOpenReceive');
+        var unitCost = me.calculateActualCost(currentRecord);
+        var qty = me.calculateActualQty(currentRecord);
         var lineTotal = 0;
 
-        if (iRely.Functions.isEmpty(currentRecord.get('intWeightUOMId'))) {
-            lineTotal = totalItemTax + (qty * unitCost)
-        }
-        else {
-            var netWgt = currentRecord.get('dblNet');
-            var costCF = currentRecord.get('dblCostUOMConvFactor');
-            lineTotal = totalItemTax + ((netWgt / costCF) * unitCost)
-        }
+        lineTotal = totalItemTax + (qty * unitCost)
+
         currentRecord.set('dblLineTotal', i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2));
     },
 
+    calculateTotalLineItems: function (current) {
+        var totalAmount = 0;
+        if (current) {
+            var items = current.tblICInventoryReceiptItems();
+            if (items) {
+                Ext.Array.each(items.data.items, function (item) {
+                    if (!item.dummy) {
+                        var amount = item.get('dblLineTotal');
+                        totalAmount += amount;
+                    }
+                });
+            }
+        }
+        return totalAmount;
+    },
+
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
+
         var taxableAmount = quantity * price;
 
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
@@ -1621,22 +1648,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return totalCharges;
     },
 
-    calculateLineTotals: function (current) {
-        var totalAmount = 0;
-        if (current) {
-            var items = current.tblICInventoryReceiptItems();
-            if (items) {
-                Ext.Array.each(items.data.items, function (item) {
-                    if (!item.dummy) {
-                        var amount = item.get('dblLineTotal');
-                        totalAmount += amount;
-                    }
-                });
-            }
-        }
-        return totalAmount;
-    },
-
     calculateGrossWeight: function (record) {
         if (!record) return;
 
@@ -1653,11 +1664,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
                     if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
 
-                    if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === undefined) {
+                    if (iRely.Functions.isEmpty(record.get('intWeightUOMId'))) {
                         weightCF = itemUOMCF;
                     }
 
-                    var total = (lotCF * qty) * weightCF;
+                    var total = 0;
+                    if (lotCF === weightCF) {
+                        total = qty;
+                    }
+                    else if (lotCF > weightCF) {
+                        total = (lotCF * qty) * weightCF;
+                    }
+                    else {
+                        total = (weightCF * qty) / lotCF;
+                    }
+
                     lot.set('dblGrossWeight', total);
                     var tare = lot.get('dblTareWeight');
                     var netTotal = total - tare;
@@ -2086,6 +2107,64 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    calculateActualQty: function(current) {
+        var receiptUOMCF = current.get('dblItemUOMConvFactor');
+        var receiptQty = current.get('dblOpenReceive');
+        var costUOMCF = current.get('dblCostUOMConvFactor');
+        var cost = current.get('dblUnitCost');
+        var weightUOMCF = current.get('dblWeightUOMConvFactor');
+        var net = current.get('dblNet');
+        var actualQty = 0;
+
+        if (iRely.Functions.isEmpty(current.get('intWeightUOMId'))) {
+            actualQty = receiptQty;
+        }
+        else {
+            if (weightUOMCF !== costUOMCF) {
+                //actualQty = (receiptUOMCF * receiptQty) / weightUOMCF; -- Computation for auto calculate
+                if (costUOMCF > weightUOMCF) {
+                    actualQty = net * weightUOMCF;
+                }
+                else {
+                    actualQty = net / costUOMCF;
+                }
+            }
+            else {
+                actualQty = net;
+            }
+        }
+
+        return actualQty;
+    },
+
+    calculateActualCost: function(current) {
+        var receiptUOMCF = current.get('dblItemUOMConvFactor');
+        var receiptQty = current.get('dblOpenReceive');
+        var costUOMCF = current.get('dblCostUOMConvFactor');
+        var cost = current.get('dblUnitCost');
+        var weightUOMCF = current.get('dblWeightUOMConvFactor');
+        var gross = current.get('dblGross');
+        var net = current.get('dblNet');
+        var actualCost = 0;
+
+        //no conversion computations yet since we take the cost straightforward
+        if (iRely.Functions.isEmpty(current.get('intCostUOMId'))) {
+            actualCost = cost;
+        }
+        else {
+            if (costUOMCF !== receiptUOMCF) {
+                actualCost = cost;
+            }
+            else {
+                actualCost = cost;
+            }
+        }
+
+        return actualCost;
+    },
+
+
+
     onEditItem: function (editor, context, eOpts) {
         var win = editor.grid.up('window');
         var me = win.controller;
@@ -2094,63 +2173,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (context.field === 'dblOpenReceive' || context.field === 'dblUnitCost') {
             if (context.record) {
-                var value = 0;
-                var record = context.record;
-                var qty = record.get('dblOpenReceive');
-                var unitCost = record.get('dblUnitCost');
-                if (context.field === 'dblOpenReceive') {
-                    qty = context.value;
-
-                    if (!vw.data.currentReceiptItem)
-                        context.record.set('intWeightUOMId', null);
-                    context.record.set('dblWeightUOMConvFactor', 0);
-                    context.record.set('dblItemUOMConvFactor', 0);
-
-                    if (vw.data.currentReceiptItem) {
-                        var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots().data.items;
-                        Ext.Array.each(tblICInventoryReceiptItemLots, function (lot) {
-                            lot.set('strWeightUOM', '');
-                        });
-                    }
-
-                    win.controller.calculateGrossWeight(context.record);
-                    {
-                        vw.data.currentReceiptItem = context.record;
-                    }
-                    me.calculateGrossWeight(record);
+                if (context.field === 'dblUnitCost') {
+                    context.record.set('dblUnitRetail', context.value);
+                    context.record.set('dblGrossMargin', 0);
                 }
-                else if (context.field === 'dblUnitCost') {
-                    unitCost = context.value
-                    record.set('dblUnitRetail', context.value);
-                    record.set('dblGrossMargin', 0);
-                }
-
-                var tax = record.get('dblTax');
-                if (iRely.Functions.isEmpty(record.get('intWeightUOMId'))) {
-                    value = tax + (qty * unitCost)
-                }
-                else {
-                    var netWgt = record.get('dblNet');
-                    var costCF = record.get('dblCostUOMConvFactor');
-                    value = tax + ((netWgt / costCF) * unitCost)
-                }
-
-                record.set('dblLineTotal', value);
             }
         }
         else if (context.field === 'dblUnitRetail') {
             if (context.record) {
-                var unitCost = context.record.get('dblUnitCost');
                 var salesPrice = context.value;
-                var grossMargin = ((salesPrice - unitCost) / (salesPrice)) * 100;
+                var grossMargin = ((salesPrice - context.record.get('dblUnitCost')) / (salesPrice)) * 100;
                 context.record.set('dblGrossMargin', grossMargin);
             }
         }
-        else if (context.field === 'strWeightUOM') {
-            if (iRely.Functions.isEmpty(context.value)) {
-            }
-        }
+
         context.record.set(context.field, context.value);
+        me.calculateGrossWeight(context.record);
+
+        var tax = context.record.get('dblTax');
+        var qty = me.calculateActualQty(context.record);
+        var cost = me.calculateActualCost(context.record);
+        var value = tax + (qty * cost);
+
+        context.record.set('dblLineTotal', value);
+
         vw.data.currentReceiptItem = context.record;
         me.calculateItemTaxes();
     },
@@ -2168,10 +2214,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
             if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
 
-            if (win.viewModel.data.currentReceiptItem.get('intWeightUOMId') === null || win.viewModel.data.currentReceiptItem.get('intWeightUOMId') === undefined) {
+            if (iRely.Functions.isEmpty(win.viewModel.data.currentReceiptItem.get('intWeightUOMId'))) {
                 weightCF = itemUOMCF;
             }
-            var total = (lotCF * qty) * weightCF;
+
+            var total = 0;
+            if (lotCF === weightCF) {
+                total = qty;
+            }
+            else if (lotCF > weightCF) {
+                total = (lotCF * qty) * weightCF;
+            }
+            else {
+                total = (lotCF * qty) / weightCF;
+            }
+
             context.record.set('dblGrossWeight', total);
             var tare = context.record.get('dblTareWeight');
             var netTotal = total - tare;

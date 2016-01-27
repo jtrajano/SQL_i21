@@ -1238,6 +1238,65 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     xtype: 'gridcombobox',
                                                                                     columns: [
                                                                                         {
+                                                                                            dataIndex: 'intItemUnitMeasureId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Unit Of Measure Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitMeasure',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Measure',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Type',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblUnitQty',
+                                                                                            dataType: 'float',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'checkcolumn',
+                                                                                            dataIndex: 'ysnStockUnit',
+                                                                                            dataType: 'boolean',
+                                                                                            text: 'Stock Unit',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblLastCost',
+                                                                                            dataType: 'float',
+                                                                                            hidden: true
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboCostUOM',
+                                                                                    displayField: 'strUnitMeasure',
+                                                                                    valueField: 'strUnitMeasure'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                summaryType: 'sum',
+                                                                                itemId: 'colTax',
+                                                                                width: 85,
+                                                                                dataIndex: 'strTax',
+                                                                                text: 'Tax'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colWeightUOM',
+                                                                                modelValidation: true,
+                                                                                width: 100,
+                                                                                dataIndex: 'strWeightUOM',
+                                                                                text: 'Gross/Net UOM',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
                                                                                             dataIndex: 'intItemUOMId',
                                                                                             dataType: 'numeric',
                                                                                             text: 'Unit Of Measure Id',
@@ -1266,60 +1325,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'boolean',
                                                                                             text: 'Stock Unit',
                                                                                             flex: 1
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboCostUOM',
-                                                                                    displayField: 'strUnitMeasure',
-                                                                                    valueField: 'strUnitMeasure'
-                                                                                }
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numbercolumn',
-                                                                                summaryType: 'sum',
-                                                                                itemId: 'colTax',
-                                                                                width: 85,
-                                                                                dataIndex: 'strTax',
-                                                                                text: 'Tax'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'gridcolumn',
-                                                                                itemId: 'colWeightUOM',
-                                                                                modelValidation: true,
-                                                                                width: 100,
-                                                                                dataIndex: 'strWeightUOM',
-                                                                                text: 'Gross/Net UOM',
-                                                                                editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intItemId',
-                                                                                            dataType: 'numeric',
-                                                                                            text: 'Item Id',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'intItemUOMId',
-                                                                                            dataType: 'numeric',
-                                                                                            text: 'Item UOM Id',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strUnitMeasure',
-                                                                                            dataType: 'string',
-                                                                                            text: 'UOM',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strUnitType',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Unit Type',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'dblUnitQty',
-                                                                                            dataType: 'float',
-                                                                                            text: 'Unit Qty',
-                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     allowEmpty: true,
