@@ -8,11 +8,11 @@ SELECT
 	strOrderNumber = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
-				THEN ISNULL(ContractView.strContractNumber, 'Contract No not found!')
+				THEN ContractView.strContractNumber
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN ISNULL(POView.strPurchaseOrderNumber, 'PO Number not found!')
+				THEN POView.strPurchaseOrderNumber
 			WHEN Receipt.strReceiptType = 'Transfer Order'
-				THEN ISNULL(TransferView.strTransferNo, 'Transfer No not found!')
+				THEN TransferView.strTransferNo
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
 			ELSE NULL
@@ -23,7 +23,7 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 				THEN ContractView.dtmContractDate
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN (SELECT ISNULL(dtmDate, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
+				THEN (SELECT dtmDate FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
 			WHEN Receipt.strReceiptType = 'Transfer Order'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Direct'
@@ -36,9 +36,9 @@ SELECT
 			CASE WHEN Receipt.intSourceType = 1 -- Scale
 				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = ReceiptItem.intSourceId)
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
-				THEN CAST(ISNULL(LogisticsView.intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50))
+				THEN CAST(ISNULL(LogisticsView.intTrackingNumber, '')AS NVARCHAR(50))
 			WHEN Receipt.intSourceType = 3 -- Transport
-				THEN ISNULL(TransportView.strTransaction, 'Transport not found!')
+				THEN TransportView.strTransaction
 			ELSE NULL
 			END
 		),
@@ -47,13 +47,13 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
-						THEN ISNULL(ContractView.strItemUOM, 'Contract No not found!') 
+						THEN ContractView.strItemUOM
 					WHEN Receipt.intSourceType = 1 -- Scale
 						THEN NULL
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
-						THEN ISNULL(LogisticsView.strUnitMeasure, 'Inbound Shipment not found!')
+						THEN LogisticsView.strUnitMeasure
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN (SELECT ISNULL(strUnitMeasure, 'Transport not found!')  FROM tblICItemUOM LEFT JOIN tblICUnitMeasure ON tblICUnitMeasure.intUnitMeasureId = tblICItemUOM.intUnitMeasureId WHERE intItemUOMId = ReceiptItem.intUnitMeasureId)
+						THEN ItemUOM.strUnitMeasure
 					ELSE NULL
 					END
 				)
@@ -77,7 +77,7 @@ SELECT
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblItemUOMCF, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN (SELECT ISNULL(dblUnitQty, 'Transport not found!')  FROM tblICItemUOM WHERE intItemUOMId = ReceiptItem.intUnitMeasureId)
+						THEN ItemUOM.dblUnitQty
 					ELSE NULL
 					END
 				)
@@ -164,6 +164,7 @@ SELECT
 	, ContractView.dblAvailableQty
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 LEFT JOIN vyuCTContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Contract'
