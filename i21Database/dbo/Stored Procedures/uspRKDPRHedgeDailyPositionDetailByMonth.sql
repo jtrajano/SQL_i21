@@ -17,6 +17,9 @@ DECLARE @strCommodityCode NVARCHAR(50)
 
 DECLARE @List AS TABLE (  
      intRowNumber INT IDENTITY(1,1),
+	 strContractNumber NVARCHAR(200),
+	 intFutOptTransactionHeaderId int,
+	 strInternalTradeNo NVARCHAR(200),
 	 strCommodityCode NVARCHAR(200),   
      strType  NVARCHAR(50), 
 	 strLocationName NVARCHAR(100),
@@ -24,8 +27,8 @@ DECLARE @List AS TABLE (
 	 dblTotal DECIMAL(24,10)
      ) 
 
-INSERT INTO @List (strCommodityCode,strType,strLocationName,strContractEndMonth,dblTotal)
-	SELECT strCommodityCode
+INSERT INTO @List (strCommodityCode,strContractNumber,strType,strLocationName,strContractEndMonth,dblTotal)
+	SELECT strCommodityCode,strContractNumber
 		,strContractType+ ' ' + strPricingType [strType]
 		,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth
@@ -34,10 +37,10 @@ INSERT INTO @List (strCommodityCode,strType,strLocationName,strContractEndMonth,
 	WHERE intContractTypeId in(1,2) AND intPricingTypeId IN (1,2,3) and intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 		AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 
-INSERT INTO @List (strCommodityCode,strType,strLocationName,strContractEndMonth,dblTotal)		
-	SELECT strCommodityCode,'Net Hedge',strLocationName, strFutureMonth,HedgedQty
+INSERT INTO @List (strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,dblTotal)		
+	SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge',strLocationName, strFutureMonth,HedgedQty
 	FROM (
-		SELECT strCommodityCode,(ISNULL(intNoOfContract, 0) - isnull(dblMatchQty, 0)) * m.dblContractSize AS HedgedQty,l.strLocationName,left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth
+		SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,(ISNULL(intNoOfContract, 0) - isnull(dblMatchQty, 0)) * m.dblContractSize AS HedgedQty,l.strLocationName,left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth
 		FROM tblRKFutOptTransaction f
 		INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId
 		INNER JOIN tblICCommodity ic on f.intCommodityId=ic.intCommodityId
@@ -51,7 +54,7 @@ INSERT INTO @List (strCommodityCode,strType,strLocationName,strContractEndMonth,
 		
 		UNION ALL
 		
-		SELECT strCommodityCode,-(ISNULL(intNoOfContract, 0) - isnull(dblMatchQty, 0)) * m.dblContractSize AS HedgedQty,l.strLocationName,left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth
+		SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,-(ISNULL(intNoOfContract, 0) - isnull(dblMatchQty, 0)) * m.dblContractSize AS HedgedQty,l.strLocationName,left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth
 		FROM tblRKFutOptTransaction f
 		INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId
 		INNER JOIN tblICCommodity ic on f.intCommodityId=ic.intCommodityId
@@ -95,7 +98,7 @@ BEGIN
 
 		IF ISNULL(@intUnitMeasureId, 0) <> 0
 		BEGIN
-		SELECT intRowNumber,strCommodityCode , strType,strLocationName,strContractEndMonth, 
+		SELECT intRowNumber,strCommodityCode ,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strLocationName,strContractEndMonth, 
 		 dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal,
 		 @StrUnitMeasure as strUnitMeasure
 		FROM @List ORDER BY strCommodityCode,CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
@@ -103,6 +106,6 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT intRowNumber,strCommodityCode , strType,strLocationName,strContractEndMonth,dblTotal,@StrUnitMeasure as strUnitMeasure FROM @List ORDER BY CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
+			SELECT intRowNumber,strCommodityCode ,strContractNumber,strInternalTradeNo,intFutOptTransactionHeaderId, strType,strLocationName,strContractEndMonth,dblTotal,@StrUnitMeasure as strUnitMeasure FROM @List ORDER BY CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
 		END
 END
