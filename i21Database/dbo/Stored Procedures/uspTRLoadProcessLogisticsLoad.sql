@@ -14,6 +14,7 @@ DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE  @intLoadHeaderId AS INT,
+         @intLoadId as int,
          @intLoadDetailId as int;
 DECLARE @intPContractDetailId as int,
         @intSContractDetailId as int,
@@ -28,7 +29,7 @@ DECLARE @LoadTable TABLE
 )
 
 BEGIN TRY
-  select @intLoadHeaderId = intLoadHeaderId from tblTRLoadHeader where strTransaction = @strTransaction
+  select @intLoadHeaderId = intLoadHeaderId ,@intLoadId= intLoadId from tblTRLoadHeader where strTransaction = @strTransaction
 
   insert into @LoadTable select distinct intLoadDetailId from tblTRLoadReceipt where intLoadHeaderId = @intLoadHeaderId and isNUll(intLoadDetailId ,0 ) !=0
 --Update the Logistics Load for InProgress 
@@ -66,7 +67,7 @@ BEGIN
 			intLoadHeaderId=null,
 			ysnInProgress = 0,
 			intConcurrencyId	=	intConcurrencyId + 1
-		  WHERE intLoadId=@intLoadDetailId
+		  WHERE intLoadId=@intLoadId
 		  UPDATE tblTRLoadReceipt SET 
 			intLoadDetailId = null
 		  WHERE intLoadDetailId=@intLoadDetailId
