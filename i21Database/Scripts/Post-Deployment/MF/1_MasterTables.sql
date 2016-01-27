@@ -1510,3 +1510,8 @@ UPDATE tblMFCompanyPreference
 SET ysnAutoPriorityOrderByDemandRatio = 0
 WHERE ysnAutoPriorityOrderByDemandRatio IS NULL
 Go
+GO
+UPDATE tblMFCompanyPreference
+SET dtmWorkOrderCreateDate = '2013-11-30 00:00:00.000'
+WHERE dtmWorkOrderCreateDate IS NULL
+GO

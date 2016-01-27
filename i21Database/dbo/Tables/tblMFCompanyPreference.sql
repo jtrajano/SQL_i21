@@ -15,5 +15,7 @@
 	ysnAutoPriorityOrderByDemandRatio bit,
     ysnDisplayNewOrderByExpectedDate BIT NULL,
 	ysnCheckCrossContamination bit NULL, 
+	dtmWorkOrderCreateDate DATETIME,
+
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )
