@@ -276,7 +276,7 @@ Begin
 				if (@dblQty >= @dblReqQty And @intNoOfSheet>1)
 					Begin
 						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId)
-						Select intLotId,intItemId,@dblReqQty,intItemUOMId,@dblReqQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId 
+						Select intLotId,intItemId,@dblReqQty,intItemUOMId,CASE WHEN intItemUOMId=intItemIssuedUOMId THEN @dblReqQty ELSE @dblReqQty/dblWeightPerUnit END,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId 
 						from @tblLot where intRowNo=@intLotCount
 
 						Update @tblLot set dblQty=dblQty-@dblReqQty where intRowNo=@intLotCount
@@ -285,7 +285,7 @@ Begin
 					Else
 					Begin
 						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId)
-						Select intLotId,intItemId,@dblQty,intItemUOMId,@dblQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId 
+						Select intLotId,intItemId,@dblQty,intItemUOMId,CASE WHEN intItemUOMId=intItemIssuedUOMId THEN @dblQty ELSE @dblQty/dblWeightPerUnit END,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId 
 						from @tblLot where intRowNo=@intLotCount
 
 						Update @tblLot set dblQty=0 where intRowNo=@intLotCount
