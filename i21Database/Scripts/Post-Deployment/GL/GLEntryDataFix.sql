@@ -243,7 +243,14 @@ GO
  GO
  	PRINT N'End Deleting Categories not used in Inventory'
  GO
- 
+ GO	
+	PRINT N'BEGIN Trim Account Description in tblGLAccount'
+ GO
+
+	UPDATE tblGLAccount set  strDescription  = LTRIM(RTRIM(strDescription)) where intAccountId IN (select intAccountId from tblGLCOACrossReference)
+ GO	
+	PRINT N'End Trim Account Description in tblGLAccount'
+ GO
 	
 
 
