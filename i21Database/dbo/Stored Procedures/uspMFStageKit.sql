@@ -26,6 +26,7 @@ Declare @intRecipeId int
 Declare @dblQtyToProduce numeric(18,6)
 Declare @intBlendItemId int
 Declare @intBlendStagingLocationId int
+Declare @dblPickedQty numeric(18,6)
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -104,6 +105,7 @@ Begin
 
 	Select TOP 1 @intBlendItemId = intItemId From tblMFWorkOrder Where intPickListId=@intPickListId 
 	Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
+	Select @dblPickedQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
 
 	SELECT @intRecipeId = intRecipeId
 	FROM tblMFRecipe
@@ -139,11 +141,11 @@ Begin
 	If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
 		Delete From @tblRemainingPickedItems
 
-	If (Select Count(1) From @tblRemainingPickedItems Where intConsumptionMethodId=1) > 0
-	Begin
-		Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
-		RaisError(@ErrMsg,16,1)
-	End
+	--If (Select Count(1) From @tblRemainingPickedItems Where intConsumptionMethodId=1) > 0
+	--Begin
+	--	Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
+	--	RaisError(@ErrMsg,16,1)
+	--End
 
 	--For Bulk Items there in Recipe
 	If Exists (Select 1 From @tblRemainingPickedItems Where intConsumptionMethodId in (2,3))
@@ -200,6 +202,12 @@ Begin
 
 			Select @intBulkMinItemCount=Min(intRowNo) From @tblRemainingPickedItems Where intRowNo > @intBulkMinItemCount
 		End
+	End
+
+	if @dblPickedQty < @dblQtyToProduce
+	Begin
+		Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
+		RaisError(@ErrMsg,16,1)
 	End
 End
 

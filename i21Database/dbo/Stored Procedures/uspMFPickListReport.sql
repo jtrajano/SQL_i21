@@ -138,4 +138,4 @@ Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId
 	Select @strPickListNo,@strBlendItemNoDesc,@strWorkOrderNo,'','','',i.strItemNo,i.strDescription,dbo.fnRemoveTrailingZeroes(tpl.dblRemainingQuantity),'','',
 	@intWorkOrderCount,'','',dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) AS dblReqQty,dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblTotalPickQty
 	From @tblRemainingPickedLots tpl Join tblICItem i on tpl.intItemId=i.intItemId
-	ORDER BY i.strItemNo,l.strLotAlias,l.strLotNumber
+	ORDER BY strPickUOM
