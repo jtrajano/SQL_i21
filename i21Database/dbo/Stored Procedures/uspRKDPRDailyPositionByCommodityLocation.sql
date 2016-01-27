@@ -1,6 +1,15 @@
 ﻿CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodityLocation]  
-    @intCommodityId int
+    @intCommodityId nvarchar(max)
 AS      
+
+DECLARE @Commodity AS TABLE 
+(
+intCommodityIdentity int IDENTITY(1,1) PRIMARY KEY , 
+intCommodity  INT
+)
+INSERT INTO @Commodity(intCommodity)
+SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')  
+
 
 SELECT strLocationName,OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodityCode,intUnitMeasureId,strUnitMeasure,isnull(CompanyTitled,0) as dblCompanyTitled,  
 isnull(CashExposure,0) as dblCaseExposure,              
@@ -127,7 +136,8 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
   FROM vyuGRGetStorageDetail ch  
   WHERE ch.intCommodityId = c.intCommodityId AND ysnDPOwnedType=1 and ch.intCompanyLocationId=cl.intCompanyLocationId) as DP,
   (	SELECT SUM(Balance)	FROM vyuGRGetStorageDetail
-				WHERE ysnCustomerStorage <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId =cl.intCompanyLocationId) dblGrainBalance  
+				WHERE ysnCustomerStorage <> 1 AND intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) 
+				AND intCompanyLocationId =cl.intCompanyLocationId) dblGrainBalance  
     
            
   FROM tblSMCompanyLocation cl  
@@ -168,7 +178,8 @@ SELECT distinct t.strLocationName,intLocationId,
 from #temp t
 JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-Where t.intCommodityId=@intCommodityId
+Where t.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) 
+ORDER BY strCommodityCode
 END
 ELSE
 BEGIN
@@ -181,5 +192,5 @@ Convert(decimal(24,10),dblCaseExposure),
 Convert(decimal(24,10),dblBasisExposure) as OpenSalQty,
 Convert(decimal(24,10),dblAvailForSale),
 Convert(decimal(24,10),dblInHouse),
-Convert(decimal(24,10),dblBasisExposure)	from #temp Where intCommodityId=@intCommodityId
+Convert(decimal(24,10),dblBasisExposure)	from #temp Where intCommodityId=@intCommodityId ORDER BY strCommodityCode
 END
