@@ -333,6 +333,22 @@ namespace iRely.Inventory.Model
                 _orderTotal = value;
             }
         }
+        private decimal _unitCost;
+        [NotMapped]
+        public decimal dblUnitCost
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.dblUnitCost ?? 0;
+                else
+                    return _unitCost;
+            }
+            set
+            {
+                _unitCost = value;
+            }
+        }
         private string _itemNo;
         [NotMapped]
         public string strItemNo
@@ -616,6 +632,7 @@ namespace iRely.Inventory.Model
         public decimal? dblItemUOMConv { get; set; }
         public string strUnitType { get; set; }
         public string strWeightUOM { get; set; }
+        public decimal? dblUnitCost { get; set; }
         public decimal? dblWeightItemUOMConv { get; set; }
         public decimal? dblQtyOrdered { get; set; }
         public decimal? dblQtyAllocated { get; set; }

@@ -2538,6 +2538,32 @@
                                                             ]
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblUnitPrice",
+                                                                "dataType": "numeric",
+                                                                "format": "0,000.00####",
+                                                                "itemId": "colUnitCost",
+                                                                "text": "Unit Cost",
+                                                                "width": 81
+                                                            },
+                                                            "name": "MyNumberColumn15",
+                                                            "designerId": "f03b2d41-8be8-49b6-a62b-1256d06caf6d",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",
@@ -2621,6 +2647,7 @@
                                                                 "align": "right",
                                                                 "dataIndex": "dblUnitPrice",
                                                                 "dataType": "numeric",
+                                                                "format": "0,000.00####",
                                                                 "itemId": "colUnitPrice",
                                                                 "text": "Unit Price",
                                                                 "width": 81

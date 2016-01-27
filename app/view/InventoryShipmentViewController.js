@@ -407,6 +407,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }]
                     }
                 },
+                colUnitCost: 'dblUnitCost',
                 colUnitPrice: 'dblUnitPrice',
                 colLineTotal: 'dblLineTotal',
                 colNotes: 'strNotes'

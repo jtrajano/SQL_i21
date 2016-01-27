@@ -1262,6 +1262,16 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        dataIndex: 'dblUnitPrice',
+                                                                        itemId: 'colUnitCost',
+                                                                        width: 81,
+                                                                        align: 'right',
+                                                                        text: 'Unit Cost',
+                                                                        format: '0,000.00####'
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colWeightUOM',
                                                                         width: 100,
@@ -1309,6 +1319,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         align: 'right',
                                                                         dataIndex: 'dblUnitPrice',
                                                                         text: 'Unit Price',
+                                                                        format: '0,000.00####',
                                                                         editor: {
                                                                             xtype: 'numeric'
                                                                         }
