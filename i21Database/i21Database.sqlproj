@@ -3260,6 +3260,10 @@
     <Build Include="dbo\Tables\tblHDLineOfBusiness.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportTransaction.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityOverview.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityOverviewConcern.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityOverviewGain.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityOverviewUniqueValue.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityOverviewSolution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
