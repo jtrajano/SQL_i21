@@ -100,14 +100,17 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMTaxGroup TG
 		ON SOD.[intTaxGroupId] = TG.intTaxGroupId
-LEFT JOIN (SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS ID
+LEFT OUTER JOIN 
+	(SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS ID
 		ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+LEFT OUTER JOIN
+	(SELECT D.intLineNo FROM tblICInventoryShipmentItem D INNER JOIN tblICInventoryShipment H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId] WHERE H.[intOrderType] = 2) ISD
+		ON SOD.[intSalesOrderDetailId] = ISD.[intLineNo] 
+		
 WHERE
-	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
-		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
-	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+	SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	AND SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000) > 0.000000
+	AND ISNULL(ISD.[intLineNo],0) = 0
 	
 UNION ALL
 
@@ -213,7 +216,7 @@ LEFT JOIN (SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FRO
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
+		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
 	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	AND SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000) > 0.000000
 	
@@ -424,8 +427,8 @@ SELECT
 	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
 	,[dblQtyOrdered]					= 0 
 	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
-	,[dblShipmentQtyShippedTotal]		= 0
-	,[dblQtyRemaining]					= 0
+	,[dblShipmentQtyShippedTotal]		= ICISI.[dblQuantity]
+	,[dblQtyRemaining]					= ICISI.[dblQuantity]
 	,[dblDiscount]						= 0 
 	,[dblPrice]							= ICISI.[dblUnitPrice]
 	,[dblShipmentUnitPrice]				= ICISI.[dblUnitPrice]
@@ -508,10 +511,10 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblARInvoiceDetail ARID
 		ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
-		AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 LEFT OUTER JOIN
 	[tblSMCompanyLocation] SMCL
 		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
+WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 
 UNION ALL
 
@@ -608,9 +611,9 @@ LEFT OUTER JOIN
 	tblEntityLocation SL
 		ON C.intShipToId = SL.intEntityLocationId
 LEFT OUTER JOIN
-	tblARInvoice ARI
-		ON LGS.[intShipmentId] = ARI.[intShipmentId]
+	tblARInvoiceDetail ARID
+		ON LGS.[intShipmentId] = ARID.[intShipmentId]
 WHERE
-	ARI.[intInvoiceId] IS NULL
+	ARID.[intInvoiceId] IS NULL
 	AND LGS.[intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails)
 	AND LGS.[ysnInventorized] = 1
