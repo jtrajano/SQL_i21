@@ -239,7 +239,12 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     return false;
                     break;
                 default:
-                    return true;
+                    if (iRely.Functions.isEmpty(get('grdInventoryShipment.selection.strOrderNumber'))) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
                     break;
             };
         },
