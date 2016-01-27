@@ -7,9 +7,9 @@ SELECT
 	strOrderNumber = 
 		(
 			CASE WHEN Shipment.intOrderType = 1
-				THEN ISNULL(ContractView.strContractNumber, 'PO Number not found!')
+				THEN ContractView.strContractNumber
 			WHEN Shipment.intOrderType = 2
-				THEN ISNULL(SODetail.strSalesOrderNumber, 'SO Number not found!')
+				THEN SODetail.strSalesOrderNumber
 			WHEN Shipment.intOrderType = 3
 				THEN NULL
 			ELSE NULL
@@ -20,7 +20,7 @@ SELECT
 			CASE WHEN Shipment.intSourceType = 1 -- Scale
 				THEN ScaleView.strTicketNumber
 			WHEN Shipment.intSourceType = 2 -- Inbound Shipment
-				THEN ISNULL(LogisticView.intTrackingNumber, 'Inbound Shipment not found!')
+				THEN LogisticView.intTrackingNumber
 			ELSE NULL
 			END
 		AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS,
@@ -29,13 +29,13 @@ SELECT
 			CASE WHEN Shipment.intOrderType = 1
 				THEN (
 					CASE WHEN Shipment.intSourceType = 0 -- None
-						THEN ISNULL(ContractView.strItemUOM, 'Ticket Number not found!')
+						THEN ContractView.strItemUOM
 					WHEN Shipment.intSourceType = 1 -- Scale
 						THEN NULL
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 						THEN NULL
 					WHEN Shipment.intSourceType = 3 -- Transport
-						THEN (SELECT ISNULL(strUnitMeasure, 'Transport not found!')  FROM tblICItemUOM LEFT JOIN tblICUnitMeasure ON tblICUnitMeasure.intUnitMeasureId = tblICItemUOM.intUnitMeasureId WHERE intItemUOMId = ShipmentItem.intItemUOMId)
+						THEN ItemUOM.strUnitMeasure
 					ELSE NULL
 					END
 				)
@@ -55,7 +55,7 @@ SELECT
 					WHEN Shipment.intSourceType = 1 -- Scale
 						THEN 0
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
-						THEN NULL
+						THEN 0
 					WHEN Shipment.intSourceType = 3 -- Transport
 						THEN ISNULL(TransportView.dblOrderedQuantity, 0)
 					ELSE NULL
@@ -114,6 +114,7 @@ SELECT
 		)
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+	LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId
 	LEFT JOIN vyuSOSalesOrderDetail SODetail
 		ON SODetail.intSalesOrderId = ShipmentItem.intOrderId AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
 		AND Shipment.intOrderType = 2
