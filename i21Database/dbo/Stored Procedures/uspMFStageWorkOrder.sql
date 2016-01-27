@@ -402,6 +402,36 @@ BEGIN TRY
 					,@intEntityUserSecurityId = @intUserId
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
+					 INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction  
+					 (  
+						intWorkOrderId  
+					   ,intLotId  
+					   ,dblQuantity  
+					   ,intItemUOMId  
+					   ,intItemId  
+					   ,intTransactionId  
+					   ,intTransactionTypeId  
+					   ,strTransactionType  
+					   ,dtmTransactionDate  
+					   ,intProcessId  
+					   ,intShiftId  
+					 )  
+					 SELECT TOP 1  
+					   WI.intWorkOrderId,  
+					   WI.intLotId,  
+					   @dblNewWeight-@dblWeight,  
+					   WI.intItemUOMId,  
+					   WI.intItemId,  
+					   @intInventoryAdjustmentId,  
+					   24,  
+					   'Empty Out Adj',  
+					   @dtmBusinessDate,  
+					   intManufacturingProcessId,  
+					   @intBusinessShiftId
+					 FROM dbo.tblMFWorkOrderInputLot WI
+					 JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId =WI.intWorkOrderId 
+					 WHERE intLotId = @intInputLotId
+
 			PRINT 'Call Lot Adjust routine.'
 		END
 

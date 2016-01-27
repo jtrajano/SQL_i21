@@ -18,7 +18,8 @@ BEGIN TRY
 		,@dtmCurrentDate datetime
 		,@dtmCurrentDateTime datetime
 		,@intDayOfYear int
-	
+		,@intShiftId int
+			
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
@@ -418,6 +419,41 @@ BEGIN TRY
 						,@intSourceTransactionTypeId = 8
 						,@intEntityUserSecurityId = @intUserId
 						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+						SELECT @intShiftId = intShiftId
+						FROM dbo.tblMFShift
+						WHERE intLocationId = @intLocationId
+							AND Convert(CHAR, GetDate(), 108) BETWEEN dtmShiftStartTime
+								AND dtmShiftEndTime + intEndOffset
+
+						INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
+							intWorkOrderId
+							,intLotId
+							,dblQuantity
+							,intItemUOMId
+							,intItemId
+							,intTransactionId
+							,intTransactionTypeId
+							,strTransactionType
+							,dtmTransactionDate
+							,intProcessId
+							,intShiftId
+							)
+						SELECT TOP 1 WP.intWorkOrderId
+							,WP.intLotId
+							,@dblNewQty - @dblQty
+							,@intItemUOMId
+							,WP.intItemId
+							,@intInventoryAdjustmentId
+							,25
+							,'Cycle Count Adj'
+							,GetDate()
+							,intManufacturingProcessId
+							,@intShiftId
+						FROM dbo.tblMFWorkOrderProducedLot WP
+						JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
+						WHERE intLotId = @intLotId
+
 				PRINT 'Call Adjust Qty procedure'
 			END
 

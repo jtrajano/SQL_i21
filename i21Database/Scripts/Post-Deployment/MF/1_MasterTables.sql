@@ -1510,8 +1510,179 @@ UPDATE tblMFCompanyPreference
 SET ysnAutoPriorityOrderByDemandRatio = 0
 WHERE ysnAutoPriorityOrderByDemandRatio IS NULL
 Go
-GO
+
 UPDATE tblMFCompanyPreference
 SET dtmWorkOrderCreateDate = '2013-11-30 00:00:00.000'
 WHERE dtmWorkOrderCreateDate IS NULL
+Go
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Input'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 1
+		,'Input'
+		,1
+		,1
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Output'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 2
+		,'Output'
+		,1
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Empty Out Adj'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 3
+		,'Empty Out Adj'
+		,0
+		,1
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Cycle Count Adj'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 4
+		,'Cycle Count Adj'
+		,0
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Queued Qty Adj'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 5
+		,'Queued Qty Adj'
+		,0
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Output Opening Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 6
+		,'Output Opening Quantity'
+		,1
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Output Count Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 7
+		,'Output Count Quantity'
+		,1
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Opening Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 8
+		,'Opening Quantity'
+		,1
+		,1
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Count Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 9
+		,'Count Quantity'
+		,1
+		,1
+END
 GO

@@ -102,6 +102,14 @@ USING	(
         SELECT    id = 23
                 ,name = 'Inventory Count'
                 ,form = 'Inventory Count'
+				UNION ALL 
+        SELECT    id = 24
+                ,name = 'Empty Out'
+                ,form = 'Empty Out'
+		UNION ALL 
+        SELECT    id = 25
+                ,name = 'Process Inventory Count'
+                ,form = 'Process Inventory Count'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
