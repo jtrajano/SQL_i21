@@ -37,7 +37,7 @@ BEGIN TRY
 	SELECT @intFromStorageLocationId = c.intStorageLocationId, @intFromContainerId = s.intContainerId, @dblQty = dblQty - ISNULL((
 				SELECT SUM(ISNULL(dblQty, 0))
 				FROM tblWHTask
-				WHERE intSKUId = s.intSKUId
+				WHERE intSKUId = s.intSKUId AND intTaskStateId IN (1,2,3) AND intTaskTypeId IN (2,7,13)
 				), 0),
 				@intItemId = s.intItemId
 	FROM tblWHSKU s
