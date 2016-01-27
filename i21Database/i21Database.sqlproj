@@ -3163,6 +3163,10 @@
     <Build Include="dbo\Stored Procedures\uspPOGetNextApproverEmail.sql" />
     <Build Include="dbo\Tables\tblPOApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspPOCreateApprover.sql" />
+    <Build Include="dbo\Views\vyuHDModule.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099MISCTwoPart.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099BTwoPart.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099INTTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
