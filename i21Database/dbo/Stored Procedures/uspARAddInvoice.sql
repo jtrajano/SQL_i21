@@ -259,8 +259,8 @@ SET
 	,[strComments]					= IE.strComments
 	,[intAccountId]					= @ARAccountId
 	,[dtmPostDate]					= NULL
-	,[ysnPosted]					= 0
-	,[ysnPaid]						= 0
+	--,[ysnPosted]					= 0
+	--,[ysnPaid]						= 0
 	,[intShipToLocationId]			= ISNULL(IE.[intShipToLocationId], EL.[intEntityLocationId]) 
 	,[strShipToLocationName]		= SL.[strLocationName]
 	,[strShipToAddress]				= SL.[strAddress]
