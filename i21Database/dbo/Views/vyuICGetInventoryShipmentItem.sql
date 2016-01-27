@@ -32,6 +32,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strUnitType = UOM.strUnitType
 	, strWeightUOM = WeightUOM.strUnitMeasure
 	, dblWeightItemUOMConv = ItemWeightUOM.dblUnitQty
+	, dblUnitCost = ShipmentItemSource.dblCost
 	, dblQtyOrdered = ISNULL(ShipmentItemSource.dblQtyOrdered, 0)
     , dblQtyAllocated = ISNULL(ShipmentItemSource.dblQtyAllocated, 0)
     , dblUnitPrice = ISNULL(ShipmentItemSource.dblUnitPrice, 0)

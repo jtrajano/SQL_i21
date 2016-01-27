@@ -35,7 +35,7 @@ SELECT
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 						THEN NULL
 					WHEN Shipment.intSourceType = 3 -- Transport
-						THEN ItemUOM.strUnitMeasure
+						THEN ItemPricing.strUnitMeasure
 					ELSE NULL
 					END
 				)
@@ -111,10 +111,11 @@ SELECT
 				THEN 0.00
 			ELSE 0.00
 			END
-		)
+		),
+	dblCost = ItemPricing.dblLastCost
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-	LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId
+	LEFT JOIN vyuICGetItemPricing ItemPricing ON ItemPricing.intUnitMeasureId = ShipmentItem.intItemUOMId AND ItemPricing.intLocationId = Shipment.intShipFromLocationId
 	LEFT JOIN vyuSOSalesOrderDetail SODetail
 		ON SODetail.intSalesOrderId = ShipmentItem.intOrderId AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
 		AND Shipment.intOrderType = 2
