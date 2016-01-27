@@ -6,9 +6,12 @@ AS
 
 BEGIN	
 	DECLARE @intTransactionId	INT,
-			@intUserId			INT
+			@intUserId			INT,
+			@isDelete			BIT
 	DECLARE @OrderToUpdate TABLE (intSalesOrderId INT, dblQuantity NUMERIC (18, 6));
 	
+	SET @isDelete = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
+
 	SELECT TOP 1 @intTransactionId = intShipmentId FROM @ItemsFromInventoryShipment
 	SELECT TOP 1 @intUserId = intEntityId 
 		FROM tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
@@ -28,7 +31,7 @@ BEGIN
 					
 		SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @qtyToPost = dblQuantity FROM @OrderToUpdate ORDER BY intSalesOrderId        
 
-		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 0, @isDelete
 
 		EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnPost ,@qtyToPost
 

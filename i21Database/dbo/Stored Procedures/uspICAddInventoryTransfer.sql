@@ -9,7 +9,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @startingNumberId_InventoryTransfer AS INT = 41;
+DECLARE @StartingNumberId_InventoryTransfer AS INT = 41;
 DECLARE @inventoryTransferNumber AS NVARCHAR(50);
 DECLARE @inventoryTransferId AS INT
 		,@strSourceId AS NVARCHAR(50)
@@ -117,7 +117,7 @@ BEGIN
 			-- Generate the transfer starting number
 			-- If @inventoryTransferNumber IS NULL, uspSMGetStartingNumber will throw an error. 
 			-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
-			EXEC dbo.uspSMGetStartingNumber @startingNumberId_InventoryTransfer, @inventoryTransferNumber OUTPUT 
+			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryTransfer, @inventoryTransferNumber OUTPUT 
 			IF @@ERROR <> 0 OR @inventoryTransferNumber IS NULL GOTO _BreakLoop;
 		END 
 

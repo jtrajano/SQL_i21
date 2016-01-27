@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE uspCMFindMatchingRecordsForBankRecon
+CREATE PROCEDURE [uspCMFindMatchingRecordsForBankRecon]
 	@strBankStatementImportId NVARCHAR(40) = NULL,
 	@intBankAccountId INT,
 	@dtmStatementDate DATETIME,
@@ -50,6 +50,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@dblAmount AS NUMERIC(18,6)
 		,@strPayee AS NVARCHAR(300)
 		,@dtmDate AS DATETIME
+		,@strReferenceNumber AS NVARCHAR(20)
 		,@ysnMatchFound AS BIT
 
 -- Temporary table of qualified transactions
@@ -87,6 +88,7 @@ SELECT	A.intTransactionId
 		,A.dtmDate
 		,A.dblAmount
 		,strPayee = CASE WHEN A.intBankTransactionTypeId IN (5) THEN A.strMemo ELSE A.strPayee END
+		,A.strReferenceNo
 		,ysnTagged = CAST(0 AS BIT)
 INTO	#tmp_list_of_transactions
 FROM	dbo.tblCMBankTransaction A
@@ -120,15 +122,33 @@ BEGIN
 			,@dblAmount = dblAmount
 			,@dtmDate = dtmDate
 			,@strPayee = strPayee
+			,@strReferenceNumber = strReferenceNo
 	FROM	#tmp_list_of_imported_record
 	IF @@ERROR <> 0	GOTO _ROLLBACK
 	
 	UPDATE #tmp_list_of_transactions
 	SET ysnTagged = 0
 	IF @@ERROR <> 0	GOTO _ROLLBACK
+	
+	DECLARE @Count AS INT = 0
 
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmp_list_of_transactions WHERE ysnTagged = 0 AND @intBankStatementImportId IS NOT NULL) 
-	BEGIN 
+	IF @dblAmount < 1
+	BEGIN
+		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE ABS(dblAmount) = ABS(@dblAmount) AND intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
+	END
+	ELSE
+		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE ABS(dblAmount) = ABS(@dblAmount) AND intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT, @BANK_TRANSACTION)
+
+
+	IF (@strPayee IS NULL OR @strPayee = '') AND (@strReferenceNumber IS NULL OR @strReferenceNumber = '') AND @Count <> 1
+	BEGIN
+		DELETE FROM #tmp_list_of_imported_record
+		WHERE intBankStatementImportId = @intBankStatementImportId
+		IF @@ERROR <> 0	GOTO _ROLLBACK
+	END
+	ELSE
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmp_list_of_transactions WHERE ysnTagged = 0 AND @intBankStatementImportId IS NOT NULL) 
+		BEGIN 
 		SELECT	TOP 1 
 				@intTransactionId = intTransactionId
 		FROM	#tmp_list_of_transactions
@@ -144,6 +164,9 @@ BEGIN
 		WHERE	A.intTransactionId = @intTransactionId
 				AND 1 = CASE	WHEN (@strPayee IS NOT NULL) THEN 
 									CASE WHEN (LTRIM(RTRIM(ISNULL(A.strPayee, ''))) = LTRIM(RTRIM(ISNULL(@strPayee, '')))) THEN 1 ELSE 0 END
+								ELSE 1 END
+				AND 1 = CASE WHEN(@strReferenceNumber IS NOT NULL OR @strReferenceNumber <> '') THEN
+									CASE WHEN (LTRIM(RTRIM(ISNULL(SUBSTRING(A.strReferenceNo, PATINDEX('%[^0 ]%', A.strReferenceNo + ' '), LEN(A.strReferenceNo)), ''))) = LTRIM(RTRIM(ISNULL(SUBSTRING(@strReferenceNumber, PATINDEX('%[^0 ]%', @strReferenceNumber + ' '), LEN(@strReferenceNumber)), '')))) THEN 1 ELSE 0 END
 								ELSE 1 END
 				AND 1 =	CASE	WHEN A.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT) THEN
 									CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 							
@@ -211,10 +234,11 @@ BEGIN
 		WHERE	intTransactionId = @intTransactionId
 		IF @@ERROR <> 0	GOTO _ROLLBACK
 	END
+		DELETE FROM #tmp_list_of_imported_record
+		WHERE intBankStatementImportId = @intBankStatementImportId
+		IF @@ERROR <> 0	GOTO _ROLLBACK
+	
 
-	DELETE FROM #tmp_list_of_imported_record
-	WHERE intBankStatementImportId = @intBankStatementImportId
-	IF @@ERROR <> 0	GOTO _ROLLBACK
 END
 
 _COMMIT:

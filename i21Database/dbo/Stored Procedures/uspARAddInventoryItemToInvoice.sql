@@ -46,6 +46,7 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
+	,@EntitySalespersonId			INT				= NULL
 AS
 
 BEGIN
@@ -216,6 +217,7 @@ BEGIN TRY
 				,[intPerformerId]
 				,[ysnLeaseBilling]
 				,[ysnVirtualMeterReading]
+				,[intEntitySalespersonId]
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -267,6 +269,7 @@ BEGIN TRY
 				,[intPerformerId]					= @ItemPerformerId
 				,[ysnLeaseBilling]					= @ItemLeaseBilling
 				,[ysnVirtualMeterReading]			= @ItemVirtualMeterReading
+				,[intEntitySalespersonId]			= @EntitySalespersonId
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC

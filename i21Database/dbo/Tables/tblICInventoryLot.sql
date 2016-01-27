@@ -34,7 +34,7 @@ Records must be maintained in this table even if the costing method for an item 
 	Maps: None
 
 
-* 	[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0 
+* 	[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0 
 	Cost of the stock per base units. 
 	Maps: None
 
@@ -86,9 +86,11 @@ Records must be maintained in this table even if the costing method for an item 
 		[intStorageLocationId] INT NULL,
 		[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblNewCost] NUMERIC(38, 20) NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,
+		[intTransactionDetailId] INT NULL,
 		[dtmCreated] DATETIME NULL, 
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[ysnStorage] BIT NOT NULL DEFAULT 0, 

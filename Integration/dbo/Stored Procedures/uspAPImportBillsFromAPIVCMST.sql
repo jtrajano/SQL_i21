@@ -12,6 +12,7 @@ BEGIN
 			@UserId INT,
 			@DateFrom DATETIME = NULL,
 			@DateTo DATETIME = NULL,
+			@creditCardOnly BIT = 0,
 			@totalImported INT OUTPUT
 		)
 		AS
@@ -149,6 +150,13 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
+					AND 1 = (CASE WHEN @creditCardOnly = 1 AND A.apivc_comment = ''CCD Reconciliation'' AND A.apivc_status_ind = ''U'' THEN 1
+								WHEN @creditCardOnly = 0 THEN 1	
+							ELSE 0 END)
+					AND NOT EXISTS(
+						SELECT 1 FROM tblAPapivcmst H
+						WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
+					)
 			) AS sourceData
 			ON  (1 = 0)
 			WHEN NOT MATCHED THEN
@@ -212,6 +220,13 @@ BEGIN
 				, sourceData.A4GLIdentity INTO #InsertedPostedBill;
 
 			SET @totalInsertedBill = (SELECT COUNT(*) FROM #InsertedPostedBill)
+
+			IF @totalInsertedBill <= 0 
+			BEGIN
+				ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
+				SET @totalImported = 0;
+				RETURN;
+			END
 	
 			--IMPORT BILL DETAILS FROM aphglmst
 			MERGE INTO tblAPBillDetail AS destination
@@ -265,6 +280,13 @@ BEGIN
 								ELSE 1 END)
 				AND C2.apivc_trans_type IN (''I'',''C'',''A'',''O'')
 				AND C2.apivc_orig_amt != 0
+				AND 1 = (CASE WHEN @creditCardOnly = 1 AND C2.apivc_comment = ''CCD Reconciliation'' AND C2.apivc_status_ind = ''U'' THEN 1 
+							WHEN @creditCardOnly = 0 THEN 1
+							ELSE 0 END)
+				AND NOT EXISTS(
+						SELECT 1 FROM tblAPapivcmst H
+						WHERE C2.apivc_ivc_no = H.apivc_ivc_no AND C2.apivc_vnd_no = H.apivc_vnd_no
+					)
 				ORDER BY C.aphgl_dist_no
 			) AS sourceData
 			ON (1 = 0)

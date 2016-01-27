@@ -33,13 +33,13 @@ RETURNS @returntable TABLE
 	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
 	[dblDebitForeign]           NUMERIC (18, 6)	NULL,
     [dblDebitReport]            NUMERIC (18, 6) NULL,
     [dblCreditForeign]          NUMERIC (18, 6) NULL,
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
-    [dblForeignRate]            NUMERIC (18, 6) NULL,
-	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
+    [dblForeignRate]            NUMERIC (18, 6) NULL
 )
 AS
 BEGIN
@@ -70,11 +70,11 @@ BEGIN
 		,[strJournalLineDescription]
 		,[intJournalLineNo]
 		,[ysnIsUnposted]
-		,[intConcurrencyId]
 		,[intUserId]
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
+		,[intConcurrencyId]
 		,[dblDebitForeign]           
 		,[dblDebitReport]            
 		,[dblCreditForeign]          
@@ -103,11 +103,11 @@ BEGIN
 		,[strJournalLineDescription]
 		,[intJournalLineNo]
 		,ysnIsUnposted = 1
-		,[intConcurrencyId]
 		,intUserId = @intUserId
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
+		,[intConcurrencyId]
 		,[dblDebitForeign]           
 		,[dblDebitReport]            
 		,[dblCreditForeign]          

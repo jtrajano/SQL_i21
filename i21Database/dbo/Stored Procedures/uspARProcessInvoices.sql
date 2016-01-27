@@ -271,7 +271,7 @@ BEGIN
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
-		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strDocumentNumber] ELSE NULL END)
+		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL([strDocumentNumber],[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
 		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
 		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
@@ -373,11 +373,12 @@ BEGIN
 	DECLARE @NewInvoiceId INT
 			,@Type NVARCHAR(200)
 	SET @Type = 'Standard'
-	--IF ISNULL(@SourceTransaction,'') = 'Provisional Invoice'
-	--	BEGIN
-	--		SET @Type = 'Provisional Invoice'
-	--	END
 	
+	IF ISNULL(@DistributionHeaderId, 0) > 0
+		BEGIN
+			SET @Type = 'Transport Delivery'
+		END
+
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
 			@EntityCustomerId				= @EntityCustomerId

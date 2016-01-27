@@ -138,7 +138,7 @@ BEGIN
 		--VALIDATION FOR RECEIPT
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
-			'The item "' + C.strItemNo + '" on this transaction was already billed.',
+			'The item "' + C.strItemNo + '" on this transaction was already vouchered.',
 			'Bill',
 			A.strBillId,
 			A.intBillId
@@ -174,7 +174,7 @@ BEGIN
 		--VALIDATION FOR MISCELLANEOUS ITEM
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
-			'The item "' + D.strItemNo + '" on this transaction was already billed.',
+			'The item "' + D.strItemNo + '" on this transaction was already vouchered.',
 			'Bill',
 			A.strBillId,
 			A.intBillId
@@ -249,7 +249,7 @@ BEGIN
 		--ALREADY HAVE PAYMENTS
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
-			'You cannot unpost this bill. ' + A.strPaymentRecordNum + ' payment was already made on this bill. You must delete the payable first.',
+			'You cannot unpost this voucher. ' + A.strPaymentRecordNum + ' payment was already made on this voucher. You must delete the payable first.',
 			'Bill',
 			C.strBillId,
 			C.intBillId

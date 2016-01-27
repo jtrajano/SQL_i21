@@ -166,8 +166,6 @@
 
 
 
-
-
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillsFromAPTRXMST.sql"

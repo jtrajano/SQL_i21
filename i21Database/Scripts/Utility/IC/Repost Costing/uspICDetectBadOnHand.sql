@@ -1,4 +1,5 @@
-﻿-- USE i21Demo01
+
+﻿--USE irely98
 
 IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspICDetectBadOnHand' AND type = 'P')
 	DROP PROCEDURE [dbo].[uspICDetectBadOnHand]

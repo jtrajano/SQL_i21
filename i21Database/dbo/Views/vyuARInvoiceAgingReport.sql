@@ -8,6 +8,7 @@ SELECT A.strInvoiceNumber
 	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , dblTotalAR			= SUM(B.dblTotalDue)
 	 , dblFuture			= 0.000000
+	 , dbl0Days				= SUM(B.dbl0Days)
 	 , dbl10Days			= SUM(B.dbl10Days)
 	 , dbl30Days			= SUM(B.dbl30Days)
 	 , dbl60Days			= SUM(B.dbl60Days)

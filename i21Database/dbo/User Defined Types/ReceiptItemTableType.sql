@@ -28,7 +28,7 @@ CREATE TYPE [dbo].[ReceiptItemTableType] AS TABLE
     ,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0				-- The quantity received in terms of intItemUOMId. Default to zero. Required.
 	,[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 1			-- The unit qty in terms intItemUOMId. Required.
 	,[dblNetWeight] NUMERIC(18, 6) NULL						-- The net weight of an item. Optional.
-    ,[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0			-- The cost of the item received in terms of intItemUOMId. 
+    ,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0			-- The cost of the item received in terms of intItemUOMId. 
 	,[intContainerId] INT NULL								-- If item has a container id or not. 
 	,[intOwnershipType] INT NOT NULL DEFAULT ((1))			-- Ownership type of the item. Required. Default to 1 (Own)
 	,[intOrderId] INT NULL									-- Link id to PO or Contract. Ex: if Receipt type is "Purchase Order", this field links to the PO table. Optional.

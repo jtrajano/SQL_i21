@@ -3,7 +3,7 @@
 GO
 
 --DO NOT CHANGE THE ID NAME COMBINATION AS OTHER MODULES ARE USING ID AS REFERENCE
---TOTAL COUNT IS 56 AS OF 10-22-2015
+--TOTAL COUNT IS 58 AS OF 01/27/2016
 BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 	BEGIN TRANSACTION
 	DECLARE @tblSegment TABLE(intAccountSegmentId INT, strAccountCategory VARCHAR(100))
@@ -101,8 +101,10 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 53,name = 'Vendor Prepayments'UNION ALL 
 			SELECT id = 54,name = 'Customer Prepayments'UNION ALL 
 			SELECT id = 55,name = 'Other Charge Expense'UNION ALL 
-			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
-			SELECT id = 57,name = 'Maintenance Sales' 
+			SELECT id = 56,name = 'Other Charge Income'UNION ALL 
+			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
+			SELECT id = 58,name = 'Deferred Revenue' 
+
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
 
@@ -164,7 +166,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
 		--REMOVE EXCESS
-		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 57
+		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 58
 	END
 	COMMIT TRANSACTION
 END TRY
@@ -219,8 +221,7 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Inventory'
-	END
-	
+	END	
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Sales Account')
 	BEGIN
@@ -295,8 +296,7 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Maintenance Sales'
-	END
-	
+	END	
 END
 GO
 	PRINT 'Finished generating default account categories'

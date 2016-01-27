@@ -1,4 +1,5 @@
-﻿-- USE i21Demo01 
+
+﻿-- use irely98 
 
 IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspICRepostCosting' AND type = 'P')
 	DROP PROCEDURE [dbo].[uspICRepostCosting]
@@ -709,15 +710,3 @@ BEGIN
 				AND intItemLocationId = @intItemLocationId
 	END 
 END
-
--------------------------------------------
----- Generate the g/l entries
--------------------------------------------
---IF @strAccountToCounterInventory IS NOT NULL 
---BEGIN 
---	EXEC dbo.uspICCreateGLEntries 
---		@strBatchId
---		,@strAccountToCounterInventory
---		,@intUserId
---		,@strGLDescription
---END 

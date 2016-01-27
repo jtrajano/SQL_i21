@@ -34,6 +34,7 @@ FROM
 		, dblInvoiceTotal = ISNULL(I.dblInvoiceTotal,0)
 		, dblAmountDue = ISNULL(I.dblAmountDue,0)
 		, dblDiscount = 0    
+		, dblInterest = 0    
 		, I.strTransactionType    
 		, I.intEntityCustomerId
 		, I.dtmDueDate    
@@ -69,6 +70,7 @@ SELECT I.dtmPostDate
 		, dblInvoiceTotal = dblInvoiceTotal* -1
 		, dblAmountDue = 0    
 		, dblDiscount = 0
+		, dblInterest = 0
 		, I.strTransactionType	  
 		, I.intEntityCustomerId
 		, I.dtmDueDate
@@ -104,6 +106,7 @@ SELECT I.dtmPostDate
 		, dblInvoiceTotal = 0    
 		, I.dblAmountDue     
 		, ISNULL(I.dblDiscount, 0) AS dblDiscount    
+		, ISNULL(I.dblInterest, 0) AS dblInterest    
 		, ISNULL(I.strTransactionType, 'Invoice')    
 		, ISNULL(I.intEntityCustomerId, '')    
 		, ISNULL(I.dtmDueDate, GETDATE())    
@@ -139,8 +142,9 @@ LEFT JOIN
 	, intInvoiceId  
 	, dblInvoiceTotal
 	, dblAmountPaid
-	, (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) AS dblTotalDue
+	, (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) + (dblInterest) AS dblTotalDue
 	, dblDiscount
+	, dblInterest
 	, dblAvailableCredit
 	, CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <= 0
 			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid), 0) ELSE 0 END dbl0Days
@@ -160,6 +164,7 @@ FROM
 		, dblInvoiceTotal = ISNULL(dblInvoiceTotal,0)
 		, dblAmountDue = 0    
 		, dblDiscount = 0    
+		, dblInterest = 0    
 		, I.dtmDueDate    
 		, I.intEntityCustomerId
 		, dblAvailableCredit = 0
@@ -180,6 +185,7 @@ SELECT I.intInvoiceId
 		, dblInvoiceTotal = dblInvoiceTotal* -1
 		, dblAmountDue = 0    
 		, dblDiscount = 0    
+		, dblInterest = 0    
 		, I.dtmDueDate    
 		, I.intEntityCustomerId
 		, dblAvailableCredit = ISNULL(I.dblAmountDue,0)
@@ -200,6 +206,7 @@ SELECT I.intInvoiceId
 	, dblInvoiceTotal = 0
 	, dblAmountDue = 0
 	, ISNULL(I.dblDiscount, 0) AS dblDiscount
+	, ISNULL(I.dblInterest, 0) AS dblInterest
 	, ISNULL(I.dtmDueDate, GETDATE())
 	, ISNULL(I.intEntityCustomerId, '')
 	, dblAvailableCredit = 0

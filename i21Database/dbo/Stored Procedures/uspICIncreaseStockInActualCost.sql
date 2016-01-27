@@ -13,12 +13,13 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInActualCost
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(38, 20)
 	,@intEntityUserSecurityId AS INT
 	,@FullQty AS NUMERIC(18,6) 
 	,@TotalQtyOffset AS NUMERIC(18,6)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT 
+	,@intTransactionDetailId AS INT 
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
 	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
@@ -104,6 +105,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[dblCost]		
 		,[strTransactionId]
 		,[intTransactionId]
+		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
@@ -119,6 +121,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@dblCost		
 		,@strTransactionId
 		,@intTransactionId
+		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1	
@@ -144,6 +147,7 @@ BEGIN
 		,[dblCost]		
 		,[strTransactionId]
 		,[intTransactionId]
+		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
@@ -159,6 +163,7 @@ BEGIN
 		,@dblCost
 		,@strTransactionId
 		,@intTransactionId
+		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1

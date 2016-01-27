@@ -6,7 +6,7 @@
     [intSubLocationId] INT NULL, 
     [dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intItemUOMId] INT NULL, 
-    [dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICBuildAssemblyDetail] PRIMARY KEY ([intBuildAssemblyDetailId]), 

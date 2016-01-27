@@ -4,12 +4,14 @@
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0			
 	,@ItemDescription				NVARCHAR(500)	= NULL
+	,@ItemDocumentNumber			NVARCHAR(100)	= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
 	,@ItemSalesOrderDetailId		INT				= NULL	
-	,@ItemTaxGroupId				INT				= NULL	
+	,@ItemTaxGroupId				INT				= NULL
+	,@EntitySalespersonId			INT				= NULL	
 AS
 
 BEGIN
@@ -69,6 +71,7 @@ BEGIN TRY
 		([intInvoiceId]
 		,[intItemId]
 		,[strItemDescription]
+		,[strDocumentNumber]
 		,[intItemUOMId]
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
@@ -108,11 +111,13 @@ BEGIN TRY
 		,[intPerformerId]
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
+		,[intEntitySalespersonId]
 		,[intConcurrencyId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= NULL 
 		,[strItemDescription]				= ISNULL(@ItemDescription, '')
+		,[strDocumentNumber]				= @ItemDocumentNumber
 		,[intItemUOMId]						= NULL
 		,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 		,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
@@ -152,6 +157,7 @@ BEGIN TRY
 		,[intPerformerId]					= NULL
 		,[ysnLeaseBilling]					= NULL
 		,[ysnVirtualMeterReading]			= NULL
+		,[intEntitySalespersonId]			= @EntitySalespersonId
 		,[intConcurrencyId]					= 0
 			
 END TRY
