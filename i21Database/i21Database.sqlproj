@@ -3169,6 +3169,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099INTTwoPart.sql" />
     <Build Include="dbo\Views\vyuWHTruckOrders.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlySUI.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckDeduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
