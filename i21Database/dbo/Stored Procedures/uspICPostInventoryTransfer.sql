@@ -280,6 +280,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,strActualCostId
 		) 
 		SELECT 	Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
