@@ -130,6 +130,7 @@ BEGIN
 		,strBillToState
 		,strBillToZipCode
 		,strBillToCountry
+		,strBOLNumber
 		,intConcurrencyId
 		,intEntityId)
 	SELECT 
@@ -176,6 +177,7 @@ BEGIN
 		,strBillToState
 		,strBillToZipCode
 		,strBillToCountry
+		,strBOLNumber
 		,0
 		,@EntityId
 	FROM 
