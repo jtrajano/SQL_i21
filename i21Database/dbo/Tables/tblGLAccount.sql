@@ -4,6 +4,7 @@
     [strDescription]    NVARCHAR (255)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strNote]           NTEXT           COLLATE Latin1_General_CI_AS NULL,
     [intAccountGroupId] INT             NULL,
+    [dblOpeningBalance] NUMERIC (18, 6) NULL,
     [ysnIsUsed]         BIT             CONSTRAINT [DF_tblGLAccount_ysnIsUsed] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
     [intAccountUnitId]  INT             NULL,

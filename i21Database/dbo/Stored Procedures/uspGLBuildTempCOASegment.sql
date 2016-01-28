@@ -119,7 +119,7 @@ BEGIN
 	BEGIN
 		EXEC ('CREATE VIEW [dbo].[vyuGLAccountView]
 		AS
-		SELECT     C.*, A.strDescription, B.strAccountGroup, B.strAccountType, A.intAccountGroupId, A.ysnIsUsed, A.ysnActive,  A.intAccountUnitId
+		SELECT     C.*, A.strDescription, B.strAccountGroup, B.strAccountType, A.intAccountGroupId, A.ysnIsUsed, A.ysnActive, A.dblOpeningBalance, A.intAccountUnitId
 		FROM		dbo.tblGLAccount AS A 
 					INNER JOIN dbo.tblGLAccountGroup AS B ON B.intAccountGroupId = A.intAccountGroupId
 					LEFT JOIN dbo.tblGLTempCOASegment AS C ON C.intAccountId = A.intAccountId')
