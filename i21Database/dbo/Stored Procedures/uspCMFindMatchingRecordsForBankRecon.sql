@@ -162,10 +162,10 @@ BEGIN
 		SELECT  @ysnMatchFound = 1
 		FROM	#tmp_list_of_transactions A
 		WHERE	A.intTransactionId = @intTransactionId
-				AND 1 = CASE	WHEN (@strPayee IS NOT NULL) THEN 
+				AND 1 = CASE	WHEN (@strPayee <> '') THEN 
 									CASE WHEN (LTRIM(RTRIM(ISNULL(A.strPayee, ''))) = LTRIM(RTRIM(ISNULL(@strPayee, '')))) THEN 1 ELSE 0 END
 								ELSE 1 END
-				AND 1 = CASE WHEN(@strReferenceNumber IS NOT NULL OR @strReferenceNumber <> '') THEN
+				AND 1 = CASE WHEN(@strReferenceNumber <> '') THEN
 									CASE WHEN (LTRIM(RTRIM(ISNULL(SUBSTRING(A.strReferenceNo, PATINDEX('%[^0 ]%', A.strReferenceNo + ' '), LEN(A.strReferenceNo)), ''))) = LTRIM(RTRIM(ISNULL(SUBSTRING(@strReferenceNumber, PATINDEX('%[^0 ]%', @strReferenceNumber + ' '), LEN(@strReferenceNumber)), '')))) THEN 1 ELSE 0 END
 								ELSE 1 END
 				AND 1 =	CASE	WHEN A.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT) THEN
