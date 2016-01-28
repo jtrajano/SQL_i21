@@ -256,6 +256,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             }
                                                         ],
                                                         flex: 1,
+                                                        enableDrillDown: true,
                                                         itemId: 'cboVendor',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Vendor',
@@ -323,6 +324,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             }
                                                         ],
+                                                        enableDrillDown: true,
                                                         flex: 1,
                                                         itemId: 'cboLocation',
                                                         margin: '0 5 0 0',
@@ -364,6 +366,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             }
                                                         ],
+                                                        enableDrillDown: true,
                                                         itemId: 'cboCurrency',
                                                         margin: '0 5 0 0',
                                                         width: 60,
@@ -625,6 +628,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        enableDrillDown: true,
                                                                         itemId: 'cboTaxGroup',
                                                                         fieldLabel: 'Tax Group',
                                                                         labelWidth: 95,
@@ -670,7 +674,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'advancefiltergrid',
+                                                                        xtype: 'frmadvancesearchgrid',
                                                                         flex: 1,
                                                                         reference: 'grdInventoryReceipt',
                                                                         itemId: 'grdInventoryReceipt',
@@ -692,13 +696,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         itemId: 'btnInsertInventoryReceipt',
                                                                                         iconCls: 'small-insert',
                                                                                         text: 'Insert'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnViewItem',
-                                                                                        iconCls: 'small-open',
-                                                                                        text: 'View Item'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
@@ -960,6 +957,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownClick: 'onItemHeaderClick',
+                                                                                headerDrillDownText: 'Open Item',
                                                                                 itemId: 'colItemNo',
                                                                                 width: 100,
                                                                                 dataIndex: 'strItemNo',
@@ -1086,6 +1085,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownText: 'Open Item',
+                                                                                headerDrillDownClick: 'onItemHeaderClick',
                                                                                 itemId: 'colDescription',
                                                                                 width: 175,
                                                                                 dataIndex: 'strDescription',
@@ -2106,7 +2107,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'advancefiltergrid',
+                                                        xtype: 'frmadvancesearchgrid',
                                                         flex: 1,
                                                         reference: 'grdCharges',
                                                         itemId: 'grdCharges',
@@ -2178,6 +2179,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                headerDrillDownText: 'Open Item',
+                                                                headerDrillDownClick: 'onItemHeaderClick',
                                                                 itemId: 'colOtherCharge',
                                                                 text: 'Other Charges',
                                                                 flex: 1.2,

@@ -509,6 +509,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strName",
+                                                "enableDrillDown": true,
                                                 "fieldLabel": "Vendor",
                                                 "itemId": "cboVendor",
                                                 "labelAlign": "top",
@@ -522,13 +523,19 @@
                                             },
                                             "name": "MyComboBox3",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "8a65ead9-b3b7-4c7a-b924-31963d6d349f",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -627,6 +634,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strLocationName",
+                                                "enableDrillDown": true,
                                                 "fieldLabel": "Location",
                                                 "itemId": "cboLocation",
                                                 "labelAlign": "top",
@@ -641,13 +649,19 @@
                                             },
                                             "name": "MyComboBox2",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "038a7242-5956-4d4d-b83d-b71a956cdfb1",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -705,6 +719,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strCurrency",
+                                                "enableDrillDown": true,
                                                 "fieldLabel": "Currency",
                                                 "itemId": "cboCurrency",
                                                 "labelAlign": "top",
@@ -717,13 +732,19 @@
                                             },
                                             "name": "MyComboBox9",
                                             "configAlternates": {
-                                                "columns": "array"
+                                                "columns": "array",
+                                                "enableDrillDown": "boolean"
                                             },
                                             "designerId": "b0b229da-0b8f-4aec-89bb-bc3143ac30b1",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "enableDrillDown",
                                                     "type": "string"
                                                 }
                                             ]
@@ -1297,6 +1318,7 @@
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strTaxGroup",
+                                                                "enableDrillDown": true,
                                                                 "fieldLabel": "Tax Group",
                                                                 "hideTrigger": null,
                                                                 "itemId": "cboTaxGroup",
@@ -1310,7 +1332,8 @@
                                                             "name": "MyComboBox5",
                                                             "configAlternates": {
                                                                 "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
+                                                                "columns": "array",
+                                                                "enableDrillDown": "boolean"
                                                             },
                                                             "designerId": "c235bca6-dcd2-4536-a088-058610a12c0b",
                                                             "customConfigs": [
@@ -1322,6 +1345,11 @@
                                                                 {
                                                                     "group": "(Custom Properties)",
                                                                     "name": "columns",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "enableDrillDown",
                                                                     "type": "string"
                                                                 }
                                                             ]
@@ -1422,7 +1450,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "columnLines": true,
-                                                                "designer|createAlias": "advancefiltergrid",
+                                                                "designer|createAlias": "frmadvancesearchgrid",
                                                                 "itemId": "grdInventoryReceipt",
                                                                 "layout|flex": 1,
                                                                 "margin": "7 0 0 0",
@@ -1464,24 +1492,6 @@
                                                                             },
                                                                             "name": "MyButton7",
                                                                             "designerId": "6f0e12ec-eeb1-4083-847e-e3305baa0d63"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-open",
-                                                                                "itemId": "btnViewItem",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "View Item"
-                                                                            },
-                                                                            "name": "MyButton9",
-                                                                            "designerId": "477a1fe3-31aa-4a0f-a6ff-b5286c6357a2"
                                                                         },
                                                                         {
                                                                             "type": "Ext.button.Button",
@@ -1873,12 +1883,26 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "dataIndex": "strItemNo",
+                                                                        "headerDrillDownClick": "onItemHeaderClick",
+                                                                        "headerDrillDownText": "Open Item",
                                                                         "itemId": "colItemNo",
                                                                         "text": "Item No.",
                                                                         "width": 100
                                                                     },
                                                                     "name": "MyColumn6",
                                                                     "designerId": "27727a09-1f38-41a7-8292-e6e6df404101",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownClick",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownText",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ],
                                                                     "cn": [
                                                                         {
                                                                             "type": "Ext.form.field.ComboBox",
@@ -2032,12 +2056,26 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "dataIndex": "strDescription",
+                                                                        "headerDrillDownClick": "onItemHeaderClick",
+                                                                        "headerDrillDownText": "Open Item",
                                                                         "itemId": "colDescription",
                                                                         "text": "Description",
                                                                         "width": 175
                                                                     },
                                                                     "name": "MyColumn",
-                                                                    "designerId": "98fb0e70-0811-4919-bb71-b6def7e9a918"
+                                                                    "designerId": "98fb0e70-0811-4919-bb71-b6def7e9a918",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownText",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownClick",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Check",
@@ -4395,7 +4433,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "columnLines": true,
-                                                "designer|createAlias": "advancefiltergrid",
+                                                "designer|createAlias": "frmadvancesearchgrid",
                                                 "itemId": "grdCharges",
                                                 "layout|flex": 1,
                                                 "reference": "grdCharges",
@@ -4556,11 +4594,25 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1.2,
+                                                        "headerDrillDownClick": "onItemHeaderClick",
+                                                        "headerDrillDownText": "Open Item",
                                                         "itemId": "colOtherCharge",
                                                         "text": "Other Charges"
                                                     },
                                                     "name": "MyColumn5",
                                                     "designerId": "6a241270-7605-401f-9c42-aa318999ab90",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "headerDrillDownText",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "headerDrillDownClick",
+                                                            "type": "string"
+                                                        }
+                                                    ],
                                                     "cn": [
                                                         {
                                                             "type": "Ext.form.field.ComboBox",

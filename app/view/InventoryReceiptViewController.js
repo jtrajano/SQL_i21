@@ -1705,6 +1705,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         i21.ModuleMgr.Inventory.showScreen(itemId, 'ItemId');
     },
 
+    onItemHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        if (grid.itemId === 'grdInventoryReceipt') {
+            i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intChargeId');
+        }
+
+
+    },
+
     onViewTaxDetailsClick: function (ReceiptItemId) {
         var win = this.getView();
         var screenName = 'Inventory.view.InventoryReceiptTaxes';
