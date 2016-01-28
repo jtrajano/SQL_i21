@@ -243,6 +243,76 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             record.set('intReceiveUOMId', me.defaultUOM.get('intItemUOMId'));
         }
         action(record);
+    },
+
+    onVendorDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', combo.getValue());
+        }
+    },
+
+    onLocationDrilldown: function(combo) {
+        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'LocationName');
+    },
+
+    onStorageLocationDrilldown: function(combo) {
+        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'StorageLocation');
+    },
+
+    onCountGroupDrilldown: function(combo) {
+        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'CountGroup');
+    },
+
+    onSubCategoryDrilldown: function(combo) {
+        iRely.Functions.openScreen('Store.view.SubCategory');
+//        i21.ModuleMgr.Inventory.showScreen(null, 'SubCategory');
+    },
+
+    onProductCodeDrilldown: function(combo) {
+        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'ProductCode');
+    },
+
+    onPromotionalDrilldown: function(combo) {
+        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'PromotionalItem');
+    },
+
+    onDepositPLUDrilldown: function(combo) {
+        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'DepositPLU');
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboLocation": {
+                drilldown: this.onLocationDrilldown
+            },
+            "#cboDefaultVendor": {
+                drilldown: this.onVendorDrilldown
+            },
+            "#cboStorageLocation": {
+                drilldown: this.onStorageLocationDrilldown
+            },
+            "#cboFamily": {
+                drilldown: this.onSubCategoryDrilldown
+            },
+            "#cboClass": {
+                drilldown: this.onSubCategoryDrilldown
+            },
+            "#cboProductCode": {
+                drilldown: this.onProductCodeDrilldown
+            },
+            "#cboMixMatchCode": {
+                drilldown: this.onPromotionalDrilldown
+            },
+            "#cboDepositPLU": {
+                drilldown: this.onDepositPLUDrilldown
+            },
+            "#cboInventoryGroupField": {
+                drilldown: this.onCountGroupDrilldown
+            }
+        });
     }
 
 });

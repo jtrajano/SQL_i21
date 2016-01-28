@@ -178,6 +178,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         }
                                                                     ],
                                                                     flex: 1.4,
+                                                                    enableDrillDown: true,
                                                                     itemId: 'cboLocation',
                                                                     fieldLabel: 'Location',
                                                                     labelWidth: 105,
@@ -206,6 +207,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                         }
                                                                     ],
                                                                     flex: 1,
+                                                                    enableDrillDown: true,
                                                                     itemId: 'cboDefaultVendor',
                                                                     margin: '0 5',
                                                                     fieldLabel: 'Vendor',
@@ -346,6 +348,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                             flex: 1
                                                                         }
                                                                     ],
+                                                                    enableDrillDown: true,
                                                                     flex: 1,
                                                                     itemId: 'cboStorageLocation',
                                                                     margin: '0 0 0 5',
@@ -452,6 +455,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            enableDrillDown: true,
                                                                             itemId: 'cboFamily',
                                                                             fieldLabel: 'Family',
                                                                             labelWidth: 105,
@@ -479,6 +483,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            enableDrillDown: true,
                                                                             itemId: 'cboClass',
                                                                             fieldLabel: 'Class',
                                                                             labelWidth: 105,
@@ -507,6 +512,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            enableDrillDown: true,
                                                                             itemId: 'cboProductCode',
                                                                             fieldLabel: 'Product Code',
                                                                             labelWidth: 105,
@@ -600,6 +606,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            enableDrillDown: true,
                                                                             itemId: 'cboMixMatchCode',
                                                                             fieldLabel: 'Promotion Item',
                                                                             labelWidth: 105,
@@ -965,6 +972,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            enableDrillDown: true,
                                                             itemId: 'cboInventoryGroupField',
                                                             fieldLabel: 'Inventory Count Group',
                                                             labelWidth: 140,

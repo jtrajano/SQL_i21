@@ -348,6 +348,27 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'Inventory.view.LotStatus';
                 columnName = 'strSecondaryName';
                 break;
+            case 'CountGroup':
+                screenName = 'Inventory.view.InventoryCountGroup';
+                columnName = 'strCountGroup';
+                break;
+
+            case 'SubCategory':
+                screenName = 'Store.view.SubCategory';
+                columnName = 'strSubcategoryType';
+                break;
+            case 'ProductCode':
+                screenName = 'Store.view.Store';
+                columnName = 'strRegProdCode';
+                break;
+            case 'PromotionalItem':
+                screenName = 'Store.view.PromotionItemList';
+                columnName = 'strPromoItemListId';
+                break;
+            case 'DepositPLU':
+                screenName = 'Store.view.SubCategory';
+                columnName = 'strSubcategoryType';
+                break;
         }
 
         var filter = [];
