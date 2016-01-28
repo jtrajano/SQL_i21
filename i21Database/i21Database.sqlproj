@@ -3170,6 +3170,7 @@
     <Build Include="dbo\Views\vyuWHTruckOrders.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlySUI.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1096.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostReturnCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostReturnAverageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICReturnStockInFIFO.sql" />
