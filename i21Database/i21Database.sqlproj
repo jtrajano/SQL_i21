@@ -3170,6 +3170,7 @@
     <Build Include="dbo\Views\vyuWHTruckOrders.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlySUI.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrual.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

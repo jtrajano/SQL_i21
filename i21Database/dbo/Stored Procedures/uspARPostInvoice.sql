@@ -60,12 +60,15 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 
 
-DECLARE @UserEntityID		INT
-		,@DiscountAccountId INT
-		,@ServiceChargesAccountId    INT
+DECLARE @UserEntityID				INT
+		,@DiscountAccountId			INT
+		,@ServiceChargesAccountId	INT
+		,@DeferredRevenueAccountId	INT
+
 SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)
+SET @DeferredRevenueAccountId = (SELECT TOP 1 intDeferredRevenueAccountId FROM tblARCompanyPreference WHERE intDeferredRevenueAccountId IS NOT NULL AND intDeferredRevenueAccountId <> 0)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 
@@ -427,7 +430,7 @@ SET @batchIdUsed = @batchId
 				--Service Charge Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The Service Charge account in the Company Preferences was not set.',
+					'The Service Charge account in the Company Configuration was not set.',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -445,6 +448,46 @@ SET @batchIdUsed = @batchId
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
 					AND D.dblTotal <> @ZeroDecimal
+
+				--Service Deferred Revenue Account
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Deferred Revenue account in the Company Configuration was not set.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				WHERE
+					ISNULL(A.intPeriodsToAccrue,0) > 1
+					AND (@DeferredRevenueAccountId IS NULL OR @DeferredRevenueAccountId = 0)
+
+				--Invoice for accrual with Inventory Items				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'Invoice : ' + A.strInvoiceNumber + ' is for accrual and must not include an inventory item : ' + I.strItemNo + '.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId	 				
+				WHERE
+					ISNULL(A.intPeriodsToAccrue,0) > 1
+					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 								
 				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -504,7 +547,7 @@ SET @batchIdUsed = @batchId
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					ISNULL(ISNULL(Acct.intMaintenanceSalesAccountId, Acct.intGeneralAccountId), 0) = 0
-					AND I.strType = 'Software'					
+					AND I.strType = 'Software'				
 					
 				--Other Charge Income Account	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -837,6 +880,7 @@ IF @post = 1
 				tblARInvoice Header
 					ON Detail.intInvoiceId = Header.intInvoiceId
 					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
+					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
 			INNER JOIN
 				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
@@ -1027,10 +1071,12 @@ IF @post = 1
 				tblARInvoice A
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId 			
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
+			WHERE
+				ISNULL(A.intPeriodsToAccrue,0) <= 1
 					
 			--CREDIT MISC
 			UNION ALL 
@@ -1075,7 +1121,7 @@ IF @post = 1
 				tblARInvoice A 
 			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
+					ON A.intInvoiceId = B.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
@@ -1091,6 +1137,7 @@ IF @post = 1
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
 				AND A.strType <> 'Debit Memo'
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT SALES
 			UNION ALL 
@@ -1124,7 +1171,7 @@ IF @post = 1
 				tblARInvoice A 
 			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
+					ON A.intInvoiceId = B.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
@@ -1147,6 +1194,7 @@ IF @post = 1
 				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				AND A.strType <> 'Debit Memo'
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
@@ -1180,7 +1228,7 @@ IF @post = 1
 				tblARInvoice A 
 			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
+					ON A.intInvoiceId = B.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
@@ -1197,6 +1245,7 @@ IF @post = 1
 			WHERE
 				B.dblTotal <> @ZeroDecimal  
 				AND A.strType = 'Debit Memo'
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT Shipping
 			UNION ALL 
@@ -1368,7 +1417,8 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
 			tblICItemUOM ItemUOM 
 				ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
@@ -1434,9 +1484,10 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON D.intItemId = IST.intItemId 
@@ -1500,9 +1551,10 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON D.intItemId = IST.intItemId 
@@ -1567,9 +1619,10 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON D.intItemId = IST.intItemId 
@@ -1600,6 +1653,36 @@ IF @post = 1
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				AND A.strType <> 'Debit Memo'
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH
+
+		-- Accruals
+		BEGIN TRY 
+			DECLARE @Accruals AS Id
+			INSERT INTO @Accruals(intId)
+			SELECT I.intInvoiceId 
+			FROM 
+				tblARInvoice I 
+			INNER JOIN 
+				@PostInvoiceData IP 
+					ON I.intInvoiceId = IP.intInvoiceId 
+			WHERE ISNULL(I.intPeriodsToAccrue,0) > 1
+
+			INSERT INTO @GLEntries 
+			EXEC	dbo.uspARGenerateEntriesForAccrual  
+						 @Invoices					= @Accruals
+						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
+						,@ServiceChargesAccountId	= @ServiceChargesAccountId
+						,@BatchId					= @batchId
+						,@Code						= @CODE
+						,@UserId					= @userId
+						,@UserEntityId				= @UserEntityID
+						,@ScreenName				= @SCREEN_NAME
+						,@ModuleName				= @MODULE_NAME
+
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
