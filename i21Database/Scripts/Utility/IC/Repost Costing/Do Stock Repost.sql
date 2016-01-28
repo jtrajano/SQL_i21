@@ -322,7 +322,7 @@ BEGIN
 						,intSubLocationId
 						,intStorageLocationId
 						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction
+				FROM	#tmpICInventoryTransaction 
 				WHERE	strBatchId = @strBatchId
 						AND dblQty < 0 
 					
@@ -555,53 +555,53 @@ BEGIN
 		END 
 
 		-- Monitor the posted status of the transaction 
-		BEGIN 
-			IF ISNULL(@ysnPost, 1) = 1
-			BEGIN 
-				PRINT 'Inserting ' + @strTransactionId + ' on #tmpICPostedTransactions'
+		--BEGIN 
+		--	IF ISNULL(@ysnPost, 1) = 1
+		--	BEGIN 
+		--		PRINT 'Inserting ' + @strTransactionId + ' on #tmpICPostedTransactions'
 
-				INSERT INTO #tmpICPostedTransactions (
-					strTransactionId 
-				)
-				SELECT	@strTransactionId
-			END 
+		--		INSERT INTO #tmpICPostedTransactions (
+		--			strTransactionId 
+		--		)
+		--		SELECT	@strTransactionId
+		--	END 
 
-			IF ISNULL(@ysnPost, 1) = 0 
-			BEGIN 
-				PRINT 'Removing ' + @strTransactionId + ' on #tmpICPostedTransactions'
+		--	IF ISNULL(@ysnPost, 1) = 0 
+		--	BEGIN 
+		--		PRINT 'Removing ' + @strTransactionId + ' on #tmpICPostedTransactions'
 
-				DELETE	FROM #tmpICPostedTransactions 
-				WHERE	strTransactionId = @strTransactionId
-			END 
-		END 	
+		--		DELETE	FROM #tmpICPostedTransactions 
+		--		WHERE	strTransactionId = @strTransactionId
+		--	END 
+		--END 	
 
 		-- Detect discrepancies on the on-hand. 
-		BEGIN 			
-			IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
-			BEGIN 
-				SELECT TOP 1 
-						@intItemId = intItemId 
-				FROM	@ItemsToPost
+		--BEGIN 			
+		--	IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
+		--	BEGIN 
+		--		SELECT TOP 1 
+		--				@intItemId = intItemId 
+		--		FROM	@ItemsToPost
 				
-				SET @intReturnId = NULL 
-				EXEC @intReturnId = dbo.uspICDetectBadOnHand 
-						@intItemId
-						,@strTransactionId
-						,@strBatchId
+		--		SET @intReturnId = NULL 
+		--		EXEC @intReturnId = dbo.uspICDetectBadOnHand 
+		--				@intItemId
+		--				,@strTransactionId
+		--				,@strBatchId
 
-				IF @intReturnId <> 0 
-				BEGIN 
-					PRINT 'Stock Discrepancies detected!'
-					PRINT '@intItemId, @strTransactionId, @strBatchId'
-					PRINT @intItemId 
-					PRINT @strTransactionId
-					PRINT @strBatchId
-				END
+		--		IF @intReturnId <> 0 
+		--		BEGIN 
+		--			PRINT 'Stock Discrepancies detected!'
+		--			PRINT '@intItemId, @strTransactionId, @strBatchId'
+		--			PRINT @intItemId 
+		--			PRINT @strTransactionId
+		--			PRINT @strBatchId
+		--		END
 
-				DELETE FROM @ItemsToPost
-				WHERE @intItemId = intItemId 
-			END 			
-		END 
+		--		DELETE FROM @ItemsToPost
+		--		WHERE @intItemId = intItemId 
+		--	END 			
+		--END 
 
 		DELETE FROM #tmpICInventoryTransaction
 		WHERE strBatchId = @strBatchId
