@@ -417,7 +417,7 @@ SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,IE.[intItemId]												--[intItemId]
 	,IC.[strDescription]										--[strItemDescription] 
-	,@strSourceId												--[strDocumentNumber]
+	,IE.strSourceId												--[strDocumentNumber]
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]		
@@ -468,6 +468,7 @@ INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
 	,[intItemId]
 	,[strItemDescription]
+	,[strDocumentNumber]
 	,[intItemUOMId]
 	,[dblQtyOrdered]
 	,[dblQtyShipped]
@@ -485,6 +486,7 @@ SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,@intFreightItemId										    --[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
+	,IE.strSourceId
 	,(SELECT	TOP 1 IU.intItemUOMId											
 						FROM dbo.tblICItemUOM IU 
 						WHERE	IU.intItemId = @intFreightItemId and IU.ysnStockUnit = 1)                                            --[intItemUOMId]
