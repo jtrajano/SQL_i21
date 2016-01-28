@@ -628,6 +628,12 @@ Ext.define('Inventory.view.CategoryViewController', {
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('i21.view.TaxClass', grid, 'intTaxClassId');
     },
 
+    onUOMHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.InventoryUOM', grid, 'intUnitMeasureId');
+    },
+
     init: function(application) {
         this.control({
             "#cboDetailUnitMeasure": {

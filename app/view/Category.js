@@ -473,7 +473,7 @@ Ext.define('Inventory.view.Category', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'advancefiltergrid',
+                                                        xtype: 'frmadvancesearchgrid',
                                                         flex: 1,
                                                         itemId: 'grdUnitOfMeasure',
                                                         header: false,
@@ -507,6 +507,8 @@ Ext.define('Inventory.view.Category', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                headerDrillDownClick: 'onUOMHeaderClick',
+                                                                headerDrillDownText: 'Open Inventory UOM',
                                                                 itemId: 'colDetailUnitMeasure',
                                                                 minWidth: 95,
                                                                 dataIndex: 'intUnitMeasureId',

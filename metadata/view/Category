@@ -945,7 +945,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "columnLines": true,
-                                                "designer|createAlias": "advancefiltergrid",
+                                                "designer|createAlias": "frmadvancesearchgrid",
                                                 "forceFit": true,
                                                 "header": false,
                                                 "itemId": "grdUnitOfMeasure",
@@ -1016,12 +1016,26 @@
                                                     "userConfig": {
                                                         "dataIndex": "intUnitMeasureId",
                                                         "flex": 2,
+                                                        "headerDrillDownClick": "onUOMHeaderClick",
+                                                        "headerDrillDownText": "Open Inventory UOM",
                                                         "itemId": "colDetailUnitMeasure",
                                                         "minWidth": 95,
                                                         "text": "Unit"
                                                     },
                                                     "name": "MyColumn",
                                                     "designerId": "4b375ae1-1982-4c33-9026-6e9e64887e12",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "headerDrillDownClick",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "headerDrillDownText",
+                                                            "type": "string"
+                                                        }
+                                                    ],
                                                     "cn": [
                                                         {
                                                             "type": "Ext.form.field.ComboBox",
