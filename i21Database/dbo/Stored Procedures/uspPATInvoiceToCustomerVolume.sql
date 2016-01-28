@@ -27,18 +27,21 @@ BEGIN
 			RETURN;
 		END
 		
+		SET @intFiscalYear = (SELECT intFiscalYearId 
+										FROM tblGLFiscalYear 
+										WHERE (SELECT dtmDate 
+												FROM tblARInvoice 
+												WHERE intInvoiceId = @intInvoiceId) 
+										BETWEEN dtmDateFrom AND dtmDateTo)
+
 		SELECT AR.intEntityCustomerId,
-			   ARD.intItemId,
 			   IC.intPatronageCategoryId,
-			   PC.strUnitAmount,
-			   ARD.dblQtyOrdered,
-			   ARD.dblPrice,
-			   ICU.dblUnitQty,
 			   AR.ysnPosted,
-			   dblVolume = CASE WHEN PC.strUnitAmount = 'Amount' THEN (ARD.dblQtyOrdered * ARD.dblPrice) 
-						   ELSE (ARD.dblQtyOrdered * ICU.dblUnitQty) END
+			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (ARD.dblQtyShipped * ARD.dblPrice) 
+						   ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END),
+						   @intFiscalYear as fiscalYear
 		  INTO #tempItem
-		  FROM tblARInvoice AR
+		  FROM tblARInvoice AR 
 	INNER JOIN tblARInvoiceDetail ARD
 			ON ARD.intInvoiceId = AR.intInvoiceId
 	INNER JOIN tblICItem IC
@@ -52,6 +55,9 @@ BEGIN
 		 WHERE AR.intInvoiceId = @intInvoiceId
 		   AND IC.intPatronageCategoryId IS NOT NULL
 		   AND ICU.ysnStockUnit = 1 -- Confirm with sir Ajith
+		   group by AR.intEntityCustomerId,
+			   IC.intPatronageCategoryId,
+			   AR.ysnPosted
 
 		IF NOT EXISTS(SELECT * FROM #tempItem)
 		BEGIN
@@ -61,17 +67,12 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SET @intFiscalYear = (SELECT intFiscalYearId 
-										FROM tblGLFiscalYear 
-										WHERE (SELECT dtmDate 
-												FROM tblARInvoice 
-												WHERE intInvoiceId = @intInvoiceId) 
-										BETWEEN dtmDateFrom AND dtmDateTo)
-
 			
+
+			--select * from #tempItem
 			MERGE tblPATCustomerVolume AS PAT
 			USING #tempItem AS B
-			   ON (PAT.intCustomerPatronId = B.intEntityCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId)
+			   ON (PAT.intCustomerPatronId = B.intEntityCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.fiscalYear)
 			 WHEN MATCHED AND B.ysnPosted = 0 AND PAT.dblVolume = B.dblVolume
 				  THEN DELETE
 			 WHEN MATCHED
@@ -85,4 +86,7 @@ BEGIN
 		END
 
 END
+
+
+
 GO

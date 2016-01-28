@@ -112,6 +112,7 @@ INSERT INTO
 		,[dblAmountDue]
 		,[dblPayment]
 		,[strTransactionType]
+		,[strType]
 		,[intPaymentMethodId]
 		,[strComments]
 		,[intAccountId]
@@ -146,7 +147,7 @@ SELECT
 	,IE.[intEntityCustomerId]	--[intEntityCustomerId]
 	,IE.dtmDate  				--[dtmDate]
 	,dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
-	,ISNULL(IE.intCurrencyId,min(AC.[intCurrencyId]))									--[intCurrencyId]
+	,ISNULL(MIN(AC.intCurrencyId), IE.intCurrencyId)--[intCurrencyId]
 	,ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
 	,ISNULL(IE.[intSalesPersonId],min(AC.[intSalespersonId]))		--[intEntitySalespersonId]
 	,IE.dtmDate  				--[dtmShipDate]
@@ -161,6 +162,7 @@ SELECT
 	,0				            --[[dblAmountDue]] need to check
 	,@ZeroDecimal				--[dblPayment]
 	,'Invoice'					--[strTransactionType]
+	,CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN 'Transport Delivery' ELSE 'Standard' END
 	,0							--[intPaymentMethodId]
 	,IE.strComments        	    --[strComments] 
 	,@ARAccountId				--[intAccountId]
@@ -252,12 +254,13 @@ SET
 	,[dblAmountDue]					= @ZeroDecimal
 	,[dblPayment]					= @ZeroDecimal
 	,[strTransactionType]			= 'Invoice'
+	,[strType]						= CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN 'Transport Delivery' ELSE 'Standard' END
 	,[intPaymentMethodId]			= 0
 	,[strComments]					= IE.strComments
 	,[intAccountId]					= @ARAccountId
 	,[dtmPostDate]					= NULL
-	,[ysnPosted]					= 0
-	,[ysnPaid]						= 0
+	--,[ysnPosted]					= 0
+	--,[ysnPaid]						= 0
 	,[intShipToLocationId]			= ISNULL(IE.[intShipToLocationId], EL.[intEntityLocationId]) 
 	,[strShipToLocationName]		= SL.[strLocationName]
 	,[strShipToAddress]				= SL.[strAddress]
@@ -396,6 +399,7 @@ INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
 	,[intItemId]
 	,[strItemDescription]
+	,[strDocumentNumber]
 	,[intItemUOMId]
 	,[dblQtyOrdered]
 	,[dblQtyShipped]
@@ -412,7 +416,8 @@ INSERT INTO [tblARInvoiceDetail]
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,IE.[intItemId]												--[intItemId]
-	,IC.[strDescription]										--strItemDescription] 
+	,IC.[strDescription]										--[strItemDescription] 
+	,@strSourceId												--[strDocumentNumber]
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]		

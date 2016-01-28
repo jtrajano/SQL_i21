@@ -222,13 +222,13 @@ BEGIN
 			,strBatchId			= 'BATCH-1'
 			,strTransactionId	= 'INVTRN-2'
 			,dblDebit			= 0
-			,dblCredit			= (100 * @25KgBagUnitQty * ROUND(2.50 / @25KgBagUnitQty, 6) ) 
+			,dblCredit			= ROUND( (100 * @25KgBagUnitQty * ROUND(2.50 / @25KgBagUnitQty, 6)), 2)
 		UNION ALL 
 		SELECT 
 			intAccountId		= @Inventory_NewHaven
 			,strBatchId			= 'BATCH-1'
 			,strTransactionId	= 'INVTRN-2'
-			,dblDebit			= (100 * @25KgBagUnitQty * ROUND(2.50 / @25KgBagUnitQty, 6)) 
+			,dblDebit			= ROUND( (100 * @25KgBagUnitQty * ROUND(2.50 / @25KgBagUnitQty, 6)), 2) 
 			,dblCredit			= 0
 
 		INSERT INTO actual_tblGLDetail (

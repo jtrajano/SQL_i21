@@ -59,6 +59,8 @@ BEGIN
 		EXEC tSQLt.ExpectNoException;
 
 		-- Act 
-		EXEC dbo.uspICValidateCostingOnUnpost @ItemsToValidate = @Items
+		EXEC dbo.uspICValidateCostingOnUnpost 
+			@ItemsToValidate = @Items
+
 	END 
 END 

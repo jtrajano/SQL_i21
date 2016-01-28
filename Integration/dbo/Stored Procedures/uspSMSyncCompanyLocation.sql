@@ -23,16 +23,19 @@ BEGIN
        
      WHILE(EXISTS(SELECT TOP 1 1 FROM #Temp))  
       BEGIN  
-       DECLARE @MaxNumber1 int  
+	   DECLARE @MaxNumber1 int  
        DECLARE @MaxNumber2 int  
 	   DECLARE @GreaterNumber int
+	   DECLARE @Unused int
 
 	   DECLARE @TopLocId int  
        SELECT @TopLocId = intCompanyLocationId FROM #Temp ORDER BY intCompanyLocationId  
        SELECT @MaxNumber1 = MAX([agloc_loc_no]) FROM aglocmst  
 	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  
+	   SET @Unused = (SELECT TOP 1 l.agloc_loc_no + 1 AS start FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no + 1 = r.agloc_loc_no WHERE r.agloc_loc_no IS NULL)
 
 	   SELECT @GreaterNumber = CASE WHEN @MaxNumber1 > @MaxNumber2 THEN @MaxNumber1 ELSE @MaxNumber2 END
+	   SELECT @GreaterNumber = CASE WHEN @GreaterNumber >= 999 THEN @Unused - 1 ELSE @GreaterNumber END
          
        --IF(EXISTS(SELECT NULL FROM aglocmst WHERE ISNUMERIC([agloc_loc_no]) = 0) OR @MaxNumber > 998)  
        -- BEGIN  

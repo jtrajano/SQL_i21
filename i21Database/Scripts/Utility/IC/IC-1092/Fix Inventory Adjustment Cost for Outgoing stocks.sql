@@ -10,7 +10,7 @@ ALTER PROCEDURE [dbo].[uspICPostInventoryTransaction]
 	,@dtmDate DATETIME
 	,@dblQty NUMERIC(18, 6)
 	,@dblUOMQty NUMERIC(18, 6)
-	,@dblCost NUMERIC(18, 6)
+	,@dblCost NUMERIC(38, 20)
 	,@dblValue NUMERIC(18, 6)
 	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
@@ -55,7 +55,7 @@ DECLARE @intInventoryTransactionId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
 		,@dblQty AS NUMERIC(18,6)
-		,@dblCost AS NUMERIC(18,6)
+		,@dblCost AS NUMERIC(38, 20)
 		,@dblUOMQty AS NUMERIC(18,6)
 		,@strBatchId AS NVARCHAR(50)
 		,@intLotId AS INT
@@ -134,7 +134,7 @@ BEGIN
 
 	SELECT	@errorFound = 1
 	WHERE	dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) NOT IN (
-		SELECT	CAST(dbo.fnCalculateUnitCost(dblCost, dblUOMQty) AS NUMERIC(18,6))
+		SELECT	dbo.fnCalculateUnitCost(dblCost, dblUOMQty)
 		FROM	dbo.tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
@@ -272,7 +272,7 @@ ALTER PROCEDURE [dbo].[uspICPostInventoryTransaction]
 	,@dtmDate DATETIME
 	,@dblQty NUMERIC(18, 6)
 	,@dblUOMQty NUMERIC(18, 6)
-	,@dblCost NUMERIC(18, 6)
+	,@dblCost NUMERIC(38, 20)
 	,@dblValue NUMERIC(18, 6)
 	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT

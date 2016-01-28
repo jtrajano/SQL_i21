@@ -12,6 +12,7 @@ BEGIN
 			@UserId INT,
 			@DateFrom DATETIME = NULL,
 			@DateTo DATETIME = NULL,
+			@creditCardOnly BIT = 0,
 			@totalImported INT OUTPUT
 		)
 		AS
@@ -102,8 +103,10 @@ BEGIN
 					[dbl1099]				=	A.apivc_1099_amt,
 					[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
 													ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
-					[dblPayment]			=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
-													ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
+					[dblPayment]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN
+													CASE WHEN (A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'') THEN A.apivc_orig_amt
+														ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
+												ELSE 0 END,
 					[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
 														CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
 															ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
@@ -147,6 +150,13 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
+					AND 1 = (CASE WHEN @creditCardOnly = 1 AND A.apivc_comment = ''CCD Reconciliation'' AND A.apivc_status_ind = ''U'' THEN 1
+								WHEN @creditCardOnly = 0 THEN 1	
+							ELSE 0 END)
+					AND NOT EXISTS(
+						SELECT 1 FROM tblAPapivcmst H
+						WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
+					)
 			) AS sourceData
 			ON  (1 = 0)
 			WHEN NOT MATCHED THEN
@@ -210,6 +220,13 @@ BEGIN
 				, sourceData.A4GLIdentity INTO #InsertedPostedBill;
 
 			SET @totalInsertedBill = (SELECT COUNT(*) FROM #InsertedPostedBill)
+
+			IF @totalInsertedBill <= 0 
+			BEGIN
+				ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
+				SET @totalImported = 0;
+				RETURN;
+			END
 	
 			--IMPORT BILL DETAILS FROM aphglmst
 			MERGE INTO tblAPBillDetail AS destination
@@ -234,7 +251,7 @@ BEGIN
 					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN
 														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
 													ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
-					[dbl1099]				=	(CASE WHEN (A.dblTotal) > 0 
+					[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
 												THEN 
 													(
 														((CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
@@ -245,8 +262,8 @@ BEGIN
 														A.dblTotal
 													)
 												ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
-					[int1099Form]			=	1,
-					[int1099Category]		=	8,
+					[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
+					[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
 					[intLineNo]				=	C.aphgl_dist_no,
 					[A4GLIdentity]			=	C.[A4GLIdentity]
 				FROM tblAPBill A
@@ -263,6 +280,13 @@ BEGIN
 								ELSE 1 END)
 				AND C2.apivc_trans_type IN (''I'',''C'',''A'',''O'')
 				AND C2.apivc_orig_amt != 0
+				AND 1 = (CASE WHEN @creditCardOnly = 1 AND C2.apivc_comment = ''CCD Reconciliation'' AND C2.apivc_status_ind = ''U'' THEN 1 
+							WHEN @creditCardOnly = 0 THEN 1
+							ELSE 0 END)
+				AND NOT EXISTS(
+						SELECT 1 FROM tblAPapivcmst H
+						WHERE C2.apivc_ivc_no = H.apivc_ivc_no AND C2.apivc_vnd_no = H.apivc_vnd_no
+					)
 				ORDER BY C.aphgl_dist_no
 			) AS sourceData
 			ON (1 = 0)

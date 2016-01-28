@@ -34,6 +34,7 @@ BEGIN
 	DECLARE @strAccountDescription NVARCHAR(500)
 	DECLARE @strAccountType NVARCHAR(50)
 	DECLARE @BalanceSide NVARCHAR(50)
+	DECLARE @strAccountsType_Row NVARCHAR(50)
 	
 	DECLARE @strRowDescription NVARCHAR(500)
 	DECLARE @strRowFilter NVARCHAR(500)
@@ -66,8 +67,17 @@ BEGIN
 	BEGIN
 		SET @strRowFilter = '[Primary Account] = ''' + @strAccount + ''''
 	END
+
+	IF(@strAccountType = 'Asset' or  @strAccountType = 'Equity' or @strAccountType = 'Liability')
+	BEGIN
+		SET @strAccountsType_Row = 'BS'
+	END
+	ELSE IF(@strAccountType = 'Expense' or @strAccountType = 'Revenue')
+	BEGIN
+		SET @strAccountsType_Row = 'IS'
+	END
 	
-	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, @strAccountsType_Row, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 	
 	SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 	

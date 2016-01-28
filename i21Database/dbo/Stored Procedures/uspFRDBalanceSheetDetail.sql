@@ -13,7 +13,6 @@ DECLARE @intRowDetailId INT
 DECLARE @intRefNo INT = 1
 DECLARE @intSort INT = 1
 DECLARE @strRelatedRows NVARCHAR(MAX) = ''
-DECLARE @strREAccount NVARCHAR(MAX) = ''
 
 DECLARE @intRowDetailId_Liability INT
 DECLARE @intRowDetailId_Equity INT
@@ -49,7 +48,7 @@ BEGIN
 	
 	DECLARE @BalanceSide NVARCHAR(50)
 	DECLARE @strAccountType NVARCHAR(50)
-	DECLARE @strAccountsType_Row NVARCHAR(50)
+	DECLARE @strAccountsType_Row NVARCHAR(50)	
 
 	SELECT TOP 1 @strAccountType = AccountType, @BalanceSide = BalanceSide FROM #TempAccountType ORDER BY cntID
 	SELECT * INTO #TempGLAccount FROM vyuGLAccountView where strAccountType = @strAccountType ORDER BY strAccountId
@@ -57,16 +56,7 @@ BEGIN
 	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType, 'Row Name - Left Align', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 	
 	SET @intRefNo = @intRefNo + 1
-	SET @intSort = @intSort + 1
-
-	IF(@strAccountType = 'Asset' OR @strAccountType = 'Liability' OR @strAccountType = 'Equity')
-	BEGIN
-		SET @strAccountsType_Row = 'BS'
-	END
-	ELSE IF(@strAccountType = 'Revenue' OR @strAccountType = 'Expense')
-	BEGIN
-		SET @strAccountsType_Row = 'IS'
-	END
+	SET @intSort = @intSort + 1	
 
 	WHILE EXISTS(SELECT 1 FROM #TempGLAccount)
 	BEGIN
@@ -78,16 +68,33 @@ BEGIN
 		DECLARE @strRowDescription NVARCHAR(500)
 		DECLARE @strRowFilter NVARCHAR(500)
 		DECLARE @rowType NVARCHAR(50) = 'Filter Accounts'
+		DECLARE @REAccount NVARCHAR(50) = ''
 
 		SELECT TOP 1 @strAccountId = strAccountId, @strAccountDescription = strDescription, @strAccountGroup = strAccountGroup FROM #TempGLAccount ORDER BY strAccountId
 
 		SET @strRowDescription = '     ' + @strAccountId + ' - ' + REPLACE(@strAccountDescription,'''','')
-		SET @strRowFilter = '[ID] = ''' + @strAccountId + ''''
+		SET @strRowFilter = '[ID] = ''' + @strAccountId + ''''		
 
-		IF(@strAccountGroup = 'Retained Earnings')
+		IF(@strAccountType = 'Asset' OR @strAccountType = 'Liability' OR @strAccountType = 'Equity')
 		BEGIN
-			SET @rowType = 'Retained Earnings'
-		END		
+			SET @strAccountsType_Row = 'BS'
+		END
+		ELSE IF(@strAccountType = 'Revenue' OR @strAccountType = 'Expense')
+		BEGIN
+			SET @strAccountsType_Row = 'IS'
+		END
+
+		SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearId = (SELECT TOP 1 intFiscalYearId FROM tblGLCurrentFiscalYear)))
+
+		IF(@REAccount = '')
+		BEGIN
+			SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear))
+		END
+
+		IF(@REAccount = @strAccountId)
+		BEGIN
+			SET @strAccountsType_Row = 'RE'
+		END	
 
 		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, @rowType, @BalanceSide, 'Column', '', @strRowFilter, @strAccountsType_Row, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 		
@@ -97,7 +104,7 @@ BEGIN
 				
 		DELETE #TempGLAccount WHERE strAccountId = @strAccountId
 
-		IF @strRelatedRows = ''
+		IF (@strRelatedRows = '' and (SELECT TOP 1 1 FROM #TempGLAccount) = 1)
 			BEGIN
 				SET @strRelatedRows = 'SUM(' + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ':'
 				SET @intRefNo = @intRefNo + 1
@@ -110,7 +117,15 @@ BEGIN
 			END
 		ELSE
 			BEGIN
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ')'
+				IF (CHARINDEX('SUM',@strRelatedRows) < 1)
+				BEGIN
+					SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25))
+				END
+				ELSE
+				BEGIN
+					SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ')'
+				END
+
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
@@ -197,7 +212,7 @@ BEGIN
 	
 	SET @strRowFilter_Hidden = '[Type] = ''' + @strAccountType_Hidden + ''''
 
-	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType_Hidden, 'Current Year Earnings', @BalanceSide_Hidden, 'Column', '', @strRowFilter_Hidden, @strAccountsType_Row, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort		
+	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strAccountType_Hidden, 'Filter Accounts', @BalanceSide_Hidden, 'Column', '', @strRowFilter_Hidden, 'CY', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort		
 
 	SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
@@ -207,7 +222,7 @@ BEGIN
 
 	IF @strRelatedRows = ''
 		BEGIN
-			SET @strRelatedRows = 'SUM(' + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ':'
+			SET @strRelatedRows = 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' - '
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1
 		END
@@ -218,7 +233,7 @@ BEGIN
 		END
 	ELSE
 		BEGIN				
-			SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ')'
+			SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25))
 			SET @intRefNo = @intRefNo + 1
 			SET @intSort = @intSort + 1
 

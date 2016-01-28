@@ -102,12 +102,36 @@ USING	(
         SELECT    id = 23
                 ,name = 'Inventory Count'
                 ,form = 'Inventory Count'
+		UNION ALL 
+		SELECT	id = 24
+				,name = 'Cost Adjustment'
+				,form = null
+		UNION ALL 
+		SELECT	id = 25
+				,name = 'Bill'
+				,form = 'Bill'
+		UNION ALL 
+		SELECT	id = 26
+				,name = 'Revalue WIP'
+				,form = null
+		UNION ALL 
+		SELECT	id = 27
+				,name = 'Revalue Produced'
+				,form = null
+		UNION ALL 
+		SELECT	id = 28
+				,name = 'Revalue Transfer'
+				,form = null
+		UNION ALL 
+		SELECT	id = 29
+				,name = 'Revalue Build Assembly'
+				,form = null
 				UNION ALL 
-        SELECT    id = 24
+        SELECT    id = 30
                 ,name = 'Empty Out'
                 ,form = 'Empty Out'
 		UNION ALL 
-        SELECT    id = 25
+        SELECT    id = 31
                 ,name = 'Process Inventory Count'
                 ,form = 'Process Inventory Count'
 

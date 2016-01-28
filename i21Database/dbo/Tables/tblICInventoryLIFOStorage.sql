@@ -33,7 +33,7 @@ Tracks all non-company owned stocks in a LIFO manner. Records are physically arr
 	Maps: None
 
 
-* 	[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0 
+* 	[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0 
 	Cost of the stock per base units. 
 	Maps: None
 
@@ -79,9 +79,10 @@ Tracks all non-company owned stocks in a LIFO manner. Records are physically arr
 		[dtmDate] DATETIME NOT NULL, 
 		[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 		
+		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,		
+		[intTransactionDetailId] INT NULL,		
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 

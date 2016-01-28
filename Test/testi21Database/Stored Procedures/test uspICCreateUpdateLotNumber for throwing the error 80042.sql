@@ -66,7 +66,7 @@ AS
 	--		,[intConcurrencyId]		= 1	
 
 --		DECLARE @Items AS ItemLotTableType
---		DECLARE @intUserId AS INT 
+--		DECLARE @intEntityUserSecurityId AS INT 
 --		DECLARE @intLotStatusId AS INT
 
 --		DECLARE	@intLotId					AS INT 
@@ -292,7 +292,7 @@ AS
 --	BEGIN 
 --		EXEC dbo.uspICCreateUpdateLotNumber
 --			@Items
---			,@intUserId
+--			,@intEntityUserSecurityId
 --			,@intLotStatusId
 --	END 
 

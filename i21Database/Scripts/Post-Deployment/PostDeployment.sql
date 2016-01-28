@@ -176,6 +176,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\9_FixServiceChargeStartingNumber.sql
 :r .\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql
 :r .\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql
+:r .\AR\DefaultData\12_UpdatesActualCostIdInInvoice.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -213,6 +214,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql
 :r .\IC\PatchFor_1510_to_1520.sql
 :r .\GL\InventoryCategoryFix.sql
+:r .\IC\15_InventoryCostAdjustmentTypes.sql
+:r .\IC\PopulateTransDetailIdOnCostBuckets.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
@@ -240,7 +243,15 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
 :r .\PR\DataFixes\AddPaycheckDirectDepositEntries.sql
 :r .\PR\DataFixes\ResetEaningHoursToProcess.sql
+:r .\PR\DataFixes\SynchronizePaycheckCheckNumber.sql
 :r .\PR\DataFixes\UpdateEarningDeductionTaxId.sql
+:r .\PR\DataFixes\UpdatePaycheckTotalHours.sql
+:r .\PR\Reports\SubReports\PaycheckEarningSubReport.sql
+:r .\PR\Reports\SubReports\PaycheckTaxSubReport.sql
+:r .\PR\Reports\SubReports\PaycheckDeductionSubReport.sql
+:r .\PR\Reports\PaycheckTop.sql
+:r .\PR\Reports\PaycheckMiddle.sql
+:r .\PR\Reports\PaycheckBottom.sql
 
 -- Version Update
 :r .\VersionUpdate.sql
@@ -267,6 +278,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\019_RemoveEmailToParentEntity.sql
 :r .\EM\020_DefaultDataForEntityImportSchemaCSV.sql
 :r .\EM\021_MoveCustomerMessageToEntity.sql
+:r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEntityPreferences
+
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

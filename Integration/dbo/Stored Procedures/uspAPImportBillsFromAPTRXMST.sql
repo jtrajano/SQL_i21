@@ -124,6 +124,10 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
+					AND NOT EXISTS(
+						SELECT 1 FROM tblAPaptrxmst H
+						WHERE A.aptrx_ivc_no = H.aptrx_ivc_no AND A.aptrx_vnd_no = H.aptrx_vnd_no
+					)
 			) AS sourceData
 			ON  (1 = 0)
 			WHEN NOT MATCHED THEN
@@ -185,6 +189,13 @@ BEGIN
 
 			SET @totalInsertedBill = (SELECT COUNT(*) FROM #InsertedUnpostedBill)
 
+			IF @totalInsertedBill <= 0
+			BEGIN
+				ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
+				SET @totalImported = 0;
+				RETURN;
+			END
+
 			--IMPORT BILL DETAILS FROM aphglmst
 			MERGE INTO tblAPBillDetail AS destination
 			USING (
@@ -227,6 +238,10 @@ BEGIN
 								ELSE 1 END)
 				AND C2.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
 				AND C2.aptrx_orig_amt != 0
+				AND NOT EXISTS(
+						SELECT 1 FROM tblAPaptrxmst H
+						WHERE C2.aptrx_ivc_no = H.aptrx_ivc_no AND C2.aptrx_vnd_no = H.aptrx_vnd_no
+					)
 				ORDER BY C.apegl_dist_no
 			) AS sourceData
 			ON (1 = 0)

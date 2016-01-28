@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[uspICUnpostStorage]
 	@intTransactionId AS INT
 	,@strTransactionId AS NVARCHAR(40)
 	,@strBatchId AS NVARCHAR(20)
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@ysnRecap AS BIT = 0
 AS
 
@@ -58,24 +58,23 @@ BEGIN
 			,ItemTrans.intItemUOMId
 			,ItemTrans.intLotId
 			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)			
-			,intSubLocationId
-			,intStorageLocationId
-			,intTransactionTypeId
-			,intInventoryTransactionStorageId
-
+			,ItemTrans.intSubLocationId
+			,ItemTrans.intStorageLocationId
+			,ItemTrans.intTransactionTypeId
+			,ItemTrans.intInventoryTransactionStorageId
 	FROM	dbo.tblICInventoryTransactionStorage ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
 	GROUP BY 
-			ItemTrans.intItemId
-			, ItemTrans.intItemLocationId
-			, ItemTrans.intItemUOMId
-			, ItemTrans.intLotId
-			, ItemTrans.intSubLocationId
-			, ItemTrans.intStorageLocationId
-			, ItemTrans.intTransactionTypeId
-			, ItemTrans.intInventoryTransactionStorageId
+		ItemTrans.intItemId
+		, ItemTrans.intItemLocationId
+		, ItemTrans.intItemUOMId
+		, ItemTrans.intLotId
+		, ItemTrans.intSubLocationId
+		, ItemTrans.intStorageLocationId
+		, ItemTrans.intTransactionTypeId
+		, ItemTrans.intInventoryTransactionStorageId
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ItemToUnpost
@@ -197,13 +196,13 @@ BEGIN
 			,[intTransactionId]						= ActualTransaction.intTransactionId
 			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
 			,[strTransactionId]						= ActualTransaction.strTransactionId
-			,[intInventoryCostBucketStorageId]	= ActualTransaction.intInventoryCostBucketStorageId
+			,[intInventoryCostBucketStorageId]		= ActualTransaction.intInventoryCostBucketStorageId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
 			,[ysnIsUnposted]						= 1
 			,[strTransactionForm]					= ActualTransaction.strTransactionForm
 			,[dtmCreated]							= GETDATE()
-			,[intCreatedUserId]						= @intUserId
+			,[intCreatedEntityId]					= @intEntityUserSecurityId
 			,[intConcurrencyId]						= 1
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionStorageId = ActualTransaction.intInventoryTransactionStorageId	
@@ -254,7 +253,7 @@ BEGIN
 			,[ysnIsUnposted]						= 1
 			,[intInventoryCostBucketStorageId]	= ActualTransaction.intInventoryCostBucketStorageId
 			,[dtmCreated]							= GETDATE()
-			,[intCreatedUserId]						= @intUserId
+			,[intCreatedEntityId]					= @intEntityUserSecurityId
 			,[intConcurrencyId]						= 1
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionStorageId = ActualTransaction.intInventoryTransactionStorageId	

@@ -25,6 +25,7 @@ SELECT
 	I.dblInvoiceTotal, 
 	ISNULL(I.dblDiscount,0)			AS dblDiscount, 
 	ISNULL(I.dblDiscountAvailable,0)	AS dblDiscountAvailable, 
+	ISNULL(I.dblInterest,0)			AS dblInterest, 
 	ISNULL(I.dblAmountDue,0)		AS dblAmountDue, 
 	ISNULL(I.dblPayment, 0)			AS dblPayment,
 	ISNULL(I.dblInvoiceSubtotal, 0)	AS dblInvoiceSubtotal,

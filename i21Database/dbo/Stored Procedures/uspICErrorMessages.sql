@@ -360,7 +360,7 @@ SET @strmessage = 'Delete is not allowed. %s is posted.'
 EXEC sp_addmessage 80070,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80071) EXEC sp_dropmessage 80071, 'us_english'	
-SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
+SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item %s.'
 EXEC sp_addmessage 80071,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80072) EXEC sp_dropmessage 80072, 'us_english'	
@@ -377,4 +377,12 @@ EXEC sp_addmessage 80074,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80075) EXEC sp_dropmessage 80075, 'us_english'	
 SET @strmessage = 'Item %s is invalid. It must be lot tracked.'
+EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80076) EXEC sp_dropmessage 80074, 'us_english'	
+SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
+EXEC sp_addmessage 80074,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80077) EXEC sp_dropmessage 80075, 'us_english'	
+SET @strmessage = 'Unable to update %s. It is posted. Please unpost it first.'
 EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'

@@ -46,6 +46,7 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
+	,@EntitySalespersonId			INT				= NULL
 AS
 
 BEGIN
@@ -155,120 +156,134 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 	END	
 
 BEGIN TRY
-	INSERT INTO [tblARInvoiceDetail]
-		([intInvoiceId]
-		,[intItemId]
-		,[strDocumentNumber]
-		,[strItemDescription]
-		,[intItemUOMId]
-		,[dblQtyOrdered]
-		,[dblQtyShipped]
-		,[dblDiscount]
-		,[dblPrice]
-		,[dblTotalTax]
-		,[dblTotal]
-		,[intAccountId]
-		,[intCOGSAccountId]
-		,[intSalesAccountId]
-		,[intInventoryAccountId]
-		,[intServiceChargeAccountId]
-		,[strMaintenanceType]
-		,[strFrequency]
-		,[dtmMaintenanceDate]
-		,[dblMaintenanceAmount]
-		,[dblLicenseAmount]
-		,[intTaxGroupId]
-		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
-		,[intInventoryShipmentItemId]
-		,[strShipmentNumber]
-		,[intSalesOrderDetailId]
-		,[strSalesOrderNumber]
-		,[intContractHeaderId]
-		,[intContractDetailId]
-		,[intShipmentId]
-		,[intShipmentPurchaseSalesContractId]
-		,[intShipmentItemUOMId]
-		,[dblShipmentQtyShipped]
-		,[dblShipmentGrossWt]
-		,[dblShipmentTareWt]
-		,[dblShipmentNetWt]
-		,[intTicketId]
-		,[intTicketHoursWorkedId]
-		,[intOriginalInvoiceDetailId]
-		,[intSiteId]
-		,[strBillingBy]
-		,[dblPercentFull]
-		,[dblNewMeterReading]
-		,[dblPreviousMeterReading]
-		,[dblConversionFactor]
-		,[intPerformerId]
-		,[ysnLeaseBilling]
-		,[ysnVirtualMeterReading]
-		,[intConcurrencyId])
-	SELECT
-		 [intInvoiceId]						= @InvoiceId
-		,[intItemId]						= IC.[intItemId] 
-		,[strDocumentNumber]				= @ItemDocumentNumber
-		,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
-		,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
-		,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
-		,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
-		,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
-		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
-		,[dblTotalTax]						= @ZeroDecimal
-		,[dblTotal]							= @ZeroDecimal
-		,[intAccountId]						= Acct.[intAccountId] 
-		,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
-		,[intSalesAccountId]				= Acct.[intSalesAccountId]
-		,[intInventoryAccountId]			= Acct.[intInventoryAccountId]
-		,[intServiceChargeAccountId]		= Acct.[intAccountId]
-		,[strMaintenanceType]				= @ItemMaintenanceType
-		,[strFrequency]						= @ItemFrequency
-		,[dtmMaintenanceDate]				= @ItemMaintenanceDate
-		,[dblMaintenanceAmount]				= @ItemMaintenanceAmount
-		,[dblLicenseAmount]					= @ItemLicenseAmount
-		,[intTaxGroupId]					= @ItemTaxGroupId
-		,[intSCInvoiceId]					= @ItemSCInvoiceId
-		,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
-		,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 
-		,[strShipmentNumber]				= @ItemShipmentNumber 
-		,[intSalesOrderDetailId]			= @ItemSalesOrderDetailId 
-		,[strSalesOrderNumber]				= @ItemSalesOrderNumber 
-		,[intContractHeaderId]				= @ItemContractHeaderId
-		,[intContractDetailId]				= @ItemContractDetailId
-		,[intShipmentId]					= @ItemShipmentId
-		,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
-		,[intShipmentItemUOMId]				= @ItemShipmentUOMId
-		,[dblShipmentQtyShipped]			= @ItemShipmentQtyShipped
-		,[dblShipmentGrossWt]				= @ItemShipmentGrossWt
-		,[dblShipmentTareWt]				= @ItemShipmentTareWt
-		,[dblShipmentNetWt]					= @ItemShipmentNetWt
-		,[intTicketId]						= @ItemTicketId
-		,[intTicketHoursWorkedId]			= @ItemTicketHoursWorkedId 
-		,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId 
-		,[intSiteId]						= @ItemSiteId
-		,[strBillingBy]						= @ItemBillingBy
-		,[dblPercentFull]					= @ItemPercentFull
-		,[dblNewMeterReading]				= @ItemNewMeterReading
-		,[dblPreviousMeterReading]			= @ItemPreviousMeterReading
-		,[dblConversionFactor]				= @ItemConversionFactor
-		,[intPerformerId]					= @ItemPerformerId
-		,[ysnLeaseBilling]					= @ItemLeaseBilling
-		,[ysnVirtualMeterReading]			= @ItemVirtualMeterReading
-		,[intConcurrencyId]					= 0
-	FROM
-		tblICItem IC
-	INNER JOIN
-		tblICItemLocation IL
-			ON IC.intItemId = IL.intItemId
-	LEFT OUTER JOIN
-		vyuARGetItemAccount Acct
-			ON IC.[intItemId] = Acct.[intItemId]
-			AND IL.[intLocationId] = Acct.[intLocationId]
-	WHERE
-		IC.[intItemId] = @ItemId
-		AND IL.[intLocationId] = @CompanyLocationId
+	DECLARE @existingInvoiceDetail INT
+
+	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId AND strSalesOrderNumber = @ItemSalesOrderNumber
+	IF ISNULL(@existingInvoiceDetail, 0) > 0
+		BEGIN
+			UPDATE tblARInvoiceDetail 
+				SET dblQtyShipped = dblQtyShipped + ISNULL(@ItemQtyShipped ,0.000000)
+			WHERE intInvoiceDetailId = @existingInvoiceDetail
+		END
+	ELSE
+		BEGIN
+			INSERT INTO [tblARInvoiceDetail]
+				([intInvoiceId]
+				,[intItemId]
+				,[strDocumentNumber]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyOrdered]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[dblTotalTax]
+				,[dblTotal]
+				,[intAccountId]
+				,[intCOGSAccountId]
+				,[intSalesAccountId]
+				,[intInventoryAccountId]
+				,[intServiceChargeAccountId]
+				,[strMaintenanceType]
+				,[strFrequency]
+				,[dtmMaintenanceDate]
+				,[dblMaintenanceAmount]
+				,[dblLicenseAmount]
+				,[intTaxGroupId]
+				,[intSCInvoiceId]
+				,[strSCInvoiceNumber]
+				,[intInventoryShipmentItemId]
+				,[strShipmentNumber]
+				,[intSalesOrderDetailId]
+				,[strSalesOrderNumber]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intShipmentId]
+				,[intShipmentPurchaseSalesContractId]
+				,[intShipmentItemUOMId]
+				,[dblShipmentQtyShipped]
+				,[dblShipmentGrossWt]
+				,[dblShipmentTareWt]
+				,[dblShipmentNetWt]
+				,[intTicketId]
+				,[intTicketHoursWorkedId]
+				,[intOriginalInvoiceDetailId]
+				,[intSiteId]
+				,[strBillingBy]
+				,[dblPercentFull]
+				,[dblNewMeterReading]
+				,[dblPreviousMeterReading]
+				,[dblConversionFactor]
+				,[intPerformerId]
+				,[ysnLeaseBilling]
+				,[ysnVirtualMeterReading]
+				,[intEntitySalespersonId]
+				,[intConcurrencyId])
+			SELECT
+				 [intInvoiceId]						= @InvoiceId
+				,[intItemId]						= IC.[intItemId] 
+				,[strDocumentNumber]				= @ItemDocumentNumber
+				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
+				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
+				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
+				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
+				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
+				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
+				,[dblTotalTax]						= @ZeroDecimal
+				,[dblTotal]							= @ZeroDecimal
+				,[intAccountId]						= Acct.[intAccountId] 
+				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
+				,[intSalesAccountId]				= Acct.[intSalesAccountId]
+				,[intInventoryAccountId]			= Acct.[intInventoryAccountId]
+				,[intServiceChargeAccountId]		= Acct.[intAccountId]
+				,[strMaintenanceType]				= @ItemMaintenanceType
+				,[strFrequency]						= @ItemFrequency
+				,[dtmMaintenanceDate]				= @ItemMaintenanceDate
+				,[dblMaintenanceAmount]				= @ItemMaintenanceAmount
+				,[dblLicenseAmount]					= @ItemLicenseAmount
+				,[intTaxGroupId]					= @ItemTaxGroupId
+				,[intSCInvoiceId]					= @ItemSCInvoiceId
+				,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
+				,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 
+				,[strShipmentNumber]				= @ItemShipmentNumber 
+				,[intSalesOrderDetailId]			= @ItemSalesOrderDetailId 
+				,[strSalesOrderNumber]				= @ItemSalesOrderNumber 
+				,[intContractHeaderId]				= @ItemContractHeaderId
+				,[intContractDetailId]				= @ItemContractDetailId
+				,[intShipmentId]					= @ItemShipmentId
+				,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
+				,[intShipmentItemUOMId]				= @ItemShipmentUOMId
+				,[dblShipmentQtyShipped]			= @ItemShipmentQtyShipped
+				,[dblShipmentGrossWt]				= @ItemShipmentGrossWt
+				,[dblShipmentTareWt]				= @ItemShipmentTareWt
+				,[dblShipmentNetWt]					= @ItemShipmentNetWt
+				,[intTicketId]						= @ItemTicketId
+				,[intTicketHoursWorkedId]			= @ItemTicketHoursWorkedId 
+				,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId 
+				,[intSiteId]						= @ItemSiteId
+				,[strBillingBy]						= @ItemBillingBy
+				,[dblPercentFull]					= @ItemPercentFull
+				,[dblNewMeterReading]				= @ItemNewMeterReading
+				,[dblPreviousMeterReading]			= @ItemPreviousMeterReading
+				,[dblConversionFactor]				= @ItemConversionFactor
+				,[intPerformerId]					= @ItemPerformerId
+				,[ysnLeaseBilling]					= @ItemLeaseBilling
+				,[ysnVirtualMeterReading]			= @ItemVirtualMeterReading
+				,[intEntitySalespersonId]			= @EntitySalespersonId
+				,[intConcurrencyId]					= 0
+			FROM
+				tblICItem IC
+			INNER JOIN
+				tblICItemLocation IL
+					ON IC.intItemId = IL.intItemId
+			LEFT OUTER JOIN
+				vyuARGetItemAccount Acct
+					ON IC.[intItemId] = Acct.[intItemId]
+					AND IL.[intLocationId] = Acct.[intLocationId]
+			WHERE
+				IC.[intItemId] = @ItemId
+				AND IL.[intLocationId] = @CompanyLocationId
+		END
 			
 END TRY
 BEGIN CATCH

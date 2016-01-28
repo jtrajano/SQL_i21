@@ -28,7 +28,7 @@
 
 	@strBatchId - The batch id to use in generating the g/l entries. 
 
-	@intUserId - The user who initiated or called this stored procedure. 
+	@intEntityUserSecurityId - The user who initiated or called this stored procedure. 
 */
 
 CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
@@ -40,7 +40,7 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@dtmDate AS DATETIME
 	,@dblQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
-	,@dblCost AS NUMERIC(18,6)	
+	,@dblCost AS NUMERIC(38, 20)	
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	,@dblExchangeRate AS NUMERIC(18,6)
@@ -215,6 +215,7 @@ BEGIN
 				,@TotalQtyOffset
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 

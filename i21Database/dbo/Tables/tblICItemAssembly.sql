@@ -19,7 +19,7 @@ Type the overview for the table here.
 		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intItemUnitMeasureId] INT NULL, 
 		[dblUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemAssembly] PRIMARY KEY ([intItemAssemblyId]), 

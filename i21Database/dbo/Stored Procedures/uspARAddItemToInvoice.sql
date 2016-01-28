@@ -47,6 +47,7 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
+	,@EntitySalespersonId			INT				= NULL
 AS
 
 BEGIN
@@ -79,7 +80,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
 			,@ItemUOMId						= @ItemUOMId
-			,@ItemQtyOrdered				= @ItemQtyShipped
+			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
@@ -118,7 +119,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemPerformerId				= @ItemPerformerId
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
-			
+			,@EntitySalespersonId			= @EntitySalespersonId
+
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0
@@ -145,7 +147,10 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				([intInvoiceId]
 				,[intItemId]
 				,[strItemDescription]
+				,[strDocumentNumber]
 				,[intItemUOMId]
+				,[intContractHeaderId]
+				,[intContractDetailId]
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
 				,[dblDiscount]
@@ -156,13 +161,17 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[dblPercentFull]
 				,[intPerformerId]
 				,[intTaxGroupId]
+				,[intEntitySalespersonId]
 				,[intSalesOrderDetailId]
 				,[strSalesOrderNumber])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
 				,@ItemDescription
+				,@ItemDocumentNumber
 				,@ItemUOMId
+				,@ItemContractHeaderId
+				,@ItemContractDetailId
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemDiscount
@@ -172,7 +181,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemNewMeterReading
 				,@ItemPercentFull
 				,@ItemPerformerId							
-				,@ItemTaxGroupId					
+				,@ItemTaxGroupId
+				,@EntitySalespersonId					
 				,@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber
 			FROM tblICItem WHERE intItemId = @ItemId
@@ -209,13 +219,15 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ErrorMessage					= @AddDetailError	OUTPUT
 			,@RaiseError					= @RaiseError
 			,@ItemDescription				= @ItemDescription
+			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
-			
+			,@EntitySalespersonId			= @EntitySalespersonId
+
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0

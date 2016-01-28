@@ -16,6 +16,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= SOD.[intContractHeaderId]
+	,[intContractDetailId]				= SOD.[intContractDetailId] 
 	,[intCompanyLocationId]				= SO.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -57,6 +59,8 @@ SELECT
 	,[strPONumber]						= SO.[strPONumber]
 	,[strBOLNumber]						= SO.[strBOLNumber]
 	,[intSplitId]						= SO.[intSplitId]
+	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
+	,[strSalespersonName]				= ESP.[strName]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -71,7 +75,10 @@ INNER JOIN
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
 	tblEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId] 
+		ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT JOIN
+	tblEntity ESP
+		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN
 	tblSMTerm T
 		ON SO.[intTermId] = T.[intTermID] 
@@ -93,14 +100,17 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMTaxGroup TG
 		ON SOD.[intTaxGroupId] = TG.intTaxGroupId
-LEFT JOIN (SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS ID
+LEFT OUTER JOIN 
+	(SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS ID
 		ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+LEFT OUTER JOIN
+	(SELECT D.intLineNo FROM tblICInventoryShipmentItem D INNER JOIN tblICInventoryShipment H ON H.[intInventoryShipmentId] = D.[intInventoryShipmentId] WHERE H.[intOrderType] = 2) ISD
+		ON SOD.[intSalesOrderDetailId] = ISD.[intLineNo] 
+		
 WHERE
-	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
-		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
-	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+	SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	AND SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000) > 0.000000
+	AND ISNULL(ISD.[intLineNo],0) = 0
 	
 UNION ALL
 
@@ -119,6 +129,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= SOD.[intContractHeaderId]
+	,[intContractDetailId]				= SOD.[intContractDetailId] 
 	,[intCompanyLocationId]				= SO.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -160,6 +172,8 @@ SELECT
 	,[strPONumber]						= SO.[strPONumber]
 	,[strBOLNumber]						= SO.[strBOLNumber]
 	,[intSplitId]						= SO.[intSplitId]
+	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
+	,[strSalespersonName]				= ESP.[strName]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -173,6 +187,9 @@ INNER JOIN
 INNER JOIN
 	tblEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId] 
+LEFT JOIN
+	tblEntity ESP
+		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN
 	tblSMTerm T
 		ON SO.[intTermId] = T.[intTermID] 
@@ -199,7 +216,7 @@ LEFT JOIN (SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FRO
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped AND tblARInvoice.ysnPosted = 1)
+		WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
 	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	AND SOD.[dblQtyOrdered] - ISNULL(ID.[dblQtyShipped], 0.000000) > 0.000000
 	
@@ -220,6 +237,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= SHP.[strShipmentNumber] 	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= SOD.[intContractHeaderId]
+	,[intContractDetailId]				= SOD.[intContractDetailId]
 	,[intCompanyLocationId]				= SHP.[intShipFromLocationId]
 	,[strLocationName]					= SHP.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -235,7 +254,7 @@ SELECT
 	,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
 	,[dblShipmentQuantity]				= SHP.[dblQuantity]	
 	,[dblShipmentQtyShippedTotal]		= SOD.[dblQtyShipped]
-	,[dblQtyRemaining]					= SOD.[dblQtyOrdered] - SOD.[dblQtyShipped]
+	,[dblQtyRemaining]					= SOD.[dblQtyOrdered]
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
 	,[dblShipmentUnitPrice]				= SHP.[dblUnitPrice]
@@ -261,6 +280,8 @@ SELECT
 	,[strPONumber]						= SO.[strPONumber]
 	,[strBOLNumber]						= SO.[strBOLNumber]
 	,[intSplitId]						= SO.[intSplitId]
+	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
+	,[strSalespersonName]				= ESP.[strName]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -271,7 +292,10 @@ INNER JOIN
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
 	tblEntity E
-		ON C.[intEntityCustomerId] = E.[intEntityId] 
+		ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT JOIN
+	tblEntity ESP
+		ON SO.[intEntitySalespersonId] = ESP.[intEntityId] 
 LEFT OUTER JOIN
 	tblSMTerm T
 		ON SO.[intTermId] = T.[intTermID] 
@@ -280,7 +304,7 @@ LEFT OUTER JOIN
 		ON SO.[intShipViaId] = S.[intEntityShipViaId]
 INNER JOIN
 	tblICItem I
-		ON SOD.[intItemId] = I.[intItemId] AND ISNULL(I.strLotTracking, 'No') <> 'No'
+		ON SOD.[intItemId] = I.[intItemId]
 LEFT JOIN
 	tblICItemUOM IU
 		ON SOD.[intItemUOMId] = IU.[intItemUOMId]
@@ -372,70 +396,73 @@ LEFT OUTER JOIN
 	
 UNION ALL
 
-SELECT 
+SELECT
 	 [strTransactionType]				= 'Inventory Shipment'
-	,[strTransactionNumber]				= ISH.[strShipmentNumber]
-	,[strShippedItemId]					= 'icis:' + CAST(ISH.[intInventoryShipmentId] AS NVARCHAR(250))
-	,[intEntityCustomerId]				= ISH.[intEntityCustomerId]
-	,[strCustomerName]					= E.[strName]
+	,[strTransactionNumber]				= ICIS.[strShipmentNumber] 
+	,[strShippedItemId]					= 'icis:' + CAST(ICIS.[intInventoryShipmentId] AS NVARCHAR(250))
+	,[intEntityCustomerId]				= ICIS.[intEntityCustomerId]
+	,[strCustomerName]					= EME.[strName]
 	,[intSalesOrderId]					= NULL
 	,[intSalesOrderDetailId]			= NULL
 	,[strSalesOrderNumber]				= ''
-	,[dtmProcessDate]					= ISH.[dtmShipDate]
-	,[intInventoryShipmentId]			= ISH.[intInventoryShipmentId]
-	,[intInventoryShipmentItemId]		= ISI.[intInventoryShipmentItemId]
-	,[strSInventoryShipmentNumber]		= ISH.[strShipmentNumber] 	
+	,[dtmProcessDate]					= ICIS.[dtmShipDate] 
+	,[intInventoryShipmentId]			= ICIS.[intInventoryShipmentId]
+	,[intInventoryShipmentItemId]		= ICISI.[intInventoryShipmentItemId]
+	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
 	,[intShipmentId]					= NULL
-	,[strShipmentNumber]				= NULL	
-	,[intCompanyLocationId]				= ISH.[intShipFromLocationId]
-	,[strLocationName]					= CL.[strLocationName]
-	,[intShipToLocationId]				= ISH.[intShipToLocationId]
-	,[intFreightTermId]					= ISH.[intFreightTermId]
-	,[intItemId]						= ISI.[intItemId]
-	,[strItemNo]						= I.[strItemNo]
-	,[strItemDescription]				= I.[strDescription]
-	,[intItemUOMId]						= ISI.[intItemUOMId]
-	,[strUnitMeasure]					= U.[strUnitMeasure]
-	,[intShipmentItemUOMId]				= ISI.[intItemUOMId]
-	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
-	,[dblQtyShipped]					= ISI.[dblQuantity]
-	,[dblQtyOrdered]					= ISI.[dblQuantity]
-	,[dblShipmentQuantity]				= ISI.[dblQuantity]	
-	,[dblShipmentQtyShippedTotal]		= ISI.[dblQuantity]
-	,[dblQtyRemaining]					= ISI.[dblQuantity]
-	,[dblDiscount]						= 0.00
-	,[dblPrice]							= ISI.[dblUnitPrice]
-	,[dblShipmentUnitPrice]				= ISI.[dblUnitPrice]
-	,[dblTotalTax]						= 0.00
-	,[dblTotal]							= ISI.[dblQuantity] * ISI.[dblUnitPrice]
-	,[intAccountId]						= A.[intAccountId]
-	,[intCOGSAccountId]					= A.[intCOGSAccountId]
-	,[intSalesAccountId]				= A.[intSalesAccountId]
-	,[intInventoryAccountId]			= A.[intInventoryAccountId]
-	,[intStorageLocationId]				= ISI.[intStorageLocationId]
-	,[strStorageLocationName]			= SL.[strName]
-	,[intTermID]						= T.[intTermID]
-	,[strTerm]							= T.[strTerm]
-	,[intEntityShipViaId]				= S.[intEntityShipViaId]
-	,[strShipVia]						= S.[strShipVia]
-	,[strTicketNumber]					= SCT.[strTicketNumber]
-	,[intTicketId]						= SCT.[intTicketId]
-	,[intTaxGroupId]					= NULL --ISI.[intTaxCodeId] 
-	,[strTaxGroup]						= NULL --TG.[strTaxGroup] 
+	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= CTCD.[intContractHeaderId]
+	,[intContractDetailId]				= CTCD.[intContractDetailId]
+	,[intCompanyLocationId]				= ICIS.[intShipFromLocationId]
+	,[strLocationName]					= SMCL.[strLocationName] 
+	,[intShipToLocationId]				= ICIS.[intShipToLocationId]
+	,[intFreightTermId]					= ICIS.[intFreightTermId]
+	,[intItemId]						= ICISI.[intItemId]	
+	,[strItemNo]						= ICI.[strItemNo] 
+	,[strItemDescription]				= ICI.[strDescription] 
+	,[intItemUOMId]						= ICISI.[intItemUOMId]
+	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
+	,[intShipmentItemUOMId]				= ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId])
+	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
+	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
+	,[dblQtyOrdered]					= 0 
+	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQtyShippedTotal]		= ICISI.[dblQuantity]
+	,[dblQtyRemaining]					= ICISI.[dblQuantity]
+	,[dblDiscount]						= 0 
+	,[dblPrice]							= ICISI.[dblUnitPrice]
+	,[dblShipmentUnitPrice]				= ICISI.[dblUnitPrice]
+	,[dblTotalTax]						= 0
+	,[dblTotal]							= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0)) * ICISI.[dblUnitPrice]
+	,[intAccountId]						= ARIA.[intAccountId]
+	,[intCOGSAccountId]					= ARIA.[intCOGSAccountId]
+	,[intSalesAccountId]				= ARIA.[intSalesAccountId]
+	,[intInventoryAccountId]			= ARIA.[intInventoryAccountId]
+	,[intStorageLocationId]				= ICISI.[intStorageLocationId]
+	,[strStorageLocationName]			= ICSL.[strName]
+	,[intTermID]						= NULL
+	,[strTerm]							= ''
+	,[intEntityShipViaId]				= NULL
+	,[strShipVia]						= ''
+	,[strTicketNumber]					= ''
+	,[intTicketId]						= NULL
+	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
+	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
 	,[dblGrossWt]						= ISISIL.dblGrossWeight 
 	,[dblTareWt]						= ISISIL.dblTareWeight 
 	,[dblNetWt]							= ISISIL.dblNetWeight
 	,[strPONumber]						= ''
-	,[strBOLNumber]						= ISH.[strBOLNumber]
+	,[strBOLNumber]						= ''
 	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= ''
 FROM
-	tblICInventoryShipmentItem ISI
+	tblICInventoryShipmentItem ICISI
 INNER JOIN
-	tblICItem I
-		ON ISI.[intItemId] = I.[intItemId]
-INNER JOIN
-	tblICInventoryShipment ISH
-		ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
+	tblICInventoryShipment ICIS
+		ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
+		AND ICIS.[intOrderType] <> 2
+		AND ICIS.[ysnPosted] = 1
 LEFT OUTER JOIN
 	(
 		SELECT
@@ -448,63 +475,47 @@ LEFT OUTER JOIN
 		GROUP BY
 			intInventoryShipmentItemId
 	) ISISIL
-		ON ISI.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
+		ON ICISI.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
+LEFT OUTER JOIN 
+	vyuCTContractDetailView CTCD	
+		ON ICISI.[intLineNo] = CTCD.[intContractDetailId]
+		AND ICIS.[intOrderType] = 1 
 INNER JOIN
-	tblEntity E
-		ON ISH.[intEntityCustomerId] = E.[intEntityId]
-LEFT OUTER JOIN
-				(	SELECT TOP 1
-						[intEntityLocationId]
-						,[intEntityId] 
-						,[strCountry]
-						,[strState]
-						,[strCity]
-						,[intTermsId]
-						,[intShipViaId]
-					FROM 
-					tblEntityLocation
-					WHERE
-						ysnDefaultLocation = 1
-				) EL
-					ON ISH.[intEntityCustomerId] = EL.[intEntityId]			
-LEFT OUTER JOIN
-	tblSMCompanyLocation CL
-		ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId]
-LEFT OUTER JOIN
-	tblSMTerm T
-		ON EL.[intTermsId] = T.[intTermID]
-LEFT OUTER JOIN
-	tblSMShipVia S
-		ON EL.[intShipViaId] = S.[intEntityShipViaId]			
+	tblARCustomer ARC
+		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN
+	tblICItem ICI
+		ON ICISI.[intItemId] = ICI.[intItemId]
 LEFT JOIN
-	[tblICItemUOM] IU
-		ON ISI.[intItemUOMId] = IU.[intItemUOMId]
+	tblICItemUOM ICIU
+		ON ICISI.[intItemUOMId] = ICIU.[intItemUOMId] 
 LEFT JOIN
-	[tblICUnitMeasure] U
-		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+	tblICUnitMeasure ICUM
+		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]	
+LEFT JOIN
+	tblICItemUOM ICIU1
+		ON ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]) = ICIU1.[intItemUOMId] 
+LEFT JOIN
+	tblICUnitMeasure ICUM1
+		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]				
+INNER JOIN
+	tblEntity EME
+		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
 LEFT OUTER JOIN
-	tblICStorageLocation SL
-		ON ISI.[intStorageLocationId] = SL.[intStorageLocationId]												
+	vyuARGetItemAccount ARIA
+		ON ICISI.[intItemId] = ARIA.[intItemId]
+		AND ICIS.[intShipFromLocationId] = ARIA.[intLocationId]	
 LEFT OUTER JOIN
-	tblSCTicket SCT
-		ON ISI.[intSourceId] = SCT.[intTicketId]
+	tblICStorageLocation ICSL
+		ON ICISI.[intStorageLocationId] = ICSL.[intStorageLocationId]				
 LEFT OUTER JOIN
-	vyuARGetItemAccount A
-		ON ISI.[intItemId] = A.[intItemId]
-		AND ISH.[intShipFromLocationId] = A.[intLocationId] 
+	tblARInvoiceDetail ARID
+		ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 LEFT OUTER JOIN
-	 tblARInvoiceDetail IND
-		ON ISI.[intInventoryShipmentItemId] = IND.[intInventoryShipmentItemId]	
---LEFT OUTER JOIN
---	tblSMTaxGroup TG
---		ON ISI.[intTaxCodeId] = TG.intTaxGroupId 											 
-	WHERE
-		ISH.[ysnPosted] = 1
-		AND ISH.[intOrderType] <> 2
-		AND IND.[intInventoryShipmentItemId] IS NULL
-		AND ISNULL(I.strLotTracking, 'No') <> 'No'
-													
-																										
+	[tblSMCompanyLocation] SMCL
+		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
+WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+
 UNION ALL
 
 SELECT
@@ -522,6 +533,8 @@ SELECT
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= LGS.[intShipmentId]
 	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
+	,[intContractHeaderId]				= NULL
+	,[intContractDetailId]				= NULL
 	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName]
 	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
@@ -563,6 +576,8 @@ SELECT
 	,[strPONumber]						= ''
 	,[strBOLNumber]						= ''
 	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= NULL
 FROM
 	vyuLGShipmentHeader LGS		
 INNER JOIN
@@ -596,9 +611,9 @@ LEFT OUTER JOIN
 	tblEntityLocation SL
 		ON C.intShipToId = SL.intEntityLocationId
 LEFT OUTER JOIN
-	tblARInvoice ARI
-		ON LGS.[intShipmentId] = ARI.[intShipmentId]
+	tblARInvoiceDetail ARID
+		ON LGS.[intShipmentId] = ARID.[intShipmentId]
 WHERE
-	ARI.[intInvoiceId] IS NULL
+	ARID.[intInvoiceId] IS NULL
 	AND LGS.[intShipmentId] IN (SELECT [intShipmentId] FROM vyuLGDropShipmentDetails)
 	AND LGS.[ysnInventorized] = 1

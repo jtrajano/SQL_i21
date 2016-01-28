@@ -21,7 +21,7 @@ CROSS APPLY (
 		TOP 1 *
 	FROM tblAP1099History C
 	WHERE C.intEntityVendorId = B.intEntityVendorId
-	AND YEAR(B.dtmDate) = 2015
+	AND YEAR(B.dtmDate) = @year
 	AND A.int1099Form = C.int1099Form
 	ORDER BY C.dtmDatePrinted DESC
 ) Status1099

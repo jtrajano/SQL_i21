@@ -53,6 +53,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							ysnIsInventory				BIT,
 							strItemDescription			NVARCHAR(100),
 							intItemUOMId				INT,
+							intContractHeaderId			INT,
+							intContractDetailId			INT,
 							dblQtyOrdered				NUMERIC(18,6),
 							dblQtyRemaining				NUMERIC(18,6),
 							dblMaintenanceAmount		NUMERIC(18,6),
@@ -81,8 +83,10 @@ SELECT SI.intItemId
 	 , dbo.fnIsStockTrackingItem(SI.intItemId)
 	 , SI.strItemDescription
 	 , SI.intItemUOMId
+	 , SOD.intContractHeaderId
+	 , SOD.intContractDetailId
 	 , SI.dblQtyOrdered
-	 , SI.dblQtyRemaining
+	 , CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , SI.dblDiscount
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
@@ -96,9 +100,11 @@ FROM tblSOSalesOrder SO
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 	LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId
+	LEFT JOIN tblICInventoryShipmentItem ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
 WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining > 0
+	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
 
 --GET ITEMS FROM POSTED SHIPMENT
 INSERT INTO @tblItemsToInvoice
@@ -106,7 +112,9 @@ SELECT ICSI.intItemId
 	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
 	 , SOD.strItemDescription
 	 , ICSI.intItemUOMId
-	 , ICSI.dblQuantity
+	 , SOD.intContractHeaderId
+	 , SOD.intContractDetailId
+	 , SOD.dblQtyOrdered
 	 , ICSI.dblQuantity
 	 , @dblZeroAmount
 	 , SOD.dblDiscount
@@ -168,9 +176,6 @@ FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
-
---GET NEW COMMENT FOR NEW INVOICE
-SET @InvoiceComment = 'ORIGIN: ' + @SalesOrderNumber + '; ' + @InvoiceComment
 
 --BEGIN TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
@@ -420,6 +425,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@NewDetailId			INT,
 						@ItemDescription		NVARCHAR(100),
 						@ItemUOMId				INT,
+						@ItemContractHeaderId	INT,
+						@ItemContractDetailId	INT,
 						@ItemQtyOrdered			NUMERIC(18,6),
 						@ItemQtyShipped			NUMERIC(18,6),
 						@ItemDiscount			NUMERIC(18,6),
@@ -434,8 +441,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@intItemToInvoiceId		= intItemToInvoiceId,
 						@ItemId					= intItemId,
 						@ItemIsInventory		= ysnIsInventory,
-						@ItemDescription		= strItemDescription,
+						@ItemDescription		= strItemDescription,						
 						@ItemUOMId				= intItemUOMId,
+						@ItemContractHeaderId	= intContractHeaderId,
+						@ItemContractDetailId	= intContractDetailId,
 						@ItemQtyOrdered			= dblQtyOrdered,
 						@ItemQtyShipped			= dblQtyRemaining,
 						@ItemDiscount			= dblDiscount,
@@ -446,7 +455,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@ItemSalesOrderNumber	= strSalesOrderNumber,
 						@ItemShipmentNumber		= strShipmentNumber
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
-
+				
 				EXEC [dbo].[uspARAddItemToInvoice]
 							 @InvoiceId						= @NewInvoiceId	
 							,@ItemId						= @ItemId
@@ -455,7 +464,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
 							,@RaiseError					= @RaiseError
 							,@ItemDescription				= @ItemDescription
+							,@ItemDocumentNumber			= @ItemSalesOrderNumber
 							,@ItemUOMId						= @ItemUOMId
+							,@ItemContractHeaderId			= @ItemContractHeaderId
+							,@ItemContractDetailId		    = @ItemContractDetailId
 							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
@@ -467,6 +479,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 							,@ItemInventoryShipmentItemId	= @ItemShipmentDetailId
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 							,@ItemShipmentNumber			= @ItemShipmentNumber
+							,@EntitySalespersonId			= @EntitySalespersonId
 
 				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 					BEGIN
@@ -488,7 +501,8 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-
+		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		
 		UPDATE
 			tblSOSalesOrder
 		SET
@@ -504,6 +518,19 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 		IF NOT EXISTS (SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @SoftwareInvoiceId AND strTransactionType = 'Invoice')
 			BEGIN
 				EXEC dbo.uspARInsertRecurringInvoice @SoftwareInvoiceId, @UserId
+			END
+
+		DECLARE @ysnSOSoftwareType BIT
+		SELECT TOP 1 @ysnSOSoftwareType = CASE WHEN strType = 'Software' THEN 1 ELSE 0 END
+		FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+
+		IF @ysnSOSoftwareType = 1 AND ISNULL(@NewInvoiceId, 0) > 0
+			BEGIN
+				DECLARE @invoiceToPost NVARCHAR(MAX)
+				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)
+				UPDATE tblARInvoice SET strType = 'Software' WHERE intInvoiceId = @NewInvoiceId
+
+				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice'
 			END			
 	END
 

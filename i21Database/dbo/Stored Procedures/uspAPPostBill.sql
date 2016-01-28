@@ -177,10 +177,54 @@ SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),
 FROM #tmpPostBillData
 ORDER BY intBillId
 
+--CREATE DATA FOR COST ADJUSTMENT
+DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
+INSERT INTO @adjustedEntries
+SELECT
+	[intItemId]							=	B.intItemId
+	,[intItemLocationId]				=	D.intItemLocationId
+	,[intItemUOMId]						=	E2.intUnitMeasureId
+	,[dtmDate] 							=	A.dtmDate
+	,[dblQty] 							=	B.dblQtyReceived
+	,[dblUOMQty] 						=	B.dblQtyReceived
+	,[dblNewCost] 						=	B.dblCost
+	,[intCurrencyId] 					=	A.intConcurrencyId
+	,[dblExchangeRate] 					=	0
+	,[intTransactionId]					=	A.intBillId
+	,[intTransactionDetailId] 			=	B.intBillDetailId
+	,[strTransactionId] 				=	A.strBillId
+	,[intTransactionTypeId] 			=	25
+	,[intLotId] 						=	NULL
+	,[intSubLocationId] 				=	NULL
+	,[intStorageLocationId] 			=	NULL
+	,[ysnIsStorage] 					=	NULL
+	,[strActualCostId] 					=	NULL
+	,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
+	,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
+	,[strSourceTransactionId] 			=	E1.strReceiptNumber
+FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B
+	ON A.intBillId = B.intBillId
+	INNER JOIN (tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 ON E1.intInventoryReceiptId = E2.intInventoryReceiptId)
+		ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
+	INNER JOIN tblICItem C
+	ON B.intItemId = C.intItemId
+	INNER JOIN tblICItemLocation D
+	ON D.intLocationId = A.intShipToId AND D.intItemId = C.intItemId
+WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost != 0
+
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
 	SELECT * FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
+
+	IF EXISTS(SELECT 1 FROM @adjustedEntries)
+	BEGIN
+		INSERT INTO @GLEntries
+		EXEC uspICPostCostAdjustment @adjustedEntries, @batchId, @userId
+	END
+
 END
 ELSE
 BEGIN
@@ -255,6 +299,16 @@ BEGIN
 		--	GROUP BY B.intTransactionId
 		--) AppliedPayments
 		EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 0
+
+		IF EXISTS(SELECT 1 FROM @adjustedEntries)
+		BEGIN
+			--Unpost Cost Adjustment
+			DECLARE @billsToUnpost AS Id
+			INSERT INTO @billsToUnpost
+			SELECT intTransactionId FROM @adjustedEntries
+
+			EXEC uspAPUnpostCostAdjustmentGL  @billsToUnpost, @batchId, @userId
+		END
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
@@ -436,6 +490,8 @@ BEGIN
 END
 ELSE
 	BEGIN
+
+		ROLLBACK TRANSACTION; --ROLLBACK CHANGES MADE FROM OTHER STORED PROCEDURE e.g. cost adjustment
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLDetailRecap
@@ -502,7 +558,10 @@ ELSE
 		
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
-		GOTO Post_Commit;
+		SET @success = 1
+		SET @successfulCount = @totalRecords
+		RETURN;
+
 	END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
