@@ -853,6 +853,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'CRM Number')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 92
+			,[strTransactionType]	= N'OffSiteTicketNumber'
+			,[strPrefix]			= N'OFF-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Grain'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'OffSiteTicketNumber')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
