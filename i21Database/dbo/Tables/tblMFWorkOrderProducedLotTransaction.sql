@@ -7,7 +7,7 @@
 	,intItemId INT NULL
 	,intTransactionId INT NULL
 	,intTransactionTypeId INT NULL
-	,strTransactionType NVARCHAR(50) NULL
+	,strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,dtmTransactionDate DATETIME NULL
 	,intProcessId INT NULL
 	,intShiftId INT NULL
