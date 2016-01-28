@@ -108,7 +108,7 @@ BEGIN
 			WHERE	intInventoryTransferId = @inventoryTransferId
 
 			-- 'Unable to update %s. It is posted. Please unpost it first.'
-			RAISERROR(80075, 11, 1, @inventoryTransferNumber);	
+			RAISERROR(80077, 11, 1, @inventoryTransferNumber);	
 			GOTO _Exit;
 		END
 				

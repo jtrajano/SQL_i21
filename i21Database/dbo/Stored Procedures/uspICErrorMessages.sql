@@ -379,10 +379,10 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80075) EXEC sp_dropmessa
 SET @strmessage = 'Item %s is invalid. It must be lot tracked.'
 EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80076) EXEC sp_dropmessage 80074, 'us_english'	
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80076) EXEC sp_dropmessage 80076, 'us_english'	
 SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
-EXEC sp_addmessage 80074,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 80076,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80077) EXEC sp_dropmessage 80075, 'us_english'	
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80077) EXEC sp_dropmessage 80077, 'us_english'	
 SET @strmessage = 'Unable to update %s. It is posted. Please unpost it first.'
-EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 80077,11,@strmessage,'us_english','False'

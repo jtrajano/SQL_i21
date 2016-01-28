@@ -170,7 +170,7 @@ BEGIN
 		-- Declare the variables for the transaction types
 		DECLARE @PurchaseType AS INT = 4
 				,@SalesType AS INT = 5
-				,@CostAdjustmentType AS INT = 24
+				,@CostAdjustmentType AS INT = 26
 				,@BillType AS INT = 23
 
 				,@RevalueTransfer AS INT = 26

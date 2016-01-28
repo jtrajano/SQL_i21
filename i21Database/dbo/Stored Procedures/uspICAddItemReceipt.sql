@@ -166,7 +166,7 @@ BEGIN
 			WHERE	intInventoryReceiptId = @inventoryReceiptId
 
 			-- 'Unable to update %s. It is posted. Please unpost it first.'
-			RAISERROR(80075, 11, 1, @receiptNumber);	
+			RAISERROR(80077, 11, 1, @receiptNumber);	
 			GOTO _Exit;
 		END
 				
