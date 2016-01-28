@@ -17,6 +17,9 @@
 	[dblPriceInUnitUOM] NUMERIC(18,6),		
 	[strRemark] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL, 
 	[intConcurrencyId] INT NOT NULL,
+	[ysnExportProvPrice] BIT NULL,
+	[ysnExported] BIT NULL,
+	[dtmExported] DATETIME NULL,
 	
 	CONSTRAINT [PK_tblCTCleanCost_intCleanCostId] PRIMARY KEY CLUSTERED ([intCleanCostId] ASC),
 	CONSTRAINT [UK_tblCTCleanCost_strReferenceNumber] UNIQUE ([strReferenceNumber]),
