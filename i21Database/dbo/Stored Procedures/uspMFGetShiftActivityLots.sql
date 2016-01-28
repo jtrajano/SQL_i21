@@ -43,7 +43,7 @@ BEGIN
 		JOIN tblMFShift S ON S.intShiftId = WPL.intBusinessShiftId
 		JOIN tblICLot L ON L.intLotId = WPL.intLotId
 		JOIN tblICItem I ON I.intItemId = L.intItemId
-		JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = WPL.intPhysicalItemUOMId
+		JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
 		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 		JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
 	END
@@ -66,7 +66,7 @@ BEGIN
 		JOIN tblMFShift S ON S.intShiftId = WPL.intBusinessShiftId
 		JOIN tblICLot L ON L.intLotId = WPL.intLotId
 		JOIN tblICItem I ON I.intItemId = L.intItemId
-		JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = WPL.intPhysicalItemUOMId
+		JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
 		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 		JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
 	END

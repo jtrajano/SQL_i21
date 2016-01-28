@@ -3324,6 +3324,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099MISCTwoPart.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099BTwoPart.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099INTTwoPart.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFEndShiftActivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

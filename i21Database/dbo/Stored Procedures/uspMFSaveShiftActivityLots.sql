@@ -18,17 +18,17 @@ BEGIN TRY
 		,@dtmShiftDate DATETIME
 		,@intShiftId INT
 		,@intManufacturingCellId INT
-		,@strUserName NVARCHAR(50)
+		,@intUserId INT
 
 	SELECT @dtmShiftDate = dtmShiftDate
 		,@intManufacturingCellId = intManufacturingCellId
-		,@strUserName = strUserName
+		,@intUserId = intUserId
 		,@intShiftActivityId = intShiftActivityId
 		,@intShiftId = intShiftId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			dtmShiftDate DATETIME
 			,intManufacturingCellId INT
-			,strUserName NVARCHAR(50)
+			,intUserId INT
 			,intShiftActivityId INT
 			,intShiftId INT
 			)
@@ -44,12 +44,18 @@ BEGIN TRY
 
 	COMMIT TRANSACTION
 
-	--EXEC dbo.uspMFEndShiftActivity @intManufacturingCellId
-	--	,@dtmShiftDate
-	--	,@intShiftId
-	--	,@intShiftActivityId
-	--	,@strUserName
-	--	,'Manually Closed'
+	DECLARE @intLocationId INT
+
+	SELECT @intLocationId = intLocationId
+	FROM dbo.tblMFManufacturingCell
+	WHERE intManufacturingCellId = @intManufacturingCellId
+
+	EXEC dbo.uspMFEndShiftActivity @intManufacturingCellId
+		,@intShiftActivityId
+		,@intUserId
+		,'Manually Closed'
+		,@intLocationId
+
 	EXEC sp_xml_removedocument @idoc
 END TRY
 
