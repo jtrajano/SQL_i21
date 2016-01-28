@@ -18,7 +18,6 @@ AS
 	,APB.dtmDate
 	,Cast(APB.dtmDueDate AS Date )AS dtmDueDate
 	,APB.dblAmountDue AS dblAmountDue
-	,ISNULL(P.dblAmountPaid,0) AS dblAmountPaid
 	,APB.dblInterest AS dblInterest
 	,APB.dblWithheld AS dblWithheld
 	,APB.dblDiscount AS dblDiscount
@@ -34,7 +33,7 @@ AS
 								WHEN APB.intTransactionType = 10 THEN 'Patronage'
 							ELSE ''
 						  END) AS strTransactionType
-	
+	,'' AS dblAmountPaid
 	,'' AS dblCost--tblAPBatchDetail.dblCost
 	,'' AS strTaxCode --tblAPBatchDetail.strTaxID AS strSalesTaxCode
 	,APB.ysnPaid AS ysnPaid
@@ -44,10 +43,6 @@ AS
 		ON APB.intEntityVendorId = APV.intEntityVendorId
 	LEFT JOIN dbo.tblEntity E
 		ON E.intEntityId = APV.intEntityVendorId
-	LEFT JOIN tblAPPaymentDetail PD
-		ON APB.intBillId = PD.intBillId
-	LEFT JOIN tblAPPayment P
-		ON PD.intPaymentId = P.intPaymentId
 	WHERE 
 			APB.ysnForApproval != 1														   --Will not show For Approval Bills
 		AND APB.ysnPosted = 1 OR (APB.dtmApprovalDate IS NOT NULL AND APB.ysnApproved = 1) --Will not show Rejected approval bills but show old Posted Transactions.
