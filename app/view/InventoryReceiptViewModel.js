@@ -33,6 +33,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'AccountsPayable.common.extensions.GridExtension'
     ],
 
+    data: {
+        forceSelection: false
+    },
+
+
     stores: {
         receiptTypes: {
             autoLoad: true,
@@ -549,7 +554,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             switch (get('current.strReceiptType')) {
                 case 'Purchase Contract':
                     if (this.getData().current) {
-                        if (this.getData().current.phantom) {d
+                        if (this.getData().current.phantom) {
                             return {
                                 property: 'intSourceType',
                                 value: '1',

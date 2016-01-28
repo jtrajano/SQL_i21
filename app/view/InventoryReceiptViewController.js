@@ -530,10 +530,49 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             grdLotTracking: {
                 readOnly: '{current.ysnPosted}',
                 colLotId: {
-                    dataIndex: 'strLotNumber'
+                    dataIndex: 'strLotNumber',
+                    editor: {
+                        forceSelection: '{forceSelection}',
+                        origValueField: 'intLotId',
+                        origUpdateField: 'intLotId',
+                        store: '{lots}',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryReceipt.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryReceipt.selection.intSubLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intStorageLocationId',
+                                value: '{grdInventoryReceipt.selection.intStorageLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intOwnershipType',
+                                value: '{grdInventoryReceipt.selection.intOwnershipType}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strLotStatusType',
+                                value: 'Active',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
                 },
                 colLotAlias: {
                     dataIndex: 'strLotAlias'
+
                 },
                 colLotUOM: {
                     dataIndex: 'strUnitMeasure',
@@ -3380,7 +3419,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var plugin = grid.getPlugin('cepItemLots');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboLotUOM') {
+        if (combo.itemId === 'cboLot') {
+            current.set('strItemUOM', records[0].get('strItemUOM'));
+            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
+            current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+
+            current.set('strWeightUOM', records[0].get('strWeightUOM'));
+            current.set('dtmExpiryDate', records[0].get('dtmExpiryDate'));
+        }
+        else if (combo.itemId === 'cboLotUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
             me.calculateGrossWeight(win.viewModel.data.currentReceiptItem);

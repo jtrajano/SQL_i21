@@ -1637,17 +1637,86 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotId',
                                                                                 width: 100,
-                                                                                dataIndex: 'string',
                                                                                 text: 'Lot Number',
                                                                                 editor: {
-                                                                                    xtype: 'textfield',
+                                                                                    xtype: 'gridcombobox',
                                                                                     columns: [
                                                                                         {
                                                                                             dataIndex: 'intLotId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Lot Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intItemId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intSubLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intStorageLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intOwnershipType',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intItemUOMId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strItemUOM',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strItemUOMType',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblItemUOMConv',
+                                                                                            dataType: 'float',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strLotStatusType',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dtmExpiryDate',
+                                                                                            dataType: 'date',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intWeightUOMId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strWeightUOM',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblWeightUOMConv',
+                                                                                            dataType: 'float',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
@@ -1657,7 +1726,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             flex: 1
                                                                                         }
                                                                                     ],
-                                                                                    itemId: 'cboLotId'
+                                                                                    itemId: 'cboLot',
+                                                                                    displayField: 'strLotNumber',
+                                                                                    valueField: 'strLotNumber'
                                                                                 }
                                                                             },
                                                                             {
