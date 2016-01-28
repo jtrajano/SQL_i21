@@ -3772,11 +3772,52 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor',{ action: 'view' });
     },
 
+    onVendorDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', combo.getValue());
+        }
+    },
+
+    onLocationDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'LocationName');
+        }
+    },
+
+    onTaxGroupDrilldown: function(combo) {
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('i21.view.TaxGroup', { action: 'new', viewConfig: { modal: true }});
+        }
+        else {
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'TaxGroup');
+        }
+    },
+
+    onCurrencyDrilldown: function(combo) {
+        iRely.Functions.openScreen('i21.view.Currency', {viewConfig: { modal: true }});
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
                 beforequery: this.onShipFromBeforeQuery,
-                select: this.onVendorSelect
+                select: this.onVendorSelect,
+                drilldown: this.onVendorDrilldown
+            },
+            "#cboLocation": {
+                drilldown: this.onLocationDrilldown
+            },
+            "#cboCurrency": {
+                drilldown: this.onCurrencyDrilldown
+            },
+            "#cboTaxGroup": {
+                drilldown: this.onTaxGroupDrilldown
             },
             "#cboTransferor": {
                 select: this.onTransferorSelect

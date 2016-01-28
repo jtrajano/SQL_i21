@@ -336,6 +336,10 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'i21.view.CompanyLocation';
                 columnName = 'strLocationName';
                 break;
+            case 'TaxGroup':
+                screenName = 'i21.view.TaxGroup';
+                columnName = 'strTaxGroup';
+                break;
             case 'StorageLocation':
                 screenName = 'Inventory.view.StorageUnit';
                 columnName = 'strName';
