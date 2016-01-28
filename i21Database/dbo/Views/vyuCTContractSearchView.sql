@@ -21,7 +21,7 @@ AS
 				CH.strApprovalBasisDescription,		CH.strCommodityCode,			CH.strINCOLocationType,
 				CH.strApprovalBasis,				CH.strContractBasis,			CH.strPricingType,
 				CH.strPricingLevelName,				CH.strLoadUnitMeasure,			CH.strCategoryUnitMeasure,
-				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				
+				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				BL.dblAppliedQty,
 				CH.dtmCreated,						CH.intContractPlanId,			CH.strContractPlan,
 				CH.strCreatedBy,					CH.strLastModifiedBy,
 				CASE	WHEN	CH.strStatuses LIKE '%Open%'
@@ -35,7 +35,9 @@ AS
 	FROM		vyuCTContractHeaderView		CH	LEFT
 	JOIN
 	(
-		SELECT	HV.intContractHeaderId,SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId,CD.dblBalance)) AS dblBalance
+		SELECT	HV.intContractHeaderId,
+				SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId,CD.dblBalance))		AS dblBalance,
+				SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId,CD.dblAppliedQty))	AS dblAppliedQty
 		FROM	vyuCTContractHeaderView		HV	LEFT
 		JOIN	tblICCommodityUnitMeasure	UM	ON	UM.intCommodityUnitMeasureId	=	HV.intCommodityUnitMeasureId LEFT
 		JOIN	vyuCTContractDetailView		CD	ON CD.intContractHeaderId			=	HV.intContractHeaderId

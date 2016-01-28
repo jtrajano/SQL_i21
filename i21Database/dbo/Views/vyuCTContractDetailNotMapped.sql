@@ -19,12 +19,17 @@ SELECT	CD.intContractDetailId,
 				THEN	dbo.fnCTConvertQtyToTargetCategoryUOM(CD.intCategoryUOMId,GU.intCategoryUOMId,1)
 				ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CM.intItemUOMId,1) 
 		END		AS		dblConversionFactor,
-		ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM
+		ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM,
+		CY.strCurrency	strMainCurrency,
+		CU.ysnSubCurrency,
+		ISNULL(CD.dblQuantity,0) - ISNULL(CD.dblBalance,0)	AS	dblAppliedQty
 
 FROM	tblCTContractDetail			CD	
 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId		LEFT
 JOIN	tblICItemContract			IC	ON	IC.intItemContractId			=	CD.intItemContractId		LEFT
 JOIN	tblSMCountry				RY	ON	RY.intCountryID					=	IC.intCountryId				LEFT
+JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	CD.intCurrencyId			LEFT
+JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CU.intMainCurrencyId		LEFT
 JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId					=	CD.intItemUOMId				LEFT
 JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId				=	QU.intUnitMeasureId			LEFT
 JOIN	tblICItemUOM				WM	ON	WM.intItemUOMId					=	CD.intNetWeightUOMId		LEFT
