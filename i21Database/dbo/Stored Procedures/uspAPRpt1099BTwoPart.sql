@@ -199,4 +199,5 @@ OUTER APPLY (
 	*
 	FROM B1099 B
 	WHERE B.int1099BId % 2 = 0
+	AND B.int1099BId = (B1099Top.int1099BId + 1)
 ) B1099Bottom
