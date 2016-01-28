@@ -376,7 +376,7 @@ Ext.define('Inventory.view.Category', {
                                                                 valueField: 'intCategoryUOMId'
                                                             },
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 itemId: 'grdTax',
                                                                 header: false,
@@ -417,6 +417,8 @@ Ext.define('Inventory.view.Category', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownText: 'Open Tax Class',
+                                                                        headerDrillDownClick: 'onTaxClassHeaderClick',
                                                                         itemId: 'colTaxClass',
                                                                         minWidth: 95,
                                                                         dataIndex: 'intUnitMeasureId',

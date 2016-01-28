@@ -722,7 +722,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "forceFit": true,
                                                         "header": false,
                                                         "itemId": "grdTax",
@@ -811,12 +811,26 @@
                                                             "userConfig": {
                                                                 "dataIndex": "intUnitMeasureId",
                                                                 "flex": 2,
+                                                                "headerDrillDownClick": "onTaxClassHeaderClick",
+                                                                "headerDrillDownText": "Open Tax Class",
                                                                 "itemId": "colTaxClass",
                                                                 "minWidth": 95,
                                                                 "text": "Tax Class"
                                                             },
                                                             "name": "MyColumn",
                                                             "designerId": "d721145f-1c3e-4e31-88c1-a28e40c7585e",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownText",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownClick",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
                                                             "cn": [
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",

@@ -426,13 +426,12 @@ Ext.define('Inventory.view.Item', {
                                                 ]
                                             },
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'frmadvancesearchgrid',
                                                 flex: 3,
                                                 reference: 'grdUnitOfMeasure',
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
                                                 columnLines: true,
-                                                forceFit: true,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -473,6 +472,8 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownText: 'Open Inventory UOM',
+                                                        headerDrillDownClick: 'onUOMHeaderClick',
                                                         itemId: 'colDetailUnitMeasure',
                                                         minWidth: 95,
                                                         dataIndex: 'intUnitMeasureId',
@@ -797,7 +798,7 @@ Ext.define('Inventory.view.Item', {
                                                         ],
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 reference: 'grdGlAccounts',
                                                                 itemId: 'grdGlAccounts',
                                                                 margin: -1,
@@ -956,7 +957,7 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 itemId: 'grdLocationStore',
                                                                 margin: -1,
@@ -1677,7 +1678,7 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'gridpanel',
+                                                                        xtype: 'frmadvancesearchgrid',
                                                                         flex: 1,
                                                                         itemId: 'grdCategory',
                                                                         margin: '0 5 0 0 ',
@@ -1716,6 +1717,8 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownClick: 'onCategoryHeaderClick',
+                                                                                headerDrillDownText: 'Open Category',
                                                                                 itemId: 'colPOSCategoryName',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Category Name',
@@ -1763,7 +1766,7 @@ Ext.define('Inventory.view.Item', {
                                                                         ]
                                                                     },
                                                                     {
-                                                                        xtype: 'gridpanel',
+                                                                        xtype: 'frmadvancesearchgrid',
                                                                         flex: 1.2,
                                                                         itemId: 'grdServiceLevelAgreement',
                                                                         title: 'Service Level Agreement Setup',
@@ -2678,7 +2681,7 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 reference: 'grdContractItem',
                                                                 itemId: 'grdContractItem',
@@ -2769,6 +2772,8 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownText: 'Open Country',
+                                                                        headerDrillDownClick: 'onCountryHeaderClick',
                                                                         itemId: 'colContractOrigin',
                                                                         dataIndex: 'string',
                                                                         text: 'Origin',
@@ -2887,7 +2892,7 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'advancefiltergrid',
+                                                                        xtype: 'frmadvancesearchgrid',
                                                                         flex: 1,
                                                                         itemId: 'grdDocumentAssociation',
                                                                         margin: '0 4 -1 -1',
@@ -2926,6 +2931,8 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownClick: 'onDocumentHeaderClick',
+                                                                                headerDrillDownText: 'Open Contract Document',
                                                                                 itemId: 'colDocument',
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
@@ -2974,7 +2981,7 @@ Ext.define('Inventory.view.Item', {
                                                                         ]
                                                                     },
                                                                     {
-                                                                        xtype: 'advancefiltergrid',
+                                                                        xtype: 'frmadvancesearchgrid',
                                                                         flex: 1,
                                                                         itemId: 'grdCertification',
                                                                         margin: '0 -1 -1 4',
@@ -3013,6 +3020,8 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownText: 'Open Certification Program',
+                                                                                headerDrillDownClick: 'onCertificationHeaderClick',
                                                                                 itemId: 'colCertification',
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
@@ -3072,7 +3081,7 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 itemId: 'grdCustomerXref',
                                                                 margin: '0 -1 4 -1',
@@ -3229,7 +3238,7 @@ Ext.define('Inventory.view.Item', {
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 itemId: 'grdVendorXref',
                                                                 margin: '0 -1 -1 -1',
@@ -3604,7 +3613,7 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 itemId: 'grdMotorFuelTax',
                                                                 margin: '-1 -1 4 -1',
@@ -3613,7 +3622,7 @@ Ext.define('Inventory.view.Item', {
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
-                                                                        xtype: 'toolbar',
+                                                                        xtype: 'advancefiltergrid',
                                                                         dock: 'top',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
@@ -3917,7 +3926,7 @@ Ext.define('Inventory.view.Item', {
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'frmadvancesearchgrid',
                                                 flex: 1,
                                                 itemId: 'grdPricing',
                                                 margin: -1,
@@ -4128,7 +4137,7 @@ Ext.define('Inventory.view.Item', {
                                                         title: 'Pricing Level',
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 reference: 'grdPricingLevel',
                                                                 itemId: 'grdPricingLevel',
                                                                 margin: -1,
@@ -4410,7 +4419,7 @@ Ext.define('Inventory.view.Item', {
                                                         title: 'Promotional Pricing',
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 itemId: 'grdSpecialPricing',
                                                                 margin: -1,
                                                                 columnLines: true,
@@ -4717,7 +4726,7 @@ Ext.define('Inventory.view.Item', {
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'frmadvancesearchgrid',
                                                 itemId: 'grdStock',
                                                 margin: -1,
                                                 columnLines: true,
@@ -5118,7 +5127,7 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 itemId: 'grdCommodityCost',
                                                                 title: 'Commodity Cost',
@@ -5267,7 +5276,7 @@ Ext.define('Inventory.view.Item', {
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'frmadvancesearchgrid',
                                                 reference: 'grdAssembly',
                                                 itemId: 'grdAssembly',
                                                 margin: -1,
@@ -5450,7 +5459,7 @@ Ext.define('Inventory.view.Item', {
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'frmadvancesearchgrid',
                                                 reference: 'grdBundle',
                                                 itemId: 'grdBundle',
                                                 margin: -1,
@@ -5630,7 +5639,7 @@ Ext.define('Inventory.view.Item', {
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'frmadvancesearchgrid',
                                                 flex: 1,
                                                 reference: 'grdKit',
                                                 itemId: 'grdKit',
@@ -5708,7 +5717,7 @@ Ext.define('Inventory.view.Item', {
                                                 ]
                                             },
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'frmadvancesearchgrid',
                                                 flex: 1,
                                                 itemId: 'grdKitDetails',
                                                 margin: -1,
@@ -5914,7 +5923,7 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 reference: 'grdFactory',
                                                                 itemId: 'grdFactory',
@@ -6010,7 +6019,7 @@ Ext.define('Inventory.view.Item', {
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
                                                                 reference: 'grdManufacturingCellAssociation',
                                                                 itemId: 'grdManufacturingCellAssociation',
@@ -6050,6 +6059,8 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownText: 'Open Manufacturing Cell',
+                                                                        headerDrillDownClick: 'onManufacturingCellHeaderClick',
                                                                         itemId: 'colCellName',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Cell Name',
@@ -6122,7 +6133,7 @@ Ext.define('Inventory.view.Item', {
                                                         title: 'Owner',
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
+                                                                xtype: 'frmadvancesearchgrid',
                                                                 itemId: 'grdOwner',
                                                                 title: 'Owner Association',
                                                                 columnLines: true,
@@ -6152,6 +6163,8 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownClick: 'onCustomerHeaderClick',
+                                                                        headerDrillDownText: 'Open Customer',
                                                                         itemId: 'colOwner',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Owner',

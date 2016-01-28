@@ -2947,6 +2947,9 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+
+    //<editor-fold desc="Search Drilldown Events">
+
     onInventoryUOMClick: function () {
         iRely.Functions.openScreen('Inventory.view.InventoryUOM', { action: 'new', viewConfig: { modal: true }});
     },
@@ -2958,6 +2961,10 @@ Ext.define('Inventory.view.ItemViewController', {
     onCommodityClick: function () {
         iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
     },
+
+    //</editor-fold>
+
+    //<editor-fold desc="Combo Box Drilldown Events">
 
     onManufacturerDrilldown: function(combo) {
         iRely.Functions.openScreen('Inventory.view.Manufacturer', {viewConfig: { modal: true }});
@@ -3014,6 +3021,54 @@ Ext.define('Inventory.view.ItemViewController', {
     onPatronageDirectDrilldown: function(combo) {
         iRely.Functions.openScreen('Patronage.view.PatronageCategory', {viewConfig: { modal: true }});
     },
+
+    //</editor-fold>
+
+    //<editor-fold desc="Header Drilldown Events">
+
+    onUOMHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.InventoryUOM', grid, 'intUnitMeasureId');
+    },
+
+    onCategoryHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Category', grid, 'intCategoryId');
+    },
+
+    onCountryHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('i21.view.Country', grid, 'intCountryID');
+    },
+
+    onDocumentHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.ContractDocument', grid, 'intDocumentId');
+    },
+
+    onCertificationHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.CertificationProgram', grid, 'intCertificationId');
+    },
+
+    onManufacturingCellHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Manufacturing.view.ManufacturingCell', grid, 'intManufacturingCellId');
+    },
+
+    onCustomerHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityCustomer', grid, 'intOwnerId');
+    },
+
+    //</editor-fold>
 
     init: function(application) {
         this.control({

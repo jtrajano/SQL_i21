@@ -246,6 +246,30 @@ Ext.define('Inventory.controller.Inventory', {
             return true;
     },
 
+    showScreenFromHeaderDrilldown: function(screen, grid, fieldName) {
+        var selections = [];
+        var idList = '';
+
+        if (grid) {
+            if (grid.getSelectionModel()) {
+                selections = grid.getSelectionModel().getSelection();
+                for (var i = 0; i < selections.length; ++i) {
+                    if (!selections[i].dummy) {
+                        if (idList.toString().length > 0) idList += '|^|';
+                        idList += selections[i].get(fieldName);
+                    }
+                }
+            }
+        }
+
+        if (idList.length > 0) {
+            iRely.Functions.openScreen(screen, idList);
+        }
+        else {
+            iRely.Functions.openScreen(screen, { action: 'new', viewConfig: { modal: true }});
+        }
+    },
+
     showScreen: function(recordId, screenType) {
         var screenName = '',
             action = 'new',
@@ -301,8 +325,11 @@ Ext.define('Inventory.controller.Inventory', {
                 columnName = 'strAdjustmentNo';
                 break;
             case 'VendorName':
+                screenName = 'EntityManagement.view.Entity:searchEntityVendor';
+                columnName = 'strName';
+                break;
             case 'CustomerName':
-                screenName = 'EntityManagement.view.Entity';
+                screenName = 'EntityManagement.view.Entity:searchEntityCustomer';
                 columnName = 'strName';
                 break;
             case 'LocationName':
@@ -338,6 +365,8 @@ Ext.define('Inventory.controller.Inventory', {
             });
         }
     },
+
+
 
     computeDateAdd: function(currentDate, qty, type) {
         if (!currentDate) return;

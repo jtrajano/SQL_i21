@@ -839,8 +839,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columnLines": true,
-                                        "designer|createAlias": "advancefiltergrid",
-                                        "forceFit": true,
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdUnitOfMeasure",
                                         "layout|flex": 3,
                                         "reference": "grdUnitOfMeasure",
@@ -928,7 +927,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter111",
                                                     "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -944,12 +943,26 @@
                                             "userConfig": {
                                                 "dataIndex": "intUnitMeasureId",
                                                 "flex": 1.3,
+                                                "headerDrillDownClick": "onUOMHeaderClick",
+                                                "headerDrillDownText": "Open Inventory UOM",
                                                 "itemId": "colDetailUnitMeasure",
                                                 "minWidth": 95,
                                                 "text": "Unit"
                                             },
                                             "name": "MyColumn",
                                             "designerId": "9f60de7f-46f4-4ac5-9881-183c6ebb93bb",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1686,7 +1699,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "forceFit": true,
                                                         "itemId": "grdGlAccounts",
                                                         "margin": -1,
@@ -1775,7 +1788,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter18",
+                                                                    "name": "filter112",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2030,7 +2043,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdLocationStore",
                                                         "layout|flex": 1,
                                                         "margin": -1,
@@ -3614,6 +3627,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "columnLines": true,
+                                                                "designer|createAlias": "frmadvancesearchgrid",
                                                                 "itemId": "grdCategory",
                                                                 "layout|flex": 1,
                                                                 "margin": "0 5 0 0 ",
@@ -3683,7 +3697,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter19",
+                                                                            "name": "filter113",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3699,11 +3713,25 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "flex": 1,
+                                                                        "headerDrillDownClick": "onCategoryHeaderClick",
+                                                                        "headerDrillDownText": "Open Category",
                                                                         "itemId": "colPOSCategoryName",
                                                                         "text": "Category Name"
                                                                     },
                                                                     "name": "MyColumn78",
                                                                     "designerId": "b889a5a2-8ffa-44a4-8d54-c3a5be7f1d2a",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownClick",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownText",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ],
                                                                     "cn": [
                                                                         {
                                                                             "type": "Ext.form.field.ComboBox",
@@ -3804,6 +3832,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "columnLines": true,
+                                                                "designer|createAlias": "frmadvancesearchgrid",
                                                                 "itemId": "grdServiceLevelAgreement",
                                                                 "layout|flex": 1.2,
                                                                 "title": "Service Level Agreement Setup"
@@ -3872,7 +3901,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter110",
+                                                                            "name": "filter114",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5589,7 +5618,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter111",
+                                                                    "name": "filter115",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5803,7 +5832,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdContractItem",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
@@ -5875,7 +5904,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter112",
+                                                                    "name": "filter116",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5993,11 +6022,25 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "headerDrillDownClick": "onCountryHeaderClick",
+                                                                "headerDrillDownText": "Open Country",
                                                                 "itemId": "colContractOrigin",
                                                                 "text": "Origin"
                                                             },
                                                             "name": "MyColumn14",
                                                             "designerId": "ae408c08-bb8b-4822-89e4-0e5cf3b188a3",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownText",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownClick",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
                                                             "cn": [
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",
@@ -6292,7 +6335,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "columnLines": true,
-                                                                "designer|createAlias": "advancefiltergrid",
+                                                                "designer|createAlias": "frmadvancesearchgrid",
                                                                 "itemId": "grdDocumentAssociation",
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
@@ -6363,7 +6406,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter113",
+                                                                            "name": "filter117",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6379,12 +6422,26 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "flex": 1.5,
+                                                                        "headerDrillDownClick": "onDocumentHeaderClick",
+                                                                        "headerDrillDownText": "Open Contract Document",
                                                                         "itemId": "colDocument",
                                                                         "text": "Document",
                                                                         "width": 215
                                                                     },
                                                                     "name": "MyColumn16",
                                                                     "designerId": "6579e26a-9329-4f56-aaad-e217d4351c83",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownClick",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownText",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ],
                                                                     "cn": [
                                                                         {
                                                                             "type": "Ext.form.field.ComboBox",
@@ -6485,7 +6542,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "columnLines": true,
-                                                                "designer|createAlias": "advancefiltergrid",
+                                                                "designer|createAlias": "frmadvancesearchgrid",
                                                                 "itemId": "grdCertification",
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
@@ -6556,7 +6613,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter114",
+                                                                            "name": "filter118",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6572,12 +6629,26 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "flex": 1.5,
+                                                                        "headerDrillDownClick": "onCertificationHeaderClick",
+                                                                        "headerDrillDownText": "Open Certification Program",
                                                                         "itemId": "colCertification",
                                                                         "text": "Certification",
                                                                         "width": 215
                                                                     },
                                                                     "name": "MyColumn16",
                                                                     "designerId": "2954b1d1-e185-4b16-8702-e7a02039e874",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownText",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownClick",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ],
                                                                     "cn": [
                                                                         {
                                                                             "type": "Ext.form.field.ComboBox",
@@ -6706,7 +6777,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdCustomerXref",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
@@ -6777,7 +6848,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter115",
+                                                                    "name": "filter119",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7056,7 +7127,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdVendorXref",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
@@ -7127,7 +7198,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter116",
+                                                                    "name": "filter120",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7855,7 +7926,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "header": false,
                                                         "itemId": "grdMotorFuelTax",
                                                         "layout|flex": 1,
@@ -7875,6 +7946,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
+                                                                "designer|createAlias": "advancefiltergrid",
                                                                 "dock": "top",
                                                                 "itemId": "tlbGridOptions"
                                                             },
@@ -7927,7 +7999,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter117",
+                                                                    "name": "filter121",
                                                                     "designerId": "49c3fb54-0e26-4ccf-ade0-359ab372f04f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -8489,7 +8561,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columnLines": true,
-                                        "designer|createAlias": "advancefiltergrid",
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdPricing",
                                         "layout|flex": 1,
                                         "margin": -1,
@@ -8559,7 +8631,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter122",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -9006,7 +9078,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdPricingLevel",
                                                         "margin": -1,
                                                         "reference": "grdPricingLevel",
@@ -9076,7 +9148,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter119",
+                                                                    "name": "filter123",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -9651,7 +9723,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdSpecialPricing",
                                                         "margin": -1,
                                                         "title": null
@@ -9702,7 +9774,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter120",
+                                                                    "name": "filter124",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10360,7 +10432,7 @@
                                     "userConfig": {
                                         "autoScroll": null,
                                         "columnLines": true,
-                                        "designer|createAlias": "advancefiltergrid",
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "forceFit": null,
                                         "hideHeaders": null,
                                         "itemId": "grdStock",
@@ -10395,7 +10467,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter121",
+                                                    "name": "filter125",
                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -11165,7 +11237,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdCommodityCost",
                                                         "layout|flex": 1,
                                                         "title": "Commodity Cost"
@@ -11234,7 +11306,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter122",
+                                                                    "name": "filter126",
                                                                     "designerId": "74ebd405-7763-4163-a329-69eecae2fbea",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -11512,7 +11584,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columnLines": true,
-                                        "designer|createAlias": "advancefiltergrid",
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdAssembly",
                                         "margin": -1,
                                         "reference": "grdAssembly",
@@ -11582,7 +11654,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter123",
+                                                    "name": "filter127",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -11891,7 +11963,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columnLines": true,
-                                        "designer|createAlias": "advancefiltergrid",
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdBundle",
                                         "margin": -1,
                                         "reference": "grdBundle",
@@ -11961,7 +12033,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter124",
+                                                    "name": "filter128",
                                                     "designerId": "336a12a5-7629-4f16-aedc-1c6511cd8165",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12275,7 +12347,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columnLines": true,
-                                        "designer|createAlias": "advancefiltergrid",
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdKit",
                                         "layout|flex": 1,
                                         "margin": "5 -1 5 -1",
@@ -12346,7 +12418,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter125",
+                                                    "name": "filter129",
                                                     "designerId": "49a9508d-505d-4de5-977b-f8ebc7227c15",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12463,7 +12535,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columnLines": true,
-                                        "designer|createAlias": "advancefiltergrid",
+                                        "designer|createAlias": "frmadvancesearchgrid",
                                         "itemId": "grdKitDetails",
                                         "layout|flex": 1,
                                         "margin": -1,
@@ -12533,7 +12605,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter130",
                                                     "designerId": "6e3091f8-4c8b-4ab7-bb33-40607d9656f6",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12923,7 +12995,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdFactory",
                                                         "layout|flex": 1,
                                                         "margin": null,
@@ -12994,7 +13066,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter127",
+                                                                    "name": "filter131",
                                                                     "designerId": "2bbc0808-5b40-4515-bf7e-466c3903a1c4",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13145,7 +13217,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdManufacturingCellAssociation",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
@@ -13217,7 +13289,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter128",
+                                                                    "name": "filter132",
                                                                     "designerId": "f1bbb210-cf31-4fe7-8040-6808d9375e23",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13233,11 +13305,25 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": 1,
+                                                                "headerDrillDownClick": "onManufacturingCellHeaderClick",
+                                                                "headerDrillDownText": "Open Manufacturing Cell",
                                                                 "itemId": "colCellName",
                                                                 "text": "Cell Name"
                                                             },
                                                             "name": "MyColumn30",
                                                             "designerId": "aca1e8f8-5289-48b6-bb4d-1936f9ffcfbc",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownText",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownClick",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
                                                             "cn": [
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",
@@ -13413,7 +13499,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "columnLines": true,
-                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "designer|createAlias": "frmadvancesearchgrid",
                                                         "itemId": "grdOwner",
                                                         "margin": null,
                                                         "title": "Owner Association"
@@ -13464,7 +13550,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter129",
+                                                                    "name": "filter133",
                                                                     "designerId": "49a6fdf8-831b-4540-9826-f339161f9600",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13480,11 +13566,25 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": 1,
+                                                                "headerDrillDownClick": "onCustomerHeaderClick",
+                                                                "headerDrillDownText": "Open Customer",
                                                                 "itemId": "colOwner",
                                                                 "text": "Owner"
                                                             },
                                                             "name": "MyColumn43",
                                                             "designerId": "c973941a-4963-4717-b4c4-ac74fbb3e037",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownClick",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "headerDrillDownText",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
                                                             "cn": [
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",
@@ -13790,7 +13890,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging15",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

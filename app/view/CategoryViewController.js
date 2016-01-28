@@ -622,6 +622,12 @@ Ext.define('Inventory.view.CategoryViewController', {
         iRely.Functions.openScreen('Inventory.view.LineOfBusiness', {viewConfig: { modal: true }});
     },
 
+    onTaxClassHeaderClick: function(menu, column) {
+        var grid = column.initOwnerCt.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('i21.view.TaxClass', grid, 'intTaxClassId');
+    },
+
     init: function(application) {
         this.control({
             "#cboDetailUnitMeasure": {
