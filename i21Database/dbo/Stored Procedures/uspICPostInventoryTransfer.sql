@@ -281,34 +281,35 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 		) 
-		SELECT Detail.intItemId  
-				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
-				,FromStock.intItemUOMId  
-				,Header.dtmTransferDate
-				,FromStock.dblQty * -1
-				,FromStock.dblUOMQty
-				,ISNULL(FromStock.dblCost, 0)
+		SELECT 	Detail.intItemId  
+				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+				,TransferSource.intItemUOMId  
+				,TransferSource.dtmDate  
+				,TransferSource.dblQty * -1 
+				,TransferSource.dblUOMQty  
+				,TransferSource.dblCost 
 				,0
 				,NULL
 				,1
-				,@intTransactionId 
+				,TransferSource.intTransactionId  
 				,Detail.intInventoryTransferDetailId
-				,@strTransactionId
-				,@INVENTORY_TRANSFER_TYPE
-				,Detail.intNewLotId
-				,Detail.intToSubLocationId
-				,Detail.intToStorageLocationId
+				,Header.strTransferNo
+				,TransferSource.intTransactionTypeId  
+				,Detail.intLotId 
+				,Detail.intFromSubLocationId
+				,Detail.intFromStorageLocationId
+				,strActualCostId = NULL 
 		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-				INNER JOIN dbo.tblICInventoryTransaction FromStock
-					ON Detail.intInventoryTransferDetailId = FromStock.intTransactionDetailId
-					AND Detail.intInventoryTransferId = FromStock.intTransactionId
-					AND FromStock.intItemId = Detail.intItemId
-				LEFT JOIN tblICItemUOM ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-		WHERE	ISNULL(FromStock.ysnIsUnposted, 0) = 0
-				AND FromStock.strBatchId = @strBatchId
-				AND Header.intInventoryTransferId = @intTransactionId
+				INNER JOIN dbo.tblICInventoryTransaction TransferSource
+					ON TransferSource.intItemId = Detail.intItemId
+					AND TransferSource.intTransactionDetailId = Detail.intInventoryTransferDetailId
+					AND TransferSource.intTransactionId = Header.intInventoryTransferId
+					AND TransferSource.strTransactionId = Header.strTransferNo
+					AND TransferSource.strBatchId = @strBatchId
+					AND TransferSource.dblQty < 0
+		WHERE	Header.strTransferNo = @strTransactionId
+				AND TransferSource.strBatchId = @strBatchId
 
 		-- Clear the GL entries 
 		DELETE FROM @GLEntries
