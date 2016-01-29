@@ -184,13 +184,13 @@ END
 ELSE
 BEGIN
 	SELECT convert(int,row_number() over (order by intCommodityId,intLocationId)) intRowNum, strLocationName,intLocationId,
-	Convert(decimal(24,10),OpenPurchasesQty),
-	Convert(decimal(24,10),OpenSalesQty),
+	Convert(decimal(24,10),OpenPurchasesQty) OpenPurchasesQty,
+	Convert(decimal(24,10),OpenSalesQty) OpenSalesQty,
 	intCommodityId,strCommodityCode,strUnitMeasure,
-	Convert(decimal(24,10),dblCompanyTitled),
-	Convert(decimal(24,10),dblCaseExposure),
+	Convert(decimal(24,10),dblCompanyTitled) dblCompanyTitled,
+	Convert(decimal(24,10),dblCaseExposure) dblCaseExposure,
 	Convert(decimal(24,10),dblBasisExposure) as OpenSalQty,
-	Convert(decimal(24,10),dblAvailForSale),
-	Convert(decimal(24,10),dblInHouse),
-	Convert(decimal(24,10),dblBasisExposure)	FROM #temp Where intCommodityId=@intCommodityId ORDER BY strCommodityCode
+	Convert(decimal(24,10),dblAvailForSale) dblAvailForSale,
+	Convert(decimal(24,10),dblInHouse) dblInHouse,
+	Convert(decimal(24,10),dblBasisExposure) dblBasisExposure	FROM #temp Where intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))  ORDER BY strCommodityCode
 END
