@@ -3327,6 +3327,8 @@
     <Build Include="dbo\Stored Procedures\uspMFEndShiftActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspMFMBSReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFMBSSubReport.sql" />
+    <Build Include="dbo\Views\vyuFRDColumnDesign.sql" />
+    <Build Include="dbo\Views\vyuFRDRowDesign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
