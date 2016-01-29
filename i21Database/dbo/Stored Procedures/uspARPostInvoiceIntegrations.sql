@@ -78,8 +78,11 @@ END
 --Contracts
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 
---Committed QUatities
+--Committed Quantities
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId
+
+--In Transit Outbound Quantities 
+EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0
 
 --Sales Order Status
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete

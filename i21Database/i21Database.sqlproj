@@ -3331,6 +3331,7 @@
     <Build Include="dbo\Views\vyuFRDRowDesign.sql" />
     <Build Include="dbo\Views\vyuICGetItemLocation.sql" />
     <Build Include="dbo\Tables\tblHDCrmSetting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
