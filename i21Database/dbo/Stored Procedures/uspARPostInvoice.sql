@@ -449,6 +449,23 @@ SET @batchIdUsed = @batchId
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
 					AND D.dblTotal <> @ZeroDecimal
 
+				-- Accrual Not in Fiscal Year					
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					A.strInvoiceNumber + ' has an Accrual setup up to ' + CONVERT(NVARCHAR(30),DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), A.dtmDate), 101) + ' which does not fall into a valid Fiscal Period.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				WHERE
+					ISNULL(A.intPeriodsToAccrue,0) > 1  
+					AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), A.dtmDate)), 0) = 0
+
 				--Service Deferred Revenue Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
@@ -955,6 +972,36 @@ IF @post = 1
 			GOTO Do_Rollback
 		END CATCH
 		
+		-- Accruals
+		BEGIN TRY 
+			DECLARE @Accruals AS Id
+			INSERT INTO @Accruals(intId)
+			SELECT I.intInvoiceId 
+			FROM 
+				tblARInvoice I 
+			INNER JOIN 
+				@PostInvoiceData IP 
+					ON I.intInvoiceId = IP.intInvoiceId 
+			WHERE ISNULL(I.intPeriodsToAccrue,0) > 1
+
+			INSERT INTO @GLEntries 
+			EXEC	dbo.uspARGenerateEntriesForAccrual  
+						 @Invoices					= @Accruals
+						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
+						,@ServiceChargesAccountId	= @ServiceChargesAccountId
+						,@BatchId					= @batchId
+						,@Code						= @CODE
+						,@UserId					= @userId
+						,@UserEntityId				= @UserEntityID
+						,@ScreenName				= @SCREEN_NAME
+						,@ModuleName				= @MODULE_NAME
+
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH		
+		
 		BEGIN TRY
 			-- Call the post routine 
 			INSERT INTO @GLEntries (
@@ -994,13 +1041,13 @@ IF @post = 1
 				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice'	THEN  
 																								(
 																								SELECT
-																									SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																								FROM
-																									tblARInvoice ARI 
-																								LEFT JOIN
-																									tblARInvoiceDetail ARID
-																										ON ARI.intInvoiceId = ARID.intInvoiceId	
+																									tblARInvoiceDetail ARID 
 																								INNER JOIN
+																									tblARInvoice ARI
+																										ON ARID.intInvoiceId = ARI.intInvoiceId	
+																								LEFT OUTER JOIN
 																									tblICItem I
 																										ON ARID.intItemId = I.intItemId
 																								LEFT OUTER JOIN
@@ -1014,8 +1061,6 @@ IF @post = 1
 																								WHERE
 																									ARI.intInvoiceId = A.intInvoiceId
 																									AND ARID.dblTotal <> @ZeroDecimal  
-																									AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																									AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 																								)
 																							ELSE 
 																								0
@@ -1025,13 +1070,13 @@ IF @post = 1
 																							ELSE 
 																								(
 																								SELECT
-																									SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																								FROM
-																									tblARInvoice ARI 
-																								LEFT JOIN
-																									tblARInvoiceDetail ARID
-																										ON ARI.intInvoiceId = ARID.intInvoiceId	
+																									tblARInvoiceDetail ARID 
 																								INNER JOIN
+																									tblARInvoice ARI
+																										ON ARID.intInvoiceId = ARI.intInvoiceId	
+																								LEFT OUTER JOIN
 																									tblICItem I
 																										ON ARID.intItemId = I.intItemId
 																								LEFT OUTER JOIN
@@ -1045,8 +1090,6 @@ IF @post = 1
 																								WHERE
 																									ARI.intInvoiceId = A.intInvoiceId
 																									AND ARID.dblTotal <> @ZeroDecimal  
-																									AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																									AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 																								)
 																							END				
 				,strDescription				= A.strComments
@@ -1097,8 +1140,8 @@ IF @post = 1
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblQtyShipped, 0.00) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblQtyShipped, 0.00) ELSE 0 END				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1118,10 +1161,10 @@ IF @post = 1
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1	
 			FROM
-				tblARInvoice A 
-			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId					
+			INNER JOIN
+				tblARInvoice A 
+					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
@@ -1131,7 +1174,11 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 		
+					AND A.intCompanyLocationId = IST.intLocationId
+			LEFT OUTER JOIN
+				vyuICGetItemStock ICIS
+					ON B.intItemId = ICIS.intItemId 
+					AND A.intCompanyLocationId = ICIS.intLocationId 						
 			WHERE
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
@@ -1168,10 +1215,10 @@ IF @post = 1
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1	
 			FROM
-				tblARInvoice A 
-			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId					
+			INNER JOIN
+				tblARInvoice A 
+					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
@@ -1225,10 +1272,10 @@ IF @post = 1
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1	
 			FROM
-				tblARInvoice A 
-			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId					
+			INNER JOIN
+				tblARInvoice A 
+					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
@@ -1659,35 +1706,6 @@ IF @post = 1
 			GOTO Do_Rollback
 		END CATCH
 
-		-- Accruals
-		BEGIN TRY 
-			DECLARE @Accruals AS Id
-			INSERT INTO @Accruals(intId)
-			SELECT I.intInvoiceId 
-			FROM 
-				tblARInvoice I 
-			INNER JOIN 
-				@PostInvoiceData IP 
-					ON I.intInvoiceId = IP.intInvoiceId 
-			WHERE ISNULL(I.intPeriodsToAccrue,0) > 1
-
-			INSERT INTO @GLEntries 
-			EXEC	dbo.uspARGenerateEntriesForAccrual  
-						 @Invoices					= @Accruals
-						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
-						,@ServiceChargesAccountId	= @ServiceChargesAccountId
-						,@BatchId					= @batchId
-						,@Code						= @CODE
-						,@UserId					= @userId
-						,@UserEntityId				= @UserEntityID
-						,@ScreenName				= @SCREEN_NAME
-						,@ModuleName				= @MODULE_NAME
-
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
 	END   
 
 --------------------------------------------------------------------------------------------  

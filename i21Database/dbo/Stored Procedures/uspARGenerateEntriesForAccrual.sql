@@ -16,10 +16,12 @@ SET @ZeroDecimal = 0.000000
 
 WHILE EXISTS(SELECT NULL FROM @Invoices I LEFT OUTER JOIN @GLEntries G ON I.intId = G.intTransactionId WHERE ISNULL(G.intTransactionId,0) = 0)
 BEGIN
-	DECLARE  @InvoiceId		INT
-			,@AccrualPeriod	INT
-			,@LoopCounter	INT
-			,@Remainder		DECIMAL(18,6)
+	DECLARE  @InvoiceId				INT
+			,@AccrualPeriod			INT
+			,@LoopCounter			INT
+			,@Remainder				DECIMAL(18,6)
+			,@RemainderWODiscount	DECIMAL(18,6)
+			,@UnitsRemainder		DECIMAL(18,6)
 	SELECT TOP 1 @InvoiceId = I.intId FROM @Invoices I LEFT OUTER JOIN @GLEntries G ON I.intId = G.intTransactionId WHERE ISNULL(G.intTransactionId,0) = 0
 
 	SELECT
@@ -66,13 +68,13 @@ BEGIN
 		,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice'	THEN  
 																						(
 																						SELECT
-																							SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																						FROM
-																							tblARInvoice ARI 
-																						LEFT JOIN
-																							tblARInvoiceDetail ARID
-																								ON ARI.intInvoiceId = ARID.intInvoiceId	
+																							tblARInvoiceDetail ARID 
 																						INNER JOIN
+																							tblARInvoice ARI
+																								ON ARID.intInvoiceId = ARI.intInvoiceId	
+																						LEFT OUTER JOIN
 																							tblICItem I
 																								ON ARID.intItemId = I.intItemId
 																						LEFT OUTER JOIN
@@ -86,8 +88,6 @@ BEGIN
 																						WHERE
 																							ARI.intInvoiceId = A.intInvoiceId
 																							AND ARID.dblTotal <> @ZeroDecimal  
-																							AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																							AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 																						)
 																					ELSE 
 																						0
@@ -97,13 +97,13 @@ BEGIN
 																					ELSE 
 																						(
 																						SELECT
-																							SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																						FROM
-																							tblARInvoice ARI 
-																						LEFT JOIN
-																							tblARInvoiceDetail ARID
-																								ON ARI.intInvoiceId = ARID.intInvoiceId	
+																							tblARInvoiceDetail ARID 
 																						INNER JOIN
+																							tblARInvoice ARI
+																								ON ARID.intInvoiceId = ARI.intInvoiceId	
+																						LEFT OUTER JOIN
 																							tblICItem I
 																								ON ARID.intItemId = I.intItemId
 																						LEFT OUTER JOIN
@@ -117,8 +117,6 @@ BEGIN
 																						WHERE
 																							ARI.intInvoiceId = A.intInvoiceId
 																							AND ARID.dblTotal <> @ZeroDecimal  
-																							AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																							AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 																						)
 																					END				
 		,strDescription				= A.strComments
@@ -155,18 +153,17 @@ BEGIN
 		,intAccountId				= @DeferredRevenueAccountId
 		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal END
 		,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
-		,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice'	THEN  
-																						0
+		,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN  0
 																					ELSE
 																						(
 																						SELECT
-																							SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																						FROM
-																							tblARInvoice ARI 
-																						LEFT JOIN
-																							tblARInvoiceDetail ARID
-																								ON ARI.intInvoiceId = ARID.intInvoiceId	
+																							tblARInvoiceDetail ARID 
 																						INNER JOIN
+																							tblARInvoice ARI
+																								ON ARID.intInvoiceId = ARI.intInvoiceId	
+																						LEFT OUTER JOIN
 																							tblICItem I
 																								ON ARID.intItemId = I.intItemId
 																						LEFT OUTER JOIN
@@ -180,20 +177,17 @@ BEGIN
 																						WHERE
 																							ARI.intInvoiceId = A.intInvoiceId
 																							AND ARID.dblTotal <> @ZeroDecimal  
-																							AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																							AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 																						)
 																					END
-		,dblCreditUnit				=  CASE WHEN A.strTransactionType = 'Invoice'	THEN   
-																						(
+		,dblCreditUnit				=  CASE WHEN A.strTransactionType = 'Invoice' THEN (
 																						SELECT
-																							SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																							SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																						FROM
-																							tblARInvoice ARI 
-																						LEFT JOIN
 																							tblARInvoiceDetail ARID
-																								ON ARI.intInvoiceId = ARID.intInvoiceId	
 																						INNER JOIN
+																							tblARInvoice ARI 
+																								ON ARID.intInvoiceId = ARI.intInvoiceId	
+																						LEFT OUTER JOIN
 																							tblICItem I
 																								ON ARID.intItemId = I.intItemId
 																						LEFT OUTER JOIN
@@ -205,10 +199,8 @@ BEGIN
 																								ON ARID.intItemId = ICIS.intItemId 
 																								AND ARI.intCompanyLocationId = ICIS.intLocationId 
 																						WHERE
-																							ARI.intInvoiceId = A.intInvoiceId
-																							AND ARID.dblTotal <> @ZeroDecimal  
-																							AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																							AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+																							ARI.intInvoiceId = A.intInvoiceId 
+																							AND ARID.dblTotal <> @ZeroDecimal
 																						)																						
 																					ELSE
 																						0
@@ -241,23 +233,33 @@ BEGIN
  
 
 	-- MISC
-	DECLARE	 @MiscTotal		DECIMAL(18,6)
-			,@MiscPerPeriod	DECIMAL(18,6)
+	DECLARE	 @MiscTotal					DECIMAL(18,6)
+			,@MiscPerPeriod				DECIMAL(18,6)
+			,@MiscTotalWODiscount		DECIMAL(18,6)
+			,@MiscPerPeriodWODiscount	DECIMAL(18,6)
+			,@UnitsTotal				DECIMAL(18,6)
+			,@UnitsPerPeriod			DECIMAL(18,6)
 
 	SELECT
-		@MiscTotal = ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))
+		 @MiscTotal				= SUM(ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))))
+		,@MiscTotalWODiscount	= SUM(ISNULL(B.dblTotal, 0.00))
+		,@UnitsTotal			= SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.000000)))
 	FROM
-		tblARInvoice A 
-	LEFT JOIN
 		tblARInvoiceDetail B
-			ON A.intInvoiceId = B.intInvoiceId
+	INNER JOIN
+		tblARInvoice A 
+			ON B.intInvoiceId = A.intInvoiceId
 	LEFT JOIN 
 		tblARCustomer C
 			ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 	LEFT OUTER JOIN
 		vyuARGetItemAccount IST
 			ON B.intItemId = IST.intItemId 
-			AND A.intCompanyLocationId = IST.intLocationId 		
+			AND A.intCompanyLocationId = IST.intLocationId
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICIS
+			ON B.intItemId = ICIS.intItemId 
+			AND A.intCompanyLocationId = ICIS.intLocationId			 		
 	WHERE
 		A.intInvoiceId = @InvoiceId 
 		AND B.dblTotal <> @ZeroDecimal 
@@ -265,8 +267,16 @@ BEGIN
 			OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
 		AND A.strType <> 'Debit Memo'
 
+	SET @Remainder = @ZeroDecimal
+	SET @RemainderWODiscount = @ZeroDecimal
+	SET @UnitsRemainder = @ZeroDecimal
+	
 	SET @MiscPerPeriod = ROUND((@MiscTotal/@AccrualPeriod),2)
 	SET @Remainder = ROUND(@MiscTotal,2) - ROUND((@MiscPerPeriod * @AccrualPeriod),2)
+	SET @MiscPerPeriodWODiscount = ROUND((@MiscTotalWODiscount/@AccrualPeriod),2)
+	SET @RemainderWODiscount = ROUND(@MiscTotalWODiscount,2) - ROUND((@MiscPerPeriodWODiscount * @AccrualPeriod),2)
+	SET @UnitsPerPeriod = ROUND((@UnitsTotal/@AccrualPeriod),6)
+	SET @UnitsRemainder = ROUND(@UnitsTotal,6) - ROUND((@UnitsPerPeriod * @AccrualPeriod),6)
 	SET @LoopCounter = 0
 
 	WHILE @LoopCounter < @AccrualPeriod
@@ -316,8 +326,8 @@ BEGIN
 											END)
 			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @MiscPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END
 			,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @MiscPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) ELSE 0  END
-			,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblQtyShipped, 0.00) END
-			,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblQtyShipped, 0.00) ELSE 0 END				
+			,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
+			,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -347,7 +357,11 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
-				AND A.intCompanyLocationId = IST.intLocationId 		
+				AND A.intCompanyLocationId = IST.intLocationId
+		LEFT OUTER JOIN
+			vyuICGetItemStock ICIS
+				ON B.intItemId = ICIS.intItemId 
+				AND A.intCompanyLocationId = ICIS.intLocationId 	
 		WHERE
 			A.intInvoiceId = @InvoiceId 
 			AND B.dblTotal <> @ZeroDecimal 
@@ -361,10 +375,10 @@ BEGIN
 			 dtmDate					= DATEADD(mm, @LoopCounter, DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0))
 			,strBatchID					= @BatchId
 			,intAccountId				= @DeferredRevenueAccountId
-			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @MiscPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) ELSE 0 END
-			,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @MiscPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END
-			,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblQtyShipped, 0.00) ELSE 0 END
-			,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblQtyShipped, 0.00) END				
+			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @MiscPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) ELSE 0 END
+			,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @MiscPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
+			,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END
+			,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END				
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -394,7 +408,11 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuARGetItemAccount IST
 				ON B.intItemId = IST.intItemId 
-				AND A.intCompanyLocationId = IST.intLocationId 		
+				AND A.intCompanyLocationId = IST.intLocationId
+		LEFT OUTER JOIN
+			vyuICGetItemStock ICIS
+				ON B.intItemId = ICIS.intItemId 
+				AND A.intCompanyLocationId = ICIS.intLocationId					
 		WHERE
 			A.intInvoiceId = @InvoiceId 
 			AND B.dblTotal <> @ZeroDecimal 
