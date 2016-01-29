@@ -2610,6 +2610,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         flex: 1
                     },
                     {
+                        dataIndex: 'strLocationName',
+                        dataType: 'string',
+                        text: 'Location Name',
+                        flex: 1.5
+                    },
+                    {
                         dataIndex: 'strItemNo',
                         dataType: 'string',
                         text: 'Item No',
@@ -2758,11 +2764,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         column: 'intEntityVendorId',
                         value: win.viewModel.data.current.get('intEntityVendorId'),
                         conjunction: 'and'
-                    },
-                    {
-                        column: 'intLocationId',
-                        value: win.viewModel.data.current.get('intLocationId'),
-                        conjunction: 'and'
                     }
                 ]
             })
@@ -2780,6 +2781,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataType: 'string',
                         text: 'Contract Number',
                         flex: 1
+                    },
+                    {
+                        dataIndex: 'strLocationName',
+                        dataType: 'string',
+                        text: 'Location Name',
+                        flex: 1.5
                     },
                     {
                         dataIndex: 'intContractSeq',
