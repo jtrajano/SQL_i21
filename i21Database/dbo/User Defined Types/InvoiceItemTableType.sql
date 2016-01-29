@@ -17,6 +17,7 @@ CREATE TYPE [dbo].[InvoiceItemTableType] AS TABLE
 		-- Detail 
 		,[intInvoiceDetailId]			INT             NOT NULL
 		,[intItemId]					INT             NULL
+		,[strItemNo]					NVARCHAR (250)  COLLATE Latin1_General_CI_AS  NULL
 		,[strItemDescription]			NVARCHAR (250)  COLLATE Latin1_General_CI_AS  NULL
 		,[intSCInvoiceId]				INT				NULL
 		,[strSCInvoiceNumber]			NVARCHAR (25)   COLLATE Latin1_General_CI_AS  NULL
@@ -39,6 +40,7 @@ CREATE TYPE [dbo].[InvoiceItemTableType] AS TABLE
 		,[dblConversionFactor]			NUMERIC (18, 8) NULL
 		,[intPerformerId]				INT				NULL
 		,[intContractHeaderId]			INT				NULL
+		,[strContractNumber]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS NULL
 		,[strMaintenanceType]           NVARCHAR(25)    COLLATE Latin1_General_CI_AS NULL
 		,[strFrequency]                 NVARCHAR(25)    COLLATE Latin1_General_CI_AS NULL
 		,[dtmMaintenanceDate]           DATETIME        NULL
