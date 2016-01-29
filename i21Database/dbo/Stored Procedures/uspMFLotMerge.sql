@@ -71,11 +71,6 @@ BEGIN TRY
 		RAISERROR(51195,11,1)
 	END
 
-	IF ROUND(@dblNewLotWeightPerUnit,3) <> ROUND(@dblLotWeightPerUnit,3)
-	BEGIN
-		RAISERROR(51196,11,1)
-	END
-
 	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
 	BEGIN
 		RAISERROR(90008,11,1)
@@ -86,6 +81,11 @@ BEGIN TRY
 		RAISERROR(90009,11,1)
 	END												 
 
+	--IF ROUND(@dblNewLotWeightPerUnit,3) <> ROUND(@dblLotWeightPerUnit,3)
+	--BEGIN
+	--	RAISERROR(51196,11,1)
+	--END
+													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
 													 @intLocationId	= @intLocationId,
