@@ -43,6 +43,36 @@ CREATE PROCEDURE [dbo].[uspCFImportFee]
 			FROM cffeemst
 				WHERE cffee_id COLLATE Latin1_General_CI_AS NOT IN (select strFee from tblCFFee) 
 
+		
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+						dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Fee'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate fee on i21 Card Fueling fees list'
+		,strOriginTable = 'cffeemst'
+		,strOriginIdentityId = cffee_id
+		,strI21Table = 'tblCFFee'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cffeemst
+		WHERE cffee_id COLLATE Latin1_General_CI_AS IN (select strFee from tblCFFee) 
+		
+		--DUPLICATE SITE ON i21--
+
+
 		WHILE (EXISTS(SELECT 1 FROM #tmpcffeemst))
 		BEGIN
 			
@@ -108,8 +138,8 @@ CREATE PROCEDURE [dbo].[uspCFImportFee]
 					 --,@intRestrictedByProduct	= LTRIM(RTRIM())
 				FROM cffeemst
 				WHERE cffee_id = @originFee
-					
-				
+
+				--*********************COMMIT TRANSACTION*****************--
 				INSERT [dbo].[tblCFFee](
 					 [strFee]					
 					,[strFeeDescription]		
@@ -145,15 +175,63 @@ CREATE PROCEDURE [dbo].[uspCFImportFee]
 					,@dblFeeRate				
 					,@intGLAccountId			
 					,@intRestrictedByProduct)
-				COMMIT TRANSACTION
+
+									   COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
 				SET @TotalSuccess += 1;
+				INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Fee'
+						,1
+						,''
+						,'cffeemst'
+						,@originFee
+						,'tblCFFee'
+						,SCOPE_IDENTITY()
+						,''
+					)
 				
 			END TRY
 			BEGIN CATCH
-				PRINT 'IMPORTING FEES' + ERROR_MESSAGE()
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Fee'
+					,0
+					,ERROR_MESSAGE()
+					,'cffeemst'
+					,@originFee
+					,'tblCFFee'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -162,13 +240,14 @@ CREATE PROCEDURE [dbo].[uspCFImportFee]
 			END
 								
 			CONTINUELOOP:
-			PRINT @originFee
 			DELETE FROM #tmpcffeemst WHERE cffee_id = @originFee
 		
 			SET @Counter += 1;
 
 		END
-	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cffeemst
+		PRINT @TotalFailed
+
 
 	END

@@ -8,14 +8,14 @@
 		SET NOCOUNT ON
 	
 		--============================================--
-		--     ONE TIME SITE GROUP SYNCHRONIZATION	  --
+		--     ONE TIME SITE SYNCHRONIZATION	  --
 		--============================================--
 		
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
 		--1 Time synchronization here
-		PRINT '1 Time SITE GROUP Synchronization'
+		PRINT '1 Time SITE Synchronization'
 
 		DECLARE @originSite								NVARCHAR(50)
 
@@ -82,59 +82,88 @@
 		DECLARE @intLastModifiedUserId					INT
 		DECLARE @dtmLastModified						DATETIME
 
-		--================================--
-		--     DETAIL FIELDS SITE ITEM	  --
-		--================================--
-		DECLARE @originSiteItem								NVARCHAR(MAX)
-		DECLARE @MasterPk									INT
-		DECLARE @intSiteItemTaxGroupMaster					INT
-		DECLARE @intSiteItemNetworkId						INT
-		DECLARE @strSiteItemProductNumber					NVARCHAR(MAX)
-		DECLARE @intSiteItemARItemId						INT
-		DECLARE @strSiteItemProductDescription				NVARCHAR(MAX)
-		DECLARE @dblSiteItemOPISAverageCost1				NUMERIC(18,6)
-		DECLARE @dtmSiteItemOPISEffectiveDate1				DATETIME
-		DECLARE @dblSiteItemOPISAverageCost2				NUMERIC(18,6)
-		DECLARE @dtmSiteItemOPISEffectiveDate2				DATETIME
-		DECLARE @dblSiteItemOPISAverageCost3				NUMERIC(18,6)
-		DECLARE @dtmSiteItemOPISEffectiveDate3				DATETIME
-		DECLARE @dblSiteItemSellingPrice					NUMERIC(18,6)
-		DECLARE @dblSiteItemPumpPrice						NUMERIC(18,6)
-		DECLARE @ysnSiteItemCarryNegligibleBalance			BIT
-		DECLARE @ysnSiteItemIncludeInQuantityDiscount		BIT
-		DECLARE @strSiteItemDepartmentType					NVARCHAR(MAX)
-		DECLARE @ysnSiteItemOverrideLocationSalesTax		BIT
-		DECLARE @dblSiteItemRemoteFeePerTransaction			NUMERIC(18,6)
-		DECLARE @dblSiteItemExtRemoteFeePerTransaction		NUMERIC(18,6)
-		DECLARE @ysnSiteItemMPGCalculation					BIT
-		DECLARE @ysnSiteItemChargeOregonP					BIT
-		DECLARE @intSiteItemCreatedUserId					INT
-		DECLARE @dtmSiteItemCreated							DATETIME
-		DECLARE @intSiteItemLastModifiedUserId				INT
-		DECLARE @dtmSiteItemLastModified					DATETIME
+		----================================--
+		----     DETAIL FIELDS SITE ITEM	  --
+		----================================--
+		--DECLARE @originSiteItem								NVARCHAR(MAX)
+		--DECLARE @MasterPk									INT
+		--DECLARE @intSiteItemTaxGroupMaster					INT
+		--DECLARE @intSiteItemNetworkId						INT
+		--DECLARE @strSiteItemProductNumber					NVARCHAR(MAX)
+		--DECLARE @intSiteItemARItemId						INT
+		--DECLARE @strSiteItemProductDescription				NVARCHAR(MAX)
+		--DECLARE @dblSiteItemOPISAverageCost1				NUMERIC(18,6)
+		--DECLARE @dtmSiteItemOPISEffectiveDate1				DATETIME
+		--DECLARE @dblSiteItemOPISAverageCost2				NUMERIC(18,6)
+		--DECLARE @dtmSiteItemOPISEffectiveDate2				DATETIME
+		--DECLARE @dblSiteItemOPISAverageCost3				NUMERIC(18,6)
+		--DECLARE @dtmSiteItemOPISEffectiveDate3				DATETIME
+		--DECLARE @dblSiteItemSellingPrice					NUMERIC(18,6)
+		--DECLARE @dblSiteItemPumpPrice						NUMERIC(18,6)
+		--DECLARE @ysnSiteItemCarryNegligibleBalance			BIT
+		--DECLARE @ysnSiteItemIncludeInQuantityDiscount		BIT
+		--DECLARE @strSiteItemDepartmentType					NVARCHAR(MAX)
+		--DECLARE @ysnSiteItemOverrideLocationSalesTax		BIT
+		--DECLARE @dblSiteItemRemoteFeePerTransaction			NUMERIC(18,6)
+		--DECLARE @dblSiteItemExtRemoteFeePerTransaction		NUMERIC(18,6)
+		--DECLARE @ysnSiteItemMPGCalculation					BIT
+		--DECLARE @ysnSiteItemChargeOregonP					BIT
+		--DECLARE @intSiteItemCreatedUserId					INT
+		--DECLARE @dtmSiteItemCreated							DATETIME
+		--DECLARE @intSiteItemLastModifiedUserId				INT
+		--DECLARE @dtmSiteItemLastModified					DATETIME
 
-		--================================--
-		--     DETAIL FIELDS CREDIT CARD  --
-		--================================--
-		DECLARE @originCreditCard							NVARCHAR(MAX)
-		DECLARE @intCreditCardCreditCardId					INT		
-		DECLARE @intCreditCardNetworkId						INT		
-		DECLARE @intCreditCardSiteId						INT		
-		DECLARE @strCreditCardPrefix						NVARCHAR(MAX)		
-		DECLARE @intCreditCardCardId						INT		
-		DECLARE @strCreditCardCardDescription				NVARCHAR(MAX)		
-		DECLARE @intCreditCardCustomerId					INT		
-		DECLARE @ysnCreditCardLocalPrefix					BIT		
-		DECLARE @intCreditCardCreatedUserId					INT		
-		DECLARE @dtmCreditCardCreated						DATETIME		
-		DECLARE @intCreditCardLastModifiedUserId			INT		
-		DECLARE @dtmCreditCardLastModified					DATETIME		
+		----================================--
+		----     DETAIL FIELDS CREDIT CARD  --
+		----================================--
+		--DECLARE @originCreditCard							NVARCHAR(MAX)
+		--DECLARE @intCreditCardCreditCardId					INT		
+		--DECLARE @intCreditCardNetworkId						INT		
+		--DECLARE @intCreditCardSiteId						INT		
+		--DECLARE @strCreditCardPrefix						NVARCHAR(MAX)		
+		--DECLARE @intCreditCardCardId						INT		
+		--DECLARE @strCreditCardCardDescription				NVARCHAR(MAX)		
+		--DECLARE @intCreditCardCustomerId					INT		
+		--DECLARE @ysnCreditCardLocalPrefix					BIT		
+		--DECLARE @intCreditCardCreatedUserId					INT		
+		--DECLARE @dtmCreditCardCreated						DATETIME		
+		--DECLARE @intCreditCardLastModifiedUserId			INT		
+		--DECLARE @dtmCreditCardLastModified					DATETIME		
 		
 
 		--Import only those are not yet imported
 		SELECT cfloc_site_no INTO #tmpcflocmst
 			FROM cflocmst
 				WHERE cfloc_site_no COLLATE Latin1_General_CI_AS NOT IN (select strSiteNumber from tblCFSite) 
+
+
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Site'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate site on i21 Card Fueling sites list'
+		,strOriginTable = 'cflocmst'
+		,strOriginIdentityId = cfloc_site_no
+		,strI21Table = 'tblCFSite'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cflocmst
+		WHERE cfloc_site_no COLLATE Latin1_General_CI_AS IN (select strSiteNumber from tblCFSite) 
+		
+		--DUPLICATE SITE ON i21--
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcflocmst))
 		BEGIN
@@ -262,46 +291,12 @@
 
 					,@strImportPath								= RTRIM(LTRIM(cfloc_import_path))
 					,@strImportFileName							= RTRIM(LTRIM(cfloc_import_file))
-
-					--,@intCardId								= RTRIM(LTRIM(cfloc_site_no))
-					--,@strAuthorityId1							= RTRIM(LTRIM(cfloc_site_no))
-					--,@strAuthorityId2							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnFederalExciseTax						= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnStateExciseTax						= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnStateSalesTax						= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax1							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax2							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax3							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax4							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax5							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax6							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax7							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax8							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax9							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax10							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax11							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnLocalTax12							= RTRIM(LTRIM(cfloc_site_no))
-					--,@intNumberOfLinesPerTransaction			= RTRIM(LTRIM(cfloc_site_no))
-					--,@intIgnoreCardID							= RTRIM(LTRIM(cfloc_site_no))
-					--,@intNumberOfDecimalInPrice				= RTRIM(LTRIM(cfloc_site_no))
-					--,@intNumberOfDecimalInQuantity			= RTRIM(LTRIM(cfloc_site_no))
-					--,@intNumberOfDecimalInTotal				= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnCenexSite							= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnUseControllerCard					= RTRIM(LTRIM(cfloc_site_no))
-					--,@ysnPPLocalPrice							= RTRIM(LTRIM(cfloc_site_no))
-					--,@intPPLocalHostId						= RTRIM(LTRIM(cfloc_site_no))
-					--,@strPPLocalSiteType						= RTRIM(LTRIM(cfloc_site_no))
-					--,@intPPLocalSiteId						= RTRIM(LTRIM(cfloc_site_no))
-					--,@intRebateSiteGroupId					= RTRIM(LTRIM(cfloc_site_no))
-					--,@intCreatedUserId						= RTRIM(LTRIM(cfloc_site_no))
-					--,@dtmCreated								= RTRIM(LTRIM(cfloc_site_no))
-					--,@intLastModifiedUserId					= RTRIM(LTRIM(cfloc_site_no))
-					--,@dtmLastModified							= RTRIM(LTRIM(cfloc_site_no))
+	
 
 				FROM cflocmst
 				WHERE cfloc_site_no = @originSite
 					
-				
+				--*********************COMMIT TRANSACTION*****************--
 				INSERT [dbo].[tblCFSite](
 				  [intNetworkId]						
 				 ,[strSiteNumber]						
@@ -357,201 +352,247 @@
 				,@strImportFileName)
 
 
-				SELECT @MasterPk  = SCOPE_IDENTITY();
-
-				--========================================--
-				--		INSERT DETAIL SITE ITEM RECORDS	  --
-				--========================================--
-				SELECT cfitm_prod_no INTO #tmpcfitmmst
-				FROM cfitmmst
-				WHERE cfitm_site_no COLLATE Latin1_General_CI_AS = @originSite
+				----========================================--
+				----		INSERT DETAIL SITE ITEM RECORDS	  --
+				----========================================--
+				--SELECT cfitm_prod_no INTO #tmpcfitmmst
+				--FROM cfitmmst
+				--WHERE cfitm_site_no COLLATE Latin1_General_CI_AS = @originSite
 				
-				WHILE (EXISTS(SELECT 1 FROM #tmpcfitmmst))
-				BEGIN
+				--WHILE (EXISTS(SELECT 1 FROM #tmpcfitmmst))
+				--BEGIN
 
-					SELECT @originSiteItem = cfitm_prod_no FROM #tmpcfitmmst
+				--	SELECT @originSiteItem = cfitm_prod_no FROM #tmpcfitmmst
 
-					SELECT TOP 1
-					 @intSiteItemCreatedUserId							  = 0		
-					,@dtmSiteItemCreated								  = CONVERT(VARCHAR(10), GETDATE(), 120)				
-					,@intSiteItemLastModifiedUserId						  = 0
-					,@dtmSiteItemLastModified							  = CONVERT(VARCHAR(10), GETDATE(), 120)
-					,@strSiteItemProductNumber							  = RTRIM(LTRIM(cfitm_prod_no))
+				--	SELECT TOP 1
+				--	 @intSiteItemCreatedUserId							  = 0		
+				--	,@dtmSiteItemCreated								  = CONVERT(VARCHAR(10), GETDATE(), 120)				
+				--	,@intSiteItemLastModifiedUserId						  = 0
+				--	,@dtmSiteItemLastModified							  = CONVERT(VARCHAR(10), GETDATE(), 120)
+				--	,@strSiteItemProductNumber							  = RTRIM(LTRIM(cfitm_prod_no))
 
-					,@intSiteItemARItemId								  = (SELECT intItemId 
-																			 FROM tblICItem 
-																			 WHERE strItemNo = RTRIM(LTRIM(cfitm_ar_itm_no)) 
-																			 COLLATE Latin1_General_CI_AS)
+				--	,@intSiteItemARItemId								  = (SELECT intItemId 
+				--															 FROM tblICItem 
+				--															 WHERE strItemNo = RTRIM(LTRIM(cfitm_ar_itm_no)) 
+				--															 COLLATE Latin1_General_CI_AS)
 
-					,@strSiteItemProductDescription						  = RTRIM(LTRIM(cfitm_prod_desc))
-					,@ysnSiteItemCarryNegligibleBalance					  = (case
-																			when RTRIM(LTRIM(cfitm_carry_neg_bal_yn)) = 'N' then 'FALSE'
-																			when RTRIM(LTRIM(cfitm_carry_neg_bal_yn)) = 'Y' then 'TRUE'
-																			else 'FALSE'
-																			end)
-					,@ysnSiteItemIncludeInQuantityDiscount				  = (case
-																			when RTRIM(LTRIM(cfitm_include_in_qty_disc_yn)) = 'N' then 'FALSE'
-																			when RTRIM(LTRIM(cfitm_include_in_qty_disc_yn)) = 'Y' then 'TRUE'
-																			else 'FALSE'
-																			end)
-					,@strSiteItemDepartmentType							  =  RTRIM(LTRIM(cfitm_dept_type))
-					,@ysnSiteItemMPGCalculation							  = (case
-																			when RTRIM(LTRIM(cfitm_mpg_calc_yn)) = 'N' then 'FALSE'
-																			when RTRIM(LTRIM(cfitm_mpg_calc_yn)) = 'Y' then 'TRUE'
-																			else 'FALSE'
-																			end)
-					,@ysnSiteItemChargeOregonP							  = (case
-																			when RTRIM(LTRIM(cfitm_remote_oregon_puc)) = 'N' then 'FALSE'
-																			when RTRIM(LTRIM(cfitm_remote_oregon_puc)) = 'Y' then 'TRUE'
-																			else 'FALSE'
-																			end)
-					FROM cfitmmst
-					WHERE cfitm_prod_no = @originSiteItem
+				--	,@strSiteItemProductDescription						  = RTRIM(LTRIM(cfitm_prod_desc))
+				--	,@ysnSiteItemCarryNegligibleBalance					  = (case
+				--															when RTRIM(LTRIM(cfitm_carry_neg_bal_yn)) = 'N' then 'FALSE'
+				--															when RTRIM(LTRIM(cfitm_carry_neg_bal_yn)) = 'Y' then 'TRUE'
+				--															else 'FALSE'
+				--															end)
+				--	,@ysnSiteItemIncludeInQuantityDiscount				  = (case
+				--															when RTRIM(LTRIM(cfitm_include_in_qty_disc_yn)) = 'N' then 'FALSE'
+				--															when RTRIM(LTRIM(cfitm_include_in_qty_disc_yn)) = 'Y' then 'TRUE'
+				--															else 'FALSE'
+				--															end)
+				--	,@strSiteItemDepartmentType							  =  RTRIM(LTRIM(cfitm_dept_type))
+				--	,@ysnSiteItemMPGCalculation							  = (case
+				--															when RTRIM(LTRIM(cfitm_mpg_calc_yn)) = 'N' then 'FALSE'
+				--															when RTRIM(LTRIM(cfitm_mpg_calc_yn)) = 'Y' then 'TRUE'
+				--															else 'FALSE'
+				--															end)
+				--	,@ysnSiteItemChargeOregonP							  = (case
+				--															when RTRIM(LTRIM(cfitm_remote_oregon_puc)) = 'N' then 'FALSE'
+				--															when RTRIM(LTRIM(cfitm_remote_oregon_puc)) = 'Y' then 'TRUE'
+				--															else 'FALSE'
+				--															end)
+				--	FROM cfitmmst
+				--	WHERE cfitm_prod_no = @originSiteItem
 					
-					INSERT [dbo].[tblCFItem](
-					 [intSiteId]
-					,[intTaxGroupMaster]				
-					,[intNetworkId]					
-					,[strProductNumber]				
-					,[intARItemId]					
-					,[strProductDescription]		
-					,[dblOPISAverageCost1]			
-					,[dtmOPISEffectiveDate1]			
-					,[dblOPISAverageCost2]			
-					,[dtmOPISEffectiveDate2]			
-					,[dblOPISAverageCost3]			
-					,[dtmOPISEffectiveDate3]		
-					,[dblSellingPrice]				
-					,[dblPumpPrice]					
-					,[ysnCarryNegligibleBalance]		
-					,[ysnIncludeInQuantityDiscount]	
-					,[strDepartmentType]				
-					,[ysnOverrideLocationSalesTax]	
-					,[dblRemoteFeePerTransaction]	
-					,[dblExtRemoteFeePerTransaction]
-					,[ysnMPGCalculation]				
-					,[ysnChargeOregonP]				
-					,[intCreatedUserId]				
-					,[dtmCreated]					
-					,[intLastModifiedUserId]			
-					,[dtmLastModified]				
-					)
-					VALUES(
-					 @MasterPk
-					 ,@intSiteItemTaxGroupMaster				
-					 ,@intSiteItemNetworkId					
-					 ,@strSiteItemProductNumber				
-					 ,@intSiteItemARItemId					
-					 ,@strSiteItemProductDescription			
-					 ,@dblSiteItemOPISAverageCost1			
-					 ,@dtmSiteItemOPISEffectiveDate1			
-					 ,@dblSiteItemOPISAverageCost2			
-					 ,@dtmSiteItemOPISEffectiveDate2			
-					 ,@dblSiteItemOPISAverageCost3			
-					 ,@dtmSiteItemOPISEffectiveDate3			
-					 ,@dblSiteItemSellingPrice				
-					 ,@dblSiteItemPumpPrice					
-					 ,@ysnSiteItemCarryNegligibleBalance		
-					 ,@ysnSiteItemIncludeInQuantityDiscount	
-					 ,@strSiteItemDepartmentType				
-					 ,@ysnSiteItemOverrideLocationSalesTax	
-					 ,@dblSiteItemRemoteFeePerTransaction		
-					 ,@dblSiteItemExtRemoteFeePerTransaction	
-					 ,@ysnSiteItemMPGCalculation				
-					 ,@ysnSiteItemChargeOregonP				
-					 ,@intSiteItemCreatedUserId				
-					 ,@dtmSiteItemCreated						
-					 ,@intSiteItemLastModifiedUserId			
-					 ,@dtmSiteItemLastModified				
-					)
-					CONTINUEDETAILLOOP:
-					PRINT @originSiteItem
-					DELETE FROM #tmpcfitmmst WHERE cfitm_prod_no = @originSiteItem
-				END
+				--	INSERT [dbo].[tblCFItem](
+				--	 [intSiteId]
+				--	,[intTaxGroupMaster]				
+				--	,[intNetworkId]					
+				--	,[strProductNumber]				
+				--	,[intARItemId]					
+				--	,[strProductDescription]		
+				--	,[dblOPISAverageCost1]			
+				--	,[dtmOPISEffectiveDate1]			
+				--	,[dblOPISAverageCost2]			
+				--	,[dtmOPISEffectiveDate2]			
+				--	,[dblOPISAverageCost3]			
+				--	,[dtmOPISEffectiveDate3]		
+				--	,[dblSellingPrice]				
+				--	,[dblPumpPrice]					
+				--	,[ysnCarryNegligibleBalance]		
+				--	,[ysnIncludeInQuantityDiscount]	
+				--	,[strDepartmentType]				
+				--	,[ysnOverrideLocationSalesTax]	
+				--	,[dblRemoteFeePerTransaction]	
+				--	,[dblExtRemoteFeePerTransaction]
+				--	,[ysnMPGCalculation]				
+				--	,[ysnChargeOregonP]				
+				--	,[intCreatedUserId]				
+				--	,[dtmCreated]					
+				--	,[intLastModifiedUserId]			
+				--	,[dtmLastModified]				
+				--	)
+				--	VALUES(
+				--	 @MasterPk
+				--	 ,@intSiteItemTaxGroupMaster				
+				--	 ,@intSiteItemNetworkId					
+				--	 ,@strSiteItemProductNumber				
+				--	 ,@intSiteItemARItemId					
+				--	 ,@strSiteItemProductDescription			
+				--	 ,@dblSiteItemOPISAverageCost1			
+				--	 ,@dtmSiteItemOPISEffectiveDate1			
+				--	 ,@dblSiteItemOPISAverageCost2			
+				--	 ,@dtmSiteItemOPISEffectiveDate2			
+				--	 ,@dblSiteItemOPISAverageCost3			
+				--	 ,@dtmSiteItemOPISEffectiveDate3			
+				--	 ,@dblSiteItemSellingPrice				
+				--	 ,@dblSiteItemPumpPrice					
+				--	 ,@ysnSiteItemCarryNegligibleBalance		
+				--	 ,@ysnSiteItemIncludeInQuantityDiscount	
+				--	 ,@strSiteItemDepartmentType				
+				--	 ,@ysnSiteItemOverrideLocationSalesTax	
+				--	 ,@dblSiteItemRemoteFeePerTransaction		
+				--	 ,@dblSiteItemExtRemoteFeePerTransaction	
+				--	 ,@ysnSiteItemMPGCalculation				
+				--	 ,@ysnSiteItemChargeOregonP				
+				--	 ,@intSiteItemCreatedUserId				
+				--	 ,@dtmSiteItemCreated						
+				--	 ,@intSiteItemLastModifiedUserId			
+				--	 ,@dtmSiteItemLastModified				
+				--	)
+				--	CONTINUEDETAILLOOP:
+				--	PRINT @originSiteItem
+				--	DELETE FROM #tmpcfitmmst WHERE cfitm_prod_no = @originSiteItem
+				--END
 
-				DROP TABLE #tmpcfitmmst
+				--DROP TABLE #tmpcfitmmst
 
 
-				--============================================--
-				--		INSERT DETAIL CREDIT CARD RECORDS	  --
-				--============================================--
-				SELECT cfccd_card_prefix INTO #tmpcfccdmst
-				FROM cfccdmst
-				WHERE cfccd_site_no COLLATE Latin1_General_CI_AS = @originSite
+				----============================================--
+				----		INSERT DETAIL CREDIT CARD RECORDS	  --
+				----============================================--
+				--SELECT cfccd_card_prefix INTO #tmpcfccdmst
+				--FROM cfccdmst
+				--WHERE cfccd_site_no COLLATE Latin1_General_CI_AS = @originSite
 				
-				WHILE (EXISTS(SELECT 1 FROM #tmpcfccdmst))
-				BEGIN
+				--WHILE (EXISTS(SELECT 1 FROM #tmpcfccdmst))
+				--BEGIN
 
-					SELECT @originCreditCard = cfccd_card_prefix FROM #tmpcfccdmst
+				--	SELECT @originCreditCard = cfccd_card_prefix FROM #tmpcfccdmst
 
-					SELECT TOP 1
-					 @intCreditCardNetworkId								= ISNULL((SELECT intNetworkId 
-																			   FROM tblCFNetwork 
-																			   WHERE strNetwork = LTRIM(RTRIM(cfccd_network_id)) 
-																			   COLLATE Latin1_General_CI_AS),0)
-					,@strCreditCardPrefix									= LTRIM(RTRIM(cfccd_card_prefix))
-					,@intCreditCardCardId									= LTRIM(RTRIM(cfccd_card_no))
-					,@strCreditCardCardDescription							= LTRIM(RTRIM(cfccd_card_desc)) 
-					,@intCreditCardCustomerId								= ISNULL((SELECT intEntityCustomerId 
-																				FROM tblARCustomer 
-																				WHERE strCustomerNumber = LTRIM(RTRIM(cfccd_ar_cus_no))
-																				COLLATE Latin1_General_CI_AS),0)
-					,@ysnCreditCardLocalPrefix								= (case
-																			   when RTRIM(LTRIM(cfccd_local_prefix)) = 'N' then 'FALSE'
-																			   when RTRIM(LTRIM(cfccd_local_prefix)) = 'Y' then 'TRUE'
-																			   else 'FALSE'
-																			   end)
-					,@intCreditCardCreatedUserId							= 0		
-					,@dtmCreditCardCreated									= CONVERT(VARCHAR(10), GETDATE(), 120)
-					,@intCreditCardLastModifiedUserId						= 0
-					,@dtmCreditCardLastModified								= CONVERT(VARCHAR(10), GETDATE(), 120)
-					FROM cfccdmst											  
-					WHERE cfccd_card_prefix = @originCreditCard
+				--	SELECT TOP 1
+				--	 @intCreditCardNetworkId								= ISNULL((SELECT intNetworkId 
+				--															   FROM tblCFNetwork 
+				--															   WHERE strNetwork = LTRIM(RTRIM(cfccd_network_id)) 
+				--															   COLLATE Latin1_General_CI_AS),0)
+				--	,@strCreditCardPrefix									= LTRIM(RTRIM(cfccd_card_prefix))
+				--	,@intCreditCardCardId									= LTRIM(RTRIM(cfccd_card_no))
+				--	,@strCreditCardCardDescription							= LTRIM(RTRIM(cfccd_card_desc)) 
+				--	,@intCreditCardCustomerId								= ISNULL((SELECT intEntityCustomerId 
+				--																FROM tblARCustomer 
+				--																WHERE strCustomerNumber = LTRIM(RTRIM(cfccd_ar_cus_no))
+				--																COLLATE Latin1_General_CI_AS),0)
+				--	,@ysnCreditCardLocalPrefix								= (case
+				--															   when RTRIM(LTRIM(cfccd_local_prefix)) = 'N' then 'FALSE'
+				--															   when RTRIM(LTRIM(cfccd_local_prefix)) = 'Y' then 'TRUE'
+				--															   else 'FALSE'
+				--															   end)
+				--	,@intCreditCardCreatedUserId							= 0		
+				--	,@dtmCreditCardCreated									= CONVERT(VARCHAR(10), GETDATE(), 120)
+				--	,@intCreditCardLastModifiedUserId						= 0
+				--	,@dtmCreditCardLastModified								= CONVERT(VARCHAR(10), GETDATE(), 120)
+				--	FROM cfccdmst											  
+				--	WHERE cfccd_card_prefix = @originCreditCard
 					
-					INSERT [dbo].[tblCFCreditCard](
-					 [intSiteId]		
-					,[intNetworkId]			
-					,[strPrefix]				
-					,[intCardId]				
-					,[strCardDescription]		
-					,[intCustomerId]			
-					,[ysnLocalPrefix]			
-					,[intCreatedUserId]	
-					,[dtmCreated]				
-					,[intLastModifiedUserId]	
-					,[dtmLastModified]			
-					)
-					VALUES(
-					  @MasterPk
-					 ,@intCreditCardNetworkId			
-					 ,@strCreditCardPrefix				
-					 ,@intCreditCardCardId				
-					 ,@strCreditCardCardDescription		
-					 ,@intCreditCardCustomerId			
-					 ,@ysnCreditCardLocalPrefix			
-					 ,@intCreditCardCreatedUserId		
-					 ,@dtmCreditCardCreated				
-					 ,@intCreditCardLastModifiedUserId	
-					 ,@dtmCreditCardLastModified			
-					)
-					CONTINUEDETAILCCLOOP:
-					PRINT @originCreditCard
-					DELETE FROM #tmpcfccdmst WHERE cfccd_card_prefix = @originCreditCard
-				END
+				--	INSERT [dbo].[tblCFCreditCard](
+				--	 [intSiteId]		
+				--	,[intNetworkId]			
+				--	,[strPrefix]				
+				--	,[intCardId]				
+				--	,[strCardDescription]		
+				--	,[intCustomerId]			
+				--	,[ysnLocalPrefix]			
+				--	,[intCreatedUserId]	
+				--	,[dtmCreated]				
+				--	,[intLastModifiedUserId]	
+				--	,[dtmLastModified]			
+				--	)
+				--	VALUES(
+				--	  @MasterPk
+				--	 ,@intCreditCardNetworkId			
+				--	 ,@strCreditCardPrefix				
+				--	 ,@intCreditCardCardId				
+				--	 ,@strCreditCardCardDescription		
+				--	 ,@intCreditCardCustomerId			
+				--	 ,@ysnCreditCardLocalPrefix			
+				--	 ,@intCreditCardCreatedUserId		
+				--	 ,@dtmCreditCardCreated				
+				--	 ,@intCreditCardLastModifiedUserId	
+				--	 ,@dtmCreditCardLastModified			
+				--	)
+				--	CONTINUEDETAILCCLOOP:
+				--	PRINT @originCreditCard
+				--	DELETE FROM #tmpcfccdmst WHERE cfccd_card_prefix = @originCreditCard
+				--END
 
-				DROP TABLE #tmpcfccdmst
+				--DROP TABLE #tmpcfccdmst
 
 
-				COMMIT TRANSACTION
+				--COMMIT TRANSACTION
+
+									   COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
 				SET @TotalSuccess += 1;
+				INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Site'
+						,1
+						,''
+						,'cflocmst'
+						,@originSite
+						,'tblCFSite'
+						,SCOPE_IDENTITY()
+						,''
+					)
 				
 			END TRY
 			BEGIN CATCH
-				PRINT 'IMPORTING SITE' + ERROR_MESSAGE()
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
-				PRINT ERROR_MESSAGE()
 				SET @TotalFailed += 1;
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Site'
+					,0
+					,ERROR_MESSAGE()
+					,'cflocmst'
+					,@originSite
+					,'tblCFSite'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -560,13 +601,14 @@
 			END
 								
 			CONTINUELOOP:
-			PRINT @originSite
 			DELETE FROM #tmpcflocmst WHERE cfloc_site_no = @originSite
 		
 			SET @Counter += 1;
 
 		END
 	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cflocmst
+		PRINT @TotalFailed
 
 	END

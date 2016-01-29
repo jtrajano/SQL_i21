@@ -29,6 +29,35 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceRuleGroup]
 			FROM cfpgpmst
 				WHERE cfpgp_prc_grp_id COLLATE Latin1_General_CI_AS NOT IN (select strPriceGroup from tblCFPriceRuleGroup) 
 
+
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Price Rule Group'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate price rule group on i21 Card Fueling price rule groups list'
+		,strOriginTable = 'cfpgpmst'
+		,strOriginIdentityId = cfpgp_prc_grp_id
+		,strI21Table = 'tblCFPriceRuleGroup'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfpgpmst
+		WHERE cfpgp_prc_grp_id COLLATE Latin1_General_CI_AS IN (select strPriceGroup from tblCFPriceRuleGroup) 
+		
+		--DUPLICATE SITE ON i21--
+
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfpgpmst))
 		BEGIN
 			
@@ -42,22 +71,70 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceRuleGroup]
 				FROM cfpgpmst
 				WHERE cfpgp_prc_grp_id = @originPriceRuleGroup
 					
-				
+				--*********************COMMIT TRANSACTION*****************--
 				INSERT [dbo].[tblCFPriceRuleGroup](
 				 [strPriceGroup]	
 				,[strPriceGroupDescription])
 				VALUES(
 				 @strPriceGroup				
 				,@strPriceGroupDescription)
-				COMMIT TRANSACTION
+
+									   COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
 				SET @TotalSuccess += 1;
+				INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Price Rule Group'
+						,1
+						,''
+						,'cfpgpmst'
+						,@originPriceRuleGroup
+						,'tblCFPriceRuleGroup'
+						,SCOPE_IDENTITY()
+						,''
+					)
 				
 			END TRY
 			BEGIN CATCH
-				PRINT 'IMPORTING PRICE RULE GROUP' + ERROR_MESSAGE()
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Price Rule Group'
+					,0
+					,ERROR_MESSAGE()
+					,'cfpgpmst'
+					,@originPriceRuleGroup
+					,'tblCFPriceRuleGroup'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -66,13 +143,14 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceRuleGroup]
 			END
 								
 			CONTINUELOOP:
-			PRINT @originPriceRuleGroup
 			DELETE FROM #tmpcfpgpmst WHERE cfpgp_prc_grp_id = @originPriceRuleGroup
 		
 			SET @Counter += 1;
 
 		END
 	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfpgpmst
+		PRINT @TotalFailed
 
 	END

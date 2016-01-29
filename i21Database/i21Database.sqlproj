@@ -2055,8 +2055,6 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
     <Build Include="dbo\Stored Procedures\uspIUAuditRemoveDefendencies.sql" />
-    <Build Include="dbo\Tables\tblCFAccountSuccessImport.sql" />
-    <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot.sql" />
     <Build Include="dbo\Tables\tblWHSKUHistory.sql" />
@@ -2151,11 +2149,7 @@
     <Build Include="dbo\Views\vyuQMTestList.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentCharge.sql" />
-    <Build Include="dbo\Tables\tblCFDiscountScheduleSuccessImport.sql" />
-    <Build Include="dbo\Tables\tblCFDiscountScheduleFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportDiscountSchedule.sql" />
-    <Build Include="dbo\Tables\tblCFPriceProfileSuccessImport.sql" />
-    <Build Include="dbo\Tables\tblCFPriceProfileFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportPriceIndex.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportPriceProfile.sql" />
     <Build Include="dbo\Tables\tblCFNetworkSuccessImport.sql" />
@@ -2296,7 +2290,6 @@
     <Build Include="dbo\Views\vyuMFGetCalendar.sql" />
     <Build Include="dbo\Views\vyuCFCardAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGetItemTaxes.sql" />
-    <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotMove.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCalendarShift.sql" />

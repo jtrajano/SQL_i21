@@ -65,89 +65,89 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 		--========================--
 		--    DETAIL DEPARTMENT   --
 		--========================--
-		DECLARE @originDepartment				NVARCHAR(50)
-		DECLARE @strDepartment					NVARCHAR(500)
-		DECLARE @strDepartmentDescription		NVARCHAR(500)
+		--DECLARE @originDepartment				NVARCHAR(50)
+		--DECLARE @strDepartment					NVARCHAR(500)
+		--DECLARE @strDepartmentDescription		NVARCHAR(500)
 
 
 		--========================--
 		--    DETAIL VEHICLE      --
 		--========================--
-		DECLARE @originVehicle							NVARCHAR(500)
-		DECLARE @strVehicleVehicleNumber				NVARCHAR(500)
-		DECLARE @strVehicleCustomerUnitNumber			NVARCHAR(500)
-		DECLARE @strVehicleVehicleDescription			NVARCHAR(500)
-		DECLARE @intVehicleDaysBetweenService			INT
-		DECLARE @intVehicleMilesBetweenService			INT
-		DECLARE @intVehicleLastReminderOdometer			INT
-		DECLARE @dtmVehicleLastReminderDate				DATETIME
-		DECLARE @dtmVehicleLastServiceDate				DATETIME
-		DECLARE @intVehicleLastServiceOdometer			INT
-		DECLARE @strVehicleNoticeMessageLine1			NVARCHAR(500)
-		DECLARE @strVehicleNoticeMessageLine2			NVARCHAR(500)
-		DECLARE @strVehicleVehicleForOwnUse				NVARCHAR(500)
-		DECLARE @intVehicleExpenseItemId				INT
-		DECLARE @strVehicleLicencePlateNumber			NVARCHAR(500)
-		DECLARE @strVehicleDepartment					NVARCHAR(500)
-		DECLARE @intVehicleCreatedUserId				INT
-		DECLARE @dtmVehicleCreated						DATETIME
-		DECLARE @intVehicleLastModifiedUserId			INT
-		DECLARE @dtmVehicleLastModified					DATETIME
-		DECLARE @ysnVehicleCardForOwnUse				BIT
+		--DECLARE @originVehicle							NVARCHAR(500)
+		--DECLARE @strVehicleVehicleNumber				NVARCHAR(500)
+		--DECLARE @strVehicleCustomerUnitNumber			NVARCHAR(500)
+		--DECLARE @strVehicleVehicleDescription			NVARCHAR(500)
+		--DECLARE @intVehicleDaysBetweenService			INT
+		--DECLARE @intVehicleMilesBetweenService			INT
+		--DECLARE @intVehicleLastReminderOdometer			INT
+		--DECLARE @dtmVehicleLastReminderDate				DATETIME
+		--DECLARE @dtmVehicleLastServiceDate				DATETIME
+		--DECLARE @intVehicleLastServiceOdometer			INT
+		--DECLARE @strVehicleNoticeMessageLine1			NVARCHAR(500)
+		--DECLARE @strVehicleNoticeMessageLine2			NVARCHAR(500)
+		--DECLARE @strVehicleVehicleForOwnUse				NVARCHAR(500)
+		--DECLARE @intVehicleExpenseItemId				INT
+		--DECLARE @strVehicleLicencePlateNumber			NVARCHAR(500)
+		--DECLARE @strVehicleDepartment					NVARCHAR(500)
+		--DECLARE @intVehicleCreatedUserId				INT
+		--DECLARE @dtmVehicleCreated						DATETIME
+		--DECLARE @intVehicleLastModifiedUserId			INT
+		--DECLARE @dtmVehicleLastModified					DATETIME
+		--DECLARE @ysnVehicleCardForOwnUse				BIT
 
 
 		--============================--
 		--    DETAIL MISCELLANEOUS    --
 		--============================--
-		DECLARE @originMiscellaneous					NVARCHAR(500)
-		DECLARE @strMiscellaneous					    NVARCHAR(500)
-		DECLARE @strMiscellaneousDescription		    NVARCHAR(500)
+		--DECLARE @originMiscellaneous					NVARCHAR(500)
+		--DECLARE @strMiscellaneous					    NVARCHAR(500)
+		--DECLARE @strMiscellaneousDescription		    NVARCHAR(500)
 
 
 		--============================--
 		--    DETAIL PURCHASE ORDER   --
 		--============================--
-		DECLARE @dtmPurchaseOrderExpirationDate			DATETIME
-		DECLARE @strPurchaseOrderNo						NVARCHAR(500)
+		--DECLARE @dtmPurchaseOrderExpirationDate			DATETIME
+		--DECLARE @strPurchaseOrderNo						NVARCHAR(500)
 
 
 		--===================--
 		--    DETAIL CARDS   --
 		--===================--
-		DECLARE @intCardNetworkId							INT
-		DECLARE @strCardCardNumber							NVARCHAR(500)
-		DECLARE @strCardCardDescription						NVARCHAR(500)
-		DECLARE @strCardCardForOwnUse						NVARCHAR(500)
-		DECLARE @intCardExpenseItemId						INT
-		DECLARE @intCardDefaultFixVehicleNumber				INT
-		DECLARE @intCardDepartmentId						INT
-		DECLARE @dtmCardLastUsedDated						DATETIME
-		DECLARE @intCardCardTypeId							INT
-		DECLARE @dtmCardIssueDate							DATETIME
-		DECLARE @ysnCardActive								BIT
-		DECLARE @ysnCardCardLocked							BIT
-		DECLARE @strCardCardPinNumber						NVARCHAR(500)
-		DECLARE @dtmCardCardExpiratioYearMonth				DATETIME
-		DECLARE @strCardCardValidationCode					NVARCHAR(500)
-		DECLARE @intCardNumberOfCardsIssued					INT
-		DECLARE @intCardCardLimitedCode						INT
-		DECLARE @intCardCardFuelCode						INT
-		DECLARE @strCardCardTierCode						NVARCHAR(500)
-		DECLARE @strCardCardOdometerCode					NVARCHAR(500)
-		DECLARE @strCardCardWCCode							NVARCHAR(500)
-		DECLARE @strCardSplitNumber							NVARCHAR(500)
-		DECLARE @intCardCardManCode							INT
-		DECLARE @intCardCardShipCat							INT
-		DECLARE @intCardCardProfileNumber					INT
-		DECLARE @intCardCardPositionSite					INT
-		DECLARE @intCardCardvehicleControl					INT
-		DECLARE @intCardCardCustomPin						INT
-		DECLARE @intCardCreatedUserId						INT
-		DECLARE @dtmCardCreated								DATETIME
-		DECLARE @intCardLastModifiedUserId					INT
-		DECLARE @dtmCardLastModified						DATETIME
-		DECLARE @ysnCardCardForOwnUse						BIT
-		DECLARE @ysnCardIgnoreCardTransaction				BIT
+		--DECLARE @intCardNetworkId							INT
+		--DECLARE @strCardCardNumber							NVARCHAR(500)
+		--DECLARE @strCardCardDescription						NVARCHAR(500)
+		--DECLARE @strCardCardForOwnUse						NVARCHAR(500)
+		--DECLARE @intCardExpenseItemId						INT
+		--DECLARE @intCardDefaultFixVehicleNumber				INT
+		--DECLARE @intCardDepartmentId						INT
+		--DECLARE @dtmCardLastUsedDated						DATETIME
+		--DECLARE @intCardCardTypeId							INT
+		--DECLARE @dtmCardIssueDate							DATETIME
+		--DECLARE @ysnCardActive								BIT
+		--DECLARE @ysnCardCardLocked							BIT
+		--DECLARE @strCardCardPinNumber						NVARCHAR(500)
+		--DECLARE @dtmCardCardExpiratioYearMonth				DATETIME
+		--DECLARE @strCardCardValidationCode					NVARCHAR(500)
+		--DECLARE @intCardNumberOfCardsIssued					INT
+		--DECLARE @intCardCardLimitedCode						INT
+		--DECLARE @intCardCardFuelCode						INT
+		--DECLARE @strCardCardTierCode						NVARCHAR(500)
+		--DECLARE @strCardCardOdometerCode					NVARCHAR(500)
+		--DECLARE @strCardCardWCCode							NVARCHAR(500)
+		--DECLARE @strCardSplitNumber							NVARCHAR(500)
+		--DECLARE @intCardCardManCode							INT
+		--DECLARE @intCardCardShipCat							INT
+		--DECLARE @intCardCardProfileNumber					INT
+		--DECLARE @intCardCardPositionSite					INT
+		--DECLARE @intCardCardvehicleControl					INT
+		--DECLARE @intCardCardCustomPin						INT
+		--DECLARE @intCardCreatedUserId						INT
+		--DECLARE @dtmCardCreated								DATETIME
+		--DECLARE @intCardLastModifiedUserId					INT
+		--DECLARE @dtmCardLastModified						DATETIME
+		--DECLARE @ysnCardCardForOwnUse						BIT
+		--DECLARE @ysnCardIgnoreCardTransaction				BIT
     
 
 		--=============================--
@@ -652,7 +652,6 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 				--END
 				--DROP TABLE #tmpcfvehmst
 				----====================================--
-
 
 				COMMIT TRANSACTION
 				SET @TotalSuccess += 1;	

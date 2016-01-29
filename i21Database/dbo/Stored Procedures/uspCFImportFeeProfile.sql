@@ -10,8 +10,6 @@ CREATE PROCEDURE [dbo].[uspCFImportFeeProfile]
 		--====================================================--
 		--     ONE TIME FEE PROFILE SYNCHRONIZATION	  --
 		--====================================================--
-		--TRUNCATE TABLE tblCFFeeProfileFailedImport
-		--TRUNCATE TABLE tblCFFeeProfileSuccessImport
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
@@ -45,6 +43,35 @@ CREATE PROCEDURE [dbo].[uspCFImportFeeProfile]
 		SELECT DISTINCT cffpr_id INTO #tmpcff
 		FROM cffprmst
 		WHERE cffpr_id COLLATE Latin1_General_CI_AS NOT IN (select strFeeProfileId from tblCFFeeProfile) 
+
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+						dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Fee Profile'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate fee profile on i21 Card Fueling fee profiles list'
+		,strOriginTable = 'cffprmst'
+		,strOriginIdentityId = cffpr_id
+		,strI21Table = 'tblCFFeeProfile'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cffprmst
+		WHERE cffpr_id COLLATE Latin1_General_CI_AS IN (select strFeeProfileId from tblCFFeeProfile) 
+		
+		--DUPLICATE SITE ON i21--
+
 				
 		WHILE (EXISTS(SELECT 1 FROM #tmpcff))
 		BEGIN
@@ -63,9 +90,11 @@ CREATE PROCEDURE [dbo].[uspCFImportFeeProfile]
 												  end)
 				FROM cffprmst
 				WHERE cffpr_id = @originFeeProfile
+				
 					
 				--================================--
 				--		INSERT MASTER RECORD	  --
+				--*******COMMIT TRANSACTION*******--
 				--================================--
 				INSERT [dbo].[tblCFFeeProfile](
 				 [strFeeProfileId]
@@ -128,26 +157,91 @@ CREATE PROCEDURE [dbo].[uspCFImportFeeProfile]
 					,@dtmEndDate			
 					,@dtmStartDate				
 					)
-					CONTINUEDETAILLOOP:
-					PRINT @originFeeProfileDetail
+
+					INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Fee Profile Detail'
+						,1
+						,''
+						,'cffprmst'
+						,@originFeeProfileDetail
+						,'tblCFFeeProfileDetail'
+						,null
+						,''
+					)
+
 					DELETE FROM #tmpcffprdmst WHERE cffpr_fee_id = @originFeeProfileDetail
 				END
 
 				DROP TABLE #tmpcffprdmst
 
-				COMMIT TRANSACTION
+									   COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
 				SET @TotalSuccess += 1;
-				--INSERT INTO tblCFFeeProfileSuccessImport(strFeeProfileId)					
-				--VALUES(@originFeeProfile)			
+				INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Fee Profile'
+						,1
+						,''
+						,'cffprmst'
+						,@originFeeProfile
+						,'tblCFFeeProfile'
+						,@MasterPk
+						,''
+					)
+				
 			END TRY
 			BEGIN CATCH
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				--INSERT INTO tblCFFeeProfileFailedImport(strFeeProfileId,strReason)					
-				--VALUES(@originFeeProfile,ERROR_MESSAGE())					
-				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
-				PRINT 'IMPORTING FEE PROFILE' + ERROR_MESSAGE()
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Fee Profile'
+					,0
+					,ERROR_MESSAGE()
+					,'cffprmst'
+					,@originFeeProfile
+					,'tblCFFeeProfile'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -163,6 +257,8 @@ CREATE PROCEDURE [dbo].[uspCFImportFeeProfile]
 
 		END
 	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cffprmst
+		PRINT @TotalFailed
 
 	END

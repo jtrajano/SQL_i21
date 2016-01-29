@@ -10,8 +10,6 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 		--================================================
 		--     ONE TIME NETWORK SYNCHRONIZATION	
 		--================================================
-		TRUNCATE TABLE tblCFNetworkFailedImport
-		TRUNCATE TABLE tblCFNetworkSuccessImport
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
@@ -54,14 +52,42 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 		--========================--
 		--    DETAIL CARD TYPE    --
 		--========================--
-		DECLARE @originCardType							 NVARCHAR(MAX)
-		DECLARE @strCardType							 NVARCHAR(MAX)
-		DECLARE @strCardTypeDescription					 NVARCHAR(MAX)
+		--DECLARE @originCardType							 NVARCHAR(MAX)
+		--DECLARE @strCardType							 NVARCHAR(MAX)
+		--DECLARE @strCardTypeDescription					 NVARCHAR(MAX)
 
 		--Import only those are not yet imported
 		SELECT cfnet_network_id INTO #tmpcfnetmst
 			FROM cfnetmst
 				WHERE cfnet_network_id COLLATE Latin1_General_CI_AS NOT IN (select strNetwork from tblCFNetwork) 
+
+		--DUPLICATE NETWORK ON i21--
+
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Network'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate network on i21 Card Fueling networks list'
+		,strOriginTable = 'cfnetmst'
+		,strOriginIdentityId = cfnet_network_id
+		,strI21Table = 'tblCFNetwork'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfnetmst
+		WHERE cfnet_network_id COLLATE Latin1_General_CI_AS IN (select strNetwork from tblCFNetwork) 
+		
+		--DUPLICATE NETWORK ON i21--
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfnetmst))
 		BEGIN
@@ -147,6 +173,7 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 															end)
 				FROM cfnetmst
 				WHERE cfnet_network_id = @originNetwork
+
 				--================================--
 				--       INSERT MASTER RECORD     --
 				--================================--
@@ -218,50 +245,88 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 				--	1. intNetworkId					  --
 				--									  --
 			
-				SELECT cfcty_type INTO #tmpcfctymst
-				FROM cfctymst
-				WHERE cfcty_network_id COLLATE Latin1_General_CI_AS = @originNetwork			
+				--SELECT cfcty_type INTO #tmpcfctymst
+				--FROM cfctymst
+				--WHERE cfcty_network_id COLLATE Latin1_General_CI_AS = @originNetwork			
 					
-				WHILE (EXISTS(SELECT 1 FROM #tmpcfctymst))
-				BEGIN
+				--WHILE (EXISTS(SELECT 1 FROM #tmpcfctymst))
+				--BEGIN
 					
-					SELECT @originCardType = cfcty_type FROM #tmpcfctymst
+				--	SELECT @originCardType = cfcty_type FROM #tmpcfctymst
 					
-					SELECT TOP 1
-					 @strCardType					  = LTRIM(RTRIM(cfcty_type))
-					,@strCardTypeDescription		  = LTRIM(RTRIM(cfcty_desc))
-					FROM cfctymst
-					WHERE cfcty_type = @originCardType
+				--	SELECT TOP 1
+				--	 @strCardType					  = LTRIM(RTRIM(cfcty_type))
+				--	,@strCardTypeDescription		  = LTRIM(RTRIM(cfcty_desc))
+				--	FROM cfctymst
+				--	WHERE cfcty_type = @originCardType
 					
-					INSERT [dbo].[tblCFCardType](
-						 [intNetworkId]
-						,[strCardType]	
-						,[strDescription]	
-					)
-					VALUES(
-						 @MasterPk
-						,@strCardType	
-						,@strCardTypeDescription	
-					)
-					CARDTYPELOOP:
-					PRINT @originCardType
-					DELETE FROM #tmpcfctymst WHERE cfcty_type = @originCardType
-				END
-				DROP TABLE #tmpcfctymst
+				--	INSERT [dbo].[tblCFCardType](
+				--		 [intNetworkId]
+				--		,[strCardType]	
+				--		,[strDescription]	
+				--	)
+				--	VALUES(
+				--		 @MasterPk
+				--		,@strCardType	
+				--		,@strCardTypeDescription	
+				--	)
+				--	CARDTYPELOOP:
+				--	PRINT @originCardType
+				--	DELETE FROM #tmpcfctymst WHERE cfcty_type = @originCardType
+				--END
+				--DROP TABLE #tmpcfctymst
 				--====================================--
 
 				COMMIT TRANSACTION
-				SET @TotalSuccess += 1;
-				INSERT INTO tblCFNetworkSuccessImport(strNetworkId)					
-				VALUES(@originNetwork)			
+				SET @TotalSuccess += 1;	
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+				   ,'Network'
+				   ,1
+				   ,''
+				   ,'cfnetmst'
+				   ,@originNetwork
+				   ,'tblCFNetwork'
+				   ,@MasterPk
+				   ,''
+				)
 			END TRY
 			BEGIN CATCH
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				INSERT INTO tblCFNetworkFailedImport(strNetworkId,strReason)					
-				VALUES(@originNetwork,ERROR_MESSAGE())			
-				PRINT 'IMPORTING NETWORK' + ERROR_MESSAGE()		
-				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+				   ,'Network'
+				   ,0
+				   ,ERROR_MESSAGE()
+				   ,'cfnetmst'
+				   ,@originNetwork
+				   ,'tblCFNetwork'
+				   ,null
+				   ,''
+				)
 				GOTO CONTINUELOOP;
 			END CATCH
 			IF(@@ERROR <> 0) 
@@ -271,13 +336,11 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 			END
 								
 			CONTINUELOOP:
-			PRINT @originNetwork
 			DELETE FROM #tmpcfnetmst WHERE cfnet_network_id = @originNetwork
-		
-			SET @Counter += 1;
-
 		END
-	
-		--SET @Total = @Counter
+		
+			PRINT @TotalSuccess
+			SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfnetmst
+			PRINT @TotalFailed
 
 	END

@@ -42,9 +42,36 @@ CREATE PROCEDURE [dbo].[uspCFImportSiteGroup]
 
 		--Import only those are not yet imported
 		SELECT cfsgp_site_grp_id INTO #tmpcfsgpmst
-		FROM cfsgpmst WHERE LTRIM(RTRIM(cfsgp_site_grp_id )) 
-		COLLATE Latin1_General_CI_AS
-		NOT IN (SELECT strSiteGroup FROM tblCFSiteGroup)
+		FROM cfsgpmst 
+		WHERE LTRIM(RTRIM(cfsgp_site_grp_id )) COLLATE Latin1_General_CI_AS NOT IN (SELECT strSiteGroup FROM tblCFSiteGroup)
+		
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+				dtmImportDate
+				,strSetupName
+				,ysnSuccessful
+				,strFailedReason
+				,strOriginTable
+				,strOriginIdentityId
+				,strI21Table
+				,intI21IdentityId
+				,strUserId
+			)
+		SELECT 
+		dtmImportDate = GETDATE()
+		,strSetupName = 'Site Group'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate site group on i21 Card Fueling site groups list'
+		,strOriginTable = 'cfsgpmst'
+		,strOriginIdentityId = cfsgp_site_grp_id
+		,strI21Table = 'tblCFSiteGroup'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfsgpmst 
+		WHERE LTRIM(RTRIM(cfsgp_site_grp_id )) COLLATE Latin1_General_CI_AS IN (SELECT strSiteGroup FROM tblCFSiteGroup)
+		
+		--DUPLICATE SITE ON i21--
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfsgpmst))
 		BEGIN
@@ -59,7 +86,10 @@ CREATE PROCEDURE [dbo].[uspCFImportSiteGroup]
 				FROM cfsgpmst
 				WHERE cfsgp_site_grp_id = @originSiteGroup
 					
-				
+				--================================--
+				--		INSERT MASTER RECORD	  --
+				--*******COMMIT TRANSACTION*******--
+				--================================--
 				INSERT [dbo].[tblCFSiteGroup](
 				 [strSiteGroup]	
 				,[strDescription]
@@ -70,7 +100,6 @@ CREATE PROCEDURE [dbo].[uspCFImportSiteGroup]
 				,@strType)
 
 				SELECT @MasterPk  = SCOPE_IDENTITY();
-
 				--============================================--
 				--		INSERT DETAIL SITE GROUP ADJUSTMENT	  --
 				--			      REQUIRED FIELDS			  --
@@ -134,26 +163,90 @@ CREATE PROCEDURE [dbo].[uspCFImportSiteGroup]
 					,@dtmEndEffectiveDate	
 					,@dblRate)
 
-				
-					DEPARTMENTLOOP:
-					PRINT @originSiteGroupAdjId
+					INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Site Group Adjustment'
+						,1
+						,''
+						,'cfsgamst'
+						,@originSiteGroupAdjItem
+						,'tblCFSiteGroupPriceAdjustment'
+						,null
+						,''
+					)
+					
 					DELETE FROM #tmpcfsgamst 
 					WHERE cfsga_site_grp_id = @originSiteGroupAdjId
 					AND cfsga_ar_itm_no = @originSiteGroupAdjItem
 
 				END
 				DROP TABLE #tmpcfsgamst
-				--====================================--
-
-			COMMIT TRANSACTION
-			SET @TotalSuccess += 1;
-				
+										COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
+				SET @TotalSuccess += 1;
+				INSERT INTO tblCFImportResult(
+					dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Site Group'
+					,1
+					,''
+					,'cfsgpmst'
+					,@originSiteGroup
+					,'tblCFSiteGroup'
+					,@MasterPk
+					,''
+				)
 			END TRY
 			BEGIN CATCH
-				PRINT 'IMPORTING SITE GROUP' + ERROR_MESSAGE()
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Site Group'
+					,0
+					,ERROR_MESSAGE()
+					,'cfsgpmst'
+					,@originSiteGroup
+					,'tblCFSiteGroup'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -162,13 +255,14 @@ CREATE PROCEDURE [dbo].[uspCFImportSiteGroup]
 			END
 								
 			CONTINUELOOP:
-			PRINT @originSiteGroup
 			DELETE FROM #tmpcfsgpmst WHERE cfsgp_site_grp_id = @originSiteGroup
 		
 			SET @Counter += 1;
 
 		END
 	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfsgpmst
+		PRINT @TotalFailed
 
 	END

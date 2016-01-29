@@ -10,8 +10,6 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 		--====================================================--
 		--     ONE TIME CARD SYNCHRONIZATION	  --
 		--====================================================--
-		--TRUNCATE TABLE tblCFDiscountScheduleFailedImport
-		--TRUNCATE TABLE tblCFDiscountScheduleSuccessImport
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
@@ -64,6 +62,36 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			FROM cfcusmst
 				WHERE cfcus_card_no COLLATE Latin1_General_CI_AS NOT IN (select strCardNumber from tblCFCard) 
 
+
+		--DUPLICATE CARD ON i21--
+
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Card'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate card on i21 Card Fueling cards list'
+		,strOriginTable = 'cfcusmst'
+		,strOriginIdentityId = cfcus_card_no
+		,strI21Table = 'tblCFCard'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfcusmst
+		WHERE cfcus_card_no COLLATE Latin1_General_CI_AS IN (select strCardNumber from tblCFCard) 
+		
+		--DUPLICATE CARD ON i21--
+
+
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfcusmst))
 		BEGIN
 				
@@ -71,7 +99,9 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			SELECT @originCard = cfcus_card_no FROM #tmpcfcusmst
 
 			BEGIN TRY
-				BEGIN TRANSACTION
+			--*********************BEGIN TRANSACTION*****************--
+								   BEGIN TRANSACTION 
+			--*********************BEGIN TRANSACTION*****************--
 				SELECT TOP 1
 				 @intNetworkId							   = (SELECT intNetworkId 
 																	FROM tblCFNetwork 
@@ -166,12 +196,10 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 				FROM cfcusmst
 				WHERE cfcus_card_no = @originCard
 				
-				
-				--================================--
-				--		INSERT MASTER RECORD	  --
-				--================================--
+			
 				IF(@intAccountId != 0)
 				BEGIN
+					--*********************COMMIT TRANSACTION*****************--
 					INSERT [dbo].[tblCFCard](
 						 [intNetworkId]			
 						,[strCardNumber]			
@@ -246,7 +274,8 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 						,@ysnIgnoreCardTransaction)
 
 
-					COMMIT TRANSACTION
+										   COMMIT TRANSACTION
+					--*********************COMMIT TRANSACTION*****************--
 					SET @TotalSuccess += 1;
 					INSERT INTO tblCFImportResult(
 						 dtmImportDate
@@ -273,6 +302,8 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 				END
 				ELSE
 				BEGIN
+				--*********************ROLLBACK TRANSACTION*****************--
+									   ROLLBACK TRANSACTION
 					INSERT INTO tblCFImportResult(
 					 dtmImportDate
 					,strSetupName
@@ -295,15 +326,13 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 						,null
 						,''
 					)
+				--*********************ROLLBACK TRANSACTION*****************--
 				END
-
-				--INSERT INTO tblCFDiscountScheduleSuccessImport(strDiscountScheduleId)					
-				--VALUES(@originCard)			
 			END TRY
 			BEGIN CATCH
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				--PRINT 'IMPORTING CARDS' + ERROR_MESSAGE()
 				
 				INSERT INTO tblCFImportResult(
 					 dtmImportDate
@@ -327,8 +356,8 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 					,null
 					,''
 				)
-
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -343,7 +372,9 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			SET @Counter += 1;
 
 		END
-	
-		--SET @Total = @Counter
+
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfcusmst
+		PRINT @TotalFailed
 
 	END
