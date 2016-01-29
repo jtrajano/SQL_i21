@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets1d6c92e15ac2a29106353d74854edb6fd5ae5c86bd261eb83119fbe4881d7560))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse5c5369a7b0cbba8862ad5587f11eb2bcf9db743d7ecd2fe56aa07738170d0aa))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets1d6c92e15ac2a29106353d74854edb6fd5ae5c86bd261eb83119fbe4881d7560 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetse5c5369a7b0cbba8862ad5587f11eb2bcf9db743d7ecd2fe56aa07738170d0aa : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "1d6c92e15ac2a29106353d74854edb6fd5ae5c86bd261eb83119fbe4881d7560"; }
+            get { return "e5c5369a7b0cbba8862ad5587f11eb2bcf9db743d7ecd2fe56aa07738170d0aa"; }
         }
 
         /// <summary>
@@ -9655,11 +9655,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemPricing
-        [CodeFirstDatabaseSchema.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
+        [CodeFirstDatabaseSchema.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strItemNo, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
     FROM (
         SELECT 
             T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
             T.intKey AS vyuICGetItemPricing_intKey, 
+            T.strItemNo AS vyuICGetItemPricing_strItemNo, 
             T.strDescription AS vyuICGetItemPricing_strDescription, 
             T.intVendorId AS vyuICGetItemPricing_intVendorId, 
             T.strVendorId AS vyuICGetItemPricing_strVendorId, 
@@ -9834,11 +9835,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemPricings
-        [iRely.Inventory.Model.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
+        [iRely.Inventory.Model.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strItemNo, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
     FROM (
         SELECT 
             T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
             T.intKey AS vyuICGetItemPricing_intKey, 
+            T.strItemNo AS vyuICGetItemPricing_strItemNo, 
             T.strDescription AS vyuICGetItemPricing_strDescription, 
             T.intVendorId AS vyuICGetItemPricing_intVendorId, 
             T.strVendorId AS vyuICGetItemPricing_strVendorId, 
