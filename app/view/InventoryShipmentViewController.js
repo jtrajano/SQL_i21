@@ -1152,6 +1152,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         width: 100
                     },
                     {
+                        dataIndex: 'strLocationName',
+                        dataType: 'string',
+                        text: 'Location Name',
+                        width: 150
+                    },
+                    {
                         dataIndex: 'strItemNo',
                         dataType: 'string',
                         text: 'Item No',
@@ -1218,6 +1224,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         dataType: 'string',
                         text: 'Contract Number',
                         flex: 1
+                    },
+                    {
+                        dataIndex: 'strLocationName',
+                        dataType: 'string',
+                        text: 'Location Name',
+                        width: 150
                     },
                     {
                         dataIndex: 'strItemNo',
