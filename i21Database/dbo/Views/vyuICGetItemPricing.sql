@@ -4,6 +4,7 @@
 SELECT 
 	intPricingKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intKey, ItemPricing.intItemPricingId) AS INT),
 	Item.intKey,
+	Item.strItemNo,
 	Item.strDescription,
 	Item.intVendorId,
 	Item.strVendorId,
