@@ -20,7 +20,7 @@ Ext.define('Inventory.model.ItemCustomerXref', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
-                            extraParams: { include: 'tblARCustomer, tblICItemLocation.tblSMCompanyLocation' },
+                            extraParams: { include: 'tblARCustomer, tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
                                 read: '../Inventory/api/ItemCustomerXref/Get'

@@ -79,8 +79,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_location))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strLocationName;
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strLocationName;
                     else
                         return null;
                 else
@@ -96,8 +96,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (tblSMCompanyLocation != null)
-                    return tblSMCompanyLocation.intCompanyLocationId;
+                if (vyuICGetItemLocation != null)
+                    return vyuICGetItemLocation.intLocationId;
                 else
                     return null;
             }
@@ -126,44 +126,6 @@ namespace iRely.Inventory.Model
                 return costingMethod;
             }
         }
-        private string _type;
-        [NotMapped]
-        public string strLocationType
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_type))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strLocationType;
-                    else
-                        return null;
-                else
-                    return _type;
-            }
-            set
-            {
-                _type = value;
-            }
-        }
-        private string _address;
-        [NotMapped]
-        public string strAddress
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_address))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strAddress;
-                    else
-                        return null;
-                else
-                    return _address;
-            }
-            set
-            {
-                _address = value;
-            }
-        }
         private string _vendor;
         [NotMapped]
         public string strVendorId
@@ -171,8 +133,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_vendor))
-                    if (vyuAPVendor != null)
-                        return vyuAPVendor.strVendorId;
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strVendorId;
                     else
                         return null;
                 else
@@ -190,8 +152,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_subLocationName))
-                    if (tblSMCompanyLocationSubLocation != null)
-                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    if (vyuICGetItemLocation != null)
+                        return vyuICGetItemLocation.strSubLocationName;
                     else
                         return null;
                 else
@@ -204,11 +166,8 @@ namespace iRely.Inventory.Model
         }
         
         public tblICItem tblICItem { get; set; }
-        public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
-        public vyuAPVendor vyuAPVendor { get; set; }
-        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
-        public tblICCountGroup tblICCountGroup { get; set; }
-
+        public vyuICGetItemLocation vyuICGetItemLocation { get; set; }
+                
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
         public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
@@ -219,29 +178,5 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
         public ICollection<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
         
-    }
-
-    public class ItemLocationVM
-    {
-        public int intItemLocationId { get; set; }
-        public int intItemId { get; set; }
-        public int? intLocationId { get; set; }
-        public int? intCompanyLocationId { get; set; }
-        public string strLocationName { get; set; }
-        public string strLocationType { get; set; }
-        public int? intVendorId { get; set; }
-        public string strVendorId { get; set; }
-        public string strDescription { get; set; }
-        public int? intCostingMethod { get; set; }
-        public string strCostingMethod { get; set; }
-        public int? intAllowNegativeInventory { get; set; }
-        public int? intSubLocationId { get; set; }
-        public string strSubLocation { get; set; }
-        public int? intStorageLocationId { get; set; }
-        public string strStorageLocation { get; set; }
-        public int? intIssueUOMId { get; set; }
-        public string strIssueUOM { get; set; }
-        public int? intReceiveUOMId { get; set; }
-        public string strReceiveUOM { get; set; }
     }
 }

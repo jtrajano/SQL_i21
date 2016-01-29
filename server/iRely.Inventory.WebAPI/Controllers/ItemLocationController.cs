@@ -23,10 +23,10 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        [ActionName("GetFullItemLocation")]
-        public async Task<HttpResponseMessage> GetFullItemLocation(GetParameter param)
+        [ActionName("GetItemLocationViews")]
+        public async Task<HttpResponseMessage> GetItemLocationViews(GetParameter param)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetFullItemLocation(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemLocationViews(param));
         }
     }
 }

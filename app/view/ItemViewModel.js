@@ -210,7 +210,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ItemLocation/GetFullItemLocation'
+                    read: '../Inventory/api/ItemLocation/GetItemLocationViews'
                 },
                 reader: {
                     type: 'json',

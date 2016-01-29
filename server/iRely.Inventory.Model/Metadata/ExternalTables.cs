@@ -26,7 +26,6 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         
-        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
 
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
@@ -69,7 +68,6 @@ namespace iRely.Inventory.Model
         public string strVendorId { get; set; }
 
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
-        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
 
@@ -196,7 +194,6 @@ namespace iRely.Inventory.Model
         public int? intAuditBin { get; set; }
         public string strAddress { get; set; }
 
-        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICStorageLocation> tblICStorageLocations { get; set; }
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }

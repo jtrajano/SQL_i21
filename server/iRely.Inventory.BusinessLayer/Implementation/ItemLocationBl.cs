@@ -24,27 +24,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
-            var query = _db.GetQuery<tblICItemLocation>()
-                .Include(p => p.tblSMCompanyLocation)
-                .Include(p => p.vyuAPVendor)
-                .Include(p => p.tblSMCompanyLocationSubLocation)
-                .Select(p => new ItemLocationVM
-                {
-                    intItemLocationId = p.intItemLocationId,
-                    intItemId = p.intItemId,
-                    intLocationId = p.intLocationId,
-                    intCompanyLocationId = p.intLocationId,
-                    strLocationName = p.tblSMCompanyLocation.strLocationName,
-                    strLocationType = p.tblSMCompanyLocation.strLocationType,
-                    intVendorId = p.intVendorId,
-                    strVendorId = p.vyuAPVendor.strName,
-                    strDescription = p.strDescription,
-                    intCostingMethod = p.intCostingMethod,
-                    intAllowNegativeInventory = p.intAllowNegativeInventory,
-                    intSubLocationId = p.intSubLocationId,
-                    strSubLocation = p.tblSMCompanyLocationSubLocation.strSubLocationName,
-                    intStorageLocationId = p.intStorageLocationId,
-                })
+            var query = _db.GetQuery<vyuICGetItemLocation>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
@@ -55,12 +35,9 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetFullItemLocation(GetParameter param)
+        public async Task<SearchResult> GetItemLocationViews(GetParameter param)
         {
-            var query = _db.GetQuery<tblICItemLocation>()
-                .Include(p => p.tblSMCompanyLocation)
-                .Include(p => p.vyuAPVendor)
-                .Include(p => p.tblSMCompanyLocationSubLocation)
+            var query = _db.GetQuery<vyuICGetItemLocation>()
                 .Filter(param, true);
             var data = await query.ToListAsync();
 

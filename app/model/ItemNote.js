@@ -20,7 +20,7 @@ Ext.define('Inventory.model.ItemNote', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
-                            extraParams: { include: 'tblICItemLocation.tblSMCompanyLocation' },
+                            extraParams: { include: 'tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
                             api: {
                                 read: '../Inventory/api/ItemNote/Get'

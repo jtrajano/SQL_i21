@@ -21,7 +21,5 @@ namespace iRely.Inventory.Model
         public bool? ysnRecountMismatch { get; set; }
         public bool? ysnExternal { get; set; }
         public int? intSort { get; set; }
-
-        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
     }
 }

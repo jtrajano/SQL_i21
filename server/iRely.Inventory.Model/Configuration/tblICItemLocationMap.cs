@@ -73,18 +73,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnCountedDaily).HasColumnName("ysnCountedDaily");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
-            this.HasOptional(p => p.tblSMCompanyLocation)
-                .WithMany(p => p.tblICItemLocations)
-                .HasForeignKey(p => p.intLocationId);
-            this.HasOptional(p => p.vyuAPVendor)
-                .WithMany(p => p.tblICItemLocations)
-                .HasForeignKey(p => p.intVendorId);
-            this.HasOptional(p => p.tblICCountGroup)
-                .WithMany(p => p.tblICItemLocations)
-                .HasForeignKey(p => p.intCountGroupId);
-            this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
-                .WithMany(p => p.tblICItemLocations)
-                .HasForeignKey(p => p.intSubLocationId);
+            this.HasOptional(p => p.vyuICGetItemLocation)
+                .WithRequired(p => p.tblICItemLocation);
         }
     }
 }
