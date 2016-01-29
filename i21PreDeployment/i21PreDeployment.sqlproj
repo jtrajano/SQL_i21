@@ -254,7 +254,4 @@
     <None Include="Scripts\Pre-Deployment\17_TR\01_Drop_Column.sql" />
     <None Include="Scripts\Pre-Deployment\6_GL\3_1440_to_1510.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <Build Include="Scripts\Pre-Deployment\9_FRD\3_1540_to_1610.sql" />
-  </ItemGroup>
 </Project>
