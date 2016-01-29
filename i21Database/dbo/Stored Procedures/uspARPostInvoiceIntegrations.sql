@@ -35,6 +35,7 @@ BEGIN
 		-- Detail 
 		,[intInvoiceDetailId]
 		,[intItemId]
+		,[strItemNo]
 		,[strItemDescription]
 		,[intSCInvoiceId]
 		,[strSCInvoiceNumber]
@@ -57,6 +58,7 @@ BEGIN
 		,[dblConversionFactor]
 		,[intPerformerId]
 		,[intContractHeaderId]
+		,[strContractNumber]
 		,[strMaintenanceType]
 		,[strFrequency]
 		,[dtmMaintenanceDate]
