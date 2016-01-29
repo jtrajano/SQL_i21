@@ -1,10 +1,10 @@
 CREATE PROCEDURE uspCTUpdateScheduleQuantity
 
 	@intContractDetailId	INT, 
-	@dblQuantityToUpdate	NUMERIC(12,4),
-	@intUserId				INT = NULL,
-	@intExternalId			INT = NULL,
-	@strScreenName			NVARCHAR(50) = NULL
+	@dblQuantityToUpdate	NUMERIC(18,6),
+	@intUserId				INT,
+	@intExternalId			INT,
+	@strScreenName			NVARCHAR(50)
 	/*
 	All the parameters are required. I am going to remove default value from the parameter in future.
 	So provide all the parameter while calling the sp.
@@ -14,13 +14,17 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@dblQuantity			NUMERIC(12,4),
-			@dblScheduleQty			NUMERIC(12,4),
-			@dblBalance				NUMERIC(12,4),
-			@dblNewScheduleQty		NUMERIC(12,4),
-			@dblQuantityToIncrease	NUMERIC(12,4),
+			@dblQuantity			NUMERIC(18,6),
+			@dblScheduleQty			NUMERIC(18,6),
+			@dblBalance				NUMERIC(18,6),
+			@dblNewScheduleQty		NUMERIC(18,6),
+			@dblQuantityToIncrease	NUMERIC(18,6),
 			@ysnUnlimitedQuantity	BIT,
-			@intPricingTypeId		INT
+			@intPricingTypeId		INT,
+			@strContractNumber		NVARCHAR(100),
+			@strContractSeq			NVARCHAR(100),
+			@strAvailableQty		NVARCHAR(100),
+			@strQuantityToUpdate	NVARCHAR(100) = LTRIM(@dblQuantityToUpdate)
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -33,7 +37,10 @@ BEGIN TRY
 			@dblScheduleQty			=	ISNULL(dblScheduleQty,0),
 			@dblBalance				=	ISNULL(dblBalance,0),
 			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0),
-			@intPricingTypeId		=	intPricingTypeId
+			@intPricingTypeId		=	intPricingTypeId,
+			@strContractNumber		=	strContractNumber,
+			@strContractSeq			=	LTRIM(intContractSeq),
+			@strAvailableQty		=	LTRIM(dblAvailableQty)
 	FROM	vyuCTContractDetailView 
 	WHERE	intContractDetailId = @intContractDetailId
 	
@@ -54,7 +61,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			RAISERROR('Total scheduled quantity should not be more than balance quantity.',16,1)
+			RAISERROR(110001,16,1,@strContractNumber,@strContractSeq,@strAvailableQty,@strQuantityToUpdate)
 		END
 	END
 	
@@ -87,7 +94,7 @@ END TRY
 
 BEGIN CATCH
 
-	SET @ErrMsg = 'uspCTUpdateScheduleQuantity - ' + ERROR_MESSAGE()  
+	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH

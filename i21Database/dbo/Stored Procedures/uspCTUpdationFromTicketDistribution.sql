@@ -90,13 +90,13 @@ BEGIN TRY
 				@intContractDetailId	=	CD.intContractDetailId,
 				@intContractHeaderId	=	CD.intContractHeaderId
 		FROM	vyuCTContractDetailView CD
-		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CD.intEntityId			=	@intEntityId
 		AND		CD.intItemId			=	@intItemId
 		AND		CD.intPricingTypeId		=	1
 		AND		CD.ysnAllowedToShow		=	1
-		AND		CD.dblBalance - CD.dblScheduleQty	>	0
+		AND		CD.dblAvailableQty		>	0
+		AND		CD.ysnEarlyDayPassed	=	1
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
 	
@@ -105,13 +105,13 @@ BEGIN TRY
 		SELECT	TOP	1	
 				@intContractDetailId	=	intContractDetailId
 		FROM	vyuCTContractDetailView CD
-		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CD.intEntityId			=	@intEntityId
 		AND		CD.intItemId			=	@intItemId
 		AND	   (CD.intPricingTypeId		=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
 		AND		CD.ysnAllowedToShow		=	1
-		AND		CD.dblBalance - CD.dblScheduleQty	>	0
+		AND		CD.dblAvailableQty		>	0
+		AND		CD.ysnEarlyDayPassed	=	1
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
 		
@@ -162,20 +162,6 @@ BEGIN TRY
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intTicketId,
 					@strScreenName			=	'Scale'
-			/*	
-			INSERT INTO tblCTContractAdjustment
-			(
-					intContractDetailId,	strAdjustmentNo,		dtmAdjustmentDate,			strComment,						ysnAdjustment,		dblOldQuantity,
-					dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					dblContractPrice,	dblCancellationPrice,
-					dblGainLossPerUnit,		dblCancelFeePerUnit,	dblCancelFeeFlatAmount,		dblTotalGainLoss,				intUserId,			dtmCreatedDate
-			)
-			SELECT	intContractDetailId,	strAdjustmentNo,		GETDATE(),					NULL,							0,					dblOldQuantity,
-					dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					NULL,				NULL,
-					NULL,					NULL,					NULL,						NULL,							@intUserId,			GETDATE()
-			
-			FROM	@Processed
-			*/
-
 
 			BREAK
 		END
@@ -185,22 +171,8 @@ BEGIN TRY
 			GOTO CONTINUEISH
 		END
 
-		/*
-		SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
-		FROM	tblSMStartingNumber 
-		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
-
-		UPDATE	tblSMStartingNumber
-		SET		intNumber = intNumber+1
-		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
-		*/
-
 		IF	@dblNetUnits <= @dblAvailable
 		BEGIN
-			--UPDATE	tblCTContractDetail 
-			--SET		dblBalance = @dblBalance - @dblNetUnits
-			--WHERE	intContractDetailId = @intContractDetailId
-			
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblAvailable,@dblNetUnits,@dblAvailable - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
 
 			SELECT	@dblNetUnits = 0
@@ -209,10 +181,6 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			--UPDATE	tblCTContractDetail 
-			--SET		dblBalance	=	0
-			--WHERE	intContractDetailId = @intContractDetailId
-			
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblQuantity,@dblAvailable,@dblAvailable,0,@dblQuantity,@strAdjustmentNo,@dblCost
 
 			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
@@ -225,48 +193,36 @@ BEGIN TRY
 		SELECT	TOP	1	
 				@intContractDetailId	=	intContractDetailId
 		FROM	vyuCTContractDetailView CD
-		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CD.intEntityId			=	@intEntityId
 		AND		CD.intItemId			=	@intItemId
 		AND		CD.intPricingTypeId		=	1
 		AND		CD.ysnAllowedToShow		=	1
-		AND		CD.dblBalance - CD.dblScheduleQty	>	0
+		AND		CD.dblAvailableQty		>	0
+		AND		CD.ysnEarlyDayPassed	=	1
 		AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
-		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
+		ORDER 
+		BY		CD.dtmStartDate, CD.intContractDetailId ASC
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
 			SELECT	TOP	1	
 					@intContractDetailId	=	intContractDetailId
 			FROM	vyuCTContractDetailView CD
-			--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 			WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 			AND		CD.intEntityId			=	@intEntityId
 			AND		CD.intItemId			=	@intItemId
 			AND	   (CD.intPricingTypeId		=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
 			AND		CD.ysnAllowedToShow		=	1
-			AND		CD.dblBalance - CD.dblScheduleQty	>	0
+			AND		CD.dblAvailableQty		>	0
+			AND		CD.ysnEarlyDayPassed	=	1
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
-			ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
+			ORDER 
+			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END
 	END	
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
-	
-	/*
-	INSERT INTO tblCTContractAdjustment
-	(
-			intContractDetailId,	strAdjustmentNo,		dtmAdjustmentDate,			strComment,						ysnAdjustment,		dblOldQuantity,
-			dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					dblContractPrice,	dblCancellationPrice,
-			dblGainLossPerUnit,		dblCancelFeePerUnit,	dblCancelFeeFlatAmount,		dblTotalGainLoss,				intUserId,			dtmCreatedDate,intTicketId
-	)
-	SELECT	intContractDetailId,	strAdjustmentNo,		GETDATE(),					NULL,							0,					dblOldQuantity,
-			dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					NULL,				NULL,
-			NULL,					NULL,					NULL,						NULL,							@intUserId,			GETDATE(),@intTicketId
-			
-	FROM	@Processed
-	*/
 	
 	SELECT	intContractDetailId,
 			dblUnitsDistributed,
@@ -278,7 +234,7 @@ END TRY
 
 BEGIN CATCH
 
-	SET @ErrMsg = 'uspCTUpdateBalanceFromScale - ' + ERROR_MESSAGE()  
+	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH
