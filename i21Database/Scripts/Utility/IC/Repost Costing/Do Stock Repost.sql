@@ -354,7 +354,7 @@ BEGIN
 						,strActualCostId
 				)
 				SELECT 	Detail.intItemId  
-						,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+						,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
 						,TransferSource.intItemUOMId  
 						,TransferSource.dtmDate  
 						,TransferSource.dblQty * -1 
