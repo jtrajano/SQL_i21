@@ -33,6 +33,6 @@
 
     CONSTRAINT [PK_tblFRBudget] PRIMARY KEY CLUSTERED ([intBudgetId] ASC),
     CONSTRAINT [FK_tblFRBudget_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblFRBudget_tblFRBudgetCode] FOREIGN KEY ([intBudgetCode]) REFERENCES [dbo].[tblFRBudgetCode] ([intBudgetCode]),
+    CONSTRAINT [FK_tblFRBudget_tblFRBudgetCode] FOREIGN KEY ([intBudgetCode]) REFERENCES [dbo].[tblFRBudgetCode] ([intBudgetCode]) ON DELETE CASCADE,
 );
 
