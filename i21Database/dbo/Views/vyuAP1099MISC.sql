@@ -12,7 +12,7 @@ WITH MISC1099 (
 	,strZip
 	,strCity
 	,strState
-	,strZipSate
+	,strZipState
 	,intYear
 	,dblBoatsProceeds
 	,dblCropInsurance
@@ -108,7 +108,7 @@ GROUP BY intEntityVendorId
 	,strZip
 	,strCity
 	,strState
-	,strZipSate
+	,strZipState
 	,intYear
 	,dblBoatsProceeds
 	,dblCropInsurance
