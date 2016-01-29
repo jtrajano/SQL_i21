@@ -29,5 +29,9 @@ AS
 				THEN CAST(1 as Bit)
 				ELSE CAST (0 as Bit)
 				END as ysnAllowedToShow,
-			CD.ysnUnlimitedQuantity
+			CD.ysnUnlimitedQuantity,
+			CD.ysnLoad,
+			CD.dblQuantityPerLoad,
+			CD.intNoOfLoad
+
 	FROM vyuCTContractDetailView 		CD

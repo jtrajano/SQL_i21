@@ -36,6 +36,9 @@ SELECT LoadDetail.intLoadDetailId
         ,intPContractSeq = PDetail.intContractSeq
 		,strVendorContract = PDetail.strCustomerContract
 		,dblPCashPrice = PDetail.dblCashPrice
+		,ysnPLoad = PDetail.ysnLoad
+		,dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
+		,intPNoOfLoads = PDetail.intNoOfLoad
 
 -- Inbound Company Location
 		,LoadDetail.intPCompanyLocationId
@@ -69,7 +72,10 @@ SELECT LoadDetail.intLoadDetailId
         ,strSContractNumber = SDetail.strContractNumber
         ,intSContractSeq = SDetail.intContractSeq
 		,strCustomerContract = SDetail.strCustomerContract
-		,dblSCashPrice = PDetail.dblCashPrice
+		,dblSCashPrice = SDetail.dblCashPrice
+		,ysnSLoad = SDetail.ysnLoad
+		,dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
+		,intSNoOfLoads = SDetail.intNoOfLoad
 
 -- Outbound Company Location
 		,LoadDetail.intSCompanyLocationId
