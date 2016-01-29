@@ -24,7 +24,7 @@ DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
 DECLARE @intScaleStationId AS INT
-DECLARE @intFreightItemId AS INT
+--DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strTicketNumber AS NVARCHAR(40)
@@ -46,25 +46,25 @@ BEGIN
 	WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
 END
 
-BEGIN
-    SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
-	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @strTicketNumber = ST.strTicketNumber,
-	@dblTicketFees = ST.dblTicketFees, @intFreightVendorId = ST.intFreightCarrierId
-	FROM dbo.tblSCTicket ST WHERE
-	ST.intTicketId = @intTicketId
-END
+--BEGIN
+--    SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
+--	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @strTicketNumber = ST.strTicketNumber,
+--	@dblTicketFees = ST.dblTicketFees, @intFreightVendorId = ST.intFreightCarrierId
+--	FROM dbo.tblSCTicket ST WHERE
+--	ST.intTicketId = @intTicketId
+--END
 
--- Get the transaction id 
-EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
+---- Get the transaction id 
+--EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
 
-IF @ReceiptNumber IS NULL 
-BEGIN 
-	-- Raise the error:
-	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	RAISERROR(50030, 11, 1);
-	RETURN;
-END 
-/*
+--IF @ReceiptNumber IS NULL 
+--BEGIN 
+--	-- Raise the error:
+--	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
+--	RAISERROR(50030, 11, 1);
+--	RETURN;
+--END 
+
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
         @total as int,
@@ -119,7 +119,7 @@ SELECT
 		strReceiptType				=	CASE	WHEN SC.intContractId IS NULL THEN 'Direct'
 												WHEN SC.intContractId IS NOT NULL THEN 'Purchase Contract'
 										END
-		,intEntityVendorId			= @intUserId
+		,intEntityVendorId			= @intEntityId
 		,intShipFromId				= SC.intProcessingLocationId
 		,intLocationId				= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
 		,intItemId					= SC.intItemId
@@ -138,8 +138,10 @@ SELECT
 		,intContractDetailId		= SC.intContractId
 		,dtmDate					= SC.dtmTicketDateTime
 		,intShipViaId				= SC.intFreightCarrierId
-		,dblQty						= SC.dblNetUnits
-		,dblCost					= SC.dblUnitPrice
+		--,dblQty						= SC.dblNetUnits
+		--,dblCost					= SC.dblUnitPrice
+		,dblQty						= LI.dblQty
+		,dblCost					= LI.dblCost
 		,intCurrencyId				= (
 										SELECT	TOP 1 
 												CP.intDefaultCurrencyId		
@@ -164,9 +166,28 @@ SELECT
 		,strVendorRefNo				= NULL
 		,strSourceId				= SC.intTicketId
 		,strSourceScreenName		= 'Scale Ticket'
-FROM	tblSCTicket SC
+--FROM	tblSCTicket SC
+FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
+			ON ItemUOM.intItemId = SC.intItemId
+			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
+			INNER JOIN dbo.tblICUnitMeasure UOM
+			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			LEFT JOIN dbo.tblCTContractDetail CNT
+			ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0);
+
+		
+-- Get the identity value from tblICInventoryReceipt
+SELECT @InventoryReceiptId = SCOPE_IDENTITY()
+
+IF @InventoryReceiptId IS NULL 
+BEGIN 
+	-- Raise the error:
+	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
+	RAISERROR(80004, 11, 1);
+	RETURN;
+END
 
 SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
 SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
@@ -266,19 +287,10 @@ SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)
 	RETURN;
 
--- Create the temp table if it does not exists. 
---IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
---BEGIN 
---	CREATE TABLE #tmpAddItemReceiptResult (
---		intSourceId INT
---		,intInventoryReceiptId INT
---	)
---END 
-
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		,@OtherCharges
-		,@intUserId;
+		,@intEntityId;
 
 -- Update the Inventory Receipt Key to the Transaction Table
 UPDATE	SC
@@ -306,29 +318,17 @@ BEGIN
 
 	SELECT	TOP 1 @intEntityId = [intEntityUserSecurityId] 
 	FROM	dbo.tblSMUserSecurity 
-	WHERE	[intEntityUserSecurityId] = @intUserId
+	WHERE	[intEntityUserSecurityId] = @intEntityId
 	BEGIN
 		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;			
 	END
 		
-
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
 END;
 
--- Get the identity value from tblICInventoryReceipt
-SELECT @InventoryReceiptId = SCOPE_IDENTITY()
-
-IF @InventoryReceiptId IS NULL 
-BEGIN 
-	-- Raise the error:
-	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
-	RAISERROR(80004, 11, 1);
-	RETURN;
-END
-
-*/
-
+--OLD INSERTING
+/*
 -- Insert the Inventory Receipt header 
 INSERT INTO dbo.tblICInventoryReceipt (
 		strReceiptNumber
@@ -590,8 +590,10 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intConcurrencyId		= 1		
 FROM	tblSCTicket SS WHERE SS.intTicketId = @intTicketId
 END
+*/
 
 -- Re-update the total cost 
+
 UPDATE	Receipt
 SET		dblInvoiceAmount = (
 			SELECT	ISNULL(SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0)) , 0)

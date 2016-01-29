@@ -696,13 +696,14 @@ BEGIN TRY
 			EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, 'Direct' ,@InventoryReceiptId OUTPUT; 
 		END
 	
-		BEGIN 
-		SELECT	@strTransactionId = IR.strReceiptNumber
-		FROM	dbo.tblICInventoryReceipt IR	        
-		WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
-		END
+		--BEGIN 
+		--SELECT	@strTransactionId = IR.strReceiptNumber
+		--FROM	dbo.tblICInventoryReceipt IR	        
+		--WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
+		--END
 	
-		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+
 		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 
