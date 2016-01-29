@@ -3171,6 +3171,7 @@
     <Build Include="dbo\Views\vyuPRReportQuarterlySUI.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrual.sql" />
+    <Build Include="dbo\User Defined Types\LineItemTaxDetailStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
