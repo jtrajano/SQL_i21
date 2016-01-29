@@ -1,3 +1,4 @@
+﻿-- USE i21Demo01 
 
 IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspICRepostCosting' AND type = 'P')
 	DROP PROCEDURE [dbo].[uspICRepostCosting]
@@ -295,8 +296,8 @@ BEGIN
 				AND ItemStock.intItemLocationId = @intItemLocationId
 
 		--------------------------------------------------------------------------------
-		-- Update average cost
-		--------------------------------------------------------------------------------		
+		-- Update average cost, last cost, and standard cost in the Item Pricing table
+		--------------------------------------------------------------------------------
 		MERGE	
 		INTO	dbo.tblICItemPricing 
 		WITH	(HOLDLOCK) 
@@ -305,7 +306,7 @@ BEGIN
 				SELECT	intItemId = @intItemId
 						,intItemLocationId = @intItemLocationId
 						,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
-						,Cost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)				
+						,Cost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
 		) AS StockToUpdate
 			ON ItemPricing.intItemId = StockToUpdate.intItemId
 			AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
@@ -313,12 +314,14 @@ BEGIN
 		-- If matched, update the average cost, last cost, and standard cost
 		WHEN MATCHED THEN 
 			UPDATE 
-			SET		dblAverageCost = 
-						CASE WHEN (@strActualCostId IS NOT NULL) THEN 
-								ItemPricing.dblAverageCost 
-							 ELSE 
-								dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
-						END 
+			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
+					,dblLastCost = CASE WHEN StockToUpdate.Qty > 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblLastCost END 
+					,dblStandardCost = 
+									CASE WHEN StockToUpdate.Qty > 0 THEN 
+											CASE WHEN ISNULL(ItemPricing.dblStandardCost, 0) = 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblStandardCost END 
+										ELSE 
+											ItemPricing.dblStandardCost
+									END 
 
 		-- If none found, insert a new item pricing record
 		WHEN NOT MATCHED THEN 
@@ -333,38 +336,12 @@ BEGIN
 			VALUES (
 				StockToUpdate.intItemId
 				,StockToUpdate.intItemLocationId
-				,CASE WHEN (@strActualCostId IS NOT NULL) THEN 
-								0
-							 ELSE 
-								dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost)
-				END 				
-				
-				
-				,0 -- Standard Cost
-				,0 -- Last Cost 
-				,1 -- Concurrency id
+				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost)
+				,StockToUpdate.Cost
+				,StockToUpdate.Cost
+				,1
 			)
 		;
-
-		--------------------------------------------------------------------------------
-		-- Update last cost and standard cost in the Item Pricing table
-		--------------------------------------------------------------------------------
-		UPDATE dbo.tblICItemPricing 
-		SET		dblLastCost = CASE WHEN StockToUpdate.Qty > 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblLastCost END 
-				,dblStandardCost = 
-								CASE WHEN StockToUpdate.Qty > 0 THEN 
-										CASE WHEN ISNULL(ItemPricing.dblStandardCost, 0) = 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblStandardCost END 
-									ELSE 
-										ItemPricing.dblStandardCost
-								END 
-		FROM	dbo.tblICItemPricing ItemPricing INNER JOIN (
-					SELECT	intItemId = @intItemId
-							,intItemLocationId = @intItemLocationId
-							,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
-							,Cost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)		
-				) StockToUpdate
-					ON ItemPricing.intItemId = StockToUpdate.intItemId
-					AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
 
 		------------------------------------------------------------
 		-- Update the Stock Quantity
@@ -459,7 +436,6 @@ BEGIN
 	FROM	@ItemsToPost
 	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
 			AND dblQty > 0 
-			AND strActualCostId IS NULL 
 
 	SET	@intInventoryTransactionId = NULL 
 	SET @strTransactionForm = NULL 
