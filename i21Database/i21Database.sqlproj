@@ -3335,6 +3335,7 @@
     <Build Include="dbo\Tables\tblEMContactDetailType.sql" />
     <Build Include="dbo\Tables\tblEMContactDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetUnscheduledShiftActivityLine.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTErrorMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

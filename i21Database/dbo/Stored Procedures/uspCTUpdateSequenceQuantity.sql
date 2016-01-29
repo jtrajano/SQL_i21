@@ -94,7 +94,7 @@ END TRY
 
 BEGIN CATCH
 
-	SET @ErrMsg = 'uspCTUpdateScheduleQuantity - ' + ERROR_MESSAGE()  
+	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH

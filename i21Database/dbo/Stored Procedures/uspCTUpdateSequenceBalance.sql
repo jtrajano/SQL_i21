@@ -92,7 +92,7 @@ END TRY
 
 BEGIN CATCH
 
-	SET @ErrMsg = 'uspCTUpdateSequenceBalance - ' + ERROR_MESSAGE()  
+	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH
