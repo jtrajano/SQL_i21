@@ -276,4 +276,52 @@ GO
 		VALUES('System Manager', 'Migrate HD Announcement to SM Announcement', 'Migrate HD Announcement to SM Announcement', GETDATE())
 	END
 
+GO	
+
+	DECLARE @currentRow INT
+	DECLARE @totalRows INT
+
+	SET @currentRow = 1
+	SELECT @totalRows = COUNT(*) FROM (SELECT Count(*) as 'Count' FROM [dbo].[tblSMUserSecurityMenuFavorite] GROUP BY intEntityUserSecurityId) a
+
+	WHILE (@currentRow <= @totalRows)
+	BEGIN
+
+		Declare @entityId INT
+		SELECT @entityId = [intEntityUserSecurityId] FROM (  
+			SELECT intEntityUserSecurityId, COUNT(*) as 'Total', ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID'
+			FROM [dbo].[tblSMUserSecurityMenuFavorite] GROUP BY intEntityUserSecurityId
+		) a
+		WHERE ROWID = @currentRow
+
+		DECLARE @currentRow1 INT
+		DECLARE @totalRows1 INT
+
+		SET @currentRow1 = 1
+		SELECT @totalRows1 = COUNT(*) FROM (SELECT Count(*) as 'Count' FROM [dbo].[tblSMUserSecurityMenuFavorite] WHERE intEntityUserSecurityId = @entityId GROUP BY intCompanyLocationId) a 
+
+		WHILE (@currentRow1 <= @totalRows1)
+		BEGIN
+
+			Declare @companyLocationId INT
+			SELECT @companyLocationId = [intCompanyLocationId] FROM (  
+				SELECT [intCompanyLocationId], Count(*) as 'Count', ROW_NUMBER() OVER(ORDER BY [intCompanyLocationId] ASC) AS 'ROWID'
+				FROM [dbo].[tblSMUserSecurityMenuFavorite] WHERE intEntityUserSecurityId = @entityId GROUP BY intCompanyLocationId
+			) a
+			WHERE ROWID = @currentRow1
+
+			INSERT INTO tblSMEntityMenuFavorite(intMenuId, intEntityId, intCompanyLocationId, intSort)
+			SELECT intMenuId, intEntityUserSecurityId, intCompanyLocationId, ROW_NUMBER() OVER (ORDER BY intUserSecurityMenuFavoriteId) AS 'intSort' 
+			FROM tblSMUserSecurityMenuFavorite SecurityFavorite
+			WHERE NOT EXISTS 
+			(
+				SELECT 1 FROM tblSMEntityMenuFavorite EntityFavorite WHERE SecurityFavorite.intMenuId = EntityFavorite.intMenuId AND SecurityFavorite.intEntityUserSecurityId = EntityFavorite.intEntityId AND ISNULL(SecurityFavorite.intCompanyLocationId,0) = ISNULL(EntityFavorite.intCompanyLocationId, 0)
+			)
+			AND intEntityUserSecurityId = @entityId AND ISNULL(intCompanyLocationId, 0) = ISNULL(@companyLocationId, 0)
+		
+		SET @currentRow1 = @currentRow1 + 1
+		END
+	SET @currentRow = @currentRow + 1
+	END
+	
 GO

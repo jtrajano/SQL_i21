@@ -146,3 +146,7 @@ GO
 		EXEC('UPDATE tblSMMasterMenu SET strMenuName = ''Notes Receivables'' WHERE strMenuName = ''Note Receivables'' AND strModuleName = ''Notes Receivable''')
 
 GO
+	/* DELETE OLD ENTITY MENU FAVORITE */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMEntityMenuFavorite' AND [COLUMN_NAME] = 'intParentEntityMenuFavoriteId') 
+		EXEC('DELETE FROM tblSMEntityMenuFavorite')
+GO
