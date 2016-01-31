@@ -3329,6 +3329,9 @@
     <Build Include="dbo\Tables\tblEMContactDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetUnscheduledShiftActivityLine.sql" />
     <Build Include="dbo\Stored Procedures\uspCTErrorMessages.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemSubstitutionView.sql" />
+    <Build Include="dbo\Views\vyuMFGetBlendConsolidationView.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemConsumptionView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
