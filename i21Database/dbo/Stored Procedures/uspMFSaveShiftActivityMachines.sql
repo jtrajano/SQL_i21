@@ -54,7 +54,7 @@ BEGIN TRY
 			WHERE intShiftActivityId = @intShiftActivityId
 			)
 
-	SELECT @intScheduledRuntime = (DATEDIFF(ss, SA.dtmShiftStartTime, SA.dtmShiftEndTime) * COUNT(SAM.intMachineId))
+	SELECT @intScheduledRuntime = ISNULL((DATEDIFF(ss, SA.dtmShiftStartTime, SA.dtmShiftEndTime) * COUNT(SAM.intMachineId)),0)
 	FROM tblMFShiftActivity SA
 	JOIN tblMFShiftActivityMachines SAM ON SAM.intShiftActivityId = SA.intShiftActivityId
 	WHERE SA.intShiftActivityId = @intShiftActivityId

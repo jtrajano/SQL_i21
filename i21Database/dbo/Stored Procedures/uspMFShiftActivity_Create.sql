@@ -31,10 +31,16 @@ BEGIN TRY
 	SELECT @intCreatedUserId = intCreatedUserId
 		,@intLastModifiedUserId = intLastModifiedUserId
 		,@ysnUseProductionLine = ysnProductionLine
-		,@dtmActualShiftStTime = dtmActualShiftStTime
-		,@dtmActualShiftEdTime = dtmActualShiftEdTime
-		,@dtmActualShiftStTime1 = dtmActualShiftStTime
-		,@dtmActualShiftEdTime1 = dtmActualShiftEdTime
+		,@dtmActualShiftStTime = CASE 
+			WHEN YEAR(dtmActualShiftStTime) = 1900
+				THEN @dtmShiftDate + dtmActualShiftStTime
+			ELSE dtmActualShiftStTime
+			END
+		,@dtmActualShiftEdTime = CASE 
+			WHEN YEAR(dtmActualShiftEdTime) = 1900
+				THEN @dtmShiftDate + dtmActualShiftEdTime
+			ELSE dtmActualShiftEdTime
+			END
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intCreatedUserId NVARCHAR(50)
 			,intLastModifiedUserId NVARCHAR(50)
@@ -43,6 +49,8 @@ BEGIN TRY
 			,dtmActualShiftEdTime DATETIME
 			)
 
+	SET @dtmActualShiftStTime1 = @dtmActualShiftStTime
+	SET @dtmActualShiftEdTime1 = @dtmActualShiftEdTime
 	SET @intManufacturingCellId = (
 			SELECT TOP 1 (intManufacturingCellId)
 			FROM OPENXML(@idoc, 'root/ManufacturingCell', 2) WITH (intManufacturingCellId INT)
