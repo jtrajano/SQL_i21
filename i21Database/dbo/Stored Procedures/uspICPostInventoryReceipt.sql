@@ -205,6 +205,9 @@ IF @ysnPost = 1
 BEGIN  
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
+	DECLARE @CompanyOwnedItemsForPost AS ItemCostingTableType  
+	DECLARE @ReturnItemsForPost AS ItemCostingTableType  
+
 	DECLARE @StorageItemsForPost AS ItemCostingTableType  
 
 	-- Process the Other Charges
@@ -388,47 +391,181 @@ BEGIN
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 		BEGIN 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]	
-					,[dblDebitReport]	
-					,[dblCreditForeign]	
-					,[dblCreditReport]	
-					,[dblReportingRate]	
-					,[dblForeignRate]
+			-- Gather the company owned items. 
+			INSERT INTO @CompanyOwnedItemsForPost (
+					intItemId  
+					,intItemLocationId 
+					,intItemUOMId  
+					,dtmDate  
+					,dblQty  
+					,dblUOMQty  
+					,dblCost  
+					,dblSalesPrice  
+					,intCurrencyId  
+					,dblExchangeRate  
+					,intTransactionId  
+					,intTransactionDetailId   
+					,strTransactionId  
+					,intTransactionTypeId  
+					,intLotId 
+					,intSubLocationId
+					,intStorageLocationId
+					,strActualCostId			
 			)
-			EXEC	@intReturnValue = dbo.uspICPostCosting  
-					@ItemsForPost  
-					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@intEntityUserSecurityId
+			SELECT 
+					intItemId  
+					,intItemLocationId 
+					,intItemUOMId  
+					,dtmDate  
+					,dblQty  
+					,dblUOMQty  
+					,dblCost  
+					,dblSalesPrice  
+					,intCurrencyId  
+					,dblExchangeRate  
+					,intTransactionId  
+					,intTransactionDetailId   
+					,strTransactionId  
+					,intTransactionTypeId  
+					,intLotId 
+					,intSubLocationId
+					,intStorageLocationId
+					,strActualCostId
+			FROM	@ItemsForPost
+			WHERE	dblQty > 0 
 
-			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			-- Gather the item returns
+			INSERT INTO @ReturnItemsForPost (
+					intItemId  
+					,intItemLocationId 
+					,intItemUOMId  
+					,dtmDate  
+					,dblQty  
+					,dblUOMQty  
+					,dblCost  
+					,dblSalesPrice  
+					,intCurrencyId  
+					,dblExchangeRate  
+					,intTransactionId  
+					,intTransactionDetailId   
+					,strTransactionId  
+					,intTransactionTypeId  
+					,intLotId 
+					,intSubLocationId
+					,intStorageLocationId
+					,strActualCostId			
+			)
+			SELECT 
+					intItemId  
+					,intItemLocationId 
+					,intItemUOMId  
+					,dtmDate  
+					,dblQty  
+					,dblUOMQty  
+					,dblCost  
+					,dblSalesPrice  
+					,intCurrencyId  
+					,dblExchangeRate  
+					,intTransactionId  
+					,intTransactionDetailId   
+					,strTransactionId  
+					,intTransactionTypeId  
+					,intLotId 
+					,intSubLocationId
+					,intStorageLocationId
+					,strActualCostId
+			FROM	@ItemsForPost
+			WHERE	dblQty < 0 
+			
+			-- Call the post routine for posting the company owned items 
+			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
+			BEGIN 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]	
+						,[dblDebitReport]	
+						,[dblCreditForeign]	
+						,[dblCreditReport]	
+						,[dblReportingRate]	
+						,[dblForeignRate]
+				)
+				EXEC	@intReturnValue = dbo.uspICPostCosting  
+						@CompanyOwnedItemsForPost  
+						,@strBatchId  
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@intEntityUserSecurityId
+
+				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			END
+		
+			-- Call the post routine for posting the return items 
+			IF EXISTS (SELECT TOP 1 1 FROM @ReturnItemsForPost)
+			BEGIN 			
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]	
+						,[dblDebitReport]	
+						,[dblCreditForeign]	
+						,[dblCreditReport]	
+						,[dblReportingRate]	
+						,[dblForeignRate]
+				)
+				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
+						@ReturnItemsForPost  
+						,@strBatchId  
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@intEntityUserSecurityId
+
+				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			END
 		END
 	END 
 
