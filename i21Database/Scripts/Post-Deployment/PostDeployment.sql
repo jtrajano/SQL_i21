@@ -177,6 +177,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\10_UpdateCustomerTotalARBalance.sql
 :r .\AR\DefaultData\11_UpdateInvoiceSODetailUOM.sql
 :r .\AR\DefaultData\12_UpdatesActualCostIdInInvoice.sql
+:r .\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
