@@ -89,10 +89,7 @@ END
        min(DD.intItemId),	  
 	   intItemUOMId = CASE
                             WHEN min(DD.intContractDetailId) is NULL  
-	                           THEN (SELECT	TOP 1 
-										IU.intItemUOMId											
-										FROM dbo.tblICItemUOM IU 
-										WHERE	IU.intItemId = min(DD.intItemId) and IU.ysnStockUnit = 1)
+	                           THEN min(IC.intIssueUOMId)
 							WHEN min(DD.intContractDetailId) is NOT NULL 
 							   THEN	(select top 1 intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = min(DD.intContractDetailId))
 							   END, 	   
@@ -141,6 +138,7 @@ END
 			JOIN dbo.tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
 			JOIN dbo.tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId			
 			LEFT JOIN dbo.vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
+			LEFT JOIN dbo.vyuICGetItemStock IC on IC.intItemId = DD.intItemId and IC.intLocationId = DH.intCompanyLocationId
 			left join dbo.tblTRLoadReceipt TR on TR.intLoadHeaderId = TL.intLoadHeaderId and TR.strReceiptLine in (select Item from dbo.fnTRSplit(DD.strReceiptLink,','))
 			left JOIN(
 		SELECT		DISTINCT intLoadDistributionDetailId,STUFF(															
