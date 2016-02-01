@@ -76,7 +76,7 @@ BEGIN TRY
 		RAISERROR(90008,11,1)
 	END
 	
-	IF @intDestinationLotWeightUOM = @intSourceLotWeightUOM
+	IF @intDestinationLotWeightUOM <> @intSourceLotWeightUOM
 	BEGIN
 		RAISERROR(90009,11,1)
 	END												 
