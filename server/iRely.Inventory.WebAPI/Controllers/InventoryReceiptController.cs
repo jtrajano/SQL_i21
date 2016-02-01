@@ -117,5 +117,12 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAddOrders(param, VendorId, ReceiptType, SourceType));
         }
+
+        [HttpGet]
+        [ActionName("GetReceiptVouchers")]
+        public async Task<HttpResponseMessage> GetReceiptVouchers(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetReceiptVouchers(param));
+        }
     }
 }

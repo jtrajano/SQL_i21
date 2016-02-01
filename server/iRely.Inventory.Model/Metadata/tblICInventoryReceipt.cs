@@ -803,6 +803,7 @@ namespace iRely.Inventory.Model
         public decimal? dblCostUOMConvFactor { get; set; }
         public decimal? dblGrossMargin { get; set; }
         public int? intGradeId { get; set; }
+        public decimal? dblBillQty { get; set; }
         public string strGrade { get; set; }
         public int? intLifeTime { get; set; }
         public string strLifeTimeType { get; set; }
@@ -1419,5 +1420,26 @@ namespace iRely.Inventory.Model
         public string strLifeTimeType { get; set; }
         public int? ysnLoad { get; set; }
         public int? dblAvailableQty { get; set; }
+    }
+
+    public class vyuICGetInventoryReceiptVoucher
+    {
+        public int? intInventoryReceiptId { get; set; }
+        public int? intInventoryReceiptItemId { get; set; }
+        public string strVendor { get; set; }
+        public string strLocationName { get; set; }
+        public string strReceiptNumber { get; set; }
+        public DateTime? dtmReceiptDate { get; set; }
+        public string strBillOfLading { get; set; }
+        public string strReceiptType { get; set; }
+        public string strOrderNumber { get; set; }
+        public string strItemDescription { get; set; }
+        public decimal? dblUnitCost { get; set; }
+        public decimal? dblQtyToReceive { get; set; }
+        public decimal? dblLineTotal { get; set; }
+        public decimal? dblQtyVouchered { get; set; }
+        public decimal? dblVoucherAmount { get; set; }
+        public decimal? dblQtyToVoucher { get; set; }
+        public decimal? dblAmountToVoucher { get; set; }
     }
 }

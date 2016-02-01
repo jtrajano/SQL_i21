@@ -18,5 +18,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchReceiptItems(GetParameter param);
         Task<SearchResult> SearchReceiptItemLots(GetParameter param);
         Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType);
+        Task<SearchResult> GetReceiptVouchers(GetParameter param);
     }
 }

@@ -145,6 +145,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string', hidden: true},
                         {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true}
                     ]
+                },
+                {
+                    title: 'Vouchers',
+                    api: {
+                        read: '../Inventory/api/InventoryReceipt/GetReceiptVouchers'
+                    },
+                    columns: [
+                        {dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
+                        {dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
+                        {dataIndex: 'strVendor', text: 'Vendor', flex: 1, dataType: 'string' },
+                        {dataIndex: 'strLocationName', text: 'Destination', flex: 1, dataType: 'string' },
+                        {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string' },
+                        {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+                        {dataIndex: 'strBillOfLading', text: 'BOL', flex: 1, dataType: 'string' },
+                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string' },
+                        {dataIndex: 'strOrderNumber', text: 'Order No', flex: 1, dataType: 'string' },
+                        {dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
+                        {dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblQtyVouchered', text: 'Qty Vouchered', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblQtyToVoucher', text: 'Qty To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                    ]
                 }
             ]
         },

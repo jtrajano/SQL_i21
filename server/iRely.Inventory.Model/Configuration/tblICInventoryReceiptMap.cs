@@ -219,6 +219,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblCostUOMConvFactor).HasColumnName("dblCostUOMConvFactor").HasPrecision(18, 6);
             this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
+            this.Property(t => t.dblBillQty).HasColumnName("dblBillQty").HasPrecision(18, 6);
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
@@ -543,6 +544,35 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
             this.Property(t => t.ysnLoad).HasColumnName("ysnLoad");
             this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty");
+        }
+    }
+
+    public class vyuICGetInventoryReceiptVoucherMap : EntityTypeConfiguration<vyuICGetInventoryReceiptVoucher>
+    {
+        public vyuICGetInventoryReceiptVoucherMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryReceiptItemId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryReceiptVoucher");
+            this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
+            this.Property(t => t.intInventoryReceiptItemId).HasColumnName("intInventoryReceiptItemId");
+            this.Property(t => t.strVendor).HasColumnName("strVendor");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
+            this.Property(t => t.dtmReceiptDate).HasColumnName("dtmReceiptDate");
+            this.Property(t => t.strBillOfLading).HasColumnName("strBillOfLading");
+            this.Property(t => t.strReceiptType).HasColumnName("strReceiptType");
+            this.Property(t => t.strOrderNumber).HasColumnName("strOrderNumber");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost").HasPrecision(18, 6);
+            this.Property(t => t.dblQtyToReceive).HasColumnName("dblQtyToReceive").HasPrecision(18, 6);
+            this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
+            this.Property(t => t.dblQtyVouchered).HasColumnName("dblQtyVouchered").HasPrecision(18, 6);
+            this.Property(t => t.dblVoucherAmount).HasColumnName("dblVoucherAmount").HasPrecision(18, 6);
+            this.Property(t => t.dblQtyToVoucher).HasColumnName("dblQtyToVoucher").HasPrecision(19, 6);
+            this.Property(t => t.dblAmountToVoucher).HasColumnName("dblAmountToVoucher").HasPrecision(38, 6);
         }
     }
 }
