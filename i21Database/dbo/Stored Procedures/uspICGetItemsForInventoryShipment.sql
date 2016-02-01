@@ -25,7 +25,7 @@ BEGIN
 			,intLocationId			= ItemLocation.intLocationId
 			,intItemUOMId			= ItemUOM.intItemUOMId
 			,dtmDate				= dbo.fnRemoveTimeOnDate(SO.dtmDate)
-			,dblQty					= SODetail.dblQtyOrdered - SODetail.dblQtyShipped
+			,dblQty					= SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= ISNULL(ItemPricing.dblLastCost, 0) -- Default to the last cost. 
 			,dblSalesPrice			= SODetail.dblPrice
@@ -49,6 +49,9 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = SODetail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+			LEFT OUTER JOIN 
+				(SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS InvoiceDetail
+				ON InvoiceDetail.intSalesOrderDetailId = SODetail.intSalesOrderDetailId
 	WHERE	SODetail.intSalesOrderId = @intSourceTransactionId
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
 			AND (SODetail.dblQtyOrdered - SODetail.dblQtyShipped) > 0			
