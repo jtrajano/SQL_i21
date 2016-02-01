@@ -16,7 +16,6 @@ SELECT
 	, A.strVendorCompanyName
 	, A.strVendorId
 	, A.strZip
-	, A.strCity
 	, A.strZipState
 	, A.strFederalTaxId
 	, A.intYear
@@ -33,6 +32,5 @@ GROUP BY intYear, intEntityVendorId
 , A.strVendorCompanyName
 , A.strVendorId
 , A.strZip
-, A.strCity
 , A.strZipState
 , A.strFederalTaxId

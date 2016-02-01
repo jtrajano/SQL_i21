@@ -3171,7 +3171,17 @@
     <Build Include="dbo\Views\vyuPRReportQuarterlySUI.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrual.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRpt1096.sql" />
+    <Build Include="dbo\User Defined Types\LineItemTaxDetailStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInActualCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

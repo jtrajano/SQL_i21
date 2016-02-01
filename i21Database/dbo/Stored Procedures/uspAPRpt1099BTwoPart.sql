@@ -57,7 +57,6 @@ DECLARE @vendorFromParam NVARCHAR(100) = NULL;
 DECLARE @vendorToParam NVARCHAR(100) = NULL;
 DECLARE @yearParam INT = YEAR(GETDATE());
 DECLARE @correctedParam BIT = 0;
-DECLARE @reprintParam BIT = 0;
 DECLARE @query NVARCHAR(MAX);
 DECLARE @xmlDocumentId AS INT;
 
@@ -124,10 +123,6 @@ BEGIN
 	FROM @temp_xml_table WHERE [fieldname] = 'year'
 
 	SELECT 
-		@reprintParam = [from]
-	FROM @temp_xml_table WHERE [fieldname] = 'reprint'
-
-	SELECT 
 		@correctedParam = [from]
 	FROM @temp_xml_table WHERE [fieldname] = 'corrected'
 END;
@@ -157,28 +152,13 @@ AS
 (
 	SELECT 
 	int1099BId = ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-	,A.* 
+	,vyuAP1099B.* 
 	,(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
-	FROM vyuAP1099B A
-	OUTER APPLY 
-	(
-		SELECT TOP 1 * FROM tblAP1099History B
-		WHERE A.intYear = B.intYear AND B.int1099Form = 3
-		AND B.intEntityVendorId = A.intEntityVendorId
-		ORDER BY B.dtmDatePrinted DESC
-	) History
+	FROM vyuAP1099B
 	WHERE 1 = (CASE WHEN @vendorFromParam IS NOT NULL THEN
-					(CASE WHEN A.strVendorId BETWEEN @vendorFromParam AND @vendorToParam THEN 1 ELSE 0 END)
+					(CASE WHEN strVendorId BETWEEN @vendorFromParam AND @vendorToParam THEN 1 ELSE 0 END)
 				ELSE 1 END)
-	AND A.intYear = @yearParam
-	AND 1 = (
-		CASE WHEN  ISNULL(@correctedParam,0) = 1 THEN 1 
-				ELSE 
-					(CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprintParam = 1 THEN 1 
-						WHEN History.ysnPrinted IS NULL THEN 1
-						WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
-					ELSE 0 END)
-		END)
+	AND intYear = @yearParam
 )
 
 SELECT 
