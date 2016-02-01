@@ -118,42 +118,6 @@ IF(@beginTransaction IS NOT NULL)
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
 
---Process Split Invoice
-IF @post = 1 AND @recap = 0
-BEGIN
-	DECLARE @SplitInvoiceData TABLE(intInvoiceId INT)
-
-	INSERT INTO @SplitInvoiceData
-	SELECT intInvoiceId FROM tblARInvoice 
-	WHERE ysnSplitted = 0 
-	  AND ISNULL(intSplitId, 0) > 0
-	  AND intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-
-	IF(SELECT COUNT(*) FROM @SplitInvoiceData) > 0
-		BEGIN
-			WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
-				BEGIN
-					DECLARE @invoicesToAdd NVARCHAR(MAX) = NULL, @intSplitInvoiceId INT
-
-					SELECT TOP 1 @intSplitInvoiceId = intInvoiceId FROM @SplitInvoiceData ORDER BY intInvoiceId
-
-					EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @userId, @invoicesToAdd OUT
-
-					DELETE FROM @PostInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
-
-					IF (ISNULL(@invoicesToAdd, '') <> '')
-						BEGIN
-							INSERT INTO @PostInvoiceData 
-							SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice 
-							WHERE ysnPosted = 0 
-							  AND intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd))
-						END
-
-					DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
-				END
-		END
-END
-
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
 	BEGIN
@@ -190,6 +154,63 @@ IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 SET @batchIdUsed = @batchId
+
+
+--Process Split Invoice
+BEGIN TRY
+	IF @post = 1 AND @recap = 0
+	BEGIN
+		DECLARE @SplitInvoiceData TABLE(intInvoiceId INT)
+
+		INSERT INTO @SplitInvoiceData
+		SELECT intInvoiceId FROM tblARInvoice 
+		WHERE ysnSplitted = 0 
+		  AND ISNULL(intSplitId, 0) > 0
+		  AND intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+		IF(SELECT COUNT(*) FROM @SplitInvoiceData) > 0
+			BEGIN
+				WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
+					BEGIN
+						DECLARE @invoicesToAdd NVARCHAR(MAX) = NULL, @intSplitInvoiceId INT
+
+						SELECT TOP 1 @intSplitInvoiceId = intInvoiceId FROM @SplitInvoiceData ORDER BY intInvoiceId
+
+						EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @userId, @invoicesToAdd OUT
+
+						DELETE FROM @PostInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
+
+						IF (ISNULL(@invoicesToAdd, '') <> '')
+							BEGIN
+								INSERT INTO @PostInvoiceData 
+								SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice 
+								WHERE ysnPosted = 0 
+								  AND intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd))
+							END
+
+						DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
+					END
+			END
+	END
+END TRY
+BEGIN CATCH
+	SELECT @ErrorMerssage = ERROR_MESSAGE()					
+	IF @raiseError = 0
+		BEGIN
+			ROLLBACK TRANSACTION							
+			BEGIN TRANSACTION
+			--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			--SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
+			EXEC uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param							
+			COMMIT TRANSACTION
+			--COMMIT TRAN @TransactionName
+		END						
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
+
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
