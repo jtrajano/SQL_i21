@@ -54,6 +54,7 @@ INSERT INTO  [tblARInvoice]
 	,[strTransactionType]
 	,[strType]
 	,[intPaymentMethodId]
+	,[intSplitId]
 	,[strComments]
 	,[intAccountId]
 	,[dtmPostDate]
@@ -99,6 +100,7 @@ SELECT
 	,'Invoice'									--[strTransactionType]
 	,'Standard'									--[strType]
 	,0											--[intPaymentMethodId]
+	,SO.intSplitId
 	,S.[strShipmentNumber] + ' : '	+ S.[strReferenceNumber]				--[strComments]
 	,@ARAccountId								--[intAccountId]
 	,NULL										--[dtmPostDate]
@@ -147,6 +149,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblEntityLocation BL
 		ON C.intShipToId = BL.intEntityLocationId
+LEFT OUTER JOIN
+	tblSOSalesOrder SO
+		ON S.strReferenceNumber = SO.strSalesOrderNumber
 WHERE
 	S.[intInventoryShipmentId] = @ShipmentId		
 		
