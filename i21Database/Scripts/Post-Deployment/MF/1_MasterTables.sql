@@ -1686,3 +1686,104 @@ BEGIN
 		,1
 END
 GO
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 1
+		,'STRING'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 2
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 2
+		,'NUMBER'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 3
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 3
+		,'DATETIME'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 4
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 4
+		,'TABLECOLUMN'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 5
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 5
+		,'SPLCHAR'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 6
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 6
+		,'SEQUENCE'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 7
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 7
+		,'UDA'
+END
+GO
