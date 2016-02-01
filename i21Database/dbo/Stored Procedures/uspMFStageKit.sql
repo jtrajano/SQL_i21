@@ -27,6 +27,7 @@ Declare @dblQtyToProduce numeric(18,6)
 Declare @intBlendItemId int
 Declare @intBlendStagingLocationId int
 Declare @dblPickedQty numeric(18,6)
+Declare @dblQuantity numeric(18,6)
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -72,7 +73,8 @@ Declare @tblPickListDetail table
 	dblPhysicalQty numeric(18,6),
 	dblWeightPerQty numeric(18,6),
 	intItemUOMId int,
-	intItemIssuedUOMId int
+	intItemIssuedUOMId int,
+	dblQuantity numeric(18,6)
 )
 
 DECLARE @tblInputItem TABLE (
@@ -93,10 +95,10 @@ Declare @tblRemainingPickedItems AS table
 )
 
 Insert Into @tblPickListDetail(intPickListId,intPickListDetailId,intLotId,strLotNumber,intParentLotId,intItemId,intStorageLocationId,
-dblPickQuantity,intPickUOMId,dblPhysicalQty,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId)
+dblPickQuantity,intPickUOMId,dblPhysicalQty,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId,dblQuantity)
 Select pld.intPickListId,pld.intPickListDetailId,pld.intLotId,l.strLotNumber,pld.intParentLotId,pld.intItemId,pld.intStorageLocationId,
 pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
-CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId
+CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId --Exclude Lots that are already in Kit Staging Location
 
@@ -223,10 +225,10 @@ Begin
 	Select @intLotId=intLotId,@strLotNumber=strLotNumber,
 	@dblMoveQty=CASE WHEN intItemUOMId = intItemIssuedUOMId THEN dblPickQuantity / dblWeightPerQty ELSE dblPickQuantity END,
 	@intItemId=intItemId,
-	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty 
+	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity 
 	From @tblPickListDetail Where intRowNo=@intMinLot
 
-	If @dblPhysicalQty < (@dblMoveQty * @dblWeightPerQty)
+	If ROUND(@dblPhysicalQty,3) < ROUND(@dblQuantity,3)
 	Begin
 		Select @strUOM=um.strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
 		Where iu.intItemUOMId=(Select intItemUOMId From @tblPickListDetail Where intRowNo=@intMinLot)
