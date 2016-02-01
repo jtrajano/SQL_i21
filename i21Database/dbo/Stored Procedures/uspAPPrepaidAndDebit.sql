@@ -4,7 +4,7 @@ AS
 
 IF ((SELECT ysnPosted FROM tblAPBill WHERE intBillId = @billId) = 1)
 BEGIN
-	RAISERROR('Bill already posted.', 16, 1);
+	RAISERROR('Voucher already posted.', 16, 1);
 	RETURN;
 END
 
@@ -279,7 +279,7 @@ CROSS APPLY
 		WHERE /*C2.intContractHeaderId = C.intContractHeaderId and*/ intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
-	AND C.intContractHeaderId = B.intContractHeaderId
+	--AND C.intContractHeaderId = B.intContractHeaderId
 ) CurrentBill 
 WHERE A.intTransactionType IN (2)
 AND A.intEntityVendorId = @vendorId
@@ -437,6 +437,44 @@ WHERE A.intTransactionType IN (2)
 --AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
 AND B.intContractHeaderId IS NULL
 AND ISNULL(B.intItemId,0) <= 0
+AND intEntityVendorId = @vendorId
+AND A.dblAmountDue != 0
+AND EXISTS
+(
+	--get prepayment record only if it has payment posted
+	SELECT 1 FROM tblAPPayment B INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
+	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
+	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
+)
+UNION ALL
+--=========================================================
+--PREPAYMENT WITHOUT CONTRACT UNRESTRICTED DIFFERENT ITEM
+--=========================================================
+SELECT
+	[intBillId]				=	@billId, 
+	[intBillDetailApplied]	=	NULL, 
+	[intLineApplied]		=	B.intLineNo, 
+	[intTransactionId]		=	A.intBillId,
+	[strTransactionNumber]	=	A.strBillId,
+	[intItemId]				=	(SELECT intItemId FROM tblICItem WHERE intItemId IN (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE intBillId = A.intBillId)),
+	[strItemDescription]	=	(SELECT strDescription FROM tblICItem WHERE intItemId IN (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE intBillId = A.intBillId)),
+	[strItemNo]				=	(SELECT strItemNo FROM tblICItem WHERE intItemId IN (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE intBillId = A.intBillId)),
+	[intContractHeaderId]	=	NULL,	
+	[strContractNumber]		=	NULL,
+	[intPrepayType]			=	B.intPrepayTypeId,
+	[dblTotal]				=	A.dblTotal,
+	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
+	[dblBalance]			=	A.dblAmountDue,
+	[dblAmountApplied]		=	0,
+	[ysnApplied]			=	0,
+	[intConcurrencyId]		=	0
+FROM tblAPBill A
+INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+WHERE A.intTransactionType IN (2)
+--AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
+AND B.intContractHeaderId IS NULL
+AND B.intItemId != (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE intBillId = @billId)
+AND B.ysnRestricted = 0
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
 AND EXISTS
