@@ -36,7 +36,8 @@
 	,cus_creditlimit	= f.dblCreditLimit
 	--,cus_defaultwarehouse = f.ware	
 	,cus_porequired		= f.ysnPORequired
-	
+	,cus_revenue		= f.dblRevenue
+	,cus_employee_count	= f.intEmployeeCount
 	--Salesperson
 	,sal_salespersonid	= g.strSalespersonId
 	

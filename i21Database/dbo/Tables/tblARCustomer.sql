@@ -82,6 +82,8 @@
 	[strFLOId]						  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
 	[intCompanyLocationPricingLevelId]INT			  NULL,
 	[intEntityTariffTypeId]			  INT			  NULL,
+	[dblRevenue]						NUMERIC (18, 6) NULL DEFAULT(0),
+	[intEmployeeCount]					INT			  NULL  DEFAULT(0),
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
