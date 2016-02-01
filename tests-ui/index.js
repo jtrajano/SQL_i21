@@ -449,6 +449,22 @@ Harness.start(
             }
         ]
     },
+    { group: 'InventoryReceipt',
+        items: [
+            {
+                url: 'InventoryReceipt/AddInventoryReceiptDirect.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'InventoryReceipt/DeleteInventoryReceipt.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            }
+        ]
+    },
     { group: 'LineOfBusiness',
         items: [
             {
