@@ -3341,6 +3341,10 @@
     <Build Include="dbo\Tables\tblMFPatternDetail.sql" />
     <Build Include="dbo\Tables\tblMFSubPatternType.sql" />
     <Build Include="dbo\Tables\tblMFPattern.sql" />
+    <Build Include="dbo\Tables\tblSMAnnouncementUpload.sql" />
+    <Build Include="dbo\Tables\tblSMAnnouncementType.sql" />
+    <Build Include="dbo\Tables\tblSMAnnouncement.sql" />
+    <Build Include="dbo\Tables\tblSMAnnouncementDisplay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

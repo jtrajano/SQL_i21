@@ -250,3 +250,30 @@ GO
 	SET strRoleType = CASE UserRole.ysnAdmin WHEN 1 THEN 'Administrator' ELSE 'User' END 
 	FROM tblSMUserRole UserRole WHERE UserRole.strRoleType IS NULL
 GO
+
+	/* MIGRATE HD ANNOUNCEMENT TO SM ANNOUNCEMENT */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate HD Announcement to SM Announcement')
+	BEGIN
+		INSERT INTO tblSMAnnouncementType(strAnnouncementType, strDescription, strDisplayTo, strFontColor, strBackColor, intSort)
+		SELECT strAnnouncementType, strDescription, strDisplayTo, strFontColor, strBackColor, intSort FROM tblHDAnnouncementType
+
+		INSERT INTO tblSMAnnouncementUpload(strImageId, strFileIdentifier, strFilename, strFileLocation, blbFile)
+		SELECT strTicketCommentImageId, strFileIdentifier, strFileName,  REPLACE(REPLACE(strFileLocation, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload\Announcement'), blbFile FROM tblHDUpload
+
+		INSERT INTO tblSMAnnouncement(intAnnouncementTypeId, dtmStartDate, dtmEndDate, strAnnouncement, intSort, strImageId)
+		SELECT AnnouncementType1.intAnnouncementTypeId, Announcement.dtmStartDate, Announcement.dtmEndDate, Announcement.strAnnouncement, Announcement.intSort, Announcement.strImageId 
+		FROM tblSMAnnouncementType AnnouncementType1
+		INNER JOIN tblHDAnnouncementType AnnouncementType2 ON AnnouncementType1.strAnnouncementType = AnnouncementType2.strAnnouncementType
+		INNER JOIN tblHDAnnouncement Announcement ON AnnouncementType2.intAnnouncementTypeId = Announcement.intAnnouncementTypeId
+
+		INSERT INTO tblSMAnnouncementDisplay(intAnnouncementId, intEntityId)
+		SELECT Announcement1.intAnnouncementId, AnnouncementDisplay.intEntityId FROM tblSMAnnouncement Announcement1
+		INNER JOIN tblHDAnnouncement Announcement2 ON Announcement1.strImageId = Announcement2.strImageId
+		INNER JOIN tblHDAnnouncementDisplay AnnouncementDisplay ON AnnouncementDisplay.intAnnouncementId = Announcement2.intAnnouncementId
+
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Migrate HD Announcement to SM Announcement', 'Migrate HD Announcement to SM Announcement', GETDATE())
+	END
+
+GO
