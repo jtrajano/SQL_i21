@@ -50,6 +50,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 			ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
 	)
 	, ReceiptItem.intGradeId
+	, ReceiptItem.dblBillQty
 	, strGrade = Grade.strDescription
 	, Item.intLifeTime
 	, Item.strLifeTimeType

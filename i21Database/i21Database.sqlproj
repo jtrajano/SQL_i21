@@ -3335,6 +3335,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceByPrimary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDBalanceSheetByPrimary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDIncomeStatementByPrimary.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
