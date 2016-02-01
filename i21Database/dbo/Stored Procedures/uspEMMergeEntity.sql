@@ -67,6 +67,11 @@ BEGIN
 			set @CurTableName = 'tblARSalesperson'
 			set @CurTableKey = 'intEntitySalespersonId'
 		end
+		else if @CurMergeType = 'User'
+		begin
+			set @CurTableName = 'tblSMUserSecurity'
+			set @CurTableKey = 'intEntityUserSecurityId'
+		end
 
 		SELECT @Columns = COALESCE(@Columns + ', ', '') + name from syscolumns where id = object_id(@CurTableName) and name <> @CurTableKey
 		
