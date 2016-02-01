@@ -178,8 +178,8 @@ BEGIN TRY
 	WHERE intStorageScheduleRule = @intStorageScheduleId
 	ORDER BY intSort
 	
-	IF @ScreenName='Process Grain Storage'
-		SET @StorageChargeDate=DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,@StorageChargeDate),0))
+	--IF @ScreenName='Process Grain Storage'
+	--	SET @StorageChargeDate=DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,@StorageChargeDate),0))
 
 	IF @ScreenName='Transfer Storage'
 	 SET @LastMonthChargeApplicable=0
@@ -4205,36 +4205,40 @@ BEGIN TRY
 
 	SELECT @dblStorageBilledAmount = @dblStorageBilledPerUnit * @dblOpenBalance
 	
-	IF @strStorageRate = 'Monthly'
-	SELECT
+	IF @ScreenName <> 'Process Grain Storage'
+	BEGIN
+
+		IF @strStorageRate = 'Monthly'
+		SELECT
+			 [intStorageChargeKey]
+			,[intPeriodKey]
+			,[strPeriodType]
+			,[dtmEffectiveDate]
+			,[dtmEndingDate]
+			,[dblStorageRate]
+			,[MonthType]
+			,[ChargeType]
+			,[ChargedNumberOfDays/Months] AS CalculatedNumberOfDays
+			,[dblStorageDuePerUnit]
+			,[dblCummulativeStorageDuePerUnit]
+			,[RemainingMonths]				
+		FROM @StorageCharge Where [ChargedNumberOfDays/Months]>0
+		
+		ELSE
+			
+		SELECT 
 		 [intStorageChargeKey]
 		,[intPeriodKey]
 		,[strPeriodType]
 		,[dtmEffectiveDate]
 		,[dtmEndingDate]
+		,[intNumberOfDays]
+		,[CalculatedNumberOfDays]
 		,[dblStorageRate]
-		,[MonthType]
-		,[ChargeType]
-		,[ChargedNumberOfDays/Months] AS CalculatedNumberOfDays
 		,[dblStorageDuePerUnit]
-		,[dblCummulativeStorageDuePerUnit]
-		,[RemainingMonths]				
-	FROM @StorageCharge Where [ChargedNumberOfDays/Months]>0
-	
-	ELSE
-		
-	SELECT 
-	 [intStorageChargeKey]
-	,[intPeriodKey]
-	,[strPeriodType]
-	,[dtmEffectiveDate]
-	,[dtmEndingDate]
-	,[intNumberOfDays]
-	,[CalculatedNumberOfDays]
-	,[dblStorageRate]
-	,[dblStorageDuePerUnit]
-	,[dblCummulativeStorageDuePerUnit] FROM @DailyStorageCharge
-	
+		,[dblCummulativeStorageDuePerUnit] FROM @DailyStorageCharge
+
+	END
 END TRY
 
 BEGIN CATCH

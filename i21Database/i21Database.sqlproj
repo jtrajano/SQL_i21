@@ -3345,6 +3345,7 @@
     <Build Include="dbo\Tables\tblSMAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblSMAnnouncement.sql" />
     <Build Include="dbo\Tables\tblSMAnnouncementDisplay.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetBillStorageDiscounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
