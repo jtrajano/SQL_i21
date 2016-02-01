@@ -116,9 +116,15 @@ INSERT into @ReceiptStagingTable(
 		,strSourceScreenName
 )	
 SELECT 
-		strReceiptType				=	CASE	WHEN SC.intContractId IS NULL THEN 'Direct'
-												WHEN SC.intContractId IS NOT NULL THEN 'Purchase Contract'
-										END
+		--strReceiptType				=	CASE	WHEN SC.intContractId IS NULL THEN 'Direct'
+		--										WHEN SC.intContractId IS NOT NULL THEN 'Purchase Contract'
+		--								END
+		strReceiptType				= CASE 
+										WHEN @strReceiptType = 'Direct'
+											THEN 'Direct'
+										WHEN @strReceiptType = 'Purchase Contract'
+											THEN 'Purchase Contract'
+									  END
 		,intEntityVendorId			= @intEntityId
 		,intShipFromId				= SC.intProcessingLocationId
 		,intLocationId				= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
@@ -134,11 +140,23 @@ SELECT
 												THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = SC.intContractId)
 										END-- Need to add the Gallons UOM from Company Preference	   
 		,strBillOfLadding			= NULL
-		,intContractHeaderId		= (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = SC.intContractId)
-		,intContractDetailId		= SC.intContractId
+		--,intContractHeaderId		= CASE 
+		--								WHEN @strReceiptType = 'Direct'
+		--									THEN NULL
+		--								WHEN @strReceiptType = 'Purchase Contract'
+		--									THEN (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = SC.intContractId)
+		--							  END
+		--,intContractDetailId		= CASE 
+		--								WHEN @strReceiptType = 'Direct'
+		--									THEN NULL
+		--								WHEN @strReceiptType = 'Purchase Contract'
+		--									THEN SC.intContractId
+		--							  END
+		,intContractHeaderId		= (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = LI.intTransactionDetailId)
+		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
 		,intShipViaId				= SC.intFreightCarrierId
-		--,dblQty						= SC.dblNetUnits
+		--,dblQty					= SC.dblNetUnits
 		--,dblCost					= SC.dblUnitPrice
 		,dblQty						= LI.dblQty
 		,dblCost					= LI.dblCost
@@ -156,8 +174,8 @@ SELECT
 		,dblFreightRate				= SC.dblFreightRate
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
-		,dblGross					= SC.dblGrossUnits
-		,dblNet						= SC.dblNetUnits
+		,dblGross					= SC.dblGross
+		,dblNet						= SC.dblGross - SC.dblShrink
 		,intInventoryReceiptId		= SC.intInventoryReceiptId
 		,dblSurcharge				= 0
 		,ysnFreightInPrice			= NULL
@@ -311,17 +329,18 @@ BEGIN
 			@ReceiptId = intInventoryReceiptId  
 	FROM	#tmpAddItemReceiptResult 
   
+	SET @InventoryReceiptId = @ReceiptId
 	-- Post the Inventory Receipt that was created
-	SELECT	@strTransactionId = strReceiptNumber 
-	FROM	tblICInventoryReceipt 
-	WHERE	intInventoryReceiptId = @ReceiptId
+	--SELECT	@strTransactionId = strReceiptNumber 
+	--FROM	tblICInventoryReceipt 
+	--WHERE	intInventoryReceiptId = @ReceiptId
 
-	SELECT	TOP 1 @intEntityId = [intEntityUserSecurityId] 
-	FROM	dbo.tblSMUserSecurity 
-	WHERE	[intEntityUserSecurityId] = @intEntityId
-	BEGIN
-		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;			
-	END
+	--SELECT	TOP 1 @intEntityId = [intEntityUserSecurityId] 
+	--FROM	dbo.tblSMUserSecurity 
+	--WHERE	[intEntityUserSecurityId] = @intEntityId
+	--BEGIN
+	--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;			
+	--END
 		
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
