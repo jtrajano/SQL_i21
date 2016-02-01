@@ -241,6 +241,10 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'dblTotal,','0 as dblTotal,')
 	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
+	SELECT @cols1 = REPLACE (@cols1,'strDetailDescription,',''''' as strDetailDescription,')
+	SELECT @cols1 = REPLACE (@cols1,'strReference,',''''' as strReference,')
+	SELECT @cols1 = REPLACE (@cols1,'strReferenceDetail,',''''' as strReferenceDetail,')
+	SELECT @cols1 = REPLACE (@cols1,'strDocument,',''''' as strDocument,')
 
 	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
 	BEGIN
