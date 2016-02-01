@@ -2,8 +2,10 @@
 	This is a user-defined table type used in inserting tax details to line items. 
 */
 CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
-(																																													
-	 [intDetailId]							INT												NOT NULL	-- Id of the line item record
+(		
+	 [intId]								INT				IDENTITY PRIMARY KEY CLUSTERED																																											
+	,[intDetailId]							INT												NOT NULL	-- Id of the line item record
+	,[intInvoiceDetailTaxId]				INT												NULL		-- Invoice Detail Tax Id(Insert new if NULL, else Update existing) 
 	,[intTaxGroupId]						INT												NULL		-- Key Value tblSMTaxGroup.intTaxGroupId
 	,[intTaxCodeId]							INT												NOT NULL	-- Key Value tblSMTaxCode.intTaxCodeId
 	,[intTaxClassId]						INT												NULL		-- Key Value tblSMTaxClass.intTaxClassId
