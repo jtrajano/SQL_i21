@@ -3332,6 +3332,9 @@
     <Build Include="dbo\Views\vyuMFGetItemSubstitutionView.sql" />
     <Build Include="dbo\Views\vyuMFGetBlendConsolidationView.sql" />
     <Build Include="dbo\Views\vyuMFGetItemConsumptionView.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceByPrimary.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBalanceSheetByPrimary.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDIncomeStatementByPrimary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
