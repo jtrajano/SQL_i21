@@ -59,7 +59,7 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @Inventory_RevalueSold AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @Inventory_WriteOffSold AS NVARCHAR(50) = 'Inventory Write-Off Sold'
 

@@ -193,7 +193,7 @@ BEGIN
 	FROM dbo.tblGLAccountCategory
 	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_RevalueSold
 
-	DECLARE @ACCOUNT_CATEGORY_NAME_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+	DECLARE @ACCOUNT_CATEGORY_NAME_AutoNegative AS NVARCHAR(100) = 'Auto Variance'
 	DECLARE @ACCOUNT_CATEGORY_ID_AutoNegative AS INT -- = 44
 
 	SELECT @ACCOUNT_CATEGORY_ID_AutoNegative = intAccountCategoryId

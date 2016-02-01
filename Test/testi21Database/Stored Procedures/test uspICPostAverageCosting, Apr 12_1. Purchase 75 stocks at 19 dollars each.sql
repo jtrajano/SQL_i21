@@ -1197,7 +1197,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1					
 
-			-- 6TH expected: The Auto Negative
+			-- 6TH expected: The Auto Variance
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]

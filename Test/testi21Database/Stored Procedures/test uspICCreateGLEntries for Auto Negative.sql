@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for Auto Negative]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for Auto Variance]
 AS
 BEGIN
 	-- Arrange 
@@ -15,7 +15,7 @@ BEGIN
 		DECLARE @InventoryTransactionTypeId_PurchaseType AS INT = 4;
 		DECLARE @InventoryTransactionTypeId_SaleType AS INT = 5;
 		
-		DECLARE @InventoryTransactionTypeName_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @InventoryTransactionTypeName_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @InventoryTransactionTypeName_RevalueSold AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @InventoryTransactionTypeName_WriteOffSold AS NVARCHAR(50) = 'Inventory Write-Off Sold'  		
 
@@ -223,13 +223,13 @@ BEGIN
 		DROP COLUMN dtmDateEntered			
 	END 
 	
-	select 'expected', * from expected
-	select 'actual', * from actual
-	
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END
+
+	SELECT * FROM expected
+	SELECT * FROM actual
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

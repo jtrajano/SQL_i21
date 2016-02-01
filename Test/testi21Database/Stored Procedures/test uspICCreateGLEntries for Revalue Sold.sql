@@ -41,7 +41,7 @@ BEGIN
 		DECLARE @USD AS INT = 1;
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @Inventory_RevalueSold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @Inventory_WriteOffSold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 		

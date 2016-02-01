@@ -16,7 +16,7 @@ DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
 DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 
---1	Inventory Auto Negative
+--1	Inventory Auto Variance
 --2	Inventory Write-Off Sold
 --3	Inventory Revalue Sold
 --4	Inventory Receipt
@@ -30,9 +30,9 @@ DECLARE @GLAccounts AS dbo.ItemGLAccount;
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
-		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Negative'
+		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Variance'
 
-		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Auto-Negative' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
+		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
 		--,@AccountCategory_Revalue_Produced AS NVARCHAR(30) = 'Revalue Produced'
 		--,@AccountCategory_Revalue_Transfer AS NVARCHAR(30) = 'Revalue Inventory Transfer'
@@ -71,7 +71,7 @@ BEGIN
 			) Query
 END 
 
--- Check for missing Auto Negative Account Id
+-- Check for missing Auto Variance Account Id
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT
 

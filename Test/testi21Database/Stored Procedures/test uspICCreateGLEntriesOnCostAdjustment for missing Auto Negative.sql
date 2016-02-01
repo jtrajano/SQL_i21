@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntriesOnCostAdjustment for missing Auto Negative]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntriesOnCostAdjustment for missing Auto Variance]
 AS
 BEGIN
 	-- Arrange 
@@ -12,7 +12,7 @@ BEGIN
 	DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 			,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
 			,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
-			,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Negative'
+			,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Variance'
 
 			,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Cost Adjustment'
 			,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Revalue WIP'
@@ -56,7 +56,7 @@ BEGIN
 		DECLARE @USD AS INT = 1;
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @Inventory_RevalueSold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @Inventory_WriteOffSold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 		
@@ -129,7 +129,7 @@ BEGIN
 				,intCreatedUserId = 1
 				,intConcurrencyId = 1
 
-		-- Delete Auto Negative from the G/L account setup to simulate a missing account id
+		-- Delete Auto Variance from the G/L account setup to simulate a missing account id
 		DELETE	ItemAccount
 		FROM	dbo.tblICItemAccount ItemAccount INNER JOIN dbo.tblGLAccountCategory GLAccountCategory
 					ON ItemAccount.intAccountCategoryId = GLAccountCategory.intAccountCategoryId
@@ -140,7 +140,7 @@ BEGIN
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
 		EXEC tSQLt.ExpectException 
-			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Auto-Negative account category.'
+			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Auto-Variance account category.'
 			,@ExpectedErrorNumber = 80008 
 	END
 

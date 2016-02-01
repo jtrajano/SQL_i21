@@ -1197,7 +1197,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 4th expected: The Auto Negative
+			-- 4th expected: The Auto Variance
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]
@@ -1339,7 +1339,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 4th expected: The Auto Negative
+			-- 4th expected: The Auto Variance
 			INSERT INTO tblICInventoryTransaction (
 					[intItemId]
 					,[intItemLocationId]
@@ -1585,7 +1585,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 4th expected: None, no Auto Negative record expected. 
+			-- 4th expected: None, no Auto Variance record expected. 
 			-- Record not expected for auto-negative since the stock is zero (zero x $27 is still zero). 			
 					
 			-- Insert expected data for tblICInventoryFIFOOut

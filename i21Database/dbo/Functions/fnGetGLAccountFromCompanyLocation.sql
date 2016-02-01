@@ -44,7 +44,7 @@ BEGIN
 						WHEN @strAccountDescription = 'Inventory' THEN intInventory
 						WHEN @strAccountDescription = 'Write-Off Sold' THEN intWriteOffSold
 						WHEN @strAccountDescription = 'Revalue Sold' THEN intRevalueSold
-						WHEN @strAccountDescription = 'Auto-Negative' THEN intAutoNegativeSold
+						WHEN @strAccountDescription = 'Auto-Variance' THEN intAutoNegativeSold
 						WHEN @strAccountDescription = 'AP Clearing' THEN intAPClearing
 						WHEN @strAccountDescription = 'Inventory In-Transit' THEN intInventoryInTransit
 				END

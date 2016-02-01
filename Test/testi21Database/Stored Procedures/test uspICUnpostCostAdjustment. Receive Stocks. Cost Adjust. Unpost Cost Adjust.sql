@@ -787,7 +787,7 @@ BEGIN
 				,[dblCredit]					= 610.44 
 				,[dblDebitUnit]					= 0 
 				,[dblCreditUnit]				= 0 
-				,[strDescription]				= 'AUTO NEGATIVE WHEAT-DEFAULT'
+				,[strDescription]				= 'Auto Variance WHEAT-DEFAULT'
 				,[strCode]						= 'ICA'
 				,[strReference]					= ''
 				,[intCurrencyId]				= @CurrencyId_USD
@@ -841,7 +841,7 @@ BEGIN
 				,[dblCredit]					= 0
 				,[dblDebitUnit]					= 0 
 				,[dblCreditUnit]				= 0 
-				,[strDescription]				= 'AUTO NEGATIVE WHEAT-DEFAULT'
+				,[strDescription]				= 'Auto Variance WHEAT-DEFAULT'
 				,[strCode]						= 'ICA'
 				,[strReference]					= ''
 				,[intCurrencyId]				= @CurrencyId_USD

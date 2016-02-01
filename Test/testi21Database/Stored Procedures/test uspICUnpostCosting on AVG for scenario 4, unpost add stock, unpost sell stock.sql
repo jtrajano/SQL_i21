@@ -31,7 +31,7 @@ BEGIN
 	DECLARE @GLDetail AS dbo.RecapTableType
 		
 	DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
-	DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto-Negative';
+	DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto-Variance';
 	
 	DECLARE @AUTO_NEGATIVE AS INT = 1
 
@@ -295,7 +295,7 @@ BEGIN
 				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	Trans.intTransactionId = @intTransactionId
 			AND Trans.strTransactionId = @strTransactionId
-			AND ICType.strName <> 'Inventory Auto Negative'	
+			AND ICType.strName <> 'Inventory Auto Variance'	
 	-- END Reverse of the inventory transactions
 
 	-- BEGIN Setup the expected Item Stock

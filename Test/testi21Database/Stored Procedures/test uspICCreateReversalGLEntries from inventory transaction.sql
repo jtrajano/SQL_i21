@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
-		DECLARE @AUTO_NEGATIVE_Name AS NVARCHAR(50) = 'Inventory Auto Negative';
+		DECLARE @AUTO_NEGATIVE_Name AS NVARCHAR(50) = 'Inventory Auto Variance';
 		DECLARE @WRITEOFF_SOLD_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold';
 		DECLARE @REVALUE_SOLD_Name AS NVARCHAR(50) = 'Inventory Revalue Sold';
 

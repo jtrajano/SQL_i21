@@ -12,7 +12,7 @@ WITH	(HOLDLOCK)
 AS		InventoryTransactionTypes
 USING	(
 		SELECT	id = 1
-				,name = 'Inventory Auto Negative'
+				,name = 'Inventory Auto Variance'
 				,form = NULL
 		UNION ALL 
 		SELECT	id = 2

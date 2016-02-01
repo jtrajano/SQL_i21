@@ -183,7 +183,7 @@ BEGIN
 	BEGIN 
 		-- Act
 		SET @Expected = 21
-		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Auto-Negative');
+		SELECT @result = dbo.fnGetGLAccountFromCompanyLocation(@locationId, 'Auto-Variance');
 		-- Assert 
 		EXEC tSQLt.AssertEquals @Expected, @result;
 	END

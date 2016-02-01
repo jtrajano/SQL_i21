@@ -521,7 +521,7 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-		-- No auto negative because the stock is zero. 
+		-- No Auto Variance because the stock is zero. 
 		-- Purchase 3: 100 @ $18.00
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
