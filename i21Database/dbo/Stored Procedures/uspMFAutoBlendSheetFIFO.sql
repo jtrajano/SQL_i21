@@ -1029,6 +1029,11 @@ BEGIN TRY
 							WHERE L.intParentLotId = @intParentLotId --AND L.dblWeight > 0
 
 						SET @dblRequiredQty = @dblRequiredQty - @dblAvailableQty
+
+					IF @dblRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantityStorageLocationId, 0) > 0 AND @intIssuedUOMTypeId = 2
+					--SELECT @intIssuedUOMTypeId = 1
+					GOTO LOOP_END
+
 					END
 				END --AvailaQty>0 End
 
