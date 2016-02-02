@@ -13,6 +13,8 @@
     [ysnAverageCostForNonBulkPlant] BIT NULL,
 	[ysnAutoAssignInvoiceNumber] BIT NULL,
 	[ysnSellerAsBillTo] BIT NULL,	
+	[ysnItemizeSurcharge] BIT NULL,	
+	[intSurchargeItemId] int NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
 )
