@@ -81,6 +81,13 @@ If @ysnEnableParentLot=0
 	where sr.intItemId=@intItemId
 	group by sr.intLotId
 
+If @ysnEnableParentLot=1
+	Insert into @tblReservedQty
+	Select sr.intParentLotId,Sum(sr.dblQty) AS dblReservedQty 
+	From tblICStockReservation sr 
+	where sr.intItemId=@intItemId
+	group by sr.intParentLotId
+
 --intPhysicalItemUOMId is 
 Select l.intLotId,l.strLotNumber,l.intItemId,i.strItemNo,i.strDescription,ISNULL(l.strLotAlias,'') AS strLotAlias,l.dblWeight AS dblPhysicalQty,
 --ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(l.dblWeight,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty,

@@ -716,7 +716,7 @@ BEGIN TRY
 							(
 								SELECT ISNULL(SUM(SR.dblQty), 0)
 								FROM tblICStockReservation SR
-								WHERE SR.intLotId = PL.intParentLotId --Review when Parent Lot Reservation Done
+								WHERE SR.intParentLotId = PL.intParentLotId --Review when Parent Lot Reservation Done
 									AND SR.intStorageLocationId = PL.intStorageLocationId
 								) + (
 								SELECT ISNULL(SUM(BS.dblQuantity), 0)
@@ -735,7 +735,48 @@ BEGIN TRY
 				FROM #tblParentLot AS PL
 				WHERE PL.intItemId = @intRawItemId
 			END
-			ELSE
+
+			IF @ysnEnableParentLot = 1
+			BEGIN
+				INSERT INTO #tblAvailableInputLot (
+					intParentLotId
+					,intItemId
+					,dblAvailableQty
+					,intStorageLocationId
+					,dblWeightPerQty
+					,dtmCreateDate
+					,dtmExpiryDate
+					,dblUnitCost
+					,intItemUOMId
+					,intItemIssuedUOMId
+					)
+				SELECT PL.intParentLotId
+					,PL.intItemId
+					,(
+						PL.dblQty - (
+							(
+								SELECT ISNULL(SUM(SR.dblQty), 0)
+								FROM tblICStockReservation SR
+								WHERE SR.intParentLotId = PL.intParentLotId
+								) + (
+								SELECT ISNULL(SUM(BS.dblQuantity), 0)
+								FROM #tblBlendSheetLot BS
+								WHERE BS.intParentLotId = PL.intParentLotId
+								)
+							)
+						) AS dblAvailableQty
+					,PL.intStorageLocationId
+					,PL.dblWeightPerQty
+					,PL.dtmCreateDate
+					,PL.dtmExpiryDate
+					,PL.dblUnitCost
+					,PL.intItemUOMId
+					,PL.intItemIssuedUOMId
+				FROM #tblParentLot AS PL
+				WHERE PL.intItemId = @intRawItemId
+			END
+
+			IF @ysnEnableParentLot = 0
 			BEGIN
 				INSERT INTO #tblAvailableInputLot (
 					intParentLotId

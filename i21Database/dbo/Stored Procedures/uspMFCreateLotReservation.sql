@@ -7,6 +7,9 @@ DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
 DECLARE @intInventoryTransactionType AS INT=8
 DECLARE @strInvalidItemNo AS NVARCHAR(50) 
 DECLARE @intInvalidItemId AS INT 
+DECLARE @intLocationId INT
+
+Select @intLocationId=intLocationId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
 If @ysnReservationByParentLot=0
 Begin
@@ -36,11 +39,6 @@ Begin
 			JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
 			JOIN tblICLot l ON l.intLotId = wcl.intLotId
 	WHERE	wcl.intWorkOrderId = @intWorkOrderId
-End
---Else
---Begin
-
---End
 
 	-- Validate the reservation 
 	EXEC dbo.uspICValidateStockReserves 
@@ -55,4 +53,26 @@ End
 			@ItemsToReserve
 			,@intWorkOrderId
 			,@intInventoryTransactionType	
-	END 	
+	END 
+End
+Else
+Begin
+	INSERT INTO tblICStockReservation(intItemId,intLocationId,intItemLocationId,intItemUOMId,intParentLotId,intStorageLocationId,
+				dblQty,intTransactionId,strTransactionId,intInventoryTransactionType)
+	SELECT	intItemId = wcl.intItemId
+			,@intLocationId AS intLocationId
+			,intItemLocationId = il.intItemLocationId
+			,intItemUOMId = wcl.intItemUOMId
+			,intParentLotId = wcl.intParentLotId
+			,intStorageLocationId = wcl.intStorageLocationId
+			,dblQty = wcl.dblQuantity
+			,intTransactionId = wcl.intWorkOrderId
+			,strTransactionId = w.strWorkOrderNo
+			,intTransactionTypeId = @intInventoryTransactionType
+	FROM	tblMFWorkOrderInputParentLot wcl
+			JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
+			JOIN tblICItemLocation il on wcl.intItemId=il.intItemId And il.intLocationId=@intLocationId
+	WHERE	wcl.intWorkOrderId = @intWorkOrderId	
+End
+
+	
