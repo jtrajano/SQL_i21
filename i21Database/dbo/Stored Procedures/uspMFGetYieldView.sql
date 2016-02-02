@@ -77,19 +77,19 @@ BEGIN TRY
 	CREATE TABLE ##tblMFTransaction (
 		intTransactionTypeId INT
 		,dtmProductionDate DATETIME
-		,strShiftName NVARCHAR(50)
+		,strShiftName NVARCHAR(50)COLLATE Latin1_General_CI_AS
 		,dtmTransactionDate DATETIME
-		,strTransactionType NVARCHAR(50)
+		,strTransactionType NVARCHAR(50)COLLATE Latin1_General_CI_AS
 		,intTransactionId INT
 		,intItemId INT
-		,strItemNo NVARCHAR(50)
-		,strDescription NVARCHAR(150)
-		,strLotNumber NVARCHAR(50)
+		,strItemNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
+		,strDescription NVARCHAR(150)COLLATE Latin1_General_CI_AS
+		,strLotNumber NVARCHAR(50)COLLATE Latin1_General_CI_AS
 		,dblTransactionQuantity NUMERIC(18, 6)
-		,strUnitMeasure NVARCHAR(50)
+		,strUnitMeasure NVARCHAR(50)COLLATE Latin1_General_CI_AS
 		,intUnitMeasureId INT
 		,intWorkOrderId INT
-		,strProcess NVARCHAR(50)
+		,strProcess NVARCHAR(50)COLLATE Latin1_General_CI_AS
 		,ysnIncluded BIT
 		)
 
@@ -99,7 +99,7 @@ BEGIN TRY
 			,WI.dtmProductionDate
 			,S.strShiftName
 			,WI.dtmBusinessDate AS dtmTransactionDate
-			,''INPUT'' AS strTransactionType
+			,''INPUT'' COLLATE Latin1_General_CI_AS AS strTransactionType
 			,WI.intWorkOrderInputLotId AS intTransactionId
 			,I.intItemId
 			,I.strItemNo
@@ -109,7 +109,7 @@ BEGIN TRY
 			,UM.strUnitMeasure
 			,UM.intUnitMeasureId
 			,WI.intWorkOrderId
-			,''Yes'' AS strProcess
+			,''Yes'' COLLATE Latin1_General_CI_AS AS strProcess
 			,CAST(1 AS BIT) AS IsIncluded
 		FROM dbo.tblMFWorkOrderInputLot WI
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
@@ -129,7 +129,7 @@ BEGIN TRY
 			,WP.dtmProductionDate
 			,S.strShiftName
 			,WP.dtmBusinessDate AS dtmTransactionDate
-			,''OUTPUT'' AS strTransactionType
+			,''OUTPUT'' COLLATE Latin1_General_CI_AS AS strTransactionType
 			,WP.intWorkOrderProducedLotId AS intTransactionId
 			,I.intItemId
 			,I.strItemNo
@@ -139,7 +139,7 @@ BEGIN TRY
 			,UM.strUnitMeasure
 			,UM.intUnitMeasureId
 			,WP.intWorkOrderId
-			,''Yes'' AS strProcess
+			,''Yes'' COLLATE Latin1_General_CI_AS AS strProcess
 			,CAST(1 AS BIT) AS IsIncluded
 		FROM dbo.tblMFWorkOrderProducedLot WP
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
@@ -170,7 +170,7 @@ BEGIN TRY
 			,NULL strUnitMeasure
 			,NULL intUnitMeasureId
 			,UnPvt.intWorkOrderId
-			,''Yes''AS strProcess
+			,''Yes'' COLLATE Latin1_General_CI_AS AS strProcess
 			,CAST(1 AS BIT) AS IsIncluded
 		FROM dbo.tblMFProductionSummary
 		UNPIVOT(dblTransactionQuantity FOR strTransactionType IN (
@@ -205,7 +205,7 @@ BEGIN TRY
 			,UM.strUnitMeasure
 			,UM.intUnitMeasureId
 			,WLT.intWorkOrderId
-			,''No'' AS strProcess
+			,''No'' COLLATE Latin1_General_CI_AS AS strProcess
 			,CAST(1 AS BIT) AS IsIncluded
 		FROM tblMFWorkOrderProducedLotTransaction WLT
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
@@ -446,9 +446,9 @@ BEGIN TRY
 
 		CREATE TABLE ##tblMFTransactionByDate (
 			intRowNum INT
-			,strTransactionType NVARCHAR(50)
-			,strItemNo NVARCHAR(MAX)
-			,strDescription NVARCHAR(MAX)
+			,strTransactionType NVARCHAR(50)COLLATE Latin1_General_CI_AS
+			,strItemNo NVARCHAR(MAX)COLLATE Latin1_General_CI_AS
+			,strDescription NVARCHAR(MAX)COLLATE Latin1_General_CI_AS
 			,dtmTransactionDate DATETIME
 			,dblTransactionQuantity NUMERIC(18, 6)
 			,dblStandardYield NUMERIC(18, 6)
@@ -564,9 +564,9 @@ BEGIN TRY
 		SELECT intRowNum
 			,TD.strItemNo
 			,strDescription
-			,CAST('' AS NVARCHAR(100)) AS strRunNo
+			,CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS AS strRunNo
 			,dtmTransactionDate AS dtmRunDate
-			,CAST('' AS NVARCHAR(100)) AS strShift
+			,CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS AS strShift
 			,CAST(0.0 AS DECIMAL(24, 10)) AS dblTotalInput
 			,CAST(0.0 AS DECIMAL(24, 10)) AS dblTotalOutput
 			,CAST(0.0 AS DECIMAL(24, 2)) AS dblActualYield
