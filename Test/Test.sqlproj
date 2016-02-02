@@ -969,6 +969,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid source transaction type id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid storage location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid sub location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add multiple line items.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
