@@ -146,6 +146,7 @@ WITH B1099 (
 	,strVendorCompanyName
 	,strVendorId
 	,strZip
+	,strCity
 	,strZipState
 	,strFederalTaxId
 	,intYear
