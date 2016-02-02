@@ -96,3 +96,5 @@ BEGIN
 	END
 END
 GO
+Delete From tblMFManufacturingCellPackType Where intManufacturingCellId NOT IN (Select intManufacturingCellId From tblMFManufacturingCell)
+GO
