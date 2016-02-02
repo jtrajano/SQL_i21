@@ -22,8 +22,14 @@ AS
 				CH.strApprovalBasis,				CH.strContractBasis,			CH.strPricingType,
 				CH.strPricingLevelName,				CH.strLoadUnitMeasure,			CH.strCategoryUnitMeasure,
 				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				BL.dblAppliedQty,
-				CH.dtmCreated,						CH.intContractPlanId,			CH.strContractPlan,
+				CH.dtmCreated,						CH.strContractPlan,
 				CH.strCreatedBy,					CH.strLastModifiedBy,
+
+				CH.intContractPlanId,				CH.intEntityId,					CH.intCommodityId,
+				CH.intGradeId,						CH.intWeightId,					CH.intContractTextId,
+				CH.intAssociationId,				CH.intTermId,					CH.intPositionId,
+				CH.intCountryId,					CH.intContractBasisId,
+
 				CASE	WHEN	CH.strStatuses LIKE '%Open%'
 						THEN	'Open'
 						WHEN	CH.strStatuses LIKE '%Complete%'
@@ -31,6 +37,8 @@ AS
 						ELSE	CH.strStatuses
 				END		strStatuses,
 				CASE WHEN CH.ysnLoad = 1 THEN CH.strHeaderUnitMeasure + '/Load' ELSE CH.strHeaderUnitMeasure END strHeaderUnitMeasure
+
+				
 
 	FROM		vyuCTContractHeaderView		CH	LEFT
 	JOIN
