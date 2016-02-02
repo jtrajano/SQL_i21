@@ -419,20 +419,24 @@ FROM
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
 				
 SELECT @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
-SELECT TOP 1 @intLocationId = I.intCompanyLocationId FROM tblARInvoice I JOIN @InvoiceEntries IE ON IE.strSourceId = I.strInvoiceOriginId
-SELECT TOP 1 @intItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intItemLocationId = @intLocationId
 
-IF ISNULL(@intItemUOMId, 0) = 0
+IF ISNULL(@intFreightItemId, 0) > 0
 	BEGIN
-		SELECT TOP 1 @intItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
-	END
+		SELECT TOP 1 @intLocationId = I.intCompanyLocationId FROM tblARInvoice I JOIN @InvoiceEntries IE ON IE.strSourceId = I.strInvoiceOriginId
+		SELECT TOP 1 @intItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intItemLocationId = @intLocationId
 
-IF ISNULL(@intItemUOMId, 0) = 0
-	BEGIN
-		RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
-		RETURN 0
-	END
+		IF ISNULL(@intItemUOMId, 0) = 0
+			BEGIN
+				SELECT TOP 1 @intItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+			END
 
+		IF ISNULL(@intItemUOMId, 0) = 0
+			BEGIN
+				RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+				RETURN 0
+			END
+	END
+	
 --Freight Items
 INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
