@@ -144,7 +144,7 @@ BEGIN
 			,(SA.intTotalDowntime / 60) AS intTotalDowntime
 			,SA.dblTotalProducedQty AS dblTotalProducedQty
 			,SA.dblTargetEfficiency AS dblTargetEfficiency
-			,CASE 
+			,ROUND((CASE 
 				WHEN ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity)) = 0
 					THEN 0
 				ELSE (
@@ -154,7 +154,7 @@ BEGIN
 							ELSE ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity))
 							END
 						) * 100
-				END AS dblEfficiencyPercent
+				END),2) AS dblEfficiencyPercent
 			,SA.strComments
 		FROM dbo.tblMFShiftActivity SA
 		JOIN dbo.tblMFManufacturingCell MC ON SA.intManufacturingCellId = MC.intManufacturingCellId
