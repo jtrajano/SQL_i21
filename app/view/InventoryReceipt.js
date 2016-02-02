@@ -255,8 +255,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             }
                                                         ],
-                                                        flex: 1,
                                                         enableDrillDown: true,
+                                                        flex: 1,
                                                         itemId: 'cboVendor',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Vendor',
@@ -1637,9 +1637,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotId',
                                                                                 width: 100,
+                                                                                dataIndex: 'string',
                                                                                 text: 'Lot Number',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
@@ -2377,6 +2377,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                headerDrillDownClick: 'onVendorHeaderClick',
+                                                                headerDrillDownText: 'Open Vendor',
                                                                 itemId: 'colCostVendor',
                                                                 text: 'Vendor',
                                                                 flex: 2,

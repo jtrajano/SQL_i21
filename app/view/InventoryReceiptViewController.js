@@ -1778,8 +1778,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else {
             i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intChargeId');
         }
+    },
 
+    onVendorHeaderClick: function (menu, column) {
+        var grid = column.initOwnerCt.grid;
 
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityVendor', grid, 'intEntityVendorId');
     },
 
     onViewTaxDetailsClick: function (ReceiptItemId) {
