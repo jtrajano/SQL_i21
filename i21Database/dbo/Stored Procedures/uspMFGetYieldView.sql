@@ -426,6 +426,7 @@ BEGIN TRY
 			,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
 			,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
 			,ROUND(AVG(dblActualYield), 2) dblActualYield
+			,CONVERT(int,1) AS intConcurrencyId
 		FROM ##tblMFYield
 
 		SELECT strItemNo
@@ -691,6 +692,7 @@ BEGIN TRY
 			,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
 			,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
 			,ROUND(AVG(dblActualYield), 2) dblActualYield
+			,CONVERT(int,1) AS intConcurrencyId
 		FROM ##tblMFYieldByDate
 
 		SELECT strItemNo
