@@ -1,25 +1,19 @@
 ﻿CREATE PROCEDURE dbo.uspMFGeneratePatternId @intCategoryId INT
 	,@intItemId INT
-	,@intStorageUnitTypeId INT
-	,@intStorageLocationId INT
 	,@intManufacturingId INT
 	,@intSubLocationId INT
 	,@intLocationId INT
-	,@intUserId INT
 	,@intOrderTypeId INT
 	,@intBlendRequirementId INT
-	,@strTagNo NVARCHAR(50)
-	,@strPatternName NVARCHAR(50)
+	,@intPatternCode int
 	,@ysnProposed BIT = 0
 	,@strPatternString NVARCHAR(50) OUTPUT
 AS
 BEGIN
-	DECLARE @intPatternId INT
-		,@intSubPatternTypeId INT
+	DECLARE @intSubPatternTypeId INT
 		,@intSubPatternSize INT
 		,@strSubPatternTypeDetail NVARCHAR(MAX)
 		,@strSubPatternFormat NVARCHAR(MAX)
-		--,@strPatternName NVARCHAR(50)
 		,@strErrMsg NVARCHAR(MAX)
 		,@strTableName NVARCHAR(50)
 		,@strColumnName NVARCHAR(50)
@@ -38,6 +32,7 @@ BEGIN
 		,@strSequence NVARCHAR(50)
 		,@strSQL NVARCHAR(MAX)
 		,@intRecordId INT
+		,@intPatternId int
 
 	SET @dtmCurrentDate = GetDate()
 
@@ -59,41 +54,15 @@ BEGIN
 		,strPK_Name NVARCHAR(128)
 		)
 
-	--IF EXISTS (
-	--		SELECT 1
-	--		FROM iMake_MaterialTypePatternMapping
-	--		WHERE MaterialTypeName = @strItemTypeName
-	--			AND PatternSettingName = @strPatternSettingName
-	--		)
-	--BEGIN
-	--	SELECT @strPatternName = strPatternName
-	--	FROM iMake_MaterialTypePatternMapping
-	--	WHERE MaterialTypeName = @strItemTypeName
-	--		AND PatternSettingName = @strPatternSettingName
-	--END
-	--ELSE
-	--BEGIN
-	--	SELECT @strPatternName = SettingValue
-	--	FROM dbo.iMake_AppSettingValue AV
-	--	JOIN dbo.iMake_AppSetting S ON S.SettingKey = AV.SettingKey
-	--	WHERE S.SettingName = @strPatternSettingName
-	--		AND IsNull(intLocationId, @intLocationId) = @intLocationId
-	--END
-	--SET @sqlCommand = 'SELECT @strColumnValue = ' + @strPatternSettingName + '
-	--									FROM dbo.tblSMCompanyLocation
-	--									WHERE intCompanyLocationId = ' + ltrim(@intLocationId)
-	--EXECUTE sp_executesql @sqlCommand
-	--	,N'@strColumnValue nvarchar(50) OUTPUT'
-	--	,@strColumnValue = @strPatternName OUTPUT
 	SELECT @intPatternId = intPatternId
 	FROM dbo.tblMFPattern
-	WHERE strPatternName = @strPatternName
+	WHERE intPatternCode = @intPatternCode
 		AND intLocationId = @intLocationId
 
 	IF @intPatternId IS NULL
 		SELECT @intPatternId = intPatternId
 		FROM dbo.tblMFPattern
-		WHERE strPatternName = @strPatternName
+		WHERE intPatternCode = @intPatternCode
 
 	SET @strPatternString = ''
 
@@ -109,7 +78,7 @@ BEGIN
 		,strSubPatternFormat
 	FROM dbo.tblMFPatternDetail
 	WHERE intPatternId = @intPatternId
-	ORDER BY intOrdinalPosition DESC
+	ORDER BY intOrdinalPosition
 
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFPatternDetail
@@ -234,23 +203,20 @@ BEGIN
 						THEN @intLocationId
 					WHEN @strTableName = 'tblSMCompanyLocationSubLocation'
 						THEN @intSubLocationId
-					WHEN @strTableName = 'tblICStorageLocation'
-						THEN @intStorageLocationId
 					WHEN @strTableName = 'tblICCategory'
 						THEN @intCategoryId
 					WHEN @strTableName = 'tblICItem'
 						THEN @intItemId
-					WHEN @strTableName = 'tblICStorageUnitType'
-						THEN @intStorageUnitTypeId
 					WHEN @strTableName = 'tblMFManufacturingCell'
 						THEN @intManufacturingId
-					WHEN @strTableName = 'tblSMUserSecurity'
-						THEN @intUserId
 					WHEN @strTableName = 'tblWHOrderType'
 						THEN @intOrderTypeId
 					WHEN @strTableName = 'tblMFBlendRequirement'
 						THEN @intBlendRequirementId
 					END
+
+			IF @intPrimaryColumnId IS NULL
+			SELECT @intPrimaryColumnId=0
 
 			SELECT @strSQL = 'Select ' + @strColumnName + ' From ' + @strTableName + ' Where ' + @strPrimaryColumnName + ' = ' + LTRIM(@intPrimaryColumnId)
 
@@ -263,17 +229,15 @@ BEGIN
 			DELETE
 			FROM @tblMFRecord
 
-			INSERT INTO @tblMFRecord
-			EXEC ('Select ' + @strValue)
+			IF @strValue IS NOT NULL
+			BEGIN
+				INSERT INTO @tblMFRecord
+				EXEC ('Select ' + @strValue)
+			END
 
 			SELECT @strPatternString = @strPatternString + strRecordName
 			FROM @tblMFRecord
 
-			IF @strPatternName = 'PhysicalCountPattern'
-			BEGIN
-				IF @strTagNo <> ''
-					SET @strPatternString = @strPatternString + @strTagNo
-			END
 		END
 
 		IF @intSubPatternTypeId = 6
