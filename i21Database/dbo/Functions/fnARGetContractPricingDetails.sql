@@ -52,7 +52,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 	WHERE
 		intEntityId = @CustomerId
 		AND intCompanyLocationId = @LocationId
-		AND intItemUOMId = @ItemUOMId
+		AND (intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND intItemId = @ItemId
 		AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty >= @Quantity) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
@@ -93,7 +93,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 	WHERE
 		intEntityId = @CustomerId
 		AND intCompanyLocationId = @LocationId
-		AND intItemUOMId = @ItemUOMId
+		AND (intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND intItemId = @ItemId
 		AND (((dblAvailableQty) >= @Quantity) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
