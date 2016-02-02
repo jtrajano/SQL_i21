@@ -110,6 +110,7 @@ BEGIN
 		,intPaymentMethodId
 		,strComments
 		,intAccountId
+		,intSplitId
 		,dtmPostDate
 		,ysnPosted
 		,ysnPaid
@@ -157,6 +158,7 @@ BEGIN
 		,intPaymentMethodId
 		,strComments + ' DUP: ' + strInvoiceNumber
 		,intAccountId
+		,intSplitId
 		,@InvoiceDate
 		,0
 		,0
