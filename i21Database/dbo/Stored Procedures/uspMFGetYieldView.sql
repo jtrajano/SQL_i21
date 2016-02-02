@@ -418,6 +418,16 @@ BEGIN TRY
 			WHERE intWorkOrderId > @intWorkOrderId
 		END
 
+		SELECT @dtmFromDate AS dtmFromDate
+			,@dtmToDate AS dtmToDate
+			,@intManufacturingProcessId AS intManufacturingProcessId
+			,@intLocationId AS intLocationId
+			,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
+			,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
+			,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
+			,ROUND(AVG(dblActualYield), 2) dblActualYield
+		FROM ##tblMFYield
+
 		SELECT strItemNo
 			,strDescription
 			,strRunNo
@@ -429,12 +439,6 @@ BEGIN TRY
 			,ROUND(dblActualYield, 2) dblActualYield
 			,ROUND(dblStandardYield, 2) dblStandardYield
 			,ROUND(dblActualYield - dblStandardYield, 2) dblVariance
-		FROM ##tblMFYield
-
-		SELECT ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
-			,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
-			,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-			,ROUND(AVG(dblActualYield), 2) dblActualYield
 		FROM ##tblMFYield
 	END
 
@@ -679,6 +683,16 @@ BEGIN TRY
 			WHERE intRowNum > @intRowNum
 		END
 
+		SELECT @dtmFromDate AS dtmFromDate
+			,@dtmToDate AS dtmToDate
+			,@intManufacturingProcessId AS intManufacturingProcessId
+			,@intLocationId AS intLocationId
+			,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
+			,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
+			,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
+			,ROUND(AVG(dblActualYield), 2) dblActualYield
+		FROM ##tblMFYieldByDate
+
 		SELECT strItemNo
 			,strDescription
 			,CAST('' AS NVARCHAR(50)) AS strRunNo
@@ -690,12 +704,6 @@ BEGIN TRY
 			,ROUND(dblActualYield, 2) dblActualYield
 			,ROUND(dblStandardYield, 2) dblStandardYield
 			,ROUND(dblActualYield - dblStandardYield, 2) dblVariance
-		FROM ##tblMFYieldByDate
-
-		SELECT ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
-			,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
-			,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
-			,ROUND(AVG(dblActualYield), 2) dblActualYield
 		FROM ##tblMFYieldByDate
 	END
 END TRY
