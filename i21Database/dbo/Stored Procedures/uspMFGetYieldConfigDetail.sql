@@ -11,7 +11,7 @@ BEGIN
 
 	IF @intYieldId IS NULL
 	BEGIN
-		SELECT NULL AS intYieldId
+		SELECT 0 AS intYieldId
 			,@intManufacturingProcessId AS intManufacturingProcessId
 			,NULL AS strInputFormula
 			,NULL AS strOutputFormula
