@@ -216,6 +216,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\InventoryCategoryFix.sql
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
 :r .\IC\PopulateTransDetailIdOnCostBuckets.sql
+:r .\IC\16_Fix_Allow_Negative_Stock_Option.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql

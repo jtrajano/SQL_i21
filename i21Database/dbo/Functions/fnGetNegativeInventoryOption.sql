@@ -3,8 +3,11 @@
 -- Values for "Allow Negative Inventory". 
 --
 -- 1 > Yes (Inventory is allowed to go less than zero and stay there) 
--- 2 > Yes with Auto Write-Off (Inventory is allowed to go negative. However as soon as it does, the system automatically adjusts the inventory back to 0 resulting in a  debit to inventory  and a credit to P&L (gain). )
 -- 3 > No (The system will block any transaction that would result in inventory going into the negative)
+
+-- Obsolete and no-longer supported values:
+-- 2 > Yes with Auto Write-Off. 
+---		Why? This value is now merged with Inventory Option 'Yes'. Auto-Negative concept is now removed. It is now replaced by Auto-Variance. 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE FUNCTION [dbo].[fnGetNegativeInventoryOption] (
 	@intItemId INT
