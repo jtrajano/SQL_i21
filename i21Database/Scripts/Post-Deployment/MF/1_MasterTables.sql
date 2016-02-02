@@ -1787,3 +1787,139 @@ BEGIN
 		,'UDA'
 END
 GO
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 33
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 33
+		,'Batch Production'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 34
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 34
+		,'Work Order'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 46
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 46
+		,'Demand Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 55
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 55
+		,'Stage Lot Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 59
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 59
+		,'Bag Off Order'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 63
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 63
+		,'Schedule Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 68
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 68
+		,'Pick List Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 70
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 70
+		,'Sanitization Order Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 78
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 78
+		,'Parent Lot Number'
+END
+GO

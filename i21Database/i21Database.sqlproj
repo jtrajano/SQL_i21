@@ -3348,6 +3348,7 @@
     <Build Include="dbo\Stored Procedures\uspGRGetBillStorageDiscounts.sql" />
     <Build Include="dbo\Views\vyuSMEntityMenuFavorite.sql" />
     <None Include="Scripts\Post-Deployment\IC\16_Fix_Allow_Negative_Stock_Option.sql" />
+    <Build Include="dbo\Tables\tblMFPatternCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
