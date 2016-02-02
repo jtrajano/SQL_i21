@@ -109,10 +109,11 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
                     intNegativeInventoryId: '1',
                     strDescription: 'Yes'
                 },
-                {
-                    intNegativeInventoryId: '2',
-                    strDescription: 'Yes with Auto Write-Off'
-                },
+                // This value is now obsolete.
+                //{
+                //    intNegativeInventoryId: '2',
+                //    strDescription: 'Yes with Auto Write-Off'
+                //},
                 {
                     intNegativeInventoryId: '3',
                     strDescription: 'No'
