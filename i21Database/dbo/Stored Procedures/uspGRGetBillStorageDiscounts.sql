@@ -90,37 +90,37 @@ BEGIN TRY
 	
 		END	
 		
-  SELECT  
-  bill.intBillStorageKey
- ,a.intCustomerStorageId
- ,a.intEntityId  
- ,E.strName    
- ,a.intItemId
- ,Item.strItemNo  
- ,a.intCompanyLocationId  
- ,c.strLocationName 
- ,a.strStorageTicketNumber  
- ,a.dblOpenBalance
- ,(a.dblStorageDue-a.dblStoragePaid) dblUnpaid   
- ,a.intStorageTypeId  
- ,b.strStorageTypeDescription
- ,a.intStorageScheduleId
- ,SR.strScheduleId
- ,a.dtmDeliveryDate
- ,a.dtmLastStorageAccrueDate
- ,a.dblStorageDue dblOldStorageDue
- ,bill.dblAdditionalCharge
- ,a.dblStorageDue+bill.dblAdditionalCharge AS dblNewStorageDue
- ,a.dblStoragePaid dblOldStorageBilled
- ,a.dblStoragePaid+bill.dblAdditionalCharge AS dblNewStorageBilled
- ,(a.dblStorageDue-a.dblStoragePaid) AS dblStorageDueAmount
-FROM tblGRCustomerStorage a  
-JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId  
-JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId  
-JOIN tblEntity E ON E.intEntityId = a.intEntityId 
-JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageScheduleId
-JOIN tblICItem Item ON Item.intItemId = a.intItemId
-JOIN @BillStorageDiscounts bill ON bill.intCustomerStorageId=a.intCustomerStorageId
+	  SELECT  
+	  bill.intBillStorageKey
+	 ,a.intCustomerStorageId
+	 ,a.intEntityId  
+	 ,E.strName    
+	 ,a.intItemId
+	 ,Item.strItemNo  
+	 ,a.intCompanyLocationId  
+	 ,c.strLocationName 
+	 ,a.strStorageTicketNumber  
+	 ,a.dblOpenBalance
+	 ,(a.dblStorageDue-a.dblStoragePaid) dblUnpaid   
+	 ,a.intStorageTypeId  
+	 ,b.strStorageTypeDescription
+	 ,a.intStorageScheduleId
+	 ,SR.strScheduleId
+	 ,a.dtmDeliveryDate
+	 ,a.dtmLastStorageAccrueDate
+	 ,a.dblStorageDue dblOldStorageDue
+	 ,bill.dblAdditionalCharge
+	 ,a.dblStorageDue+bill.dblAdditionalCharge AS dblNewStorageDue
+	 ,a.dblStoragePaid dblOldStorageBilled
+	 ,CASE WHEN @PostType='Bill Storage' THEN (a.dblStoragePaid+bill.dblAdditionalCharge) ELSE a.dblStoragePaid END  AS dblNewStorageBilled
+	 ,a.dblOpenBalance* CASE WHEN @PostType='Bill Storage' THEN bill.dblAdditionalCharge ELSE 0 END  AS dblStorageDueAmount
+	FROM tblGRCustomerStorage a  
+	JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId  
+	JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId  
+	JOIN tblEntity E ON E.intEntityId = a.intEntityId 
+	JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageScheduleId
+	JOIN tblICItem Item ON Item.intItemId = a.intItemId
+	JOIN @BillStorageDiscounts bill ON bill.intCustomerStorageId=a.intCustomerStorageId
 	
 END TRY
 
