@@ -181,7 +181,7 @@ AS
 		FROM tblGLAccount A
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT CASE WHEN ''' + ISNULL(@dtmDateFrom,'') + ''' = '''' THEN MIN(dtmDate) ELSE ''' +  ISNULL(@dtmDateFrom,'') + ''' END FROM GLAccountDetails)) D
+		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT CASE WHEN ''' + ISNULL(@dtmDateFrom,'''') + ''' = '''' THEN MIN(dtmDate) ELSE ''' +  ISNULL(@dtmDateFrom,'''') + ''' END FROM GLAccountDetails)) D
 ),'
 
 SET @sqlCte +='RAWREPORT AS (
@@ -267,7 +267,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + ISNULL(@strAccountIdTo,'''') + ' END 
+			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'''') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + ISNULL(@strAccountIdTo,'''') + ''' END 
 			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -286,7 +286,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'''') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + ISNULL(@strPrimaryCodeTo,'''') + ' END 
+			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'''') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + ISNULL(@strPrimaryCodeTo,'''') + ''' END 
 			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -315,7 +315,7 @@ BEGIN
 	sum(dblDebitUnit) dblDebitUnit, sum(dblCreditUnit) dblCreditUnit,
 	intAccountId, ysnIsUnposted, dtmDate from tblGLDetail group by intAccountId , ysnIsUnposted, dtmDate
 	having ysnIsUnposted = 0
-	and dtmDate between '''+ @dtmDateFrom +''' and '''+ isnull(@dtmDateTo,'''') +'''),
+	and dtmDate between '''+ @dtmDateFrom + ''' and '''+ isnull(@dtmDateTo,'''') + '''),
 	cteRetain1 as
 	(select 
 	CAST(CONVERT(VARCHAR(4),YEAR(dtmDate)) + ''-'' +  CONVERT(VARCHAR(2), MONTH (dtmDate)) + ''-'' + ''1'' AS DATE) as dtmDate,
@@ -332,7 +332,7 @@ BEGIN
 	c.strAccountType from cteRetain a
 	join tblGLAccount b on a.intAccountId = b.intAccountId
 	join tblGLAccountGroup c on b.intAccountGroupId = c.intAccountGroupId
-	OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnitRE(b.strAccountId,'''+ @dtmDateFrom1 +''') D
+	OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnitRE(b.strAccountId,''' + @dtmDateFrom1 + ''') D
 	where c.strAccountType in (''Revenue'', ''Expense'') 
 	group by  DATENAME(MONTH,dtmDate) ,DATENAME(YEAR,dtmDate),MONTH(dtmDate) ,strAccountType, year(dtmDate),D.beginBalance,D.beginBalanceUnit)
 	select ' + @cols2 + ' FROM cteRetain1 union all select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
