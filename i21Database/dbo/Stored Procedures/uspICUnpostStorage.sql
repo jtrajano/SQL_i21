@@ -76,6 +76,42 @@ BEGIN
 		, ItemTrans.intTransactionTypeId
 		, ItemTrans.intInventoryTransactionStorageId
 
+	DECLARE @DecreaseOnStorageQty AS ItemCostingTableType
+	INSERT INTO @DecreaseOnStorageQty (
+		intItemId
+		, intItemLocationId
+		, intItemUOMId
+		, dtmDate
+		, dblQty
+		, dblUOMQty
+		, dblCost
+		, dblValue
+		, dblSalesPrice
+		, dblExchangeRate
+		, intTransactionId
+		, strTransactionId 
+		, intTransactionTypeId
+	)
+	SELECT 		
+		intItemId
+		, intItemLocationId
+		, intItemUOMId
+		, dtmDate
+		, dblQty * -1
+		, dblUOMQty
+		, dblCost
+		, dblValue
+		, dblSalesPrice
+		, dblExchangeRate
+		, intTransactionId
+		, strTransactionId 
+		, intTransactionTypeId
+	FROM	dbo.tblICInventoryTransactionStorage ItemTrans
+	WHERE	intTransactionId = @intTransactionId
+			AND strTransactionId = @strTransactionId
+			AND ISNULL(ysnIsUnposted, 0) = 0
+			AND dblQty <> 0
+
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ItemToUnpost
 	SET		dblUOMQty = ItemUOM.dblUnitQty
@@ -135,18 +171,19 @@ BEGIN
 		,@intTransactionId
 END
 
--- Validate if there is something to reverse. 
-IF NOT EXISTS (
-	SELECT	TOP 1 1 
-	FROM	#tmpInventoryTransactionStockToReverse 
-)
-BEGIN 
-	-- 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
-	RAISERROR(80038, 11, 1)
-	GOTO _Exit
-END 
+---- Validate if there is something to reverse. 
+--IF NOT EXISTS (
+--	SELECT	TOP 1 1 
+--	FROM	#tmpInventoryTransactionStockToReverse 
+--)
+--BEGIN 
+--	-- 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
+--	RAISERROR(80038, 11, 1)
+--	GOTO _Exit
+--END 
 
 -- Create the reversal 
+IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
 BEGIN 
 	-------------------------------------------------
 	-- Create reversal of the inventory transactions
@@ -261,6 +298,13 @@ BEGIN
 				AND ActualTransaction.intItemUOMId IS NOT NULL
 			INNER JOIN tblICItemLocation ItemLocation
 				ON ActualTransaction.intItemLocationId = ItemLocation.intItemLocationId
+END
+-----------------------------------
+-- Update the Item Stock table
+-----------------------------------
+BEGIN 
+	EXEC uspICIncreaseOnStorageQty
+		@DecreaseOnStorageQty
 END
 
 _Exit: 

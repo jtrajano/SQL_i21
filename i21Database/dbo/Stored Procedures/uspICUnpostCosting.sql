@@ -92,7 +92,7 @@ END
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @ValidateItemsToUnpost AS dbo.UnpostItemsTableType
+	DECLARE @ValidateItemsToUnpost AS dbo.UnpostItemsTableType	
 	DECLARE @returnValue AS INT 
 
 	-- Aggregate the stock qty for a faster validation. 

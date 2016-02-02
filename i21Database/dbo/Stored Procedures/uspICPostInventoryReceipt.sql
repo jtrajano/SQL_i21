@@ -603,8 +603,7 @@ IF @ysnPost = 0
 BEGIN   
 	-- Call the unpost routine 
 	BEGIN 
-
-		-- Call the post routine 
+		-- Unpost the company owned stocks. 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -645,6 +644,16 @@ BEGIN
 				,@intEntityUserSecurityId
 				,@ysnRecap
 
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+		-- Unpost storage stocks. 
+		EXEC	@intReturnValue = dbo.uspICUnpostStorage
+				@intTransactionId
+				,@strTransactionId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@ysnRecap
+		
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 				
 		-- Unpost the Other Charges
