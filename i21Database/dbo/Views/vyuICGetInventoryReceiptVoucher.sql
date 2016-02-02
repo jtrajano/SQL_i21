@@ -1,7 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryReceiptVoucher]
 	AS 
 
-SELECT strVendorId + ' ' + strVendorName strVendor
+SELECT 
+	ReceiptItem.intInventoryReceiptId
+	, ReceiptItem.intInventoryReceiptItemId
+	, strVendorId + ' ' + strVendorName strVendor
 	, ReceiptItem.strLocationName
 	, ReceiptItem.strReceiptNumber
 	, ReceiptItem.dtmReceiptDate
