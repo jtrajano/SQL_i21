@@ -26,7 +26,7 @@ AS
 			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
 			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
 			CD.strDestinationPointType,			CD.intItemContractId,			CD.intNoOfLoad,
-			CD.dblQuantityPerLoad,				CD.strReference,
+			CD.dblQuantityPerLoad,				CD.strReference,				CD.intStorageScheduleRuleId,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -34,7 +34,7 @@ AS
 			MZ.strMarketZoneCode,				OH.strContractOptDesc,			U3.strUnitMeasure				AS	strAdjUOM,
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
 			IX.strIndexType,					EF.strFieldNumber,				LP.strCity						AS	strLoadingPoint,	
-																				DP.strCity						AS	strDestinationPoint,
+			SR.strScheduleDescription,											DP.strCity						AS	strDestinationPoint,
 																				DC.strCity						AS	strDestinationCity,
 																				PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
 																				U4.strUnitMeasure				AS	strStockItemUOM,
@@ -152,6 +152,7 @@ AS
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
 	JOIN	tblEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
+	JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId	=	CD.intStorageScheduleRuleId	LEFT
 	JOIN(
 			SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
 			FROM	tblICItemUOM			IU	LEFT 
