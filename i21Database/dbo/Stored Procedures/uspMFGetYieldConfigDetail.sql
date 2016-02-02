@@ -9,14 +9,26 @@ BEGIN
 	FROM dbo.tblMFYield
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 
-	SELECT intYieldId
-		,intManufacturingProcessId
-		,strInputFormula
-		,strOutputFormula
-		,strYieldFormula
-		,intConcurrencyId
-	FROM dbo.tblMFYield
-	WHERE intYieldId = @intYieldId
+	IF @intYieldId IS NULL
+	BEGIN
+		SELECT NULL AS intYieldId
+			,@intManufacturingProcessId AS intManufacturingProcessId
+			,NULL AS strInputFormula
+			,NULL AS strOutputFormula
+			,NULL AS strYieldFormula
+			,0 AS intConcurrencyId
+	END
+	ELSE
+	BEGIN
+		SELECT intYieldId
+			,intManufacturingProcessId
+			,strInputFormula
+			,strOutputFormula
+			,strYieldFormula
+			,intConcurrencyId
+		FROM dbo.tblMFYield
+		WHERE intYieldId = @intYieldId
+	END
 
 	SELECT CASE 
 			WHEN ysnProcessRelated = 1
