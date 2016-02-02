@@ -166,6 +166,12 @@ Ext.define('Inventory.view.ItemViewController', {
                     itemId: 'btnInventoryUOM',
                     clickHandler: 'onInventoryUOMClick',
                     width: 100
+                },
+                {
+                    text: 'Lot Status',
+                    itemId: 'btnLotStatus',
+                    clickHandler: 'onLotStatusClick',
+                    width: 100
                 }
             ]
         },
@@ -3081,6 +3087,10 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onCommodityClick: function () {
         iRely.Functions.openScreen('Inventory.view.Commodity', { action: 'new', viewConfig: { modal: true }});
+    },
+
+    onLotStatusClick: function () {
+        iRely.Functions.openScreen('Inventory.view.LotStatus');
     },
 
     //</editor-fold>
