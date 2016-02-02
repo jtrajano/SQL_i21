@@ -99,7 +99,7 @@ BEGIN TRY
 	DELETE FROM
 		tblARInvoiceDetailTax 
 	WHERE 
-		[intInvoiceDetailId] IN (SELECT DISTINCT [intInvoiceDetailId] FROM @TaxDetails)
+		[intInvoiceDetailId] IN (SELECT DISTINCT [intDetailId] FROM @TaxDetails)
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

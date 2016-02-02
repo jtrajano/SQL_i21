@@ -33,6 +33,16 @@ DECLARE  @ZeroDecimal NUMERIC(18, 6)
 
 SET @ZeroDecimal = 0.000000
 
+SELECT 
+	@InvoiceDate = [dtmDate]
+FROM
+	tblARInvoice ARI
+INNER JOIN
+	tblARInvoiceDetail ARID 
+		ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+WHERE
+	ARID.[intInvoiceDetailId] = @InvoiceDetailId 
+
 IF NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId)
 	BEGIN
 		SET @ErrorMessage = 'Invoice line item does not exists!'
@@ -47,20 +57,48 @@ IF NOT EXISTS(SELECT NULL FROM tblSMTaxCode WHERE [intTaxCodeId] = @TaxCodeId)
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
-	END	
+	END
+
+DECLARE @TaxCode NVARCHAR(100)
+SELECT TOP 1
+	@TaxCode = strTaxCode 
+FROM
+	tblSMTaxCode	
+WHERE
+	[intTaxCodeId] = @TaxCodeId
+	AND ISNULL(@SalesTaxAccountId,0) = 0
+	AND ISNULL(intSalesTaxAccountId,0) = 0
+
+IF LEN(LTRIM(RTRIM(ISNULL(@TaxCode,'')))) > 0
+	BEGIN
+		SET @ErrorMessage = 'Tax Code ' + @TaxCode + ' does not have a Sales Account!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+
+DECLARE @CalcMethod NVARCHAR(100)
+SELECT TOP 1
+	 @CalcMethod = TRD.[strCalculationMethod] 
+FROM
+	tblSMTaxCode
+	CROSS APPLY
+		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate) TRD		
+WHERE
+	[intTaxCodeId] = @TaxCodeId
+
+IF UPPER(LTRIM(RTRIM(ISNULL(@CalculationMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND UPPER(LTRIM(RTRIM(ISNULL(@CalcMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage'))
+	BEGIN
+		SET @ErrorMessage = '"' + @CalculationMethod + '" is not a valid calculation method!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 	BEGIN TRANSACTION
 	
-SELECT 
-	@InvoiceDate = [dtmDate]
-FROM
-	tblARInvoice ARI
-INNER JOIN
-	tblARInvoiceDetail ARID 
-		ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
-WHERE
-	ARID.[intInvoiceDetailId] = @InvoiceDetailId 	
+
 	
 	
 BEGIN TRY
@@ -87,13 +125,13 @@ BEGIN TRY
 		,intTaxGroupId			= @TaxGroupId
 		,intTaxCodeId			= @TaxCodeId
 		,intTaxClassId			= CASE WHEN ISNULL(@TaxClassId,0) <> 0 THEN @TaxClassId ELSE [intTaxClassId] END
-		,strTaxableByOtherTaxes	= CASE WHEN ISNULL(@TaxableByOtherTaxes,'') <> '' THEN @TaxableByOtherTaxes ELSE [strTaxableByOtherTaxes] END
+		,strTaxableByOtherTaxes	= CASE WHEN ISNULL(@TaxableByOtherTaxes,'') <> '' THEN ISNULL(@TaxableByOtherTaxes,'') ELSE ISNULL([strTaxableByOtherTaxes],'') END
 		,strCalculationMethod	= CASE WHEN ISNULL(@CalculationMethod,'') <> '' THEN @CalculationMethod ELSE TRD.[strCalculationMethod] END
 		,numRate				= CASE WHEN ISNULL(@Rate,0) <> 0 THEN @Rate ELSE TRD.numRate END
 		,intSalesTaxAccountId	= CASE WHEN ISNULL(@SalesTaxAccountId,0) <> 0 THEN @SalesTaxAccountId ELSE intSalesTaxAccountId END
 		,dblTax					= ISNULL(@Tax, @ZeroDecimal)
-		,dblAdjustedTax			= ISNULL(@AdjustedTax, @ZeroDecimal)
-		,ysnTaxAdjusted			= ISNULL(@TaxAdjusted, 0)
+		,dblAdjustedTax			= ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal))
+		,ysnTaxAdjusted			= CASE WHEN ISNULL(@TaxAdjusted, 0) = 1 THEN ISNULL(@TaxAdjusted, 0) ELSE (CASE WHEN ISNULL(@Tax, @ZeroDecimal) <> ISNULL(@AdjustedTax,0) THEN 1 ELSE 0 END) END
 		,ysnSeparateOnInvoice	= ISNULL(@SeparateOnInvoice, 0)
 		,ysnCheckoffTax			= ISNULL(@CheckoffTax, [ysnCheckoffTax])
 		,ysnTaxExempt			= ISNULL(@TaxExempt, 0)
