@@ -70,7 +70,6 @@ BEGIN TRY
 	BEGIN
 		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
 		FROM	vyuCTContractDetailView CD
-		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CD.intEntityId			=	@intEntityId
 		AND		CD.intItemId			=	@intItemId
@@ -95,7 +94,7 @@ BEGIN TRY
 		AND		CD.intItemId			=	@intItemId
 		AND		CD.intPricingTypeId		=	1
 		AND		CD.ysnAllowedToShow		=	1
-		AND		CD.dblAvailableQty		>	0
+		AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
 		AND		CD.ysnEarlyDayPassed	=	1
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
@@ -108,9 +107,9 @@ BEGIN TRY
 		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CD.intEntityId			=	@intEntityId
 		AND		CD.intItemId			=	@intItemId
-		AND	   (CD.intPricingTypeId		=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
+		AND	    (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
 		AND		CD.ysnAllowedToShow		=	1
-		AND		CD.dblAvailableQty		>	0
+		AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
 		AND		CD.ysnEarlyDayPassed	=	1
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
@@ -198,7 +197,7 @@ BEGIN TRY
 		AND		CD.intItemId			=	@intItemId
 		AND		CD.intPricingTypeId		=	1
 		AND		CD.ysnAllowedToShow		=	1
-		AND		CD.dblAvailableQty		>	0
+		AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
 		AND		CD.ysnEarlyDayPassed	=	1
 		AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 		ORDER 
@@ -214,7 +213,7 @@ BEGIN TRY
 			AND		CD.intItemId			=	@intItemId
 			AND	   (CD.intPricingTypeId		=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
 			AND		CD.ysnAllowedToShow		=	1
-			AND		CD.dblAvailableQty		>	0
+			AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
 			AND		CD.ysnEarlyDayPassed	=	1
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			ORDER 
