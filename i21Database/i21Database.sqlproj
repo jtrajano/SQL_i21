@@ -3351,6 +3351,7 @@
     <Build Include="dbo\Tables\tblMFPatternCode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetYieldConfigDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveYieldConfig.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityDowntime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
