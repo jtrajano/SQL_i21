@@ -50,7 +50,9 @@ BEGIN
 				ON ItemPricing.intItemId = SODetail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 			LEFT OUTER JOIN 
-				(SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY intSalesOrderDetailId) AS InvoiceDetail
+				(SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID 
+					INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+					WHERE I.ysnPosted = 1 GROUP BY ID.intSalesOrderDetailId) AS InvoiceDetail
 				ON InvoiceDetail.intSalesOrderDetailId = SODetail.intSalesOrderDetailId
 	WHERE	SODetail.intSalesOrderId = @intSourceTransactionId
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
