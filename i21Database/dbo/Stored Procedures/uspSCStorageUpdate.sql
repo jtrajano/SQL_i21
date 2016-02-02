@@ -478,7 +478,7 @@ BEGIN TRY
 		SELECT	@intTicketItemUOMId = UM.intItemUOMId
 			FROM	dbo.tblICItemUOM UM	
 			  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-		WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+		WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
 	END
 	
 	-- Insert the Customer Storage Record 
@@ -696,13 +696,13 @@ BEGIN TRY
 			EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, 'Direct' ,@InventoryReceiptId OUTPUT; 
 		END
 	
-		--BEGIN 
-		--SELECT	@strTransactionId = IR.strReceiptNumber
-		--FROM	dbo.tblICInventoryReceipt IR	        
-		--WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
-		--END
+		BEGIN 
+		SELECT	@strTransactionId = IR.strReceiptNumber
+		FROM	dbo.tblICInventoryReceipt IR	        
+		WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
+		END
 	
-		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 
 		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;

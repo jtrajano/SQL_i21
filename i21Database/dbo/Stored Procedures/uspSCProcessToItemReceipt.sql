@@ -43,6 +43,7 @@ DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
+DECLARE @total AS INT
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -249,6 +250,10 @@ BEGIN TRY
 
 	-- Validate the items to receive 
 	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+
+	SELECT @total = COUNT(*) FROM @ItemsForItemReceipt;
+	IF (@total = 0)
+		RETURN;
 
 	-- Add the items to the item receipt 
 	--IF @strSourceType = @SourceType_Direct
