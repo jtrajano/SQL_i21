@@ -49,6 +49,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMask1).HasColumnName("strMask1");
             this.Property(t => t.strMask2).HasColumnName("strMask2");
             this.Property(t => t.strMask3).HasColumnName("strMask3");
+            this.Property(t => t.dblMaxWeightPerPack).HasColumnName("dblMaxWeightPerPack").HasPrecision(18, 6);
             this.Property(t => t.intPatronageCategoryId).HasColumnName("intPatronageCategoryId");
             this.Property(t => t.intPatronageCategoryDirectId).HasColumnName("intPatronageCategoryDirectId");
             this.Property(t => t.ysnStockedItem).HasColumnName("ysnStockedItem");
