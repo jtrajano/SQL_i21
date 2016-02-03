@@ -48,6 +48,7 @@ Type the overview for the table here.
 		[strMask1] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strMask2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strMask3] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[dblMaxWeightPerPack] NUMERIC(18, 6) NULL DEFAULT((0)),
 		[intPatronageCategoryId] INT NULL,
 		[intPatronageCategoryDirectId] INT NULL,
 		[ysnStockedItem] BIT NULL DEFAULT ((0)), 
