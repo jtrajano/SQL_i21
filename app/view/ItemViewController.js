@@ -1670,19 +1670,19 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onInventoryTypeSelect: function(combo, records) {
-        if (records.length <= 0)
+    onInventoryTypeSelect: function(combo, record) {
+        if (record.length <= 0)
             return;
 
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
         if (current) {
-            if (records[0].get('strType') == 'Assembly/Blend') {
+            if (record.get('strType') == 'Assembly/Blend') {
                 current.set('strLotTracking', 'No');
             }
 
-            else if (records[0].get('strType') == 'Bundle') {
+            else if (record.get('strType') == 'Bundle') {
                 if (current.tblICItemUOMs()) {
                     Ext.Array.each(current.tblICItemUOMs().data.items, function (uom) {
                         if (!uom.dummy) {
