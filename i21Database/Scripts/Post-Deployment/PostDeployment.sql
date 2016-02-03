@@ -238,6 +238,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
+:R .\MF\3_Pattern.sql
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
