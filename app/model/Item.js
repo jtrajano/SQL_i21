@@ -70,6 +70,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'strMask1', type: 'string' },
         { name: 'strMask2', type: 'string' },
         { name: 'strMask3', type: 'string' },
+        { name: 'dblMaxWeightPerPack', type: 'float' },
         { name: 'intPatronageCategoryId', type: 'int', allowNull: true },
         { name: 'intPatronageCategoryDirectId', type: 'int', allowNull: true },
         { name: 'intSalesTaxGroupId', type: 'int', allowNull: true },
