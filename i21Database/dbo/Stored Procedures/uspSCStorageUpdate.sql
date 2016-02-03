@@ -639,26 +639,26 @@ BEGIN TRY
 		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
 	END
 	
-	INSERT INTO @ItemsForItemReceipt (
-				 intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,intTransactionDetailId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage 
-			)
+	--INSERT INTO @ItemsForItemReceipt (
+	--			 intItemId
+	--			,intItemLocationId
+	--			,intItemUOMId
+	--			,dtmDate
+	--			,dblQty
+	--			,dblUOMQty
+	--			,dblCost
+	--			,dblSalesPrice
+	--			,intCurrencyId
+	--			,dblExchangeRate
+	--			,intTransactionId
+	--			,intTransactionDetailId
+	--			,strTransactionId
+	--			,intTransactionTypeId
+	--			,intLotId
+	--			,intSubLocationId
+	--			,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+	--			,ysnIsStorage 
+	--		)
 			SELECT intItemId = ScaleTicket.intItemId
 							,intLocationId = ItemLocation.intItemLocationId 
 							,intItemUOMId = ItemUOM.intItemUOMId
@@ -689,20 +689,20 @@ BEGIN TRY
 							AND TicketCommodityUOM.ysnStockUnit = 1
 					WHERE	ScaleTicket.intTicketId = @intTicketId
 	
-		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+		--EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 
 		-- Add the items to the item receipt 
-		BEGIN 
-			EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, 'Direct' ,@InventoryReceiptId OUTPUT; 
-		END
+		--BEGIN 
+		--	EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, 'Direct' ,@InventoryReceiptId OUTPUT; 
+		--END
 	
-		BEGIN 
-		SELECT	@strTransactionId = IR.strReceiptNumber
-		FROM	dbo.tblICInventoryReceipt IR	        
-		WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
-		END
+		--BEGIN 
+		--SELECT	@strTransactionId = IR.strReceiptNumber
+		--FROM	dbo.tblICInventoryReceipt IR	        
+		--WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
+		--END
 	
-		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 
 		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
