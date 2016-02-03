@@ -34,6 +34,7 @@ BEGIN TRY
 		,@strCurrentDate NVARCHAR(50)
 		,@intWorkOrderConsumedLotId INT
 		,@intWorkOrderInputLotId INT
+		,@intCategoryId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -91,11 +92,26 @@ BEGIN TRY
 
 	SELECT @dtmCurrentDate = GetDate()
 
+	SELECT @intCategoryId = intCategoryId
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
+
 	IF @strWorkOrderNo IS NULL
 		OR @strWorkOrderNo = ''
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 70
-			,@strWorkOrderNo OUTPUT
+		--EXEC dbo.uspSMGetStartingNumber 70
+		--	,@strWorkOrderNo OUTPUT
+
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+			,@intItemId = @intItemId
+			,@intManufacturingId = @intManufacturingCellId
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = 8
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 70
+			,@ysnProposed = 0
+			,@strPatternString = @strWorkOrderNo OUTPUT
 	END
 
 	IF @intManufacturingCellId IS NULL
@@ -294,8 +310,19 @@ BEGIN TRY
 	FROM tblSMUserSecurity
 	WHERE intEntityUserSecurityId = @intUserId
 
-	EXEC dbo.uspSMGetStartingNumber 75
-		,@strBOLNo OUTPUT
+	--EXEC dbo.uspSMGetStartingNumber 75
+	--	,@strBOLNo OUTPUT
+
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = @intManufacturingCellId
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = 8
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 75
+				,@ysnProposed = 0
+				,@strPatternString = @strBOLNo OUTPUT
 
 	DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
 

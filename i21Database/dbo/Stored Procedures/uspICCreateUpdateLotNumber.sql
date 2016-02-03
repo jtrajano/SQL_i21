@@ -576,6 +576,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intLotId
 			,@intParentLotId OUTPUT 
+			,@intSubLocationId
+			,@intLocationId
 
 		IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
 			RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;

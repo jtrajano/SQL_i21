@@ -49,6 +49,7 @@ BEGIN TRY
 		,@strProcessName nvarchar(50)
 		,@dtmBusinessDate datetime
 		,@intBusinessShiftId int
+		,@intManufacturingCellId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -223,6 +224,7 @@ BEGIN TRY
 		BEGIN
 
 		SELECT @strWorkOrderNo = strWorkOrderNo
+				,@intManufacturingCellId=intManufacturingCellId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -478,8 +480,21 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				EXEC dbo.uspSMGetStartingNumber 55
-					,@strDestinationLotNumber OUTPUT
+				--EXEC dbo.uspSMGetStartingNumber 55
+				--	,@strDestinationLotNumber OUTPUT
+
+				Declare @intCategoryId int
+				Select @intCategoryId=intCategoryId from tblICItem Where intItemId=@intItemId
+				EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+					,@intItemId = @intItemId
+					,@intManufacturingId = @intManufacturingCellId
+					,@intSubLocationId = @intSubLocationId
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 55
+					,@ysnProposed = 0
+					,@strPatternString = @strDestinationLotNumber OUTPUT
 					
 				PRINT '1.Call Lot Merge routine.'
 

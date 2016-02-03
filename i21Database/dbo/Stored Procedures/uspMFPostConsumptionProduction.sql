@@ -239,6 +239,8 @@ BEGIN
 		,@intLotStatusId = 1
 		,@intEntityUserSecurityId = @intUserId
 		,@intLotId = @intLotId
+		,@intSubLocationId=@intSubLocationId
+		,@intLocationId=@intLocationId
 
 	DELETE
 	FROM @ItemsForPost

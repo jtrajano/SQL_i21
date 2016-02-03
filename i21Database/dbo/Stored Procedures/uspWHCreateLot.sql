@@ -180,7 +180,9 @@ BEGIN
 												@dtmExpiryDate=@dtmExpiryDate,
 												@intLotStatusId=1,
 												@intEntityUserSecurityId =@intUserId,
-												@intLotId=@intLotId
+												@intLotId=@intLotId,
+												@intSubLocationId=@intSubLocationId,
+												@intLocationId=@intLocationId
 
 END
 

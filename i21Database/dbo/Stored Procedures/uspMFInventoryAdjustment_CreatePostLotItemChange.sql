@@ -174,8 +174,9 @@ EXEC dbo.uspMFCreateUpdateParentLotNumber   @strParentLotNumber=@strParentLotNum
 											@dtmExpiryDate=@dtmExpiryDate,
 											@intLotStatusId=@intLotStatusId,
 											@intEntityUserSecurityId =@intUserId,
-											@intLotId=@intLotId
-
+											@intLotId=@intLotId,
+											@intSubLocationId=@intSubLocationId,
+											@intLocationId=@intLocationId
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the header record
 ------------------------------------------------------------------------------------------------------------------------------------

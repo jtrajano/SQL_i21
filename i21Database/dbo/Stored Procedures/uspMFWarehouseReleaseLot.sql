@@ -42,6 +42,7 @@ BEGIN TRY
 		,@dblAdjustByQuantity NUMERIC(18, 6)
 		,@intAttributeIdByBatch INT
 		,@strAttributeValueByBatch NVARCHAR(50)
+		,@intCategoryId int
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -184,6 +185,7 @@ BEGIN TRY
 		,@strGTIN = strGTIN
 		,@intLayerPerPallet = intLayerPerPallet
 		,@intUnitPerLayer = intUnitPerLayer
+		,@intCategoryId=intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -317,8 +319,19 @@ BEGIN TRY
 		FROM dbo.tblICItemUOM
 		WHERE intItemUOMId = @intItemUOMId
 
-		EXEC dbo.uspSMGetStartingNumber 33
-			,@intBatchId OUTPUT
+		--EXEC dbo.uspSMGetStartingNumber 33
+		--	,@intBatchId OUTPUT
+
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+					,@intItemId = @intItemId
+					,@intManufacturingId = NULL
+					,@intSubLocationId = @intSubLocationId
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 33
+					,@ysnProposed = 0
+					,@strPatternString = @intBatchId OUTPUT
 
 		EXEC dbo.uspWHCreateSKUByLot @strUserName = @strUserName
 			,@intCompanyLocationSubLocationId = @intLocationId

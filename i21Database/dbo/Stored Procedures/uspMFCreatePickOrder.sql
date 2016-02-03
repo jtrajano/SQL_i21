@@ -65,8 +65,19 @@ BEGIN TRY
 	FROM tblSMUserSecurity
 	WHERE intEntityUserSecurityId = @intUserId
 
-	EXEC dbo.uspSMGetStartingNumber 75
-		,@strBOLNo OUTPUT
+	--EXEC dbo.uspSMGetStartingNumber 75
+	--	,@strBOLNo OUTPUT
+
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+					,@intItemId = NULL
+					,@intManufacturingId = NULL
+					,@intSubLocationId = NULL
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = 6
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 75
+					,@ysnProposed = 0
+					,@strPatternString = @strBOLNo OUTPUT
 
 	DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
 

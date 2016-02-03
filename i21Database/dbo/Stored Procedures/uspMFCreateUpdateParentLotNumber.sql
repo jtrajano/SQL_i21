@@ -6,16 +6,31 @@
 	,@intLotStatusId INT
 	,@intEntityUserSecurityId INT
 	,@intLotId INT
-	,@intParentLotId INT = NULL OUTPUT  
+	,@intParentLotId INT = NULL OUTPUT 
+	,@intSubLocationId INT = NULL
+	,@intLocationId INT = NULL 
 AS
 
 	DECLARE @ErrMsg NVARCHAR(Max)
+			,@intCategoryId int
 
 	IF @strParentLotNumber IS NULL OR @strParentLotNumber = ''
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 
-			78
-			,@strParentLotNumber OUTPUT
+		--EXEC dbo.uspSMGetStartingNumber 
+		--	78
+		--	,@strParentLotNumber OUTPUT
+		Select @intCategoryId=intCategoryId from tblICItem Where intItemId=@intItemId
+
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+			,@intItemId = @intItemId
+			,@intManufacturingId = NULL
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 78
+			,@ysnProposed = 0
+			,@strPatternString = @strParentLotNumber OUTPUT
 	END
 
 	SELECT @intParentLotId = intParentLotId

@@ -129,7 +129,10 @@ If (Select count(1) from @tblWorkOrder)=0
 
 Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
 
-Select TOP 1 @intBlendItemId=intItemId From tblMFWorkOrder Where strWorkOrderNo in (Select strWorkOrderNo From @tblWorkOrder)
+Declare @intManufacturingCellId int
+		,@intSubLocationId int
+
+Select TOP 1 @intBlendItemId=intItemId,@intManufacturingCellId=intManufacturingCellId,@intSubLocationId =intSubLocationId  From tblMFWorkOrder Where strWorkOrderNo in (Select strWorkOrderNo From @tblWorkOrder)
 
 If @ysnBlendSheetRequired = 1
 Begin
@@ -183,7 +186,20 @@ Delete From @tblPickListDetail Where intLotId=0
 
 If ISNULL(@strPickListNo,'') = ''
 	Begin
-		EXEC dbo.uspSMGetStartingNumber 68,@strPickListNo OUTPUT
+		--EXEC dbo.uspSMGetStartingNumber 68,@strPickListNo OUTPUT
+		Declare @intCategoryId int
+		Select @intCategoryId=intCategoryId from dbo.tblICItem Where intItemId=@intBlendItemId
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+							,@intItemId = @intBlendItemId
+							,@intManufacturingId = @intManufacturingCellId
+							,@intSubLocationId = @intSubLocationId
+							,@intLocationId = @intLocationId
+							,@intOrderTypeId = NULL
+							,@intBlendRequirementId = NULL
+							,@intPatternCode = 68
+							,@ysnProposed = 0
+							,@strPatternString = @strPickListNo OUTPUT
+
 		Update @tblPickList Set strPickListNo=@strPickListNo
 	End
 

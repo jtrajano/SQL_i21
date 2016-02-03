@@ -66,6 +66,7 @@ BEGIN TRY
 		,@strComment nvarchar(MAX)
 		,@strParentLotNumber nvarchar(50)
 		,@ysnIgnoreTolerance bit
+		,@intCategoryId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -176,6 +177,7 @@ BEGIN TRY
 	SELECT @dtmCurrentDate = GetDate()
 
 	SELECT @strLotTracking = strLotTracking
+			,@intCategoryId=intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -221,8 +223,18 @@ BEGIN TRY
 				)
 			AND @strLotTracking <> 'Yes - Serial Number'
 		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 24
-				,@strOutputLotNumber OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 24
+			--	,@strOutputLotNumber OUTPUT
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+						,@intItemId = @intItemId
+						,@intManufacturingId = @intManufacturingCellId
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 24
+						,@ysnProposed = 0
+						,@strPatternString = @strOutputLotNumber OUTPUT
 		END
 
 	IF EXISTS (
@@ -244,8 +256,19 @@ BEGIN TRY
 		PRINT 'Move the selected lot''s container to Audit container'
 	END
 
-	EXEC dbo.uspSMGetStartingNumber 33
-		,@intBatchId OUTPUT
+	--EXEC dbo.uspSMGetStartingNumber 33
+	--	,@intBatchId OUTPUT
+
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+						,@intItemId = @intItemId
+						,@intManufacturingId = @intManufacturingCellId
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 33
+						,@ysnProposed = 0
+						,@strPatternString = @intBatchId OUTPUT
 
 	IF @intWorkOrderId IS NULL
 		OR @intWorkOrderId = 0
@@ -292,8 +315,19 @@ BEGIN TRY
 
 		END
 
-		EXEC dbo.uspSMGetStartingNumber 59
-			,@strWorkOrderNo OUTPUT
+		--EXEC dbo.uspSMGetStartingNumber 59
+		--	,@strWorkOrderNo OUTPUT
+
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+					,@intItemId = @intItemId
+					,@intManufacturingId = @intManufacturingCellId
+					,@intSubLocationId = @intSubLocationId
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 59
+					,@ysnProposed = 0
+					,@strPatternString = @strWorkOrderNo OUTPUT
 
 		--SELECT @intManufacturingCellId = intManufacturingCellId
 		--FROM dbo.tblMFRecipe

@@ -33,6 +33,7 @@ BEGIN TRY
 	DECLARE @intNewItemUOMId INT
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
 	DECLARE @strLotTracking NVARCHAR(50)
+			,@intCategoryId int
 	
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
@@ -52,6 +53,7 @@ BEGIN TRY
 		   @intSourceTransactionTypeId= 8
 	
 	SELECT @strLotTracking = strLotTracking
+			,@intCategoryId=intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -59,7 +61,17 @@ BEGIN TRY
 	BEGIN 
 		IF (@strLotTracking = 'Yes - Serial Number')
 		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 24, @strNewLotNumber OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 24, @strNewLotNumber OUTPUT
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+						,@intItemId = @intItemId
+						,@intManufacturingId = NULL
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 24
+						,@ysnProposed = 0
+						,@strPatternString = @strNewLotNumber OUTPUT
 		END
 		ELSE 
 		BEGIN

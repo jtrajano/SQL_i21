@@ -44,6 +44,7 @@ Declare @strWorkOrderNoOrig nVarchar(50)
 Declare @ysnRequireCustomerApproval bit
 Declare @strLotTracking nvarchar(50)
 Declare @intMinWO int
+Declare @intCategoryId int
 
 Declare @tblWO As table
 (
@@ -113,7 +114,7 @@ Begin
 	End
 
 	Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
-	Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
+	Select @strLotTracking=strLotTracking,@intCategoryId=intCategoryId From tblICItem Where intItemId=@intItemId
 
 	Select @ysnRequireCustomerApproval=ysnRequireCustomerApproval 
 	From tblICItem Where intItemId=@intItemId
@@ -154,8 +155,19 @@ Begin
 	End
 
 	--Get Demand No
-	EXEC dbo.uspSMGetStartingNumber 46
-		,@strDemandNo OUTPUT
+	--EXEC dbo.uspSMGetStartingNumber 46
+	--	,@strDemandNo OUTPUT
+
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = NULL
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 46
+				,@ysnProposed = 0
+				,@strPatternString = @strDemandNo OUTPUT
 
 	Select @dtmDueDate=Min(dtmDueDate) From @tblWO
 
@@ -225,8 +237,20 @@ Begin
 
 		--Get Work Order No
 		If ISNULL(@strWorkOrderNo,'') = ''
-			EXEC dbo.uspSMGetStartingNumber 34
-				,@strWorkOrderNo OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 34
+			--	,@strWorkOrderNo OUTPUT
+		Begin
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+			,@intItemId = @intItemId
+			,@intManufacturingId = @intCellId
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 34
+			,@ysnProposed = 0
+			,@strPatternString = @strWorkOrderNo OUTPUT
+		End
 
 		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
 		And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate)

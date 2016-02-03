@@ -42,6 +42,7 @@ BEGIN TRY
 		,@strYieldAdjustmentAllowed nvarchar(50)
 		,@intManufacturingProcessId int
 		,@strAllInputItemsMandatoryforConsumption nvarchar(50)
+		,@intManufacturingCellId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -52,6 +53,7 @@ BEGIN TRY
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
 		,@intManufacturingProcessId=intManufacturingProcessId
+		,@intManufacturingCellId=intManufacturingCellId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 	
@@ -381,10 +383,12 @@ BEGIN TRY
 						,@strLotNumber nvarchar(50)
 						,@intItemUOMId int
 						,@intSubLocationId int
+						,@intCategoryId int
 
 					SELECT @strLifeTimeType = strLifeTimeType
 						,@intLifeTime = intLifeTime
 						,@strLotTracking = strLotTracking
+						,@intCategoryId=intCategoryId
 					FROM dbo.tblICItem
 					WHERE intItemId = @intItemId
 
@@ -411,8 +415,23 @@ BEGIN TRY
 
 					IF @strLotTracking <> 'Yes - Serial Number'
 					BEGIN
-						EXEC dbo.uspSMGetStartingNumber 55
-							,@strLotNumber OUTPUT
+						--EXEC dbo.uspSMGetStartingNumber 55
+						--	,@strLotNumber OUTPUT
+
+						SELECT @intSubLocationId = @intSubLocationId
+						FROM dbo.tblICStorageLocation
+						WHERE intStorageLocationId = @intStorageLocationId
+
+						EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+							,@intItemId = @intItemId
+							,@intManufacturingId = @intManufacturingCellId
+							,@intSubLocationId = @intSubLocationId
+							,@intLocationId = @intLocationId
+							,@intOrderTypeId = NULL
+							,@intBlendRequirementId = NULL
+							,@intPatternCode = 55
+							,@ysnProposed = 0
+							,@strPatternString = @strLotNumber OUTPUT
 					END
 
 					IF @intConsumptionMethodId=2 

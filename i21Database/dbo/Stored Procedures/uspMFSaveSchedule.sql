@@ -51,8 +51,21 @@ BEGIN TRY
 	IF @intScheduleId IS NULL
 	BEGIN
 		IF @strScheduleNo IS NULL
-			EXEC dbo.uspSMGetStartingNumber 63
-				,@strScheduleNo OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 63
+			--	,@strScheduleNo OUTPUT
+			Declare @intSubLocationId int
+			Select @intSubLocationId=intSubLocationId from dbo.tblMFManufacturingCell  Where intManufacturingCellId = @intManufacturingCellId
+
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+							,@intItemId = NULL
+							,@intManufacturingId = @intManufacturingCellId
+							,@intSubLocationId = @intSubLocationId
+							,@intLocationId = @intLocationId
+							,@intOrderTypeId = NULL
+							,@intBlendRequirementId = NULL
+							,@intPatternCode = 63
+							,@ysnProposed = 0
+							,@strPatternString = @strScheduleNo OUTPUT
 
 		INSERT INTO dbo.tblMFSchedule (
 			strScheduleNo
