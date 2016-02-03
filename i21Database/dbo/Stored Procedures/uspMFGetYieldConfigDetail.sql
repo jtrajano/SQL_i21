@@ -30,7 +30,8 @@ BEGIN
 		WHERE intYieldId = @intYieldId
 	END
 
-	SELECT CASE 
+	SELECT ISNULL(@intYieldId,0) AS intYieldId
+		,CASE 
 			WHEN ysnProcessRelated = 1
 				THEN 'Process Related'
 			ELSE 'Non-Process Related'
