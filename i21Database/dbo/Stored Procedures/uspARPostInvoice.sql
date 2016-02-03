@@ -220,6 +220,21 @@ END CATCH
 		--Posting
 		IF @post = 1
 			BEGIN
+				-- Tank consumption site
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType,strTransactionId, strBatchNumber, intTransactionId)
+				SELECT TOP 1 
+					'Unable to find a tank consumption site for item no. ' + item.strItemNo,
+					invoice.strTransactionType,
+					invoice.strInvoiceNumber,
+					@batchId,
+					invoice.intInvoiceId
+				from tblARInvoice invoice 
+				INNER JOIN tblARInvoiceDetail detail on invoice.intInvoiceId = detail.intInvoiceId
+				INNER JOIN tblICItem item on item.intItemId = detail.intItemId
+				INNER JOIN @PostInvoiceData B ON invoice.intInvoiceId = B.intInvoiceId
+				OUTER APPLY (SELECT TOP 1 intSiteID from tblTMSite site where site.intProduct = item.intItemId) tm
+				WHERE item.ysnTankRequired = 1 AND tm.intSiteID IS NULL
+
 				--Fiscal Year
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
