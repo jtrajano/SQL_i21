@@ -47,9 +47,9 @@ DECLARE @intItemId AS INT
 		,@intItemLocationId AS INT 
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 					
-		,@dblQty AS NUMERIC(18, 6) 
-		,@dblUOMQty AS NUMERIC(18, 6)
-		,@dblCost AS NUMERIC(18, 6)
+		,@dblQty AS NUMERIC(38,20) 
+		,@dblUOMQty AS NUMERIC(38,20)
+		,@dblCost AS NUMERIC(38,20)
 		,@intLotId AS INT
 		,@dtmDate AS DATETIME
 		,@intCurrencyId AS INT 

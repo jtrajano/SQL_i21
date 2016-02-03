@@ -19,7 +19,7 @@ When adding or reducing the stock qty of an item under the company's custody, th
 		[intSubLocationId] INT NULL,
 		[intStorageLocationId] INT NULL,
 		[dtmDate] DATETIME NOT NULL, 
-		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[intItemUOMId] INT NULL,
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[intTransactionId] INT NOT NULL, 

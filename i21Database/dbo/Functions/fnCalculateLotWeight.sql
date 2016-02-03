@@ -5,14 +5,16 @@ CREATE FUNCTION [dbo].[fnCalculateLotWeight](
 	@intLotItemUOMId INT
 	,@intLotWeightUOMId INT
 	,@intCostingItemUOMId INT 
-	,@dblLotWeight NUMERIC(18,6)
-	,@dblCostingQty NUMERIC(18,6)
+	,@dblLotWeight NUMERIC(38,20)
+	,@dblCostingQty NUMERIC(38,20)
 	,@dblLotWeightPerQty NUMERIC(38,20)
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS 
 BEGIN
-	RETURN	CASE	WHEN ISNULL(@intLotWeightUOMId, 0) = @intCostingItemUOMId AND @intLotItemUOMId <> @intCostingItemUOMId THEN
+
+	RETURN 
+			CASE	WHEN ISNULL(@intLotWeightUOMId, 0) = @intCostingItemUOMId AND @intLotItemUOMId <> @intCostingItemUOMId THEN
 						-- @dblCostingQty is in Weight 
 						ISNULL(@dblLotWeight, 0) + @dblCostingQty
 					ELSE 

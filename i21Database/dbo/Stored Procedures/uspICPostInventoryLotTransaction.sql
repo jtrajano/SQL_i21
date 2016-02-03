@@ -6,8 +6,8 @@
 	,@intSubLocationId INT
 	,@intStorageLocationId INT
 	,@dtmDate DATETIME
-	,@dblQty NUMERIC(18, 6)
-	,@dblCost NUMERIC(38, 20)
+	,@dblQty NUMERIC(38,20)
+	,@dblCost NUMERIC(38,20)
 	,@intTransactionId INT
 	,@strTransactionId NVARCHAR(40)
 	,@strBatchId NVARCHAR(20)

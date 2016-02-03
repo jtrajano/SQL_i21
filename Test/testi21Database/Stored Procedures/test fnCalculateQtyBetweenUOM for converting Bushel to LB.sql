@@ -8,14 +8,14 @@ BEGIN
 			,@LB AS INT = 2
 
 	-- Arrange
-	DECLARE @dblQty AS NUMERIC(18,6) = 1
+	DECLARE @dblQty AS FLOAT = 1
 
 	DECLARE @result AS NUMERIC(38,20) 
-	DECLARE @Expected AS NUMERIC(38,20) = 56.00 -- One bushel is 56 pounds. 
-
+	DECLARE @expected AS NUMERIC(38,20) = 55.99999999999999000000 -- One bushel is 56 LBS but calculations can only compute it as 55.99999999999999000000 lb
+	
 	-- Act
-	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@BUSHEL, @LB, @dblQty)
+	SELECT @result = dbo.[fnCalculateQtyBetweenUOM](@BUSHEL, @LB, @dblQty)
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @Expected, @result;
+	EXEC tSQLt.AssertEquals @expected, @result;
 END

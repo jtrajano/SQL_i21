@@ -5,7 +5,7 @@ BEGIN
 	DECLARE @dblCost AS NUMERIC(38, 20) = 5.0
 	DECLARE @dblUnitQty AS NUMERIC(38, 20) = 7.0
 	DECLARE @result AS NUMERIC(38, 20)
-	DECLARE @expected AS NUMERIC(38, 20) = 0.71428571428571 -- (5.0 / 7.0) 
+	DECLARE @expected AS NUMERIC(38, 20) = 0.7142857142857143 -- (5.0 / 7.0) 
 
 	-- Act
 	SELECT @result = dbo.fnCalculateUnitCost(@dblCost, @dblUnitQty);

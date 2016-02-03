@@ -3181,6 +3181,7 @@
     <Build Include="dbo\Stored Procedures\uspICReturnStockInLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostReturnActualCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICReturnStockInActualCost.sql" />
+    <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -184,7 +184,8 @@ BEGIN
 		WITH	(HOLDLOCK) 
 		AS		Receipt 
 		USING (
-			SELECT	RawData.*
+			SELECT	TOP 1 
+					RawData.*
 			FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
 						ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

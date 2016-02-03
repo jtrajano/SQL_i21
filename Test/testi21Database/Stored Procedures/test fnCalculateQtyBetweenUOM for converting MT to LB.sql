@@ -13,11 +13,11 @@ BEGIN
 	DECLARE @dblQty AS NUMERIC(38,20) = 1
 
 	DECLARE @result AS NUMERIC(38,20) 
-	DECLARE @Expected AS NUMERIC(38,20) = 2202.643171 -- One metric ton is 2204.63171 pounds. 
+	DECLARE @expected AS NUMERIC(38,20) = 2204.622621848776 -- 1 / 0.00045359237	 
 
 	-- Act
 	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@METRIC_TON, @LB, @dblQty)
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @Expected, @result;
+	EXEC tSQLt.AssertEquals @expected, @result;
 END
