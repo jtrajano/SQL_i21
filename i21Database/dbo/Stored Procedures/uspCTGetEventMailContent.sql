@@ -2,9 +2,13 @@
 AS
 
 BEGIN	
-	DECLARE @intEventId INT,@intContractEventId INT,@style NVARCHAR(MAX),@html NVARCHAR(MAX),@row  NVARCHAR(MAX)
-	DECLARE @strContractNumber NVARCHAR(MAX),@strName NVARCHAR(MAX),@strCustomerContract NVARCHAR(MAX),@dtmContractDate NVARCHAR(MAX),@newRow NVARCHAR(MAX),@newHTML NVARCHAR(MAX)
-	DECLARE @Mail NVARCHAR(MAX),@strContractEventId  NVARCHAR(MAX)
+	DECLARE @intEventId				INT,			@intContractEventId INT,			@style					NVARCHAR(MAX),
+			@html					NVARCHAR(MAX),	@row				NVARCHAR(MAX),	@strContractHeaderId	NVARCHAR(MAX),
+			@strContractNumber		NVARCHAR(MAX),	@strName			NVARCHAR(MAX),	@strCustomerContract	NVARCHAR(MAX),
+			@dtmContractDate		NVARCHAR(MAX),	@newRow				NVARCHAR(MAX),	@newHTML				NVARCHAR(MAX),
+			@Mail					NVARCHAR(MAX),	@strContractEventId NVARCHAR(MAX),	@strNotificationType	NVARCHAR(MAX),
+			@intContractHeaderId	INT,			@strEventName		NVARCHAR(MAX),	@strContractNumbers		NVARCHAR(MAX),
+			@strUserIds				NVARCHAR(MAX)
 
 	DECLARE @tblTempFinal TABLE
 	(
@@ -12,7 +16,10 @@ BEGIN
 		strSubject			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS ,
 		strMailContent		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS ,
 		strMailTo			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS ,
-		strContractEventId	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS 
+		strContractEventId	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS ,
+		strNotificationType	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS ,
+		strNamespace		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS ,
+		strUserIds			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	)
 
 	SET @style =	'<style type="text/css" scoped>
@@ -79,7 +86,11 @@ BEGIN
 				EV.ysnSummarized,
 				dbo.fnCTGetEventRecipientEmail(EV.intEventId) strMailTo,
 				EV.strSubject,
-				EV.strMessage
+				EV.strMessage,
+				EV.strNotificationType,
+				dbo.fnCTGetEventRecipientId(EV.intEventId) strUserIds,
+				EV.strEventName,
+				CH.intContractHeaderId
 				
 		FROM	tblCTContractEvent	CE
 		JOIN	tblCTEvent			EV	ON	EV.intEventId			=	CE.intEventId
@@ -100,7 +111,7 @@ BEGIN
 	SELECT	@intEventId = MIN(intEventId) FROM #tblTempEventMail WHERE ysnSummarized = 1
 	WHILE	ISNULL(@intEventId,0) > 0
 	BEGIN
-			SELECT	@Mail = '',@newHTML = @html,@newRow = '',@strContractEventId = ''
+			SELECT	@Mail = '',@newHTML = @html,@newRow = '',@strContractEventId = '',@strContractNumbers = '',@strContractHeaderId = ''
 			SELECT	@intContractEventId = MIN(intContractEventId) FROM #tblTempEventMail WHERE intEventId = @intEventId
 			
 			WHILE	ISNULL(@intContractEventId,0) > 0
@@ -111,12 +122,18 @@ BEGIN
 							@dtmContractDate		=	CONVERT(NVARCHAR(30),dtmContractDate,106),
 							@strMailTo				=	strMailTo,
 							@strSubject				=	strSubject,
-							@strMessage				=	strMessage
+							@strMessage				=	strMessage,
+							@strNotificationType	=	strNotificationType,
+							@intContractHeaderId	=	intContractHeaderId,
+							@strEventName			=	strEventName,
+							@strUserIds				=	strUserIds
 					FROM	#tblTempEventMail
 					WHERE	intContractEventId = @intContractEventId
 					
-					SELECT	@strContractEventId	= 	@strContractEventId +LTRIM(@intContractEventId) +','	
-					
+					SELECT	@strContractEventId		= 	@strContractEventId	 + LTRIM(@intContractEventId)  + ','
+					SELECT	@strContractNumbers		= 	@strContractNumbers	 + @strContractNumber  + ','	
+					SELECT	@strContractHeaderId	= 	@strContractHeaderId + LTRIM(@intContractHeaderId) + '|^|'
+
 					SELECT	@newRow = REPLACE(REPLACE(REPLACE(REPLACE(@row,'ContractNumber',@strContractNumber),'Entity',@strName),'CustomerContract',@strCustomerContract),'ContractDate',@dtmContractDate)
 					SELECT	@newHTML = REPLACE(@newHTML,'</tbody>',@newRow+'</tbody>')
 					
@@ -126,10 +143,20 @@ BEGIN
 			SELECT	@Mail = @style + @newHTML
 			
 			SELECT  @strContractEventId = CASE @strContractEventId WHEN NULL THEN NULL ELSE ( CASE LEN(@strContractEventId) WHEN 0 THEN @strContractEventId ELSE LEFT(@strContractEventId, LEN(@strContractEventId) - 1) END ) END
+			SELECT  @strContractNumbers = CASE @strContractNumbers WHEN NULL THEN NULL ELSE ( CASE LEN(@strContractNumbers) WHEN 0 THEN @strContractNumbers ELSE LEFT(@strContractNumbers, LEN(@strContractNumbers) - 3) END ) END
 			
-			INSERT	INTO @tblTempFinal
-			SELECT	@strSubject,@Mail,@strMailTo,@strContractEventId
+			IF ISNULL(@strMailTo,'') <> '' AND (@strNotificationType = 'Mail' OR @strNotificationType = 'Both')
+			BEGIN
+				INSERT	INTO @tblTempFinal
+				SELECT	@strSubject,@Mail,@strMailTo,@strContractEventId,'Mail',NULL,NULL
+			END
 			
+			IF ISNULL(@strUserIds,'') <> '' AND (@strNotificationType = 'Screen' OR @strNotificationType = 'Both')
+			BEGIN
+				INSERT	INTO @tblTempFinal
+				SELECT	'Contract - ',@strEventName,@strContractNumbers,@strContractEventId,'Screen','ContractManagement.view.Contract?routeId=' + @strContractHeaderId,@strUserIds
+			END
+
 			SELECT	@intEventId = MIN(intEventId) FROM #tblTempEventMail WHERE ysnSummarized = 1 AND intEventId > @intEventId
 	END
 
@@ -137,7 +164,7 @@ BEGIN
 
 	WHILE	ISNULL(@intContractEventId,0) > 0
 	BEGIN
-			SELECT	@Mail = '',@newHTML = '',@newRow = ''
+			SELECT	@Mail = '',@newHTML = @html,@newRow = '',@strContractEventId = '',@strContractNumbers = '',@strContractHeaderId = ''
 			
 			SELECT	@strContractNumber		=	strContractNumber,
 					@strName				=	strName, 
@@ -145,7 +172,11 @@ BEGIN
 					@dtmContractDate		=	CONVERT(NVARCHAR(30),dtmContractDate,106),
 					@strMailTo				=	strMailTo,
 					@strSubject				=	strSubject,
-					@strMessage				=	strMessage
+					@strMessage				=	strMessage,
+					@strNotificationType	=	strNotificationType,
+					@intContractHeaderId	=	intContractHeaderId,
+					@strEventName			=	strEventName,
+					@strUserIds				=	strUserIds
 			FROM	#tblTempEventMail
 			WHERE	intContractEventId = @intContractEventId
 				
@@ -157,8 +188,17 @@ BEGIN
 			
 			SELECT  @strContractEventId = LTRIM(@intContractEventId)
 
-			INSERT	INTO @tblTempFinal
-			SELECT	@strSubject,@Mail,@strMailTo,@strContractEventId
+			IF ISNULL(@strMailTo,'') <> '' AND (@strNotificationType = 'Mail' OR @strNotificationType = 'Both')
+			BEGIN
+				INSERT	INTO @tblTempFinal
+				SELECT	@strSubject,@Mail,@strMailTo,@strContractEventId,'Mail',NULL,NULL
+			END
+			
+			IF ISNULL(@strUserIds,'') <> '' AND (@strNotificationType = 'Screen' OR @strNotificationType = 'Both')
+			BEGIN
+				INSERT	INTO @tblTempFinal
+				SELECT	'Contract - ',@strEventName,@strContractNumbers,@strContractEventId,'Screen','ContractManagement.view.Contract?routeId=' + @strContractHeaderId,@strUserIds
+			END
 			
 			SELECT	@intContractEventId = MIN(intContractEventId) FROM #tblTempEventMail WHERE intContractEventId > @intContractEventId AND ysnSummarized = 0
 	END

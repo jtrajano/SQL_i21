@@ -3354,6 +3354,7 @@
     <Build Include="dbo\Views\vyuMFShiftActivityDowntime.sql" />
     <Build Include="dbo\Tables\tblCFFailedImportedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryShipmentAfterSave.sql" />
+    <Build Include="dbo\Functions\fnCTGetEventRecipientId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
