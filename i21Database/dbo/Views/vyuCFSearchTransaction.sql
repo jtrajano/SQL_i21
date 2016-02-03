@@ -1,5 +1,6 @@
 ﻿CREATE VIEW dbo.vyuCFSearchTransaction
 AS
+
 SELECT 
 		cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.intPumpNumber, cfTransaction.strPONumber, cfTransaction.strMiscellaneous, cfTransaction.strDeliveryPickupInd, cfTransaction.intTransactionId, cfTransaction.dtmBillingDate, 
        cfTransaction.intTransTime, cfTransaction.strSequenceNumber, cfSite.strLocationName AS strCompanyLocation, cfTransaction.strTransactionId, cfTransaction.dtmTransactionDate, cfTransaction.strTransactionType, cfTransaction.dblQuantity, 
@@ -32,14 +33,17 @@ LEFT JOIN
 	iciItem.strItemNo,
 	iciItemPricing.dblAverageCost
 	from tblCFItem cfiItem
+	LEFT JOIN tblCFSite cfiSite
+	on cfiSite.intSiteId = cfiItem.intSiteId
 	LEFT JOIN tblICItem iciItem
 	ON cfiItem.intARItemId = iciItem.intItemId
 	LEFT JOIN tblICItemLocation iciItemLocation
-	ON cfiItem.intARItemId = iciItemLocation.intItemId
+	ON cfiItem.intARItemId = iciItemLocation.intItemId 
+	AND iciItemLocation.intLocationId = cfiSite.intARLocationId
 	LEFT JOIN vyuICGetItemPricing iciItemPricing
 	ON cfiItem.intARItemId = iciItemPricing.intItemId 
-		AND iciItemLocation.intLocationId = iciItemPricing.intLocationId 
-		AND iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId) AS cfItem
+	AND iciItemLocation.intLocationId = iciItemPricing.intLocationId 
+	AND iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId ) AS cfItem
 ON cfTransaction.intProductId = cfItem.intItemId
 LEFT JOIN 
 	(select

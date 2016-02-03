@@ -3352,6 +3352,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetYieldConfigDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveYieldConfig.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityDowntime.sql" />
+    <Build Include="dbo\Tables\tblCFFailedImportedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
