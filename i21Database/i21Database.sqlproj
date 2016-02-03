@@ -3355,6 +3355,7 @@
     <Build Include="dbo\Tables\tblCFFailedImportedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryShipmentAfterSave.sql" />
     <Build Include="dbo\Functions\fnCTGetEventRecipientId.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityWastage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
