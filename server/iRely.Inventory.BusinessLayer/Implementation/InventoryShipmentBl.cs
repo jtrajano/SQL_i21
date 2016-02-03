@@ -22,6 +22,13 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        public static int DefaultUserId;
+
+        public void SetUser(int UserId)
+        {
+            DefaultUserId = UserId;
+        }
+
         public override async Task<SearchResult> Search(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetInventoryShipment>()
@@ -45,9 +52,12 @@ namespace iRely.Inventory.BusinessLayer
                 var connection = _db.ContextManager.Database.Connection;
                 try
                 {
+                    int? ShipmentId = null;
+                    bool ysnDeleted = false;
                     // Get the shipment id from records with Updated or New data. 
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
+                        ShipmentId = shipment.intInventoryShipmentId;
                         if (shipment.intOrderType == 2)
                         {
                             if (!salesOrderToUpdate.Contains(shipment.intInventoryShipmentId))
@@ -59,6 +69,8 @@ namespace iRely.Inventory.BusinessLayer
                     var deletedShipments = _db.ContextManager.ChangeTracker.Entries<tblICInventoryShipment>().Where(p => p.State == EntityState.Deleted).ToList();
                     foreach (var shipment in deletedShipments)
                     {
+                        ShipmentId = shipment.Entity.intInventoryShipmentId;
+                        ysnDeleted = true;
                         if (shipment.Entity.intOrderType == 2)
                         {
                             if (!salesOrderToUpdate.Contains(shipment.Entity.intInventoryShipmentId))
@@ -74,22 +86,12 @@ namespace iRely.Inventory.BusinessLayer
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId, @ysnOpenStatus", idParameter, openStatus);
                     }
 
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICLogTransactionDetail @TransactionType, @TransactionId", new SqlParameter("TransactionType", 2), new SqlParameter("TransactionId", ShipmentId));
+
                     result = await _db.SaveAsync(true).ConfigureAwait(false);
-                                        
-                    // Update the stock reservation for the deleted shipments                    
-                    foreach (var shipment in deletedShipments)
-                    {
-                        var idParameter = new SqlParameter("intTransactionId", shipment.Entity.intInventoryShipmentId);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
-                    }
                                         
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
-                        
-                        // Update the stock reservation for the latest shipment data. 
-                        var intTransactionId = new SqlParameter("intTransactionId", shipment.intInventoryShipmentId);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", intTransactionId);
-
                         // Update the sales order status using the latest shipment data
                         if (shipment.intOrderType == 2)
                         {
@@ -97,6 +99,9 @@ namespace iRely.Inventory.BusinessLayer
                             _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", intShipmentId);
                         }
                     }
+
+                    var userId = DefaultUserId;
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId", new SqlParameter("ShipmentId", ShipmentId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", userId));
 
                     transaction.Commit();
 
