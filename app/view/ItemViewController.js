@@ -413,6 +413,7 @@ Ext.define('Inventory.view.ItemViewController', {
             txtMask1: '{current.strMask1}',
             txtMask2: '{current.strMask2}',
             txtMask3: '{current.strMask3}',
+            txtMaxWeightPerPack: '{current.dblMaxWeightPerPack}',
 
             cboPackType: {
                 value: '{current.intPackTypeId}',

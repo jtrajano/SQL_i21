@@ -49,6 +49,7 @@ namespace iRely.Inventory.Model
         public string strMask1 { get; set; }
         public string strMask2 { get; set; }
         public string strMask3 { get; set; }
+        public decimal? dblMaxWeightPerPack { get; set; }
         public int? intPatronageCategoryId { get; set; }
         public int? intPatronageCategoryDirectId { get; set; }
         public bool? ysnStockedItem { get; set; }
