@@ -7,8 +7,8 @@ CREATE PROCEDURE [dbo].[uspICPostStockQuantity]
 	@intSubLocationId AS INT,
 	@intStorageLocationId AS INT,
 	@intItemUOMId AS INT,
-	@dblQty AS NUMERIC(18, 6),
-	@dblUOMQty AS NUMERIC(18, 6),
+	@dblQty AS NUMERIC(38,20),
+	@dblUOMQty AS NUMERIC(38,20),
 	@intLotId AS INT 
 AS
 
@@ -26,10 +26,10 @@ SET @dblUOMQty = ISNULL(@dblUOMQty, 0)
 -- If item is a Lot, retrieve Weight UOM and Weight Per Qty
 ------------------------------------------------------------
 BEGIN 
-	DECLARE @dblWeightPerQty AS NUMERIC(38, 20)
+	DECLARE @dblWeightPerQty AS NUMERIC(38,20)
 			,@intLotWeightUOMId AS INT
 			,@intLotItemUOMId AS INT 
-			,@dblWeightUnitQty AS NUMERIC(18, 6) 
+			,@dblWeightUnitQty AS NUMERIC(38,20) 
 
 	SELECT	@intLotItemUOMId = intItemUOMId
 			,@intLotWeightUOMId = intWeightUOMId

@@ -20,7 +20,7 @@ This table logs all inventory transactions related to Lot
 		[intSubLocationId] INT NULL,
 		[intStorageLocationId] INT NULL,
 		[dtmDate] DATETIME NOT NULL, 
-		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[intItemUOMId] INT NULL,
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[intTransactionId] INT NOT NULL, 

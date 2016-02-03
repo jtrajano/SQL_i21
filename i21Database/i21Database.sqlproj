@@ -3185,6 +3185,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddInvoiceTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItem.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateOnHand.sql" />
+    <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

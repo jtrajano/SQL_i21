@@ -25,7 +25,7 @@ CREATE FUNCTION [dbo].[fnCalculateCostBetweenUOM](
 RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
-	DECLARE	@result AS NUMERIC(38,20)
+	DECLARE	@result AS FLOAT 
 
 	DECLARE @dblUnitQtyFrom AS NUMERIC(38,20)
 			,@dblUnitQtyTo AS NUMERIC(38,20)
@@ -52,13 +52,13 @@ BEGIN
 	-- Calculate the Unit Cost
 	SET @result = 
 		CASE	WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
-					@dblCost
+					CAST(@dblCost AS FLOAT) 
 				ELSE 
-					CASE	WHEN @dblUnitQtyFrom <> 0 THEN (@dblCost / @dblUnitQtyFrom) * @dblUnitQtyTo							
+					CASE	WHEN @dblUnitQtyFrom <> 0 THEN (CAST(@dblCost AS FLOAT) / CAST(@dblUnitQtyFrom AS FLOAT)) * CAST(@dblUnitQtyTo AS FLOAT) 
 							ELSE NULL 
 					END
 		END 
 
-	RETURN @result;	
+	RETURN dbo.fnConvertFloatToNumeric(@result);	
 END
 GO
