@@ -3,7 +3,7 @@
 	select
 			tblEntity.intEntityId
 			,tblEntity.strName
-			,tblARSalesperson.strSalespersonId
+			,strSalespersonId = (case when tblEntity.strEntityNo is null then tblARSalesperson.strSalespersonId else tblEntity.strEntityNo end)
 			,tblARSalesperson.strTitle
 			,tblARSalesperson.strType
 			,tblEntity.strEmail
