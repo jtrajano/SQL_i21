@@ -96,3 +96,21 @@ BEGIN
 	END
 END
 GO
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblMFManufacturingCellPackType')) AND
+		EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblMFManufacturingCell'))
+BEGIN
+	EXEC('Delete From tblMFManufacturingCellPackType Where intManufacturingCellId NOT IN (Select intManufacturingCellId From tblMFManufacturingCell)')
+END
+GO
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblMFManufacturingProcessAttribute')) AND
+		EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblMFManufacturingProcess'))
+BEGIN
+	EXEC('Delete From tblMFManufacturingProcessAttribute Where intManufacturingProcessId NOT IN  (Select intManufacturingProcessId From tblMFManufacturingProcess)')
+END
+GO
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblMFManufacturingProcessMachine')) AND
+		EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblMFManufacturingProcess'))
+BEGIN
+	EXEC('Delete From tblMFManufacturingProcessMachine Where intManufacturingProcessId NOT IN  (Select intManufacturingProcessId From tblMFManufacturingProcess)')
+END
+GO
