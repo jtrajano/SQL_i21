@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using IdeaBlade.Linq;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -384,32 +385,84 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        /// <summary>
-        /// Return Inventory Valuation of Item and some of its details
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
+        ///// <summary>
+        ///// Return Inventory Valuation of Item and some of its details
+        ///// </summary>
+        ///// <param name="param"></param>
+        ///// <returns></returns>
+        //public async Task<SearchResult> GetInventoryValuation(GetParameter param)
+        //{
+        //    var query = _db.GetQuery<vyuICGetInventoryValuation>()
+        //        .Filter(param, true);
+
+        //    var sorts = new List<SearchSort>();
+        //    sorts.Add(new SearchSort() { property = "intItemId" });
+        //    sorts.Add(new SearchSort() { property = "intItemLocationId" });
+        //    sorts.Add(new SearchSort() { property = "dtmDate", direction = "DESC" });
+        //    sorts.Add(new SearchSort() { property = "intInventoryTransactionId", direction = "ASC" });
+        //    sorts.AddRange(param.sort.ToList());
+        //    param.sort = sorts;
+            
+        //    var data = await query.ExecuteProjection(param, "intInventoryValuationKeyId").ToListAsync();
+
+        //    return new SearchResult()
+        //    {
+        //        data = data.AsQueryable(),
+        //        total = await query.CountAsync()
+        //    };
+        //}
+
         public async Task<SearchResult> GetInventoryValuation(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetInventoryValuation>()
-                .Filter(param, true);
 
-            var sorts = new List<SearchSort>();
-            sorts.Add(new SearchSort() { property = "intItemId" });
-            sorts.Add(new SearchSort() { property = "intItemLocationId" });
-            sorts.Add(new SearchSort() { property = "dtmDate", direction = "DESC" });
-            sorts.Add(new SearchSort() { property = "intInventoryTransactionId", direction = "DESC" });
-            sorts.AddRange(param.sort.ToList());
-            param.sort = sorts;
+            var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
+            var sort = ExpressionBuilder.GetSortSelector(param.sort);
+            var query = (
+                from v in _db.GetQuery<vyuICGetInventoryValuation>()
+                select v
+            ).Filter(param, true);   
+                  
+
+            // Initialize the beginning and running balances.     
+            decimal? dblBeginningBalance = 0;
+            decimal? dblRunningBalance = 0;
+            decimal? dblBeginningQty = 0;
+            decimal? dblRunningQty = 0;
+
+            // Get the beginning balance
+            if (param.start > 0)
+            {
+                dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Sum(s => s.dblValue);
+                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Sum(s => s.dblQuantity);
+            }
+
+            // Convert the Queryable into a list
+            //var paged_data = await query.Skip(param.start.Value).Take(param.limit.Value).ToListAsync();
+
+            var paged_data = await query.PagingBySelector(param).ToListAsync();
+            // Loop thru the list to assign the running balance per record. 
+            foreach (var row in paged_data)
+            {
+                // Update the balances
+                row.dblBeginningBalance = dblBeginningBalance;
+                dblRunningBalance = dblBeginningBalance + row.dblValue;
+                row.dblRunningBalance = dblRunningBalance;
+                dblBeginningBalance = dblRunningBalance;
+
+                // Update the Qty
+                row.dblBeginningQtyBalance = dblBeginningQty;
+                dblRunningQty = dblBeginningQty + row.dblQuantity;
+                row.dblRunningQtyBalance = dblRunningQty;
+                dblBeginningQty = dblRunningQty;
+            }
             
-            var data = await query.ExecuteProjection(param, "intInventoryValuationKeyId").ToListAsync();
-
             return new SearchResult()
             {
-                data = data.AsQueryable(),
+                data = paged_data.AsQueryable().Select(selector),
                 total = await query.CountAsync()
             };
         }
+
 
         /// <summary>
         /// Return Inventory Valuation of Item and some of its details
