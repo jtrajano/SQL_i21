@@ -30,6 +30,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strUnitMeasure = UOM.strUnitMeasure
 	, dblItemUOMConv = ItemUOM.dblUnitQty
 	, strUnitType = UOM.strUnitType
+	, ShipmentItem.intCurrencyId
+	, Currency.strCurrency
 	, strWeightUOM = WeightUOM.strUnitMeasure
 	, dblWeightItemUOMConv = ItemWeightUOM.dblUnitQty
 	, dblUnitCost = ShipmentItemSource.dblCost
@@ -57,3 +59,4 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId    
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ShipmentItem.intDiscountSchedule
+	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentItem.intCurrencyId

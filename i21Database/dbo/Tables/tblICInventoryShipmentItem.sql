@@ -23,6 +23,7 @@ Type the overview for the table here.
 		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
 		[intItemUOMId] INT NOT NULL, 
+		[intCurrencyId] INT NULL,
 		[intWeightUOMId] INT NULL,
 		[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intDockDoorId] INT NULL, 
@@ -39,7 +40,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 	)
 
 	GO
