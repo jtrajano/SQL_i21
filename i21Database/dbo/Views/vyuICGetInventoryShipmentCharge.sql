@@ -9,6 +9,7 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, strItemDescription = Charge.strDescription
 	, ShipmentCharge.strCostMethod
 	, ShipmentCharge.dblRate
+	, ShipmentCharge.dblExchangeRate
 	, strCostUOM = UOM.strUnitMeasure
 	, Charge.strUnitType
 	, ShipmentCharge.intCurrencyId
