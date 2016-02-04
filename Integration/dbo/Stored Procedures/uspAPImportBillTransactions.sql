@@ -90,9 +90,9 @@ BEGIN
 			--CREATE AP ACCOUNT CATEGORY
 			EXEC uspGLUpdateAPAccountCategory
 
-			EXEC uspAPImportBillsFromAPIVCMST @UserId = @UserId, @DateFrom = @DateFrom, @DateTo= @DateTo, @totalPostedImport = @totalPostedImport OUTPUT
+			EXEC uspAPImportBillsFromAPIVCMST @UserId = @UserId, @DateFrom = @DateFrom, @DateTo= @DateTo, @totalImported = @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
-			EXEC uspAPImportBillsFromAPTRXMST @UserId = @UserId, @DateFrom = @DateFrom, @DateTo= @DateTo, @totalPostedImport = @totalPostedImport OUTPUT
+			EXEC uspAPImportBillsFromAPTRXMST @UserId = @UserId, @DateFrom = @DateFrom, @DateTo= @DateTo, @totalImported = @totalPostedImport OUTPUT
 			SET @Total = @Total + @totalPostedImport;
 		END
 		ELSE
