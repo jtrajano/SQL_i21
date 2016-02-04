@@ -3358,6 +3358,10 @@
     <Build Include="dbo\Views\vyuMFShiftActivityWastage.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityQuote.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGetContracts.sql" />
+    <Build Include="dbo\Tables\tblSMContactMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMFixUserRoleMenus.sql" />
+    <Build Include="dbo\Tables\tblEMEntityToRole.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMTogglePortalAccess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

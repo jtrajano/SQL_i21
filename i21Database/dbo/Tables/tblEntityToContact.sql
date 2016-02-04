@@ -6,6 +6,7 @@
 	[strUserType]              NVARCHAR (5) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPortalAccess]          BIT          NOT NULL,    
 	[ysnDefaultContact] BIT NOT NULL DEFAULT ((0)), 
+	[intEntityRoleId] INT NULL, 
     [intConcurrencyId]     INT DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntity2Contact1] PRIMARY KEY CLUSTERED ([intEntityToContactId] ASC),
     --CONSTRAINT [FK_tblEntityToContact_tblEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityId]) ON DELETE CASCADE
