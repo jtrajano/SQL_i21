@@ -5,7 +5,7 @@
 	,@intLocationId INT
 	,@intOrderTypeId INT
 	,@intBlendRequirementId INT
-	,@intPatternCode int
+	,@intPatternCode INT
 	,@ysnProposed BIT = 0
 	,@strPatternString NVARCHAR(50) OUTPUT
 AS
@@ -32,7 +32,7 @@ BEGIN
 		,@strSequence NVARCHAR(50)
 		,@strSQL NVARCHAR(MAX)
 		,@intRecordId INT
-		,@intPatternId int
+		,@intPatternId INT
 
 	SET @dtmCurrentDate = GetDate()
 
@@ -63,6 +63,16 @@ BEGIN
 		SELECT @intPatternId = intPatternId
 		FROM dbo.tblMFPattern
 		WHERE intPatternCode = @intPatternCode
+
+	IF @intPatternId IS NULL
+	BEGIN
+		EXEC dbo.uspSMGetStartingNumber @intPatternCode
+			,@strPatternString OUTPUT
+
+		--SELECT @strPatternString AS strPatternString
+
+		RETURN
+	END
 
 	SET @strPatternString = ''
 
@@ -216,7 +226,7 @@ BEGIN
 					END
 
 			IF @intPrimaryColumnId IS NULL
-			SELECT @intPrimaryColumnId=0
+				SELECT @intPrimaryColumnId = 0
 
 			SELECT @strSQL = 'Select ' + @strColumnName + ' From ' + @strTableName + ' Where ' + @strPrimaryColumnName + ' = ' + LTRIM(@intPrimaryColumnId)
 
@@ -237,7 +247,6 @@ BEGIN
 
 			SELECT @strPatternString = @strPatternString + strRecordName
 			FROM @tblMFRecord
-
 		END
 
 		IF @intSubPatternTypeId = 6
@@ -313,5 +322,5 @@ BEGIN
 		WHERE intRecordId > @intRecordId
 	END
 
-	SELECT @strPatternString AS strPatternString
+	--SELECT @strPatternString AS strPatternString
 END
