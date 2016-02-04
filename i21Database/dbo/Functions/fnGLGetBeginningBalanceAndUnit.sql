@@ -24,7 +24,7 @@ RETURN
 	FROM tblGLAccount A
 		LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 		LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
-		CROSS APPLY (SELECT dtmDate from tblGLFiscalYear where dtmDateFrom = @dtmDate) D
+		OUTER APPLY (SELECT dtmDate from tblGLFiscalYear where dtmDateFrom = @dtmDate) D
 	WHERE strAccountId = @strAccountId and C.dtmDate < @dtmDate and strCode <> ''
 	GROUP BY strAccountId
 )
