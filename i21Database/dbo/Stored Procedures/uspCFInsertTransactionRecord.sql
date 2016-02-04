@@ -61,7 +61,7 @@ BEGIN
 	------------------------------------------------------------
 	--			    TRUNCATE IMPORT LOG TABLE 				  --
 	------------------------------------------------------------
-	truncate table tblCFFailedImportedTransaction
+	--truncate table tblCFFailedImportedTransaction
 	------------------------------------------------------------
 
 
@@ -101,6 +101,8 @@ BEGIN
 		,[strTaxCode]					NVARCHAR(100)						
 		,[ysnTaxExempt]					BIT
 		,[strTaxGroup]					NVARCHAR(100)
+		,[ysnInvalid]					BIT
+		,[strReason]					NVARCHAR(MAX)
 	)
 	DECLARE @tblTaxRateTable		TABLE
 	(
@@ -412,138 +414,6 @@ BEGIN
 
 
 
-
-		------------------------------------------------------------
-		--				       GET TAX RECORDS					  --
-		------------------------------------------------------------
-		IF (@strTransactionType = 'Local/Network')
-		BEGIN
-			SELECT  
-			@strCountry = strCountry 
-			,@strCity = strCity
-			,@strState = strStateProvince
-			FROM tblSMCompanyLocation 
-			WHERE intCompanyLocationId = @intARItemLocationId
-
-			SELECT @intTaxGroupId = @intTaxMasterId
-
-		INSERT INTO @tblTaxTable
-		SELECT
-		[intTransactionDetailTaxId]
-		,[intTransactionDetailId]  AS [intInvoiceDetailId]
-		,NULL
-		,[intTaxGroupId]
-		,[intTaxCodeId]
-		,[intTaxClassId]
-		,[strTaxableByOtherTaxes]
-		,[strCalculationMethod]
-		,[numRate]
-		,[dblTax]
-		,[dblAdjustedTax]
-		,[intTaxAccountId]    AS [intSalesTaxAccountId]
-		,[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]
-		,[strTaxCode]
-		,[ysnTaxExempt]
-		,[strTaxGroup]
-		FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer]
-		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId, NULL, 0,NULL)
-			
-		END 
-		ELSE IF (@strTransactionType = 'Remote'  OR @strTransactionType = 'Extended Remote')
-		BEGIN
-
-		INSERT INTO @tblTaxTable
-		SELECT
-			 [intTransactionDetailTaxId]
-			,[intTransactionDetailId]  AS [intInvoiceDetailId]
-			,NULL
-			,[intTaxGroupId]
-			,[intTaxCodeId]
-			,[intTaxClassId]
-			,[strTaxableByOtherTaxes]
-			,[strCalculationMethod]
-			,[numRate]
-			,[dblTax]
-			,[dblAdjustedTax]
-			,[intTaxAccountId]    AS [intSalesTaxAccountId]
-			,[ysnSeparateOnInvoice]
-			,[ysnCheckoffTax]
-			,[strTaxCode]
-			,[ysnTaxExempt]
-			,[strTaxGroup]
-		 FROM
-		 [dbo].[fnCFRemoteTaxes](
-			 @TaxState		
-			,@FET	
-			,@SET	
-			,@SST	
-			,@LC1	
-			,@LC2	
-			,@LC3	
-			,@LC4		
-			,@LC5		
-			,@LC6		
-			,@LC7		
-			,@LC8		
-			,@LC9		
-			,@LC10			
-			,@LC11			
-			,@LC12			
-			,@intNetworkId)
-							
-		END					 	
-
-
-		INSERT INTO @tblTaxRateTable
-		SELECT 
-		 [intTransactionDetailTaxId]
-		,[intTransactionDetailId]  AS [intInvoiceDetailId]
-		,[intTaxGroupMasterId]
-		,[intTaxGroupId]
-		,[intTaxCodeId]
-		,[intTaxClassId]
-		,[strTaxableByOtherTaxes]
-		,[strCalculationMethod]
-		,[numRate]
-		,[dblTax]
-		,[dblAdjustedTax]
-		,[intTaxAccountId]    AS [intSalesTaxAccountId]
-		,[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]
-		,[strTaxCode]
-		,[ysnTaxExempt]
-		,[strTaxGroup]
-		FROM @tblTaxTable
-		WHERE LOWER(strCalculationMethod) = 'percentage'
-		INSERT INTO @tblTaxUnitTable
-		SELECT 
-		 [intTransactionDetailTaxId]
-		,[intTransactionDetailId]  AS [intInvoiceDetailId]
-		,[intTaxGroupMasterId]
-		,[intTaxGroupId]
-		,[intTaxCodeId]
-		,[intTaxClassId]
-		,[strTaxableByOtherTaxes]
-		,[strCalculationMethod]
-		,[numRate]
-		,[dblTax]
-		,[dblAdjustedTax]
-		,[intTaxAccountId]    AS [intSalesTaxAccountId]
-		,[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]
-		,[strTaxCode]
-		,[ysnTaxExempt]
-		,[strTaxGroup]
-		FROM @tblTaxTable
-		WHERE LOWER(strCalculationMethod) = 'unit'
-		------------------------------------------------------------
-
-
-
-
-
 		------------------------------------------------------------
 		--				INSERT TRANSACTION RECORD				  --
 		------------------------------------------------------------
@@ -664,6 +534,8 @@ BEGIN
 
 
 
+
+
 		------------------------------------------------------------
 		--				UPDATE CONTRACTS QUANTITY				  --
 		------------------------------------------------------------
@@ -680,6 +552,198 @@ BEGIN
 
 
 
+
+
+		
+
+		------------------------------------------------------------
+		--				       GET TAX RECORDS					  --
+		------------------------------------------------------------
+		IF (@strTransactionType = 'Local/Network')
+		BEGIN
+			SELECT  
+			@strCountry = strCountry 
+			,@strCity = strCity
+			,@strState = strStateProvince
+			FROM tblSMCompanyLocation 
+			WHERE intCompanyLocationId = @intARItemLocationId
+
+			SELECT @intTaxGroupId = @intTaxMasterId
+
+		INSERT INTO @tblTaxTable
+		(
+			[intTransactionDetailTaxId]
+			,[intTransactionDetailId]	
+			,[intTaxGroupMasterId]		
+			,[intTaxGroupId]			
+			,[intTaxCodeId]				
+			,[intTaxClassId]			
+			,[strTaxableByOtherTaxes]	
+			,[strCalculationMethod]		
+			,[numRate]					
+			,[dblTax]					
+			,[dblAdjustedTax]			
+			,[intTaxAccountId]			
+			,[ysnSeparateOnInvoice]		
+			,[ysnCheckoffTax]			
+			,[strTaxCode]				
+			,[ysnTaxExempt]				
+			,[strTaxGroup]			
+		)
+		SELECT
+			 [intTransactionDetailTaxId]
+			,[intTransactionDetailId]  AS [intInvoiceDetailId]
+			,NULL
+			,[intTaxGroupId]
+			,[intTaxCodeId]
+			,[intTaxClassId]
+			,[strTaxableByOtherTaxes]
+			,[strCalculationMethod]
+			,[numRate]
+			,[dblTax]
+			,[dblAdjustedTax]
+			,[intTaxAccountId]    AS [intSalesTaxAccountId]
+			,[ysnSeparateOnInvoice]
+			,[ysnCheckoffTax]
+			,[strTaxCode]
+			,[ysnTaxExempt]
+			,[strTaxGroup]
+		FROM
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer]
+		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId, NULL, 0,NULL)
+			
+		END 
+		ELSE IF (@strTransactionType = 'Remote'  OR @strTransactionType = 'Extended Remote')
+		BEGIN
+
+		INSERT INTO @tblTaxTable 
+		(
+			 [intTransactionDetailTaxId]
+			,[intTransactionDetailId]	
+			,[intTaxGroupMasterId]		
+			,[intTaxGroupId]			
+			,[intTaxCodeId]				
+			,[intTaxClassId]			
+			,[strTaxableByOtherTaxes]	
+			,[strCalculationMethod]		
+			,[numRate]					
+			,[dblTax]					
+			,[dblAdjustedTax]			
+			,[intTaxAccountId]			
+			,[ysnSeparateOnInvoice]		
+			,[ysnCheckoffTax]			
+			,[strTaxCode]				
+			,[ysnTaxExempt]				
+			,[strTaxGroup]				
+			,[ysnInvalid]				
+			,[strReason]		
+		)		
+		SELECT
+			 [intTransactionDetailTaxId]
+			,[intTransactionDetailId]  AS [intInvoiceDetailId]
+			,NULL
+			,[intTaxGroupId]
+			,[intTaxCodeId]
+			,[intTaxClassId]
+			,[strTaxableByOtherTaxes]
+			,[strCalculationMethod]
+			,[numRate]
+			,[dblTax]
+			,[dblAdjustedTax]
+			,[intTaxAccountId]    AS [intSalesTaxAccountId]
+			,[ysnSeparateOnInvoice]
+			,[ysnCheckoffTax]
+			,[strTaxCode]
+			,[ysnTaxExempt]
+			,[strTaxGroup]
+			,[ysnInvalid]
+			,[strReason]
+		 FROM
+		 [dbo].[fnCFRemoteTaxes](
+			 @TaxState		
+			,@FET	
+			,@SET	
+			,@SST	
+			,@LC1	
+			,@LC2	
+			,@LC3	
+			,@LC4		
+			,@LC5		
+			,@LC6		
+			,@LC7		
+			,@LC8		
+			,@LC9		
+			,@LC10			
+			,@LC11			
+			,@LC12			
+			,@intNetworkId)
+							
+		END
+		
+		------------------------------------------------------------
+		--			VALIDATION FOR UNMAPPED NETWORK TAX			  --
+		------------------------------------------------------------
+		INSERT INTO tblCFFailedImportedTransaction
+		(
+			intTransactionId
+			,strFailedReason
+		)
+		SELECT
+			@Pk 					 	
+			,strReason
+		FROM @tblTaxTable
+		WHERE ysnInvalid = 1
+
+		IF((SELECT COUNT(*) FROM @tblTaxTable WHERE ysnInvalid = 1) > 0)
+		BEGIN
+			UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @Pk
+		END
+		------------------------------------------------------------
+
+
+		INSERT INTO @tblTaxRateTable
+		SELECT 
+		 [intTransactionDetailTaxId]
+		,[intTransactionDetailId]  AS [intInvoiceDetailId]
+		,[intTaxGroupMasterId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[numRate]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[intTaxAccountId]    AS [intSalesTaxAccountId]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[strTaxCode]
+		,[ysnTaxExempt]
+		,[strTaxGroup]
+		FROM @tblTaxTable
+		WHERE LOWER(strCalculationMethod) = 'percentage'
+		INSERT INTO @tblTaxUnitTable
+		SELECT 
+		 [intTransactionDetailTaxId]
+		,[intTransactionDetailId]  AS [intInvoiceDetailId]
+		,[intTaxGroupMasterId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[numRate]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[intTaxAccountId]    AS [intSalesTaxAccountId]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[strTaxCode]
+		,[ysnTaxExempt]
+		,[strTaxGroup]
+		FROM @tblTaxTable
+		WHERE LOWER(strCalculationMethod) = 'unit'
+		------------------------------------------------------------
 
 
 		------------------------------------------------------------
