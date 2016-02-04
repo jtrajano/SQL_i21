@@ -18,6 +18,7 @@
 	[strRemark] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL, 
 	[intConcurrencyId] INT NOT NULL,
 	[ysnExportProvPrice] BIT NULL,
+	[dtmExportProvPrice] DATETIME NULL,
 	[ysnExported] BIT NULL,
 	[dtmExported] DATETIME NULL,
 	
