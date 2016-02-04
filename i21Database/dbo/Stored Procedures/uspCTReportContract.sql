@@ -70,7 +70,7 @@ BEGIN TRY
 			   (SELECT			
 					CHAR(13)+CHAR(10) + DM.strDocumentName	
 					FROM tblCTContractDocument CD	
-					JOIN tblICDocument DM ON DM.intDocumentId = CD.intContractDocumentId	
+					JOIN tblICDocument DM ON DM.intDocumentId = CD.intDocumentId	
 					WHERE CD.intContractHeaderId=CH.intContractHeaderId	
 					ORDER BY DM.strDocumentName		
 					FOR XML PATH(''), TYPE				
@@ -96,10 +96,10 @@ BEGIN TRY
 			SQ.strLocationName,
 			CY.strCropYear,
 
-			SQ.srtLoadingPoint,
+			SQ.srtLoadingPoint + ' :' srtLoadingPoint,
 			SQ.strLoadingPointName,
 			SQ.strShipper,
-			SQ.srtDestinationPoint,
+			SQ.srtDestinationPoint + ' :' srtDestinationPoint,
 			SQ.strDestinationPointName,
 			SQ.strLoadingPointName + ' to ' + SQ.strDestinationPointName AS strLoadingAndDestinationPointName,
 
