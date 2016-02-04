@@ -4662,4 +4662,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5f48a8f4-f4c9-46ec-8141-d6ee555a6d7b" ChangeDateTime="02/03/2016 08:11:53">
+    <Property Name="ElementName" Value="[dbo].[tblICLotStatus].[intBackColor]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICLotStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strBackColor" />
+  </Operation>
 </Operations>
