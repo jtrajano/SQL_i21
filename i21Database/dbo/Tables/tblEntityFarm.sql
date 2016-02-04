@@ -22,6 +22,6 @@
     [intConcurrencyId]		INT            NOT NULL,
     CONSTRAINT [PK_tblEntityFarm] PRIMARY KEY CLUSTERED ([intFarmFieldId] ASC),
 	CONSTRAINT [FK_tblEntityFarm_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [UK_tblEntityFarm_strFarmNumber_strFieldNumber] UNIQUE NONCLUSTERED ([strFarmNumber] ASC, [strFieldNumber] ASC)	
+	CONSTRAINT [UK_tblEntityFarm_strFarmNumber_strFieldNumber] UNIQUE NONCLUSTERED ([strFarmNumber] ASC, [strFieldNumber] ASC,[intEntityId] ASC)	
 
 )
