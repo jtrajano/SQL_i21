@@ -63,6 +63,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intTaxGroupId				INT,
 							intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
+							strMaintenanceType			NVARCHAR(100),
 							strItemType					NVARCHAR(100),
 							strSalesOrderNumber			NVARCHAR(100),
 							strShipmentNumber			NVARCHAR(100))
@@ -93,6 +94,7 @@ SELECT SI.intItemId
 	 , SI.intTaxGroupId
 	 , SI.intSalesOrderDetailId
 	 , NULL
+	 , SOD.strMaintenanceType
 	 , I.strType
 	 , SI.strSalesOrderNumber
 	 , NULL
@@ -122,6 +124,7 @@ SELECT ICSI.intItemId
 	 , SOD.intTaxGroupId
 	 , SOD.intSalesOrderDetailId
 	 , ICSI.intInventoryShipmentItemId
+	 , SOD.strMaintenanceType
 	 , ICI.strType
 	 , SO.strSalesOrderNumber
 	 , ICS.strShipmentNumber
@@ -135,19 +138,20 @@ AND ICS.ysnPosted = 1
 
 --GET SOFTWARE ITEMS
 IF @FromShipping = 0
-	BEGIN --NON STOCK SOFTWARE
+	BEGIN --MAINTENANCE/SAAS/LICENSEORMAINTENANCE SOFTWARE ITEMS
 		INSERT INTO @tblSODSoftware (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
 		SELECT intSalesOrderDetailId
 				, @dblZeroAmount
 				, @dblZeroAmount
 				, dblMaintenanceAmount
-				, dblMaintenanceAmount * dblQtyRemaining
-		FROM @tblItemsToInvoice WHERE strItemType = 'Software'
+				, dblMaintenanceAmount * dblQtyRemaining				
+		FROM @tblItemsToInvoice 
+		WHERE strItemType = 'Software' AND strMaintenanceType IN ('Maintenance Only', 'SaaS', 'License/Maintenance')
 			ORDER BY intSalesOrderDetailId
 	END
 	
 --COMPUTE INVOICE TOTAL AMOUNTS FOR SOFTWARE
-SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
+SELECT @dblSalesOrderSubtotal	  = SUM(dblPrice)
 	    , @dblTax				  = SUM(dblTotalTax)
 		, @dblSalesOrderTotal	  = SUM(dblTotal)
 		, @dblDiscount			  = SUM(dblDiscount)
@@ -186,7 +190,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 	BEGIN
 		SELECT TOP 1 @SoftwareInvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @EntityCustomerId AND ysnTemplate = 1 AND strType = 'Software'
 		
-		IF ISNULL(@SoftwareInvoiceId, 0) <> 0
+		IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			BEGIN
 				--UPDATE EXISTING RECURRING INVOICE
 				UPDATE tblARInvoice 
@@ -365,7 +369,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 	END
 
 --CHECK IF THERE IS NON STOCK ITEMS
-IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
+IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN ('Maintenance Only', 'SaaS'))
 	BEGIN
 		--INSERT INVOICE HEADER
 		BEGIN TRY
@@ -523,6 +527,11 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 		DECLARE @ysnSOSoftwareType BIT
 		SELECT TOP 1 @ysnSOSoftwareType = CASE WHEN strType = 'Software' THEN 1 ELSE 0 END
 		FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @tblItemsToInvoice WHERE strItemType = 'Software' AND strMaintenanceType NOT IN ('Maintenance Only', 'SaaS'))
+			BEGIN
+				SET @ysnSOSoftwareType = 0
+			END
 
 		IF @ysnSOSoftwareType = 1 AND ISNULL(@NewInvoiceId, 0) > 0
 			BEGIN
