@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf6282b2c01cef039f8e9118adedd1812a7636f52251976574d11775f8f32241c))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets01b8342366abee34b06394b2d22acc4ee467065147f00f68bbabf6930debfa91))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsf6282b2c01cef039f8e9118adedd1812a7636f52251976574d11775f8f32241c : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets01b8342366abee34b06394b2d22acc4ee467065147f00f68bbabf6930debfa91 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "f6282b2c01cef039f8e9118adedd1812a7636f52251976574d11775f8f32241c"; }
+            get { return "01b8342366abee34b06394b2d22acc4ee467065147f00f68bbabf6930debfa91"; }
         }
 
         /// <summary>
@@ -3754,13 +3754,14 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLotStatus
-        [CodeFirstDatabaseSchema.tblICLotStatus](T1.tblICLotStatus_intLotStatusId, T1.tblICLotStatus_strSecondaryStatus, T1.tblICLotStatus_strDescription, T1.tblICLotStatus_strPrimaryStatus, T1.tblICLotStatus_intSort, T1.tblICLotStatus_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICLotStatus](T1.tblICLotStatus_intLotStatusId, T1.tblICLotStatus_strSecondaryStatus, T1.tblICLotStatus_strDescription, T1.tblICLotStatus_strPrimaryStatus, T1.tblICLotStatus_strBackColor, T1.tblICLotStatus_intSort, T1.tblICLotStatus_intConcurrencyId)
     FROM (
         SELECT 
             T.intLotStatusId AS tblICLotStatus_intLotStatusId, 
             T.strSecondaryStatus AS tblICLotStatus_strSecondaryStatus, 
             T.strDescription AS tblICLotStatus_strDescription, 
             T.strPrimaryStatus AS tblICLotStatus_strPrimaryStatus, 
+            T.strBackColor AS tblICLotStatus_strBackColor, 
             T.intSort AS tblICLotStatus_intSort, 
             T.intConcurrencyId AS tblICLotStatus_intConcurrencyId, 
             True AS _from0
@@ -6769,13 +6770,14 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLotStatuss
-        [iRely.Inventory.Model.tblICLotStatus](T1.tblICLotStatus_intLotStatusId, T1.tblICLotStatus_strSecondaryStatus, T1.tblICLotStatus_strDescription, T1.tblICLotStatus_strPrimaryStatus, T1.tblICLotStatus_intSort, T1.tblICLotStatus_intConcurrencyId)
+        [iRely.Inventory.Model.tblICLotStatus](T1.tblICLotStatus_intLotStatusId, T1.tblICLotStatus_strSecondaryStatus, T1.tblICLotStatus_strDescription, T1.tblICLotStatus_strPrimaryStatus, T1.tblICLotStatus_strBackColor, T1.tblICLotStatus_intSort, T1.tblICLotStatus_intConcurrencyId)
     FROM (
         SELECT 
             T.intLotStatusId AS tblICLotStatus_intLotStatusId, 
             T.strSecondaryStatus AS tblICLotStatus_strSecondaryStatus, 
             T.strDescription AS tblICLotStatus_strDescription, 
             T.strPrimaryStatus AS tblICLotStatus_strPrimaryStatus, 
+            T.strBackColor AS tblICLotStatus_strBackColor, 
             T.intSort AS tblICLotStatus_intSort, 
             T.intConcurrencyId AS tblICLotStatus_intConcurrencyId, 
             True AS _from0

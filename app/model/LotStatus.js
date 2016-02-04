@@ -15,6 +15,7 @@ Ext.define('Inventory.model.LotStatus', {
         { name: 'strSecondaryStatus', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'strPrimaryStatus', type: 'string'},
+        { name: 'strBackColor', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],
 

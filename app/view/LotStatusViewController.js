@@ -59,6 +59,28 @@ Ext.define('Inventory.view.LotStatusViewController', {
                                 store: '{primaryStatus}'
                             }
                         }
+                    },
+                    {
+                        itemId: 'colBackColor',
+                        dataIndex: 'strBackColor',
+                        text: 'Backcolor',
+                        flex: 1,
+                        editor: {
+                            itemId: 'cboBackColor',
+                            xtype: 'colorpickercombobox',
+                            listeners: {
+                                select: function(picker, selColor) {
+                                    console.log('test');
+                                    var grid = picker.up('grid');
+                                    
+                                    if (selColor) {
+                                        picker.setStyle({
+                                            backgroundColor: selColor
+                                        });
+                                    }
+                                }
+                            }
+                        }
                     }
                 ]
             })
