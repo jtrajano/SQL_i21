@@ -59,3 +59,5 @@ GO
 GO
 	PRINT N'END NOTIFICATION'
 GO
+
+	DELETE tblSMConnectedUser
