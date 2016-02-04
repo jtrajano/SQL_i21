@@ -45,8 +45,11 @@ BEGIN
      				ON CT.intContractDetailId = TR.intContractDetailId
      			LEFT JOIN tblTRSupplyPoint SP 
      				ON SP.intSupplyPointId = TR.intSupplyPointId
+				LEFT JOIN vyuICGetItemStock IC
+			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId	
      	WHERE	TL.intLoadHeaderId = @intLoadHeaderId 
      			AND TR.strOrigin = 'Terminal'
+				AND IC.strType != 'Non-Inventory'
      			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0);
 	SELECT @total = COUNT(*) FROM #tmpAddItemReceiptResult;
     IF (@total = 0)
