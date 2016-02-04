@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspRKDPRInvDailyPositionDetail]
+﻿CREATE PROCEDURE [dbo].[uspRKDPRInvDailyPositionDetail] 
 	 @intCommodityId nvarchar(max)  
-	,@intLocationId nvarchar(max) = NULL
+	,@intLocationId int = NULL
 AS
 BEGIN
 	 DECLARE @Commodity AS TABLE 
@@ -22,12 +22,22 @@ DECLARE @Final AS TABLE (
 					strCustomer nvarchar(50),
 					intReceiptNo nvarchar(50),
 					strContractNumber nvarchar(100),
+					strCustomerReference nvarchar(100),
+					strDistributionOption nvarchar(100),
+					strDPAReceiptNo nvarchar(100),
+					dblDiscDue DECIMAL(24,10),
+					dblStorageDue DECIMAL(24,10),	
+					dtmLastStorageAccrueDate datetime,
+					strScheduleId nvarchar(100),
+					strTicket nvarchar(100),
 					dtmOpenDate datetime,
-					dblOriginalQuantity  numeric(24,10),
-					dblRemainingQuantity numeric(24,10),
-					intCommodityId int
+					dtmDeliveryDate datetime,
+					dtmTicketDateTime datetime,
+					dblOriginalQuantity  DECIMAL(24,10),
+					dblRemainingQuantity DECIMAL(24,10),
+					intCommodityId int,
+					strItemNo nvarchar(100)
 )
-
 
 DECLARE @mRowNumber INT
 DECLARE @intCommodityId1 INT
@@ -35,116 +45,86 @@ DECLARE @strDescription NVARCHAR(50)
 
 SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
 
-	WHILE @mRowNumber > 0
-		BEGIN
-			SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
-			SELECT @strDescription = strDescription	FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
+WHILE @mRowNumber > 0
+	BEGIN
+		SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
+		SELECT @strDescription = strCommodityCode	FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
 if @intCommodityId >= 0
 BEGIN
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-	SELECT 1 AS intSeqId,@strDescription
-		,'In-House' AS [strType]
-		,ISNULL(invQty, 0) - ISNULL(ReserveQty, 0) + ISNULL(dblBalance, 0) AS dblTotal,@intCommodityId
-	FROM (
-		SELECT (
-				SELECT sum(isnull(it1.dblUnitOnHand, 0))
+INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intCommodityId)
+
+				SELECT 1 AS intSeqId,@strDescription,'In-House' AS [strType],sum(isnull(it1.dblUnitOnHand, 0)), ic.strLocationName,i.strItemNo,@intCommodityId
 				FROM tblICItem i
+				INNER JOIN tblICInventoryReceiptItem ii on ii.intItemId = i.intItemId
+				INNER JOIN tblICInventoryReceipt ir on ir.intInventoryReceiptId=ii.intInventoryReceiptId
 				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
 				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				WHERE i.intCommodityId =@intCommodityId
-					AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
-				) AS invQty
-			,(
-				SELECT SUM(isnull(sr1.dblQty, 0))
+				INNER JOIN tblSMCompanyLocation ic on ic.intCompanyLocationId = il.intLocationId
+				WHERE i.intCommodityId =@intCommodityId AND il.intLocationId= case when isnull(0,0)=0 then il.intLocationId else 0 end
+				group by ic.strLocationName,i.strItemNo,strReceiptNumber,dtmReceiptDate
+				UNION
+				SELECT 1 AS intSeqId,@strDescription,'In-House' AS [strType],-isnull(sr1.dblQty, 0), ic.strLocationName,i.strItemNo,@intCommodityId
 				FROM tblICItem i
 				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
 				INNER JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId
 				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				WHERE i.intCommodityId = @intCommodityId
-					AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
-				) AS ReserveQty
-			,(
-				SELECT ISNULL(SUM(ISNULL(Balance,0)),0)
-				FROM vyuGRGetStorageDetail
-				WHERE ysnCustomerStorage <> 1
-					AND intCommodityId = @intCommodityId
-					AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
-				) dblBalance
-		) t
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-	SELECT 2 AS intSeqId,@strDescription
-		,'Off-Site' [Storage Type]
-		,isnull(sum(Balance), 0) dblTotal,@intCommodityId
-	FROM vyuGRGetStorageOffSiteDetail
-	WHERE ysnReceiptedStorage = 1 AND ysnExternal = 1
-		AND strOwnedPhysicalStock = 'Customer'
-		AND intCommodityId = @intCommodityId
+				INNER JOIN tblSMCompanyLocation ic on ic.intCompanyLocationId = il.intLocationId
+				WHERE i.intCommodityId = @intCommodityId	AND il.intLocationId= case when isnull(0,0)=0 then il.intLocationId else 0 end
+				UNION
+				SELECT 1 AS intSeqId,@strDescription,'In-House' AS [strType],(ISNULL(Balance,0)),strLocationName,strItemNo,@intCommodityId
+				FROM vyuGRGetStorageDetail 
+				WHERE ysnCustomerStorage <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(0,0)=0 then intCompanyLocationId else 0 end
+
+INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId ,strLocationName ,dtmDeliveryDate ,strTicket ,
+					strCustomerReference,strDPAReceiptNo ,dblDiscDue ,dblStorageDue , dtmLastStorageAccrueDate ,strScheduleId)
+		SELECT 2,@strDescription,'Off-Site' strType,ISNULL(Balance, 0) dblTotal,intCommodityId,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,
+				Ticket strTicket ,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,
+				[Storage Due] AS dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId  
+		FROM vyuGRGetStorageOffSiteDetail  
+		WHERE ysnReceiptedStorage = 1 AND ysnExternal = 1 AND strOwnedPhysicalStock = 'Customer' AND intCommodityId = @intCommodityId 
 		AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-	SELECT 3 AS intSeqId,@strDescription
-		,'Purchase In-Transit' AS [strType]
-		,ISNULL(ReserveQty, 0) AS dblTotal,@intCommodityId
+INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intCommodityId)
+	SELECT 3 AS intSeqId,@strDescription,'Purchase In-Transit' AS [strType],ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemNo,@intCommodityId
 	FROM (
-		SELECT (
-				SELECT sum(isnull(it1.dblUnitOnHand, 0))
-				FROM tblICItem i
-				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
-				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				WHERE i.intCommodityId = @intCommodityId
-				AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
-				) AS invQty
-			,(
-				SELECT SUM(isnull(sr1.dblQty, 0))
+				SELECT (isnull(sr1.dblQty, 0)) as ReserveQty,ic.strLocationName,i.strItemNo
 				FROM tblICItem i
 				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
 				INNER JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId
 				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
+				INNER JOIN tblSMCompanyLocation ic on ic.intCompanyLocationId = il.intLocationId
 				WHERE i.intCommodityId = @intCommodityId
 			    AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end					
-			 ) AS ReserveQty
 		) t
 
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
+INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intCommodityId)
 SELECT 4 AS intSeqId,@strDescription
 		,'Sales In-Transit' AS [strType]
-		,ISNULL(ReserveQty, 0) AS dblTotal,@intCommodityId
+		,ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemNo,@intCommodityId
 	FROM (
-		SELECT (
-				SELECT sum(isnull(it1.dblUnitOnHand, 0))
-				FROM tblICItem i
-				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
-				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				WHERE i.intCommodityId = @intCommodityId
-					  AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
-				) AS invQty
-			,(
-				SELECT SUM(isnull(sr1.dblQty, 0))
+		SELECT (isnull(sr1.dblQty, 0)) as ReserveQty,ic.strLocationName,i.strItemNo
 				FROM tblICItem i
 				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
 				INNER JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId
 				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
+				INNER JOIN tblSMCompanyLocation ic on ic.intCompanyLocationId = il.intLocationId
 				WHERE i.intCommodityId = @intCommodityId
-					 AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
-				) AS ReserveQty
+			    AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end	
 		) t
 
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-	SELECT 5 AS intSeqId,@strDescription
-		,*,@intCommodityId
-	FROM (
-		SELECT [Storage Type] strType
-			,ISNULL(SUM(ISNULL(Balance, 0)), 0) dblTotal
-		FROM vyuGRGetStorageDetail
-		WHERE intCommodityId = @intCommodityId
-		     AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
-			AND ysnDPOwnedType = 0 AND ysnReceiptedStorage = 0	GROUP BY [Storage Type]
-		) t
+INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+					  dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId)
+		SELECT 5,@strDescription,[Storage Type] strType,ISNULL(Balance, 0) dblTotal,intCommodityId,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+		,Customer as strCustomerReference,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
+		,dtmLastStorageAccrueDate ,strScheduleId    
+		FROM vyuGRGetStorageDetail  
+		WHERE intCommodityId = @intCommodityId AND ysnDPOwnedType = 0  AND ysnReceiptedStorage = 0  
+		AND	intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
+INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,intCommodityId)
 	SELECT 7 AS intSeqId,@strDescription
 		,'Total Non-Receipted' [Storage Type]
-		,sum(Balance) dblTotal,@intCommodityId
+		,(Balance) dblTotal,strLocationName,strItemNo, @intCommodityId
 	FROM vyuGRGetStorageDetail
 	WHERE ysnReceiptedStorage = 0
 		AND strOwnedPhysicalStock = 'Customer'
@@ -152,39 +132,35 @@ INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
 		AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 	
 --Collatral Sale
-		INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCollateralId,strLocationName,strCustomer,intReceiptNo,strContractNumber,dtmOpenDate,dblOriginalQuantity,dblRemainingQuantity,intCommodityId)
-		SELECT 8, @strDescription,'Collatral Receipts - Sales' ,isnull(dblRemainingQuantity,0), c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
+INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCollateralId,strLocationName,strCustomer,intReceiptNo,strContractNumber,dtmOpenDate,dblOriginalQuantity,dblRemainingQuantity,intCommodityId)
+		SELECT 8, @strDescription,'Collateral Receipts - Sales' ,isnull(dblRemainingQuantity,0), c.intCollateralId,cl.strLocationName,ch.strEntityName,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
 		isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,@intCommodityId	
 		FROM tblRKCollateral c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
-		LEFT JOIN tblCTContractHeader ch on c.intContractHeaderId=ch.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		WHERE strType = 'Sale' AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
-
 -- Collatral Purchase
-
-		INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCollateralId,strLocationName,strCustomer,intReceiptNo,strContractNumber,dtmOpenDate,dblOriginalQuantity,dblRemainingQuantity,intCommodityId)
-		SELECT 8, @strDescription,'Collatral Receipts - Purchase' ,isnull(dblRemainingQuantity,0), c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
+INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCollateralId,strLocationName,strCustomer,intReceiptNo,strContractNumber,dtmOpenDate,dblOriginalQuantity,dblRemainingQuantity,intCommodityId)
+		SELECT 9, @strDescription,'Collateral Receipts - Purchase' ,isnull(dblRemainingQuantity,0), c.intCollateralId,cl.strLocationName,ch.strEntityName,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
 		isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,@intCommodityId	
 		FROM tblRKCollateral c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
-		LEFT JOIN tblCTContractHeader ch on c.intContractHeaderId=ch.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		WHERE strType = 'Purchase' AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
 
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-		SELECT 10 AS intSeqId,@strDescription,[Storage Type] strType
-			,isnull(SUM(Balance), 0) dblTotal,@intCommodityId
-		FROM vyuGRGetStorageOffSiteDetail
-		WHERE intCommodityId = @intCommodityId AND 
-		intCompanyLocationId = case when isnull(@intLocationId,0)=0 then intCompanyLocationId  else @intLocationId end
-		AND ysnReceiptedStorage = 1 AND ysnExternal <> 1
-		GROUP BY [Storage Type]
+INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+					  dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId)
+			SELECT 10,@strDescription,[Storage Type] strType,ISNULL(Balance, 0) dblTotal,intCommodityId  ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
+			,dtmLastStorageAccrueDate ,strScheduleId  
+			FROM vyuGRGetStorageOffSiteDetail  WHERE ysnReceiptedStorage = 1 AND ysnExternal <> 1 AND strOwnedPhysicalStock = 'Customer'  
+			AND intCommodityId = @intCommodityId  AND intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end 
 
 INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-
 SELECT 11 AS intSeqId,@strDescription
 		,'Total Receipted' AS [strType]
 		,isnull(dblTotal1, 0) + (isnull(CollateralSale, 0) - isnull(CollateralPurchases, 0)) dblTotal,@intCommodityId
@@ -226,52 +202,49 @@ SELECT 11 AS intSeqId,@strDescription
 			WHERE dblAdjustmentAmount <> dblOriginalQuantity
 			) AS CollateralPurchases
 
-	INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-		SELECT 12 AS intSeqId,@strDescription, [Storage Type] strType
-			,isnull(SUM(Balance), 0) dblTotal,@intCommodityId
-		FROM vyuGRGetStorageDetail
-		WHERE intCommodityId = @intCommodityId
-			AND intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
-			AND ysnDPOwnedType = 1
-		GROUP BY [Storage Type]
+INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
+					  dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId)
+			SELECT 12,@strDescription,[Storage Type] strType,ISNULL(Balance, 0) dblTotal,intCommodityId  ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
+			,dtmLastStorageAccrueDate ,strScheduleId  
+			FROM vyuGRGetStorageOffSiteDetail  WHERE  ysnDPOwnedType = 1  
+			AND intCommodityId = @intCommodityId  AND intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end 
 
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-	SELECT 13 AS intSeqId,@strDescription
-		,'Pur Basis Deliveries' AS [strType]
-		,isnull(SUM(dblTotal), 0) AS dblTotal,@intCommodityId
-	FROM (
-		SELECT PLDetail.dblLotPickedQty AS dblTotal
-		FROM tblLGDeliveryPickDetail Del
-		INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
-		INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
-		INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId
-		WHERE CT.intPricingTypeId = 2
-			AND CT.intCommodityId = @intCommodityId
-			AND CT.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then CT.intCompanyLocationId else @intLocationId end
-					
-		UNION ALL
-		
-		SELECT isnull(SUM(isnull(ri.dblReceived, 0)), 0) AS dblTotal
-		FROM tblICInventoryReceipt r
-		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId	AND r.strReceiptType = 'Purchase Contract'
-		INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo	AND cd.intPricingTypeId = 2
-		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-		WHERE ch.intCommodityId = @intCommodityId
-		AND cd.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end			
-		) tot
+INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption)
+			SELECT 13,@strDescription,'Pur Basis Deliveries' strType,PLDetail.dblLotPickedQty AS dblTotal,intCommodityId,cl.strLocationName,convert(nvarchar,CT.strContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicket,CT.dtmContractDate as dtmTicketDateTime ,
+			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption
+			FROM tblLGDeliveryPickDetail Del
+			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
+			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
+			INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId
+			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=CT.intCompanyLocationId
+			WHERE CT.intPricingTypeId = 2 AND CT.intCommodityId = @intCommodityId 
+			AND CT.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then CT.intCompanyLocationId   else @intLocationId end
+			
+			UNION ALL
+			
+			SELECT 13,@strDescription,'Pur Basis Deliveries' strType,isnull(ri.dblReceived, 0) AS dblTotal,st.intCommodityId,cl.strLocationName,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
+					strDistributionOption
+			FROM tblICInventoryReceipt r
+			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
+			INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2
+			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
+			WHERE ch.intCommodityId = @intCommodityId 
+			AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 
-INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
-
-	SELECT 14 AS intSeqId,@strDescription
-		,'Sls Basis Deliveries' AS [strType]
-		,isnull(SUM(isnull(ri.dblQuantity, 0)), 0) AS dblTotal,@intCommodityId
-	FROM tblICInventoryShipment r
-	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-	INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
-		AND cd.intPricingTypeId = 2
-	INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-	WHERE ch.intCommodityId = @intCommodityId
-	AND cd.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end	
+INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption)
+			SELECT 13,@strDescription,'Sls Basis Deliveries' strType,ri.dblQuantity AS dblTotal,intCommodityId,cl.strLocationName,convert(nvarchar,ch.strContractNumber)+'/'+convert(nvarchar,cd.intContractSeq) strTicketNumber,
+			ch.dtmContractDate as dtmTicketDateTime ,
+			ch.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption
+			FROM tblICInventoryShipment r
+			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
+			INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	
+			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
+			WHERE ch.intCommodityId = @intCommodityId 
+			AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 
 INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId)
 
@@ -339,11 +312,6 @@ SELECT 15 AS intSeqId,@strDescription
 		) t
 
 
-SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber
-END
-END
-END
-
 DECLARE @intUnitMeasureId int
 DECLARE @intFromCommodityUnitMeasureId int
 DECLARE @intToCommodityUnitMeasureId int
@@ -369,20 +337,33 @@ BEGIN
 	WHERE t.intCommodityId= @intCommodityId
 END
 
+SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber
+END
+END
+END
+
 BEGIN
 		IF (ISNULL(@intToCommodityUnitMeasureId,'') <> '' and ISNULL(@intToCommodityUnitMeasureId,'') <> '')
 		BEGIN
-			SELECT intRow,intSeqId,strCommodityCode,strType, @StrUnitMeasure as strUnitMeasure, 
-				Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal)) dblTotal
-				,intCollateralId,strLocationName,strCustomer,intReceiptNo,strContractNumber,dtmOpenDate,dblOriginalQuantity,dblRemainingQuantity,intCommodityId		
-		FROM @Final 
+
+			SELECT	intRow, intSeqId, strCommodityCode ,strType ,Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal)) dblTotal ,
+					 @StrUnitMeasure as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
+					intReceiptNo,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
+					strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
+					dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
+					dtmDeliveryDate ,dtmTicketDateTime,strItemNo  
+			FROM @Final where isnull(dblTotal,0) <> 0
 
 		END
 		ELSE
 		BEGIN
 
-			SELECT intRow,intSeqId,strCommodityCode,strType,@StrUnitMeasure as strUnitMeasure,Convert(decimal(24,10),dblTotal) dblTotal,
-			intCollateralId,strLocationName,strCustomer,intReceiptNo,strContractNumber,dtmOpenDate,dblOriginalQuantity,dblRemainingQuantity,intCommodityId
-			FROM @Final
+			SELECT	intRow, intSeqId, strCommodityCode ,strType ,Convert(decimal(24,10),dblTotal) dblTotal, @StrUnitMeasure as strUnitMeasure,
+				intCollateralId,strLocationName,strCustomer,
+				intReceiptNo,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
+				strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
+				dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
+				dtmDeliveryDate ,dtmTicketDateTime,strItemNo  
+			FROM @Final where isnull(dblTotal,0) <> 0
 		END
 END

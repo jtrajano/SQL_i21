@@ -25,6 +25,7 @@ DECLARE @List AS TABLE (
 	 strLocationName NVARCHAR(100),
 	 strContractEndMonth NVARCHAR(50),
 	 dblTotal DECIMAL(24,10)
+	 ,intSeqNo int
      ) 
 
 INSERT INTO @List (strCommodityCode,strContractNumber,strType,strLocationName,strContractEndMonth,dblTotal)
@@ -93,19 +94,25 @@ BEGIN
 	join tblICUnitMeasure c on c.intUnitMeasureId=cuc.intUnitMeasureId 	
 	WHERE t.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 END
-
+UPDATE @List set intSeqNo = 1 where strType='Purchase Priced'
+UPDATE @List set intSeqNo = 2 where strType='Purchase Basis'
+UPDATE @List set intSeqNo = 3 where strType='Purchase HTA'
+UPDATE @List set intSeqNo = 4 where strType='Sale Priced'
+UPDATE @List set intSeqNo = 5 where strType='Sale Basis'
+UPDATE @List set intSeqNo = 6 where strType='Sale HTA'
+UPDATE @List set intSeqNo = 7 where strType='Net Hedge'
 BEGIN
 
-		IF ISNULL(@intUnitMeasureId, 0) <> 0
-		BEGIN
-		SELECT intRowNumber,strCommodityCode ,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strLocationName,strContractEndMonth, 
-		 dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal,
-		 @StrUnitMeasure as strUnitMeasure
-		FROM @List ORDER BY strCommodityCode,CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
-
-		END
-		ELSE
-		BEGIN
-			SELECT intRowNumber,strCommodityCode ,strContractNumber,strInternalTradeNo,intFutOptTransactionHeaderId, strType,strLocationName,strContractEndMonth,dblTotal,@StrUnitMeasure as strUnitMeasure FROM @List ORDER BY CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
-		END
+IF ISNULL(@intUnitMeasureId, 0) <> 0
+BEGIN
+	SELECT intRowNumber,strCommodityCode ,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strLocationName,strContractEndMonth, 
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal,
+		@StrUnitMeasure as strUnitMeasure
+	FROM @List ORDER BY intSeqNo,strCommodityCode,CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
+END
+ELSE
+BEGIN
+	SELECT intRowNumber,strCommodityCode ,strContractNumber,strInternalTradeNo,intFutOptTransactionHeaderId, strType,strLocationName,strContractEndMonth,dblTotal,@StrUnitMeasure as strUnitMeasure 
+	FROM @List ORDER BY intSeqNo,strCommodityCode,CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
+END
 END

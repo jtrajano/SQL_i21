@@ -25,8 +25,11 @@ SELECT
 	,a.strCustomerReference  
  	,a.dtmLastStorageAccrueDate  
  	,c1.strScheduleId
+	,i.strItemNo
+	,c.strLocationName
 FROM tblGRCustomerStorage a
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
+JOIN tblICItem i on i.intItemId=a.intItemId
 LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId  
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEntity E ON E.intEntityId=a.intEntityId
