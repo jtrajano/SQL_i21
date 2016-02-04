@@ -24,7 +24,7 @@ This table is also used to map the negative fifo stock buckets it was able to re
 	Maps: None
 
 
-*	[dblQty] NUMERIC(18, 6) NOT NULL
+*	[dblQty] NUMERIC(38, 20) NOT NULL
 	Qty, in base units, that was sold or revalued. 
 	Maps: None
 

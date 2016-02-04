@@ -20,7 +20,7 @@ It only tracks the qty of those non-'Stock UOM's.
 	FK to the tblICItemUOM table. 
 	Maps: None
 
-*	[dblOnHand] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblOnHand] NUMERIC(38, 20) NULL DEFAULT ((0))
 	The number of stocks currently at the specific UOM. 
 	Maps: None
 

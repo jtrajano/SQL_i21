@@ -42,7 +42,7 @@ END
 BEGIN 
 	DECLARE @CostBucketIntTransactionId AS INT
 			,@CostBucketStrTransactionId AS NVARCHAR(50)
-			,@CostAdjQty AS NUMERIC(18,6)
+			,@CostAdjQty AS NUMERIC(38,20)
 			,@CostAdjNewCost AS NUMERIC(38,20)
 			,@CostBucketId AS INT 
 			,@CostAdjLogId AS INT 
@@ -52,7 +52,7 @@ BEGIN
 			,@NewTransactionValue AS NUMERIC(38,20)
 			,@OriginalTransactionValue AS NUMERIC(38,20)
 			,@dblNewCalculatedCost AS NUMERIC(38,20)
-			,@CostBucketStockInQty AS NUMERIC(18,6)
+			,@CostBucketStockInQty AS NUMERIC(38,20)
 				
 
 	DECLARE loopLIFOCostBucket CURSOR LOCAL FAST_FORWARD

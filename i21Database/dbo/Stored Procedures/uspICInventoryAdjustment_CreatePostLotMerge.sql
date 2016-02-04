@@ -11,12 +11,12 @@
 	,@intNewSubLocationId AS INT
 	,@intNewStorageLocationId AS INT
 	,@strNewLotNumber AS NVARCHAR(50)
-	,@dblAdjustByQuantity AS NUMERIC(18,6)
-	,@dblNewSplitLotQuantity AS NUMERIC(18,6)	
-	,@dblNewWeight AS NUMERIC(18,6)
+	,@dblAdjustByQuantity AS NUMERIC(38,20)
+	,@dblNewSplitLotQuantity AS NUMERIC(38,20)	
+	,@dblNewWeight AS NUMERIC(38,20)
 	,@intNewItemUOMId AS INT
 	,@intNewWeightUOMId AS INT
-	,@dblNewUnitCost AS NUMERIC(38, 20)
+	,@dblNewUnitCost AS NUMERIC(38,20)
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT

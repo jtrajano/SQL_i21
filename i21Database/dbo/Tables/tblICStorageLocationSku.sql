@@ -16,7 +16,7 @@ Type the overview for the table here.
 		[intStorageLocationId] INT NOT NULL, 
 		[intItemId] INT NULL, 
 		[intSkuId] INT NULL, 
-		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intContainerId] INT NULL, 
 		[intLotCodeId] INT NULL, 
 		[intLotStatusId] INT NULL, 

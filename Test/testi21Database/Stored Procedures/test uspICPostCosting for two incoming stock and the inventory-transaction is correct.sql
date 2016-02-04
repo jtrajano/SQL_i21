@@ -21,10 +21,10 @@ BEGIN
 				,@ColdGrains AS INT = 4
 				,@HotGrains AS INT = 5
 
-		-- Declare the variables for location
-		DECLARE @Default_Location AS INT = 1
-				,@NewHaven AS INT = 2
-				,@BetterHaven AS INT = 3
+		---- Declare the variables for location
+		--DECLARE @Default_Location AS INT = 1
+		--		,@NewHaven AS INT = 2
+		--		,@BetterHaven AS INT = 3
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -32,6 +32,64 @@ BEGIN
 				,@PremiumGrains_BushelUOMId AS INT = 3
 				,@ColdGrains_BushelUOMId AS INT = 4
 				,@HotGrains_BushelUOMId AS INT = 5
+
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
+
+				,@CornCommodity_DefaultLocation AS INT = 18
+				,@CornCommodity_NewHaven AS INT = 19
+				,@CornCommodity_BetterHaven AS INT = 20
+
+				,@ManualLotGrains_NewHaven AS INT = 21
+				,@SerializedLotGrains_NewHaven AS INT = 22
+
+				,@OtherCharges_DefaultLocation AS INT = 23
+				,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+				,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+				,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
+
+				,@OtherCharges_NewHaven AS INT = 27
+				,@SurchargeOtherCharges_NewHaven AS INT = 28
+				,@SurchargeOnSurcharge_NewHaven AS INT = 29
+				,@SurchargeOnSurchargeOnSurcharge_NewHaven AS INT = 30
+
+				,@OtherCharges_BetterHaven AS INT = 31
+				,@SurchargeOtherCharges_BetterHaven AS INT = 32
+				,@SurchargeOnSurcharge_BetterHaven AS INT = 33
+				,@SurchargeOnSurchargeOnSurcharge_BetterHaven AS INT = 34
+
+		DECLARE	@UOM_Bushel AS INT = 1
+				,@UOM_Pound AS INT = 2
+				,@UOM_Kg AS INT = 3
+				,@UOM_25KgBag AS INT = 4
+				,@UOM_10LbBag AS INT = 5
+				,@UOM_Ton AS INT = 6
+
+		DECLARE @BushelUnitQty AS NUMERIC(18,6) = 1
+				,@PoundUnitQty AS NUMERIC(18,6) = 1
+				,@KgUnitQty AS NUMERIC(18,6) = 2.20462
+				,@25KgBagUnitQty AS NUMERIC(18,6) = 55.1155
+				,@10LbBagUnitQty AS NUMERIC(18,6) = 10
+				,@TonUnitQty AS NUMERIC(18,6) = 2204.62
 
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
@@ -98,11 +156,11 @@ BEGIN
 				,intStorageLocationId 
 		)
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 14, 2014'
 				,dblQty = 100
-				,dblUOMQty = 1
+				,dblUOMQty = @BushelUnitQty
 				,dblCost = 14.00
 				,dblValue = 0
 				,dblSalesPrice = 0
@@ -117,11 +175,11 @@ BEGIN
 				,intStorageLocationId = NULL
 		UNION ALL 
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblQty = 75
-				,dblUOMQty = 1
+				,dblUOMQty = @BushelUnitQty
 				,dblCost = 18.25
 				,dblValue = 0
 				,dblSalesPrice = 0
@@ -142,6 +200,7 @@ BEGIN
 				,intItemUOMId
 				,dtmDate 
 				,dblQty 
+				,dblUOMQty
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 
@@ -154,12 +213,14 @@ BEGIN
 				,intLotId 
 				,intCreatedEntityId 
 				,intConcurrencyId 
+				,intCostingMethod
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 14, 2014'
 				,dblQty = 100
+				,dblUOMQty = @BushelUnitQty
 				,dblCost = 14.00
 				,dblValue = 0
 				,dblSalesPrice = 0 
@@ -172,12 +233,14 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
+				,intCostingMethod = 1 -- Average Costing
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblQty = 75
+				,dblUOMQty = @BushelUnitQty
 				,dblCost = 18.25
 				,dblValue = 0
 				,dblSalesPrice = 0 
@@ -190,34 +253,36 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-		UNION ALL 
-		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
-				,intItemUOMId = NULL 
-				,dtmDate = 'November 14, 2014'
-				,dblQty = 0
-				,dblCost = 0
-				,dblValue = (18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
-				,dblSalesPrice = 0 
-				,intCurrencyId = @USD
-				,dblExchangeRate = 1
-				,intTransactionId = 1
-				,strTransactionId = 'PURCHASE-000001'
-				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @AUTO_NEGATIVE
-				,intLotId = NULL
-				,intCreatedUserId = 1
-				,intConcurrencyId = 1
-
+				,intCostingMethod = 1 -- Average Costing
+		--UNION ALL 
+		--SELECT	intItemId = @WetGrains
+		--		,intItemLocationId = @WetGrains_BushelUOMId
+		--		,intItemUOMId = NULL 
+		--		,dtmDate = 'November 14, 2014'
+		--		,dblQty = 0
+		--		,dblUOMQty = @BushelUnitQty
+		--		,dblCost = 0
+		--		,dblValue = (18.0681818181818 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
+		--		,dblSalesPrice = 0 
+		--		,intCurrencyId = @USD
+		--		,dblExchangeRate = 1
+		--		,intTransactionId = 1
+		--		,strTransactionId = 'PURCHASE-000001'
+		--		,strBatchId = 'BATCH-000001'
+		--		,intTransactionTypeId = @AUTO_NEGATIVE
+		--		,intLotId = NULL
+		--		,intCreatedUserId = 1
+		--		,intConcurrencyId = 1
+		--		,intCostingMethod = 1 -- Average Costing
 	END 
 	
 	-- Act
 	BEGIN 	
-		-- Call uspICPostCosting to post the costing and generate the g/l entries  
+		-- Call uspICPostCosting to post the costing and generate the g/l entries 
 		EXEC dbo.uspICPostCosting
 			@ItemsToPost
 			,@strBatchId 
-			,@strAccountToCounterInventory
+			,NULL -- @strAccountToCounterInventory 
 			,@intEntityUserSecurityId
 
 		INSERT INTO actual (
@@ -226,24 +291,7 @@ BEGIN
 				,intItemUOMId
 				,dtmDate 
 				,dblQty 
-				,dblCost 
-				,dblValue 
-				,dblSalesPrice 
-				,intCurrencyId 
-				,dblExchangeRate 
-				,intTransactionId 
-				,strTransactionId 
-				,strBatchId 
-				,intTransactionTypeId 
-				,intLotId 
-				,intCreatedEntityId 
-				,intConcurrencyId 		
-		)
-		SELECT	intItemId 
-				,intItemLocationId 
-				,intItemUOMId
-				,dtmDate 
-				,dblQty 
+				,dblUOMQty
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 
@@ -256,10 +304,31 @@ BEGIN
 				,intLotId 
 				,intCreatedEntityId 
 				,intConcurrencyId 
+				,intCostingMethod		
+		)
+		SELECT	intItemId 
+				,intItemLocationId 
+				,intItemUOMId
+				,dtmDate 
+				,dblQty 
+				,dblUOMQty
+				,dblCost 
+				,dblValue 
+				,dblSalesPrice 
+				,intCurrencyId 
+				,dblExchangeRate 
+				,intTransactionId 
+				,strTransactionId 
+				,strBatchId 
+				,intTransactionTypeId 
+				,intLotId 
+				,intCreatedEntityId 
+				,intConcurrencyId 
+				,intCostingMethod
 		FROM	dbo.tblICInventoryTransaction
 		WHERE	strBatchId = 'BATCH-000001'
 	END 
-	
+
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

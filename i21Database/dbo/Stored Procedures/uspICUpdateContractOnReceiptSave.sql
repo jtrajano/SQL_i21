@@ -4,7 +4,7 @@
 AS
 
 DECLARE @ContractId INT
-DECLARE @QtyToReceive NUMERIC(18, 6)
+DECLARE @QtyToReceive NUMERIC(38,20)
 DECLARE @ExternalId INT
 
 BEGIN

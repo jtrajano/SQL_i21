@@ -3,8 +3,8 @@
 	 @ItemId				INT
 	,@VendorId				INT
 	,@TransactionDate		DATETIME
-	,@ItemCost				NUMERIC(18,6)
-	,@Quantity				NUMERIC(18,6)
+	,@ItemCost				NUMERIC(38,20)
+	,@Quantity				NUMERIC(38,20)
 	,@TaxGroupId			INT
 	,@CompanyLocationId		INT
 	,@VendorLocationId		INT
