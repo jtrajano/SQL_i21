@@ -242,22 +242,32 @@ BEGIN
 									END
 		FROM @LoadDetailTable L1 where L1.intId = @incval
 
-		SET @strOriginFullAddress = LTRIM(RTRIM(@strOriginName)) + ', ' + CHAR(13)+CHAR(10) +
-									ISNULL(LTRIM(RTRIM(@strOriginLocationName)),'') + ', ' + CHAR(13)+CHAR(10) +
+		SET @strOriginFullAddress = CASE WHEN IsNull(@strOriginName, '') <> '' THEN
+										LTRIM(RTRIM(@strOriginName)) + ', ' + CHAR(13)+CHAR(10)
+									ELSE
+										' ' + CHAR(13)+CHAR(10)
+									END
+		SET @strOriginFullAddress = @strOriginFullAddress + ISNULL(LTRIM(RTRIM(@strOriginLocationName)),'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(@strOriginAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(@strOriginCity)),'') + 
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(@strOriginState)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginState)) END,'') + 
 									ISNULL(' '+CASE WHEN LTRIM(RTRIM(@strOriginZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginZipCode)) END,'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(''+CASE WHEN LTRIM(RTRIM(@strOriginCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginCountry)) END,'')
-		SET @strDestinationFullAddress = LTRIM(RTRIM(@strDestinationName)) + ', ' + CHAR(13)+CHAR(10) +
-									ISNULL(LTRIM(RTRIM(@strDestinationLocationName)),'') + ', ' + CHAR(13)+CHAR(10) +
+
+		SET @strDestinationFullAddress = CASE WHEN IsNull(@strDestinationName, '') <> '' THEN
+										LTRIM(RTRIM(@strDestinationName)) + ', ' + CHAR(13)+CHAR(10)
+									ELSE
+										' ' + CHAR(13)+CHAR(10)
+									END
+		SET @strDestinationFullAddress = @strDestinationFullAddress + ISNULL(LTRIM(RTRIM(@strDestinationLocationName)),'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(@strDestinationAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(@strDestinationCity)),'') + 
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(@strDestinationState)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationState)) END,'') + 
 									ISNULL(' '+CASE WHEN LTRIM(RTRIM(@strDestinationZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationZipCode)) END,'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(''+CASE WHEN LTRIM(RTRIM(@strDestinationCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationCountry)) END,'')
 
-		UPDATE @LoadDetailTable SET strOriginFullAddress = @strOriginFullAddress, strDestinationFullAddress = @strDestinationFullAddress WHERE intId=@incval
+		UPDATE @LoadDetailTable SET strOriginFullAddress = @strOriginFullAddress, strDestinationFullAddress = @strDestinationFullAddress, 
+									strScheduleInfoMsg = @strScheduleInfo, strLoadDirectionMsg = @strLoadDirections WHERE intId=@incval
 
 		SET @incval = @incval + 1
 	END
