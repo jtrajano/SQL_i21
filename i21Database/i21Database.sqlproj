@@ -3357,6 +3357,7 @@
     <Build Include="dbo\Functions\fnCTGetEventRecipientId.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityWastage.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
