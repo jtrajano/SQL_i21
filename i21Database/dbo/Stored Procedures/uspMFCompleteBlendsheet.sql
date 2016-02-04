@@ -13,7 +13,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@strRetBatchId NVARCHAR(40)
 		,@intStatusId INT
-		,@strWONo NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
 		,@strProduceXml NVARCHAR(Max)
 		,@intManufacturingProcessId INT
 		,@intLocationId INT
@@ -28,11 +28,20 @@ BEGIN TRY
 		,@strVesselNo NVARCHAR(50)
 		,@intRetLotId INT
 		,@strLotTracking nvarchar(50)
+		,@intExecutionOrder INT
+		,@intCellId INT
+		,@intCategoryId INT
+		,@strDemandNo NVARCHAR(50)
+		,@intBlendRequirementId INT
+		,@intUOMId INT
+		,@dblPlannedQuantity NUMERIC(18,6)
+		,@intMachineId INT
+		,@dblBlendBinSize NUMERIC(18,6)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
-	SELECT @intWorkOrderId = intWorkOrderId
+	SELECT @intWorkOrderId = ISNULL(intWorkOrderId,0)
 		,@intItemId = intItemId
 		,@dblQtyToProduce = dblQtyToProduce
 		,@intItemUOMId = intItemUOMId
@@ -43,6 +52,8 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@strVesselNo = strVesselNo
+		,@intCellId = intManufacturingCellId
+		,@dblPlannedQuantity = dblPlannedQuantity
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -55,29 +66,38 @@ BEGIN TRY
 			,intLocationId INT
 			,intStorageLocationId INT
 			,strVesselNo NVARCHAR(50)
+			,intManufacturingCellId INT
+			,dblPlannedQuantity NUMERIC(18, 6)
 			)
 
-	SELECT @intStatusId = intStatusId
-		,@strWONo = strWorkOrderNo
-		,@intManufacturingProcessId = ISNULL(intManufacturingProcessId, 0)
-	FROM tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
-
-	IF @intManufacturingProcessId = 0
-		SELECT TOP 1 @intManufacturingProcessId = intManufacturingProcessId
-		FROM tblMFWorkOrderRecipe
+	If @intWorkOrderId > 0
+	Begin
+		SELECT @intStatusId = intStatusId
+			,@strWorkOrderNo = strWorkOrderNo
+			,@intManufacturingProcessId = ISNULL(intManufacturingProcessId, 0)
+		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-	IF (@intStatusId <> 12)
-	BEGIN
-		SET @strErrMsg = 'Blend Sheet ' + @strWONo + ' is either not staged or already produced. Please reload the blend sheet.'
+		IF @intManufacturingProcessId = 0
+			SELECT TOP 1 @intManufacturingProcessId = intManufacturingProcessId
+			FROM tblMFWorkOrderRecipe
+			WHERE intWorkOrderId = @intWorkOrderId
 
-		RAISERROR (
-				@strErrMsg
-				,16
-				,1
-				)
-	END
+		IF (@intStatusId <> 12)
+		BEGIN
+			SET @strErrMsg = 'Blend Sheet ' + @strWorkOrderNo + ' is either not staged or already produced. Please reload the blend sheet.'
+
+			RAISERROR (
+					@strErrMsg
+					,16
+					,1
+					)
+		END
+	End
+	Else
+	Begin
+		Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFRecipe Where intItemId=@intItemId AND intLocationId=@intLocationId AND ysnActive=1
+	End
 
 	SELECT @intSubLocationId = intSubLocationId
 	FROM tblICStorageLocation
@@ -101,9 +121,68 @@ BEGIN TRY
 		SET @dblWeightPerUnit = 1
 	END
 
-	Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
+	Select @strLotTracking=strLotTracking,@intCategoryId=intCategoryId From tblICItem Where intItemId=@intItemId
+	Select @intUOMId=intUnitMeasureId From tblICItemUOM Where intItemUOMId=@intItemUOMId
 
 	BEGIN TRANSACTION
+
+	--Simple Blend Production
+	If @intWorkOrderId=0
+	Begin
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+					,@intItemId = @intItemId
+					,@intManufacturingId = NULL
+					,@intSubLocationId = @intSubLocationId
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 46
+					,@ysnProposed = 0
+					,@strPatternString = @strDemandNo OUTPUT
+
+		Insert Into tblMFBlendRequirement(strDemandNo,intItemId,dblQuantity,intUOMId,dtmDueDate,intLocationId,intStatusId,dblIssuedQty,
+		intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
+		Values(@strDemandNo,@intItemId,@dblPlannedQuantity,@intUOMId,@dtmCurrentDate,@intLocationId,2,@dblPlannedQuantity,
+		@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate)
+
+		Select @intBlendRequirementId=SCOPE_IDENTITY()
+
+		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
+		And convert(date,dtmExpectedDate)=convert(date,@dtmCurrentDate) And intBlendRequirementId is not null
+		And intStatusId Not in (2,13)
+
+		Set @intExecutionOrder=@intExecutionOrder+1
+
+		Select @strWorkOrderNo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  
+		from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
+
+		if ISNULL(@strWorkOrderNo,'')=''
+			Set @strWorkOrderNo=convert(varchar,@strDemandNo) + '01'
+
+		Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
+		From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
+		Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
+		Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
+		Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
+		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
+		And mc.intManufacturingCellId=@intCellId
+
+		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
+		intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId,intConcurrencyId)
+		Select @strWorkOrderNo,@intItemId,@dblPlannedQuantity,@intItemUOMId,10,@intCellId,@intMachineId,@intLocationId,@dblBlendBinSize,@dtmCurrentDate,@intExecutionOrder,1,
+		@dblPlannedQuantity,@intBlendRequirementId,0,null,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,1
+
+		Select @intWorkOrderId=SCOPE_IDENTITY()
+
+		--Copy Recipe
+		Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWorkOrderId
+
+		-- Update intWorkOrderId in XML variable
+		Select @strXml=REPLACE(@strXml,'<intWorkOrderId>0</intWorkOrderId>','<intWorkOrderId>' + CONVERT(varchar,@intWorkOrderId) + '</intWorkOrderId>')
+
+		--Consume Lots
+		Exec [uspMFEndBlendSheet] @strXml
+	End
 
 	If @strLotTracking='No' 
 	Begin
@@ -155,7 +234,7 @@ BEGIN TRY
 		SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
 		--Set @strProduceXml=@strProduceXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
 		SET @strProduceXml = @strProduceXml + '<intProductionTypeId>' + convert(VARCHAR, 2) + '</intProductionTypeId>'
-		SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, @strWONo) + '</strLotAlias>'
+		SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, @strWorkOrderNo) + '</strLotAlias>'
 		SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
 		SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 		SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'

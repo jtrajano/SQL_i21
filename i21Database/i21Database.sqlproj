@@ -3363,6 +3363,7 @@
     <Build Include="dbo\Tables\tblEMEntityToRole.sql" />
     <Build Include="dbo\Stored Procedures\uspEMTogglePortalAccess.sql" />
     <Build Include="dbo\Functions\fnCFRemoteTaxes.sql" />
+    <Build Include="dbo\Views\vyuMFGetBlendItemByLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
