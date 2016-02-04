@@ -441,6 +441,7 @@ BEGIN TRY
 				,@intProduceUOMKey = @intProduceUnitMeasureId
 				,@intBatchId = @intBatchId
 				,@intUserId = @intUserId
+				,@dblUnitQty=@dblUnitQty
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
@@ -457,6 +458,7 @@ BEGIN TRY
 				,@intProduceUOMKey = @intPhysicalItemUOMId
 				,@intBatchId = @intBatchId
 				,@intUserId = @intUserId
+				,@dblUnitQty=@dblUnitQty
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblPhysicalCount
