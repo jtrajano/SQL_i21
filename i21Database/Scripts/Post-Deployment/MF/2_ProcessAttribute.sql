@@ -952,3 +952,23 @@ BEGIN
         ,'Select convert(varchar,intStorageLocationId) as ValueMember,strName as DisplayMember from tblICStorageLocation'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 46
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 46
+		,'Packaging Category'
+		,5
+		,1
+		,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
+END
+GO
