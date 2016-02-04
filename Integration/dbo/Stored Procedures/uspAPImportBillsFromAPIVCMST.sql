@@ -587,7 +587,8 @@ BEGIN
 				AND A.apchk_chk_no = B.apivc_chk_no
 				AND A.apchk_rev_dt = B.apivc_chk_rev_dt
 				AND A.apchk_cbk_no = B.apivc_cbk_no
-			AND A.apchk_trx_ind <> ''O'' AND A.apchk_chk_amt <> 0
+			--AND A.apchk_trx_ind <> ''O'' 
+			AND A.apchk_chk_amt <> 0
 				INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId)
 					ON B.apivc_ivc_no = C.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 					AND B.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
@@ -682,7 +683,7 @@ BEGIN
 				intPayeeId = C.intEntityVendorId
 			FROM tblCMBankTransaction A
 			INNER JOIN tblAPPayment B
-				ON A.dblAmount = dblAmountPaid--(CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
+				ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 				AND A.dtmDate = B.dtmDatePaid
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
