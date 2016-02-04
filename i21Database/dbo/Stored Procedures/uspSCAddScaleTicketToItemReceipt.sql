@@ -117,8 +117,7 @@ INSERT into @ReceiptStagingTable(
 		--,strSourceScreenName
 
 		-- Header
-		strReceiptType	
-		,intEntityVendorId
+		intEntityVendorId
 		,strBillOfLadding
 		,intCurrencyId
 		,intLocationId
@@ -148,16 +147,17 @@ INSERT into @ReceiptStagingTable(
 		,strSourceScreenName
 )	
 SELECT 
-		strReceiptType				= CASE 
-										WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
-									  END
-		,intEntityVendorId			= @intEntityId
+		--strReceiptType				= CASE 
+		--								WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
+		--								WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
+		--							  END
+		intEntityVendorId			= @intEntityId
 		,strBillOfLadding			= NULL
 		,intCurrencyId				= SC.intCurrencyId
 		,intLocationId				= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
 		,intShipFromId				= SC.intProcessingLocationId
 		,intShipViaId				= SC.intFreightCarrierId
+
 		--Detail
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
@@ -180,21 +180,23 @@ SELECT
 		
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
-		--,dblQty					= SC.dblNetUnits
-		--,dblCost					= SC.dblUnitPrice
 		,dblQty						= LI.dblQty
 		,dblCost					= LI.dblCost
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from scale
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
-		,ysnIsStorage				= 0
+		,ysnIsStorage				= CASE 
+										WHEN LI.intTransactionDetailId IS NULL THEN 0
+										WHEN LI.intTransactionDetailId IS NOT NULL THEN 1
+									  END
 		,dblFreightRate				= SC.dblFreightRate
 		,dblGross					= SC.dblGrossWeight
 		,dblNet						= SC.dblGrossWeight - SC.dblTareWeight
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
+		
 		--,intInventoryReceiptId		= SC.intInventoryReceiptId
 		--,dblSurcharge				= 0
 		--,ysnFreightInPrice		= NULL
@@ -202,8 +204,6 @@ SELECT
 		--,intTaxGroupId			= NULL
 		--,strVendorRefNo				= NULL
 		--,strSourceId				= SC.intTicketId
-		
---FROM	tblSCTicket SC
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
