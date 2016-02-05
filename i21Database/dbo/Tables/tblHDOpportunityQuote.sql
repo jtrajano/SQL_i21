@@ -5,6 +5,7 @@
 	[intSalesOrderId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDOpportunityQuote] PRIMARY KEY CLUSTERED ([intOpportunityQuoteId] ASC),
+	CONSTRAINT [AK_tblHDOpportunityQuote_intProjectId_intSalesOrderId] UNIQUE ([intProjectId],[intSalesOrderId]),
     CONSTRAINT [FK_tblHDOpportunityQuote_tblHDProject] FOREIGN KEY ([intProjectId]) REFERENCES [dbo].[tblHDProject] ([intProjectId]),
     CONSTRAINT [FK_tblHDOpportunityQuote_tblSOSalesorder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId])
 )
