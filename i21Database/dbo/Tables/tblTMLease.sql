@@ -14,6 +14,8 @@
     [strRentalStatus]         NVARCHAR (20) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [dtmLastLeaseBillingDate] DATETIME      NULL,
     [intLastInvoiceId] INT NULL, 
+    [intLetterId] INT NULL, 
+    [ysnPrintDeviceValueInAgreement] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblTMLease] PRIMARY KEY CLUSTERED ([intLeaseId] ASC),
     CONSTRAINT [FK_tblTMLease_tblTMLeaseCode] FOREIGN KEY ([intLeaseCodeId]) REFERENCES [dbo].[tblTMLeaseCode] ([intLeaseCodeId]),
     CONSTRAINT [UQ_tblTMLease_strLeaseNumber] UNIQUE NONCLUSTERED ([strLeaseNumber] ASC)
@@ -155,3 +157,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMLease',
     @level2type = N'COLUMN',
     @level2name = N'intLastInvoiceId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Agreement Letter Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMLease',
+    @level2type = N'COLUMN',
+    @level2name = N'intLetterId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Print Device Value in Agreement',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMLease',
+    @level2type = N'COLUMN',
+    @level2name = 'ysnPrintDeviceValueInAgreement'
