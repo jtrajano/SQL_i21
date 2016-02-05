@@ -198,7 +198,7 @@ SELECT
 	,[intSubLocationId] 				=	NULL
 	,[intStorageLocationId] 			=	NULL
 	,[ysnIsStorage] 					=	NULL
-	,[strActualCostId] 					=	NULL
+	,[strActualCostId] 					=	E1.strActualCostId
 	,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
 	,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
 	,[strSourceTransactionId] 			=	E1.strReceiptNumber
@@ -212,7 +212,7 @@ FROM tblAPBill A
 	INNER JOIN tblICItemLocation D
 	ON D.intLocationId = A.intShipToId AND D.intItemId = C.intItemId
 WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost != 0
+AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost != 0 AND B.dblCost != B.dblOldCost
 
 IF ISNULL(@post,0) = 1
 BEGIN
