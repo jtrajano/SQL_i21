@@ -429,7 +429,7 @@ BEGIN TRY
 			,CONVERT(int,1) AS intConcurrencyId
 		FROM ##tblMFYield
 
-		SELECT ROW_NUMBER() OVER(ORDER BY dtmRunDate) AS intRowId
+		SELECT CONVERT(int,ROW_NUMBER() OVER(ORDER BY dtmRunDate)) AS intRowId
 			,@intManufacturingProcessId AS intManufacturingProcessId
 			,strItemNo
 			,strDescription
@@ -697,7 +697,7 @@ BEGIN TRY
 			,CONVERT(int,1) AS intConcurrencyId
 		FROM ##tblMFYieldByDate
 
-		SELECT ROW_NUMBER() OVER(ORDER BY dtmRunDate) AS intRowId
+		SELECT CONVERT(int,ROW_NUMBER() OVER(ORDER BY dtmRunDate)) AS intRowId
 			,@intManufacturingProcessId AS intManufacturingProcessId
 			,strItemNo
 			,strDescription

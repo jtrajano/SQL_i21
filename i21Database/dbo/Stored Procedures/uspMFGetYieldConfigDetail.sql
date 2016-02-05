@@ -43,12 +43,8 @@ BEGIN
 			ELSE 'Output'
 			END AS strSection
 		,YT.intYieldTransactionId
-		,Convert(BIT, CASE 
-				WHEN YD.intYieldTransactionId IS NULL
-					THEN 0
-				ELSE 1
-				END) AS ysnSelect
-	FROM dbo.tblMFYieldTransaction YT
-	LEFT JOIN dbo.tblMFYieldDetail YD ON YD.intYieldTransactionId = YT.intYieldTransactionId
+		,YD.ysnSelect
+	FROM dbo.tblMFYieldDetail YD
+	JOIN dbo.tblMFYieldTransaction YT ON YD.intYieldTransactionId = YT.intYieldTransactionId
 		AND intYieldId = @intYieldId
 END
