@@ -43,8 +43,8 @@ BEGIN
 			ELSE 'Output'
 			END AS strSection
 		,YT.intYieldTransactionId
-		,YD.ysnSelect
-	FROM dbo.tblMFYieldDetail YD
-	JOIN dbo.tblMFYieldTransaction YT ON YD.intYieldTransactionId = YT.intYieldTransactionId
+		,ISNULL(YD.ysnSelect,0) AS ysnSelect
+	FROM dbo.tblMFYieldTransaction YT
+	LEFT JOIN dbo.tblMFYieldDetail YD ON YD.intYieldTransactionId = YT.intYieldTransactionId
 		AND intYieldId = @intYieldId
 END
