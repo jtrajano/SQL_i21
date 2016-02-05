@@ -414,14 +414,24 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<SearchResult> GetInventoryValuation(GetParameter param)
         {
-
-            var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
+            // Default sort is dtmDate ASC. Add it if it missing. 
             var sort = ExpressionBuilder.GetSortSelector(param.sort);
+            var dateSort = from s in param.sort where s.property == "dtmDate" select s;
+            if (dateSort.Count() <= 0)
+            {
+                var newSort = param.sort.Concat(new SearchSort[] { new SearchSort() {property = "dtmDate", direction = "ASC"} });
+                param.sort = newSort; 
+                sort = ExpressionBuilder.GetSortSelector(newSort);                
+            }
+
+            // Get only the specific data columns asked by the caller. 
+            var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
+            
+            // Create the initial query. 
             var query = (
                 from v in _db.GetQuery<vyuICGetInventoryValuation>()
                 select v
-            ).Filter(param, true);   
-                  
+            ).Filter(param, true);                     
 
             // Initialize the beginning and running balances.     
             decimal? dblBeginningBalance = 0;
@@ -436,26 +446,26 @@ namespace iRely.Inventory.BusinessLayer
                 dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Sum(s => s.dblQuantity);
             }
 
-            // Convert the Queryable into a list
-            //var paged_data = await query.Skip(param.start.Value).Take(param.limit.Value).ToListAsync();
-
+            // Convert the Queryable into a List
             var paged_data = await query.PagingBySelector(param).ToListAsync();
-            // Loop thru the list to assign the running balance per record. 
+
+            // Loop thru the List and assign and calculate the running Qty and Balance for each record. 
             foreach (var row in paged_data)
             {
-                // Update the balances
+                // Update the beginning and ending balances
                 row.dblBeginningBalance = dblBeginningBalance;
                 dblRunningBalance = dblBeginningBalance + row.dblValue;
                 row.dblRunningBalance = dblRunningBalance;
                 dblBeginningBalance = dblRunningBalance;
 
-                // Update the Qty
+                // Update the beginning and ending quantities. 
                 row.dblBeginningQtyBalance = dblBeginningQty;
                 dblRunningQty = dblBeginningQty + row.dblQuantity;
                 row.dblRunningQtyBalance = dblRunningQty;
                 dblBeginningQty = dblRunningQty;
             }
             
+            // Return the data back to the caller. 
             return new SearchResult()
             {
                 data = paged_data.AsQueryable().Select(selector),
