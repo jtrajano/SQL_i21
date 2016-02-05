@@ -20,4 +20,5 @@ CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
 	,[ysnCheckoffTax]						BIT												NULL		
 	,[ysnTaxExempt]							BIT												NULL		-- Indicate whether the tax code is marked as exempted
 	,[strNotes]								NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL		-- Details of exemption
+	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id of parent line item detail (InvoiceIntegrationStagingTable) which are also fro processing
 )
