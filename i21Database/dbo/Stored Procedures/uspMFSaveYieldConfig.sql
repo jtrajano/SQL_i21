@@ -64,10 +64,11 @@ BEGIN TRY
 			,@dtmCurrentDate
 			,@intUserId
 			,@dtmCurrentDate
-			,@intConcurrencyId
+			,1
 			)
 
 		SELECT @intYieldId = SCOPE_IDENTITY()
+		SELECT @intConcurrencyId=1
 	END
 	ELSE
 	BEGIN
