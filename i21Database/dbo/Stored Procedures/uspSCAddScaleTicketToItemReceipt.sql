@@ -118,7 +118,8 @@ INSERT into @ReceiptStagingTable(
 		--,strSourceScreenName
 
 		-- Header
-		intEntityVendorId
+		strReceiptType
+		,intEntityVendorId
 		,strBillOfLadding
 		,intCurrencyId
 		,intLocationId
@@ -148,7 +149,11 @@ INSERT into @ReceiptStagingTable(
 		,strSourceScreenName
 )	
 SELECT 
-		intEntityVendorId			= @intEntityId
+		strReceiptType				= CASE 
+										WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
+										WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
+									  END
+		,intEntityVendorId			= @intEntityId
 		,strBillOfLadding			= NULL
 		,intCurrencyId				= SC.intCurrencyId
 		,intLocationId				= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
