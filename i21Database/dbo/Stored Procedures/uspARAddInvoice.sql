@@ -430,7 +430,7 @@ IF ISNULL(@intFreightItemId, 0) > 0
 				SELECT TOP 1 @intItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
 			END
 
-		IF ISNULL(@intItemUOMId, 0) = 0
+		IF ISNULL(@intItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblSurcharge, @ZeroDecimal) > @ZeroDecimal)
 			BEGIN
 				RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 				RETURN 0
