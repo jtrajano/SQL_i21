@@ -31,6 +31,12 @@ AS
 			RETURN 0
 		END
 
+	IF ISNULL(@locationId, 0) = 0
+		BEGIN
+			RAISERROR('Please setup your Default Location.', 11, 1) 
+			RETURN 0
+		END
+
 	IF (@isRecap = 1)
 		BEGIN
 			SET @batchId = CONVERT(NVARCHAR(100), NEWID())
