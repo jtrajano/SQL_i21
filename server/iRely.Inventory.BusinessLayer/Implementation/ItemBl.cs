@@ -414,20 +414,64 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<SearchResult> GetInventoryValuation(GetParameter param)
         {
-            // Default sort is dtmDate ASC. Add it if it missing. 
-            var sort = ExpressionBuilder.GetSortSelector(param.sort);
-            var dateSort = from s in param.sort where s.property == "dtmDate" select s;
-            if (dateSort.Count() <= 0)
+            // Setup the default sort. 
+            List<SearchSort> addDefaultSortList = new List<SearchSort>();
+            var defaultLocationSort = new SearchSort() { property = "strLocationName", direction = "ASC" }; 
+            var defaultDateSort = new SearchSort(){property = "dtmDate", direction = "ASC"};
+
+            foreach (var ps in param.sort)
             {
-                var newSort = param.sort.Concat(new SearchSort[] { new SearchSort() {property = "dtmDate", direction = "ASC"} });
-                param.sort = newSort; 
-                sort = ExpressionBuilder.GetSortSelector(newSort);                
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "dtmdate")
+                {
+                    defaultDateSort.direction = ps.direction;
+                }
+
+                // Use the direction specified by the caller. 
+                else if (ps.property.ToLower() == "strlocationname")
+                {
+                    defaultLocationSort.direction = ps.direction;
+                }
+
+                // Use any more sorting specified by the caller. 
+                else
+                {
+                    addDefaultSortList.Add(
+                        new SearchSort()
+                        {
+                            direction = ps.direction,
+                            property = ps.property
+                        }
+                    );
+                }                
             }
+
+            // Make sure location and date are the first int he sorting order. 
+            addDefaultSortList.Insert(0, defaultDateSort);
+            addDefaultSortList.Insert(0, defaultLocationSort);
+
+            IEnumerable<SearchSort> enDefaultSort = addDefaultSortList;
+            var sort = ExpressionBuilder.GetSortSelector(enDefaultSort);
+            param.sort = addDefaultSortList;
+                              
+            // Create a reverse sort
+            List<SearchSort> reverseSortList = new List<SearchSort>();
+            foreach (var x in enDefaultSort)
+            {
+                reverseSortList.Add(
+                    new SearchSort() { 
+                        direction = x.direction.ToLower() == "asc" ? "DESC" : "ASC", 
+                        property = x.property
+                    }
+                ); 
+            }
+            IEnumerable<SearchSort> enReverseSort = reverseSortList;
+            var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort); 
 
             // Get only the specific data columns asked by the caller. 
             var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
             
-            // Create the initial query. 
+            // Assemble the query. 
             var query = (
                 from v in _db.GetQuery<vyuICGetInventoryValuation>()
                 select v
@@ -438,31 +482,49 @@ namespace iRely.Inventory.BusinessLayer
             decimal? dblRunningBalance = 0;
             decimal? dblBeginningQty = 0;
             decimal? dblRunningQty = 0;
+            string locationFromPreviousPage = ""; 
 
-            // Get the beginning balance
+            // If it is not the starting page, retrieve the previous page data. 
             if (param.start > 0)
             {
-                dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Sum(s => s.dblValue);
-                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Sum(s => s.dblQuantity);
+                // Get the last location used from the previous page. 
+                var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault(); 
+                locationFromPreviousPage = previousPage.strLocationName;
+
+                // Get the beginning qty and balances
+                dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblValue);
+                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblQuantity);
             }
 
-            // Convert the Queryable into a List
+            // Get the page. Convert it into a list for further processing. 
             var paged_data = await query.PagingBySelector(param).ToListAsync();
 
-            // Loop thru the List and assign and calculate the running Qty and Balance for each record. 
+            // Loop thru the List, calculate, and assign the running qty and balance for each record. 
+            string currentLocation = locationFromPreviousPage;
+            string lastLocation = locationFromPreviousPage; 
             foreach (var row in paged_data)
             {
-                // Update the beginning and ending balances
+                // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
+                currentLocation = row.strLocationName;
+                if (lastLocation != currentLocation)
+                {
+                    // Reset the qty and balances back to zero. 
+                    dblBeginningBalance = 0;
+                    dblBeginningQty = 0; 
+                    lastLocation = currentLocation;
+                }
+
+                // Calculate beginning and running balance
                 row.dblBeginningBalance = dblBeginningBalance;
                 dblRunningBalance = dblBeginningBalance + row.dblValue;
                 row.dblRunningBalance = dblRunningBalance;
                 dblBeginningBalance = dblRunningBalance;
 
-                // Update the beginning and ending quantities. 
+                // Calculate the beginning and running quantity
                 row.dblBeginningQtyBalance = dblBeginningQty;
                 dblRunningQty = dblBeginningQty + row.dblQuantity;
                 row.dblRunningQtyBalance = dblRunningQty;
-                dblBeginningQty = dblRunningQty;
+                dblBeginningQty = dblRunningQty;                
             }
             
             // Return the data back to the caller. 
