@@ -10,6 +10,7 @@
 			,tblEntityLocation.intEntityLocationId
 			,tblEntityLocation.strLocationName
 			,tblEntity.ysnActive
+			,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = tblARCustomer.intEntityCustomerId and et.strType in ('Customer','Prospect'))
 		from tblARCustomer
 			,tblEntityToContact
 			,tblEntity

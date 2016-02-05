@@ -18,6 +18,7 @@
 			,ysni21User = 0
 			,imgPhoto = null
 			,intConcurrencyId = 1
+			,strEntityType = ''
 		--select
 		--	strCustomer = cus.strCustomerNumber
 		--	,strFullName = ec.strEmail

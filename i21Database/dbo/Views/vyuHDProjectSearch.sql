@@ -15,6 +15,7 @@
 			,strProjectManager = (select top 1 e.strName from tblEntity e where e.intEntityId = proj.intInternalProjectManager)
 			,strProjectType = proj.strType
 			,proj.intCustomerContactId
+			,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = cus.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
         from
             tblHDProject proj,
             tblARCustomer cus,

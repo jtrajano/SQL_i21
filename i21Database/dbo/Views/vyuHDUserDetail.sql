@@ -26,6 +26,7 @@
 			,intConcurrencyId = 1
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityUserSecurityId] and ysnDefaultContact = 1)
 			--,strFullName2 = (select top 1 strName from tblEntity where intEntityId = us.[intEntityUserSecurityId])
+			,strEntityType = 'Agent'
 		from
 			tblSMUserSecurity us,
 			tblSMUserRole ur
@@ -62,6 +63,7 @@
 			,imgPhoto = ec.imgPhoto
 			,intConcurrencyId = 1
 			,strFullName2 = ec.strName
+			,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = cus.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
 		from
 			--tblEntityContact ec
 			tblEntity ec
