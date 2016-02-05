@@ -35,7 +35,7 @@ SELECT INV.intInvoiceId
 	 , FT.strFreightTerm
 	 , INV.strDeliverPickup	 
 	 , strInvoiceHeaderComment = INV.strComments
-	 , strInvoiceFooterComment = [dbo].fnARGetFooterComment(INV.intCompanyLocationId, INV.intEntityCustomerId, 'Invoice Footer')
+	 , strInvoiceFooterComment = INV.strFooterComments
 	 , dblInvoiceSubtotal = ISNULL(INV.dblInvoiceSubtotal, 0)
 	 , dblShipping = ISNULL(INV.dblShipping, 0)
 	 , dblTax = ISNULL(ID.dblTotalTax, 0)

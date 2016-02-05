@@ -32,7 +32,7 @@ SELECT SO.intSalesOrderId
 	 , FT.strFreightTerm
 	 , strSplitName = CASE WHEN ISNULL(ES.strDescription, '') <> '' THEN ES.strDescription ELSE ES.strSplitNumber END
 	 , strSOHeaderComment = SO.strComments
-	 , strSOFooterComment = [dbo].fnARGetFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer')
+	 , strSOFooterComment = SO.strFooterComments
 	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping = ISNULL(SO.dblShipping, 0)
 	 , dblTax = ISNULL(SD.dblTotalTax, 0)
