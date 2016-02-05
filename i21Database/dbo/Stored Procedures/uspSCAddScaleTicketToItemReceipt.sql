@@ -30,6 +30,7 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strTicketNumber AS NVARCHAR(40)
 DECLARE @dblTicketFees AS DECIMAL(7, 2)
 DECLARE @intFeeItemId AS INT
+DECLARE @checkContract AS INT
 
 
 BEGIN 
@@ -147,10 +148,6 @@ INSERT into @ReceiptStagingTable(
 		,strSourceScreenName
 )	
 SELECT 
-		--strReceiptType				= CASE 
-		--								WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
-		--								WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
-		--							  END
 		intEntityVendorId			= @intEntityId
 		,strBillOfLadding			= NULL
 		,intCurrencyId				= SC.intCurrencyId
@@ -161,15 +158,7 @@ SELECT
 		--Detail
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
-		,intItemUOMId				=	CASE	
-											WHEN SC.intContractId is NULL  
-												THEN (SELECT TOP 1 
-														IU.intItemUOMId											
-														FROM dbo.tblICItemUOM IU 
-														WHERE	IU.intItemId = SC.intItemId and IU.ysnStockUnit = 1)
-											WHEN SC.intContractId is NOT NULL 
-												THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = LI.intTransactionDetailId)
-										END-- Need to add the Gallons UOM from Company Preference
+		,intItemUOMId				= LI.intItemUOMId
 		--,intCostUOMId				= (SELECT intUnitMeasureId FROM tblSCScaleSetup WHERE intTicketPoolId = SC.intTicketPoolId)	   
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN 
@@ -319,6 +308,10 @@ FROM	@ReceiptStagingTable RE
 WHERE	RE.dblSurcharge != 0 
 
 -- No Records to process so exit
+SELECT @checkContract = COUNT(intContractDetailId) FROM @ReceiptStagingTable WHERE intContractDetailId != 0;
+IF(@checkContract > 0)
+	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
+
 SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)
 	RETURN;
