@@ -113,3 +113,14 @@ IF @strDefaultComment IS NULL
 	END
 ELSE
 	RETURN
+
+--9. No Hiearchy
+IF @strDefaultComment IS NULL
+	BEGIN
+		SELECT TOP 1 @strDefaultComment = strCommentDesc
+			FROM tblARCommentMaintenance
+			WHERE strTransactionType IS NULL
+		ORDER BY intCommentId DESC
+	END
+ELSE
+	RETURN
