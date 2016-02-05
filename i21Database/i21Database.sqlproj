@@ -3362,6 +3362,7 @@
     <Build Include="dbo\Stored Procedures\uspSMFixUserRoleMenus.sql" />
     <Build Include="dbo\Tables\tblEMEntityToRole.sql" />
     <Build Include="dbo\Stored Procedures\uspEMTogglePortalAccess.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityProspect.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
