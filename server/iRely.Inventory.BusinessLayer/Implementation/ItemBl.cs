@@ -418,6 +418,7 @@ namespace iRely.Inventory.BusinessLayer
             List<SearchSort> addDefaultSortList = new List<SearchSort>();
             var defaultLocationSort = new SearchSort() { property = "strLocationName", direction = "ASC" }; 
             var defaultDateSort = new SearchSort(){property = "dtmDate", direction = "ASC"};
+            var defaultItemSort = new SearchSort() { property = "strItemNo", direction = "ASC" };
 
             foreach (var ps in param.sort)
             {
@@ -433,6 +434,12 @@ namespace iRely.Inventory.BusinessLayer
                     defaultLocationSort.direction = ps.direction;
                 }
 
+                // Use the direction specified by the caller. 
+                else if (ps.property.ToLower() == "stritemno")
+                {
+                    defaultItemSort.direction = ps.direction;
+                }
+
                 // Use any more sorting specified by the caller. 
                 else
                 {
@@ -446,10 +453,11 @@ namespace iRely.Inventory.BusinessLayer
                 }                
             }
 
-            // Make sure location and date are the first int he sorting order. 
+            // Make sure item, location and date are the first in the sorting order.             
             addDefaultSortList.Insert(0, defaultDateSort);
             addDefaultSortList.Insert(0, defaultLocationSort);
-
+            addDefaultSortList.Insert(0, defaultItemSort);
+            
             IEnumerable<SearchSort> enDefaultSort = addDefaultSortList;
             var sort = ExpressionBuilder.GetSortSelector(enDefaultSort);
             param.sort = addDefaultSortList;
