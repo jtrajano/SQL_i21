@@ -9,8 +9,21 @@
 	@intUserId				INT
 AS
 BEGIN TRY
-	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg					NVARCHAR(MAX),
+			@intExternalHeaderId	INT,
+			@intContractHeaderId	INT,
+			@intContractSeq			INT,
+			@strNumber				NVARCHAR(MAX),
+			@strUserName			NVARCHAR(MAX)
 	
+
+	SELECT	@intExternalHeaderId	=	intExternalHeaderId, 
+			@intContractHeaderId	=	intContractHeaderId, 
+			@intContractSeq			=	intContractSeq,
+			@strNumber				=	strNumber,
+			@strUserName			=	strUserName
+	FROM	dbo.fnCTGetSequenceUsageHistoryAdditionalParam(@intContractDetailId,@strScreenName,@intExternalId,@intUserId)
+
 	INSERT INTO tblCTSequenceUsageHistory
 	(
 			intContractDetailId,	strScreenName,			intExternalId,	strFieldName,
