@@ -4669,4 +4669,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strBackColor" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d509181d-1f57-4098-b5a4-b0871925e47c" ChangeDateTime="02/08/2016 14:35:46">
+    <Property Name="ElementName" Value="[dbo].[tblLGLoad].[intLoadNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGLoad]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strLoadNumber]" />
+  </Operation>
 </Operations>

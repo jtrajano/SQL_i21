@@ -3,7 +3,7 @@
 select 
 LG.intLoadId,
 LG.intLoadDetailId,
-LG.intLoadNumber,
+LG.[strLoadNumber],
 LG.strType,
 LG.intItemId,
 LG.intVendorEntityId as intEntityVendorId,
@@ -100,7 +100,7 @@ UNION ALL
 select 
 LG.intLoadId,
 LG.intLoadDetailId,
-LG.intLoadNumber,
+LG.[strLoadNumber],
 LG.strType,
 LG.intItemId,
 NULL as intEntityVendorId,

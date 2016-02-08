@@ -2,7 +2,7 @@
 		@xmlParam NVARCHAR(MAX) = NULL
 AS
 BEGIN
-	DECLARE @intLoadNumber			INT,
+	DECLARE @strLoadNumber			NVARCHAR(MAX),
 			@xmlDocumentId			INT 
 	
 	DECLARE @strHaulerAddress NVARCHAR(MAX), @strHaulerCity NVARCHAR(MAX), @strHaulerCountry NVARCHAR(MAX), @strHaulerState NVARCHAR(MAX), @strHaulerZip NVARCHAR(MAX)
@@ -38,9 +38,9 @@ BEGIN
 				[datatype]		NVARCHAR(50)  
 	)  
     
-	SELECT	@intLoadNumber = [from]
+	SELECT	@strLoadNumber = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intLoadNumber' 
+	WHERE	[fieldname] = 'strLoadNumber' 
 
 	SELECT
 		@strHaulerAddress = (SELECT EL.strAddress from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
@@ -48,7 +48,7 @@ BEGIN
 		@strHaulerCountry = (SELECT EL.strCountry from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
 		@strHaulerState = (SELECT EL.strState from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
 		@strHaulerZip = (SELECT EL.strZipCode from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId)
-	FROM vyuLGLoadView L WHERE L.intLoadNumber = @intLoadNumber
+	FROM vyuLGLoadView L WHERE L.[strLoadNumber] = @strLoadNumber
 
 SELECT DISTINCT 
 		(SELECT TOP(1) C.strCompanyName FROM tblSMCompanySetup C) as strCompanyName,
@@ -58,7 +58,7 @@ SELECT DISTINCT
 		(SELECT TOP(1) C.strState FROM tblSMCompanySetup C) as strCompanyState,
 		(SELECT TOP(1) C.strZip FROM tblSMCompanySetup C) as strCompanyZip,
 
-		L.intLoadNumber,
+		L.[strLoadNumber],
 		L.strEquipmentType,
 		L.dtmScheduledDate,
 		L.strComments,
@@ -78,5 +78,5 @@ SELECT DISTINCT
 		L.strTrailerNo2,
 		L.strTrailerNo3,
 		L.strTruckNo
-	FROM vyuLGLoadView L WHERE L.intLoadNumber = @intLoadNumber
+	FROM vyuLGLoadView L WHERE L.[strLoadNumber] = @strLoadNumber
 END

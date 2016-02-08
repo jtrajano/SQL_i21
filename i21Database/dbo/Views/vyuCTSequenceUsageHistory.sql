@@ -49,7 +49,7 @@ AS
 			CD.intContractSeq,
 			UH.dtmTransactionDate,
 			UH.strScreenName,
-			LTRIM(DL.intLoadNumber)	AS	strNumber,
+			LTRIM(DL.[strLoadNumber])	AS	strNumber,
 			UH.strFieldName,
 			UH.dblOldValue,
 			UH.dblTransactionQuantity,

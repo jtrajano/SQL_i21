@@ -50,7 +50,7 @@ BEGIN
 	ELSE IF @strScreenName = 'Load Schedule'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intLoadId,
-				@strNumber				=	LTRIM(HR.intLoadNumber)
+				@strNumber				=	LTRIM(HR.[strLoadNumber])
 		FROM	tblLGLoadDetail			DL
 		JOIN	tblLGLoad				HR	ON	HR.intLoadId	=	DL.intLoadId 
 		WHERE	DL.intLoadDetailId		=	@intExternalId
