@@ -14,6 +14,7 @@ SET ANSI_WARNINGS OFF
 BEGIN
 	SELECT DISTINCT MC.intManufacturingCellId
 		,MC.strCellName
+		,MC.strDescription
 		,@dtmShiftDate AS dtmShiftDate
 		,@intShiftId AS intShiftId
 		,SH.dtmShiftStartTime
