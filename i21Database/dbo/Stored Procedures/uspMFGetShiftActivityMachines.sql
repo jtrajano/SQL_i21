@@ -23,16 +23,16 @@ BEGIN
 			,CONVERT(BIT, CASE 
 					WHEN EXISTS (
 							SELECT SM.intMachineId
-							FROM tblMFShiftActivityMachines SM
+							FROM dbo.tblMFShiftActivityMachines SM
 							WHERE SM.intShiftActivityId = @intShiftActivityId
 								AND SM.intMachineId = M.intMachineId
 							)
 						THEN 1
 					ELSE 0
 					END) AS ysnSelected
-		FROM tblMFMachine M
-		JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-		JOIN tblMFManufacturingCellPackType MCP ON MCP.intPackTypeId = MP.intPackTypeId
+		FROM dbo.tblMFMachine M
+		JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
+		JOIN dbo.tblMFManufacturingCellPackType MCP ON MCP.intPackTypeId = MP.intPackTypeId
 			AND MCP.intManufacturingCellId = @intManufacturingCellId
 		WHERE M.intLocationId = @intLocationId
 			AND M.intMachineId NOT IN (
