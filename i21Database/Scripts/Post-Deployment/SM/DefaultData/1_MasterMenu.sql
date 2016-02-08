@@ -2880,6 +2880,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Wastage S
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ShiftActivityView?searchCommand=searchConfigWastageView' WHERE strMenuName = 'Wastage Summary View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Lots View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Unallocated Lots View', N'Manufacturing', @ManufacturingParentMenuId, N'Unallocated Lots View', N'Activity', N'Screen', N'Manufacturing.view.ShiftActivityView?searchCommand=searchConfigUnallocatedLotsView', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ShiftActivityView?searchCommand=searchConfigUnallocatedLotsView' WHERE strMenuName = 'Unallocated Lots View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
 
 /* STORE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Store' AND strModuleName = 'Store' AND intParentMenuID = 0)

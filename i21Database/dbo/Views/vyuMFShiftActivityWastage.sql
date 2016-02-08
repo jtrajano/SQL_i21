@@ -32,14 +32,14 @@ FROM (
 		,ISNULL(MC.dblWastageFactor, 0) AS dblWastageFactor
 		,ISNULL(MC.dblWastageCost, 0) AS dblWastageCost
 		,MC.intLocationId
-	FROM tblMFWastage WD
-	JOIN tblMFShiftActivity SA ON SA.intShiftActivityId = WD.intShiftActivityId
-	JOIN tblMFWastageType WT ON WT.intWastageTypeId = WD.intWastageTypeId
-	JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = SA.intManufacturingCellId
+	FROM dbo.tblMFWastage WD
+	JOIN dbo.tblMFShiftActivity SA ON SA.intShiftActivityId = WD.intShiftActivityId
+	JOIN dbo.tblMFWastageType WT ON WT.intWastageTypeId = WD.intWastageTypeId
+	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = SA.intManufacturingCellId
 		AND SA.intShiftActivityStatusId = 3
 		AND SA.dblTotalWeightofProducedQty > 0
-	JOIN tblMFWorkOrderProducedLot wpq ON wpq.intShiftActivityId = SA.intShiftActivityId -- To get only the allocated shifts
-	JOIN tblMFShift SH ON SH.intShiftId = SA.intShiftId
+	JOIN dbo.tblMFWorkOrderProducedLot wpq ON wpq.intShiftActivityId = SA.intShiftActivityId -- To get only the allocated shifts
+	JOIN dbo.tblMFShift SH ON SH.intShiftId = SA.intShiftId
 	) t
 GROUP BY dtmShiftDate
 	,strCellName

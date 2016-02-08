@@ -32,20 +32,20 @@ BEGIN
 			,UOM.strUnitMeasure
 			,I.strItemNo
 			,I.strDescription
-			,CAST(WPL.dtmCreated AS DATETIME) AS dtmDateCreated
+			,WPL.dtmCreated AS dtmDateCreated
 			,S.strShiftName
 			,US.strUserName
-		FROM tblMFWorkOrderProducedLot WPL
-		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		FROM dbo.tblMFWorkOrderProducedLot WPL
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 			AND W.intManufacturingCellId = @intManufacturingCellId
 			AND WPL.dtmCreated > @WorkOrderCreateDate
 			AND WPL.intShiftActivityId = @intShiftActivityId
-		JOIN tblMFShift S ON S.intShiftId = WPL.intBusinessShiftId
-		JOIN tblICLot L ON L.intLotId = WPL.intLotId
-		JOIN tblICItem I ON I.intItemId = L.intItemId
-		JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
-		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-		JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
+		JOIN dbo.tblMFShift S ON S.intShiftId = WPL.intBusinessShiftId
+		JOIN dbo.tblICLot L ON L.intLotId = WPL.intLotId
+		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+		JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+		JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
 	END
 	ELSE
 	BEGIN -- UnAllocated Lots
@@ -55,19 +55,19 @@ BEGIN
 			,UOM.strUnitMeasure
 			,I.strItemNo
 			,I.strDescription
-			,CAST(WPL.dtmCreated AS DATETIME) AS dtmDateCreated
+			,WPL.dtmCreated AS dtmDateCreated
 			,S.strShiftName
 			,US.strUserName
-		FROM tblMFWorkOrderProducedLot WPL
-		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		FROM dbo.tblMFWorkOrderProducedLot WPL
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 			AND W.intManufacturingCellId = @intManufacturingCellId
 			AND WPL.dtmCreated > @WorkOrderCreateDate
 			AND WPL.intShiftActivityId IS NULL
-		JOIN tblMFShift S ON S.intShiftId = WPL.intBusinessShiftId
-		JOIN tblICLot L ON L.intLotId = WPL.intLotId
-		JOIN tblICItem I ON I.intItemId = L.intItemId
-		JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
-		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-		JOIN tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
+		JOIN dbo.tblMFShift S ON S.intShiftId = WPL.intBusinessShiftId
+		JOIN dbo.tblICLot L ON L.intLotId = WPL.intLotId
+		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+		JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+		JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = L.intCreatedEntityId
 	END
 END

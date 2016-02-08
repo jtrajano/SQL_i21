@@ -3366,6 +3366,7 @@
     <Build Include="dbo\Views\vyuMFGetBlendItemByLocation.sql" />
     <Build Include="dbo\Tables\tblLGCompanyPreference.sql" />
     <Build Include="dbo\Functions\fnCTGetSequenceUsageHistoryAdditionalParam.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityUnallocatedLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

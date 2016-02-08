@@ -247,8 +247,8 @@ BEGIN TRY
 				,GETDATE()
 				,@intLastModifiedUserId
 				,GETDATE()
-			FROM tblMFShift S
-				,tblMFManufacturingCell MC
+			FROM dbo.tblMFShift S
+				,dbo.tblMFManufacturingCell MC
 			WHERE S.intShiftId = @intShiftId
 				AND MC.intManufacturingCellId = @intManufacturingCellId
 				AND MC.ysnIncludeEfficiency = 1

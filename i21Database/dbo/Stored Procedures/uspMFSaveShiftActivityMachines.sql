@@ -20,7 +20,7 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	DELETE
-	FROM tblMFShiftActivityMachines
+	FROM dbo.tblMFShiftActivityMachines
 	WHERE intShiftActivityId = @intShiftActivityId
 		AND intMachineId NOT IN (
 			-- To ignore available Machines in XML
@@ -28,7 +28,7 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/Machine', 2) WITH (intMachineId INT)
 			)
 
-	INSERT INTO tblMFShiftActivityMachines (
+	INSERT INTO dbo.tblMFShiftActivityMachines (
 		intConcurrencyId
 		,intShiftActivityId
 		,intMachineId
@@ -50,18 +50,18 @@ BEGIN TRY
 	WHERE intMachineId NOT IN (
 			-- To ignore available Machines in table
 			SELECT intMachineId
-			FROM tblMFShiftActivityMachines
+			FROM dbo.tblMFShiftActivityMachines
 			WHERE intShiftActivityId = @intShiftActivityId
 			)
 
 	SELECT @intScheduledRuntime = ISNULL((DATEDIFF(ss, SA.dtmShiftStartTime, SA.dtmShiftEndTime) * COUNT(SAM.intMachineId)),0)
-	FROM tblMFShiftActivity SA
-	JOIN tblMFShiftActivityMachines SAM ON SAM.intShiftActivityId = SA.intShiftActivityId
+	FROM dbo.tblMFShiftActivity SA
+	JOIN dbo.tblMFShiftActivityMachines SAM ON SAM.intShiftActivityId = SA.intShiftActivityId
 	WHERE SA.intShiftActivityId = @intShiftActivityId
 	GROUP BY SA.dtmShiftStartTime
 		,SA.dtmShiftEndTime
 
-	UPDATE tblMFShiftActivity
+	UPDATE dbo.tblMFShiftActivity
 	SET intScheduledRuntime = @intScheduledRuntime
 	WHERE intShiftActivityId = @intShiftActivityId
 

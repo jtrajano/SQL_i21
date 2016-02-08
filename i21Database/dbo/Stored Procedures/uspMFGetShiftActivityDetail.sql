@@ -11,7 +11,7 @@ SET ANSI_WARNINGS OFF
 BEGIN
 	-- Shift Activity
 	SELECT *
-	FROM tblMFShiftActivity SA
+	FROM dbo.tblMFShiftActivity SA
 	WHERE SA.intShiftActivityId = @intShiftActivityId
 
 	-- Downtime
@@ -28,11 +28,11 @@ BEGIN
 		,D.dtmShiftEndTime
 		,D.intDowntimeId
 		,SA.intShiftActivityId
-	FROM tblMFShiftActivity SA
-	JOIN tblMFDowntime D ON D.intShiftActivityId = SA.intShiftActivityId
-	JOIN tblMFDowntimeMachines DM ON DM.intDowntimeId = D.intDowntimeId
-	JOIN tblMFReasonCode RC ON RC.intReasonCodeId = D.intReasonCodeId
-	JOIN tblMFMachine M ON M.intMachineId = DM.intMachineId
+	FROM dbo.tblMFShiftActivity SA
+	JOIN dbo.tblMFDowntime D ON D.intShiftActivityId = SA.intShiftActivityId
+	JOIN dbo.tblMFDowntimeMachines DM ON DM.intDowntimeId = D.intDowntimeId
+	JOIN dbo.tblMFReasonCode RC ON RC.intReasonCodeId = D.intReasonCodeId
+	JOIN dbo.tblMFMachine M ON M.intMachineId = DM.intMachineId
 		AND M.intLocationId = @intLocationId
 	WHERE SA.intShiftActivityId = @intShiftActivityId
 	ORDER BY DM.intDowntimeMachineId DESC
@@ -49,10 +49,10 @@ BEGIN
 		,W.dblNetWeight
 		,W.intWeightUnitMeasureId
 		,U.strUnitMeasure
-	FROM tblMFWastage W
-	JOIN tblMFBinType B ON B.intBinTypeId = W.intBinTypeId
-	JOIN tblMFWastageType WT ON WT.intWastageTypeId = W.intWastageTypeId
-	JOIN tblICUnitMeasure U ON U.intUnitMeasureId = W.intWeightUnitMeasureId
+	FROM dbo.tblMFWastage W
+	JOIN dbo.tblMFBinType B ON B.intBinTypeId = W.intBinTypeId
+	JOIN dbo.tblMFWastageType WT ON WT.intWastageTypeId = W.intWastageTypeId
+	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = W.intWeightUnitMeasureId
 	WHERE W.intShiftActivityId = @intShiftActivityId
 	ORDER BY W.intWastageId DESC
 
@@ -62,9 +62,9 @@ BEGIN
 		,ISNULL(S.dblTotalSKUProduced, 0) AS dblTotalSKUProduced
 		,ISNULL(SUM(WD.dblNetWeight), 0) AS dblTotalNetWeight
 		,ISNULL(((SUM(WD.dblNetWeight) * MC.dblWastageFactor) / SUM(WD.dblGrossWeight)), 0) AS dblWastagePercentage
-	FROM tblMFShiftActivity S
-	LEFT JOIN tblMFWastage WD ON WD.intShiftActivityId = S.intShiftActivityId
-	JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
+	FROM dbo.tblMFShiftActivity S
+	LEFT JOIN dbo.tblMFWastage WD ON WD.intShiftActivityId = S.intShiftActivityId
+	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
 	WHERE S.intShiftActivityId = @intShiftActivityId
 	GROUP BY S.dblTotalWeightofProducedQty
 		,MC.dblWastageFactor

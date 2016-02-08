@@ -14,19 +14,19 @@ BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 
 	SELECT @intTotalDowntime = ISNULL(SUM(intDowntime), 0)
-	FROM tblMFDowntimeMachines DM
-	JOIN tblMFDowntime D ON D.intDowntimeId = DM.intDowntimeId
+	FROM dbo.tblMFDowntimeMachines DM
+	JOIN dbo.tblMFDowntime D ON D.intDowntimeId = DM.intDowntimeId
 	WHERE D.intShiftActivityId = @intShiftActivityId
 
 	SELECT @intReduceAvailableTime = ISNULL(SUM(intDowntime) / 60, 0)
-	FROM tblMFDowntimeMachines DM
-	JOIN tblMFDowntime D ON D.intDowntimeId = DM.intDowntimeId
-	JOIN tblMFReasonCode RC ON RC.intReasonCodeId = D.intReasonCodeId
+	FROM dbo.tblMFDowntimeMachines DM
+	JOIN dbo.tblMFDowntime D ON D.intDowntimeId = DM.intDowntimeId
+	JOIN dbo.tblMFReasonCode RC ON RC.intReasonCodeId = D.intReasonCodeId
 	WHERE RC.ysnReduceavailabletime = 1
 		AND D.intShiftActivityId = @intShiftActivityId
 
 	SELECT @intDuration = ISNULL(intScheduledRuntime, 0)
-	FROM tblMFShiftActivity
+	FROM dbo.tblMFShiftActivity
 	WHERE intShiftActivityId = @intShiftActivityId
 
 	IF (@intTotalDowntime > @intDuration)
@@ -40,7 +40,7 @@ BEGIN TRY
 				)
 	END
 
-	UPDATE tblMFShiftActivity
+	UPDATE dbo.tblMFShiftActivity
 	SET intTotalDowntime = @intTotalDowntime
 		,intReduceAvailableTime = @intReduceAvailableTime
 	WHERE intShiftActivityId = @intShiftActivityId
