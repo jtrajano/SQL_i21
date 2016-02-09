@@ -3182,6 +3182,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostReturnActualCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICReturnStockInActualCost.sql" />
     <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
