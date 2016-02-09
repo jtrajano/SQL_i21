@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[intItemKitDetailId] INT NOT NULL IDENTITY, 
 		[intItemKitId] INT NOT NULL, 
 		[intItemId] INT NOT NULL, 
-		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intItemUnitMeasureId] INT NULL, 
 		[dblPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnSelected] INT NULL, 
