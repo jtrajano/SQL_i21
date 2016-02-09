@@ -4089,7 +4089,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboChargeCurrency": {
                 select: this.onChargeSelect
-            },
+            }
         })
     }
 

@@ -507,7 +507,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         store: '{costMethod}'
                     }
                 },
+                colChargeCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{chargeCurrency}',
+                        origValueField: 'intCurrencyID',
+                        origUpdateField: 'intCurrencyId',
+                        defaultFilters: [
+                            {
+                                column: 'ysnSubCurrency',
+                                value: false,
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colRate: 'dblRate',
+                colExchangeRate: 'dblExchangeRate',
                 colCostUOM: {
                     dataIndex: 'strCostUOM',
                     editor: {
@@ -1692,6 +1708,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
+        else if (combo.itemId === 'cboChargeCurrency') {
+            current.set('dblExchangeRate', record.get('dblDailyRate'));
+        }
     },
 
     onQualityClick: function(button, e, eOpts) {
@@ -2098,6 +2117,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnAddOrders": {
                 click: this.onAddOrderClick
+            },
+            "#cboChargeCurrency": {
+                select: this.onChargeSelect
             }
         })
     }

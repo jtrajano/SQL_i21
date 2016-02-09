@@ -19,7 +19,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'EntityManagement.store.VendorBuffered',
         'AccountsReceivable.store.SalesOrderDetailCompactBuffered',
         'ContractManagement.store.ContractDetailViewBuffered',
-        'ContractManagement.store.ContractHeaderViewBuffered'
+        'ContractManagement.store.ContractHeaderViewBuffered',
+        'i21.store.CurrencyBuffered'
     ],
 
     data: {
@@ -188,6 +189,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        chargeCurrency: {
+            type: 'currencybuffered'
         }
     },
 
