@@ -445,7 +445,7 @@ namespace iRely.Inventory.Model
         public decimal? dblPhysicalCount { get; set; }
         public int? intItemUOMId { get; set; }
         public string strUnitMeasure { get; set; }
-        public int? dblPhysicalCountStockUnit { get; set; }
+        public decimal? dblPhysicalCountStockUnit { get; set; }
         public decimal? dblVariance { get; set; }
         public bool? ysnRecount { get; set; }
         public int? intEntityUserSecurityId { get; set; }

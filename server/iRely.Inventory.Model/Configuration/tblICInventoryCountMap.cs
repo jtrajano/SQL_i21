@@ -59,12 +59,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
-            this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(18, 6);
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
+            this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
             this.Property(t => t.strCountLine).HasColumnName("strCountLine");
-            this.Property(t => t.dblPallets).HasColumnName("dblPallets").HasPrecision(18, 6);
-            this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(18, 6);
-            this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(18, 6);
+            this.Property(t => t.dblPallets).HasColumnName("dblPallets").HasPrecision(38, 20);
+            this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(38, 20);
+            this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(38, 20);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
@@ -141,17 +141,17 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
-            this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(18, 6);
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
+            this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
             this.Property(t => t.strCountLine).HasColumnName("strCountLine");
-            this.Property(t => t.dblPallets).HasColumnName("dblPallets").HasPrecision(18, 6);
-            this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(18, 6);
-            this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(18, 6);
+            this.Property(t => t.dblPallets).HasColumnName("dblPallets").HasPrecision(38, 20);
+            this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(38, 20);
+            this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(38, 20);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
-            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(18, 6);
-            this.Property(t => t.dblPhysicalCountStockUnit).HasColumnName("dblPhysicalCountStockUnit").HasPrecision(18, 6);
-            this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(18, 6);
+            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(38, 20);
+            this.Property(t => t.dblPhysicalCountStockUnit).HasColumnName("dblPhysicalCountStockUnit").HasPrecision(38, 20);
+            this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(38, 20);
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
             this.Property(t => t.strUserName).HasColumnName("strUserName");
@@ -190,16 +190,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
-            this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(18, 6);
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
+            this.Property(t => t.dblSystemCount).HasColumnName("dblSystemCount").HasPrecision(38, 20);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
             this.Property(t => t.strCountLine).HasColumnName("strCountLine");
-            this.Property(t => t.dblPallets).HasColumnName("dblPallets").HasPrecision(18, 6);
-            this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(18, 6);
-            this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(18, 6);
+            this.Property(t => t.dblPallets).HasColumnName("dblPallets").HasPrecision(38, 20);
+            this.Property(t => t.dblQtyPerPallet).HasColumnName("dblQtyPerPallet").HasPrecision(38, 20);
+            this.Property(t => t.dblPhysicalCount).HasColumnName("dblPhysicalCount").HasPrecision(38, 20);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
-            this.Property(t => t.dblPhysicalCountStockUnit).HasColumnName("dblPhysicalCountStockUnit");
-            this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(18, 6);
+            this.Property(t => t.dblPhysicalCountStockUnit).HasColumnName("dblPhysicalCountStockUnit").HasPrecision(38, 20);
+            this.Property(t => t.dblVariance).HasColumnName("dblVariance").HasPrecision(38, 20);
             this.Property(t => t.ysnRecount).HasColumnName("ysnRecount");
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
             this.Property(t => t.strUserName).HasColumnName("strUserName");
@@ -239,12 +239,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
-            this.Property(t => t.dblStockIn).HasColumnName("dblStockIn").HasPrecision(18, 6);
-            this.Property(t => t.dblStockOut).HasColumnName("dblStockOut").HasPrecision(18, 6);
-            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(18, 6);
-            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(18, 6);
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
-            this.Property(t => t.dblTotalCost).HasColumnName("dblTotalCost").HasPrecision(18, 6);
+            this.Property(t => t.dblStockIn).HasColumnName("dblStockIn").HasPrecision(38, 20);
+            this.Property(t => t.dblStockOut).HasColumnName("dblStockOut").HasPrecision(38, 20);
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(38, 20);
+            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(38, 20);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
+            this.Property(t => t.dblTotalCost).HasColumnName("dblTotalCost").HasPrecision(38, 20);
         }
     }
 
@@ -279,12 +279,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
-            this.Property(t => t.dblStockIn).HasColumnName("dblStockIn").HasPrecision(18, 6);
-            this.Property(t => t.dblStockOut).HasColumnName("dblStockOut").HasPrecision(18, 6);
-            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(18, 6);
-            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(18, 6);
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
-            this.Property(t => t.dblTotalCost).HasColumnName("dblTotalCost").HasPrecision(18, 6);
+            this.Property(t => t.dblStockIn).HasColumnName("dblStockIn").HasPrecision(38, 20);
+            this.Property(t => t.dblStockOut).HasColumnName("dblStockOut").HasPrecision(38, 20);
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(38, 20);
+            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(38, 20);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
+            this.Property(t => t.dblTotalCost).HasColumnName("dblTotalCost").HasPrecision(38, 20);
         }
     }
 }

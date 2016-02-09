@@ -107,7 +107,7 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICStorageLocationSku");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
             this.Property(t => t.intContainerId).HasColumnName("intContainerId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intLotCodeId).HasColumnName("intLotCodeId");

@@ -16,10 +16,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intAssemblyItemId).HasColumnName("intAssemblyItemId");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
             this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
-            this.Property(t => t.dblUnit).HasColumnName("dblUnit").HasPrecision(18, 6);
-            this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
+            this.Property(t => t.dblUnit).HasColumnName("dblUnit").HasPrecision(38, 20);
+            this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(38, 20);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetAssemblyItem)
@@ -45,14 +45,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strComponentDescription).HasColumnName("strComponentDescription");
             this.Property(t => t.strComponentType).HasColumnName("strComponentType");
             this.Property(t => t.strComponentLotTracking).HasColumnName("strComponentLotTracking");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
             this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
             this.Property(t => t.strComponentUOM).HasColumnName("strComponentUOM");
-            this.Property(t => t.dblComponentUOMCF).HasColumnName("dblComponentUOMCF").HasPrecision(18, 6);
-            this.Property(t => t.dblUnit).HasColumnName("dblUnit").HasPrecision(18, 6);
-            this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
-            this.Property(t => t.dblUnitLastCost).HasColumnName("dblUnitLastCost").HasPrecision(18, 6);
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
+            this.Property(t => t.dblComponentUOMCF).HasColumnName("dblComponentUOMCF").HasPrecision(38, 20);
+            this.Property(t => t.dblUnit).HasColumnName("dblUnit").HasPrecision(38, 20);
+            this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(38, 20);
+            this.Property(t => t.dblUnitLastCost).HasColumnName("dblUnitLastCost").HasPrecision(38, 20);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
         }
     }
 }
