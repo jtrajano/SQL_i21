@@ -440,7 +440,7 @@ namespace iRely.Inventory.BusinessLayer
                     defaultItemSort.direction = ps.direction;
                 }
 
-                // Use any more sorting specified by the caller. 
+                // Add any additional sorting specified by the caller. 
                 else
                 {
                     addDefaultSortList.Add(
@@ -475,8 +475,6 @@ namespace iRely.Inventory.BusinessLayer
             }
             IEnumerable<SearchSort> enReverseSort = reverseSortList;
             var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort); 
-
-            // Get only the specific data columns asked by the caller. 
             var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
             
             // Assemble the query. 
@@ -504,7 +502,7 @@ namespace iRely.Inventory.BusinessLayer
                 dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblQuantity);
             }
 
-            // Get the page. Convert it into a list for further processing. 
+            // Get the page. Convert it into a list for the loop below. 
             var paged_data = await query.PagingBySelector(param).ToListAsync();
 
             // Loop thru the List, calculate, and assign the running qty and balance for each record. 
@@ -535,7 +533,6 @@ namespace iRely.Inventory.BusinessLayer
                 dblBeginningQty = dblRunningQty;                
             }
             
-            // Return the data back to the caller. 
             return new SearchResult()
             {
                 data = paged_data.AsQueryable().Select(selector),

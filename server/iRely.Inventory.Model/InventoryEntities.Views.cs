@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse6247277175bf497de8a8c1fcedeea3d50db12b1f6208b6f631c9ef526c006e8))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf80f0b99c2093664b9d7c190f26866449cbf11e4b9831f536801a01f493f0dc2))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetse6247277175bf497de8a8c1fcedeea3d50db12b1f6208b6f631c9ef526c006e8 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsf80f0b99c2093664b9d7c190f26866449cbf11e4b9831f536801a01f493f0dc2 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "e6247277175bf497de8a8c1fcedeea3d50db12b1f6208b6f631c9ef526c006e8"; }
+            get { return "f80f0b99c2093664b9d7c190f26866449cbf11e4b9831f536801a01f493f0dc2"; }
         }
 
         /// <summary>
@@ -8965,14 +8965,14 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStockReservation
-        [CodeFirstDatabaseSchema.tblICStockReservation](T1.tblICStockReservation_intStockReservationId, T1.tblICStockReservation_intItemId, T1.tblICStockReservation_intItemLocationId, T1.tblICStockReservation_intItemUOMId, T1.tblICStockReservation_dblQuantity, T1.tblICStockReservation_intTransactionId, T1.tblICStockReservation_strTransactionId, T1.tblICStockReservation_intSort, T1.tblICStockReservation_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICStockReservation](T1.tblICStockReservation_intStockReservationId, T1.tblICStockReservation_intItemId, T1.tblICStockReservation_intItemLocationId, T1.tblICStockReservation_intItemUOMId, T1.tblICStockReservation_dblQty, T1.tblICStockReservation_intTransactionId, T1.tblICStockReservation_strTransactionId, T1.tblICStockReservation_intSort, T1.tblICStockReservation_intConcurrencyId)
     FROM (
         SELECT 
             T.intStockReservationId AS tblICStockReservation_intStockReservationId, 
             T.intItemId AS tblICStockReservation_intItemId, 
             T.intItemLocationId AS tblICStockReservation_intItemLocationId, 
             T.intItemUOMId AS tblICStockReservation_intItemUOMId, 
-            T.dblQuantity AS tblICStockReservation_dblQuantity, 
+            T.dblQuantity AS tblICStockReservation_dblQty, 
             T.intTransactionId AS tblICStockReservation_intTransactionId, 
             T.strTransactionId AS tblICStockReservation_strTransactionId, 
             T.intSort AS tblICStockReservation_intSort, 
@@ -8997,7 +8997,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intItemId AS tblICStockReservation_intItemId, 
             T.intItemLocationId AS tblICStockReservation_intItemLocationId, 
             T.intItemUOMId AS tblICStockReservation_intItemUOMId, 
-            T.dblQuantity AS tblICStockReservation_dblQuantity, 
+            T.dblQty AS tblICStockReservation_dblQuantity, 
             T.intTransactionId AS tblICStockReservation_intTransactionId, 
             T.strTransactionId AS tblICStockReservation_strTransactionId, 
             T.intSort AS tblICStockReservation_intSort, 
