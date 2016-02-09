@@ -44,7 +44,7 @@ BEGIN TRY
 	Where 
 	ISNULL(a.strStorageType,'') <> 'ITR' 
 	AND b.ysnCustomerStorage=0  
-	AND (a.dblOpenBalance >0 OR (a.dblStorageDue-a.dblStoragePaid)>0 )
+	AND a.dblOpenBalance >0
 	ORDER BY a.dtmDeliveryDate
 	
 		SELECT @intTicketKey = MIN(intTicketKey)
