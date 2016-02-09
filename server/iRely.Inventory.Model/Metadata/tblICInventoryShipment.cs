@@ -188,6 +188,7 @@ namespace iRely.Inventory.Model
         public int? intOwnershipType { get; set; }
         public decimal? dblQuantity { get; set; }
         public int? intItemUOMId { get; set; }
+        public int? intCurrencyId { get; set; }
         public int? intWeightUOMId { get; set; }
         public decimal? dblUnitPrice { get; set; }
         public int? intDockDoorId { get; set; }
@@ -593,6 +594,25 @@ namespace iRely.Inventory.Model
                 _discountSchedule = value;
             }
         }
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
 
         public vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem { get; set; }
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
@@ -631,9 +651,11 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
         public decimal? dblItemUOMConv { get; set; }
         public string strUnitType { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
         public string strWeightUOM { get; set; }
-        public decimal? dblUnitCost { get; set; }
         public decimal? dblWeightItemUOMConv { get; set; }
+        public decimal? dblUnitCost { get; set; }
         public decimal? dblQtyOrdered { get; set; }
         public decimal? dblQtyAllocated { get; set; }
         public decimal? dblUnitPrice { get; set; }
@@ -658,11 +680,13 @@ namespace iRely.Inventory.Model
         public int? intChargeId { get; set; }
         public string strCostMethod { get; set; }
         public decimal? dblRate { get; set; }
+        public decimal? dblExchangeRate { get; set; }
         public int? intCostUOMId { get; set; }
+        public int? intCurrencyId { get; set; }
         public decimal? dblAmount { get; set; }
         public bool? ysnAccrue { get; set; }
-        public bool? ysnPrice { get; set; }
         public int? intEntityVendorId { get; set; }
+        public bool? ysnPrice { get; set; }
         public int? intSort { get; set; }
 
         private string _contractNo;
@@ -795,6 +819,25 @@ namespace iRely.Inventory.Model
                 _vendorId = value;
             }
         }
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
 
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
         public vyuICGetInventoryShipmentCharge vyuICGetInventoryShipmentCharge { get; set; }
@@ -810,15 +853,18 @@ namespace iRely.Inventory.Model
         public string strItemDescription { get; set; }
         public string strCostMethod { get; set; }
         public decimal? dblRate { get; set; }
+        public decimal? dblExchangeRate { get; set; }
         public string strCostUOM { get; set; }
         public string strUnitType { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
         public int? intOnCostTypeId { get; set; }
         public bool? ysnPrice { get; set; }
         public string strOnCostType { get; set; }
-        public int? intEntityVendorId { get; set; }
-        public string strVendorId { get; set; }
         public decimal? dblAmount { get; set; }
         public bool? ysnAccrue { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
 
         public tblICInventoryShipmentCharge tblICInventoryShipmentCharge { get; set; }
     }

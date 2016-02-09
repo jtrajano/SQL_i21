@@ -215,6 +215,7 @@ namespace iRely.Inventory.Model
         public int? intUnitMeasureId { get; set; }
         public int? intWeightUOMId { get; set; }
         public int? intCostUOMId { get; set; }
+        public int? intCurrencyId { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
@@ -223,6 +224,8 @@ namespace iRely.Inventory.Model
         public decimal? dblNet { get; set; }
         public decimal? dblTax { get; set; }
         public int? intDiscountSchedule { get; set; }
+        public bool? ysnExported { get; set; }
+        public DateTime? dtmExportedDate { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
@@ -746,7 +749,26 @@ namespace iRely.Inventory.Model
                 _discountSchedule = value;
             }
         }
-
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
+        
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
 
@@ -801,6 +823,8 @@ namespace iRely.Inventory.Model
         public decimal? dblWeightUOMConvFactor { get; set; }
         public string strCostUOM { get; set; }
         public decimal? dblCostUOMConvFactor { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
         public decimal? dblGrossMargin { get; set; }
         public int? intGradeId { get; set; }
         public decimal? dblBillQty { get; set; }
@@ -811,6 +835,8 @@ namespace iRely.Inventory.Model
         public decimal? dblAvailableQty { get; set; }
         public int? intDiscountSchedule { get; set; }
         public string strDiscountSchedule { get; set; }
+        public bool? ysnExported { get; set; }
+        public DateTime? dtmExportedDate { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
@@ -824,12 +850,17 @@ namespace iRely.Inventory.Model
         public bool? ysnInventoryCost { get; set; }
         public string strCostMethod { get; set; }
         public decimal? dblRate { get; set; }
+        public decimal? dblExchangeRate { get; set; }
         public int? intCostUOMId { get; set; }
-        public int? intEntityVendorId { get; set; }
+        public int? intCurrencyId { get; set; }
         public decimal? dblAmount { get; set; }
         public string strAllocateCostBy { get; set; }
         public bool? ysnAccrue { get; set; }
+        public int? intEntityVendorId { get; set; }
         public bool? ysnPrice { get; set; }
+        public decimal? dblAmountBilled { get; set; }
+        public decimal? dblAmountPaid { get; set; }
+        public decimal? dblAmountPriced { get; set; }
         public int? intSort { get; set; }
 
         private string _contractNo;
@@ -984,6 +1015,25 @@ namespace iRely.Inventory.Model
                 _vendorName = value;
             }
         }
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
@@ -1000,15 +1050,19 @@ namespace iRely.Inventory.Model
         public bool? ysnInventoryCost { get; set; }
         public string strCostMethod { get; set; }
         public decimal? dblRate { get; set; }
+        public decimal? dblExchangeRate { get; set; }
         public string strCostUOM { get; set; }
         public string strUnitType { get; set; }
+        public int? intCurrencyId { get; set; }
+        public string strCurrency { get; set; }
         public int? intOnCostTypeId { get; set; }
         public string strOnCostType { get; set; }
-        public string strVendorId { get; set; }
-        public string strVendorName { get; set; }
         public decimal? dblAmount { get; set; }
         public string strAllocateCostBy { get; set; }
         public bool? ysnAccrue { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
         public bool? ysnPrice { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
