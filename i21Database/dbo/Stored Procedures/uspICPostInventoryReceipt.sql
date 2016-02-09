@@ -280,86 +280,116 @@ BEGIN
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
 				,intItemUOMId = 
-							-- Check if Lot 
-							-- If it is a Lot:
-							--		Use Weight UOM if there is a weight. 
-							--		Otherwise, use the Lot-Item UOM. 
-							-- If not lot, user the Item UOM. 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
-										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
-												ELSE DetailItemLot.intItemUnitMeasureId
-										END 
-									ELSE 
-										DetailItem.intUnitMeasureId
-							END
+							-- New Hierarchy:
+							-- 1. Use the Gross/Net UOM (intWeightUOMId) 
+							-- 2. If there is no Gross/Net UOM, then check the lot. 
+								-- 2.1. If it is a Lot, use the Lot UOM. 
+								-- 2.2. If it is not a Lot, use the Item UOM. 
+							ISNULL( 
+								DetailItem.intWeightUOMId, 
+								CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
+											DetailItemLot.intItemUnitMeasureId
+										ELSE 
+											DetailItem.intUnitMeasureId
+								END 
+							)
+
 				,dtmDate = Header.dtmReceiptDate  
 				,dblQty =						
+							-- New Hierarchy:
+							-- 1. If there is a Gross/Net UOM, use the Net Qty. 
+								-- 2.1. If it is not a Lot, use the item's Net Qty. 
+								-- 2.2. If it is a Lot, use the Lot's Net Qty. 
+							-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
+								-- 2.1. If it is not a Lot, use the item Qty. 
+								-- 2.2. If it is a Lot, use the lot qty. 
+							CASE		-- Use the Gross/Net Qty if there is a Gross/Net UOM. 
+										WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 									
+											CASE	-- When item is NOT a Lot, receive it by the item's net qty. 
+													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+														ISNULL(DetailItem.dblNet, 0)
+													
+													-- When item is a LOT, get the net qty from the Lot record. 
+													-- 1. If Net Qty is not provided, convert the Lot Qty into Gross/Net UOM. 
+													-- 2. Else, get the Net Qty by using this formula: Gross Weight - Tare Weight. 
+													ELSE 
+																-- When Net Qty is missing, then convert the Lot Qty to Gross/Net UOM. 
+														CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																	dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+																-- Calculate the Net Qty
+																ELSE 
+																	ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+														END 
+											END 
 
-							-- Check if it is processing a lot item or not. 
-							-- If it is a lot, 
-							--		If there is no weight UOM, receive it by Lot Qty.
-							--		If there is a weight UOM, receive it by Weights. 
-							-- Otherwise
-							--		Receive the qty from the detail item. 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
-										CASE	-- The item has no weight UOM. Receive by the Lot Qty. 
-												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
-													ISNULL(DetailItemLot.dblQuantity, 0)
-											
-												-- The item has a weight UOM. 
+									-- If Gross/Net UOM is missing, then get the item/lot qty. 
+									ELSE 
+										CASE	-- When item is NOT a Lot, receive it by the item qty.
+												WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+													DetailItem.dblOpenReceive
+												
+												-- When item is a LOT, receive it by the Lot Qty. 
 												ELSE 
-													-- If there is weight value (non-zero), use it. 
-													-- Otherwise, convert the Qty from Detail-Item-Lot-UOM to the Detail-Item-Weight-UOM. 
-													CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-																dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-															ELSE 
-																ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-													END
-										END 									
-									ELSE	
-										DetailItem.dblOpenReceive
+													ISNULL(DetailItemLot.dblQuantity, 0)
+										END 								
+
 							END 
 
 				,dblUOMQty = 
-
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
-										CASE	-- When the item has no weight UOM. Use the Unit Qty from Lot UOM. 
-												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
-													LotItemUOM.dblUnitQty
-											
-												-- If item has a weight UOMm then use the unit qty from Weight UOM. 
-												ELSE 
-													WeightUOM.dblUnitQty
-										END 									
-									ELSE	
-										ItemUOM.dblUnitQty
-							END 
+							-- New Hierarchy:
+							-- 1. Use the Gross/Net UOM (intWeightUOMId) 
+							-- 2. If there is no Gross/Net UOM, then check the lot. 
+								-- 2.1. If it is a Lot, use the Lot UOM. 
+								-- 2.2. If it is not a Lot, use the Item UOM. 
+							ISNULL( 
+								WeightUOM.dblUnitQty, 
+								CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
+											LotItemUOM.dblUnitQty
+										ELSE 
+											ItemUOM.dblUnitQty
+								END 
+							)
 							
 				,dblCost =	
+							-- New Hierarchy:
+							-- 1. If there is a Gross/Net UOM, use the Net Qty. 
+								-- 2.1. If it is not a Lot, use the item's Net Qty. 
+								-- 2.2. If it is a Lot, use the Lot's Net Qty. 
+							-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
+								-- 2.1. If it is not a Lot, use the item Qty. 
+								-- 2.2. If it is a Lot, use the lot qty. 
 
-									-- If Item has a lot, then determine the cost either by weight or by Lot UOM. 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
-												-- If lot has weight, then convert cost from Cost UOM into Gross/Net UOM 
-										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-													(
+							CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
+									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
+									
+											CASE	
+													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
 														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-													)
-												-- If lot has no weight, then cost is in 'packs'. 
-												ELSE 
-													(
-														DetailItem.dblUnitCost 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)														
-													)
-													* LotItemUOM.dblUnitQty
 													
-										END 
-									-- If non-lot, then cost is in Item UOM. 
+													ELSE 
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+											END
+
+									-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
 									ELSE 
-										DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-							END 		
 
+											CASE	
+													-- It is an non-Lot item. 
+													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+														-- Convert the Cost UOM to Item UOM. 
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+													
+													-- It is a Lot item. 
+													ELSE 
+														-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+											END 
 
+							END
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
@@ -599,62 +629,99 @@ BEGIN
 							END
 				,dtmDate = Header.dtmReceiptDate  
 				,dblQty =						
-							-- Check if it is processing a lot item or not. 
-							-- If it is a lot, 
-							--		If there is no weight UOM, convert the Item-Lot-Qty to the UOM of the Detail-Item.
-							--		If there is a weight UOM, receive the qty in weights. 
-							-- Otherwise
-							--		Receive the qty from the detail item. 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
-										CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
-												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
-													dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
-											
-												-- The item has a weight UOM. 
-												ELSE 
-													-- If there is weight value (non-zero), use it. 
-													-- Otherwise, convert the Qty from Detail-Item-Lot-UOM to the Detail-Item-Weight-UOM. 
-													CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-																dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-															ELSE 
-																ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-													END
-										END 									
-									ELSE	
-										DetailItem.dblOpenReceive
-							END 				
-				,dblUOMQty = 
-							-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
-							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-										(
-											SELECT	TOP 1 
-													dblUnitQty
-											FROM	dbo.tblICItemUOM
-											WHERE	intItemUOMId = DetailItem.intWeightUOMId									
-										)
+							-- New Hierarchy:
+							-- 1. If there is a Gross/Net UOM, use the Net Qty. 
+								-- 2.1. If it is not a Lot, use the item's Net Qty. 
+								-- 2.2. If it is a Lot, use the Lot's Net Qty. 
+							-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
+								-- 2.1. If it is not a Lot, use the item Qty. 
+								-- 2.2. If it is a Lot, use the lot qty. 
+							CASE		-- Use the Gross/Net Qty if there is a Gross/Net UOM. 
+										WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 									
+											CASE	-- When item is NOT a Lot, receive it by the item's net qty. 
+													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+														ISNULL(DetailItem.dblNet, 0)
+													
+													-- When item is a LOT, get the net qty from the Lot record. 
+													-- 1. If Net Qty is not provided, convert the Lot Qty into Gross/Net UOM. 
+													-- 2. Else, get the Net Qty by using this formula: Gross Weight - Tare Weight. 
+													ELSE 
+																-- When Net Qty is missing, then convert the Lot Qty to Gross/Net UOM. 
+														CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																	dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+																-- Calculate the Net Qty
+																ELSE 
+																	ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+														END 
+											END 
+
+									-- If Gross/Net UOM is missing, then get the item/lot qty. 
 									ELSE 
-										(
-											SELECT	TOP 1 
-													dblUnitQty
-											FROM	dbo.tblICItemUOM
-											WHERE	intItemUOMId = DetailItem.intUnitMeasureId
-										)
+										CASE	-- When item is NOT a Lot, receive it by the item qty.
+												WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+													DetailItem.dblOpenReceive
+												
+												-- When item is a LOT, receive it by the Lot Qty. 
+												ELSE 
+													ISNULL(DetailItemLot.dblQuantity, 0)
+										END 								
+
 							END 
 
-				,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
-							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-										dbo.fnCalculateCostPerWeight (
-											dbo.fnCalculateCostPerLot ( 
-												DetailItem.intUnitMeasureId
-												,DetailItem.intWeightUOMId
-												,DetailItemLot.intItemUnitMeasureId
-												,DetailItem.dblUnitCost
-											) * DetailItemLot.dblQuantity
-											,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-										) 
+				,dblUOMQty = 
+							-- New Hierarchy:
+							-- 1. Use the Gross/Net UOM (intWeightUOMId) 
+							-- 2. If there is no Gross/Net UOM, then check the lot. 
+								-- 2.1. If it is a Lot, use the Lot UOM. 
+								-- 2.2. If it is not a Lot, use the Item UOM. 
+							ISNULL( 
+								WeightUOM.dblUnitQty, 
+								CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
+											LotItemUOM.dblUnitQty
+										ELSE 
+											ItemUOM.dblUnitQty
+								END 
+							)
+							
+				,dblCost =	
+							-- New Hierarchy:
+							-- 1. If there is a Gross/Net UOM, use the Net Qty. 
+								-- 2.1. If it is not a Lot, use the item's Net Qty. 
+								-- 2.2. If it is a Lot, use the Lot's Net Qty. 
+							-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
+								-- 2.1. If it is not a Lot, use the item Qty. 
+								-- 2.2. If it is a Lot, use the lot qty. 
 
+							CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
+									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
+									
+											CASE	
+													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+													
+													ELSE 
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+											END
+
+									-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
 									ELSE 
-										DetailItem.dblUnitCost  
+
+											CASE	
+													-- It is an non-Lot item. 
+													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
+														-- Convert the Cost UOM to Item UOM. 
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+													
+													-- It is a Lot item. 
+													ELSE 
+														-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
+														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+											END 
+
 							END 
 
 				,dblSalesPrice = 0  
@@ -674,6 +741,12 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+				LEFT JOIN dbo.tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
+				LEFT JOIN dbo.tblICItemUOM LotItemUOM
+					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
+				LEFT JOIN dbo.tblICItemUOM WeightUOM
+					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
   
