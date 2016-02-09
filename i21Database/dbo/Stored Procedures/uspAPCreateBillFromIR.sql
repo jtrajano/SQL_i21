@@ -237,7 +237,7 @@ BEGIN
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
 		[dblCost]					=	A.dblUnitCost,
-		[dblOldCost]				=	A.dblUnitCost,
+		[dblOldCost]				=	0,
 		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
 		[intContractHeaderId]		=	A.intContractHeaderId,
