@@ -119,7 +119,7 @@ BEGIN
 													WHEN A.apivc_trans_type = ''A'' THEN 2
 													WHEN A.apivc_trans_type = ''C'' OR A.apivc_orig_amt < 0 THEN 3
 													ELSE 0 END,
-					[dblDiscount]			=	A.apivc_disc_avail,
+					[dblDiscount]			=	ISNULL(A.apivc_disc_avail,0),
 					[dblWithheld]			=	A.apivc_wthhld_amt,
 					[ysnOrigin]				=	1,
 					[intCurrencyId]			=	(SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency LIKE ''%USD%''),
