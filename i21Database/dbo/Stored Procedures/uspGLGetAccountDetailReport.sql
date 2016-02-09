@@ -42,13 +42,13 @@ END
 --SET FMTONLY off;
 DECLARE @idoc INT
 DECLARE @filterTable FilterTableType
-DECLARE @strAccountIdFrom NVARCHAR(50)
-DECLARE @strAccountIdTo NVARCHAR(50)
-DECLARE @strPrimaryCodeFrom NVARCHAR(50)
-DECLARE @strPrimaryCodeTo NVARCHAR(50)
+DECLARE @strAccountIdFrom NVARCHAR(50)=''
+DECLARE @strAccountIdTo NVARCHAR(50)=''
+DECLARE @strPrimaryCodeFrom NVARCHAR(50)=''
+DECLARE @strPrimaryCodeTo NVARCHAR(50)=''
 DECLARE @strPrimaryCodeCondition NVARCHAR(50) = ''
-DECLARE @dtmDateFrom NVARCHAR(50)
-DECLARE @dtmDateTo NVARCHAR(50)
+DECLARE @dtmDateFrom NVARCHAR(50)=''
+DECLARE @dtmDateTo NVARCHAR(50)=''
 DECLARE @strAccountIdCondition NVARCHAR(20)=''
 
 IF @xmlParam <> ''
@@ -67,10 +67,11 @@ BEGIN
 						, [datatype] nvarchar(50))  
 		
 	DELETE FROM @filterTable WHERE [from] IS NULL OR RTRIM([from]) = ''
-	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] ,@strAccountIdCondition =[condition] from  @filterTable WHERE [fieldname] = 'strAccountId' 
-	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = 'Primary Account' 
-	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate' 
+	SELECT TOP 1 @strAccountIdFrom= ISNULL([from],'') , @strAccountIdTo = ISNULL([to],'') ,@strAccountIdCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'strAccountId' 
+	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'Primary Account' 
+	SELECT TOP 1 @dtmDateFrom= ISNULL([from],'') , @dtmDateTo = ISNULL([to],'') from  @filterTable WHERE [fieldname] = 'dtmDate' 
 
+	
 	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
 	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
 	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account' 
@@ -181,7 +182,7 @@ AS
 		FROM tblGLAccount A
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT CASE WHEN ''' + ISNULL(@dtmDateFrom,'''') + ''' = '''' THEN MIN(dtmDate) ELSE ''' +  ISNULL(@dtmDateFrom,'''') + ''' END FROM GLAccountDetails)) D
+		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT CASE WHEN ''' + @dtmDateFrom + ''' = '''' THEN MIN(dtmDate) ELSE ''' +  @dtmDateFrom + ''' END FROM GLAccountDetails)) D
 ),'
 
 SET @sqlCte +='RAWREPORT AS (
@@ -229,7 +230,7 @@ SELECT @sqlCte += ',cteBase as(
 	select * from RAWREPORT ' + CASE WHEN @Where <> 'Where' THEN  @Where END + ')'
 
 
-IF @dtmDateFrom IS NOT NULL
+IF @dtmDateFrom <> ''
 BEGIN
 	DECLARE @cols1 NVARCHAR(MAX) = ''
 	SELECT @cols1 = REPLACE (@cols,'dtmDate','''' + @dtmDateFrom  + '''' + ' as dtmDate')
@@ -241,7 +242,7 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
 
-	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
+	IF @strAccountIdFrom = '' AND @strPrimaryCodeFrom = ''
 	BEGIN
 	SET @sqlCte +=
 		',cteInactive (accountId,id)AS
@@ -259,7 +260,7 @@ BEGIN
 		
 	END
 
-	IF @strAccountIdFrom IS NOT NULL  AND @strPrimaryCodeFrom IS NULL
+	IF @strAccountIdFrom <> ''  AND @strPrimaryCodeFrom = ''
 	BEGIN
 
 
@@ -267,7 +268,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'''') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + ISNULL(@strAccountIdTo,'''') + ''' END 
+			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + @strAccountIdTo + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
 			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -286,7 +287,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'''') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + ISNULL(@strPrimaryCodeTo,'''') + ''' END 
+			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + @strPrimaryCodeTo + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
 			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -315,7 +316,7 @@ BEGIN
 	sum(dblDebitUnit) dblDebitUnit, sum(dblCreditUnit) dblCreditUnit,
 	intAccountId, ysnIsUnposted, dtmDate from tblGLDetail group by intAccountId , ysnIsUnposted, dtmDate
 	having ysnIsUnposted = 0
-	and dtmDate between '''+ @dtmDateFrom + ''' and '''+ isnull(@dtmDateTo,'''') + '''),
+	and dtmDate between '''+ @dtmDateFrom + ''' and '''+ @dtmDateTo + '''),
 	cteRetain1 as
 	(select 
 	CAST(CONVERT(VARCHAR(4),YEAR(dtmDate)) + ''-'' +  CONVERT(VARCHAR(2), MONTH (dtmDate)) + ''-'' + ''1'' AS DATE) as dtmDate,
