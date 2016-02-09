@@ -138,7 +138,7 @@ BEGIN
 	WHERE t.intCommodityId= @intCommodityId
 
 END
-UPDATE @List SET intFromCommodityUnitMeasureId=@intFromCommodityUnitMeasureId,intToCommodityUnitMeasureId=@intToCommodityUnitMeasureId,StrUnitMeasure=@StrUnitMeasure 
+UPDATE @List SET intFromCommodityUnitMeasureId=@intFromCommodityUnitMeasureId,intToCommodityUnitMeasureId=@intToCommodityUnitMeasureId,strUnitMeasure=@StrUnitMeasure 
 WHERE intCommodityId= @intCommodityId
 END
 SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber	
