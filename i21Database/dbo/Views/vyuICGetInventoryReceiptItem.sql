@@ -60,6 +60,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.dblAvailableQty
 	, ReceiptItem.intDiscountSchedule
 	, strDiscountSchedule = DiscountSchedule.strDiscountId
+	, ReceiptItem.ysnExported
+	, ReceiptItem.dtmExportedDate
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
