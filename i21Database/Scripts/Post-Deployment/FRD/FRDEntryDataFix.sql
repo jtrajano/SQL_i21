@@ -73,7 +73,7 @@ GO
 GO
 
 UPDATE tblFRRowDesign SET strBalanceSide = '' 
-	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts','Current Year Earnings','Retained Earnings') AND strBalanceSide <> ''
+	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts','Current Year Earnings','Retained Earnings','Percentage') AND strBalanceSide <> ''
 
 GO
 	PRINT N'END REMOVE'
