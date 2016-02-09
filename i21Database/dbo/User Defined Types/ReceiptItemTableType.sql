@@ -12,7 +12,7 @@ CREATE TYPE [dbo].[ReceiptItemTableType] AS TABLE
 	,[intSourceType] INT NOT NULL DEFAULT ((0))
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction. Required. 
 	,[intCurrencyId] INT NULL								-- The currency id used in a tranaction. 
-	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
+	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 
 	-- Detail 
 	,[intInventoryReceiptDetailId] INT NULL					-- Link id to the receipt detail. 	

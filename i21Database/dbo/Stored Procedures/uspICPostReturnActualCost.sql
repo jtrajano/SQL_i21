@@ -10,12 +10,12 @@ CREATE PROCEDURE [dbo].[uspICPostReturnActualCost]
 	,@intSubLocationId AS INT 
 	,@intStorageLocationId AS INT
 	,@dtmDate AS DATETIME
-	,@dblQty AS NUMERIC(18,6)
-	,@dblUOMQty AS NUMERIC(18,6)
+	,@dblQty AS NUMERIC(38,20)
+	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38, 20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
-	,@dblExchangeRate AS NUMERIC(18,6)
+	,@dblExchangeRate AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -43,13 +43,13 @@ DECLARE @Inventory_Write_Off_Sold AS INT = 2;
 DECLARE @Inventory_Revalue_Sold AS INT = 3;
 
 -- Create the variables 
-DECLARE @RemainingQty AS NUMERIC(18,6);
-DECLARE @dblReduceQty AS NUMERIC(18,6);
-DECLARE @dblAddQty AS NUMERIC(18,6);
-DECLARE @CostUsed AS NUMERIC(18,6);
-DECLARE @FullQty AS NUMERIC(18,6);
-DECLARE @QtyOffset AS NUMERIC(18,6);
-DECLARE @TotalQtyOffset AS NUMERIC(18,6);
+DECLARE @RemainingQty AS NUMERIC(38,20);
+DECLARE @dblReduceQty AS NUMERIC(38,20);
+DECLARE @dblAddQty AS NUMERIC(38,20);
+DECLARE @CostUsed AS NUMERIC(38,20);
+DECLARE @FullQty AS NUMERIC(38,20);
+DECLARE @QtyOffset AS NUMERIC(38,20);
+DECLARE @TotalQtyOffset AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -57,7 +57,7 @@ DECLARE @NewActualCostId AS INT
 DECLARE @UpdatedActualCostId AS INT 
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
-DECLARE @dblValue AS NUMERIC(18,6)
+DECLARE @dblValue AS NUMERIC(38,20)
 
 -------------------------------------------------
 -- 1. Process the Actual Cost buckets
@@ -88,7 +88,7 @@ BEGIN
 				,@UpdatedActualCostId OUTPUT 
 
 			-- Insert the inventory transaction record
-			DECLARE @dblComputedQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
+			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
 
 			EXEC [dbo].[uspICPostInventoryTransaction]
