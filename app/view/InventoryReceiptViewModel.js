@@ -61,7 +61,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         sourceTypes: {
             autoLoad: true,
-            autoFilter: true,
             data: [
                 {
                     intSourceType: 0,
@@ -80,7 +79,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     strSourceType: 'Transport'
                 }
             ],
-            filters: '{filterSourceByType}',
             fields: {
                 name: 'intSourceType',
                 name: 'strSourceType'
@@ -562,16 +560,16 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     if (this.getData().current) {
                         if (this.getData().current.phantom) {
                             return {
-                                property: 'intSourceType',
-                                value: '1',
-                                operator: '!='
+                                column: 'intSourceType',
+                                value: 1,
+                                condition: 'noteq'
                             };
                         }
                     }
-                    return {};
+                    return [];
                     break;
                 default:
-                    return {};
+                    return [];
                     break;
             }
         },

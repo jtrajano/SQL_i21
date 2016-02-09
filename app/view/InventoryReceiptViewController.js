@@ -202,7 +202,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboSourceType: {
                 value: '{current.intSourceType}',
                 store: '{sourceTypes}',
-                readOnly: '{disableSourceType}'
+                readOnly: '{disableSourceType}',
+                defaultFilters: '{filterSourceByType}'
             },
             cboVendor: {
                 value: '{current.intEntityVendorId}',
