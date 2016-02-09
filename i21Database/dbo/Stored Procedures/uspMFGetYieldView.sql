@@ -383,7 +383,7 @@ BEGIN TRY
 
 			SET @strCFormula = ''
 
-			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Opening Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
 			EXEC sp_executesql @strCFormula
 				,N'@strYieldValue Numeric(18, 6) OUTPUT'
@@ -391,7 +391,7 @@ BEGIN TRY
 
 			SET @strCFormula = ''
 
-			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Opening Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Count Quantityt', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
 			EXEC sp_executesql @strCFormula
 				,N'@strYieldValue Numeric(18, 6) OUTPUT'
@@ -657,13 +657,15 @@ BEGIN TRY
 
 			SET @strCFormula = ''
 
-			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Opening Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
 			EXEC sp_executesql @strCFormula
-				,N'@strYieldValue DECIMAL(24,10) OUTPUT'
+				,N'@strYieldValue Numeric(18, 6) OUTPUT'
 				,@strYieldValue = @dblTOutput OUTPUT
 
-			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Opening Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Input CycleCount', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output CycleCount', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SET @strCFormula = ''
+
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Count Quantityt', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
 			EXEC sp_executesql @strCFormula
 				,N'@strYieldValue DECIMAL(24,10) OUTPUT'
