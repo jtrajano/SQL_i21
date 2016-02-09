@@ -7,20 +7,20 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	 [intId] INT IDENTITY PRIMARY KEY CLUSTERED
 
 	 -- Header
-	,[strReceiptType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL 
+	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 	,[intEntityVendorId] INT NOT NULL						-- The Vendor. 
 	,[intShipFromId] INT NOT NULL						    -- The Vendor Location. 
 	,[intLocationId] INT NOT NULL                           -- Company Location	
-	,[strBillOfLadding] nvarchar(50) COLLATE Latin1_General_CI_AS NULL --Bill of Ladding Number
+	,[strBillOfLadding] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL --Bill of Ladding Number
 	,[intContractHeaderId] INT NULL							-- Contract Header Id
 	,[intContractDetailId] INT NULL                         -- Contract Detail Id
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
 	,[intShipViaId] INT NULL                                -- ShipVia
 	,[intCurrencyId] INT NULL								-- The currency id used in a tranaction. 
-	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
+	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 	,[intSourceId] INT NULL                                 -- Source Id of the Originated Transaction
-	,[strActualCostId] nvarchar(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
-	,[strVendorRefNo] nvarchar(50) COLLATE Latin1_General_CI_AS NULL -- Vendor Reference No. 
+	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
+	,[strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Vendor Reference No. 
 	,[intTaxGroupId] INT NULL								-- Overriding Tax Group Id, if you want to override the Tax Group that will be used from the Ship From Location setup.
 
 	-- Detail 

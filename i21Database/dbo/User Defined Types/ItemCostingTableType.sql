@@ -14,7 +14,7 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[dblValue] NUMERIC(38, 20) NOT NULL DEFAULT 0 
 	,[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0		-- The sales price of selling an item per UOM. Sales price is always in base currency. 
 	,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
-	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
+	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
     ,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
 	,[intTransactionDetailId] INT NULL						-- Link id to the transaction detail. 
 	,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
