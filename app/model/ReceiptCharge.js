@@ -33,6 +33,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'ysnInventoryCost', type: 'boolean' },
         { name: 'strCostMethod', type: 'string' },
         { name: 'dblRate', type: 'float' },
+        { name: 'dblExchangeRate', type: 'float' },
         { name: 'intCostUOMId', type: 'int', allowNull: true },
         { name: 'dblAmount', type: 'float' },
         { name: 'strAllocateCostBy', type: 'string' },

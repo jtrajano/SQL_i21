@@ -700,7 +700,6 @@
                                                     "\t{",
                                                     "\t\tdataIndex: 'intCurrencyID',",
                                                     "\t\tdataType: 'numeric',",
-                                                    "\t\ttext: 'Currency Id',",
                                                     "\t\thidden: true",
                                                     "\t},",
                                                     "\t{",
@@ -714,6 +713,16 @@
                                                     "\t\tdataType: 'string',",
                                                     "\t\ttext: 'Description',",
                                                     "\t\tflex: 1",
+                                                    "\t},",
+                                                    "    {",
+                                                    "\t\tdataIndex: 'ysnSubCurrency',",
+                                                    "\t\tdataType: 'boolean',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intMainCurrencyId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\thidden: true",
                                                     "\t}",
                                                     "]"
                                                 ],
@@ -2353,6 +2362,79 @@
                                                                             },
                                                                             "name": "MyNumberField15",
                                                                             "designerId": "46c05c3b-099d-4567-86c4-01bf9cc1f99a"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "itemId": "colItemSubCurrency",
+                                                                        "text": "Sub Currency"
+                                                                    },
+                                                                    "name": "MyColumn48",
+                                                                    "designerId": "bf3d5c3c-68e4-4b9e-80d9-b6964192fab9",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'intCurrencyID',",
+                                                                                    "\t\tdataType: 'numeric',",
+                                                                                    "\t\thidden: true",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'strCurrency',",
+                                                                                    "\t\tdataType: 'string',",
+                                                                                    "\t\ttext: 'Currency',",
+                                                                                    "\t\tflex: 1",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                                    "\t\tdataType: 'string',",
+                                                                                    "\t\ttext: 'Description',",
+                                                                                    "\t\tflex: 1",
+                                                                                    "\t},",
+                                                                                    "    {",
+                                                                                    "\t\tdataIndex: 'ysnSubCurrency',",
+                                                                                    "\t\tdataType: 'boolean',",
+                                                                                    "\t\thidden: true",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'intMainCurrencyId',",
+                                                                                    "\t\tdataType: 'numeric',",
+                                                                                    "\t\thidden: true",
+                                                                                    "\t}",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strCurrency",
+                                                                                "itemId": "cboItemSubCurrency",
+                                                                                "valueField": "strCurrency"
+                                                                            },
+                                                                            "name": "MyComboBox77",
+                                                                            "configAlternates": {
+                                                                                "columns": "array"
+                                                                            },
+                                                                            "designerId": "49ecb544-5ff7-4e02-ba4a-8da94738db05",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -4805,6 +4887,79 @@
                                                     ]
                                                 },
                                                 {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "colChargeCurrency",
+                                                        "text": "Currency"
+                                                    },
+                                                    "name": "MyColumn53",
+                                                    "designerId": "11978d9a-f652-4779-8e35-91f0c65b23c0",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCurrencyID',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strCurrency',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Currency',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "    {",
+                                                                    "\t\tdataIndex: 'ysnSubCurrency',",
+                                                                    "\t\tdataType: 'boolean',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intMainCurrencyId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\thidden: true",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strCurrency",
+                                                                "itemId": "cboChargeCurrency",
+                                                                "valueField": "strCurrency"
+                                                            },
+                                                            "name": "MyComboBox77",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "f7b28852-a843-40cb-8256-6d7aa4b11959",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
                                                     "type": "Ext.grid.column.Number",
                                                     "reference": {
                                                         "name": "columns",
@@ -4904,6 +5059,37 @@
                                                                     "type": "string"
                                                                 }
                                                             ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Number",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 1,
+                                                        "format": "0,000.000000",
+                                                        "itemId": "colExchangeRate",
+                                                        "text": "Exchange Rate"
+                                                    },
+                                                    "name": "MyNumberColumn24",
+                                                    "designerId": "4d890153-7a6f-44d3-a137-4b404cbf4f43",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "designer|createAlias": "numericfield"
+                                                            },
+                                                            "name": "MyNumberField60",
+                                                            "designerId": "45042bcf-17e9-4278-ab79-54378bb60de6"
                                                         }
                                                     ]
                                                 },
