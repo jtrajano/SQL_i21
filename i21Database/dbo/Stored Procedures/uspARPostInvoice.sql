@@ -233,7 +233,9 @@ END CATCH
 				INNER JOIN tblICItem item on item.intItemId = detail.intItemId
 				INNER JOIN @PostInvoiceData B ON invoice.intInvoiceId = B.intInvoiceId
 				OUTER APPLY (SELECT TOP 1 intSiteID from tblTMSite site where site.intProduct = item.intItemId) tm
-				WHERE item.ysnTankRequired = 1 AND tm.intSiteID IS NULL
+				WHERE item.ysnTankRequired = 1  
+				AND invoice.strType = 'Tank Delivery' 
+				AND tm.intSiteID IS NULL
 
 				--Fiscal Year
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
