@@ -417,5 +417,161 @@ Ext.define('Inventory.controller.Inventory', {
                 break;
         }
         return newDate;
+    },
+
+    globalSearchSettings: function() {
+        return [
+            {
+                screen: 'Inventory.view.InventoryReceipt',
+                valueField: 'intInventoryReceiptId',
+                displayField: 'strReceiptNumber',
+                displayTitle: 'Inventory Receipt',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryReceipt/Search',
+                fields: [
+                    {name: 'intInventoryReceiptId', type: 'int'},
+                    {name: 'strReceiptNumber', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryReceipt',
+                valueField: 'intInventoryReceiptId',
+                displayField: 'strReceiptNumber',
+                displayTitle: 'Inventory Receipt Details',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryReceipt/SearchReceiptItems',
+                fields: [
+                    {name: 'intInventoryReceiptId', type: 'int'},
+                    {name: 'strReceiptNumber', type: 'string'},
+                    {name: 'strReceiptType', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryReceipt',
+                valueField: 'intInventoryReceiptId',
+                displayField: 'strReceiptNumber',
+                displayTitle: 'Inventory Receipt Lots',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryReceipt/SearchReceiptItemLots',
+                fields: [
+                    {name: 'intInventoryReceiptId', type: 'int'},
+                    {name: 'strReceiptNumber', type: 'string'},
+                    {name: 'strReceiptType', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryReceipt',
+                valueField: 'intInventoryReceiptId',
+                displayField: 'strReceiptNumber',
+                displayTitle: 'Inventory Receipt Vouchers',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryReceipt/GetReceiptVouchers',
+                fields: [
+                    {name: 'intInventoryReceiptId', type: 'int'},
+                    {name: 'strReceiptNumber', type: 'string'},
+                    {name: 'strReceiptType', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryShipment',
+                valueField: 'intInventoryShipmentId',
+                displayField: 'strShipmentNumber',
+                displayTitle: 'Inventory Shipment',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryShipment/Search',
+                fields: [
+                    {name: 'intInventoryShipmentId', type: 'int'},
+                    {name: 'strShipmentNumber', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryShipment',
+                valueField: 'intInventoryShipmentId',
+                displayField: 'strShipmentNumber',
+                displayTitle: 'Inventory Shipment Details',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryShipment/SearchShipmentItems',
+                fields: [
+                    {name: 'intInventoryShipmentId', type: 'int'},
+                    {name: 'strShipmentNumber', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryShipment',
+                valueField: 'intInventoryShipmentId',
+                displayField: 'strShipmentNumber',
+                displayTitle: 'Inventory Shipment Lots',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryShipment/SearchShipmentItemLots',
+                fields: [
+                    {name: 'intInventoryShipmentId', type: 'int'},
+                    {name: 'strShipmentNumber', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryAdjustment',
+                valueField: 'intInventoryAdjustmentId',
+                displayField: 'strAdjustmentNo',
+                displayTitle: 'Inventory Adjustment',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryAdjustment/Search',
+                fields: [
+                    {name: 'intInventoryShipmentId', type: 'int'},
+                    {name: 'strAdjustmentNo', type: 'string'},
+                    {name: 'strAdjustmentType', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.InventoryAdjustment',
+                valueField: 'intInventoryAdjustmentDetailId',
+                displayField: 'strAdjustmentNo',
+                displayTitle: 'Inventory Adjustment Details',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/InventoryAdjustment/SearchAdjustmentDetails',
+                fields: [
+                    {name: 'intInventoryAdjustmentDetailId', type: 'int'},
+                    {name: 'intInventoryShipmentId', type: 'int'},
+                    {name: 'strAdjustmentNo', type: 'string'},
+                    {name: 'strAdjustmentType', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.Item',
+                valueField: 'intItemId',
+                displayField: 'strItemNo',
+                displayTitle: 'Item',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/Item/Search',
+                fields: [
+                    {name: 'intItemId', type: 'int'},
+                    {name: 'strItemNo', type: 'string'},
+                    {name: 'strType', type: 'string'}
+                ]
+            },
+            {
+                screen: 'Inventory.view.Item',
+                valueField: 'intItemId',
+                displayField: 'strItemNo',
+                displayTitle: 'Item Locations',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/ItemLocation/GetItemLocationViews',
+                fields: [
+                    {name: 'intItemId', type: 'int'},
+                    {name: 'strItemNo', type: 'string'},
+                ]
+            },
+            {
+                screen: 'Inventory.view.Item',
+                valueField: 'intItemId',
+                displayField: 'strItemNo',
+                displayTitle: 'Item Pricing',
+                screenIcon: 'maintenance',
+                url: '../Inventory/api/ItemPricing/GetItemPricingViews',
+                fields: [
+                    {name: 'intItemId', type: 'int'},
+                    {name: 'strItemNo', type: 'string'}
+                ]
+            }
+        ]
     }
 });
