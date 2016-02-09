@@ -3371,6 +3371,7 @@
     <Build Include="dbo\Views\vyuMFShiftActivityWastageTotal.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryWithWastage.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummary.sql" />
+    <Build Include="dbo\Views\vyuCTEntityToContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
