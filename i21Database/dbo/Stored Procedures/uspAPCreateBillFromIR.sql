@@ -190,7 +190,7 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
+		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,6)),
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
