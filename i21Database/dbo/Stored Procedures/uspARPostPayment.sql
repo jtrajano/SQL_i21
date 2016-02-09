@@ -162,10 +162,10 @@ IF(@exclude IS NOT NULL)
 --			AND	GL.strModuleName = @MODULE_NAME
 --	END
 	
---IF(@batchId IS NULL)
---	BEGIN
+IF(@batchId IS NULL)
+	BEGIN
 		EXEC uspSMGetStartingNumber 3, @batchId OUT
---	END
+	END
 
 SET @batchIdUsed = @batchId	
 
