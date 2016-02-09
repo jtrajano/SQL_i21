@@ -3186,6 +3186,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItem.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateOnHand.sql" />
     <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
