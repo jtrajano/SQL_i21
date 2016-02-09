@@ -3368,6 +3368,9 @@
     <Build Include="dbo\Functions\fnCTGetSequenceUsageHistoryAdditionalParam.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityUnallocatedLot.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptAPTransactionByGLAccount.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityWastageTotal.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryWithWastage.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityProductionSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
