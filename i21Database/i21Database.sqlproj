@@ -3367,6 +3367,7 @@
     <Build Include="dbo\Tables\tblLGCompanyPreference.sql" />
     <Build Include="dbo\Functions\fnCTGetSequenceUsageHistoryAdditionalParam.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityUnallocatedLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptAPTransactionByGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
