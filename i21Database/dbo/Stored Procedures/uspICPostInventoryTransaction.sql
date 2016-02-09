@@ -9,9 +9,9 @@
 	,@dblUOMQty NUMERIC(38,20)
 	,@dblCost NUMERIC(38,20)
 	,@dblValue NUMERIC(38,20)
-	,@dblSalesPrice NUMERIC(38,20)	
+	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
-	,@dblExchangeRate NUMERIC(38,20)
+	,@dblExchangeRate NUMERIC (38,20)
 	,@intTransactionId INT
 	,@intTransactionDetailId INT 
 	,@strTransactionId NVARCHAR(40)

@@ -16,7 +16,7 @@ Type the overview for the table here.
 		[intItemId] INT NOT NULL, 
 		[intBundleItemId] INT NOT NULL, 
 		[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intItemUnitMeasureId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 

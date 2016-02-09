@@ -10,12 +10,12 @@ CREATE PROCEDURE [dbo].[uspICPostReturnLot]
 	,@intStorageLocationId AS INT 
 	,@dtmDate AS DATETIME
 	,@intLotId AS INT
-	,@dblQty AS NUMERIC(38,20)
-	,@dblUOMQty AS NUMERIC(38,20)
-	,@dblCost AS NUMERIC(38,20)
+	,@dblQty AS NUMERIC(18,6)
+	,@dblUOMQty AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(38, 20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
-	,@dblExchangeRate AS NUMERIC(38,20)
+	,@dblExchangeRate AS NUMERIC(18,6)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT 
 	,@strTransactionId AS NVARCHAR(20)
@@ -43,13 +43,13 @@ DECLARE @Inventory_Write_Off_Sold AS INT = 2;
 DECLARE @Inventory_Revalue_Sold AS INT = 3;
 
 -- Create the variables 
-DECLARE @RemainingQty AS NUMERIC(38,20);
-DECLARE @dblReduceQty AS NUMERIC(38,20);
-DECLARE @dblAddQty AS NUMERIC(38,20);
-DECLARE @CostUsed AS NUMERIC(38,20);
-DECLARE @FullQty AS NUMERIC(38,20);
-DECLARE @QtyOffset AS NUMERIC(38,20);
-DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @RemainingQty AS NUMERIC(18,6);
+DECLARE @dblReduceQty AS NUMERIC(18,6);
+DECLARE @dblAddQty AS NUMERIC(18,6);
+DECLARE @CostUsed AS NUMERIC(18,6);
+DECLARE @FullQty AS NUMERIC(18,6);
+DECLARE @QtyOffset AS NUMERIC(18,6);
+DECLARE @TotalQtyOffset AS NUMERIC(18,6);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -57,7 +57,7 @@ DECLARE @NewInventoryLotId AS INT
 DECLARE @UpdatedInventoryLotId AS INT 
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
-DECLARE @dblValue AS NUMERIC(38,20)
+DECLARE @dblValue AS NUMERIC(18,6)
 
 -- Initialize the transaction name. Use this as the transaction form name
 --DECLARE @TransactionTypeName AS NVARCHAR(200) 
@@ -138,8 +138,8 @@ BEGIN
 				,@UpdatedInventoryLotId OUTPUT 
 
 			-- Insert the inventory transaction record
-			DECLARE @dblComputedUnitQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
-			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblComputedUnitQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
+			DECLARE @dblCostToUse AS NUMERIC(38, 20) = ISNULL(@CostUsed, @dblCost)
 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId

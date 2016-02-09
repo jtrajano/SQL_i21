@@ -5,7 +5,7 @@
     [intItemId] INT NOT NULL, 
     [strBuildNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intLocationId] INT NULL, 
-    [dblBuildQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblBuildQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [dblCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intSubLocationId] INT NULL, 
     [intItemUOMId] INT NULL, 

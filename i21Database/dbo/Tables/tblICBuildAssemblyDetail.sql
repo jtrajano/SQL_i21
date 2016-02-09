@@ -4,7 +4,7 @@
     [intBuildAssemblyId] INT NOT NULL, 
     [intItemId] INT NOT NULL, 
     [intSubLocationId] INT NULL, 
-    [dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intItemUOMId] INT NULL, 
     [dblCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
