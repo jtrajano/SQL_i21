@@ -650,7 +650,6 @@
     <Build Include="testi21Database\Fake Data\Fake data for item uom table, bushel scenario.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostStorage on Lot Costing for a successful unpost.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostStorage for an unsuccessful unpost.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post with positive qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostSplitLot for a successful post with new weight.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage for non-supported costing method.sql" />
