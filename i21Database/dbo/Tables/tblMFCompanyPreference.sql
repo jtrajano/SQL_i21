@@ -16,6 +16,7 @@
     ysnDisplayNewOrderByExpectedDate BIT NULL,
 	ysnCheckCrossContamination bit NULL, 
 	dtmWorkOrderCreateDate DATETIME,
+	ysnIncludeWastageInProductionSummary BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnIncludeWastageInProductionSummary] DEFAULT 0,
 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )

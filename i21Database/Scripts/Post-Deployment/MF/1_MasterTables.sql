@@ -1923,3 +1923,9 @@ BEGIN
 		,'Parent Lot Number'
 END
 GO
+
+GO
+UPDATE tblMFCompanyPreference
+SET ysnIncludeWastageInProductionSummary = 1
+WHERE ysnIncludeWastageInProductionSummary IS NULL
+GO
