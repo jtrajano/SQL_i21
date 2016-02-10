@@ -33,6 +33,12 @@
 	,@strTransactionType			NVARCHAR(MAX)	= NULL
 	,@strDeliveryPickupInd			NVARCHAR(MAX)	= NULL
 	,@intSiteId						INT				= 0
+	,@strSiteState					NVARCHAR(MAX)	= NULL
+	,@strSiteAddress				NVARCHAR(MAX)	= NULL
+	,@strSiteCity					NVARCHAR(MAX)	= NULL
+	,@intPPHostId					INT				= 0
+	,@strPPSiteType					NVARCHAR(MAX)	= NULL
+	,@strSiteType					NVARCHAR(MAX)	= NULL
 	--------------------------------------
 
 	-------------REMOTE TAXES-------------
@@ -55,6 +61,9 @@
 	,@LC10							NUMERIC(18,6)	= 0.000000
 	,@LC11							NUMERIC(18,6)	= 0.000000
 	,@LC12							NUMERIC(18,6)	= 0.000000
+
+
+
 AS
 BEGIN
 	
@@ -70,6 +79,14 @@ BEGIN
 	------------------------------------------------------------
 	--					  DECLARE VARIABLE 					  --
 	------------------------------------------------------------
+
+	--LOGS--
+	DECLARE @ysnSiteCreated			BIT = 0
+	DECLARE @ysnSiteItemUsed		BIT = 0
+	DECLARE @ysnNetworkItemUsed		BIT = 0
+	--LOGS--
+
+
 	DECLARE @intCardId				INT = 0
 	DECLARE @intVehicleId			INT	= 0
 	DECLARE @intProductId			INT	= 0
@@ -159,21 +176,83 @@ BEGIN
 		BEGIN
 			SET @intSalesPersonId = NULL
 		END
-		
 	IF(@intSiteId = 0)
 		BEGIN
 			SET @intSiteId =(SELECT TOP 1 intSiteId
 							FROM tblCFSite
 							WHERE strSiteNumber = @strSiteId)
-		END
 
 	IF(@intNetworkId = 0)
 		BEGIN
 			SET @intNetworkId = (SELECT TOP 1 intNetworkId 
 								FROM tblCFNetwork
 								WHERE strNetwork = @strNetworkId)
-		END
+	END
+	
+	------------------------------------------------------------
+	--					AUTO CREATE SITE
+	-- if transaction is remote or ext remote				  --
+	------------------------------------------------------------
+	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R'))
+		BEGIN 
+			DECLARE @strNetworkType						NVARCHAR(MAX)
+			DECLARE @intNetworkLocation					INT
 
+			SELECT 
+				 @strNetworkType = strNetworkType
+				,@intNetworkLocation = intLocationId
+			FROM tblCFNetwork
+			WHERE intNetworkId = @intNetworkId
+
+			INSERT INTO tblCFSite
+			(
+				intNetworkId		
+				,strSiteNumber	
+				,strSiteName
+				,strDeliveryPickup	
+				,intARLocationId	
+				,strControllerType	
+				,strTaxState		
+				,strSiteAddress		
+				,strSiteCity		
+				,intPPHostId		
+				,strPPSiteType		
+				,strSiteType
+			)
+			SELECT
+				intNetworkId			= @intNetworkId
+				,strSiteNumber			= @strSiteId
+				,strSiteName			= @strSiteId
+				,strDeliveryPickup		= 'Pickup'
+				,intARLocationId		= @intNetworkLocation
+				,strControllerType		= (CASE @strNetworkType 
+											WHEN 'PacPride' 
+												THEN 'PacPride'
+											ELSE 'CFN'
+											END)
+				,strTaxState			= @strSiteState
+				,strSiteAddress			= @strSiteAddress	
+				,strSiteCity			= @strSiteCity	
+				,intPPHostId			= @intPPHostId	
+				,strPPSiteType			= (CASE @strPPSiteType 
+											WHEN 'N' 
+												THEN 'Network'
+											WHEN 'X' 
+												THEN 'Exclusive'
+											WHEN 'R' 
+												THEN 'Retail'
+											END)	
+				,strSiteType			= (CASE @strPPSiteType 
+											WHEN 'N' 
+												THEN 'Remote'
+											WHEN 'R' 
+												THEN 'Extended Remote'
+											END)
+
+			END
+			SET @intSiteId = SCOPE_IDENTITY();
+			SET @ysnSiteCreated = 1;
+	END
 	SELECT TOP 1 
 		 @intCardId = C.intCardId
 		,@intCustomerId = A.intCustomerId
@@ -192,6 +271,13 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		ORDER BY intSiteId
+
+		IF(@intProductId != 0)
+		BEGIN
+			SET @ysnSiteItemUsed = 0
+			SET @ysnNetworkItemUsed = 1
+		END
+
 	END
 
 	--FIND IN SITE ITEM--
@@ -204,6 +290,12 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		ORDER BY intNetworkId
+
+		IF(@intProductId != 0)
+		BEGIN
+			SET @ysnSiteItemUsed = 1
+			SET @ysnNetworkItemUsed = 0
+		END
 	END
 
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
@@ -543,6 +635,10 @@ BEGIN
 		BEGIN
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find site ' + @strSiteId + ' into i21 site list')
 		END
+		IF(@ysnSiteCreated != 0)
+		BEGIN
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site ' + @strSiteId + ' has been automatically created')
+		END
 		IF(@intCardId = 0 OR @intCardId IS NULL)
 		BEGIN
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
@@ -551,6 +647,18 @@ BEGIN
 		BEGIN
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid quantity - ' + @dblQuantity)
 		END
+		IF(@ysnSiteItemUsed = 0 AND @ysnNetworkItemUsed = 1)
+		BEGIN
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Network item ' + @strProductId + ' has been used')
+		END
+		ELSE IF(@ysnSiteItemUsed = 1 AND @ysnNetworkItemUsed = 0)
+		BEGIN 
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site item ' + @strProductId + ' has been used')
+		END
+
+		
+
+
 		------------------------------------------------------------
 
 
