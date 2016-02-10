@@ -159,18 +159,21 @@ BEGIN
 		BEGIN
 			SET @intSalesPersonId = NULL
 		END
+		
 	IF(@intSiteId = 0)
 		BEGIN
 			SET @intSiteId =(SELECT TOP 1 intSiteId
 							FROM tblCFSite
 							WHERE strSiteNumber = @strSiteId)
 		END
+
 	IF(@intNetworkId = 0)
 		BEGIN
 			SET @intNetworkId = (SELECT TOP 1 intNetworkId 
 								FROM tblCFNetwork
 								WHERE strNetwork = @strNetworkId)
 		END
+
 	SELECT TOP 1 
 		 @intCardId = C.intCardId
 		,@intCustomerId = A.intCustomerId
@@ -178,15 +181,35 @@ BEGIN
 	INNER JOIN tblCFAccount A
 	ON C.intAccountId = A.intAccountId
 	WHERE C.strCardNumber = @strCardId
-	SELECT TOP 1 
-		 @intProductId = intItemId
-		,@intARItemId = intARItemId
-		,@intTaxMasterId = intTaxGroupMaster
-	FROM tblCFItem 
-	WHERE strProductNumber = @strProductId
+
+	--FIND IN NETWORK ITEM--
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+			,@intTaxMasterId = intTaxGroupMaster
+		FROM tblCFItem 
+		WHERE strProductNumber = @strProductId
+		ORDER BY intSiteId
+	END
+
+	--FIND IN SITE ITEM--
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+			,@intTaxMasterId = intTaxGroupMaster
+		FROM tblCFItem 
+		WHERE strProductNumber = @strProductId
+		ORDER BY intNetworkId
+	END
+
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
 								FROM tblCFSite 
 								WHERE intSiteId = @intSiteId)
+
 	SET @intVehicleId =(SELECT TOP 1 intVehicleId
 						FROM tblCFVehicle
 						WHERE strVehicleNumber	= @strVehicleId)
