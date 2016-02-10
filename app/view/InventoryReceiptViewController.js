@@ -1424,15 +1424,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         currentRecord.set('dblTax', totalItemTax);
         var unitCost = currentRecord.get('dblUnitCost');
         var qty = currentRecord.get('dblOpenReceive');
+        var costCF = currentRecord.get('dblCostUOMConvFactor');
+        var receiveQtyCF = currentRecord.get('dblItemUOMConvFactor');
         var lineTotal = 0;
 
         if (iRely.Functions.isEmpty(currentRecord.get('intWeightUOMId'))) {
-            lineTotal = totalItemTax + (qty * unitCost)
+            // formula is: {Receive UOM Unit Qty} x {Receive Qty} x ({Unit Cost} / {Cost UOM})
+            // ex: {60 Gallons} x {100 Qty} x ({$1} / {Gallon})
+            lineTotal = totalItemTax + (qty * receiveQtyCF * (unitCost / costCF))
         }
         else {
             var netWgt = currentRecord.get('dblNet');
-            var costCF = currentRecord.get('dblCostUOMConvFactor');
-            lineTotal = totalItemTax + ((netWgt / costCF) * unitCost)
+            var netWgtCF = currentRecord.get('dblWeightUOMConvFactor');
+
+            // formula is: {Weight Unit Qty} x {Net Qty} x ({Unit Cost} / {Cost UOM})
+            // ex: {450 Gallons} x {1 per Gallon} x ({$1} / {Gallon})
+            lineTotal = totalItemTax + (netWgt * netWgtCF * (unitCost / costCF))
         }
         currentRecord.set('dblLineTotal', i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2));
     },
