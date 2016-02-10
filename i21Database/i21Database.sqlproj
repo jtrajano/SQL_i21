@@ -3460,6 +3460,7 @@
     <None Include="Scripts\Post-Deployment\EM\021_MoveCustomerMessageToEntity.sql" />
     <None Include="Scripts\Post-Deployment\EM\022_DefaultDataForContactTypeAndImport.sql" />
     <None Include="Scripts\Post-Deployment\MF\3_Pattern.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCreateEntityById.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
