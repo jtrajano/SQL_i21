@@ -683,7 +683,7 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
-		SET		dblTax = ISNULL(Taxes.dblTaxPerLineItem, 0)
+		SET		dblTax = ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0), 2) 
 		FROM	dbo.tblICInventoryReceiptItem ReceiptItem LEFT JOIN (
 					SELECT	dblTaxPerLineItem = SUM(ReceiptItemTax.dblTax) 
 							,ReceiptItemTax.intInventoryReceiptItemId
