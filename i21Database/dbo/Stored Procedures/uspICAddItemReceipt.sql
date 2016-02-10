@@ -350,6 +350,7 @@ BEGIN
 				,dblGross
 				,dblNet
 				,intCostUOMId
+				,intDiscountSchedule
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -382,6 +383,7 @@ BEGIN
 				,dblGross				= RawData.dblGross
 				,dblNet					= RawData.dblNet
 				,intCostUOMId			= RawData.intCostUOMId
+				,intDiscountSchedule	= RawData.intDiscountSchedule
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
