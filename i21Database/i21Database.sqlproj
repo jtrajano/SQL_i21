@@ -3372,6 +3372,7 @@
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryWithWastage.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummary.sql" />
     <Build Include="dbo\Views\vyuCTEntityToContact.sql" />
+    <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
