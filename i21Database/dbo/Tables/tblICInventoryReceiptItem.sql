@@ -39,7 +39,7 @@ Type the overview for the table here.
 		[dblNet] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intDiscountSchedule] INT NULL,
-		[ysnExported] BIT NULL DEFAULT ((0)),
+		[ysnExported] BIT NULL,
 		[dtmExportedDate] DATETIME NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
