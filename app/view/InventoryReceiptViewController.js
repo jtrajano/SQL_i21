@@ -1275,6 +1275,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboCostUOM') {
             current.set('dblCostUOMConvFactor', records[0].get('dblUnitQty'));
+            current.set('intCostUOMId', records[0].get('intItemUOMId'));
+
         }
         else if (combo.itemId === 'cboStorageLocation') {
             if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
