@@ -23,6 +23,7 @@
 	[dtmCompleted] [datetime] NULL,
 	[intLastModifiedUserId] [int] NULL,
 	[intLastModifiedUserEntityId] [int] NULL,
+	[intLastCommentedByEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
 	[dtmLastCommented] [datetime] NULL,
 	[dblQuotedHours] [numeric](18, 6) NULL,
