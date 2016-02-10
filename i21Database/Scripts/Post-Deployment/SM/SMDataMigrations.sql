@@ -424,7 +424,7 @@ GO
 			BEGIN
 
 				DECLARE @timeStamp VARCHAR(50)
-				select @timeStamp = FORMAT(CURRENT_TIMESTAMP, 'yyMMddHHmmssmmm')
+				select @timeStamp = SUBSTRING(REPLACE(REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, GETDATE(), 121), ' ', ''), '-', ''), ':', ''), '.', ''), 3, 15)
 				--PRINT CONCAT(N'TIMESTAMP ', @timeStamp)
 
 				DECLARE @contactAdminName VARCHAR(50)
