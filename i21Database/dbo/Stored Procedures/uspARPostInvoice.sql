@@ -229,13 +229,12 @@ END CATCH
 					@batchId,
 					invoice.intInvoiceId
 				from tblARInvoice invoice 
+				INNER JOIN @PostInvoiceData B ON invoice.intInvoiceId = B.intInvoiceId
 				INNER JOIN tblARInvoiceDetail detail on invoice.intInvoiceId = detail.intInvoiceId
 				INNER JOIN tblICItem item on item.intItemId = detail.intItemId
-				INNER JOIN @PostInvoiceData B ON invoice.intInvoiceId = B.intInvoiceId
-				OUTER APPLY (SELECT TOP 1 intSiteID from tblTMSite site where site.intProduct = item.intItemId) tm
-				WHERE item.ysnTankRequired = 1  
+				WHERE detail.intSiteId is null
 				AND invoice.strType = 'Tank Delivery' 
-				AND tm.intSiteID IS NULL
+				
 
 				--Fiscal Year
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
