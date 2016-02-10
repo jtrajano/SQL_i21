@@ -3188,6 +3188,7 @@
     <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
+    <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
