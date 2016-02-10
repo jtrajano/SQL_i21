@@ -24,6 +24,7 @@
 	[intLastModifiedUserId] [int] NULL,
 	[intLastModifiedUserEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
+	[dtmLastCommented] [datetime] NULL,
 	[dblQuotedHours] [numeric](18, 6) NULL,
 	[dblActualHours] [numeric](18, 6) NULL,
 	[strJiraKey] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
