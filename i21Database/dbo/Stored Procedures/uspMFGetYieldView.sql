@@ -126,7 +126,7 @@ BEGIN TRY
 		'''
 		UNION
 		SELECT 4 AS intTransactionTypeId
-			,WP.dtmProductionDate
+			,WP.dtmBusinessDate
 			,S.strShiftName
 			,WP.dtmBusinessDate AS dtmTransactionDate
 			,''OUTPUT'' COLLATE Latin1_General_CI_AS AS strTransactionType
@@ -148,10 +148,10 @@ BEGIN TRY
 		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
 		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WP.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFShift S on S.intShiftId=WP.intShiftId
+		JOIN dbo.tblMFShift S on S.intShiftId=WP.intBusinessShiftId
 		WHERE W.intManufacturingProcessId = ' 
 		+ ltrim(@intManufacturingProcessId) + '
-			AND WP.dtmProductionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
+			AND WP.dtmBusinessDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
 				AND ''' + ltrim(@dtmToDate) + 
 		'''
 		UNION
@@ -225,6 +225,19 @@ BEGIN TRY
 	--Select @strSQL
 	INSERT INTO ##tblMFTransaction
 	EXEC (@strSQL)
+
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Time based production'
+
+	SELECT @strTimeBasedProduction = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @strTimeBasedProduction IS NULL
+	SELECT @strTimeBasedProduction='False'
 
 	IF @strMode = 'Run'
 		OR @strMode = 'Both'
@@ -326,16 +339,6 @@ BEGIN TRY
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'Empty Out Adj'
-
-			SELECT @intAttributeId = intAttributeId
-			FROM tblMFAttribute
-			WHERE strAttributeName = 'Time based production'
-
-			SELECT @strTimeBasedProduction = strAttributeValue
-			FROM tblMFManufacturingProcessAttribute
-			WHERE intManufacturingProcessId = @intManufacturingProcessId
-				AND intLocationId = @intLocationId
-				AND intAttributeId = @intAttributeId
 
 			IF @strTimeBasedProduction = 'True'
 			BEGIN
