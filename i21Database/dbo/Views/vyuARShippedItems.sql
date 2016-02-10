@@ -409,7 +409,7 @@ SELECT
 	,[intInventoryShipmentId]			= ICIS.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]		= ICISI.[intInventoryShipmentItemId]
 	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
-	,[intShipmentId]					= NULL
+	,[intShipmentId]					= LGICShipment.[intShipmentId]
 	,[strShipmentNumber]				= NULL
 	,[intContractHeaderId]				= CTCD.[intContractHeaderId]
 	,[intContractDetailId]				= CTCD.[intContractDetailId]
@@ -476,6 +476,27 @@ LEFT OUTER JOIN
 			intInventoryShipmentItemId
 	) ISISIL
 		ON ICISI.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
+LEFT OUTER JOIN
+	(
+		SELECT TOP 1
+			 LGSD.[intShipmentId]
+			,LGSD.[intTrackingNumber]
+			,ICISI1.[intInventoryShipmentItemId]
+		FROM
+			tblICInventoryShipmentItem ICISI1
+		INNER JOIN
+			tblICInventoryShipmentItemLot ICISIL1
+				ON ICISI1.[intInventoryShipmentItemId] = ICISIL1.[intInventoryShipmentItemId]
+		INNER JOIN
+			tblICInventoryLot ICIL1
+				ON ICISIL1.[intLotId] = ICIL1.[intLotId] 
+				AND ICIL1.[ysnIsUnposted] = 0
+		INNER JOIN tblICInventoryReceiptItem ICIRI1
+				ON ICIL1.[intTransactionDetailId] = ICIRI1.[intInventoryReceiptItemId]
+		INNER JOIN vyuLGShipmentContainerPurchaseContracts LGSD
+				ON ICIRI1.[intLineNo] = LGSD.[intContractDetailId]
+	) LGICShipment
+		ON ICISI.[intInventoryShipmentItemId] = LGICShipment.[intInventoryShipmentItemId]
 LEFT OUTER JOIN 
 	vyuCTContractDetailView CTCD	
 		ON ICISI.[intLineNo] = CTCD.[intContractDetailId]
