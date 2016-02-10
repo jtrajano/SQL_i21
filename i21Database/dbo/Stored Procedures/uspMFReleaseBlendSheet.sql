@@ -42,9 +42,22 @@ BEGIN TRY
 	DECLARE @intKitStatusId INT = NULL
 	DECLARE @dblBulkReqQuantity NUMERIC(18, 6)
 	DECLARE @dblPlannedQuantity NUMERIC(18, 6)
+			,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
+		,@dtmCurrentDateTime DATETIME
+		,@dtmProductionDate DATETIME
 
+	SELECT @dtmCurrentDateTime = GetDate()
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
+
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
+
+	SELECT @intBusinessShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 	BEGIN TRAN
 
@@ -561,6 +574,10 @@ BEGIN TRY
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
 
+		SELECT @dtmProductionDate = dtmExpectedDate
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
 		--Insert Into Input/Consumed Lot
 		IF @ysnEnableParentLot = 0
 		BEGIN
@@ -580,6 +597,9 @@ BEGIN TRY
 					,dtmLastModified
 					,intLastModifiedUserId
 					,intRecipeItemId
+					,dtmProductionDate
+					,dtmBusinessDate
+					,intBusinessShiftId
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -594,6 +614,9 @@ BEGIN TRY
 					,GetDate()
 					,@intUserId
 					,intRecipeItemId
+					,@dtmProductionDate
+					,@dtmBusinessDate
+					,@intBusinessShiftId
 				FROM @tblBSLot
 
 				INSERT INTO tblMFWorkOrderConsumedLot (
@@ -642,6 +665,9 @@ BEGIN TRY
 					,dtmLastModified
 					,intLastModifiedUserId
 					,intRecipeItemId
+					,dtmProductionDate
+					,dtmBusinessDate
+					,intBusinessShiftId
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -656,6 +682,9 @@ BEGIN TRY
 					,GetDate()
 					,@intUserId
 					,intRecipeItemId
+					,@dtmProductionDate
+					,@dtmBusinessDate
+					,@intBusinessShiftId
 				FROM @tblBSLot
 			END
 		END

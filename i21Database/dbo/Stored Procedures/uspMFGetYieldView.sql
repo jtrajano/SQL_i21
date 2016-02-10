@@ -118,7 +118,7 @@ BEGIN TRY
 		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
 		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WI.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFShift S on S.intShiftId=WI.intShiftId
+		LEFT JOIN dbo.tblMFShift S on S.intShiftId=WI.intShiftId
 		WHERE W.intManufacturingProcessId = ' 
 		+ ltrim(@intManufacturingProcessId) + '
 			AND WI.dtmProductionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
@@ -126,9 +126,9 @@ BEGIN TRY
 		'''
 		UNION
 		SELECT 4 AS intTransactionTypeId
-			,WP.dtmBusinessDate
+			,WP.dtmProductionDate
 			,S.strShiftName
-			,WP.dtmBusinessDate AS dtmTransactionDate
+			,WP.dtmProductionDate AS dtmTransactionDate
 			,''OUTPUT'' COLLATE Latin1_General_CI_AS AS strTransactionType
 			,WP.intWorkOrderProducedLotId AS intTransactionId
 			,I.intItemId
@@ -148,10 +148,10 @@ BEGIN TRY
 		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
 		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WP.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFShift S on S.intShiftId=WP.intBusinessShiftId
+		LEFT JOIN dbo.tblMFShift S on S.intShiftId=WP.intShiftId
 		WHERE W.intManufacturingProcessId = ' 
 		+ ltrim(@intManufacturingProcessId) + '
-			AND WP.dtmBusinessDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
+			AND WP.dtmProductionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
 				AND ''' + ltrim(@dtmToDate) + 
 		'''
 		UNION

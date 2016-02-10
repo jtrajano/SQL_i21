@@ -186,6 +186,12 @@ BEGIN TRY
 	DECLARE @intBlendRequirementId INT
 		,@strDemandNo NVARCHAR(50)
 		,@intManufacturingProcessId INT
+		,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
+		,@dtmCurrentDateTime DATETIME
+		,@dtmProductionDate DATETIME
+
+	SELECT @dtmCurrentDateTime = GetDate()
 
 	SELECT @intWorkOrderId = intWorkOrderId
 		,@intBlendRequirementId = intBlendRequirementId
@@ -205,6 +211,14 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@dblPlannedQuantity = dblPlannedQuantity
 	FROM @tblBlendSheet
+
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
+
+	SELECT @intBusinessShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 	BEGIN TRAN
 
@@ -293,6 +307,10 @@ BEGIN TRY
 		JOIN @tblBlendSheet b ON a.intWorkOrderId = b.intWorkOrderId
 
 	--Delete From tblMFWorkOrderInputLot where intWorkOrderId=@intWorkOrderId
+	SELECT @dtmProductionDate = dtmExpectedDate
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
 	DECLARE @intMinRowNo INT
 
 	SELECT @intMinRowNo = Min(intRowNo)
@@ -325,6 +343,9 @@ BEGIN TRY
 					,dtmLastModified
 					,intLastModifiedUserId
 					,intRecipeItemId
+					,dtmProductionDate
+					,dtmBusinessDate
+					,intBusinessShiftId
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -339,6 +360,9 @@ BEGIN TRY
 					,GetDate()
 					,intUserId
 					,intRecipeItemId
+					,@dtmProductionDate
+					,@dtmBusinessDate
+					,@intBusinessShiftId
 				FROM @tblLot
 				WHERE intRowNo = @intMinRowNo
 			ELSE
@@ -394,6 +418,9 @@ BEGIN TRY
 						FROM @tblLot
 						WHERE intRowNo = @intMinRowNo
 						)
+					,dtmProductionDate = @dtmProductionDate
+					,dtmBusinessDate = @dtmBusinessDate
+					,intBusinessShiftId = @intBusinessShiftId
 				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 			ELSE
 				UPDATE tblMFWorkOrderInputParentLot
