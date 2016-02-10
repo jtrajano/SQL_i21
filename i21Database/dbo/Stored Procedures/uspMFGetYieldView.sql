@@ -68,7 +68,7 @@ BEGIN TRY
 
 	SELECT @strIFormula = strInputFormula
 		,@strOFormula = strOutputFormula
-	FROM tblMFYield
+	FROM dbo.tblMFYield
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 
 	IF OBJECT_ID('tempdb..##tblMFTransaction') IS NOT NULL
@@ -157,9 +157,9 @@ BEGIN TRY
 		UNION
 
 		SELECT 36 AS intTransactionTypeId
-			,W.dtmPlannedDate
+			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 			,NULL strShiftName
-			,dtmPlannedDate AS dtmTransactionDate
+			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate) AS dtmTransactionDate
 			,strTransactionType
 			,intProductionSummaryId AS intTransactionId
 			,UnPvt.intItemId
@@ -185,14 +185,14 @@ BEGIN TRY
 		JOIN dbo.tblICItem I ON I.intItemId=UnPvt.intItemId
 		WHERE dblTransactionQuantity>0 and W.intManufacturingProcessId = ' 
 		+ ltrim(@intManufacturingProcessId) + '
-			AND W.dtmPlannedDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
+			AND ISNULL(W.dtmPlannedDate,W.dtmExpectedDate) BETWEEN ''' + ltrim(@dtmFromDate) + '''
 				AND ''' + ltrim(@dtmToDate) + 
 		'''
 		UNION
 
 		SELECT 
 			intTransactionTypeId
-			,W.dtmPlannedDate
+			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 			,S.strShiftName
 			,WLT.dtmTransactionDate
 			,strTransactionType
@@ -285,7 +285,7 @@ BEGIN TRY
 
 			SELECT @strRunNo = strWorkOrderNo
 				,@intItemId = intItemId
-				,@dtmRunDate = dtmPlannedDate
+				,@dtmRunDate = ISNULL(dtmPlannedDate,dtmExpectedDate)
 				,@intManufacturingProcessId = intManufacturingProcessId
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
@@ -468,13 +468,13 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO ##tblMFTransactionByDate
 			SELECT DENSE_RANK() OVER (
-					ORDER BY W.dtmPlannedDate
+					ORDER BY ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 						,W.intItemId
 					) intRowNum
 				,strTransactionType
 				,I.strItemNo
 				,I.strDescription
-				,W.dtmPlannedDate
+				,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,CASE 
 					WHEN strTransactionType = 'Output'
 						THEN SUM(dblTransactionQuantity)
@@ -502,7 +502,7 @@ BEGIN TRY
 				WHERE intRecipeItemTypeId = 1
 				GROUP BY WRI.intWorkOrderId
 				) BM ON BM.intWorkOrderId = W.intWorkOrderId
-			GROUP BY W.dtmPlannedDate
+			GROUP BY ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,I.strItemNo
 				,I.strDescription
 				,W.intItemId
@@ -514,13 +514,13 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO ##tblMFTransactionByDate
 			SELECT DENSE_RANK() OVER (
-					ORDER BY W.dtmPlannedDate
+					ORDER BY ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 						,W.intItemId
 					) intRowNum
 				,strTransactionType
 				,I.strItemNo
 				,I.strDescription
-				,W.dtmPlannedDate
+				,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,CASE 
 					WHEN strTransactionType = 'Output'
 						THEN SUM(dblTransactionQuantity)
@@ -558,7 +558,7 @@ BEGIN TRY
 					,R.intItemId
 				) BM ON BM.intItemId = W.intItemId
 			GROUP BY BM.intRecipeId
-				,W.dtmPlannedDate
+				,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,W.intItemId
 				,I.strItemNo
 				,I.strDescription
