@@ -1956,8 +1956,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     if (!vw.data.currentReceiptItem)
                         context.record.set('intWeightUOMId', null);
-                    context.record.set('dblWeightUOMConvFactor', 0);
-                    context.record.set('dblItemUOMConvFactor', 0);
 
                     if (vw.data.currentReceiptItem) {
                         var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots().data.items;
