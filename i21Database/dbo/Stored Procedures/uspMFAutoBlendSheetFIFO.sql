@@ -52,6 +52,7 @@ BEGIN TRY
 	DECLARE @intConsumptionMethodId INT
 	DECLARE @intConsumptionStoragelocationId INT
 	DECLARE @ysnIsSubstitute bit
+	DECLARE @intWorkOrderId INT
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
 		,@strRuleName NVARCHAR(100)
@@ -221,65 +222,113 @@ BEGIN TRY
 		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
 	)
 
+	Select TOP 1 @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where intBlendRequirementId=@intBlendRequirementId
+
 	--Get Recipe Input Items
 	--@strXml (if it has value)- Used For Picking Specific Recipe Items with qty full or remaining qty
 	--Called From uspMFGetPickListDetails
 	If ISNULL(@strXml,'')=''
 	Begin
-		INSERT INTO @tblInputItem (
-			intRecipeId
-			,intRecipeItemId
-			,intItemId
-			,dblRequiredQty
-			,ysnIsSubstitute
-			,ysnMinorIngredient
-			,intConsumptionMethodId
-			,intConsumptionStoragelocationId
-			,intParentItemId
-			)
-		SELECT @intRecipeId
-			,ri.intRecipeItemId
-			,ri.intItemId
-			,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
-			,0
-			,ri.ysnMinorIngredient
-			,ri.intConsumptionMethodId
-			,ri.intStorageLocationId
-			,0
-		FROM tblMFRecipeItem ri
-		JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-		WHERE r.intRecipeId = @intRecipeId
-			AND ri.intRecipeItemTypeId = 1
-			AND (
-				(
-					ri.ysnYearValidationRequired = 1
-					AND @dtmDate BETWEEN ri.dtmValidFrom
-						AND ri.dtmValidTo
-					)
-				OR (
-					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-						AND DATEPART(dy, ri.dtmValidTo)
-					)
+		If Exists (Select 1 From tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId)
+				INSERT INTO @tblInputItem (
+				intRecipeId
+				,intRecipeItemId
+				,intItemId
+				,dblRequiredQty
+				,ysnIsSubstitute
+				,ysnMinorIngredient
+				,intConsumptionMethodId
+				,intConsumptionStoragelocationId
+				,intParentItemId
 				)
+			SELECT r.intRecipeId
+				,ri.intRecipeItemId
+				,ri.intItemId
+				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
+				,0 AS ysnIsSubstitute
+				,ri.ysnMinorIngredient
+				,ri.intConsumptionMethodId
+				,ri.intStorageLocationId
+				,0
+			FROM tblMFWorkOrderRecipeItem ri
+			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
+			WHERE r.intWorkOrderId=@intWorkOrderId
+				AND ri.intRecipeItemTypeId = 1
 	
-		UNION
+			UNION
 	
-		SELECT @intRecipeId
-			,rs.intRecipeSubstituteItemId
-			,rs.intSubstituteItemId AS intItemId
-			,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
-			,1
-			,0
-			,1
-			,0
-			,ri.intItemId
-		FROM tblMFRecipeSubstituteItem rs
-		JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
-		JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
-		WHERE r.intRecipeId = @intRecipeId
-			AND rs.intRecipeItemTypeId = 1
-		ORDER BY ysnMinorIngredient
+			SELECT r.intRecipeId
+				,rs.intRecipeSubstituteItemId
+				,rs.intSubstituteItemId AS intItemId
+				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
+				,1 AS ysnIsSubstitute
+				,0
+				,1
+				,0
+				,ri.intItemId
+			FROM tblMFWorkOrderRecipeSubstituteItem rs
+			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
+			JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+			WHERE r.intWorkOrderId = @intWorkOrderId
+				AND rs.intRecipeItemTypeId = 1
+			ORDER BY ysnIsSubstitute, ysnMinorIngredient
+		Else
+		Begin
+			INSERT INTO @tblInputItem (
+				intRecipeId
+				,intRecipeItemId
+				,intItemId
+				,dblRequiredQty
+				,ysnIsSubstitute
+				,ysnMinorIngredient
+				,intConsumptionMethodId
+				,intConsumptionStoragelocationId
+				,intParentItemId
+				)
+			SELECT @intRecipeId
+				,ri.intRecipeItemId
+				,ri.intItemId
+				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
+				,0
+				,ri.ysnMinorIngredient
+				,ri.intConsumptionMethodId
+				,ri.intStorageLocationId
+				,0
+			FROM tblMFRecipeItem ri
+			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			WHERE r.intRecipeId = @intRecipeId
+				AND ri.intRecipeItemTypeId = 1
+				AND (
+					(
+						ri.ysnYearValidationRequired = 1
+						AND @dtmDate BETWEEN ri.dtmValidFrom
+							AND ri.dtmValidTo
+						)
+					OR (
+						ri.ysnYearValidationRequired = 0
+						AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+							AND DATEPART(dy, ri.dtmValidTo)
+						)
+					)
+	
+			UNION
+	
+			SELECT @intRecipeId
+				,rs.intRecipeSubstituteItemId
+				,rs.intSubstituteItemId AS intItemId
+				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
+				,1
+				,0
+				,1
+				,0
+				,ri.intItemId
+			FROM tblMFRecipeSubstituteItem rs
+			JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+			JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+			WHERE r.intRecipeId = @intRecipeId
+				AND rs.intRecipeItemTypeId = 1
+			ORDER BY ysnMinorIngredient
+		End
 
 		IF (
 				SELECT ISNULL(COUNT(1), 0)

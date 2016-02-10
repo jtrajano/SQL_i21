@@ -234,10 +234,11 @@ Begin
 			Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder)
 
 			SELECT @intRecipeId = intRecipeId
-			FROM tblMFRecipe
+			FROM tblMFWorkOrderRecipe
 			WHERE intItemId = @intBlendItemId
 				AND intLocationId = @intLocationId
-				AND ysnActive = 1
+				AND ysnActive = 1 
+				AND intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
 				INSERT INTO @tblInputItem (
 				intItemId
@@ -250,10 +251,11 @@ Begin
 				,(ri.dblCalculatedQuantity * (@dblQuantity / r.dblQuantity)) AS dblRequiredQty
 				,0
 				,ri.intConsumptionMethodId
-			FROM tblMFRecipeItem ri
-			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			FROM tblMFWorkOrderRecipeItem ri
+			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 			WHERE r.intRecipeId = @intRecipeId
 				AND ri.intRecipeItemTypeId = 1
+				AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
 			--Bulk Items
 			Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId)
@@ -273,8 +275,9 @@ Begin
 					From @tblRemainingPickedItems Where intRowNo=@intMinItemCount
 
 					Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
-					From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
-					Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+					From tblMFWorkOrderRecipe r Join tblMFWorkOrderRecipeItem ri on r.intWorkOrderId=ri.intWorkOrderId 
+					Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1 
+					AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
 					Set @strXml = @strXml + '<item>'
 					Set @strXml = @strXml + '<intRecipeId>' + CONVERT(varchar,@intRecipeId) + '</intRecipeId>'
