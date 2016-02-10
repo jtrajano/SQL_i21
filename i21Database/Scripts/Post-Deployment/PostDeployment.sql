@@ -180,8 +180,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql
 :r .\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql
 
-:r .\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql
-
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
 --:r .\AP\FixEntitiesData.sql
