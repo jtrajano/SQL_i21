@@ -92,6 +92,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		DECLARE @strAccountId NVARCHAR(150)
 		DECLARE @strAccountType NVARCHAR(150)
 		DECLARE @strAccountDescription NVARCHAR(MAX)
+		DECLARE @REAccount NVARCHAR(100)
 
 		WHILE EXISTS(SELECT 1 FROM #tempGLAccount)
 		BEGIN
@@ -99,6 +100,26 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 						 @strAccountId			= [strAccountId], 
 						 @strAccountType		= [strAccountType],
 						 @strAccountDescription = [strDescription] FROM #tempGLAccount ORDER BY [strAccountId]
+
+			SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearId = (SELECT TOP 1 intFiscalYearId FROM tblGLCurrentFiscalYear)))
+
+			IF(@REAccount = '')
+			BEGIN
+				SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear))
+			END
+
+			IF(@REAccount = @strAccountId)
+			BEGIN
+				SET @strAccountsType = 'RE'
+			END	
+			ELSE IF(@strAccountType = 'Asset' or  @strAccountType = 'Equity' or @strAccountType = 'Liability')
+			BEGIN
+				SET @strAccountsType = 'BS'
+			END
+			ELSE IF(@strAccountType = 'Expense' or @strAccountType = 'Revenue')
+			BEGIN
+				SET @strAccountsType = 'IS'
+			END
 
 			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId)
 								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,1,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1)
