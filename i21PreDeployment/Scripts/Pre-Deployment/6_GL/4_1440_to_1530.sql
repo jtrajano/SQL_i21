@@ -18,7 +18,7 @@ PRINT 'Finished Renaming tblGLTempCOASegment column Location to Location'
 PRINT 'Begin Fixing Segment Categories'
 IF EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblSMBuildNumber' and type = 'U')
 BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo > 15.1)
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE SUBSTRING ( strVersionNo ,0 , 5) > 15.1)
 	BEGIN
 		DECLARE @sqlStmt NVARCHAR(MAX) =
 		'UPDATE t SET intAccountCategoryId =(

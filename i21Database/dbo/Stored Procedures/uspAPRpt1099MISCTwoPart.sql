@@ -84,7 +84,7 @@ BEGIN
 			,NULL AS strZip2
 			,NULL AS strCity2
 			,NULL AS strState2
-			,NULL AS strZipSate2
+			,NULL AS strZipState2
 			,0 AS intYear2
 			,0 AS dblBoatsProceeds2
 			,0 AS dblCropInsurance2
@@ -172,7 +172,7 @@ WITH MISC1099 (
 	,strZip
 	,strCity
 	,strState
-	,strZipSate
+	,strZipState
 	,intYear
 	,dblBoatsProceeds
 	,dblCropInsurance
@@ -230,7 +230,7 @@ SELECT
 	,MISC1099Top.strZip
 	,MISC1099Top.strCity
 	,MISC1099Top.strState
-	,MISC1099Top.strZipSate
+	,MISC1099Top.strZipState
 	,MISC1099Top.intYear
 	,MISC1099Top.dblBoatsProceeds
 	,MISC1099Top.dblCropInsurance
@@ -258,7 +258,7 @@ SELECT
 	,MISC1099Bottom.strZip						AS strZip2
 	,MISC1099Bottom.strCity						AS strCity2
 	,MISC1099Bottom.strState					AS strState2
-	,MISC1099Bottom.strZipSate					AS strZipSate2
+	,MISC1099Bottom.strZipState					AS strZipState2
 	,MISC1099Bottom.intYear						AS intYear2
 	,MISC1099Bottom.dblBoatsProceeds			AS dblBoatsProceeds2
 	,MISC1099Bottom.dblCropInsurance			AS dblCropInsurance2
@@ -287,4 +287,5 @@ OUTER APPLY (
 	*
 	FROM MISC1099 A
 	WHERE A.int1099MISCId % 2 = 0
+	AND A.int1099MISCId = (MISC1099Top.int1099MISCId + 1)
 ) MISC1099Bottom

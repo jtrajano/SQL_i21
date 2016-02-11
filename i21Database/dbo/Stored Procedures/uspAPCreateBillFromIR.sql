@@ -190,9 +190,9 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
+		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,6)),
 		[dblCost]					=	B.dblUnitCost,
-		[dblOldCost]				=	B.dblUnitCost,
+		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
@@ -237,7 +237,7 @@ BEGIN
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
 		[dblCost]					=	A.dblUnitCost,
-		[dblOldCost]				=	A.dblUnitCost,
+		[dblOldCost]				=	0,
 		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
 		[intContractHeaderId]		=	A.intContractHeaderId,
@@ -294,7 +294,7 @@ BEGIN
 			[dblRate]				=	A.dblRate, 
 			[intAccountId]			=	A.intTaxAccountId, 
 			[dblTax]				=	A.dblTax, 
-			[dblAdjustedTax]		=	A.dblAdjustedTax, 
+			[dblAdjustedTax]		=	ISNULL(A.dblAdjustedTax,0), 
 			[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 			[ysnSeparateOnBill]		=	A.ysnSeparateOnInvoice, 
 			[ysnCheckOffTax]		=	A.ysnCheckoffTax

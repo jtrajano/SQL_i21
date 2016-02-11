@@ -8,6 +8,6 @@ BEGIN
 		
 	INSERT INTO dbo.tblICItemUOM(intItemUOMId, dblUnitQty)
 	
-	SELECT @BUSHEL, 1								-- Bushel is the stock unit. 
-	UNION ALL SELECT @LB,  0.017857142857142		-- one bushel is 56 pounds. 
+	SELECT @BUSHEL, 1											-- Bushel is the stock unit. A bushel is 56 lb. 
+	UNION ALL SELECT @LB,  0.01785714285714285714285714285714	-- 1 lb is 0.01785714285714285714285714285714 bushel. 
 END

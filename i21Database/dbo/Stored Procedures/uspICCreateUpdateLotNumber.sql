@@ -58,9 +58,9 @@ DECLARE
 	,@intItemLocationId			AS INT 
 	,@intSubLocationId			AS INT 
 	,@intStorageLocationId		AS INT
-	,@dblQty					AS NUMERIC(18,6) 
+	,@dblQty					AS NUMERIC(38,20) 
 	,@intItemUOMId				AS INT 
-	,@dblWeight					AS NUMERIC(18,6)
+	,@dblWeight					AS NUMERIC(38,20)
 	,@intWeightUOMId			AS INT
 	,@dtmExpiryDate				AS DATETIME
 	,@dtmManufacturedDate		AS DATETIME
@@ -79,7 +79,7 @@ DECLARE
 	,@ysnProduced				AS BIT 
 	,@intDetailId				AS INT 
 	,@intOwnershipType			AS INT
-	,@dblGrossWeight			AS NUMERIC(18,6)
+	,@dblGrossWeight			AS NUMERIC(38,20)
 	,@strParentLotNumber		AS NVARCHAR(50) 
 	,@strParentLotAlias			AS NVARCHAR(50) 
 	,@intLotStatusId_ItemLotTable AS INT 

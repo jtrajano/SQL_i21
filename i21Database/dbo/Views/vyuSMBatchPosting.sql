@@ -1,17 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuSMBatchPosting]
 AS 
 SELECT CAST (ROW_NUMBER() OVER (ORDER BY BatchPosting.dtmDate DESC) AS INT)	AS	intBatchPostingId, 
-BatchPosting.strTransactionType		AS	strTransactionType, 
-intJournalId						AS	intTransactionId, 
-strJournalId						AS	strTransactionId, 
-BatchPosting.intEntityId			AS	intEntityId, 
-ISNULL(BatchPosting.dblAmount, 0.0)	AS	dblAmount,
-BatchPosting.strVendorInvoiceNumber	AS	strVendorInvoiceNumber,
-BatchPosting.intEntityVendorId		AS  intEntityVendorId,
-ISNULL(Entity.strName, '')			AS	strVendorName,
-UserSecurity.strUserName			AS	strUserName,
-BatchPosting.strDescription			AS	strDescription,
-BatchPosting.dtmDate				AS	dtmDate,
+BatchPosting.strTransactionType			AS	strTransactionType, 
+intJournalId							AS	intTransactionId, 
+strJournalId							AS	strTransactionId, 
+BatchPosting.intEntityId				AS	intEntityId, 
+ISNULL(BatchPosting.dblAmount, 0.0)		AS	dblAmount,
+BatchPosting.strVendorInvoiceNumber		AS	strVendorInvoiceNumber,
+BatchPosting.intEntityVendorId			AS  intEntityVendorId,
+ISNULL(Entity.strName, '')				AS	strVendorName,
+ISNULL(UserSecurity.strUserName, '')	AS	strUserName,
+BatchPosting.strDescription				AS	strDescription,
+BatchPosting.dtmDate					AS	dtmDate,
 CONVERT(NVARCHAR(100),ISNULL(Fiscal.guid, ForBatchPosting.strBatchId))	AS  strFiscalUniqueId
 FROM 
 (
@@ -32,7 +32,7 @@ FROM
 	SELECT 'Card Fueling', intTransactionId, strTransactionId, dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmTransactionDate, strDescription FROM vyuCFBatchPostTransactions
 ) BatchPosting
 LEFT JOIN tblEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
-INNER JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
+LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
 LEFT JOIN tblGLForBatchPosting Fiscal on BatchPosting.intJournalId = Fiscal.intTransactionId
 LEFT JOIN tblSMForBatchPosting ForBatchPosting on BatchPosting.intJournalId = ForBatchPosting.intTransactionId
 GO

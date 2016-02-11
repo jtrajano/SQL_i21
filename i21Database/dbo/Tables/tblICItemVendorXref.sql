@@ -18,7 +18,7 @@ Type the overview for the table here.
 		[intVendorId] INT NOT NULL, 
 		[strVendorProduct] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strProductDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-		[dblConversionFactor] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
+		[dblConversionFactor] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
 		[intItemUnitMeasureId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 

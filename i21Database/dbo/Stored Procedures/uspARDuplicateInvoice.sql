@@ -133,7 +133,7 @@ BEGIN
 		,intConcurrencyId
 		,intEntityId)
 	SELECT 
-		 CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN strInvoiceNumber ELSE strInvoiceOriginId END 
+		 strInvoiceNumber
 		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN @intSplitEntityId ELSE intEntityCustomerId END
 		,@InvoiceDate
 		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
@@ -154,7 +154,7 @@ BEGIN
 		,strTransactionType
 		,strType
 		,intPaymentMethodId
-		,strComments
+		,strComments + ' DUP: ' + strInvoiceNumber
 		,intAccountId
 		,@InvoiceDate
 		,0
@@ -361,7 +361,7 @@ BEGIN
 					SELECT
 						 @ItemId						= [intItemId]			
 						,@ItemUOMId						= [intItemUOMId]
-						,@ItemQtyOrdered				= [dblQtyShipped]
+						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDescription				= [strItemDescription]
 						,@ItemPrice						= [dblPrice]						
@@ -400,6 +400,7 @@ BEGIN
 						,@NewInvoiceDetailId			= @NewInvoiceDetailId	OUTPUT 
 						,@ErrorMessage					= @ErrorMessage	OUTPUT
 						,@ItemUOMId						= @ItemUOMId
+						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemPrice						= @ItemPrice
 						,@ItemDescription				= @ItemDescription

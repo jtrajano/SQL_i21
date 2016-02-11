@@ -57,8 +57,8 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 
-													THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END),
+		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 
+													THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -106,7 +106,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	C.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	B.dblAmountApplied,
+		[dblCredit]						=	CAST(B.dblAmountApplied AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	C.strReference,

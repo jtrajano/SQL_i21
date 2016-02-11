@@ -699,7 +699,7 @@ BEGIN
 
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
-		SET		dblLineTotal = ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0)
+		SET		dblLineTotal = ROUND(ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0), 2)
 		FROM	dbo.tblICInventoryReceiptItem ReceiptItem
 		WHERE	intInventoryReceiptId = @inventoryReceiptId
 

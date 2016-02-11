@@ -5,10 +5,10 @@
 	,@intSubLocationId INT
 	,@intStorageLocationId INT
 	,@dtmDate DATETIME
-	,@dblQty NUMERIC(18, 6)
-	,@dblUOMQty NUMERIC(18, 6)
-	,@dblCost NUMERIC(38, 20)
-	,@dblValue NUMERIC(18, 6)
+	,@dblQty NUMERIC(38,20)
+	,@dblUOMQty NUMERIC(38,20)
+	,@dblCost NUMERIC(38,20)
+	,@dblValue NUMERIC(38,20)
 	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
 	,@dblExchangeRate NUMERIC (38, 20)
