@@ -636,7 +636,7 @@ Ext.define('Inventory.view.Category', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnEditLocation',
                                                                 iconCls: 'small-open',
-                                                                text: 'Open'
+                                                                text: 'View'
                                                             },
                                                             {
                                                                 xtype: 'button',

@@ -107,13 +107,13 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
             win.show();
 
             var context = me.setupContext( { window : win } );
-            me.intCategoryId = config.id;
-            if (config.action === 'new') {
+            me.intCategoryId = config.param.CategoryId;
+            if (config.param.action === 'new') {
                 context.data.addRecord();
             } else {
                 var filter = [{
-                    column: 'intCategoryId',
-                    value: config.id
+                    column: 'intCategoryLocationId',
+                    value: config.param.CategoryLocationId
                 }];
                 context.data.load({
                     filters: filter

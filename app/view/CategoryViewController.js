@@ -354,58 +354,83 @@ Ext.define('Inventory.view.CategoryViewController', {
         }
     },
 
-    onbtnEditLocationClick: function(button, e, eOpts) {
+    onEditLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
+        var grd = button.up('grid');
+        var selection = grd.getSelectionModel().getSelection();
+
+        if (selection.length <= 0){
+            iRely.Functions.showErrorDialog('Please select a location to edit.');
+            return;
+        }
 
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openCategoryLocationScreen('edit', win);
+                me.openCategoryLocationScreen('edit', win, selection[0]);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    me.openCategoryLocationScreen('edit', win);
+                    me.openCategoryLocationScreen('edit', win, selection[0]);
                 }
             });
         }
     },
 
-    openCategoryLocationScreen: function (action, window) {
+    openCategoryLocationScreen: function (action, window, record) {
         var win = window;
         var me = win.controller;
         var screenName = 'Inventory.view.CategoryLocation';
 
-        Ext.require([
-                screenName,
-                screenName + 'ViewModel',
-                screenName + 'ViewController'
-        ], function() {
-            var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel : { type: screen.toLowerCase() } });
-            view.on('destroy', me.onDestroyCategoryLocationScreen, me, { window: win });
+        var current = win.getViewModel().data.current;
+        if (action === 'edit'){
+            iRely.Functions.openScreen(screenName, {
+                viewConfig: {
+                    listeners: {
+                        destroy: function() {
+                            var grdLocation = win.down('#grdLocation');
+                            var vm = win.getViewModel();
+                            var categoryId = vm.data.current.get('intCategoryId');
+                            var filterCategory = grdLocation.store.filters.items[0];
 
-            var controller = view.getController();
-            var current = win.getViewModel().data.current;
-            controller.show({ id: current.get('intCategoryId'), action: action });
-        });
-    },
+                            filterCategory.setValue(categoryId);
+                            filterCategory.config.value = categoryId;
+                            filterCategory.initialConfig.value = categoryId;
+                            grdLocation.store.getProxy().setExtraParams({include:'tblSMCompanyLocation'});
+                            grdLocation.store.load();
+                        }
+                    }
+                },
+                CategoryId: current.get('intCategoryId'),
+                CategoryLocationId: record.get('intCategoryLocationId'),
+                action: 'edit'
+            });
+        }
+        else if (action === 'new') {
+            iRely.Functions.openScreen(screenName, {
+                viewConfig: {
+                    listeners: {
+                        destroy: function() {
+                            var grdLocation = win.down('#grdLocation');
+                            var vm = win.getViewModel();
+                            var categoryId = vm.data.current.get('intCategoryId');
+                            var filterCategory = grdLocation.store.filters.items[0];
 
-    onDestroyCategoryLocationScreen: function(win, eOpts) {
-        var me = eOpts.window.getController();
-        var win = eOpts.window;
-        var grdLocation = win.down('#grdLocation');
-        var vm = win.getViewModel();
-        var categoryId = vm.data.current.get('intCategoryId');
-        var filterItem = grdLocation.store.filters.items[0];
-
-        filterItem.setValue(categoryId);
-        filterItem.config.value = categoryId;
-        filterItem.initialConfig.value = categoryId;
-        grdLocation.store.getProxy().setExtraParams({include:'vyuICGetItemLocation'});
-        grdLocation.store.load();
+                            filterCategory.setValue(categoryId);
+                            filterCategory.config.value = categoryId;
+                            filterCategory.initialConfig.value = categoryId;
+                            grdLocation.store.getProxy().setExtraParams({include:'tblSMCompanyLocation'});
+                            grdLocation.store.load();
+                        }
+                    }
+                },
+                CategoryId: current.get('intCategoryId'),
+                action: 'new'
+            });
+        }
     },
 
     onUOMUnitMeasureSelect: function(combo, records, eOpts) {
@@ -634,6 +659,32 @@ Ext.define('Inventory.view.CategoryViewController', {
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.InventoryUOM', grid, 'intUnitMeasureId');
     },
 
+    onLocationDoubleClick: function(view, record, item, index, e, eOpts){
+        var win = view.up('window');
+        var me = win.controller;
+        var vm = win.getViewModel();
+
+        if (!record){
+            iRely.Functions.showErrorDialog('Please select a location to edit.');
+            return;
+        }
+
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                me.openCategoryLocationScreen('edit', win, record);
+                return;
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openCategoryLocationScreen('edit', win, record);
+                    return;
+                }
+            });
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboDetailUnitMeasure": {
@@ -649,7 +700,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 click: this.onbtnAddLocationClick
             },
             "#btnEditLocation": {
-                click: this.onbtnEditLocationClick
+                click: this.onEditLocationClick
             },
             "#btnAddRequired": {
                 click: this.onAddRequiredClick
@@ -662,6 +713,9 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             "#cboLineOfBusiness": {
                 drilldown: this.onLineOfBusinessDrilldown
+            },
+            "#grdLocation" : {
+                itemdblclick: this.onLocationDoubleClick
             }
         });
     }
