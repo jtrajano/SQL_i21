@@ -3381,6 +3381,7 @@
     <Build Include="dbo\Tables\tblMFForecastItemValue.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveForecast.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetForecastDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetCleanUncleanWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
