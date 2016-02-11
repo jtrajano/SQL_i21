@@ -3374,6 +3374,7 @@
     <Build Include="dbo\Views\vyuCTEntityToContact.sql" />
     <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByLine.sql" />
+    <Build Include="dbo\Views\vyuHDCrmKeyword.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
