@@ -6,6 +6,7 @@ SET NOCOUNT ON;
 IF (ISNULL(@xmlParam,'')  = '')
 BEGIN
 	SELECT DISTINCT
+	'' as strCompanyName,
 	0 as intAccountId,
 	'' as strTransactionId,
 	'' as strAccountId,
@@ -80,7 +81,8 @@ BEGIN
 END
 DECLARE @Where NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filterTable)
 
-DECLARE @cols NVARCHAR (MAX) = 'intAccountId, strTransactionId,strAccountId,strAccountDescription,strDetailDescription,strAccountGroup,strAccountType,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,dtmDate,dblBeginBalance,dblBeginBalanceUnit,intAccountUnitId,dblTotal,dblTotalUnit,strUOMCode'
+DECLARE @cols NVARCHAR (MAX) = 'strCompanyName, intAccountId, strTransactionId,strAccountId,strAccountDescription,strDetailDescription,strAccountGroup,strAccountType,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,dtmDate,dblBeginBalance,dblBeginBalanceUnit
+,intAccountUnitId,dblTotal,dblTotalUnit,strUOMCode'
 DECLARE @sqlCte NVARCHAR(MAX) 
 SET @sqlCte =
 ';WITH Units
@@ -98,7 +100,7 @@ AS
 			  tblGLAccount.strDescription as strAccountDescription
 			 ,tblGLDetail.strTransactionId as strTransactionId
 			 ,tblGLDetail.strDescription as strDetailDescription
-			 ,ISNULL(ROUND(dblDebit,2),0) as dblDebit
+			  ,ISNULL(ROUND(dblDebit,2),0) as dblDebit
 			 ,ISNULL(ROUND(dblCredit,2),0) as dblCredit
 			 ,ISNULL((Case When intAccountUnitId IS NULL Then dblDebitUnit
 				   Else
@@ -151,7 +153,9 @@ AS
 RAWREPORT AS
 (
 
-	SELECT A.intAccountId
+	SELECT
+	C.strCompanyName
+	,A.intAccountId
 	,A.strTransactionId
 	,A.strAccountId
 	,A.strAccountDescription
@@ -172,11 +176,13 @@ RAWREPORT AS
 	,(CASE WHEN A.intGLDetailId  is  NULL  then '''' else A.intGLDetailId END) as intGLDetailId
 		FROM TrialBalanceDetails A
 			LEFT JOIN BeginBalance B ON A.intAccountId = B.intAccountId
+			OUTER APPLY(SELECT TOP 1 strCompanyName from tblSMCompanySetup) C
 	
 )'
 SELECT @sqlCte += ',cteBase1 as(
 	select 
-	intAccountId, strTransactionId,strAccountId,strAccountDescription,strDetailDescription,strAccountGroup,strAccountType
+	strCompanyName
+	,intAccountId, strTransactionId,strAccountId,strAccountDescription,strDetailDescription,strAccountGroup,strAccountType
 	,sum(dblDebit) AS dblDebit
 	,sum(dblCredit) as dblCredit
 	,dtmDate
@@ -206,7 +212,8 @@ SELECT @sqlCte += ',cteBase1 as(
 	
 	from RAWREPORT A
 	Group By
-	intAccountId
+	strCompanyName
+	,intAccountId
 	,strTransactionId
 	,strAccountId
 	,strAccountDescription
