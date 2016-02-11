@@ -22,7 +22,7 @@ INNER JOIN tblAPBill B ON A.intEntityVendorId = B.intEntityVendorId
 OUTER APPLY tblAPCompanyPreference C
 WHERE B.intBillId = @voucherId AND B.ysnForApproval = 1
 
-IF @approverListId IS NULL OR @approverListId <= 0 RAISERROR('Please setup approver for this vendor.', 16, 1);
+IF @approverListId IS NULL OR @approverListId <= 0 RAISERROR('Please setup approver either in vendor or company configuration.', 16, 1);
 
 DELETE FROM tblAPVoucherApprover WHERE intVoucherId = @voucherId;
 
@@ -45,7 +45,7 @@ SELECT DISTINCT
 FROM tblSMApprovalListUserSecurity A
 CROSS APPLY tblAPBill B
 WHERE B.intBillId = @voucherId
-AND 1 = (CASE WHEN A.dblAmountLessThanEqual <= B.dblTotal OR A.dblAmountOver > B.dblTotal THEN 1 ELSE 0 END)
+AND 1 = (CASE WHEN B.dblTotal <= A.dblAmountLessThanEqual OR B.dblTotal > A.dblAmountOver THEN 1 ELSE 0 END)
 AND A.intApprovalListId = @approverListId
 ORDER BY A.intApproverLevel
 

@@ -18,7 +18,7 @@ BEGIN
 				,@dtmDate AS DATETIME						= '01/01/2011'
 				,@dblQty AS NUMERIC(18, 6)					= 6
 				,@dblUOMQty AS NUMERIC(18, 6)				= 7
-				,@dblCost AS NUMERIC(18, 6)					= 8
+				,@dblCost AS NUMERIC(38, 20)					= 8
 				,@dblValue AS NUMERIC(18, 6)				= 9
 				,@dblSalesPrice AS NUMERIC(18, 6)			= 10
 				,@intCurrencyId AS INT						= 11
@@ -46,7 +46,7 @@ BEGIN
 			,intStorageLocationId INT
 			,dtmDate DATETIME
 			,dblQty NUMERIC(18, 6)
-			,dblCost NUMERIC(18, 6)
+			,dblCost NUMERIC(38, 20)
 			,dblValue NUMERIC(18, 6)
 			,dblSalesPrice NUMERIC(18, 6)
 			,intCurrencyId INT
@@ -75,7 +75,7 @@ BEGIN
 			,intStorageLocationId INT
 			,dtmDate DATETIME
 			,dblQty NUMERIC(18, 6)
-			,dblCost NUMERIC(18, 6)
+			,dblCost NUMERIC(38, 20)
 			,dblValue NUMERIC(18, 6)
 			,dblSalesPrice NUMERIC(18, 6)
 			,intCurrencyId INT

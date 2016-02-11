@@ -9,12 +9,12 @@ CREATE PROCEDURE [dbo].[uspICPostFIFOStorage]
 	,@intSubLocationId AS INT 
 	,@intStorageLocationId AS INT 
 	,@dtmDate AS DATETIME
-	,@dblQty AS NUMERIC(18,6)
-	,@dblUOMQty AS NUMERIC(18,6)
-	,@dblCost AS NUMERIC(18,6)
-	,@dblSalesPrice AS NUMERIC(18,6)
+	,@dblQty AS NUMERIC(38,20)
+	,@dblUOMQty AS NUMERIC(38,20)
+	,@dblCost AS NUMERIC(38,20)
+	,@dblSalesPrice AS NUMERIC(38,20)
 	,@intCurrencyId AS INT
-	,@dblExchangeRate AS NUMERIC(18,6)
+	,@dblExchangeRate AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -31,10 +31,10 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables 
-DECLARE @RemainingQty AS NUMERIC(18,6);
-DECLARE @dblReduceQty AS NUMERIC(18,6);
-DECLARE @dblAddQty AS NUMERIC(18,6);
-DECLARE @CostUsed AS NUMERIC(18,6);
+DECLARE @RemainingQty AS NUMERIC(38,20);
+DECLARE @dblReduceQty AS NUMERIC(38,20);
+DECLARE @dblAddQty AS NUMERIC(38,20);
+DECLARE @CostUsed AS NUMERIC(38,20);
 
 DECLARE @NewInventoryCostBucketStorageId AS INT
 DECLARE @UpdatedCostBucketStorageId AS INT 
@@ -69,8 +69,8 @@ BEGIN
 			IF @@ERROR <> 0 GOTO _Exit
 
 			-- Insert the inventory transaction record
-			DECLARE @dblComputedReduceQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
-			DECLARE @dblCostToUse AS NUMERIC(18,6) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblComputedReduceQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
+			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
 
 			EXEC [dbo].[uspICPostInventoryTransactionStorage]
 					@intItemId = @intItemId
@@ -117,6 +117,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@strTransactionId
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@NewInventoryCostBucketStorageId OUTPUT 
 
 

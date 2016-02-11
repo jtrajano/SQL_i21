@@ -56,13 +56,13 @@ BEGIN
 			TR.intConcurrencyId,
 			SP.strFuelSupplier,
 			SP.strSupplyPoint,
-			(select top 1 SM.strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = TR.intCompanyLocationId) as strReceiptCompanyLocation,
-            (select top 1 yy.strReceiptNumber from tblTRLoadReceipt xx
+			(select top 1 SM.strLocationName from dbo.tblSMCompanyLocation SM where SM.intCompanyLocationId = TR.intCompanyLocationId) as strReceiptCompanyLocation,
+            (select top 1 yy.strReceiptNumber from dbo.tblTRLoadReceipt xx
                                  left join dbo.tblICInventoryReceipt yy on xx.intInventoryReceiptId = yy.intInventoryReceiptId where xx.intLoadReceiptId = TR.intLoadReceiptId ),
-            (select top 1 yyy.strTransferNo from tblTRLoadReceipt xxx
+            (select top 1 yyy.strTransferNo from dbo.tblTRLoadReceipt xxx
                                  left join dbo.tblICInventoryTransfer yyy on xxx.intInventoryTransferId = yyy.intInventoryTransferId  where xxx.intLoadReceiptId = TR.intLoadReceiptId)
 	from tblTRLoadReceipt TR 
-         join vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
+         left join vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
      where TR.strReceiptLine in (select Item from fnTRSplit(@strReceiptLink,','))
 	       and TR.intLoadHeaderId = @intLoadHeaderId
 

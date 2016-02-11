@@ -267,7 +267,7 @@ If @ysnEnableParentLot=0
 	Select l.intLotId,l.intItemId,icl.strLotNumber,icl.strLotAlias,i.strItemNo,
 	ISNULL((ISNULL(icl.dblWeight,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
 	l.dblQty,
-	(l.dblQty % l.dblWeightPerUnit) AS dblOverCommitQty,
+	(l.dblQty - ISNULL((ISNULL(icl.dblWeight,0) - ISNULL(r.dblReservedQty,0)),0)) AS dblOverCommitQty,
 	l.dblWeightPerUnit,
 	um.strUnitMeasure
 	from @tblLot l
@@ -634,7 +634,7 @@ Declare @tblMoreOverCommitQty table
 
 Insert Into @tblMoreOverCommitQty(intLotId,intItemId,strLotNo,strLotAlias,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM)
 Select intLotId,intItemId,strLotNo,strLotAlias,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM 
-From  @tblAvailableQty where dblOverCommitQty > dblWeightPerUnit AND dblOverCommitQty > 0
+From  @tblAvailableQty where dblOverCommitQty >= dblWeightPerUnit AND dblOverCommitQty > 0
 
 If (Select Count(1) From @tblMoreOverCommitQty)>0
 Begin

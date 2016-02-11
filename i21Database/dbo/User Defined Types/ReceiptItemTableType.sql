@@ -12,7 +12,7 @@ CREATE TYPE [dbo].[ReceiptItemTableType] AS TABLE
 	,[intSourceType] INT NOT NULL DEFAULT ((0))
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction. Required. 
 	,[intCurrencyId] INT NULL								-- The currency id used in a tranaction. 
-	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
+	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 
 	-- Detail 
 	,[intInventoryReceiptDetailId] INT NULL					-- Link id to the receipt detail. 	
@@ -25,10 +25,10 @@ CREATE TYPE [dbo].[ReceiptItemTableType] AS TABLE
 	,[intStorageLocationId] INT NULL						-- Storage Location. Optional 
 	,[intItemUOMId] INT NOT NULL							-- UOM of an item. Required. 
 	,[intWeightUOMId] INT NULL								-- If item is received by weights, then this field has a value. Optional 	
-    ,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0				-- The quantity received in terms of intItemUOMId. Default to zero. Required.
-	,[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 1			-- The unit qty in terms intItemUOMId. Required.
-	,[dblNetWeight] NUMERIC(18, 6) NULL						-- The net weight of an item. Optional.
-    ,[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0			-- The cost of the item received in terms of intItemUOMId. 
+    ,[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0				-- The quantity received in terms of intItemUOMId. Default to zero. Required.
+	,[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 1			-- The unit qty in terms intItemUOMId. Required.
+	,[dblNetWeight] NUMERIC(38, 20) NULL						-- The net weight of an item. Optional.
+    ,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0			-- The cost of the item received in terms of intItemUOMId. 
 	,[intContainerId] INT NULL								-- If item has a container id or not. 
 	,[intOwnershipType] INT NOT NULL DEFAULT ((1))			-- Ownership type of the item. Required. Default to 1 (Own)
 	,[intOrderId] INT NULL									-- Link id to PO or Contract. Ex: if Receipt type is "Purchase Order", this field links to the PO table. Optional.

@@ -12,14 +12,18 @@ Declare @strXml nvarchar(max)
 Declare @strWorkOrderIds nvarchar(max)
 Declare @intKitStagingLocationId int
 Declare @intManufacturingProcessId int
+Declare @intWorkOrderId int
 Declare @intMinItemCount int,
 		@intRecipeItemId int,
 		@intRawItemId int,
 		@dblRequiredQty numeric(18,6),
 		@intConsumptionMethodId int,
-		@intConsumptionStoragelocationId int
+		@intConsumptionStoragelocationId int,
+		@ysnIsSubstitute bit,
+		@intParentItemId int,
+		@intMinRemainingItem int
 
-Select @intManufacturingProcessId=intManufacturingProcessId
+Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId,@intWorkOrderId=intWorkOrderId
 From tblMFWorkOrder Where intPickListId=@intPickListId
 
 Select @intKitStatusId=intKitStatusId,@intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
@@ -40,10 +44,12 @@ Declare @tblReservedQty table
 )
 
 DECLARE @tblInputItem TABLE (
+	intRowNo INT IDENTITY,
 	intItemId INT
 	,dblRequiredQty NUMERIC(18, 6)
 	,ysnIsSubstitute BIT
 	,intConsumptionMethodId INT
+	,intParentItemId INT
 	)
 
 DECLARE @tblPickList TABLE (
@@ -82,7 +88,9 @@ Declare @tblRemainingPickedItems AS table
 	intRowNo int IDENTITY,
 	intItemId int,
 	dblRemainingQuantity numeric(18,6),
-	intConsumptionMethodId int
+	intConsumptionMethodId int,
+	ysnIsSubstitute bit,
+	intParentItemId int
 )
 
 Declare @tblChildLot AS table
@@ -197,8 +205,9 @@ Declare @tblPickedLotsFinal AS table
 )
 
 	SELECT @intRecipeId = intRecipeId
-	FROM tblMFRecipe
-	WHERE intItemId = @intBlendItemId
+	FROM tblMFWorkOrderRecipe
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intItemId = @intBlendItemId
 		AND intLocationId = @intLocationId
 		AND ysnActive = 1
 
@@ -207,16 +216,19 @@ Declare @tblPickedLotsFinal AS table
 		,dblRequiredQty
 		,ysnIsSubstitute
 		,intConsumptionMethodId
+		,intParentItemId
 		)
 	SELECT 
 		ri.intItemId
 		,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
 		,0
 		,ri.intConsumptionMethodId
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		,0
+	FROM tblMFWorkOrderRecipeItem ri
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = @intWorkOrderId
 	
 	UNION
 	
@@ -225,10 +237,13 @@ Declare @tblPickedLotsFinal AS table
 		,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 		,1
 		,0
-	FROM tblMFRecipeSubstituteItem rs
-	JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+		,ri.intItemId
+	FROM tblMFWorkOrderRecipeSubstituteItem rs
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
+	JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
 	WHERE r.intRecipeId = @intRecipeId
 		AND rs.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = @intWorkOrderId
 
 --WO created from Blend Management Screen if Lots are there input lot table when kitting enabled
 If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
@@ -240,7 +255,7 @@ Begin
 
 	Select @dblQtyToProduce=SUM(dblPlannedQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
 
-			INSERT INTO @tblInputItem (
+		INSERT INTO @tblInputItem (
 		intItemId
 		,dblRequiredQty
 		,ysnIsSubstitute
@@ -292,13 +307,13 @@ Begin
 	Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
 	Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
+	Join tblICItemUOM iu1 on pld.intItemIssuedUOMId=iu1.intItemUOMId
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join @tblReservedQty rq on pld.intLotId=rq.intLotId
 	Where pld.intPickListId=@intPickListId
 
-	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId)
-	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId 
+	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute,intParentItemId)
+	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute,ti.intParentItemId 
 	From @tblInputItem ti Left Join 
 	(Select intItemId,SUM(dblQuantity) AS dblQuantity From @tblPickList Group by intItemId) tpl on  ti.intItemId=tpl.intItemId
 	WHERE (ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) > 0
@@ -306,6 +321,23 @@ Begin
 	--intSalesOrderLineItemId = 0 implies WOs are created from Blend Managemnet Screen And Lots are already attached, keep only bulk items
 	If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
 		Delete From @tblRemainingPickedItems Where intConsumptionMethodId not in (2,3)
+
+	--Remove main item if substitute is selected
+	Select @intMinRemainingItem=Min(intRowNo) From @tblInputItem Where ysnIsSubstitute=1
+	Declare @intRemainingSubItemId int
+	Declare @intRemainingParentItemId int
+	While(@intMinRemainingItem is not null)
+	Begin
+		Select @intRemainingSubItemId=intItemId,@intRemainingParentItemId=intParentItemId From @tblInputItem Where intRowNo=@intMinRemainingItem
+		
+		If Exists (Select 1 From @tblPickList Where intItemId=@intRemainingSubItemId)
+			Delete From @tblRemainingPickedItems Where intItemId=@intRemainingParentItemId
+
+		Select @intMinRemainingItem=Min(intRowNo) From @tblInputItem Where intRowNo>@intMinRemainingItem And ysnIsSubstitute=1
+	End
+
+	--Remove sub item if main is selected
+	Delete a From @tblRemainingPickedItems a join @tblPickList b on a.intParentItemId=b.intItemId Where a.ysnIsSubstitute=1
 
 	--Find the Remaining Lots
 	If (Select COUNT(1) From @tblRemainingPickedItems) > 0
@@ -315,22 +347,29 @@ Begin
 		Set @strXml = '<root>'
 		While(@intMinItemCount is not null)
 		Begin
-			Select @intRawItemId=intItemId,@dblRequiredQty=dblRemainingQuantity
+			Select @intRawItemId=intItemId,@dblRequiredQty=dblRemainingQuantity,@ysnIsSubstitute=ysnIsSubstitute,@intParentItemId=ISNULL(intParentItemId,0)
 			From @tblRemainingPickedItems Where intRowNo=@intMinItemCount
 
-			Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
-			From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
-			Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+			--WO created from Blend Management Screen if Lots are there input lot table when kitting enabled
+			If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
+				Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
+				From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
+				Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+			Else
+				Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
+				From tblMFWorkOrderRecipe r Join tblMFWorkOrderRecipeItem ri on r.intWorkOrderId=ri.intWorkOrderId 
+				Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1 AND r.intWorkOrderId=@intWorkOrderId
 
 			Set @strXml = @strXml + '<item>'
 			Set @strXml = @strXml + '<intRecipeId>' + CONVERT(varchar,@intRecipeId) + '</intRecipeId>'
 			Set @strXml = @strXml + '<intRecipeItemId>' + CONVERT(varchar,@intRecipeItemId) + '</intRecipeItemId>'
 			Set @strXml = @strXml + '<intItemId>' + CONVERT(varchar,@intRawItemId) + '</intItemId>'
 			Set @strXml = @strXml + '<dblRequiredQty>' + CONVERT(varchar,@dblRequiredQty) + '</dblRequiredQty>'
-			Set @strXml = @strXml + '<ysnIsSubstitute>' + CONVERT(varchar,0) + '</ysnIsSubstitute>'
+			Set @strXml = @strXml + '<ysnIsSubstitute>' + CONVERT(varchar,@ysnIsSubstitute) + '</ysnIsSubstitute>'
 			Set @strXml = @strXml + '<ysnMinorIngredient>' + CONVERT(varchar,0) + '</ysnMinorIngredient>'
 			Set @strXml = @strXml + '<intConsumptionMethodId>' + CONVERT(varchar,@intConsumptionMethodId) + '</intConsumptionMethodId>'
 			Set @strXml = @strXml + '<intConsumptionStoragelocationId>' + CONVERT(varchar,ISNULL(@intConsumptionStoragelocationId,0)) + '</intConsumptionStoragelocationId>'
+			Set @strXml = @strXml + '<intParentItemId>' + CONVERT(varchar,@intParentItemId) + '</intParentItemId>'
 			Set @strXml = @strXml + '</item>'
 
 			Select @intMinItemCount=Min(intRowNo) from @tblRemainingPickedItems Where intRowNo > @intMinItemCount
@@ -416,9 +455,15 @@ Begin
 			Select @intRawItemId=intItemId,@dblRequiredQty=dblRemainingQuantity
 			From @tblRemainingPickedItems Where intRowNo=@intMinItemCount
 
-			Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
-			From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
-			Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+			--WO created from Blend Management Screen if Lots are there input lot table when kitting enabled
+			If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
+				Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
+				From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
+				Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+			Else
+				Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
+				From tblMFWorkOrderRecipe r Join tblMFWorkOrderRecipeItem ri on r.intWorkOrderId=ri.intWorkOrderId 
+				Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1 AND r.intWorkOrderId=@intWorkOrderId
 
 			Set @strXml = @strXml + '<item>'
 			Set @strXml = @strXml + '<intRecipeId>' + CONVERT(varchar,@intRecipeId) + '</intRecipeId>'
@@ -488,7 +533,7 @@ Begin
 	Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
 	Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
+	Join tblICItemUOM iu1 on pld.intItemIssuedUOMId=iu1.intItemUOMId
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join @tblReservedQty rq on pld.intStageLotId=rq.intLotId
 	Where pld.intPickListId=@intPickListId

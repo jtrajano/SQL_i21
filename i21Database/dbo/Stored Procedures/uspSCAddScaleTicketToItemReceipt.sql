@@ -182,7 +182,8 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 												AND tblICUnitMeasure.strUnitType = 'Weight'
 												AND dbo.fnGetItemLotType(SC.intItemId) IN (1,2)
 									)
-		,dblUnitCost			= LI.dblCost
+		--,dblUnitCost			= LI.dblCost
+		,dblUnitCost			= SC.dblUnitPrice + SC.dblUnitBasis
 		,dblLineTotal			= LI.dblQty * LI.dblCost
 		,intSort				= 1
 		,intConcurrencyId		= 1

@@ -32,6 +32,7 @@ BEGIN
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		-- Create the actual table
@@ -39,6 +40,7 @@ BEGIN
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		DECLARE @GLEntries AS RecapTableType
@@ -118,8 +120,8 @@ BEGIN
 			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Debit and credit amounts are not balanced.', 50003)
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Debit and credit amounts are not balanced.', 50003)
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Debit and credit amounts are not balanced.', 50003, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Debit and credit amounts are not balanced.', 50003, 'Inventory')
 
 		-- Call the fake data for GL Account 
 		EXEC testi21Database.[Fake COA used for fake inventory items];

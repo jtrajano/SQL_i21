@@ -19,7 +19,7 @@ BEGIN
 				,@intStorageLocationId INT
 				,@dtmDate DATETIME
 				,@dblQty NUMERIC(18, 6)
-				,@dblCost NUMERIC(18, 6)
+				,@dblCost NUMERIC(38, 20)
 				,@intTransactionId INT
 				,@intTransactionDetailId INT 
 				,@strTransactionId NVARCHAR(40)
@@ -64,7 +64,7 @@ BEGIN
 			[dtmDate] DATETIME , 
 			[dblQty] NUMERIC(18, 6) , 
 			[intItemUOMId] INT ,
-			[dblCost] NUMERIC(18, 6) , 
+			[dblCost] NUMERIC(38, 20) , 
 			[intTransactionId] INT , 
 			[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
 			[intTransactionTypeId] INT, 
@@ -89,7 +89,7 @@ BEGIN
 			[dtmDate] DATETIME , 
 			[dblQty] NUMERIC(18, 6) , 
 			[intItemUOMId] INT ,
-			[dblCost] NUMERIC(18, 6) , 
+			[dblCost] NUMERIC(38, 20) , 
 			[intTransactionId] INT , 
 			[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
 			[intTransactionTypeId] INT, 

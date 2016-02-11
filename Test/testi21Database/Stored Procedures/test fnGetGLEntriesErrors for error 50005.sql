@@ -32,6 +32,7 @@ BEGIN
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		-- Create the actual table
@@ -39,6 +40,7 @@ BEGIN
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		DECLARE @GLEntries AS RecapTableType
@@ -123,10 +125,10 @@ BEGIN
 			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period to match the transaction date.', 50005)
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period to match the transaction date.', 50005)
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189)
-		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189)
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period to match the transaction date.', 50005, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period to match the transaction date.', 50005, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period for Inventory module to match the transaction date.', 51189, 'Inventory')
 
 
 		-- Call the fake data for GL Account 

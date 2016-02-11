@@ -58,7 +58,7 @@ FROM
 	  , I.strTransactionType
 	  , I.strType
 	  , ID.strItemDescription
-	  , intItemAccountId			  = (CASE WHEN dbo.fnIsStockTrackingItem(ID.intItemId) = 1 
+	  , intItemAccountId			  = (CASE WHEN dbo.fnIsStockTrackingItem(ID.intItemId) = 1 OR IA.strType = 'Bundle'
 												THEN IA.intSalesAccountId 
 											  WHEN IA.strType = 'Other Charge'
 												THEN IA.intOtherChargeIncomeAccountId
@@ -123,7 +123,7 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.strTransactionType
 	 , SO.strType
 	 , SOD.strItemDescription
-	 , intItemAccountId				= (CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 
+	 , intItemAccountId				= (CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1  OR IA.strType = 'Bundle'
 												THEN IA.intSalesAccountId 
 											WHEN IA.strType = 'Other Charge'
 												THEN IA.intOtherChargeIncomeAccountId

@@ -20,7 +20,7 @@ It only tracks the qty of those non-'Stock UOM's.
 	FK to the tblICItemUOM table. 
 	Maps: None
 
-*	[dblOnHand] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblOnHand] NUMERIC(38, 20) NULL DEFAULT ((0))
 	The number of stocks currently at the specific UOM. 
 	Maps: None
 
@@ -41,17 +41,17 @@ It only tracks the qty of those non-'Stock UOM's.
 		[intItemUOMId] INT NOT NULL,
 		[intSubLocationId] INT NULL,
 		[intStorageLocationId] INT NULL,
-		[dblOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblOnHand] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		--[dblStorage] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblInConsigned] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblUnitReserved] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblInTransitInbound] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblInTransitOutbound] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblUnitStorage] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblConsignedPurchase] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblConsignedSale] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblInConsigned] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblOnOrder] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblOrderCommitted] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblUnitReserved] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblInTransitInbound] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblInTransitOutbound] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblUnitStorage] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblConsignedPurchase] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblConsignedSale] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((1)), 
 		CONSTRAINT [PK_tblICItemStockUOM] PRIMARY KEY ([intItemStockUOMId]), 
 		CONSTRAINT [FK_tblICItemStockUOM_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])

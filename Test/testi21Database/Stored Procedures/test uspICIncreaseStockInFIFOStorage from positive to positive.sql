@@ -90,7 +90,7 @@ BEGIN
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38, 20)
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -102,7 +102,7 @@ BEGIN
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38, 20)
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -113,10 +113,11 @@ BEGIN
 				,@intItemUOMId AS INT					= @PremiumGrains_BushelUOMId
 				,@dtmDate AS DATETIME					= 'January 2, 2014'
 				,@dblQty NUMERIC(18,6)					= 40
-				,@dblCost AS NUMERIC(18,6)				= 88.77
-				,@intEntityUserSecurityId AS INT						= 1
+				,@dblCost AS NUMERIC(38, 20)			= 88.77
+				,@intEntityUserSecurityId AS INT		= 1
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
+				,@intTransactionDetailId AS INT 
 				,@NewFifoStorageId AS INT 
 
 		-- Setup the expected values 
@@ -194,6 +195,7 @@ BEGIN
 			,@intEntityUserSecurityId 
 			,@strTransactionId 
 			,@intTransactionId 
+			,@intTransactionDetailId
 			,@NewFifoStorageId OUTPUT 
 	END 
 

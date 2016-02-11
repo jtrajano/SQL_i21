@@ -3,10 +3,10 @@
 	,@intItemUOMIdFrom INT
 	,@intWeightUnitMeasureIdTo INT 
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
-	DECLARE	@result AS NUMERIC(18,6)
+	DECLARE	@result AS NUMERIC(38,20)
 
 	DECLARE @intItemUOMIdTo AS INT
 

@@ -52,6 +52,7 @@ BEGIN
 									ORDER BY Z.intSiteDeviceID
 									FOR XML PATH ('''')) + ''#@$'','', #@$'','''')
 				,A.intLocationId
+				,ysnSiteActive = ISNULL(A.ysnActive,0)
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -87,6 +88,7 @@ BEGIN
 									ORDER BY Z.intSiteDeviceID
 									FOR XML PATH ('''')) + ''#@$'','', #@$'','''')
 				,A.intLocationId
+				,ysnSiteActive = ISNULL(A.ysnActive,0)
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID

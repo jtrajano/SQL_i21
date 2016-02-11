@@ -26,6 +26,8 @@ Declare @intRecipeId int
 Declare @dblQtyToProduce numeric(18,6)
 Declare @intBlendItemId int
 Declare @intBlendStagingLocationId int
+Declare @dblPickedQty numeric(18,6)
+Declare @dblQuantity numeric(18,6)
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -71,7 +73,8 @@ Declare @tblPickListDetail table
 	dblPhysicalQty numeric(18,6),
 	dblWeightPerQty numeric(18,6),
 	intItemUOMId int,
-	intItemIssuedUOMId int
+	intItemIssuedUOMId int,
+	dblQuantity numeric(18,6)
 )
 
 DECLARE @tblInputItem TABLE (
@@ -92,10 +95,10 @@ Declare @tblRemainingPickedItems AS table
 )
 
 Insert Into @tblPickListDetail(intPickListId,intPickListDetailId,intLotId,strLotNumber,intParentLotId,intItemId,intStorageLocationId,
-dblPickQuantity,intPickUOMId,dblPhysicalQty,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId)
+dblPickQuantity,intPickUOMId,dblPhysicalQty,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId,dblQuantity)
 Select pld.intPickListId,pld.intPickListDetailId,pld.intLotId,l.strLotNumber,pld.intParentLotId,pld.intItemId,pld.intStorageLocationId,
 pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
-CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId
+CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId --Exclude Lots that are already in Kit Staging Location
 
@@ -104,12 +107,14 @@ Begin
 
 	Select TOP 1 @intBlendItemId = intItemId From tblMFWorkOrder Where intPickListId=@intPickListId 
 	Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
+	Select @dblPickedQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
 
 	SELECT @intRecipeId = intRecipeId
-	FROM tblMFRecipe
+	FROM tblMFWorkOrderRecipe
 	WHERE intItemId = @intBlendItemId
 		AND intLocationId = @intLocationId
 		AND ysnActive = 1
+		AND intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
 
 		INSERT INTO @tblInputItem (
 		intItemId
@@ -124,10 +129,11 @@ Begin
 		,0
 		,ri.intConsumptionMethodId
 		,ri.intStorageLocationId
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+	FROM tblMFWorkOrderRecipeItem ri
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
 
 	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,intConsumptionStorageLocationId)
 	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.intConsumptionStorageLocationId 
@@ -139,11 +145,11 @@ Begin
 	If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
 		Delete From @tblRemainingPickedItems
 
-	If (Select Count(1) From @tblRemainingPickedItems Where intConsumptionMethodId=1) > 0
-	Begin
-		Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
-		RaisError(@ErrMsg,16,1)
-	End
+	--If (Select Count(1) From @tblRemainingPickedItems Where intConsumptionMethodId=1) > 0
+	--Begin
+	--	Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
+	--	RaisError(@ErrMsg,16,1)
+	--End
 
 	--For Bulk Items there in Recipe
 	If Exists (Select 1 From @tblRemainingPickedItems Where intConsumptionMethodId in (2,3))
@@ -201,6 +207,12 @@ Begin
 			Select @intBulkMinItemCount=Min(intRowNo) From @tblRemainingPickedItems Where intRowNo > @intBulkMinItemCount
 		End
 	End
+
+	if @dblPickedQty < @dblQtyToProduce
+	Begin
+		Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
+		RaisError(@ErrMsg,16,1)
+	End
 End
 
 Begin Tran
@@ -215,10 +227,10 @@ Begin
 	Select @intLotId=intLotId,@strLotNumber=strLotNumber,
 	@dblMoveQty=CASE WHEN intItemUOMId = intItemIssuedUOMId THEN dblPickQuantity / dblWeightPerQty ELSE dblPickQuantity END,
 	@intItemId=intItemId,
-	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty 
+	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity 
 	From @tblPickListDetail Where intRowNo=@intMinLot
 
-	If @dblPhysicalQty < (@dblMoveQty * @dblWeightPerQty)
+	If ROUND(@dblPhysicalQty,3) < ROUND(@dblQuantity,3)
 	Begin
 		Select @strUOM=um.strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
 		Where iu.intItemUOMId=(Select intItemUOMId From @tblPickListDetail Where intRowNo=@intMinLot)

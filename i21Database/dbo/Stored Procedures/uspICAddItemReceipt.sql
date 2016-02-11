@@ -11,10 +11,10 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @intEntityId AS INT
-DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
-DECLARE @ReceiptNumber AS NVARCHAR(50);
+DECLARE @startingNumberId_InventoryReceipt AS INT = 23;
+DECLARE @receiptNumber AS NVARCHAR(50);
 
-DECLARE @InventoryReceiptId AS INT
+DECLARE @inventoryReceiptId AS INT
 		,@strSourceId AS NVARCHAR(50)
 		,@strSourceScreenName AS NVARCHAR(50)
 		,@strReceiptNumber AS NVARCHAR(50)
@@ -141,11 +141,11 @@ BEGIN
 	WHILE @@FETCH_STATUS = 0
 	BEGIN 
 		
-		SET @ReceiptNumber = NULL 
-		SET @InventoryReceiptId = NULL 
+		SET @receiptNumber = NULL 
+		SET @inventoryReceiptId = NULL 
 
 		-- Check if there is an existing Inventory receipt 
-		SELECT	@InventoryReceiptId = RawData.intInventoryReceiptId
+		SELECT	@inventoryReceiptId = RawData.intInventoryReceiptId
 				,@strSourceScreenName = RawData.strSourceScreenName
 				,@strSourceId = RawData.strSourceId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
@@ -157,22 +157,35 @@ BEGIN
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)	
 		WHERE	RawHeaderData.intId = @intId
+
+		-- Block overwrite of a posted inventory receipt record.
+		IF EXISTS (SELECT 1 FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @inventoryReceiptId AND ISNULL(ysnPosted, 0) = 1) 
+		BEGIN 
+			SELECT	@receiptNumber = strReceiptNumber
+			FROM	dbo.tblICInventoryReceipt 
+			WHERE	intInventoryReceiptId = @inventoryReceiptId
+
+			-- 'Unable to update %s. It is posted. Please unpost it first.'
+			RAISERROR(80075, 11, 1, @receiptNumber);	
+			GOTO _Exit;
+		END
 				
-		IF @InventoryReceiptId IS NULL 
+		IF @inventoryReceiptId IS NULL 
 		BEGIN 
 			-- Generate the receipt starting number
-			-- If @ReceiptNumber IS NULL, uspSMGetStartingNumber will throw an error. 
+			-- If @receiptNumber IS NULL, uspSMGetStartingNumber will throw an error. 
 			-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
-			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
-			IF @@ERROR <> 0 OR @ReceiptNumber IS NULL GOTO _BreakLoop;
+			EXEC dbo.uspSMGetStartingNumber @startingNumberId_InventoryReceipt, @receiptNumber OUTPUT 
+			IF @@ERROR <> 0 OR @receiptNumber IS NULL GOTO _BreakLoop;
 		END 
-
+		
 		MERGE	
 		INTO	dbo.tblICInventoryReceipt 
 		WITH	(HOLDLOCK) 
 		AS		Receipt 
 		USING (
-			SELECT	RawData.*
+			SELECT	TOP 1 
+					RawData.*
 			FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
 						ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -257,7 +270,7 @@ BEGIN
 				,intTaxGroupId
 			)
 			VALUES (
-				/*strReceiptNumber*/			@ReceiptNumber
+				/*strReceiptNumber*/			@receiptNumber
 				/*dtmReceiptDate*/				,dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmDate, GETDATE()))
 				/*intEntityVendorId*/			,IntegrationData.intEntityVendorId
 				/*strReceiptType*/				,IntegrationData.strReceiptType
@@ -294,13 +307,13 @@ BEGIN
 		;
 				
 		-- Get the identity value from tblICInventoryReceipt to check if the insert was successful
-		IF @InventoryReceiptId IS NULL 
+		IF @inventoryReceiptId IS NULL 
 		BEGIN 
-			SELECT @InventoryReceiptId = SCOPE_IDENTITY()
+			SELECT @inventoryReceiptId = SCOPE_IDENTITY()
 		END 
 						
 		-- Validate the inventory receipt id
-		IF @InventoryReceiptId IS NULL 
+		IF @inventoryReceiptId IS NULL 
 		BEGIN 
 			-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
 			RAISERROR(80004, 11, 1);
@@ -310,10 +323,10 @@ BEGIN
 		--  Flush out existing detail detail data for re-insertion
 		BEGIN 
 			DELETE FROM dbo.tblICInventoryReceiptItem
-			WHERE intInventoryReceiptId = @InventoryReceiptId
+			WHERE intInventoryReceiptId = @inventoryReceiptId
 
 			DELETE FROM dbo.tblICInventoryReceiptCharge
-			WHERE intInventoryReceiptId = @InventoryReceiptId
+			WHERE intInventoryReceiptId = @inventoryReceiptId
 		END 
 
 		-- Insert the Inventory Receipt Detail. 
@@ -338,7 +351,7 @@ BEGIN
 				,dblNet
 				,intCostUOMId
 		)
-		SELECT	intInventoryReceiptId	= @InventoryReceiptId
+		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
 				,intOrderId				= RawData.intContractHeaderId
 				,intSourceId			= RawData.intSourceId
@@ -355,8 +368,8 @@ BEGIN
 															ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
 												WHERE	tblICItemUOM.intItemId = RawData.intItemId 
 														AND tblICItemUOM.ysnStockUnit = 1 
-														AND tblICUnitMeasure.strUnitType = 'Weight'
-														AND dbo.fnGetItemLotType(RawData.intItemId) IN (1,2)
+														AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
+														--AND dbo.fnGetItemLotType(RawData.intItemId) IN (1,2)
 										)
 				,dblUnitCost			= RawData.dblCost
 				--,dblLineTotal			= RawData.dblQty * RawData.dblCost
@@ -400,7 +413,7 @@ BEGIN
 				,[ysnPrice]
 		)
 		SELECT 
-				[intInventoryReceiptId]		= @InventoryReceiptId
+				[intInventoryReceiptId]		= @inventoryReceiptId
 				,[intContractId]			= RawData.intContractHeaderId
 				,[intChargeId]				= RawData.intChargeId
 				,[ysnInventoryCost]			= RawData.ysnInventoryCost
@@ -469,7 +482,7 @@ BEGIN
 					,Receipt.intTaxGroupId
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-			WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+			WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
 			OPEN loopReceiptItems;
 
@@ -516,8 +529,8 @@ BEGIN
 					,@EntityId
 					,@TaxGroupId
 
-				DECLARE	@Amount	NUMERIC(18,6) 
-						,@Qty	NUMERIC(18,6)
+				DECLARE	@Amount	NUMERIC(38,20) 
+						,@Qty	NUMERIC(38,20)
 				-- Fields used in the calculation of the taxes
 
 				SELECT TOP 1
@@ -528,7 +541,7 @@ BEGIN
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 						INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
 							ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-				WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+				WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 						AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 
 				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
@@ -624,7 +637,7 @@ BEGIN
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 							INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
 								ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-					WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+					WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 					
 					-- Call the SM stored procedure to compute the tax. 
@@ -657,36 +670,36 @@ BEGIN
 		BEGIN 			
 			-- Calculate the other charges. 
 			EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
-				@InventoryReceiptId			
+				@inventoryReceiptId			
 
 			-- Calculate the surcharges
 			EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
-				@InventoryReceiptId
+				@inventoryReceiptId
 			
 			-- Allocate the other charges and surcharges. 
 			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
-				@InventoryReceiptId			
+				@inventoryReceiptId			
 		END 
 
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
-		SET		dblTax = ISNULL(Taxes.dblTaxPerLineItem, 0)
+		SET		dblTax = ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0), 2) 
 		FROM	dbo.tblICInventoryReceiptItem ReceiptItem LEFT JOIN (
 					SELECT	dblTaxPerLineItem = SUM(ReceiptItemTax.dblTax) 
 							,ReceiptItemTax.intInventoryReceiptItemId
 					FROM	dbo.tblICInventoryReceiptItemTax ReceiptItemTax INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON ReceiptItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-					WHERE	ReceiptItem.intInventoryReceiptId = @InventoryReceiptId
+					WHERE	ReceiptItem.intInventoryReceiptId = @inventoryReceiptId
 					GROUP BY ReceiptItemTax.intInventoryReceiptItemId
 				) Taxes
 					ON ReceiptItem.intInventoryReceiptItemId = Taxes.intInventoryReceiptItemId
-		WHERE	ReceiptItem.intInventoryReceiptId = @InventoryReceiptId
+		WHERE	ReceiptItem.intInventoryReceiptId = @inventoryReceiptId
 
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
-		SET		dblLineTotal = ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0)
+		SET		dblLineTotal = ROUND(ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0), 2)
 		FROM	dbo.tblICInventoryReceiptItem ReceiptItem
-		WHERE	intInventoryReceiptId = @InventoryReceiptId
+		WHERE	intInventoryReceiptId = @inventoryReceiptId
 
 		-- Re-update the total cost 
 		UPDATE	Receipt
@@ -695,11 +708,11 @@ BEGIN
 					SELECT	dblTotal = SUM(dblLineTotal) 
 							,intInventoryReceiptId
 					FROM	dbo.tblICInventoryReceiptItem 
-					WHERE	intInventoryReceiptId = @InventoryReceiptId
+					WHERE	intInventoryReceiptId = @inventoryReceiptId
 					GROUP BY intInventoryReceiptId
 				) Detail
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
-		WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
 		-- Log successful inserts. 
 		INSERT INTO #tmpAddItemReceiptResult (
@@ -710,7 +723,7 @@ BEGIN
 				,Receipt.intInventoryReceiptId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		
 		-- Create an Audit Log
 		BEGIN 
@@ -718,10 +731,10 @@ BEGIN
 			
 			SELECT	@strReceiptNumber = strReceiptNumber
 			FROM	dbo.tblICInventoryReceipt 
-			WHERE	intInventoryReceiptId = @InventoryReceiptId
+			WHERE	intInventoryReceiptId = @inventoryReceiptId
 			
 			EXEC	dbo.uspSMAuditLog 
-					@keyValue = @InventoryReceiptId							-- Primary Key Value of the Inventory Receipt. 
+					@keyValue = @inventoryReceiptId							-- Primary Key Value of the Inventory Receipt. 
 					,@screenName = 'Inventory.view.InventoryReceipt'        -- Screen Namespace
 					,@entityId = @intEntityId                               -- Entity Id.
 					,@actionType = 'Processed'                              -- Action Type

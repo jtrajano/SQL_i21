@@ -7,7 +7,8 @@ SELECT
 	,[strName]					= E.[strName] 
 	,[dblAmount]				= A.[dblAmountPaid]
 	,[strSourceSystem]			= 'AR'
-	,[intBankAccountId]			= A.[intBankAccountId] 					
+	,[intBankAccountId]			= A.[intBankAccountId]
+	,[intLocationId]			= A.[intLocationId] 					
 
 FROM 
 	tblARPayment A
@@ -24,6 +25,11 @@ LEFT OUTER JOIN
 		ON 	A.intPaymentId = CM.intSourceTransactionId 
 		AND A.strRecordNumber = CM.strSourceTransactionId 							 
 		AND CM.strSourceSystem = 'AR'
+LEFT OUTER JOIN
+	tblSMPaymentMethod SMPM
+		ON A.intPaymentMethodId = SMPM.intPaymentMethodID
 WHERE
 	A.ysnPosted = 1
 	AND CM.intSourceTransactionId IS NULL
+	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
+			

@@ -59,6 +59,9 @@ SELECT
 
 	,[strName]									=	Entity.strName
 	,[strVendorId]								=	Vendor.strVendorId
+	,[strContractNumber]						=	vReceiptCharge.strContractNumber
+	,[intContractHeaderId]						=	ReceiptCharge.intContractId
+
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt
@@ -71,6 +74,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId
+
+	INNER JOIN vyuICGetInventoryReceiptCharge vReceiptCharge
+		ON ReceiptCharge.intInventoryReceiptChargeId = vReceiptCharge.intInventoryReceiptChargeId
 
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
@@ -144,6 +150,10 @@ SELECT
 
 	,[strName]									=	Entity.strName
 	,[strVendorId]								=	Vendor.strVendorId
+	,[strContractNumber]						=	vReceiptCharge.strContractNumber
+	,[intContractHeaderId]						=	ReceiptCharge.intContractId
+
+
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt
@@ -156,6 +166,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId
+
+	INNER JOIN vyuICGetInventoryReceiptCharge vReceiptCharge
+		ON ReceiptCharge.intInventoryReceiptChargeId = vReceiptCharge.intInventoryReceiptChargeId
 
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId

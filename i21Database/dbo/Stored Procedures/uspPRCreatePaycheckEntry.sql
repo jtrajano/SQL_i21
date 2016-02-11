@@ -295,7 +295,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				END
 			,@dblEarningAmount
 			,CASE WHEN (@strCalculationType IN ('Hourly Rate', 'Overtime')
-					OR (@strCalculationType = 'Rate Factor' AND (SELECT TOP 1 strCalculationType FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate')) THEN 
+					OR (@strCalculationType = 'Rate Factor' AND (SELECT TOP 1 strCalculationType FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId) = 'Hourly Rate')) THEN 
 				-- If Calculation is Hourly Based
 				CASE 
 					--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours

@@ -70,6 +70,7 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@PickPreference='Substitute Item'
 			,@ysnExcessConsumptionAllowed=@ysnExcessConsumptionAllowed
+			,@dblUnitQty =NULL
 
 		EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 			,@dblProduceQty = @dblProduceQty

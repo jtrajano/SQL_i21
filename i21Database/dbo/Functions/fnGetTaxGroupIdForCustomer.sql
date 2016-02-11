@@ -4,6 +4,7 @@
 	,@CompanyLocationId		INT
 	,@ItemId				INT
 	,@CustomerLocationId	INT
+	,@SiteId				INT
 )
 RETURNS INT
 AS
@@ -28,7 +29,21 @@ BEGIN
 	DECLARE @TaxGroupId INT
 	SET @TaxGroupId = NULL
 
-	
+
+	--Consumption Site
+	IF ISNULL(@SiteId, 0) <> 0
+	BEGIN
+		SELECT TOP 1
+			@TaxGroupId = [intTaxStateID]
+		FROM
+			tblTMSite
+		WHERE
+			[intSiteID] = @SiteId 
+
+		IF ISNULL(@TaxGroupId,0) <> 0
+			RETURN @TaxGroupId;	
+	END
+		
 	--Customer Special Tax
 	DECLARE @CustomerSpecialTax TABLE(
 		 [intSequence] INT

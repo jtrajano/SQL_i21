@@ -30,6 +30,10 @@ SAVE TRANSACTION #duplicatePO
 		,strPurchaseOrderNumber = @generatedPurchaseRecordId
 		,intEntityId = @userId
 		,strReference = A.strReference + ' Duplicate of ' + A.strPurchaseOrderNumber
+		,ysnApproved = 0
+		,ysnForApproval = CASE WHEN A.ysnForApprovalSubmitted = 1 OR dtmApprovalDate IS NOT NULL THEN 1 ELSE 0 END
+		,A.ysnForApprovalSubmitted = 0
+		,dtmApprovalDate = NULL
 	FROM #tmpDuplicatePO A
 
 	INSERT INTO tblPOPurchase
@@ -42,13 +46,19 @@ SAVE TRANSACTION #duplicatePO
 
 	DECLARE @purchaseDetailTaxes TABLE(intCreatedPurchaseDetailId INT, originalPurchaseDetailId INT)
 
-	SELECT * INTO #tmpDuplicatePurchaseDetail FROM tblPOPurchaseDetail WHERE intPurchaseId = @poId
+	SELECT A.* INTO #tmpDuplicatePurchaseDetail 
+	FROM tblPOPurchaseDetail A 
+	LEFT JOIN tblCTContractDetail B ON A.intContractDetailId = B.intContractDetailId
+	WHERE A.intPurchaseId = @poId
+	AND 1 = (CASE WHEN B.intContractDetailId IS NOT NULL AND ((B.dblQuantity - B.dblScheduleQty) <= 0) THEN 0 ELSE 1 END) --Exclude the contract if no available balance
 	--ALTER TABLE #tmpDuplicateBillDetail DROP COLUMN intBillDetailId
 
 	UPDATE A
 		SET A.intPurchaseId = @poIdCreated
 		,A.dblQtyReceived = 0
+		,A.dblQtyOrdered = (CASE WHEN B.intContractDetailId IS NOT NULL THEN (B.dblQuantity - B.dblScheduleQty) ELSE A.dblQtyOrdered END)
 	FROM #tmpDuplicatePurchaseDetail A
+	LEFT JOIN tblCTContractDetail B ON A.intContractDetailId = B.intContractDetailId
 
 	MERGE INTO tblPOPurchaseDetail
 	USING #tmpDuplicatePurchaseDetail A
@@ -125,6 +135,32 @@ SAVE TRANSACTION #duplicatePO
 
 	INSERT INTO tblPOPurchaseDetailTax
 	SELECT * FROM #tmpDuplicatePurchaseDetailTaxes
+
+	--UPDATE CONTRACT
+	CREATE TABLE #poContractDetails(intContractDetailId INT, intPurchaseDetailId INT, dblQtyOrdered NUMERIC(18,6));
+	
+	INSERT INTO #poContractDetails
+	SELECT intContractDetailId, intPurchaseDetailId, dblQtyOrdered
+	FROM #tmpDuplicatePurchaseDetail WHERE intContractDetailId IS NOT NULL
+
+	WHILE EXISTS(SELECT 1 FROM #poContractDetails)
+	BEGIN
+		DECLARE @contractDetailId INT;
+		DECLARE @purchaseDetailId INT;
+		DECLARE @qty NUMERIC(18,6);
+		 SELECT TOP 1 
+			@contractDetailId = intContractDetailId 
+			,@purchaseDetailId = intPurchaseDetailId
+			,@qty = dblQtyOrdered
+		FROM #poContractDetails;
+
+		IF(@contractDetailId IS NOT NULL AND @contractDetailId > 0)
+		EXEC uspCTUpdateScheduleQuantity @contractDetailId, @qty, @userId, @purchaseDetailId, 'Purchase Order'
+
+		DELETE FROM #poContractDetails WHERE intPurchaseDetailId = @purchaseDetailId
+	END
+
+	EXEC uspPOUpdateOnOrder @poId, 0
 
 	COMMIT TRANSACTION #duplicatePO
 END TRY

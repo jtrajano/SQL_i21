@@ -32,6 +32,7 @@ DECLARE @dblAvailableUnit numeric(18,6)
 Declare @ysnBlendSheetRequired bit
 Declare @intLocationId int
 Declare @intBlendItemId int
+Declare @intWorkOrderId int
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -187,11 +188,14 @@ If ISNULL(@strPickListNo,'') = ''
 		Update @tblPickList Set strPickListNo=@strPickListNo
 	End
 
+Select @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where strWorkOrderNo = (Select TOP 1 strWorkOrderNo From @tblWorkOrder)
+
 --Do not save items if consumption method is not By Lot
 Delete tpl From @tblPickListDetail tpl 
-Join tblMFRecipeItem ri on tpl.intItemId=ri.intItemId 
-Join tblMFRecipe r on ri.intRecipeId=r.intRecipeId 
+Join tblMFWorkOrderRecipeItem ri on tpl.intItemId=ri.intItemId 
+Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
 Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+AND r.intWorkOrderId = @intWorkOrderId
 
 Begin Tran
 

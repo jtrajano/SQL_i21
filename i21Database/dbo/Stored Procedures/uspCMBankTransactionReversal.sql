@@ -49,6 +49,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@ACH AS INT = 22
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -84,7 +85,7 @@ IF (@dtmReverseDate IS NULL)
 				,intLastModifiedUserId = @intUserId
 		FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 					ON F.strTransactionId = TMP.strTransactionId
-		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
 				-- Condition #1:
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
@@ -103,7 +104,7 @@ ELSE
 
 		/** Clean-up Reversing Date parameter **/
 		SELECT @dtmReversalDate = ISNULL(@dtmReverseDate, dtmDate), @intTransactionId = intTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP ON F.strTransactionId = TMP.strTransactionId
-		WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS) AND F.strReferenceNo NOT IN (@CASH_PAYMENT) AND F.dtmCheckPrinted IS NOT NULL 
+		WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK) AND F.strReferenceNo NOT IN (@CASH_PAYMENT) AND F.dtmCheckPrinted IS NOT NULL 
 
 		/** Insert Reversal Entry Header **/
 		INSERT INTO tblCMBankTransaction
@@ -118,7 +119,7 @@ ELSE
 			@intUserId, intCompanyLocationId, getdate(), @intUserId
 		FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 					ON F.strTransactionId = TMP.strTransactionId
-		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
 				-- Condition #1:
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
@@ -149,7 +150,7 @@ ELSE
 		SELECT strTransactionId, intEntityId, intBankTransactionTypeId INTO #tmpCMBankTransactionReversal FROM 
 			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId, F.intBankTransactionTypeId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 				ON F.strTransactionId = TMP.strTransactionId
-				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
 				AND F.dtmCheckPrinted IS NOT NULL) X
 
@@ -207,7 +208,7 @@ ELSE
 				,intLastModifiedUserId = @intUserId
 		FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 					ON F.strTransactionId = TMP.strTransactionId
-		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS, @PAYCHECK)		
 				-- Condition #1:
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
@@ -312,7 +313,7 @@ IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 DELETE tblCMBankTransaction
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH)		
 		AND (
 			-- Condition #1:
 			F.strReferenceNo IN (@CASH_PAYMENT)

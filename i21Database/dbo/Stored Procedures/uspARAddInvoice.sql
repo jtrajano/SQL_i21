@@ -11,17 +11,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal decimal(18,6)
-		,@ARAccountId int
-		,@EntityId int
-		,@intFreightItemId int
-SET @ZeroDecimal = 0.000000;
-	
+DECLARE @ZeroDecimal		DECIMAL(18,6)
+	  , @ARAccountId		INT
+	  , @EntityId			INT
+	  , @intFreightItemId	INT
+	  , @intLocationId		INT
+	  , @intItemUOMId		INT
 
-
-
+SET @ZeroDecimal = 0.000000
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
-
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
 	BEGIN			
@@ -29,27 +27,24 @@ IF(@ARAccountId IS NULL OR @ARAccountId = 0)
 		RETURN 0
 	END
 
-DECLARE @StartingNumberId_Invoice AS INT = 19;
-DECLARE @total as INT;
-DECLARE @incval as INT;
-DECLARE @InvoiceNumber as nvarchar(50);
-DECLARE @temp TABLE
-    (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-    Customer int,
-	Location int,
-	strSource nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	dtmDate DATETIME ,
-	Currency int ,
-	Salesperson int ,
-	Shipvia int,
-	Comments nvarchar(250) COLLATE Latin1_General_CI_AS NULL,
-	PurchaseOrder nvarchar(25) COLLATE Latin1_General_CI_AS NULL,
-    InvoiceNumber nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-    InvoiceId int NULL
-    )
+DECLARE @StartingNumberId_Invoice	INT = 19
+	  , @total						INT
+	  , @incval						INT
+	  , @InvoiceNumber				NVARCHAR(50)
+DECLARE @temp TABLE (intId			INT IDENTITY PRIMARY KEY CLUSTERED
+				   , Customer		INT
+				   , Location		INT
+				   , strSource		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				   , dtmDate		DATETIME
+				   , Currency		INT
+				   , Salesperson	INT
+				   , Shipvia		INT
+				   , Comments		NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				   , PurchaseOrder	NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+				   , InvoiceNumber	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				   , InvoiceId		INT NULL)
 
-insert into @temp(Customer ,
+INSERT INTO @temp(Customer ,
 				  Location,
 				  strSource,
 				  dtmDate,
@@ -64,9 +59,6 @@ insert into @temp(Customer ,
 		select intEntityCustomerId,intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,IE.strPurchaseOrder,null,intInvoiceId from @InvoiceEntries IE
 				       group by IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,IE.strPurchaseOrder,IE.intInvoiceId
 
---select @total = count(*) from @temp;
---set @incval = 1 
---WHILE @incval <=@total 
 WHILE EXISTS(SELECT NULL FROM @temp WHERE ISNULL(InvoiceNumber,'') = '' AND ISNULL(InvoiceId,0) = 0)
 BEGIN
 	SELECT TOP 1 @incval = intId FROM @temp WHERE ISNULL(InvoiceNumber,'') = '' AND ISNULL(InvoiceId,0) = 0 ORDER BY intId 
@@ -80,18 +72,14 @@ BEGIN
 	   RAISERROR(50030, 11, 1);
 	   RETURN;
    END 
-   update @temp 
-       set InvoiceNumber = @InvoiceNumber
-         where intId = @incval 
-   --SET @incval = @incval + 1;
+   UPDATE @temp SET InvoiceNumber = @InvoiceNumber WHERE intId = @incval 
 END;	
 
-SELECT @EntityId =[intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId;
+SELECT @EntityId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId;
 
 DISABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
 
-INSERT INTO 
-	[tblARInvoice]	   
+INSERT INTO [tblARInvoice]	   
 		([strInvoiceNumber]
 		,[strInvoiceOriginId]
 		,[intEntityCustomerId]
@@ -112,6 +100,7 @@ INSERT INTO
 		,[dblAmountDue]
 		,[dblPayment]
 		,[strTransactionType]
+		,[strType]
 		,[intPaymentMethodId]
 		,[strComments]
 		,[intAccountId]
@@ -140,94 +129,82 @@ INSERT INTO
 		,[strActualCostId]
 		,[strBOLNumber]
 )
-SELECT
-     TE.InvoiceNumber           -- invoice number
-	,IE.strSourceId				--[strInvoiceOriginId]
-	,IE.[intEntityCustomerId]	--[intEntityCustomerId]
-	,IE.dtmDate  				--[dtmDate]
-	,dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
-	,ISNULL(IE.intCurrencyId,min(AC.[intCurrencyId]))									--[intCurrencyId]
-	,ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
-	,ISNULL(IE.[intSalesPersonId],min(AC.[intSalespersonId]))		--[intEntitySalespersonId]
-	,IE.dtmDate  				--[dtmShipDate]
-	,ISNULL(IE.intShipViaId,ISNULL(min(EL.[intShipViaId]), 0))  --[intShipViaId]
-	,IE.strPurchaseOrder    	--[strPONumber]
-	,EL.[intTermsId]			--[intTermId]
-	,0          				--[dblInvoiceSubtotal] need to check
-	,@ZeroDecimal				--[dblShipping]
-	,@ZeroDecimal				--[dblTax]
-	,0        				    --[dblInvoiceTotal] need to check
-	,@ZeroDecimal				--[dblDiscount]
-	,0				            --[[dblAmountDue]] need to check
-	,@ZeroDecimal				--[dblPayment]
-	,'Invoice'					--[strTransactionType]
-	,0							--[intPaymentMethodId]
-	,IE.strComments        	    --[strComments] 
-	,@ARAccountId				--[intAccountId]
-	,IE.dtmDate 				--[dtmPostDate] need to check
-	,0							--[ysnPosted]
-	,0							--[ysnPaid]
-	,ISNULL(min(IE.intShipToLocationId), min(EL.[intEntityLocationId]))			--[intShipToLocationId] 
-	,min(SL.[strLocationName])		--[strShipToLocationName]
-	,min(SL.[strAddress])			--[strShipToAddress]
-	,min(SL.[strCity])				--[strShipToCity]
-	,min(SL.[strState])				--[strShipToState]
-	,min(SL.[strZipCode])			--[strShipToZipCode]
-	,min(SL.[strCountry])			--[strShipToCountry]
-	,ISNULL(min(AC.[intBillToId]), min(EL.[intEntityLocationId]))			--[intBillToLocationId] 
-	,min(BL.[strLocationName])		--[strBillToLocationName]
-	,min(BL.[strAddress])			--[strBillToAddress]
-	,min(BL.[strCity])				--[strBillToCity]
-	,min(BL.[strState])				--[strBillToState]
-	,min(BL.[strZipCode])			--[strBillToZipCode]
-	,min(BL.[strCountry])			--[strBillToCountry]
-	,CASE WHEN IE.strSourceScreenName = 'Transport Load' THEN IE.intSourceId ELSE NULL END
-	,CASE WHEN IE.strSourceScreenName = 'Transport Loads' THEN IE.intSourceId ELSE NULL END
-	,1
-	,@EntityId
-	,IE.strDeliverPickup
-	,IE.strActualCostId
-	,IE.strBOLNumber
-FROM
-	@InvoiceEntries IE
-	Join @temp TE
-       on TE.Customer = IE.intEntityCustomerId 
-	   and TE.Location = IE.intLocationId 
-	   and TE.strSource = IE.strSourceId
-	   and TE.dtmDate = IE.dtmDate
-	   and TE.Currency = IE.intCurrencyId
-       and TE.Salesperson = IE.intSalesPersonId
-	   and TE.Shipvia = IE.intShipViaId
-	   and TE.Comments = IE.strComments
-	   and TE.PurchaseOrder = IE.strPurchaseOrder	  
-INNER JOIN
-	tblARCustomer AC
+SELECT TE.InvoiceNumber														-- invoice number
+	 , IE.strSourceId														--[strInvoiceOriginId]
+	 , IE.[intEntityCustomerId]												--[intEntityCustomerId]
+	 , IE.dtmDate  															--[dtmDate]
+	 , dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
+	 , ISNULL(MIN(AC.intCurrencyId), IE.intCurrencyId)						--[intCurrencyId]
+	 , ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
+	 , ISNULL(IE.[intSalesPersonId], MIN(AC.[intSalespersonId]))			--[intEntitySalespersonId]
+	 , IE.dtmDate  															--[dtmShipDate]
+	 , ISNULL(IE.intShipViaId, ISNULL(MIN(EL.[intShipViaId]), 0))			--[intShipViaId]
+	 , IE.strPurchaseOrder    												--[strPONumber]
+	 , EL.[intTermsId]														--[intTermId]
+	 , 0          															--[dblInvoiceSubtotal] need to check
+	 , @ZeroDecimal															--[dblShipping]
+	 , @ZeroDecimal															--[dblTax]
+	 , 0        															--[dblInvoiceTotal] need to check
+	 , @ZeroDecimal															--[dblDiscount]
+	 , 0																	--[[dblAmountDue]] need to check
+	 , @ZeroDecimal															--[dblPayment]
+	 , 'Invoice'															--[strTransactionType]
+	 , CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN 'Transport Delivery' ELSE 'Standard' END
+	 , 0																	--[intPaymentMethodId]
+	 , IE.strComments        												--[strComments] 
+	 , @ARAccountId															--[intAccountId]
+	 , IE.dtmDate 															--[dtmPostDate] need to check
+	 , 0																	--[ysnPosted]
+	 , 0																	--[ysnPaid]
+	 , ISNULL(min(IE.intShipToLocationId), MIN(EL.[intEntityLocationId]))	--[intShipToLocationId] 
+	 , MIN(SL.[strLocationName])											--[strShipToLocationName]
+	 , MIN(SL.[strAddress])													--[strShipToAddress]
+	 , MIN(SL.[strCity])													--[strShipToCity]
+	 , MIN(SL.[strState])													--[strShipToState]
+	 , MIN(SL.[strZipCode])													--[strShipToZipCode]
+	 , MIN(SL.[strCountry])													--[strShipToCountry]
+	 , ISNULL(MIN(AC.[intBillToId]), MIN(EL.[intEntityLocationId]))			--[intBillToLocationId] 
+	 , MIN(BL.[strLocationName])											--[strBillToLocationName]
+	 , MIN(BL.[strAddress])													--[strBillToAddress]
+	 , MIN(BL.[strCity])													--[strBillToCity]
+	 , MIN(BL.[strState])													--[strBillToState]
+	 , MIN(BL.[strZipCode])													--[strBillToZipCode]
+	 , MIN(BL.[strCountry])													--[strBillToCountry]
+	 , CASE WHEN IE.strSourceScreenName = 'Transport Load' THEN IE.intSourceId ELSE NULL END
+	 , CASE WHEN IE.strSourceScreenName = 'Transport Loads' THEN IE.intSourceId ELSE NULL END
+	 , 1
+	 , @EntityId
+	 , IE.strDeliverPickup
+	 , IE.strActualCostId
+	 , IE.strBOLNumber
+FROM @InvoiceEntries IE
+JOIN @temp TE ON TE.Customer		= IE.intEntityCustomerId 
+			 AND TE.Location		= IE.intLocationId 
+			 AND TE.strSource		= IE.strSourceId
+			 AND TE.dtmDate			= IE.dtmDate
+			 AND TE.Currency		= IE.intCurrencyId
+			 AND TE.Salesperson		= IE.intSalesPersonId
+			 AND TE.Shipvia			= IE.intShipViaId
+			 AND TE.Comments		= IE.strComments
+			 AND TE.PurchaseOrder	= IE.strPurchaseOrder	  
+INNER JOIN tblARCustomer AC
 		ON IE.[intEntityCustomerId] = AC.[intEntityCustomerId]
-LEFT OUTER JOIN
-				(	SELECT
-						[intEntityLocationId]
-						,[intEntityId] 
-						,[strCountry]
-						,[strState]
-						,[strCity]
-						,[intTermsId]
-						,[intShipViaId]
-					FROM 
-					tblEntityLocation
-					WHERE
-						ysnDefaultLocation = 1
-				) EL
-					ON AC.[intEntityCustomerId] = EL.[intEntityId]
-LEFT OUTER JOIN
-	tblEntityLocation SL
+LEFT OUTER JOIN (SELECT [intEntityLocationId]
+					  , [intEntityId] 
+					  , [strCountry]
+					  , [strState]
+					  , [strCity]
+					  , [intTermsId]
+					  , [intShipViaId]
+					FROM tblEntityLocation
+					WHERE ysnDefaultLocation = 1 ) EL
+						ON AC.[intEntityCustomerId] = EL.[intEntityId]
+LEFT OUTER JOIN tblEntityLocation SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
-LEFT OUTER JOIN
-	tblEntityLocation BL
+LEFT OUTER JOIN tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
-WHERE
-	IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
-group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber,IE.strSourceScreenName;				
-
+WHERE IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
+GROUP BY TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber,IE.strSourceScreenName;				
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
 
@@ -252,12 +229,11 @@ SET
 	,[dblAmountDue]					= @ZeroDecimal
 	,[dblPayment]					= @ZeroDecimal
 	,[strTransactionType]			= 'Invoice'
+	,[strType]						= CASE WHEN IE.strSourceScreenName IN ('Transport Load', 'Transport Loads') THEN 'Transport Delivery' ELSE 'Standard' END
 	,[intPaymentMethodId]			= 0
 	,[strComments]					= IE.strComments
 	,[intAccountId]					= @ARAccountId
 	,[dtmPostDate]					= NULL
-	,[ysnPosted]					= 0
-	,[ysnPaid]						= 0
 	,[intShipToLocationId]			= ISNULL(IE.[intShipToLocationId], EL.[intEntityLocationId]) 
 	,[strShipToLocationName]		= SL.[strLocationName]
 	,[strShipToAddress]				= SL.[strAddress]
@@ -279,23 +255,19 @@ SET
 	,[strDeliverPickup]				= IE.strDeliverPickup   
 	,[strActualCostId]  			= IE.strActualCostId
 	,[strBOLNumber]  				= IE.[strBOLNumber]
-FROM
-	[tblARInvoice] I
-INNER JOIN 
-	@InvoiceEntries IE
+FROM [tblARInvoice] I
+INNER JOIN  @InvoiceEntries IE
 		ON I.intInvoiceId = IE.intInvoiceId 
-Join @temp TE
-       on TE.Customer = IE.intEntityCustomerId 
-	   and TE.Location = IE.intLocationId 
-	   and TE.strSource = IE.strSourceId
-	   and TE.dtmDate = IE.dtmDate
-	   and TE.Currency = IE.intCurrencyId
-       and TE.Salesperson = IE.intSalesPersonId
-	   and TE.Shipvia = IE.intShipViaId
-	   and TE.Comments = IE.strComments
-	   and TE.PurchaseOrder = IE.strPurchaseOrder	  
-INNER JOIN
-	tblARCustomer AC
+JOIN @temp TE ON TE.Customer		= IE.intEntityCustomerId 
+	         AND TE.Location		= IE.intLocationId 
+	         AND TE.strSource		= IE.strSourceId
+	         AND TE.dtmDate			= IE.dtmDate
+	         AND TE.Currency		= IE.intCurrencyId
+             AND TE.Salesperson		= IE.intSalesPersonId
+	         AND TE.Shipvia			= IE.intShipViaId
+	         AND TE.Comments		= IE.strComments
+	         AND TE.PurchaseOrder	= IE.strPurchaseOrder	  
+INNER JOIN tblARCustomer AC
 		ON IE.[intEntityCustomerId] = AC.[intEntityCustomerId]
 LEFT OUTER JOIN
 				(	SELECT
@@ -312,31 +284,27 @@ LEFT OUTER JOIN
 						ysnDefaultLocation = 1
 				) EL
 					ON AC.[intEntityCustomerId] = EL.[intEntityId]
-LEFT OUTER JOIN
-	tblEntityLocation SL
+LEFT OUTER JOIN tblEntityLocation SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
-LEFT OUTER JOIN
-	tblEntityLocation BL
+LEFT OUTER JOIN tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
-WHERE
-	IE.intInvoiceId IS NOT NULL 
-	AND IE.intInvoiceId <> 0
+WHERE IE.intInvoiceId IS NOT NULL AND IE.intInvoiceId <> 0
 	
 DECLARE @InvoicesForUpdate AS TABLE(intInvoiceID INT)
+
 INSERT INTO @InvoicesForUpdate 
-SELECT DISTINCT
-	[intInvoiceId]
-FROM 
-	@InvoiceEntries
+SELECT DISTINCT [intInvoiceId]
+FROM @InvoiceEntries
 WHERE intInvoiceId IS NOT NULL AND intInvoiceId <> 0
 
 --Log Update 
-DECLARE @strDescription AS NVARCHAR(100) --= @strSourceScreenName + ' to Invoice'
-		,@strSourceId AS NVARCHAR(250)
-		,@strInvoiceNumber AS NVARCHAR(250)
-		,@intNewInvoiceId AS INT   
-		,@intUpdatedInvoiceId AS INT   
-DECLARE @InvoiceIdForUpdate as int;		
+DECLARE @strDescription			NVARCHAR(100)
+	  , @strSourceId			NVARCHAR(250)
+	  , @strInvoiceNumber		NVARCHAR(250)
+	  , @intNewInvoiceId		INT   
+	  , @intUpdatedInvoiceId	INT   
+	  , @InvoiceIdForUpdate		INT
+
 WHILE EXISTS(SELECT NULL FROM @InvoicesForUpdate)
 BEGIN
 	SELECT TOP 1 @InvoiceIdForUpdate = [intInvoiceID] FROM @InvoicesForUpdate
@@ -371,7 +339,6 @@ BEGIN
 	DELETE FROM @InvoicesForUpdate WHERE [intInvoiceID] = @InvoiceIdForUpdate
 END	
 
-
 DELETE FROM tblARInvoiceDetailTax 
 WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NOT NULL))
 
@@ -379,23 +346,19 @@ DELETE FROM tblARInvoiceDetail
 WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NOT NULL )
 
 UPDATE @temp 
-SET 
-	InvoiceNumber = I.strInvoiceNumber 
-FROM
-	@temp T
-INNER JOIN	
-	tblARInvoice I
-		ON T.InvoiceId = I.intInvoiceId 
-INNER JOIN
-	@InvoiceEntries I2
-		ON I2.intInvoiceId = I.intInvoiceId 
-WHERE
-	T.InvoiceId = I2.intInvoiceId
+SET InvoiceNumber = I.strInvoiceNumber 
+FROM @temp T
+INNER JOIN tblARInvoice I
+	ON T.InvoiceId = I.intInvoiceId 
+INNER JOIN @InvoiceEntries I2
+	ON I2.intInvoiceId = I.intInvoiceId 
+WHERE T.InvoiceId = I2.intInvoiceId
 		
 INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
 	,[intItemId]
 	,[strItemDescription]
+	,[strDocumentNumber]
 	,[intItemUOMId]
 	,[dblQtyOrdered]
 	,[dblQtyShipped]
@@ -412,41 +375,41 @@ INSERT INTO [tblARInvoiceDetail]
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,IE.[intItemId]												--[intItemId]
-	,IC.[strDescription]										--strItemDescription] 
+	,IC.[strDescription]										--[strItemDescription] 
+	,IE.strSourceId												--[strDocumentNumber]
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]		
-	,dblPrice = CASE
-                    WHEN IE.ysnFreightInPrice = 0  
+	,dblPrice = CASE WHEN IE.ysnFreightInPrice = 0  
 	                   THEN IE.[dblPrice]					
-					WHEN IE.ysnFreightInPrice = 1 and isNull(IE.dblSurcharge,0) != 0
+					 WHEN IE.ysnFreightInPrice = 1 and isNull(IE.dblSurcharge,0) != 0
 					   THEN	IE.[dblPrice] + isNull(IE.[dblFreightRate],0) + (isNull(IE.[dblFreightRate],0) *(IE.dblSurcharge / 100))
-					WHEN IE.ysnFreightInPrice = 1
+					 WHEN IE.ysnFreightInPrice = 1
 					   THEN	IE.[dblPrice] + isNull(IE.[dblFreightRate],0) 
-			        END 	                                    --[dblPrice]
+			    END 											--[dblPrice]
 	,0          												--[dblTotal]
 	,Acct.[intAccountId]										--[intAccountId]
 	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
 	,Acct.[intSalesAccountId]									--[intSalesAccountId]
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
-	,(select intContractHeaderId from vyuCTContractDetailView CT where CT.intContractDetailId = IE.intContractDetailId)   --[intContractHeaderId]
+	,(SELECT intContractHeaderId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId = IE.intContractDetailId)   --[intContractHeaderId]
 	,IE.intContractDetailId                                     --[intContractDetailId]
 	,IE.[intTaxGroupId]											--[intTaxGroupId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE
 	JOIN @temp TE
-	 on TE.Customer = IE.intEntityCustomerId 
-	   and TE.Location = IE.intLocationId 
-	   and TE.strSource = IE.strSourceId
-	   and TE.dtmDate = IE.dtmDate
-	   and TE.Currency = IE.intCurrencyId
-       and TE.Salesperson = IE.intSalesPersonId
-	   and TE.Shipvia = IE.intShipViaId
-	   and TE.Comments = IE.strComments
-	   and TE.PurchaseOrder = IE.strPurchaseOrder	  
+	 ON TE.Customer = IE.intEntityCustomerId 
+	   AND TE.Location = IE.intLocationId 
+	   AND TE.strSource = IE.strSourceId
+	   AND TE.dtmDate = IE.dtmDate
+	   AND TE.Currency = IE.intCurrencyId
+       AND TE.Salesperson = IE.intSalesPersonId
+	   AND TE.Shipvia = IE.intShipViaId
+	   AND TE.Comments = IE.strComments
+	   AND TE.PurchaseOrder = IE.strPurchaseOrder	  
 	JOIN tblARInvoice IV
-	    on TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
+	    ON TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
     INNER JOIN
 	 	tblICItem IC
 	 		ON IE.[intItemId] = IC.[intItemId] 
@@ -454,15 +417,32 @@ FROM
 	 	vyuARGetItemAccount Acct
 	 		ON IE.[intItemId] = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
+				
+SELECT @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
 
+IF ISNULL(@intFreightItemId, 0) > 0
+	BEGIN
+		SELECT TOP 1 @intLocationId = intLocationId FROM @InvoiceEntries 
+		SELECT TOP 1 @intItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intLocationId = @intLocationId
 
-select @intFreightItemId = intItemForFreightId from tblTRCompanyPreference
-		
+		IF ISNULL(@intItemUOMId, 0) = 0
+			BEGIN
+				SELECT TOP 1 @intItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+			END
+
+		IF ISNULL(@intItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
+			BEGIN
+				RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+				RETURN 0
+			END
+	END
+	
 --Freight Items
 INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
 	,[intItemId]
 	,[strItemDescription]
+	,[strDocumentNumber]
 	,[intItemUOMId]
 	,[dblQtyOrdered]
 	,[dblQtyShipped]
@@ -480,40 +460,38 @@ SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,@intFreightItemId										    --[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
-	,(SELECT	TOP 1 IU.intItemUOMId											
-						FROM dbo.tblICItemUOM IU 
-						WHERE	IU.intItemId = @intFreightItemId and IU.ysnStockUnit = 1)                                            --[intItemUOMId]
+	,IE.strSourceId
+	,@intItemUOMId												--[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]
 	,dblPrice = CASE		
-					WHEN isNull(IE.dblSurcharge,0) != 0
-					   THEN	isNull(IE.[dblFreightRate],0) + (isNull(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
-					WHEN isNull(IE.dblSurcharge,0) = 0
-					   THEN	 isNull(IE.[dblFreightRate],0) 
+					WHEN ISNULL(IE.dblSurcharge,0) != 0
+					   THEN	ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
+					WHEN ISNULL(IE.dblSurcharge,0) = 0
+					   THEN	 ISNULL(IE.[dblFreightRate],0) 
 			        END 
 	,0          												--[dblTotal]
 	,Acct.[intAccountId]										--[intAccountId]
 	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
 	,Acct.[intSalesAccountId]									--[intSalesAccountId]
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
-	,null														--[intContractHeaderId]
-	,null														--[intContractDetailId]
+	,NULL														--[intContractHeaderId]
+	,NULL														--[intContractDetailId]
 	,NULL														--[intTaxGroupId]
 	,1															--[intConcurrencyId]
-FROM
-    @InvoiceEntries IE
-	JOIN @temp TE
-	 on TE.Customer = IE.intEntityCustomerId 
-	   and TE.Location = IE.intLocationId 
-	   and TE.strSource = IE.strSourceId
-	   and TE.dtmDate = IE.dtmDate
-	   and TE.Currency = IE.intCurrencyId
-       and TE.Salesperson = IE.intSalesPersonId
-	   and TE.Shipvia = IE.intShipViaId
-	   and TE.Comments = IE.strComments
-	   and TE.PurchaseOrder = IE.strPurchaseOrder	  
+FROM @InvoiceEntries IE
+JOIN @temp TE
+	 ON TE.Customer = IE.intEntityCustomerId 
+	   AND TE.Location = IE.intLocationId 
+	   AND TE.strSource = IE.strSourceId
+	   AND TE.dtmDate = IE.dtmDate
+	   AND TE.Currency = IE.intCurrencyId
+       AND TE.Salesperson = IE.intSalesPersonId
+	   AND TE.Shipvia = IE.intShipViaId
+	   AND TE.Comments = IE.strComments
+	   AND TE.PurchaseOrder = IE.strPurchaseOrder	  
 	JOIN tblARInvoice IV
-	    on TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
+	    ON TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
     INNER JOIN
 	 	tblICItem IC
 	 		ON @intFreightItemId = IC.[intItemId] 
@@ -521,7 +499,7 @@ FROM
 	 	vyuARGetItemAccount Acct
 	 		ON @intFreightItemId = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
-     where isNull(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice !=1
+     WHERE ISNULL(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice !=1
 	
 --Log Insert	
 DECLARE @Invoices AS TABLE(intInvoiceID INT)
@@ -570,12 +548,11 @@ END
   
 -- Output the values to calling SP  
       
-select IE.intSourceId,
+SELECT IE.intSourceId,
        IV.intInvoiceId
-FROM
-    @InvoiceEntries IE
+FROM @InvoiceEntries IE
 	JOIN @temp TE
-	on TE.Customer = IE.intEntityCustomerId and TE.Location = IE.intLocationId	
+		ON TE.Customer = IE.intEntityCustomerId AND TE.Location = IE.intLocationId	
 	JOIN tblARInvoice IV
-	    on TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId	       
+	    ON TE.InvoiceNumber = IV.strInvoiceNumber AND IE.strSourceId = IV.strInvoiceOriginId	       
 END           

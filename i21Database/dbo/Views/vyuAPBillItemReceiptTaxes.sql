@@ -17,7 +17,7 @@ SELECT
 	[dblRate]					=	A.dblRate, 
 	[intAccountId]				=	A.intTaxAccountId, 
 	[dblTax]					=	A.dblTax, 
-	[dblAdjustedTax]			=	A.dblAdjustedTax, 
+	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
 	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 	[ysnSeparateOnBill]			=	A.ysnSeparateOnInvoice, 
 	[ysnCheckOffTax]			=	A.ysnCheckoffTax
@@ -39,7 +39,7 @@ SELECT
 	[dblRate]					=	A.dblRate, 
 	[intAccountId]				=	A.intTaxAccountId, 
 	[dblTax]					=	A.dblTax, 
-	[dblAdjustedTax]			=	A.dblAdjustedTax, 
+	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0),
 	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 	[ysnSeparateOnBill]			=	A.ysnSeparateOnInvoice, 
 	[ysnCheckOffTax]			=	A.ysnCheckoffTax
@@ -61,7 +61,7 @@ SELECT
 	[dblRate]					=	A.dblRate, 
 	[intAccountId]				=	A.intAccountId, 
 	[dblTax]					=	A.dblTax, 
-	[dblAdjustedTax]			=	A.dblAdjustedTax, 
+	[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
 	[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
 	[ysnSeparateOnBill]			=	A.ysnSeparateOnBill, 
 	[ysnCheckOffTax]			=	A.ysnCheckOffTax

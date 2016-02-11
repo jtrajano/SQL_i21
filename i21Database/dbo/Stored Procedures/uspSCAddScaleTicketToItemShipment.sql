@@ -150,7 +150,8 @@ BEGIN
 			,intSubLocationId		= SC.intSubLocationId
 			,dblQuantity			= LI.dblQty
 			,intItemUOMId			= ItemUOM.intItemUOMId
-			,dblUnitPrice			= LI.dblCost
+			--,dblUnitPrice			= LI.dblCost
+			,dblUnitPrice			= SC.dblUnitPrice + SC.dblUnitBasis
 			,intDockDoorId			= NULL
 			,strNotes				= SC.strTicketComment
 			,intSort				= 1

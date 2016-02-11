@@ -31,7 +31,7 @@
 	,@PaymentId						INT				= NULL
 	,@SplitId						INT				= NULL
 	,@DistributionHeaderId			INT				= NULL
-	,@ActualCostId					NVARCHAR(50)	= ''			
+	,@ActualCostId					NVARCHAR(50)	= NULL			
 	,@ShipmentId					INT				= NULL
 	,@TransactionId					INT				= NULL
 	,@OriginalInvoiceId				INT				= NULL
@@ -222,7 +222,7 @@ BEGIN TRY
 		,[intConcurrencyId])
 	SELECT
 		 [strTransactionType]			= @TransactionType
-		,[strType]						= @Type 
+		,[strType]						= CASE WHEN ISNULL(@DistributionHeaderId, 0) > 0 THEN 'Transport Delivery' ELSE ISNULL(@Type, 'Standard') END
 		,[intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId

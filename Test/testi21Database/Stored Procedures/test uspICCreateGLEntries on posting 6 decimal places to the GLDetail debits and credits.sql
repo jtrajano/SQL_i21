@@ -147,7 +147,7 @@ BEGIN
 			dtmDate						= 'January 12, 2014'
 			,strBatchId					= 'BATCH-000001'
 			,intAccountId				= @Inventory_Default
-			,dblDebit					= (100.75 * 3.1527)
+			,dblDebit					= ROUND(100.75 * 3.1527, 2)
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
@@ -173,7 +173,7 @@ BEGIN
 			,strBatchId					= 'BATCH-000001'
 			,intAccountId				= @CostOfGoods_Default
 			,dblDebit					= 0
-			,dblCredit					= (100.75 * 3.1527)
+			,dblCredit					= ROUND(100.75 * 3.1527, 2)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= 'COST OF GOODS WHEAT-DEFAULT'

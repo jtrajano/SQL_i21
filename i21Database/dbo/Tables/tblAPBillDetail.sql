@@ -23,6 +23,7 @@
     [dblQtyReceived] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblOldCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblLandedCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblTax] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblPrepayPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

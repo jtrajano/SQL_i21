@@ -98,7 +98,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -111,7 +111,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -125,11 +125,12 @@ BEGIN
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6)				= 163
-				,@dblCost AS NUMERIC(18,6)			= 22
-				,@intEntityUserSecurityId AS INT					= 1
+				,@dblCost AS NUMERIC(38,20)			= 22
+				,@intEntityUserSecurityId AS INT	= 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'
 				,@intTransactionId AS INT			= 4
+				,@intTransactionDetailId AS INT		= 4
 				,@TotalQtyOffset AS NUMERIC(18,6)	= 0			
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
@@ -238,6 +239,7 @@ BEGIN
 				,@TotalQtyOffset
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 

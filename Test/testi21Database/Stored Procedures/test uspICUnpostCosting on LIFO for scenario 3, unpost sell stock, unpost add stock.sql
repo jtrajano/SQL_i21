@@ -74,7 +74,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblQty NUMERIC(18,6)
 		,dblUOMQty NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38, 20)
 		,dblValue NUMERIC(18,6)
 		,dblSalesPrice NUMERIC(18,6)
 		,intTransactionId INT
@@ -95,7 +95,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblQty NUMERIC(18,6)
 		,dblUOMQty NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38, 20)
 		,dblValue NUMERIC(18,6)
 		,dblSalesPrice NUMERIC(18,6)
 		,intTransactionId INT
@@ -131,7 +131,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38, 20)
 		,strTransactionId NVARCHAR(40)
 		,intTransactionId INT		
 		,ysnIsUnposted BIT 		
@@ -145,7 +145,7 @@ BEGIN
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
-		,dblCost NUMERIC(18,6)
+		,dblCost NUMERIC(38, 20)
 		,strTransactionId NVARCHAR(40)
 		,intTransactionId INT
 		,ysnIsUnposted BIT 		

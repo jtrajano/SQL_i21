@@ -1,6 +1,4 @@
-﻿-- USE i21Demo01
-
-------------------------------------------------------------------------------------------------------------------------------------
+﻿------------------------------------------------------------------------------------------------------------------------------------
 -- Open the fiscal year periods
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Open the fiscal year periods
@@ -130,30 +128,12 @@ BEGIN
 				,@intItemId = intItemId
 				,@dblQty = dblQty 
 				,@intTransactionTypeId = intTransactionTypeId
-		FROM	#tmpICInventoryTransaction		
-		ORDER BY dtmDate ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
+		FROM	#tmpICInventoryTransaction
+		ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
+		-- ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 		-- ORDER BY intInventoryTransactionId ASC 
 
-		-- Detect if the transaction is posted or not. 
-		BEGIN 
-			SET @ysnPost = 1 
-
-			SELECT	@strTransactionId = 
-						CASE	WHEN RTRIM(LTRIM(ISNULL(@strTransactionId, ''))) <> '' THEN 
-									@strTransactionId 
-								ELSE 
-									ICType.strName + '-' + CAST(@intTransactionId AS NVARCHAR(10))  
-						END
-			FROM	dbo.tblICInventoryTransactionType ICType
-			WHERE	intTransactionTypeId = @intTransactionTypeId
-
-			SELECT	@ysnPost = 0 
-			FROM	#tmpICPostedTransactions
-			WHERE	strTransactionId = @strTransactionId
-		END 
-
 		-- Run the post routine. 
-		IF ISNULL(@ysnPost, 1) = 1
 		BEGIN 
 			PRINT 'Posting ' + @strBatchId
 
@@ -185,7 +165,8 @@ BEGIN
 
 			DELETE FROM @ItemsToPost
 
-			IF @strTransactionForm IN ('Consume', 'Produce') 
+			--IF @strTransactionForm IN ('Consume', 'Produce') 
+			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -227,7 +208,11 @@ BEGIN
 						,strActualCostId = NULL 
 				FROM	#tmpICInventoryTransaction
 				WHERE	strBatchId = @strBatchId
-						AND strTransactionForm = 'Consume'
+						AND (
+							strTransactionForm = 'Consume'
+							OR intTransactionTypeId = 8 
+						)
+
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -282,7 +267,10 @@ BEGIN
 						,strActualCostId = NULL 
 				FROM	#tmpICInventoryTransaction
 				WHERE	strBatchId = @strBatchId
-						AND strTransactionForm = 'Produce'
+						AND (
+							strTransactionForm = 'Produce'
+							OR intTransactionTypeId = 9
+						)
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -290,8 +278,9 @@ BEGIN
 					,@intUserId
 					,@strGLDescription
 					,@ItemsToPost
-			END 
-			ELSE IF @strTransactionForm = 'Inventory Transfer'
+			END
+			--ELSE IF @strTransactionForm = 'Inventory Transfer'
+			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Transfer'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -331,7 +320,7 @@ BEGIN
 						,intSubLocationId
 						,intStorageLocationId
 						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction
+				FROM	#tmpICInventoryTransaction 
 				WHERE	strBatchId = @strBatchId
 						AND dblQty < 0 
 					
@@ -364,34 +353,35 @@ BEGIN
 						,intStorageLocationId		
 						,strActualCostId
 				)
-				SELECT 	intItemId  
-						,intItemLocationId 
-						,intItemUOMId  
-						,dtmDate  
-						,dblQty  
-						,dblUOMQty  
-						,dblCost = (
-								SELECT	dblCost 
-								FROM	dbo.tblICInventoryTransaction 
-								WHERE	strTransactionId = @strTransactionId 
-										AND strBatchId = @strBatchId
-										AND dblQty < 0 
-										AND ysnIsUnposted = 0 
-						) 
-						,dblSalesPrice  
-						,intCurrencyId  
-						,dblExchangeRate  
-						,intTransactionId  
-						,intTransactionDetailId  
-						,strTransactionId  
-						,intTransactionTypeId  
-						,intLotId 
-						,intSubLocationId
-						,intStorageLocationId
+				SELECT 	Detail.intItemId  
+						,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+						,TransferSource.intItemUOMId  
+						,TransferSource.dtmDate  
+						,TransferSource.dblQty * -1 
+						,TransferSource.dblUOMQty  
+						,TransferSource.dblCost 
+						,0
+						,NULL
+						,1
+						,TransferSource.intTransactionId  
+						,Detail.intInventoryTransferDetailId
+						,Header.strTransferNo
+						,TransferSource.intTransactionTypeId  
+						,Detail.intLotId 
+						,Detail.intFromSubLocationId
+						,Detail.intFromStorageLocationId
 						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction
-				WHERE	strBatchId = @strBatchId
-						AND dblQty > 0 
+				FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
+							ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+						INNER JOIN dbo.tblICInventoryTransaction TransferSource
+							ON TransferSource.intItemId = Detail.intItemId
+							AND TransferSource.intTransactionDetailId = Detail.intInventoryTransferDetailId
+							AND TransferSource.intTransactionId = Header.intInventoryTransferId
+							AND TransferSource.strTransactionId = Header.strTransferNo
+							AND TransferSource.strBatchId = @strBatchId
+							AND TransferSource.dblQty < 0
+				WHERE	Header.strTransferNo = @strTransactionId
+						AND TransferSource.strBatchId = @strBatchId
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -430,6 +420,8 @@ BEGIN
 						,RebuilInvTrans.dblUOMQty  
 						,dblCost  = CASE WHEN dblQty < 0 THEN 
 											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId) * dblUOMQty  
+										 WHEN (dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0 AND AdjDetail.dblNewCost IS NULL) THEN 
+											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId) * dblUOMQty  
 										 ELSE 
 											RebuilInvTrans.dblCost
 									END 
@@ -450,6 +442,12 @@ BEGIN
 						LEFT JOIN dbo.tblARInvoice Invoice
 							ON Invoice.intInvoiceId = RebuilInvTrans.intTransactionId
 							AND Invoice.strInvoiceNumber = RebuilInvTrans.strTransactionId
+						LEFT JOIN dbo.tblICInventoryAdjustment Adj
+							ON Adj.strAdjustmentNo = RebuilInvTrans.strTransactionId						
+							AND Adj.intInventoryAdjustmentId = RebuilInvTrans.intTransactionId
+						LEFT JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
+							AND AdjDetail.intInventoryAdjustmentDetailId = RebuilInvTrans.intTransactionDetailId 
 				WHERE	strBatchId = @strBatchId
 
 				EXEC dbo.uspICRepostCosting
@@ -499,7 +497,7 @@ BEGIN
 					,[strTransactionId]					
 					,[intTransactionId]
 					,[strTransactionType]
-					,[strTransactionForm]
+					,[strTransactionForm] 
 					,[strModuleName]
 					,[intConcurrencyId]
 					,[dblDebitForeign]
@@ -532,52 +530,6 @@ BEGIN
 			END 							
 		END 
 
-		ELSE IF @ysnPost = 0 
-		BEGIN 
-			PRINT 'Unposting ' + @strBatchId
-
-			-- Unpost and re-create the Unpost G/L entries. 
-			DELETE FROM @GLEntries
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-			)	
-			EXEC [dbo].[uspICUnpostCosting]
-				@intTransactionId = @intTransactionId 
-				,@strTransactionId = @strTransactionId 
-				,@strBatchId = @strBatchId 
-				,@intEntityUserSecurityId = @intUserId 
-		END 		
-
 		-- Book the G/L Entries
 		BEGIN 
 			BEGIN TRY
@@ -597,55 +549,6 @@ BEGIN
 
 				GOTO STOP_QUERY
 			END CATCH 
-		END 
-
-		-- Monitor the posted status of the transaction 
-		BEGIN 
-			IF ISNULL(@ysnPost, 1) = 1
-			BEGIN 
-				PRINT 'Inserting ' + @strTransactionId + ' on #tmpICPostedTransactions'
-
-				INSERT INTO #tmpICPostedTransactions (
-					strTransactionId 
-				)
-				SELECT	@strTransactionId
-			END 
-
-			IF ISNULL(@ysnPost, 1) = 0 
-			BEGIN 
-				PRINT 'Removing ' + @strTransactionId + ' on #tmpICPostedTransactions'
-
-				DELETE	FROM #tmpICPostedTransactions 
-				WHERE	strTransactionId = @strTransactionId
-			END 
-		END 	
-
-		-- Detect discrepancies on the on-hand. 
-		BEGIN 			
-			IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
-			BEGIN 
-				SELECT TOP 1 
-						@intItemId = intItemId 
-				FROM	@ItemsToPost
-				
-				SET @intReturnId = NULL 
-				EXEC @intReturnId = dbo.uspICDetectBadOnHand 
-						@intItemId
-						,@strTransactionId
-						,@strBatchId
-
-				IF @intReturnId <> 0 
-				BEGIN 
-					PRINT 'Stock Discrepancies detected!'
-					PRINT '@intItemId, @strTransactionId, @strBatchId'
-					PRINT @intItemId 
-					PRINT @strTransactionId
-					PRINT @strBatchId
-				END
-
-				DELETE FROM @ItemsToPost
-				WHERE @intItemId = intItemId 
-			END 			
 		END 
 
 		DELETE FROM #tmpICInventoryTransaction

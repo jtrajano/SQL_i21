@@ -3,13 +3,13 @@
 	@intItemId INT
 	,@intItemLocationId INT
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
-	DECLARE @Value AS NUMERIC(18,6)
+	DECLARE @totalItemValuation AS NUMERIC(38,20)
 
 	-- Get the total transaction value of an item per location. 
-	SELECT	@Value = SUM(
+	SELECT	@totalItemValuation = SUM(
 				dbo.fnCalculateStockUnitQty(A.dblQty, A.dblUOMQty) 
 				* dbo.fnCalculateUnitCost(A.dblCost, A.dblUOMQty)
 				+ ISNULL(A.dblValue, 0)
@@ -18,6 +18,6 @@ BEGIN
 	WHERE	A.intItemId = @intItemId
 			AND A.intItemLocationId = @intItemLocationId
 
-	RETURN ISNULL(@Value, 0)
+	RETURN ISNULL(@totalItemValuation, 0)
 END
 GO

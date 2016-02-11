@@ -45,12 +45,14 @@ BEGIN
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		CREATE TABLE actual (
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		DECLARE @GLEntries AS RecapTableType
@@ -62,10 +64,12 @@ BEGIN
 				strTransactionId
 				,strText
 				,intErrorCode
+				,strModuleName
 		)
 		SELECT	strTransactionId = NULL 
 				,strText = 'G/L entries are expected. Cannot continue because it is missing.'
 				,intErrorCode = 50032
+				,strModuleName = NULL 
 	END 
 
 	-- Act

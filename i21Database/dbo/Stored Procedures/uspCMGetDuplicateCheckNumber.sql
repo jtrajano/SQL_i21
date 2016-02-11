@@ -43,7 +43,7 @@ SELECT	TOP 1
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	strTransactionId <> @strTransactionId
 		AND intBankAccountId = @intBankAccountId
-		AND intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT)
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT, @PAYCHECK)
 		AND (
 			strReferenceNo = @strCheckNo 
 			OR strReferenceNo = dbo.fnAddZeroPrefixes(@strCheckNo)

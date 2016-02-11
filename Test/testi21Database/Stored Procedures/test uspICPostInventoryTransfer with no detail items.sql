@@ -155,7 +155,7 @@ AS
 --			@ysnPost = 1
 --			,@ysnRecap = 0
 --			,@strTransactionId = 'INVTRN-1'
---			,@intUserId = 1
+--			,@intEntityUserSecurityId = 1
 --			,@intEntityId = 1
 --	END 
 

@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		-- Create the fake data
-		EXEC testi21Database.[Fake transactions for item costing]
+		EXEC testi21Database.[Fake transactions for FIFO or Ave costing]
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @WRITE_OFF_SOLD AS INT = -1

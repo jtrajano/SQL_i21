@@ -226,9 +226,9 @@ BEGIN TRY
 			SET @OpeningInventory = (
 					--SELECT SUM(dblQty)
 					SELECT SUM(CASE 
-									WHEN intWeightUOMId IS NOT NULL
-										THEN dblWeight
-									ELSE dblQty
+								WHEN intWeightUOMId IS NOT NULL
+									THEN dblWeight
+								ELSE dblQty
 								END)
 					FROM tblICLot
 					WHERE intItemId IN (
@@ -243,6 +243,7 @@ BEGIN TRY
 			SET @OpeningInventory = 0
 
 		DECLARE @PastDueExistingPurchases DECIMAL(24, 6)
+
 		SET @PastDueExistingPurchases = ISNULL((
 					SELECT SUM(CASE 
 								WHEN @TargetUOMKey = IUOM.intUnitMeasureId
@@ -257,16 +258,16 @@ BEGIN TRY
 					), 0)
 
 		DECLARE @PastDueIntransitPurchases DECIMAL(24, 6)
-		SET @PastDueIntransitPurchases = ISNULL((
-										SELECT SUM(IV.dblQtyInStockUOM)
-										FROM [dbo].[vyuLGInventoryView] IV
-										JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
-										WHERE IV.intItemId = @intItemId
-											AND IV.strStatus = 'In-transit'
-											AND SS.intContractStatusId = 1
-											AND SS.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
-										), 0)
 
+		SET @PastDueIntransitPurchases = ISNULL((
+					SELECT SUM(IV.dblQtyInStockUOM)
+					FROM [dbo].[vyuLGInventoryView] IV
+					JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+					WHERE IV.intItemId = @intItemId
+						AND IV.strStatus = 'In-transit'
+						AND SS.intContractStatusId = 1
+						AND SS.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
+					), 0)
 		SET @strItemNo = @strItemNo + ' (' + @TargetUOMName + ' per ' + @SourceUOMName + ' --> ' + CAST(@Conversion_Factor AS NVARCHAR(30)) + ')'
 		SET @SQL = @SQL + ' INSERT INTO @Table (intItemId , strItemNo , StdUOM , BaseUOM , AttributeId , strAttributeName ) 
 		SELECT ' + Cast(@intItemId AS NVARCHAR(10)) + ', ''' + @strItemNo + ''', ''' + @SourceUOMName + ''', ''' + @TargetUOMName + ''', intReportAttributeID, strAttributeName 
@@ -352,6 +353,169 @@ BEGIN TRY
 				SET @FetchExisting = 0
 			END
 
+		-- Forecast based on Multiple Recipe level starts
+		DECLARE @MinId INT
+		DECLARE @MinBlendDemandItemId INT
+		DECLARE @intItemId1 INT
+		DECLARE @intBlendDemandItemId INT
+		DECLARE @intBlendDemandItemRecipeId INT
+		DECLARE @intRecipeId INT
+		DECLARE @Count INT
+		DECLARE @dblTotalRecipeItemQty NUMERIC(18, 6)
+
+		IF OBJECT_ID('tempdb..#TempInput') IS NOT NULL
+			DROP TABLE #TempInput
+
+		CREATE TABLE #TempInput (
+			Id INT IDENTITY(1, 1)
+			,intBlendDemandItemId INT
+			,intItemId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intRecipeId INT
+			,intRecipeItemId INT
+			)
+
+		IF OBJECT_ID('tempdb..#TempInputALL') IS NOT NULL
+			DROP TABLE #TempInputALL
+
+		CREATE TABLE #TempInputALL (
+			Id INT
+			,intBlendDemandItemId INT
+			,intItemId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intRecipeId INT
+			,intRecipeItemId INT
+			)
+
+		IF OBJECT_ID('tempdb..#TempBlendDemandItem') IS NOT NULL
+			DROP TABLE #TempBlendDemandItem
+
+		CREATE TABLE #TempBlendDemandItem (
+			Id INT IDENTITY(1, 1)
+			,intItemId INT
+			)
+
+		INSERT INTO #TempBlendDemandItem
+		SELECT DISTINCT intItemId
+		FROM tblCTBlendDemand
+
+		SELECT @MinBlendDemandItemId = MIN(Id)
+		FROM #TempBlendDemandItem
+
+		WHILE @MinBlendDemandItemId > 0
+		BEGIN
+			SET @intBlendDemandItemId = NULL
+			SET @intBlendDemandItemRecipeId = NULL
+
+			SELECT @intBlendDemandItemId = intItemId
+			FROM #TempBlendDemandItem
+			WHERE Id = @MinBlendDemandItemId
+
+			SELECT @intBlendDemandItemRecipeId = intRecipeId
+			FROM tblMFRecipe
+			WHERE intItemId = @intBlendDemandItemId
+				AND ysnActive = 1
+
+			INSERT INTO #TempInput (
+				intBlendDemandItemId
+				,intItemId
+				,dblQuantity
+				,intRecipeId
+				,intRecipeItemId
+				)
+			SELECT @intBlendDemandItemId
+				,RI.intItemId
+				,(RI.dblQuantity / R.dblQuantity)
+				,RI.intRecipeId
+				,RI.intRecipeItemId
+			FROM tblMFRecipeItem RI
+			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+				AND ysnActive = 1
+			WHERE RI.intRecipeId = @intBlendDemandItemRecipeId
+				AND intRecipeItemTypeId = 1
+
+			INSERT INTO #TempInputAll
+			SELECT *
+			FROM #TempInput
+
+			SELECT @Count = COUNT(*)
+			FROM #TempInput
+
+			WHILE @Count > 0
+			BEGIN
+				SELECT @MinId = Min(Id)
+				FROM #TempInput
+
+				WHILE ISNULL(@MinId, 0) > 0
+				BEGIN
+					SET @intItemId1 = NULL
+					SET @intRecipeId = NULL
+
+					DECLARE @MaxId INT = NULL
+
+					SET @dblTotalRecipeItemQty = NULL
+
+					SELECT @intItemId1 = intItemId
+						,@dblTotalRecipeItemQty = dblQuantity
+					FROM #TempInput
+					WHERE Id = @MinId
+
+					SELECT @intRecipeId = intRecipeId
+					FROM tblMFRecipe
+					WHERE intItemId = @intItemId1
+						AND ysnActive = 1
+
+					SELECT @MaxId = MAX(Id)
+					FROM #TempInput
+
+					DELETE
+					FROM #TempInput
+					WHERE Id = @MinId
+
+					IF @intRecipeId IS NOT NULL
+					BEGIN
+						DELETE
+						FROM #TempInputALL
+						WHERE Id = @MinId
+					END
+
+					INSERT INTO #TempInput (
+						intBlendDemandItemId
+						,intItemId
+						,dblQuantity
+						,intRecipeId
+						,intRecipeItemId
+						)
+					SELECT @intBlendDemandItemId
+						,intItemId
+						,(dblQuantity * @dblTotalRecipeItemQty)
+						,intRecipeId
+						,intRecipeItemId
+					FROM tblMFRecipeItem
+					WHERE intRecipeId = @intRecipeId
+						AND intRecipeItemTypeId = 1
+
+					INSERT INTO #TempInputAll
+					SELECT *
+					FROM #TempInput
+					WHERE Id > @MaxId
+
+					SELECT @MinId = Min(Id)
+					FROM #TempInput
+					WHERE Id > @MinId
+				END
+
+				SELECT @Count = COUNT(*)
+				FROM #TempInput
+			END
+
+			SELECT @MinBlendDemandItemId = Min(Id)
+			FROM #TempBlendDemandItem
+			WHERE Id > @MinBlendDemandItemId
+		END
+
+		--SELECT * FROM #TempInputAll
+		-- Forecast based on Multiple Recipe level ends
 		--If @MinReportAttributeID = 8 --Forecasted Consumption
 		--BEGIN
 		DECLARE @SQL_ForecastedConsumption NVARCHAR(MAX)
@@ -397,18 +561,29 @@ BEGIN TRY
 					--					AND [strYear] = Right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
 					--				), 0)
 					--		)
+					--SET @ForecastedConsumption = (
+					--		ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+					--		FROM tblMFRecipeItem RI
+					--		JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+					--			AND R.ysnActive = 1
+					--			AND RI.intRecipeItemTypeId = 1
+					--		JOIN tblCTBlendDemand BD ON BD.intItemId = R.intItemId
+					--			AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+					--			AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+					--		WHERE RI.intItemId = @intItemId)
+					--		,0)
+					--	)
 					SET @ForecastedConsumption = (
-							ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
-							FROM tblMFRecipeItem RI
-							JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
-								AND R.ysnActive = 1
-								AND RI.intRecipeItemTypeId = 1
-							JOIN tblCTBlendDemand BD ON BD.intItemId = R.intItemId
+							SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0))
+							FROM #TempInputAll TIA
+							JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
 								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
-							WHERE RI.intItemId = @intItemId)
-							,0)
-						)
+							WHERE TIA.intItemId = @intItemId
+							)
+						--DROP TABLE #TempInput
+						--DROP TABLE #TempInputALL
+						--DROP TABLE #TempBlendDemandItem
 				END
 			END
 			ELSE
@@ -423,17 +598,25 @@ BEGIN TRY
 				--					AND [strYear] = Right(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
 				--				), 0)
 				--		)
+				--SET @ForecastedConsumption = (
+				--			ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+				--			FROM tblMFRecipeItem RI
+				--			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+				--				AND R.ysnActive = 1
+				--				AND RI.intRecipeItemTypeId = 1
+				--			JOIN tblCTBlendDemand BD ON BD.intItemId = R.intItemId
+				--				AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+				--				AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+				--			WHERE RI.intItemId = @intItemId)
+				--			,0)
+				--		)
 				SET @ForecastedConsumption = (
-							ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
-							FROM tblMFRecipeItem RI
-							JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
-								AND R.ysnActive = 1
-								AND RI.intRecipeItemTypeId = 1
-							JOIN tblCTBlendDemand BD ON BD.intItemId = R.intItemId
-								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
-								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
-							WHERE RI.intItemId = @intItemId)
-							,0)
+						SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0))
+						FROM #TempInputAll TIA
+						JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
+							AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
+							AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+						WHERE TIA.intItemId = @intItemId
 						)
 			END
 
@@ -627,9 +810,7 @@ BEGIN TRY
 
 			SET @SQL = @SQL + ')
 										) p
-									) Ext WHERE Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + 
-									' AND [@Table].intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + ' AND Ext.intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + 
-									' AND [@Table].AttributeId = Ext.intReportAttributeID  '
+									) Ext WHERE Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + ' AND [@Table].intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + ' AND Ext.intItemId = ' + CAST(@intItemId AS NVARCHAR(20)) + ' AND [@Table].AttributeId = Ext.intReportAttributeID  '
 
 			IF @NewMonthsToView > @ExistingMonthsToView
 			BEGIN
@@ -722,7 +903,6 @@ BEGIN TRY
 							SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
 							SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@IntransitPurchases_Ext, 0) AS NVARCHAR(50))
 							SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 14'
-
 							SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueExistingPurchases) - convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
 							SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@ExistingPurchases_Ext, 0) - ISNULL(@IntransitPurchases_Ext, 0) AS NVARCHAR(50))
 							SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 13'
@@ -1221,7 +1401,6 @@ BEGIN TRY
 						SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
 						SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@IntransitPurchases, 0) AS NVARCHAR(50))
 						SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 14'
-
 						SET @SQL = @SQL + ' Update @Table SET PastDue = ' + convert(VARCHAR, convert(DECIMAL(24, 6), @PastDueExistingPurchases) - convert(DECIMAL(24, 6), @PastDueIntransitPurchases))
 						SET @SQL = @SQL + ' ,strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' = ' + Cast(ISNULL(@ExistingPurchases, 0) - ISNULL(@IntransitPurchases, 0) AS NVARCHAR(50))
 						SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 13'
@@ -1526,8 +1705,7 @@ BEGIN TRY
 						BEGIN
 							SET @SQL = @SQL + ' Declare @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' Decimal(24,2) '
 							SET @SQL = @SQL + ' SET @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' 
-								= convert(decimal(24,6),( dbo.fnCTConvertQuantityToTargetItemUOM(' + Cast(@intItemId AS NVARCHAR(10)) + ',' + CAST(@TargetUOMKey AS NVARCHAR(5)) + '  , ' + 
-								CAST(@SourceUOMKey AS NVARCHAR(5)) + ' , CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0 ELSE
+								= convert(decimal(24,6),( dbo.fnCTConvertQuantityToTargetItemUOM(' + Cast(@intItemId AS NVARCHAR(10)) + ',' + CAST(@TargetUOMKey AS NVARCHAR(5)) + '  , ' + CAST(@SourceUOMKey AS NVARCHAR(5)) + ' , CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0 ELSE
 								 ISNULL( ABS(@ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ') ,0) END ) ))'
 							--SET @SQL = @SQL + ' Set @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + 
 							--		' = convert(decimal(24,6),( CASE WHEN @ShortExcess' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' <= 0 THEN 0
@@ -1544,8 +1722,7 @@ BEGIN TRY
 							SET @SQL = @SQL + ' WHERE intItemId = ' + Cast(@intItemId AS NVARCHAR(10)) + ' AND AttributeId = 5 '
 							SET @SQL = @SQL + ' Declare @6' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' Decimal(24,2) '
 							SET @SQL = @SQL + ' SET @6' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' 
-								= convert(decimal(24,6),( dbo.fnCTConvertQuantityToTargetItemUOM(' + Cast(@intItemId AS NVARCHAR(10)) + ',' + CAST(@SourceUOMKey AS NVARCHAR(5)) + '  , ' + 
-								CAST(@TargetUOMKey AS NVARCHAR(5)) + ' , ISNULL( @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' ,0) ) ))'
+								= convert(decimal(24,6),( dbo.fnCTConvertQuantityToTargetItemUOM(' + Cast(@intItemId AS NVARCHAR(10)) + ',' + CAST(@SourceUOMKey AS NVARCHAR(5)) + '  , ' + CAST(@TargetUOMKey AS NVARCHAR(5)) + ' , ISNULL( @5' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' ,0) ) ))'
 							SET @SQL = @SQL + ' Update @Table SET   
 							PastDue = PastDue '
 							SET @SQL = @SQL + ' , strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' =  @6' + '_' + CAST(@MinRowNo AS NVARCHAR(5)) + '_' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' '
@@ -1686,7 +1863,6 @@ BEGIN TRY
 	SET @SQL = @SQL + @SQL2
 	--SET @SQL = @SQL + ' SELECT * FROM @Table ORDER By intItemId, AttributeId '
 	SET @SQL = @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
-
 	-- ******* Plan Totals start *****************
 	SET @SQL = @SQL + 'DECLARE @Table_Sum table(AttributeId int, strAttributeName nvarchar(50)
 						, OpeningInv decimal(24,6), PastDue nvarchar(35)'

@@ -74,7 +74,7 @@ BEGIN
 			,[dtmDate] DATETIME 
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -87,7 +87,7 @@ BEGIN
 			,[dtmDate] DATETIME 
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -101,10 +101,11 @@ BEGIN
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6)				= 10
-				,@dblCost AS NUMERIC(18,6)			= 33.19
+				,@dblCost AS NUMERIC(38,20)			= 33.19
 				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'
 				,@intTransactionId AS INT			= 1
-				,@intEntityUserSecurityId AS INT					= 1
+				,@intTransactionDetailId AS INT		= 1
+				,@intEntityUserSecurityId AS INT	= 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
 				,@RemainingQty AS NUMERIC(18,6)
@@ -175,6 +176,7 @@ BEGIN
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@intEntityUserSecurityId
 			,@NewInventoryLotStorageId OUTPUT 
 

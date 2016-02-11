@@ -451,5 +451,106 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,RawStockData.Qty 
 		,0
 		,1	
+	);
+
+-------------------
+--UPDATE ON ORDER--
+-------------------
+UPDATE tblICItemStock
+SET dblOnOrder = 0
+
+UPDATE tblICItemStockUOM
+SET dblOnOrder = 0 
+
+MERGE	
+INTO	dbo.tblICItemStock 
+WITH	(HOLDLOCK) 
+AS		ItemStock	
+USING (
+		SELECT	
+			intItemId
+			,A.intItemLocationId
+			,dblOnOrder = (SUM(dblQtyOrdered) - SUM(dblQtyReceived))
+		FROM vyuPOStatus A
+		WHERE dblQtyReceived < dblQtyOrdered
+		GROUP BY A.intItemLocationId, A.intItemId
+) AS StockToUpdate
+	ON ItemStock.intItemId = StockToUpdate.intItemId
+	AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
+
+-- If matched, update the unit on order qty. 
+WHEN MATCHED THEN 
+	UPDATE 
+	SET		dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0) + StockToUpdate.dblOnOrder
+
+-- If none found, insert a new item stock record
+WHEN NOT MATCHED THEN 
+	INSERT (
+		intItemId
+		,intItemLocationId
+		,dblUnitOnHand
+		,dblOrderCommitted
+		,dblOnOrder
+		,dblLastCountRetail
+		,intSort
+		,intConcurrencyId
+	)
+	VALUES (
+		StockToUpdate.intItemId
+		,StockToUpdate.intItemLocationId
+		,0
+		,StockToUpdate.dblOnOrder
+		,0
+		,0
+		,NULL 
+		,1	
+	);
+--UPDATE tblICItemStockUOM
+MERGE	
+INTO	dbo.tblICItemStockUOM 
+WITH	(HOLDLOCK) 
+AS		ItemStockUOM	
+USING (
+		SELECT	ItemTransactions.intItemId
+				,ItemTransactions.intUnitOfMeasureId AS intItemUOMId
+				,ItemTransactions.intItemLocationId
+				,ItemTransactions.intSubLocationId
+				,ItemTransactions.intStorageLocationId
+				,dblOnOrder = (SUM(dblQtyOrdered) - SUM(dblQtyReceived))
+		FROM	vyuPOStatus ItemTransactions
+		WHERE dblQtyReceived < dblQtyOrdered
+		GROUP BY ItemTransactions.intItemId, ItemTransactions.intUnitOfMeasureId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
+) AS RawStockData
+	ON ItemStockUOM.intItemId = RawStockData.intItemId
+	AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
+	AND ItemStockUOM.intItemUOMId = RawStockData.intItemUOMId
+	AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(RawStockData.intSubLocationId, 0)
+	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(RawStockData.intStorageLocationId, 0)	
+
+WHEN MATCHED THEN 
+	UPDATE 
+	SET		dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0) + RawStockData.dblOnOrder
+
+-- If none found, insert a new item stock record
+WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
+	INSERT (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblOnHand
+		,dblOnOrder
+		,intConcurrencyId
+	)
+	VALUES (
+		RawStockData.intItemId
+		,RawStockData.intItemLocationId
+		,RawStockData.intItemUOMId
+		,RawStockData.intSubLocationId
+		,RawStockData.intStorageLocationId
+		,0
+		,RawStockData.dblOnOrder
+		,1	
 	)
 ;

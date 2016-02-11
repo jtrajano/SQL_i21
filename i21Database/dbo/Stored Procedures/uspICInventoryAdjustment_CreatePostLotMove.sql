@@ -11,7 +11,7 @@
 	,@intNewSubLocationId AS INT
 	,@intNewStorageLocationId AS INT
 	,@strNewLotNumber AS NVARCHAR(50)
-	,@dblMoveQty AS NUMERIC(18,6)
+	,@dblMoveQty AS NUMERIC(38,20)
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT

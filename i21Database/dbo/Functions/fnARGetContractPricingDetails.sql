@@ -32,6 +32,11 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,@AvailableQuantity		NUMERIC(18,6)
 		,@UnlimitedQuantity     BIT
 
+	IF ISNULL(@ContractDetailId,0) <> 0 AND ISNULL(@ContractHeaderId,0) = 0
+	BEGIN
+		SELECT TOP 1 @ContractHeaderId = intContractHeaderId FROM vyuCTContractDetailView WHERE  intContractDetailId = @ContractDetailId
+	END
+
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())	
 			
 	SELECT TOP 1
@@ -47,7 +52,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 	WHERE
 		intEntityId = @CustomerId
 		AND intCompanyLocationId = @LocationId
-		AND intItemUOMId = @ItemUOMId
+		AND (intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND intItemId = @ItemId
 		AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty >= @Quantity) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
@@ -88,7 +93,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 	WHERE
 		intEntityId = @CustomerId
 		AND intCompanyLocationId = @LocationId
-		AND intItemUOMId = @ItemUOMId
+		AND (intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND intItemId = @ItemId
 		AND (((dblAvailableQty) >= @Quantity) OR ysnUnlimitedQuantity = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)

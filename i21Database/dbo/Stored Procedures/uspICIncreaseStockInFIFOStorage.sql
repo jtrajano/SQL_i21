@@ -8,11 +8,12 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInFIFOStorage
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
-	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(18,6)
+	,@dblQty NUMERIC(38,20) 
+	,@dblCost AS NUMERIC(38,20)
 	,@intEntityUserSecurityId AS INT
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT 
+	,@intTransactionDetailId AS INT 
 	,@NewFifoStorageId AS INT OUTPUT 
 AS
 
@@ -36,6 +37,7 @@ INSERT dbo.tblICInventoryFIFOStorage (
 	,[dblCost]		
 	,[strTransactionId]
 	,[intTransactionId]
+	,[intTransactionDetailId]
 	,[dtmCreated]
 	,[intCreatedEntityId]
 	,[intConcurrencyId]
@@ -50,6 +52,7 @@ VALUES (
 	,@dblCost
 	,@strTransactionId
 	,@intTransactionId
+	,@intTransactionDetailId
 	,GETDATE()
 	,@intEntityUserSecurityId
 	,1

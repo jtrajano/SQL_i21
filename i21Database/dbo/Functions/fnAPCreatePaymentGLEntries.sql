@@ -30,13 +30,13 @@ RETURNS @returntable TABLE
 	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
 	[dblDebitForeign]           NUMERIC (18, 6)	NULL,
     [dblDebitReport]            NUMERIC (18, 6) NULL,
     [dblCreditForeign]          NUMERIC (18, 6) NULL,
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
-    [dblForeignRate]            NUMERIC (18, 6) NULL,
-	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
+    [dblForeignRate]            NUMERIC (18, 6) NULL
 )
 AS
 BEGIN
@@ -109,13 +109,13 @@ BEGIN
 		[strTransactionType]		=	@SCREEN_NAME,
 		[strTransactionForm]		=	@SCREEN_NAME,
 		[strModuleName]				=	@MODULE_NAME,
+		[intConcurrencyId]			=	1,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	0,
-		[intConcurrencyId]			=	1
+		[dblForeignRate]				=	0
 	FROM	[dbo].tblAPPayment A 
 	INNER JOIN tblAPVendor C
 		ON A.intEntityVendorId = C.intEntityVendorId
@@ -150,13 +150,13 @@ BEGIN
 			[strTransactionType]		=	@SCREEN_NAME,
 			[strTransactionForm]		=	@SCREEN_NAME,
 			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]			=	1
+			[dblForeignRate]				=	0
 			FROM [dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
@@ -193,13 +193,13 @@ BEGIN
 			[strTransactionType]		=	@SCREEN_NAME,
 			[strTransactionForm]		=	@SCREEN_NAME,
 			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]			=	1
+			[dblForeignRate]				=	0
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -243,13 +243,13 @@ BEGIN
 		[strTransactionType]		=	@SCREEN_NAME,
 		[strTransactionForm]		=	@SCREEN_NAME,
 		[strModuleName]				=	@MODULE_NAME,
+		[intConcurrencyId]			=	1,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	0,
-		[intConcurrencyId]			=	1
+		[dblForeignRate]				=	0
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
@@ -295,13 +295,13 @@ BEGIN
 			[strTransactionType]		=	@SCREEN_NAME,
 			[strTransactionForm]		=	@SCREEN_NAME,
 			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]			=	1
+			[dblForeignRate]				=	0
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -347,13 +347,13 @@ BEGIN
 			[strTransactionType]		=	@SCREEN_NAME,
 			[strTransactionForm]		=	@SCREEN_NAME,
 			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1,
 			[dblDebitForeign]				=	0,      
 			[dblDebitReport]				=	0,
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[intConcurrencyId]			=	1
+			[dblForeignRate]				=	0
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor B
 					ON A.intEntityVendorId = B.intEntityVendorId

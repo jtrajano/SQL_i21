@@ -169,6 +169,7 @@ BEGIN
 		[intAccountId],
 		[dblTotal],
 		[dblCost],
+		[dblOldCost],
 		[dblNetWeight],
 		[intContractDetailId],
 		[intContractHeaderId],
@@ -189,8 +190,9 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
+		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)),
 		[dblCost]					=	B.dblUnitCost,
+		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
@@ -235,9 +237,10 @@ BEGIN
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
 		[dblCost]					=	A.dblUnitCost,
+		[dblOldCost]				=	0,
 		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
-		[intContractHeaderId]		=	NULL,
+		[intContractHeaderId]		=	A.intContractHeaderId,
 		[intCostUOMId]				=	NULL,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1
@@ -291,7 +294,7 @@ BEGIN
 			[dblRate]				=	A.dblRate, 
 			[intAccountId]			=	A.intTaxAccountId, 
 			[dblTax]				=	A.dblTax, 
-			[dblAdjustedTax]		=	A.dblAdjustedTax, 
+			[dblAdjustedTax]		=	ISNULL(A.dblAdjustedTax,0), 
 			[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 			[ysnSeparateOnBill]		=	A.ysnSeparateOnInvoice, 
 			[ysnCheckOffTax]		=	A.ysnCheckoffTax
@@ -302,8 +305,8 @@ BEGIN
 	END
 	
 	UPDATE A
-		SET A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
-		,A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
+		SET --A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) AP-2116
+		A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
 	FROM tblAPBill A
 	WHERE intBillId = @generatedBillId
 

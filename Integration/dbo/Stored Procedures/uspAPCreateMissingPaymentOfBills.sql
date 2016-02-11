@@ -142,7 +142,7 @@ BEGIN
 		SELECT * INTO  ##Tempi21APPaymentFROMBillOrigin 
 		FROM tblAPPayment WHERE intPaymentId  in (SELECT intPaymentId FROM  @createdPayment) 
 
-		IF EXISTS(SELECT 1 FROM Tempi21APPaymentFROMBillOrigin)
+		IF EXISTS(SELECT 1 FROM ##Tempi21APPaymentFROMBillOrigin)
 		BEGIN
 			--Update Record no.
 			UPDATE A set strPaymentRecordNum  =  ''PAY-'' + convert (NVARCHAR,B.intPaymentId)

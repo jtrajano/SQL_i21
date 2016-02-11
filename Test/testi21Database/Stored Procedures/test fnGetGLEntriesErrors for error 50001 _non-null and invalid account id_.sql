@@ -32,6 +32,7 @@ BEGIN
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		-- Create the actual table
@@ -39,6 +40,7 @@ BEGIN
 			strTransactionId NVARCHAR(40)
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
+			,strModuleName NVARCHAR(50)
 		)
 
 		DECLARE @GLEntries AS RecapTableType
@@ -73,8 +75,9 @@ BEGIN
 			strTransactionId
 			,strText
 			,intErrorCode
+			,strModuleName
 		)
-		VALUES ('DUMMY-00001', 'Invalid G/L account id found.', 50001)
+		VALUES ('DUMMY-00001', 'Invalid G/L account id found.', 50001, 'Inventory')
 
 		-- Call the fake data for GL Account 
 		EXEC testi21Database.[Fake COA used for fake inventory items];

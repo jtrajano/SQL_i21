@@ -148,15 +148,20 @@ GO
 	BEGIN
 		EXEC
 		(
-		'ALTER TABLE tblSMRecurringTransaction ALTER COLUMN intUserId INT NULL
+		'PRINT N''Check if tblSMRecurrintTransaction is existing''
 
-		UPDATE tblSMRecurringTransaction SET intUserId = NULL 
-		WHERE intUserId NOT IN (SELECT intUserSecurityID FROM tblSMUserSecurity) 
-		AND intUserId NOT IN (SELECT intEntityId FROM tblSMUserSecurity)
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblSMRecurringTransaction'')
+		BEGIN
+			ALTER TABLE tblSMRecurringTransaction ALTER COLUMN intUserId INT NULL
+
+			UPDATE tblSMRecurringTransaction SET intUserId = NULL 
+			WHERE intUserId NOT IN (SELECT intUserSecurityID FROM tblSMUserSecurity) 
+			AND intUserId NOT IN (SELECT intEntityId FROM tblSMUserSecurity)
 		
-		UPDATE tblSMRecurringTransaction SET intUserId = UserSecurity.intEntityId
-		FROM tblSMRecurringTransaction Recurring
-		INNER JOIN tblSMUserSecurity UserSecurity ON Recurring.intUserId = UserSecurity.intUserSecurityID'
+			UPDATE tblSMRecurringTransaction SET intUserId = UserSecurity.intEntityId
+			FROM tblSMRecurringTransaction Recurring
+			INNER JOIN tblSMUserSecurity UserSecurity ON Recurring.intUserId = UserSecurity.intUserSecurityID
+		END'
 		)
 	END
 

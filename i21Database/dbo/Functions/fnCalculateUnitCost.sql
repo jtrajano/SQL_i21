@@ -1,16 +1,20 @@
 ﻿-- This function returns the unit cost. 
 CREATE FUNCTION [dbo].[fnCalculateUnitCost] (
-	@dblCost AS NUMERIC(18,6)
-	,@dblUnitQty AS NUMERIC(18,6)
+	@dblCost AS NUMERIC(38,20)
+	,@dblUnitQty AS NUMERIC(38,20)
 )
 RETURNS NUMERIC(38,20)
 AS
 BEGIN 
-	DECLARE @result AS NUMERIC(38,20)
+	DECLARE @result AS FLOAT
 
 	-- formula is cost  / unit qty
 	-- If unit qty is zero, return cost. 
-	SET @result = CASE WHEN ISNULL(@dblUnitQty, 0) = 0 THEN @dblCost ELSE ISNULL(@dblCost, 0) / @dblUnitQty END 
+	SET @result =	CASE	WHEN ISNULL(@dblUnitQty, 0) = 0 THEN 
+								CAST(@dblCost AS FLOAT) 
+							ELSE	
+								CAST(ISNULL(@dblCost, 0) AS FLOAT) / CAST(@dblUnitQty AS FLOAT) 
+					END 
 
-	RETURN ISNULL(@result, 0);
+	RETURN dbo.fnConvertFloatToNumeric(ISNULL(@result, 0));
 END

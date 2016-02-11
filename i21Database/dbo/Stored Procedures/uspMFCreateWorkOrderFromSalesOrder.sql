@@ -204,8 +204,7 @@ Begin
 		Select @intWokrOrderId=SCOPE_IDENTITY()
 
 		--Copy Recipe
-		If @ysnKittingEnabled=0
-			Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWokrOrderId
+		Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWokrOrderId
 
 		Select @intMinWO=Min(intRowNo) From @tblWO Where intRowNo > @intMinWO
 	End
@@ -242,6 +241,11 @@ Begin
 		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,1,@intCellId,null,@intLocationId,@dtmDueDate,1,1,
 		null,0,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@intManufacturingProcessId,@intSalesOrderDetailId,
 		@dtmCurrentDate,@dtmDueDate,@intUserId,@intSubLocationId,@intCustomerId,@strSalesOrderNo,1
+
+		Select @intWokrOrderId=SCOPE_IDENTITY()
+		
+		--Copy Recipe
+		Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWokrOrderId
 
 		Select @intMinWO=Min(intRowNo) From @tblWO Where intRowNo > @intMinWO
 	End

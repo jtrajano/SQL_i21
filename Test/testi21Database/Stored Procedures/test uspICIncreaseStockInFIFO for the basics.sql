@@ -11,7 +11,7 @@ BEGIN
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38, 20)
 			,[dtmCreated] DATETIME 
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
@@ -23,7 +23,7 @@ BEGIN
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38, 20)
 			,[dtmCreated] DATETIME 
 			,[intCreatedEntityId] INT 
 			,[intConcurrencyId]	INT
@@ -35,10 +35,11 @@ BEGIN
 				,@intitemUOMId AS INT
 				,@dtmDate AS DATETIME
 				,@dblQty NUMERIC(18,6) 
-				,@dblCost AS NUMERIC(18,6)
+				,@dblCost AS NUMERIC(38, 20)
 				,@intEntityUserSecurityId AS INT
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
+				,@intTransactionDetailId AS INT
 				,@TotalQtyOffset AS NUMERIC(18,6)					
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
@@ -63,6 +64,7 @@ BEGIN
 			,@FullQty
 			,@strTransactionId
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@TotalQtyOffset
 			,@RemainingQty OUTPUT
 			,@CostUsed OUTPUT

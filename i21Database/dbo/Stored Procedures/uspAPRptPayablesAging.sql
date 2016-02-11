@@ -40,6 +40,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
+DECLARE @dtmDateTo DATETIME = NULL;
 DECLARE @total NUMERIC(18,6), @amountDue NUMERIC(18,6), @amountPad NUMERIC(18,6);
 DECLARE @count INT = 0;
 DECLARE @fieldname NVARCHAR(50)
@@ -98,6 +99,7 @@ WITH (
 --select * from @temp_xml_table
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
+SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery = 'SELECT 
 					intBillId
 					,dblTotal
@@ -121,6 +123,21 @@ BEGIN
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate'
+
+IF @dtmDate IS NOT NULL
+BEGIN	
+	IF @condition = 'Equal To'
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+	END
+    ELSE 
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+	END  
+END
+
+
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN

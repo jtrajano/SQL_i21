@@ -32,7 +32,7 @@ BEGIN
 			,intTransactionId INT
 			,dblStockIn NUMERIC(18,6)
 			,dblStockOut NUMERIC(18,6)
-			,dblCost NUMERIC(18,6)
+			,dblCost NUMERIC(38,20)
 			,strActualCostId NVARCHAR(50)
 		)
 
@@ -41,7 +41,7 @@ BEGIN
 			,intTransactionId INT
 			,dblStockIn NUMERIC(18,6)
 			,dblStockOut NUMERIC(18,6)
-			,dblCost NUMERIC(18,6)
+			,dblCost NUMERIC(38,20)
 			,strActualCostId NVARCHAR(50)
 		)
 

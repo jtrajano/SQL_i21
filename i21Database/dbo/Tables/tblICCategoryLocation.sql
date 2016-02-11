@@ -26,7 +26,7 @@ Type the overview for the table here.
 		[intNucleusGroupId] INT NULL, 
 		[dblTargetGrossProfit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblTargetInventoryCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblCostInventoryBOM] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblCostInventoryBOM] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblLowGrossMarginAlert] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblHighGrossMarginAlert] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dtmLastInventoryLevelEntry] DATETIME NULL, 

@@ -1,5 +1,5 @@
-﻿CREATE TABLE [dbo].[tblFRRowDesignPrintEach] (
-    [intRowDetailId]			INT             IDENTITY (1, 1) NOT NULL,
+﻿CREATE TABLE [dbo].[tblFRRowDesignPrintEach] (    
+	[intRowDetailId]			INT             IDENTITY (1, 1) NOT NULL,
     [intRowId]					INT             NOT NULL,
     [intRefNo]					INT             NOT NULL,
     [strDescription]			NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -8,11 +8,13 @@
 	[strSource]					NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [strRelatedRows]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountsUsed]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strAccountsType]			NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [ysnShowCredit]				BIT             DEFAULT 1 NULL,
     [ysnShowDebit]				BIT             DEFAULT 1 NULL,
     [ysnShowOthers]				BIT             DEFAULT 1 NULL,
     [ysnLinktoGL]				BIT             NULL,
 	[ysnPrintEach]				BIT             NULL,
+	[ysnHidden]					BIT             NULL,
     [dblHeight]					NUMERIC (18, 6) NULL,
     [strFontName]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strFontStyle]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,

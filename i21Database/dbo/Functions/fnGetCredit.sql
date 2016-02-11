@@ -14,4 +14,4 @@ RETURNS TABLE
 AS 
 
 RETURN 
-SELECT Value = CASE WHEN @value < 0 THEN ABS(@value) ELSE 0 END 
+SELECT Value = ROUND(CASE WHEN @value < 0 THEN ABS(@value) ELSE 0 END, 2) 

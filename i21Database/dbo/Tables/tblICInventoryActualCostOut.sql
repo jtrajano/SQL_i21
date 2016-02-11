@@ -24,7 +24,7 @@ This table is also used to map the negative ActualCost stock buckets it was able
 	Maps: None
 
 
-*	[dblQty] NUMERIC(18, 6) NOT NULL
+*	[dblQty] NUMERIC(38, 20) NOT NULL
 	Qty, in base units, that was sold or revalued. 
 	Maps: None
 
@@ -37,7 +37,8 @@ This table is also used to map the negative ActualCost stock buckets it was able
 		[intInventoryActualCostId] INT NULL, 
 		[intInventoryTransactionId] INT NOT NULL,
 		[intRevalueActualCostId] INT NULL,
-		[dblQty] NUMERIC(18, 6) NOT NULL,
+		[dblQty] NUMERIC(38, 20) NOT NULL,
+		[dblCostAdjustQty] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryActualCostOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO

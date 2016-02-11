@@ -15,8 +15,9 @@ Type the overview for the table here.
 		[intId] INT NOT NULL IDENTITY, 
 		[intInventoryLIFOId] INT NULL, 
 		[intInventoryTransactionId] INT NOT NULL, 
-		[dblQty] NUMERIC(18, 6) NOT NULL,
+		[dblQty] NUMERIC(38, 20) NOT NULL,
 		[intRevalueLifoId] INT NULL,
+		[dblCostAdjustQty] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryLIFOOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO

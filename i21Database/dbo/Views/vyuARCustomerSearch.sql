@@ -44,6 +44,7 @@ SELECT
 ,Cus.dblARBalance
 ,Cus.dtmLastActivityDate
 ,Cus.strStockStatus
+,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.intEntityCustomerId) = 1 then 1 else 0 end as bit)
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1

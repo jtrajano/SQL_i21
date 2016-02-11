@@ -48,7 +48,7 @@ ELSE
                   @fromValue = '',                                       -- Previous Value
                   @toValue = ''                                          -- New Value
          END
-         EXEC uspTRLoadPostingValidation @intLoadHeaderId,@ysnPostOrUnPost
+         EXEC uspTRLoadPostingValidation @intLoadHeaderId,@ysnPostOrUnPost,@intUserId
          EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
          EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
          EXEC uspTRLoadProcessToInvoice @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost

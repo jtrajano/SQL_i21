@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[intUnitMeasureConversionId] INT NOT NULL IDENTITY, 
 		[intUnitMeasureId] INT NOT NULL, 
 		[intStockUnitMeasureId] INT NOT NULL, 
-		[dblConversionToStock] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblConversionToStock] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICUnitMeasureConversion] PRIMARY KEY ([intUnitMeasureConversionId]), 

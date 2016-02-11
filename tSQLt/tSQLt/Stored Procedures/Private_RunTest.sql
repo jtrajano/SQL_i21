@@ -145,7 +145,10 @@ BEGIN
     END CATCH
 
     BEGIN TRY
-        ROLLBACK TRAN @TranName;
+		-- Replaced "ROLLBACK TRAN @TranName;" with "ROLLBACK TRAN;". The prior approach can't handle nested named transactions. 
+        --ROLLBACK TRAN @TranName;
+
+		ROLLBACK TRAN;
     END TRY
     BEGIN CATCH
         DECLARE @PostExecTrancount INT;
@@ -183,7 +186,8 @@ BEGIN
                'Error', 
                'TestResult entry is missing; Original outcome: ' + @Result + ', ' + @Msg;
     END    
-      
-
+     
+	-- Add "IF (@@TRANCOUNT > 0)" so that it will only do the commit if there is a transaction. 
+	IF (@@TRANCOUNT > 0)
     COMMIT;
 END;

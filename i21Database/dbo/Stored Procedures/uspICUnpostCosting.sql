@@ -47,9 +47,9 @@ DECLARE @intItemId AS INT
 		,@intItemLocationId AS INT 
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 					
-		,@dblQty AS NUMERIC(18, 6) 
-		,@dblUOMQty AS NUMERIC(18, 6)
-		,@dblCost AS NUMERIC(18, 6)
+		,@dblQty AS NUMERIC(38,20) 
+		,@dblUOMQty AS NUMERIC(38,20)
+		,@dblCost AS NUMERIC(38,20)
 		,@intLotId AS INT
 		,@dtmDate AS DATETIME
 		,@intCurrencyId AS INT 
@@ -58,7 +58,7 @@ DECLARE @intItemId AS INT
 
 -- Get the list of items to unpost
 BEGIN 
-	-- Insert the items per location, UOM, and if it exists, Lot
+	-- Insert the items per location, UOM, and if possible also by Lot. 
 	INSERT INTO @ItemsToUnpost (
 			intItemId
 			,intItemLocationId
@@ -219,6 +219,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
+			,[intTransactionDetailId]			
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -231,6 +232,7 @@ BEGIN
 			,[dtmCreated]
 			,[intCreatedEntityId]
 			,[intConcurrencyId]
+			,[intCostingMethod]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -247,6 +249,7 @@ BEGIN
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
 			,[intTransactionId]						= ActualTransaction.intTransactionId
+			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
 			,[strTransactionId]						= ActualTransaction.strTransactionId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
@@ -259,6 +262,7 @@ BEGIN
 			,[dtmCreated]							= GETDATE()
 			,[intCreatedEntityId]					= @intEntityUserSecurityId
 			,[intConcurrencyId]						= 1
+			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	

@@ -64,6 +64,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@TotalItemTax		DECIMAL(18,6) 
 				,@TaxGroupId		INT
 				,@ItemType			NVARCHAR(100)
+				,@SiteId			INT
 				
 
 		SELECT TOP 1
@@ -78,6 +79,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@ItemPrice				= tblARInvoiceDetail.[dblPrice]
 			,@QtyShipped			= tblARInvoiceDetail.[dblQtyShipped]
 			,@TaxGroupId			= tblARInvoiceDetail.[intTaxGroupId]
+			,@SiteId				= tblARInvoiceDetail.intSiteId 
 		FROM
 			tblARInvoiceDetail
 		WHERE
@@ -133,7 +135,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[strNotes] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId)
 		
 		SELECT @TotalItemTax = SUM([dblAdjustedTax]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
 								

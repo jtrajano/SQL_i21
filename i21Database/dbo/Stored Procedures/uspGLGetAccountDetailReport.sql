@@ -1,5 +1,4 @@
-﻿
-/****** Object:  StoredProcedure [dbo].[uspGLGetAccountDetailReport]    Script Date: 10/30/2015 7:17:16 PM ******/
+﻿/****** Object:  StoredProcedure [dbo].[uspGLGetAccountDetailReport]    Script Date: 10/30/2015 7:17:16 PM ******/
 CREATE PROCEDURE [dbo].[uspGLGetAccountDetailReport]
 (@xmlParam NVARCHAR(MAX)= '')
 as
@@ -9,7 +8,7 @@ IF (ISNULL(@xmlParam,'')  = '')
 BEGIN
 	SELECT DISTINCT
 	'' as AccountHeader,
-	'' as strAccountDescripion,
+	'' as strAccountDescription,
 	'' as strAccountType,
 	'' as strAccountGroup,
 	getdate() as dtmDate,
@@ -43,13 +42,13 @@ END
 --SET FMTONLY off;
 DECLARE @idoc INT
 DECLARE @filterTable FilterTableType
-DECLARE @strAccountIdFrom NVARCHAR(50)
-DECLARE @strAccountIdTo NVARCHAR(50)
-DECLARE @strPrimaryCodeFrom NVARCHAR(50)
-DECLARE @strPrimaryCodeTo NVARCHAR(50)
+DECLARE @strAccountIdFrom NVARCHAR(50)=''
+DECLARE @strAccountIdTo NVARCHAR(50)=''
+DECLARE @strPrimaryCodeFrom NVARCHAR(50)=''
+DECLARE @strPrimaryCodeTo NVARCHAR(50)=''
 DECLARE @strPrimaryCodeCondition NVARCHAR(50) = ''
-DECLARE @dtmDateFrom NVARCHAR(50)
-DECLARE @dtmDateTo NVARCHAR(50)
+DECLARE @dtmDateFrom NVARCHAR(50)=''
+DECLARE @dtmDateTo NVARCHAR(50)=''
 DECLARE @strAccountIdCondition NVARCHAR(20)=''
 
 IF @xmlParam <> ''
@@ -68,10 +67,11 @@ BEGIN
 						, [datatype] nvarchar(50))  
 		
 	DELETE FROM @filterTable WHERE [from] IS NULL OR RTRIM([from]) = ''
-	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] ,@strAccountIdCondition =[condition] from  @filterTable WHERE [fieldname] = 'strAccountId' 
-	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = 'Primary Account' 
-	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate' 
+	SELECT TOP 1 @strAccountIdFrom= ISNULL([from],'') , @strAccountIdTo = ISNULL([to],'') ,@strAccountIdCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'strAccountId' 
+	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'Primary Account' 
+	SELECT TOP 1 @dtmDateFrom= ISNULL([from],'') , @dtmDateTo = ISNULL([to],'') from  @filterTable WHERE [fieldname] = 'dtmDate' 
 
+	
 	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
 	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
 	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account' 
@@ -93,7 +93,7 @@ BEGIN
 END
 
 DECLARE @Where NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filterTable)
-DECLARE @cols NVARCHAR (MAX) = 'AccountHeader, strAccountDescripion,strAccountType,strAccountGroup,dtmDate,strBatchId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDetailDescription,strTransactionId, intTransactionId,strTransactionType,strTransactionForm,strModuleName,strReference,strReferenceDetail,strDocument,dblTotal,intAccountUnitId,strCode,intGLDetailId,ysnIsUnposted,strAccountId,[Primary Account],Location,strUOMCode,dblBeginBalance,dblBeginBalanceUnit'
+DECLARE @cols NVARCHAR (MAX) = 'AccountHeader, strAccountDescription,strAccountType,strAccountGroup,dtmDate,strBatchId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDetailDescription,strTransactionId, intTransactionId,strTransactionType,strTransactionForm,strModuleName,strReference,strReferenceDetail,strDocument,dblTotal,intAccountUnitId,strCode,intGLDetailId,ysnIsUnposted,strAccountId,[Primary Account],Location,strUOMCode,dblBeginBalance,dblBeginBalanceUnit'
 DECLARE @sqlCte NVARCHAR(MAX) 
 SET @sqlCte = ';WITH Units 
 AS 
@@ -127,8 +127,8 @@ SELECT B.strDescription  as strAccountDescription-- account description
 		,strReferenceDetail = detail.strReference
 	    ,strDocument = detail.strDocument
 		,dblTotal = ( 
-				CASE	WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(A.dblDebit, 0 ) - isnull(A.dblCredit,0) 
-						ELSE isnull(A.dblCredit, 0 ) - isnull(A.dblDebit,0) 
+				CASE	WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(ROUND(A.dblDebit,2), 0 ) - isnull(ROUND(A.dblCredit,2),0) 
+						ELSE isnull(ROUND(A.dblCredit,2), 0 ) - isnull(ROUND(A.dblDebit,2),0) 
 				END
 				)  
 		,B.intAccountUnitId 
@@ -182,19 +182,19 @@ AS
 		FROM tblGLAccount A
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT CASE WHEN ''' + ISNULL(@dtmDateFrom,'') + ''' = '''' THEN MIN(dtmDate) ELSE ''' +  ISNULL(@dtmDateFrom,'') + ''' END FROM GLAccountDetails)) D
+		OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnit(A.strAccountId,(SELECT CASE WHEN ''' + @dtmDateFrom + ''' = '''' THEN MIN(dtmDate) ELSE ''' +  @dtmDateFrom + ''' END FROM GLAccountDetails)) D
 ),'
 
 SET @sqlCte +='RAWREPORT AS (
 SELECT 
-''Account ID :'' + A.strAccountId + '' - '' + ISNULL(RTRIM(A.strAccountDescription),RTRIM(B.strAccountDescription)) + '' '' +  A.strAccountGroup + ''-'' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
-(CASE WHEN A.strAccountDescription  is  NULL  then B.strAccountDescription else A.strAccountDescription END) as strAccountDescripion
+ISNULL(RTRIM(A.strAccountDescription),RTRIM(B.strAccountDescription)) + '' '' +  A.strAccountGroup + ''-'' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
+(CASE WHEN A.strAccountDescription  is  NULL  then B.strAccountDescription else A.strAccountDescription END) as strAccountDescription
 ,(CASE WHEN A.strAccountType  is  NULL  then B.strAccountType else A.strAccountType END) as strAccountType
 ,(CASE WHEN A.strAccountGroup  is  NULL  then B.strAccountGroup else A.strAccountGroup END) as strAccountGroup
 ,A.dtmDate
 ,(CASE WHEN A.strBatchId  is  NULL  then '''' else A.strBatchId END) as strBatchId
-,(CASE WHEN A.dblDebit  is  NULL  then 0.00 else A.dblDebit END) as dblDebit
-,(CASE WHEN A.dblCredit  is  NULL  then 0.00 else A.dblCredit END) as dblCredit
+,(CASE WHEN A.dblDebit  is  NULL  then 0.00 else ROUND(A.dblDebit,2) END) as dblDebit
+,(CASE WHEN A.dblCredit  is  NULL  then 0.00 else ROUND(A.dblCredit,2) END) as dblCredit
 ,(CASE WHEN A.dblDebitUnit  is  NULL  then 0.00 else A.dblDebitUnit END) as dblDebitUnit
 ,(CASE WHEN A.dblCreditUnit  is  NULL  then 0.00 else A.dblCreditUnit END) as dblCreditUnit
 ,(CASE WHEN A.strDetailDescription  is  NULL  then '''' else A.strDetailDescription END) as strDetailDescription
@@ -215,14 +215,14 @@ SELECT
 ,B.[Primary Account]
 ,B.Location
 ,(CASE WHEN A.strUOMCode is  NULL  then '''' else A.strUOMCode END) as strUOMCode
-,ISNULL(B.dblBeginBalance,0) AS dblBeginBalance
+,ISNULL(ROUND(B.dblBeginBalance,2),0) AS dblBeginBalance
 ,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.dblBeginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0 
 					ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END	
 FROM
 GLAccountDetails A 
 OUTER APPLY(SELECT * from GLAccountBalance  bal WHERE bal.intAccountId = A.intAccountId and bal.intGLDetailId = A.intGLDetailId) B
 OUTER APPLY(SELECT dblLbsPerUnit from Units u WHERE u.intAccountId = A.intAccountId) U
-WHERE ISNULL(A.ysnIsUnposted ,0) = 0)'
+WHERE ISNULL(A.ysnIsUnposted ,0) = 0 and A.intAccountId NOT IN (SELECT intRetainAccount FROM tblGLFiscalYear))'
 
 
 
@@ -230,7 +230,7 @@ SELECT @sqlCte += ',cteBase as(
 	select * from RAWREPORT ' + CASE WHEN @Where <> 'Where' THEN  @Where END + ')'
 
 
-IF @dtmDateFrom IS NOT NULL
+IF @dtmDateFrom <> ''
 BEGIN
 	DECLARE @cols1 NVARCHAR(MAX) = ''
 	SELECT @cols1 = REPLACE (@cols,'dtmDate','''' + @dtmDateFrom  + '''' + ' as dtmDate')
@@ -242,7 +242,7 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
 
-	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
+	IF @strAccountIdFrom = '' AND @strPrimaryCodeFrom = ''
 	BEGIN
 	SET @sqlCte +=
 		',cteInactive (accountId,id)AS
@@ -256,17 +256,19 @@ BEGIN
 			SELECT * FROM RAWREPORT	A join cteInactive B
 			ON B.accountId = A.strAccountId 
 			AND B.id = A.intGLDetailId
-		)
-		SELECT ' + @cols1 + ' FROM cte1 union all select ' + @cols + ' from cteBase '
+		)'
+		
 	END
 
-	IF @strAccountIdFrom IS NOT NULL  AND @strPrimaryCodeFrom IS NULL
+	IF @strAccountIdFrom <> ''  AND @strPrimaryCodeFrom = ''
 	BEGIN
+
+
 	SET @sqlCte +=
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
+			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + @strAccountIdTo + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
 			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -276,8 +278,8 @@ BEGIN
 			ON B.accountId = A.strAccountId 
 			AND B.id = A.intGLDetailId
 		
-		)
-		SELECT ' + @cols1 + ' FROM cte1 union all select ' + @cols + ' from cteBase '
+		)'
+		
 	END
 	IF @strAccountIdFrom IS NULL  AND @strPrimaryCodeFrom IS NOT NULL
 	BEGIN
@@ -285,7 +287,7 @@ BEGIN
 		',cteInactive (accountId,id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
+			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + @strPrimaryCodeTo + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
 			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -295,14 +297,51 @@ BEGIN
 			ON B.accountId = A.strAccountId 
 			AND B.id = A.intGLDetailId
 		
-		)
-		SELECT ' + @cols1 + ' FROM cte1 union all select ' + @cols + ' from cteBase '
+		)'
+		
 	END
+	DECLARE @dte DATETIME 
+	DECLARE @dtmDateFrom1 NVARCHAR(10) = @dtmDateFrom
 	
+	SELECT TOP 1 @dte= dtmDateFrom from tblGLFiscalYear WHERE  CAST(@dtmDateFrom AS DATETIME) >= dtmDateFrom  and CAST(@dtmDateFrom AS DATETIME) <= dtmDateTo ORDER BY dtmDateFrom DESC
+	IF @dte IS NOT NULL
+	BEGIN
+		SELECT TOP 1 @dtmDateFrom =  convert(varchar(10), dtmDateFrom,101) ,@dtmDateTo = convert(varchar(20), dtmDateTo,101)  from tblGLFiscalYear WHERE  dtmDateTo = DATEADD(DAY,-1, @dte)
+	END
+	DECLARE @cols2 NVARCHAR (MAX) = 'AccountHeader, strAccountDescription,strAccountType = '''',strAccountGroup = '''',dtmDate,strBatchId = '''',dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDetailDescription='''',strTransactionId, intTransactionId = 0,strTransactionType = '''',strTransactionForm= '''',strModuleName='''',strReference ,strReferenceDetail='''',strDocument='''',dblTotal=dblCredit-dblDebit,intAccountUnitId = 0,strCode = '''',intGLDetailId= 0,ysnIsUnposted=0,strAccountId,[Primary Account]='''',Location='''',strUOMCode='''',dblBeginBalance,dblBeginBalanceUnit'
+	SET @cols2 = REPLACE(@cols2, 'AccountHeader', 'strAccountId + '' - '' + strAccountDescription + ''(Retained Earnings)'' as AccountHeader' )
+	SET @sqlCte +=
+	',cteRetain as(
+	select sum(dblDebit) dblDebit,sum(dblCredit) dblCredit,
+	sum(dblDebitUnit) dblDebitUnit, sum(dblCreditUnit) dblCreditUnit,
+	intAccountId, ysnIsUnposted, dtmDate from tblGLDetail group by intAccountId , ysnIsUnposted, dtmDate
+	having ysnIsUnposted = 0
+	and dtmDate between '''+ @dtmDateFrom + ''' and '''+ @dtmDateTo + '''),
+	cteRetain1 as
+	(select 
+	CAST(CONVERT(VARCHAR(4),YEAR(dtmDate)) + ''-'' +  CONVERT(VARCHAR(2), MONTH (dtmDate)) + ''-'' + ''1'' AS DATE) as dtmDate,
+	(select top 1 strAccountId from tblGLFiscalYear F join tblGLAccount A on F.intRetainAccount = A.intAccountId) as strAccountId,
+	(select top 1 strDescription from tblGLFiscalYear F join tblGLAccount A on F.intRetainAccount = A.intAccountId) as strAccountDescription,
+	DATENAME(YEAR,dtmDate) + ''-'' + CAST(MONTH(dtmDate) AS VARCHAR(4))  as strTransactionId,
+	DATENAME(MONTH,dtmDate) + '' '' +  DATENAME(YEAR,dtmDate) + '' '' +c.strAccountType as strReference,
+	D.beginBalance dblBeginBalance,
+	D.beginBalanceUnit dblBeginBalanceUnit, 
+	sum(dblDebit) dblDebit,
+	sum(dblCredit) dblCredit, 
+	sum(dblDebitUnit) dblDebitUnit,
+	sum(dblCreditUnit) dblCreditUnit,  
+	c.strAccountType from cteRetain a
+	join tblGLAccount b on a.intAccountId = b.intAccountId
+	join tblGLAccountGroup c on b.intAccountGroupId = c.intAccountGroupId
+	OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnitRE(b.strAccountId,''' + @dtmDateFrom1 + ''') D
+	where c.strAccountType in (''Revenue'', ''Expense'') 
+	group by  DATENAME(MONTH,dtmDate) ,DATENAME(YEAR,dtmDate),MONTH(dtmDate) ,strAccountType, year(dtmDate),D.beginBalance,D.beginBalanceUnit)
+	select ' + @cols2 + ' FROM cteRetain1 union all select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
+
 END
 ELSE
 BEGIN
 	SET @sqlCte += 'SELECT * FROM cteBase'
 END
-EXEC (@sqlCte)
+	EXEC (@sqlCte)
 END

@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [uspMFLotMerge] 
  @intLotId INT,     
  @intNewLotId INT,  
- @dblMergeQty NUMERIC(16,8),
+ @dblMergeQty NUMERIC(18,6),
  @intUserId INT
 
 AS
@@ -17,7 +17,7 @@ BEGIN TRY
 	DECLARE @intSourceId INT
 	DECLARE @intSourceTransactionTypeId INT
 	DECLARE @intLotStatusId INT
-	DECLARE @dblLotWeightPerUnit NUMERIC(16,8)
+	DECLARE @dblLotWeightPerUnit NUMERIC(38,20)
 		
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
@@ -28,9 +28,9 @@ BEGIN TRY
 	DECLARE @intNewStorageLocationId INT	
 	DECLARE @intNewItemUOMId INT
 	DECLARE @intNewLotStatusId INT
-	DECLARE @dblNewLotWeightPerUnit NUMERIC(16,8)
+	DECLARE @dblNewLotWeightPerUnit NUMERIC(38,20)
 	DECLARE @strNewLotNumber NVARCHAR(100)
-	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
+	DECLARE @dblAdjustByQuantity NUMERIC(18,6)
 	
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -67,10 +67,10 @@ BEGIN TRY
 		RAISERROR(51195,11,1)
 	END
 
-	IF @dblNewLotWeightPerUnit <> @dblLotWeightPerUnit
-	BEGIN
-		RAISERROR(51196,11,1)
-	END
+	--IF ROUND(@dblNewLotWeightPerUnit,3) <> ROUND(@dblLotWeightPerUnit,3)
+	--BEGIN
+	--	RAISERROR(51196,11,1)
+	--END
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,

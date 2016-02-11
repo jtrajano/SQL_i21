@@ -10,13 +10,13 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLIFOStorage]
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
-	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(18,6)
+	,@dblQty NUMERIC(38,20) 
+	,@dblCost AS NUMERIC(38,20)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
 	,@intEntityUserSecurityId AS INT
-	,@RemainingQty AS NUMERIC(18,6) OUTPUT
-	,@CostUsed AS NUMERIC(18,6) OUTPUT 
+	,@RemainingQty AS NUMERIC(38,20) OUTPUT
+	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@SourceInventoryLIFOStorageId AS INT OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF

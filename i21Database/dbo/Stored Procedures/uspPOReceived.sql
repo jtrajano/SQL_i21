@@ -94,11 +94,19 @@ END
 -- Update the PO receive Qty
 BEGIN 
 	UPDATE	PODetail
-	SET		dblQtyReceived = PODetail.dblQtyReceived + dbo.fnCalculateQtyBetweenUOM(ReceiptItems.intItemUOMId, PODetail.intUnitOfMeasureId, ReceiptItems.dblQty)
-	FROM	tblPOPurchaseDetail PODetail INNER JOIN @ItemsFromInventoryReceipt ReceiptItems
-				ON PODetail.intItemId = ReceiptItems.intItemId 
+		SET		dblQtyReceived = PODetail.dblQtyReceived + dbo.fnCalculateQtyBetweenUOM(Items.intItemUOMId, PODetail.intUnitOfMeasureId, Items.dblTotalQty)
+	FROM	tblPOPurchaseDetail PODetail 
+	CROSS APPLY ( 
+	
+		SELECT 
+			SUM(ReceiptItems.dblQty) AS dblTotalQty
+			,ReceiptItems.intItemUOMId
+		FROM @ItemsFromInventoryReceipt ReceiptItems
+				WHERE PODetail.intItemId = ReceiptItems.intItemId 
 				AND PODetail.intPurchaseDetailId = ReceiptItems.intLineNo
 				AND PODetail.intPurchaseId = ReceiptItems.intOrderId
+		GROUP BY ReceiptItems.intItemUOMId
+	) Items
 END
 
 --UPDATE CONTRACT IF PO ITEM IS PART OF A CONTRACT

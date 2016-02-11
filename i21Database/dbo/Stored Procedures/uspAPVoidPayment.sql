@@ -95,7 +95,8 @@ BEGIN
 			[ysnVoid],
 			[ysnPrinted],
 			[ysnDeleted],
-			[dtmDateDeleted]
+			[dtmDateDeleted],
+			[ysnPrepay]
 		)
 		VALUES
 		(
@@ -119,7 +120,8 @@ BEGIN
 			p.[ysnVoid],
 			p.[ysnPrinted],
 			p.[ysnDeleted],
-			p.[dtmDateDeleted]
+			p.[dtmDateDeleted],
+			p.[ysnPrepay]
 		)
 		OUTPUT p.intPaymentId, inserted.intPaymentId INTO #tmpPayables(intPaymentId, intNewPaymentId); --get the new and old payment id
 
