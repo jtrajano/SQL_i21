@@ -37,7 +37,7 @@ BEGIN
 		WHERE M.intLocationId = @intLocationId
 			AND M.intMachineId NOT IN (
 				SELECT *
-				FROM fn_SQLInClause(@strMachineId)
+				FROM dbo.[fnSplitString](@strMachineId,',')
 				)
 			AND M.strName LIKE '%' + @strName + '%'
 		) A
