@@ -1094,7 +1094,7 @@ IF @post = 1
 		)
 		--DEBIT
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= (CASE WHEN UPPER(RTRIM(LTRIM(PM.strPaymentMethod))) = UPPER('Write Off') THEN @WriteOffAccount ELSE A.intAccountId END)
 			,dblDebit					= A.dblAmountPaid
@@ -1134,7 +1134,7 @@ IF @post = 1
 		UNION ALL
 		--CREDIT Overpayment
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
@@ -1171,7 +1171,7 @@ IF @post = 1
 		UNION ALL
 		--CREDIT Prepayment
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount 
 			,dblDebit					= 0
@@ -1209,7 +1209,7 @@ IF @post = 1
 		UNION ALL
 		--DEBIT Discount
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @DiscountAccount 
 			,dblDebit					= SUM(B.dblDiscount)
@@ -1258,7 +1258,7 @@ IF @post = 1
 		UNION ALL
 		--DEBIT Interest
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount 
 			,dblDebit					= SUM(B.dblInterest)
@@ -1308,7 +1308,7 @@ IF @post = 1
 		UNION ALL
 		--CREDIT
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= B.intAccountId 
 			,dblDebit					= 0
@@ -1359,7 +1359,7 @@ IF @post = 1
 		UNION ALL
 		
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
@@ -1408,7 +1408,7 @@ IF @post = 1
 		UNION ALL
 		
 		SELECT
-			 dtmDate					= @PostDate
+			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId
 			,intAccountId				= @IncomeInterestAccount
 			,dblDebit					= 0
@@ -1497,7 +1497,7 @@ IF @post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 @PostDate
+				 GL.dtmDate
 				,@batchId
 				,GL.intAccountId
 				,dblDebit						= GL.dblCredit
@@ -1703,8 +1703,8 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.ysnPaid = 0,
-				tblARInvoice.dtmPostDate = ISNULL((SELECT TOP 1 dtmDate FROM tblGLDetail WHERE strTransactionId = C.strInvoiceNumber AND intTransactionId = C.intInvoiceId AND ysnIsUnposted = 0), C.dtmPostDate)
+				tblARInvoice.ysnPaid = 0
+				--,tblARInvoice.dtmPostDate = ISNULL((SELECT TOP 1 dtmDate FROM tblGLDetail WHERE strTransactionId = C.strInvoiceNumber AND intTransactionId = C.intInvoiceId AND ysnIsUnposted = 0), C.dtmPostDate)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1958,8 +1958,8 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.ysnPaid = (CASE WHEN (C.dblAmountDue) = 0 THEN 1 ELSE 0 END),
-				tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN @PostDate ELSE C.dtmPostDate END)
+				tblARInvoice.ysnPaid = (CASE WHEN (C.dblAmountDue) = 0 THEN 1 ELSE 0 END)
+				--,tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN @PostDate ELSE C.dtmPostDate END)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 

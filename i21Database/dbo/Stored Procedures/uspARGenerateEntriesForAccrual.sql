@@ -14,6 +14,9 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @ZeroDecimal decimal(18,6)
 SET @ZeroDecimal = 0.000000	
 
+DECLARE @PostDate AS DATETIME
+SET @PostDate = CAST(GETDATE() AS DATE)
+
 WHILE EXISTS(SELECT NULL FROM @Invoices I LEFT OUTER JOIN @GLEntries G ON I.intId = G.intTransactionId WHERE ISNULL(G.intTransactionId,0) = 0)
 BEGIN
 	DECLARE  @InvoiceId				INT
@@ -60,7 +63,7 @@ BEGIN
 				,[intConcurrencyId]
 			)
 	SELECT
-		 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= A.intAccountId
 		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
@@ -124,7 +127,7 @@ BEGIN
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
 		,dblExchangeRate			= 1
-		,dtmDateEntered				= GETDATE()
+		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 		,intJournalLineNo			= A.intInvoiceId
@@ -148,7 +151,7 @@ BEGIN
 	UNION ALL
 	--CREDIT Deferred Revenue
 	SELECT
-		 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= @DeferredRevenueAccountId
 		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal END
@@ -210,7 +213,7 @@ BEGIN
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
 		,dblExchangeRate			= 1
-		,dtmDateEntered				= GETDATE()
+		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 		,intJournalLineNo			= A.intInvoiceId
@@ -310,7 +313,7 @@ BEGIN
 				)
 		--CREDIT	
 		SELECT
-			 dtmDate					= DATEADD(mm, @LoopCounter, DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0))
+			 dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
 			,strBatchID					= @BatchId
 			,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 												THEN
@@ -333,7 +336,7 @@ BEGIN
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDate
 			,strJournalLineDescription	= B.strItemDescription 
 			,intJournalLineNo			= B.intInvoiceDetailId
@@ -372,7 +375,7 @@ BEGIN
 		UNION ALL
 		--DEBIT Deffered Revenue	
 		SELECT
-			 dtmDate					= DATEADD(mm, @LoopCounter, DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0))
+			 dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
 			,strBatchID					= @BatchId
 			,intAccountId				= @DeferredRevenueAccountId
 			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @MiscPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) ELSE 0 END
@@ -384,7 +387,7 @@ BEGIN
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDate
 			,strJournalLineDescription	= B.strItemDescription 
 			,intJournalLineNo			= B.intInvoiceDetailId
