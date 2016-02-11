@@ -9,10 +9,8 @@ FROM (
 		 , SO.dblCommitted 
 	FROM (
 		SELECT SOD.intItemId
-			 , SO.intCompanyLocationId
-			 , dblOrdered = SUM(SOD.dblQtyOrdered)
-			 , dblShipped = SUM(SOD.dblQtyShipped)
-			 , dblCommitted = SUM(SOD.dblQtyOrdered) - SUM(SOD.dblQtyShipped)
+			 , SO.intCompanyLocationId			 
+			 , dblCommitted = SUM(dbo.fnICConvertUOMtoStockUnit(SOD.intItemId, SOD.intItemUOMId, SOD.dblQtyOrdered)) - SUM(dbo.fnICConvertUOMtoStockUnit(SOD.intItemId, SOD.intItemUOMId, SOD.dblQtyShipped))
 		FROM tblSOSalesOrderDetail SOD
 			INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
 			LEFT JOIN (tblARInvoiceDetail ID INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId)

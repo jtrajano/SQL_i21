@@ -79,7 +79,7 @@ END
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 
 --Committed QUatities
-EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId
+EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
 
 --On-Hand Quantities
 EXEC dbo.[uspARUpdateOnHand] @TransactionId, @post
