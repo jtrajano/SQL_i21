@@ -80,7 +80,7 @@ WHERE I.ysnPosted = 1
 
 UNION ALL
 						
-SELECT I.dtmDate
+SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
 	 , I.strInvoiceNumber
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
@@ -92,28 +92,29 @@ SELECT I.dtmDate
 	 , dblInterest			= 0
 	 , I.strTransactionType	  
 	 , I.intEntityCustomerId
-	 , I.dtmDueDate
+	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	 , I.intTermId
 	 , T.intBalanceDue
 	 , strCustomerName		= E.strName
 	 , strCustomerNumber	= C.strCustomerNumber
-	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) <= 0 THEN 'Current'
-					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) > 0  AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) <= 10 THEN '1 - 10 Days'
-			         WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) > 10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) <= 30 THEN '11 - 30 Days'
-				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) > 30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) <= 60 THEN '31 - 60 Days'     
-				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) <= 90 THEN '61 - 90 Days'    
-				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) > 90 THEN 'Over 90' END
+	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) <= 0 THEN 'Current'
+					 WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) > 0  AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) <= 10 THEN '1 - 10 Days'
+			         WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) > 10 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) <= 30 THEN '11 - 30 Days'
+				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) > 30 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) <= 60 THEN '31 - 60 Days'     
+				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) > 60 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) <= 90 THEN '61 - 90 Days'    
+				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), @dtmDateTo) > 90 THEN 'Over 90' END
 	 , I.ysnPosted
 	 , dblAvailableCredit	= ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
  AND I.ysnForgiven = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
- AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ISNULL(P.dtmDatePaid, I.dtmDate)))) BETWEEN @dtmDateFrom AND @dtmDateTo
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -223,17 +224,18 @@ SELECT I.strInvoiceNumber
 	  , dblAmountDue		= 0    
 	  , dblDiscount			= 0
 	  , dblInterest			= 0    
-	  , I.dtmDueDate
-	  , dtmDatePaid			= NULL    
+	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+	  , P.dtmDatePaid
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
  AND I.ysnForgiven = 0
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
- AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ISNULL(P.dtmDatePaid, I.dtmDate)))) BETWEEN @dtmDateFrom AND @dtmDateTo
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId

@@ -3269,6 +3269,7 @@
     <None Include="Scripts\Post-Deployment\EM\019_RemoveEmailToParentEntity.sql" />
     <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddPaycheckDirectDepositEntries.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\15_FixInvoiceDateForCredits.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

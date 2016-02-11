@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCreatePrePayment]
-	 @PaymentId		as int
-	,@Post			as bit			= 1
-	,@BatchId		as nvarchar(20)	= NULL
-	,@UserId		as int			= 1
-	,@NewInvoiceId	as int			= NULL OUTPUT			
+	  @PaymentId	AS INT
+	, @Post			AS BIT			= 1
+	, @BatchId		AS NVARCHAR(20)	= NULL
+	, @UserId		AS INT			= 1
+	, @NewInvoiceId	AS INT			= NULL OUTPUT			
 AS
 
 BEGIN
@@ -15,13 +15,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal decimal(18,6)
-		,@DateOnly DATETIME
-		,@ARAccountId int
+DECLARE @ZeroDecimal DECIMAL(18,6)		
+	  , @ARAccountId INT
 
 SET @ZeroDecimal = 0.000000
-		
-SELECT @DateOnly = CAST(GETDATE() as date)
 SET @ARAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 
 IF @ARAccountId IS NULL OR @ARAccountId = 0
@@ -74,12 +71,12 @@ INSERT INTO [tblARInvoice]
 SELECT
 	[strInvoiceOriginId]	= NULL
 	,[intCustomerId]		= A.[intEntityCustomerId] 
-	,[dtmDate]				= @DateOnly
-	,[dtmDueDate]			= @DateOnly
+	,[dtmDate]				= A.dtmDatePaid
+	,[dtmDueDate]			= A.dtmDatePaid
 	,[intCurrencyId]		= ISNULL(A.[intCurrencyId], 0)
 	,[intCompanyLocationId]	= ISNULL(A.[intLocationId], 0)
 	,[intSalespersonId]		= ISNULL(C.[intSalespersonId], 0) 
-	,[dtmShipDate]			= GETDATE()
+	,[dtmShipDate]			= A.dtmDatePaid
 	,[intShipViaId]			= ISNULL(EL.[intShipViaId], 0)
 	,[strPONumber]			= ''
 	,[intTermId]			= ISNULL(EL.[intTermsId], 0)
@@ -94,7 +91,7 @@ SELECT
 	,[intPaymentMethodId]	= ISNULL(A.[intPaymentMethodId], 0)
 	,[strComments]			= A.strRecordNumber 
 	,[intAccountId]			= @ARAccountId 
-	,[dtmPostDate]			= NULL
+	,[dtmPostDate]			= A.dtmDatePaid
 	,[ysnPosted]			= 1
 	,[ysnPaid]				= 0
 	,[strShipToLocationName]= ISNULL(SL.[strLocationName], EL.[strLocationName])
@@ -145,7 +142,7 @@ WHERE
 	A.[intPaymentId] = @PaymentId 
 	
 	
-DECLARE @NewId as int
+DECLARE @NewId AS INT
 SET @NewId = SCOPE_IDENTITY()
 SET @NewInvoiceId = @NewId 
 
