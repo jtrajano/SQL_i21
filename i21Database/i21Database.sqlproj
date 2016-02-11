@@ -3377,6 +3377,10 @@
     <Build Include="dbo\Views\vyuHDCrmKeyword.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityProspect.sql" />
     <Build Include="dbo\Tables\tblMFBuyingGroup.sql" />
+    <Build Include="dbo\Tables\tblMFForecastItemType.sql" />
+    <Build Include="dbo\Tables\tblMFForecastItemValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveForecast.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetForecastDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
