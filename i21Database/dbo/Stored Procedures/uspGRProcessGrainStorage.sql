@@ -98,11 +98,18 @@ BEGIN TRY
 	FROM @BillDiscounts	
 	WHILE @intBillDiscountKey > 0
 	BEGIN
-		    SET @intCustomerStorageId = NULL
-			SELECT @intCustomerStorageId = intCustomerStorageId			
-			FROM @BillDiscounts
-			WHERE intBillDiscountKey = @intBillDiscountKey
-		
+		SET @intCustomerStorageId = NULL
+		SET @dblStorageDuePerUnit= 0		 
+		SET @dblStorageDueAmount= 0	
+		SET @dblStorageDueTotalPerUnit= 0	
+		SET @dblStorageDueTotalAmount= 0	
+		SET @dblStorageBilledPerUnit= 0	
+		SET @dblStorageBilledAmount= 0
+
+		SELECT @intCustomerStorageId = intCustomerStorageId			
+		FROM @BillDiscounts
+		WHERE intBillDiscountKey = @intBillDiscountKey
+				
 		  EXEC uspGRCalculateStorageCharge
 		  @strProcessType
 		 ,@strUpdateType
