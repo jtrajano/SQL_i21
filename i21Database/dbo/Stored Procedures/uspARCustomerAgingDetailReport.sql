@@ -15,6 +15,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 
 		DECLARE @temp_aging_table TABLE(
 			 [strInvoiceNumber]			NVARCHAR(100)
+			,[strRecordNumber]			NVARCHAR(100)
 			,[intInvoiceId]				INT
 			,[strCustomerName]			NVARCHAR(100)
 			,[strBOLNumber]				NVARCHAR(100)
@@ -125,6 +126,7 @@ END
 
 SET @query = 'DECLARE @temp_aging_table TABLE(
 	 [strInvoiceNumber]			NVARCHAR(100)
+	,[strRecordNumber]			NVARCHAR(100)
 	,[intInvoiceId]				INT
 	,[strCustomerName]			NVARCHAR(100)
 	,[strBOLNumber]				NVARCHAR(100)
