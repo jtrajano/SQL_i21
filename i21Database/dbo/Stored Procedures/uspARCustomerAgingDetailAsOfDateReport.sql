@@ -121,7 +121,8 @@ WHERE I.ysnPosted = 1
       
 UNION ALL      
       
-SELECT I.dtmDate      
+SELECT DISTINCT
+       I.dtmDate      
      , I.strInvoiceNumber
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
@@ -150,7 +151,7 @@ FROM tblARInvoice I
 	 INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
 	 INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
 	 INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
-	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) ON I.intInvoiceId = PD.intInvoiceId
+	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId
 	 LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted  = 1
  AND I.ysnForgiven = 0 
@@ -240,7 +241,8 @@ WHERE I.ysnPosted = 1
 						      
 UNION ALL      
       
-SELECT I.strInvoiceNumber
+SELECT DISTINCT
+    I.strInvoiceNumber
   , I.intInvoiceId
   , I.strBOLNumber
   , dblAmountPaid		= ISNULL(PD.dblPayment,0)
