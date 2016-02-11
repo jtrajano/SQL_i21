@@ -69,13 +69,60 @@ BEGIN TRY
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 				BEGIN
 					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @CreateTicketId AND intUserRoleId = @UserRoleID
+				END
+				
+				DECLARE @OpenTicketsMenuId INT
+				SELECT  @OpenTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @OpenTicketsMenuId AND intUserRoleId = @UserRoleID
 				END					
 				
+				DECLARE @TicketsReportedByMeMenuId INT
+				SELECT  @TicketsReportedByMeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @TicketsReportedByMeMenuId AND intUserRoleId = @UserRoleID
+				END
+
 				DECLARE @ProjectListsId INT
 				SELECT @ProjectListsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 				BEGIN
 					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @ProjectListsId AND intUserRoleId = @UserRoleID
+				END
+
+				/* PURCHASING */
+				DECLARE @AccountsPayableParentMenuId INT
+				SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+
+				DECLARE @VendorMenuId INT
+				SELECT  @VendorMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @VendorMenuId AND intUserRoleId = @UserRoleID
+				END
+
+				/* SALES */
+				DECLARE @AccountsReceivableParentMenuId INT
+				SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0
+
+				DECLARE @CustomerMenuId INT
+				SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @CustomerMenuId AND intUserRoleId = @UserRoleID
+				END
+
+				/* GRAIN */
+				DECLARE @GrainParentMenuId INT
+				SELECT @GrainParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Grain' AND strModuleName = 'Grain' AND intParentMenuID = 0
+
+				DECLARE @StorageSettleMenuId INT
+				SELECT  @StorageSettleMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @StorageSettleMenuId AND intUserRoleId = @UserRoleID
 				END
 			END
 		
