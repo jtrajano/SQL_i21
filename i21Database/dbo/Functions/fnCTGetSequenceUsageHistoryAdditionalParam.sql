@@ -10,8 +10,9 @@ RETURNS @returntable	TABLE
 	intExternalHeaderId	INT,
 	intContractHeaderId	INT,
 	intContractSeq		INT,
-	strNumber			NVARCHAR(MAX),
-	strUserName			NVARCHAR(MAX)
+	strNumber			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strUserName			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strHeaderIdColumn	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -20,7 +21,8 @@ BEGIN
 			@intContractHeaderId	INT,
 			@intContractSeq			INT,
 			@strNumber				NVARCHAR(MAX),
-			@strUserName			NVARCHAR(MAX) 
+			@strUserName			NVARCHAR(MAX), 
+			@strHeaderIdColumn		NVARCHAR(MAX) 
 
 	SELECT	@intContractHeaderId	=	intContractHeaderId,
 			@intContractSeq			=	intContractSeq 
@@ -34,7 +36,8 @@ BEGIN
 	IF	@strScreenName = 'Inventory Receipt'
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intInventoryReceiptId,
-				@strNumber						=	HR.strReceiptNumber
+				@strNumber						=	HR.strReceiptNumber,
+				@strHeaderIdColumn				=	'intInventoryReceiptId'
 		FROM	tblICInventoryReceiptItem		DL
 		JOIN	tblICInventoryReceipt			HR	ON	HR.intInventoryReceiptId	=	DL.intInventoryReceiptId
 		WHERE	DL.intInventoryReceiptItemId	=	@intExternalId
@@ -42,7 +45,8 @@ BEGIN
 	ELSE IF @strScreenName = 'Invoice'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intInvoiceId,
-				@strNumber				=	HR.strInvoiceNumber
+				@strNumber				=	HR.strInvoiceNumber,
+				@strHeaderIdColumn		=	'intInvoiceId'
 		FROM	tblARInvoiceDetail		DL
 		JOIN	tblARInvoice			HR	ON	HR.intInvoiceId	=	DL.intInvoiceId 
 		WHERE	DL.intInvoiceDetailId	=	@intExternalId
@@ -50,7 +54,8 @@ BEGIN
 	ELSE IF @strScreenName = 'Load Schedule'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intLoadId,
-				@strNumber				=	LTRIM(HR.[strLoadNumber])
+				@strNumber				=	HR.strLoadNumber,
+				@strHeaderIdColumn		=	'intLoadId'
 		FROM	tblLGLoadDetail			DL
 		JOIN	tblLGLoad				HR	ON	HR.intLoadId	=	DL.intLoadId 
 		WHERE	DL.intLoadDetailId		=	@intExternalId
@@ -58,7 +63,8 @@ BEGIN
 	ELSE IF @strScreenName = 'Transport Purchase'
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intLoadHeaderId,
-				@strNumber						=	HR.strTransaction
+				@strNumber						=	HR.strTransaction,
+				@strHeaderIdColumn				=	'intLoadHeaderId'
 		FROM	tblTRLoadReceipt				DL
 		JOIN	tblTRLoadHeader					HR	ON	HR.intLoadHeaderId	=	DL.intLoadHeaderId
 		WHERE	DL.intLoadReceiptId				=	@intExternalId
@@ -66,7 +72,8 @@ BEGIN
 	ELSE IF @strScreenName = 'Transport Sale'
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intLoadHeaderId,
-				@strNumber						=	HR.strTransaction
+				@strNumber						=	HR.strTransaction,
+				@strHeaderIdColumn				=	'intLoadHeaderId'
 		FROM	tblTRLoadDistributionDetail		DD
 		JOIN	tblTRLoadDistributionHeader		DL	ON	DL.intLoadDistributionHeaderId	=	DD.intLoadDistributionHeaderId 
 		JOIN	tblTRLoadHeader					HR	ON	HR.intLoadHeaderId				=	DL.intLoadHeaderId
@@ -75,14 +82,16 @@ BEGIN
 	ELSE IF @strScreenName = 'Scale'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intTicketId,
-				@strNumber				=	HR.strTicketNumber
+				@strNumber				=	HR.strTicketNumber,
+				@strHeaderIdColumn		=	'intTicketId'
 		FROM	tblSCTicket				HR
 		WHERE	HR.intTicketId			=	@intExternalId
 	END
 	ELSE IF @strScreenName = 'Purchase Order'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intPurchaseId,
-				@strNumber				=	HR.strPurchaseOrderNumber
+				@strNumber				=	HR.strPurchaseOrderNumber,
+				@strHeaderIdColumn		=	'intPurchaseId'
 		FROM	tblPOPurchaseDetail		DL
 		JOIN	tblPOPurchase			HR	ON	HR.intPurchaseId	=	DL.intPurchaseId 
 		WHERE	DL.intPurchaseDetailId	=	@intExternalId
@@ -90,14 +99,16 @@ BEGIN
 	ELSE IF @strScreenName = 'Settle Storage'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
-				@strNumber				=	HR.strStorageTicketNumber
+				@strNumber				=	HR.strStorageTicketNumber,
+				@strHeaderIdColumn		=	'intCustomerStorageId'
 		FROM	tblGRCustomerStorage	HR	
 		WHERE	HR.intCustomerStorageId	=	@intExternalId
 	END
 	ELSE IF @strScreenName = 'Inventory Shipment'
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intInventoryShipmentId,
-				@strNumber						=	HR.strShipmentNumber
+				@strNumber						=	HR.strShipmentNumber,
+				@strHeaderIdColumn				=	'intInventoryShipmentId'
 		FROM	tblICInventoryShipmentItem		DL
 		JOIN	tblICInventoryShipment			HR	ON	HR.intInventoryShipmentId	=	DL.intInventoryShipmentId
 		WHERE	DL.intInventoryShipmentItemId	=	@intExternalId
@@ -109,13 +120,15 @@ BEGIN
 			intContractHeaderId, 
 			intContractSeq,
 			strNumber,
-			strUserName
+			strUserName,
+			strHeaderIdColumn
 	)
 	SELECT	@intExternalHeaderId, 
 			@intContractHeaderId, 
 			@intContractSeq,
 			@strNumber,
-			@strUserName
+			@strUserName,
+			@strHeaderIdColumn
 		
 	RETURN;
 END
