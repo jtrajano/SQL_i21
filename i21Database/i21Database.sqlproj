@@ -3376,6 +3376,7 @@
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByLine.sql" />
     <Build Include="dbo\Views\vyuHDCrmKeyword.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityProspect.sql" />
+    <Build Include="dbo\Tables\tblMFBuyingGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
