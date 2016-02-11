@@ -3189,6 +3189,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailAsOfDateReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
