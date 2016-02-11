@@ -196,11 +196,16 @@ Begin
 		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
 		And mc.intManufacturingCellId=@intCellId
 
-		Select @strWorkOrderNo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  
-		from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
-
-		if ISNULL(@strWorkOrderNo,'')=''
-			Set @strWorkOrderNo=convert(varchar,@strDemandNo) + '01'
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		,@intItemId = @intItemId
+		,@intManufacturingId = @intCellId
+		,@intSubLocationId = 0
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = @intBlendRequirementId
+		,@intPatternCode = 93
+		,@ysnProposed = 0
+		,@strPatternString = @strWorkOrderNo OUTPUT
 
 		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
 		And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null

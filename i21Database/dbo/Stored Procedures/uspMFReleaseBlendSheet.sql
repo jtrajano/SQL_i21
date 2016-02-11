@@ -46,6 +46,7 @@ BEGIN TRY
 		,@intBusinessShiftId INT
 		,@dtmCurrentDateTime DATETIME
 		,@dtmProductionDate DATETIME
+	Declare @intCategoryId int
 
 	SELECT @dtmCurrentDateTime = GetDate()
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -236,6 +237,7 @@ BEGIN TRY
 	SELECT @strBlendItemNo = strItemNo
 		,@strBlendItemStatus = strStatus
 		,@ysnRequireCustomerApproval = ysnRequireCustomerApproval
+		,@intCategoryId = intCategoryId
 	FROM tblICItem
 	WHERE intItemId = @intBlendItemId
 
@@ -503,16 +505,16 @@ BEGIN TRY
 		END
 
 		--Create WorkOrder
-		IF (
-				SELECT count(1)
-				FROM tblMFWorkOrder
-				WHERE strWorkOrderNo LIKE @strDemandNo + '%'
-				) = 0
-			SET @strNextWONo = convert(VARCHAR, @strDemandNo) + '01'
-		ELSE
-			SELECT @strNextWONo = convert(VARCHAR, @strDemandNo) + right('00' + Convert(VARCHAR, (Max(Cast(right(strWorkOrderNo, 2) AS INT))) + 1), 2)
-			FROM tblMFWorkOrder
-			WHERE strWorkOrderNo LIKE @strDemandNo + '%'
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intBlendItemId
+				,@intManufacturingId = @intCellId
+				,@intSubLocationId = 0
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = @intBlendRequirementId
+				,@intPatternCode = 93
+				,@ysnProposed = 0
+				,@strPatternString = @strNextWONo OUTPUT
 
 		SET @intExecutionOrder = @intExecutionOrder + 1
 

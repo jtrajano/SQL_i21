@@ -15,6 +15,8 @@ BEGIN TRY
 	DECLARE @intLocationId INT
 	DECLARE @dblPlannedQuantity NUMERIC(18, 6)
 	DECLARE @dblBulkReqQuantity NUMERIC(18, 6)
+	Declare @intCategoryId int
+	Declare @intCellId int
 
 	SET @intWorkOrderId = 0;
 
@@ -195,6 +197,7 @@ BEGIN TRY
 
 	SELECT @intWorkOrderId = intWorkOrderId
 		,@intBlendRequirementId = intBlendRequirementId
+		,@intCellId = intCellId
 	FROM @tblBlendSheet
 
 	SELECT @strDemandNo = strDemandNo
@@ -211,6 +214,7 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@dblPlannedQuantity = dblPlannedQuantity
 	FROM @tblBlendSheet
+	Select @intCategoryId=intCategoryId From tblICItem Where intItemId=@intBlendItemId
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
@@ -226,16 +230,16 @@ BEGIN TRY
 	BEGIN
 		DECLARE @strNextWONo NVARCHAR(50)
 
-		IF (
-				SELECT count(1)
-				FROM tblMFWorkOrder
-				WHERE strWorkOrderNo LIKE @strDemandNo + '%'
-				) = 0
-			SET @strNextWONo = convert(VARCHAR, @strDemandNo) + '01'
-		ELSE
-			SELECT @strNextWONo = convert(VARCHAR, @strDemandNo) + right('00' + Convert(VARCHAR, (Max(Cast(right(strWorkOrderNo, 2) AS INT))) + 1), 2)
-			FROM tblMFWorkOrder
-			WHERE strWorkOrderNo LIKE @strDemandNo + '%'
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+            ,@intItemId = @intBlendItemId
+            ,@intManufacturingId = @intCellId
+            ,@intSubLocationId = 0
+            ,@intLocationId = @intLocationId
+            ,@intOrderTypeId = NULL
+            ,@intBlendRequirementId = @intBlendRequirementId
+            ,@intPatternCode = 93
+            ,@ysnProposed = 0
+            ,@strPatternString = @strNextWONo OUTPUT
 
 		INSERT INTO tblMFWorkOrder (
 			strWorkOrderNo
