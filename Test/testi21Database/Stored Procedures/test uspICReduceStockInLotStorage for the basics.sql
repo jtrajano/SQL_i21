@@ -49,46 +49,44 @@ BEGIN
 		-- Create the variables 
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
-				,@intItemUOMId AS INT 
-				,@dtmDate AS DATETIME 
+				,@intItemUOMId AS INT
 				,@intLotId AS INT
-				,@intSubLocationId AS INT
-				,@intStorageLocationId AS INT
-				,@dblQty NUMERIC(18,6) 
+				,@intSubLocationId INT 
+				,@intStorageLocationId INT 
+				,@dtmDate AS DATETIME
+				,@dblSoldQty NUMERIC(18,6)
 				,@dblCost AS NUMERIC(38,20)
 				,@strTransactionId AS NVARCHAR(40)
-				,@intTransactionId AS INT 
+				,@intTransactionId AS INT
+				,@intTransactionDetailId AS INT
 				,@intEntityUserSecurityId AS INT
+				,@dblReduceQty AS NUMERIC(18,6)
 				,@RemainingQty AS NUMERIC(18,6)
 				,@CostUsed AS NUMERIC(18,6)
-				,@InventoryLotStorageId AS INT
-	END 
-	
-	-- Assert
-	BEGIN
-		EXEC tSQLt.ExpectException
-				--@ExpectedMessage = 'Negative stock quantity is not allowed.',
-				@ExpectedErrorNumber = 80003
+				,@QtyOffset AS NUMERIC(18,6)
+				,@LotStorageId AS INT
 	END 
 
 	-- Act
 	BEGIN 
 		EXEC [dbo].[uspICReduceStockInLotStorage]
-			@intItemId 
-			,@intItemLocationId 
-			,@intItemUOMId 
-			,@dtmDate
-			,@intLotId 
-			,@intSubLocationId 
-			,@intStorageLocationId 
-			,@dblQty 
-			,@dblCost 
-			,@strTransactionId 
-			,@intTransactionId 
-			,@intEntityUserSecurityId 
-			,@RemainingQty OUTPUT  
-			,@CostUsed OUTPUT
-			,@InventoryLotStorageId OUTPUT
+				@intItemId
+				,@intItemLocationId
+				,@intItemUOMId
+				,@dtmDate
+				,@intLotId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@dblReduceQty
+				,@dblCost
+				,@strTransactionId
+				,@intTransactionId
+				,@intTransactionDetailId
+				,@intEntityUserSecurityId
+				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT
+				,@QtyOffset OUTPUT 
+				,@LotStorageId OUTPUT 
 
 		INSERT INTO actual (
 				[intItemId]

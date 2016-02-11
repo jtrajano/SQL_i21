@@ -35,16 +35,16 @@ This table is also used to map the negative Lot stock buckets it was able to rev
 	(
 		[intId] INT NOT NULL IDENTITY, 
 		[intInventoryLotStorageId] INT NULL, 
-		[intInventoryTransactionId] INT NOT NULL,
+		[intInventoryTransactionStorageId] INT NOT NULL,
 		[intRevalueLotId] INT NULL,
-		[dblQty] NUMERIC(18, 6) NOT NULL,
-		[dblCostAdjustQty] NUMERIC(18, 6) NULL,
+		[dblQty] NUMERIC(38, 20) NOT NULL,
+		[dblCostAdjustQty] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryLotStorageOut] PRIMARY KEY CLUSTERED ([intId]),
-		CONSTRAINT [FK_tblICInventoryLotStorageOut_tblICInventoryLot] FOREIGN KEY ([intInventoryLotStorageId]) REFERENCES [tblICInventoryLotStorage]([intInventoryLotStorageId]) 
+		CONSTRAINT [FK_tblICInventoryLotStorageOut_tblICInventoryLotStorage] FOREIGN KEY ([intInventoryLotStorageId]) REFERENCES [tblICInventoryLotStorage]([intInventoryLotStorageId]) 
 	)
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotStorageOut_intInventoryTransactionId]
-		ON [dbo].[tblICInventoryLotStorageOut]([intInventoryTransactionId] ASC)
+		ON [dbo].[tblICInventoryLotStorageOut]([intInventoryTransactionStorageId] ASC)
 		INCLUDE(intInventoryLotStorageId);
 	GO

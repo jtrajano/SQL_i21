@@ -3392,6 +3392,35 @@
     <Build Include="dbo\Stored Procedures\uspICReturnStockInActualCost.sql" />
     <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostFIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLotStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLotStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOInFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOOutFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOInFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOutFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromStorage2.sql">
+      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

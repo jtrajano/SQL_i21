@@ -14,15 +14,15 @@ Type the overview for the table here.
 	(
 		[intId] INT NOT NULL IDENTITY, 
 		[intInventoryLIFOStorageId] INT NULL, 
-		[intInventoryTransactionId] INT NOT NULL, 
-		[dblQty] NUMERIC(18, 6) NOT NULL,
+		[intInventoryTransactionStorageId] INT NOT NULL, 
+		[dblQty] NUMERIC(38, 20) NOT NULL,
 		[intRevalueLifoId] INT NULL,
-		[dblCostAdjustQty] NUMERIC(18, 6) NULL,
+		[dblCostAdjustQty] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryLIFOStorageOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOStorageOut_intInventoryTransactionId]
-		ON [dbo].[tblICInventoryLIFOStorageOut]([intInventoryTransactionId] ASC)
+		ON [dbo].[tblICInventoryLIFOStorageOut]([intInventoryTransactionStorageId] ASC)
 		INCLUDE(intInventoryLIFOStorageId);
 	GO

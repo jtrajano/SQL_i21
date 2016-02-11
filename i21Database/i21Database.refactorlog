@@ -4676,4 +4676,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strLoadNumber]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4dbaf112-907c-4237-aea0-1b4cce4b82c8" ChangeDateTime="02/12/2016 03:06:00">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryFIFOStorageOut].[intInventoryTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryFIFOStorageOut]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransactionStorageId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e249b3c2-b88a-490d-8f3d-b5e6b5c22135" ChangeDateTime="02/12/2016 03:06:09">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryLIFOStorageOut].[intInventoryTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryLIFOStorageOut]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransactionStorageId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2dcc97ae-861b-4b50-964a-716d044d3c25" ChangeDateTime="02/12/2016 03:06:17">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryLotStorageOut].[intInventoryTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryLotStorageOut]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransactionStorageId" />
+  </Operation>
 </Operations>
