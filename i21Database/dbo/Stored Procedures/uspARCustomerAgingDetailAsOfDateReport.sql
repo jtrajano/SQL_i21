@@ -33,8 +33,8 @@ SELECT A.strInvoiceNumber
 	 , dblInvoiceTotal		= A.dblInvoiceTotal
 	 , dblCredits			= B.dblAvailableCredit
 	 , dblPrepaids			= 0.000000
-	 , dtmDate
-	 , dtmDueDate
+	 , dtmDate				= ISNULL(B.dtmDatePaid, A.dtmDate)
+	 , dtmDueDate	 
 	 , dtmAsOfDate			= @dtmDateTo
 	 , strSalespersonName	= 'strSalespersonName'
 	 , intCompanyLocationId	 
@@ -170,10 +170,11 @@ LEFT JOIN
   , strBOLNumber
   , dblInvoiceTotal
   , dblAmountPaid
+  , dtmDatePaid
   , (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) + (dblInterest) AS dblTotalDue
   , dblDiscount
   , dblInterest
-  , dblAvailableCredit
+  , dblAvailableCredit  
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <= 0
 		THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid), 0) ELSE 0 END dbl0Days
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) > 0  AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <= 10
@@ -195,7 +196,8 @@ FROM
 	  , dblAmountDue		= 0    
 	  , dblDiscount			= 0
 	  , dblInterest			= 0   
-	  , I.dtmDueDate    
+	  , I.dtmDueDate
+	  , dtmDatePaid			= NULL
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= 0
 FROM tblARInvoice I
@@ -220,7 +222,8 @@ SELECT I.strInvoiceNumber
 	  , dblAmountDue		= 0    
 	  , dblDiscount			= 0
 	  , dblInterest			= 0    
-	  , I.dtmDueDate    
+	  , I.dtmDueDate
+	  , dtmDatePaid			= NULL    
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
@@ -246,6 +249,7 @@ SELECT I.strInvoiceNumber
   , dblDiscount			= ISNULL(I.dblDiscount, 0)
   , dblInterest			= ISNULL(I.dblInterest, 0)
   , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
+  , P.dtmDatePaid
   , I.intEntityCustomerId
   , dblAvailableCredit	= 0
 FROM tblARInvoice I 
