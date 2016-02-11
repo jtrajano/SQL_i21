@@ -1005,7 +1005,7 @@ IF @post = 1
 					,@batchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@UserEntityID
-
+					
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
@@ -1495,8 +1495,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= ICT.strTransactionForm
-				,strTransactionForm			= ICT.strTransactionForm
+				,strTransactionType			= @SCREEN_NAME
+				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1562,8 +1562,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= ICT.strTransactionForm
-				,strTransactionForm			= ICT.strTransactionForm
+				,strTransactionType			= @SCREEN_NAME
+				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
