@@ -34,7 +34,6 @@ Ext.define('Inventory.view.ItemViewModel', {
         'i21.store.TaxGroupMasterBuffered',
         'i21.store.CompanyLocationPricingLevelBuffered',
         'i21.store.ModuleBuffered',
-        'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Manufacturing.store.BufferedManufacturingCell',
         'Manufacturing.store.BufferedPackType',
@@ -200,9 +199,6 @@ Ext.define('Inventory.view.ItemViewModel', {
         accountCategoryList: {
             autoLoad: true,
             type: 'glbufaccountcategorygroup'
-        },
-        glAccountId: {
-            type: 'glbufaccountid'
         },
 
         copyLocation: {

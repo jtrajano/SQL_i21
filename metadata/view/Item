@@ -1878,47 +1878,9 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intAccountId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Account Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strAccountId',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Account Id',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strDescription',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Description',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t\t{",
-                                                                            "\t\tdataIndex: 'intAccountGroupId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Account Group Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strAccountGroup',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Account Group',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strAccountType',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Account Type',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "allowBlank": false,
+                                                                        "allowOnlyWhitespace": false,
+                                                                        "designer|createAlias": "glaccountcombobox",
                                                                         "displayField": "strAccountId",
                                                                         "itemId": "cboGLAccountId",
                                                                         "valueField": "strAccountId"
@@ -1927,14 +1889,7 @@
                                                                     "configAlternates": {
                                                                         "columns": "array"
                                                                     },
-                                                                    "designerId": "af4ceded-7097-4bf3-b4f4-3acf652fc63e",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "af4ceded-7097-4bf3-b4f4-3acf652fc63e"
                                                                 }
                                                             ]
                                                         },
@@ -13890,7 +13845,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging13",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

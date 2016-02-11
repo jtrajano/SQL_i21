@@ -116,7 +116,6 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
-                        store: '{glAccount}',
                         defaultFilters: [{
                             column: 'intAccountCategoryId',
                             value: '{grdGlAccounts.selection.intAccountCategoryId}'
@@ -564,7 +563,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
-                me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
+                me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
                 me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
                 me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
@@ -577,7 +576,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
-                me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
+                me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
                 me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
                 me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
@@ -589,7 +588,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
-                me.addAccountCategory(current, 'Auto-Negative', accountCategoryList);
+                me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
                 me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
                 me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;

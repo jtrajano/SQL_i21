@@ -776,46 +776,10 @@ Ext.define('Inventory.view.Category', {
                                                         text: 'Account Id',
                                                         flex: 1,
                                                         editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intAccountId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountId',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Id',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intAccountGroupId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Group Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountGroup',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Group',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountType',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
+                                                            xtype: 'glaccountcombobox',
                                                             itemId: 'cboAccountId',
+                                                            allowBlank: false,
+                                                            allowOnlyWhitespace: false,
                                                             displayField: 'strAccountId',
                                                             valueField: 'strAccountId'
                                                         }

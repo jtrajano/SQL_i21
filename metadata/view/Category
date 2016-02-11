@@ -1661,47 +1661,9 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intAccountId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Account Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountId',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Id',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intAccountGroupId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Account Group Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountGroup',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Group',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
+                                                        "allowBlank": false,
+                                                        "allowOnlyWhitespace": false,
+                                                        "designer|createAlias": "glaccountcombobox",
                                                         "displayField": "strAccountId",
                                                         "itemId": "cboAccountId",
                                                         "valueField": "strAccountId"
@@ -1710,14 +1672,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "e900d183-a7de-446d-a45e-206b18713f4c",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "designerId": "e900d183-a7de-446d-a45e-206b18713f4c"
                                                 }
                                             ]
                                         },

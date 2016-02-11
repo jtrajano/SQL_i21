@@ -8,7 +8,6 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'Inventory.store.BufferedLineOfBusiness',
         'Inventory.store.BufferedCategoryLocation',
         'Inventory.store.BufferedCategoryUOM',
-        'GeneralLedger.store.BufAccountId',
         'EntityManagement.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.TaxClassBuffered',
@@ -143,9 +142,6 @@ Ext.define('Inventory.view.CategoryViewModel', {
         accountCategoryList: {
             autoLoad: true,
             type: 'glbufaccountcategorygroup'
-        },
-        glAccount: {
-            type: 'glbufaccountid'
         },
         location: {
             type: 'icbufferedcategorylocation'
