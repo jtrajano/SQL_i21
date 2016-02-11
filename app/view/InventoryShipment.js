@@ -1231,7 +1231,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intItemUOMId',
+                                                                                    dataIndex: 'intItemUnitMeasureId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Unit Of Measure Id',
                                                                                     hidden: true
@@ -1249,11 +1249,26 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'dblUnitQty',
+                                                                                    dataType: 'float',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblSalePrice',
+                                                                                    dataType: 'float',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     xtype: 'checkcolumn',
                                                                                     dataIndex: 'ysnStockUnit',
                                                                                     dataType: 'boolean',
                                                                                     text: 'Stock Unit',
                                                                                     flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblLastCost',
+                                                                                    dataType: 'float',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboUOM',

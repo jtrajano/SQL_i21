@@ -1735,7 +1735,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter134",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2490,32 +2490,47 @@
                                                                     "userConfig": {
                                                                         "columns": [
                                                                             "[",
-                                                                            "                                                                                {",
-                                                                            "                                                                                    dataIndex: 'intItemUOMId',",
-                                                                            "                                                                                    dataType: 'numeric',",
-                                                                            "                                                                                    text: 'Unit Of Measure Id',",
-                                                                            "                                                                                    hidden: true",
-                                                                            "                                                                                },",
-                                                                            "                                                                                {",
-                                                                            "                                                                                    dataIndex: 'strUnitMeasure',",
-                                                                            "                                                                                    dataType: 'string',",
-                                                                            "                                                                                    text: 'Unit Measure',",
-                                                                            "                                                                                    flex: 1",
-                                                                            "                                                                                },",
-                                                                            "                                                                                {",
-                                                                            "                                                                                    dataIndex: 'strUnitType',",
-                                                                            "                                                                                    dataType: 'string',",
-                                                                            "                                                                                    text: 'Unit Type',",
-                                                                            "                                                                                    flex: 1",
-                                                                            "                                                                                },",
-                                                                            "                                                                                {",
-                                                                            "                                                                                    xtype: 'checkcolumn',",
-                                                                            "                                                                                    dataIndex: 'ysnStockUnit',",
-                                                                            "                                                                                    dataType: 'boolean',",
-                                                                            "                                                                                    text: 'Stock Unit',",
-                                                                            "                                                                                    flex: 1",
-                                                                            "                                                                                }",
-                                                                            "                                                                            ]"
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intItemUnitMeasureId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Unit Of Measure Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Unit Measure',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strUnitType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Unit Type',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblUnitQty',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblSalePrice',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\txtype: 'checkcolumn',",
+                                                                            "\t\tdataIndex: 'ysnStockUnit',",
+                                                                            "\t\tdataType: 'boolean',",
+                                                                            "\t\ttext: 'Stock Unit',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblLastCost',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\thidden: true",
+                                                                            "\t}",
+                                                                            "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strUnitMeasure",
@@ -2907,7 +2922,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter135",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3401,7 +3416,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter136",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3662,7 +3677,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter137",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4438,7 +4453,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging14",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

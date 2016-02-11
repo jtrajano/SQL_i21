@@ -5,6 +5,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     requires: [
         'Inventory.store.BufferedItemStockDetailView',
         'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedItemPricingView',
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedLot',
         'Inventory.store.BufferedGradeAttribute',
@@ -129,7 +130,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             type: 'icbufferedgradeattribute'
         },
         itemUOM: {
-            type: 'icbuffereditemunitmeasure'
+            type: 'icbuffereditempricingview'
         },
         weightUOM: {
             type: 'icbuffereditemweightuom'

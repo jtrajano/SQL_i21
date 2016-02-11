@@ -389,10 +389,18 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryShipment.selection.intItemId}'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryShipment.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intShipFromLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colWeightUOM: {
@@ -861,6 +869,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strSubLocationName', records[0].get('strSubLocationName'));
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
+        }
+        else if (combo.itemId === 'cboUOM') {
+            current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
+            current.set('dblUnitCost', records[0].get('dblLastCost'));
+            current.set('dblUnitPrice', records[0].get('dblSalePrice'));
         }
     },
 
@@ -2071,6 +2084,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onOrderNumberSelect
             },
             "#cboItemNo": {
+                select: this.onItemNoSelect
+            },
+            "#cboUOM": {
                 select: this.onItemNoSelect
             },
             "#grdInventoryShipment": {
