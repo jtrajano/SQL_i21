@@ -63,6 +63,9 @@ DECLARE @ZeroPayment TABLE (
 	UNIQUE (intPaymentId)
 );
 
+DECLARE @PostDate AS DATETIME
+SET @PostDate = CAST(GETDATE() AS DATE)
+
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
 
@@ -1091,7 +1094,7 @@ IF @post = 1
 		)
 		--DEBIT
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= (CASE WHEN UPPER(RTRIM(LTRIM(PM.strPaymentMethod))) = UPPER('Write Off') THEN @WriteOffAccount ELSE A.intAccountId END)
 			,dblDebit					= A.dblAmountPaid
@@ -1103,7 +1106,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1131,7 +1134,7 @@ IF @post = 1
 		UNION ALL
 		--CREDIT Overpayment
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
@@ -1143,7 +1146,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1168,7 +1171,7 @@ IF @post = 1
 		UNION ALL
 		--CREDIT Prepayment
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount 
 			,dblDebit					= 0
@@ -1180,7 +1183,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1206,7 +1209,7 @@ IF @post = 1
 		UNION ALL
 		--DEBIT Discount
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= @DiscountAccount 
 			,dblDebit					= SUM(B.dblDiscount)
@@ -1218,7 +1221,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId  
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1255,7 +1258,7 @@ IF @post = 1
 		UNION ALL
 		--DEBIT Interest
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount 
 			,dblDebit					= SUM(B.dblInterest)
@@ -1267,7 +1270,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId  
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1305,7 +1308,7 @@ IF @post = 1
 		UNION ALL
 		--CREDIT
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= B.intAccountId 
 			,dblDebit					= 0
@@ -1319,7 +1322,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1356,7 +1359,7 @@ IF @post = 1
 		UNION ALL
 		
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
@@ -1368,7 +1371,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId  
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1405,7 +1408,7 @@ IF @post = 1
 		UNION ALL
 		
 		SELECT
-			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			 dtmDate					= @PostDate
 			,strBatchID					= @batchId
 			,intAccountId				= @IncomeInterestAccount
 			,dblDebit					= 0
@@ -1417,7 +1420,7 @@ IF @post = 1
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId  
 			,dblExchangeRate			= 1
-			,dtmDateEntered				= GETDATE()
+			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
@@ -1494,7 +1497,7 @@ IF @post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 GL.dtmDate
+				 @PostDate
 				,@batchId
 				,GL.intAccountId
 				,dblDebit						= GL.dblCredit
@@ -1506,7 +1509,7 @@ IF @post = 0
 				,GL.strReference
 				,GL.intCurrencyId
 				,GL.dblExchangeRate
-				,dtmDateEntered					= GETDATE()
+				,dtmDateEntered					= @PostDate
 				,GL.dtmTransactionDate
 				,GL.strJournalLineDescription
 				,GL.intJournalLineNo 
@@ -1701,13 +1704,13 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.ysnPaid = 0,
-				tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE C.dtmPostDate END)
+				tblARInvoice.dtmPostDate = ISNULL((SELECT TOP 1 dtmDate FROM tblGLDetail WHERE strTransactionId = C.strInvoiceNumber AND intTransactionId = C.intInvoiceId AND ysnIsUnposted = 0), C.dtmPostDate)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblARInvoice C
-				ON B.intInvoiceId = C.intInvoiceId
+				ON B.intInvoiceId = C.intInvoiceId				
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 				
@@ -1762,7 +1765,7 @@ IF @recap = 0
 
 			-- Calling the stored procedure
 			DECLARE @ReverseDate AS DATETIME
-			SET @ReverseDate = GETDATE()
+			SET @ReverseDate = @PostDate
 			EXEC uspCMBankTransactionReversal @userId, @ReverseDate, @isSuccessful OUTPUT
 			
 			--update payment record based on record from tblCMBankTransaction
@@ -1956,7 +1959,7 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.ysnPaid = (CASE WHEN (C.dblAmountDue) = 0 THEN 1 ELSE 0 END),
-				tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE C.dtmPostDate END)
+				tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN @PostDate ELSE C.dtmPostDate END)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
