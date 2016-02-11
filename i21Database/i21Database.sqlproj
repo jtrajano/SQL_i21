@@ -3373,6 +3373,9 @@
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummary.sql" />
     <Build Include="dbo\Views\vyuCTEntityToContact.sql" />
     <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotStorageOut.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFOStorageOut.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFOStorageOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
