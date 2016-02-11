@@ -32,25 +32,25 @@ SELECT A.strCustomerName
      , strSalespersonName   ='strSalespersonName' 
 FROM
 
-(SELECT I.dtmDate AS dtmDate
-        , I.intInvoiceId
-        , 0 AS dblAmountPaid   
-        , dblInvoiceTotal = ISNULL(I.dblInvoiceTotal,0)
-        , dblAmountDue = ISNULL(I.dblAmountDue,0)
-        , dblDiscount = 0    
-		, dblInterest = 0    
-        , I.strTransactionType    
-        , I.intEntityCustomerId
-        , I.dtmDueDate    
-        , I.intTermId
-        , T.intBalanceDue    
-        , E.strName AS strCustomerName
-        , E.strEntityNo   
-        , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=10 THEN '0 - 10 Days'
-                        WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=30 THEN '11 - 30 Days'
-                        WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=60 THEN '31 - 60 Days'
-                        WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=90 THEN '61 - 90 Days'
-                        WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>90 THEN 'Over 90' END
+(SELECT I.dtmDate
+    , I.intInvoiceId
+    , dblAmountPaid		= 0
+    , dblInvoiceTotal	= ISNULL(I.dblInvoiceTotal, 0)
+    , dblAmountDue		= ISNULL(I.dblAmountDue, 0)
+    , dblDiscount		= 0    
+	, dblInterest		= 0    
+    , I.strTransactionType    
+    , I.intEntityCustomerId
+    , I.dtmDueDate    
+    , I.intTermId
+    , T.intBalanceDue    
+    , strCustomerName	= E.strName
+    , E.strEntityNo   
+    , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=10 THEN '0 - 10 Days'
+                    WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=30 THEN '11 - 30 Days'
+                    WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=60 THEN '31 - 60 Days'
+                    WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)<=90 THEN '61 - 90 Days'
+                    WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo)>90 THEN 'Over 90' END
     , I.ysnPosted
     , dblAvailableCredit = 0
 FROM tblARInvoice I
@@ -71,17 +71,17 @@ UNION ALL
                                     
 SELECT I.dtmPostDate
         , I.intInvoiceId
-        , dblAmountPaid = 0
-        , dblInvoiceTotal = dblInvoiceTotal* -1
-        , dblAmountDue = 0    
-        , dblDiscount = 0
-		, dblInterest = 0
+        , dblAmountPaid			= 0
+        , dblInvoiceTotal		= dblInvoiceTotal * -1
+        , dblAmountDue			= 0    
+        , dblDiscount			= 0
+		, dblInterest			= 0
         , I.strTransactionType    
         , I.intEntityCustomerId
         , I.dtmDueDate
         , I.intTermId
         , T.intBalanceDue
-        , E.strName AS strCustomerName
+        , strCustomerName		= E.strName
         , E.strEntityNo
         , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)<=10 THEN '0 - 10 Days'
                         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)<=30 THEN '11 - 30 Days'
@@ -89,7 +89,7 @@ SELECT I.dtmPostDate
                         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)<=90 THEN '61 - 90 Days'
                         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)>90 THEN 'Over 90' END
         , I.ysnPosted
-        , dblAvailableCredit = ISNULL(I.dblAmountDue,0)
+        , dblAvailableCredit	= ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -109,33 +109,33 @@ UNION ALL
       
 SELECT I.dtmPostDate      
         , I.intInvoiceId
-        , dblAmountPaid = ISNULL(PD.dblPayment,0)
-        , dblInvoiceTotal = 0    
-        , I.dblAmountDue     
-        , ISNULL(I.dblDiscount, 0) AS dblDiscount    
-		, ISNULL(I.dblInterest, 0) AS dblInterest    
-        , ISNULL(I.strTransactionType, 'Invoice')    
-        , ISNULL(I.intEntityCustomerId, '')    
-        , ISNULL(I.dtmDueDate, GETDATE())    
-        , ISNULL(T.intTermID, '')
-        , ISNULL(T.intBalanceDue, 0)    
-        , ISNULL(E.strName, '') AS strCustomerName
-        , ISNULL(E.strEntityNo, '') AS strEntityNo      
+        , dblAmountPaid			= ISNULL(PD.dblPayment,0)
+        , dblInvoiceTotal		= 0    
+        , I.dblAmountDue		 
+        , dblDiscount			= ISNULL(I.dblDiscount, 0)
+		, dblInterest			= ISNULL(I.dblInterest, 0)
+        , strTransactionType	= ISNULL(I.strTransactionType, 'Invoice')    
+        , I.intEntityCustomerId
+        , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
+        , T.intTermID
+        , intBalanceDue			= ISNULL(T.intBalanceDue, 0)    
+        , strCustomerName		= ISNULL(E.strName, '')
+        , strEntityNo			= ISNULL(E.strEntityNo, '')
         , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)<=10 THEN '0 - 10 Days'
                         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)<=30 THEN '11 - 30 Days'
                         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)<=60 THEN '31 - 60 Days'
                         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)<=90 THEN '61 - 90 Days'
                         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, @dtmDateTo)>90 THEN 'Over 90'
                         ELSE '0 - 10 Days' END
-        , ISNULL(I.ysnPosted, 1)
-        , dblAvailableCredit = 0 
+        , ysnPosted				= ISNULL(I.ysnPosted, 1)
+        , dblAvailableCredit	= 0 
 FROM tblARInvoice I 
         INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
         INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
         INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
         LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId
         LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
-WHERE ISNULL(I.ysnPosted, 1) = 1
+WHERE I.ysnPosted = 1
 	AND I.ysnForgiven = 0
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
@@ -167,11 +167,11 @@ LEFT JOIN
                 THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl91Days    
 FROM
 (SELECT I.intInvoiceId
-        , 0 AS dblAmountPaid
-        , dblInvoiceTotal = ISNULL(dblInvoiceTotal,0)
-        , dblAmountDue = 0    
-        , dblDiscount = 0    
-		, dblInterest = 0    
+        , dblAmountPaid		= 0
+        , dblInvoiceTotal	= ISNULL(dblInvoiceTotal,0)
+        , dblAmountDue		= 0    
+        , dblDiscount		= 0    
+		, dblInterest		= 0    
         , I.dtmDueDate    
         , I.intEntityCustomerId
         , dblAvailableCredit = 0
@@ -190,14 +190,14 @@ WHERE I.ysnPosted = 1
 UNION ALL
 
 SELECT I.intInvoiceId
-        , 0 AS dblAmountPaid
-        , dblInvoiceTotal = dblInvoiceTotal* -1
-        , dblAmountDue = 0    
-        , dblDiscount = 0    
-		, dblInterest = 0    
+        , dblAmountPaid			= 0
+        , dblInvoiceTotal		= dblInvoiceTotal * -1
+        , dblAmountDue			= 0    
+        , dblDiscount			= 0    
+		, dblInterest			= 0    
         , I.dtmDueDate    
         , I.intEntityCustomerId
-        , dblAvailableCredit = ISNULL(I.dblAmountDue,0)
+        , dblAvailableCredit	= ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
@@ -213,14 +213,14 @@ WHERE I.ysnPosted = 1
 UNION ALL      
             
 SELECT I.intInvoiceId
-    , dblAmountPaid = ISNULL(PD.dblPayment,0)
-    , dblInvoiceTotal = 0
-    , dblAmountDue = 0
-    , ISNULL(I.dblDiscount, 0) AS dblDiscount
-	, ISNULL(I.dblInterest, 0) AS dblInterest
-    , ISNULL(I.dtmDueDate, GETDATE())
-    , ISNULL(I.intEntityCustomerId, '')
-    , dblAvailableCredit = 0
+    , dblAmountPaid			= ISNULL(PD.dblPayment,0)
+    , dblInvoiceTotal		= 0
+    , dblAmountDue			= 0
+    , dblDiscount			= ISNULL(I.dblDiscount, 0)
+	, dblInterest			= ISNULL(I.dblInterest, 0)
+    , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
+    , I.intEntityCustomerId
+    , dblAvailableCredit	= 0
 FROM tblARInvoice I 
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
@@ -236,9 +236,10 @@ WHERE I.ysnPosted  = 1
                                                             WHERE AG.strAccountGroup = 'Receivables')) AS TBL) AS B
           
 ON
-A.intEntityCustomerId = B.intEntityCustomerId
-AND A.intInvoiceId = B.intInvoiceId
-AND A.dblInvoiceTotal = B.dblInvoiceTotal
-AND A.dblAmountPaid =B.dblAmountPaid
+A.intEntityCustomerId	 = B.intEntityCustomerId
+AND A.intInvoiceId		 = B.intInvoiceId
+AND A.dblInvoiceTotal	 = B.dblInvoiceTotal
+AND A.dblAmountPaid		 = B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
+
 GROUP BY A.strCustomerName, A.intEntityCustomerId, A.strEntityNo
