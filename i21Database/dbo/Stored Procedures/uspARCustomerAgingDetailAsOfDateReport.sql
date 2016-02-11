@@ -14,6 +14,7 @@ IF RTRIM(LTRIM(@strSalesperson)) = ''
     SET @strSalesperson = NULL
 
 SELECT A.strInvoiceNumber
+     , A.strRecordNumber
      , A.intInvoiceId
 	 , A.strCustomerName
 	 , A.strBOLNumber
@@ -41,6 +42,7 @@ SELECT A.strInvoiceNumber
 FROM
 (SELECT I.dtmDate
 	 , I.strInvoiceNumber
+	 , strRecordNumber		= NULL
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
@@ -82,6 +84,7 @@ UNION ALL
 						
 SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
 	 , I.strInvoiceNumber
+	 , P.strRecordNumber
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
@@ -125,6 +128,7 @@ UNION ALL
 SELECT DISTINCT
        I.dtmDate      
      , I.strInvoiceNumber
+	 , P.strRecordNumber
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
