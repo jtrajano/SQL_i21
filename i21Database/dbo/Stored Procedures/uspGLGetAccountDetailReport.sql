@@ -127,8 +127,8 @@ SELECT B.strDescription  as strAccountDescription-- account description
 		,strReferenceDetail = detail.strReference
 	    ,strDocument = detail.strDocument
 		,dblTotal = ( 
-				CASE	WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(A.dblDebit, 0 ) - isnull(A.dblCredit,0) 
-						ELSE isnull(A.dblCredit, 0 ) - isnull(A.dblDebit,0) 
+				CASE	WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(ROUND(A.dblDebit,2), 0 ) - isnull(ROUND(A.dblCredit,2),0) 
+						ELSE isnull(ROUND(A.dblCredit,2), 0 ) - isnull(ROUND(A.dblDebit,2),0) 
 				END
 				)  
 		,B.intAccountUnitId 
@@ -193,8 +193,8 @@ ISNULL(RTRIM(A.strAccountDescription),RTRIM(B.strAccountDescription)) + '' '' + 
 ,(CASE WHEN A.strAccountGroup  is  NULL  then B.strAccountGroup else A.strAccountGroup END) as strAccountGroup
 ,A.dtmDate
 ,(CASE WHEN A.strBatchId  is  NULL  then '''' else A.strBatchId END) as strBatchId
-,(CASE WHEN A.dblDebit  is  NULL  then 0.00 else A.dblDebit END) as dblDebit
-,(CASE WHEN A.dblCredit  is  NULL  then 0.00 else A.dblCredit END) as dblCredit
+,(CASE WHEN A.dblDebit  is  NULL  then 0.00 else ROUND(A.dblDebit,2) END) as dblDebit
+,(CASE WHEN A.dblCredit  is  NULL  then 0.00 else ROUND(A.dblCredit,2) END) as dblCredit
 ,(CASE WHEN A.dblDebitUnit  is  NULL  then 0.00 else A.dblDebitUnit END) as dblDebitUnit
 ,(CASE WHEN A.dblCreditUnit  is  NULL  then 0.00 else A.dblCreditUnit END) as dblCreditUnit
 ,(CASE WHEN A.strDetailDescription  is  NULL  then '''' else A.strDetailDescription END) as strDetailDescription
@@ -215,7 +215,7 @@ ISNULL(RTRIM(A.strAccountDescription),RTRIM(B.strAccountDescription)) + '' '' + 
 ,B.[Primary Account]
 ,B.Location
 ,(CASE WHEN A.strUOMCode is  NULL  then '''' else A.strUOMCode END) as strUOMCode
-,ISNULL(B.dblBeginBalance,0) AS dblBeginBalance
+,ISNULL(ROUND(B.dblBeginBalance,2),0) AS dblBeginBalance
 ,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.dblBeginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0 
 					ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END	
 FROM
