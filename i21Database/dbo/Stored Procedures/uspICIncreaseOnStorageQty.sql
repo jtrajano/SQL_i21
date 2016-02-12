@@ -16,7 +16,7 @@ AS		ItemStock
 USING (
 		SELECT	ItemsToIncreaseInTransitOutBound.intItemId
 				,ItemsToIncreaseInTransitOutBound.intItemLocationId
-				,Aggregrate_ReserveQty = SUM(ISNULL(dblQty, 0) * ISNULL(tblICItemUOM.dblUnitQty, 0))					
+				,Aggregrate_StorageQty = SUM(ISNULL(dblQty, 0) * ISNULL(tblICItemUOM.dblUnitQty, 0))					
 		FROM	@ItemsToIncreaseOnStorage ItemsToIncreaseInTransitOutBound LEFT JOIN dbo.tblICItemUOM 
 					ON ItemsToIncreaseInTransitOutBound.intItemUOMId = tblICItemUOM.intItemUOMId
 		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
@@ -28,7 +28,7 @@ USING (
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblUnitStorage = CASE WHEN ISNULL(ItemStock.dblUnitStorage, 0) + Source_Query.Aggregrate_ReserveQty < 0 THEN 0 ELSE ISNULL(ItemStock.dblUnitStorage, 0) + Source_Query.Aggregrate_ReserveQty END 
+	SET		dblUnitStorage = ISNULL(ItemStock.dblUnitStorage, 0) + Source_Query.Aggregrate_StorageQty 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -42,7 +42,7 @@ WHEN NOT MATCHED THEN
 	VALUES (
 		Source_Query.intItemId
 		,Source_Query.intItemLocationId
-		,CASE WHEN Source_Query.Aggregrate_ReserveQty < 0 THEN 0 ELSE Source_Query.Aggregrate_ReserveQty END -- dblUnitStorage
+		,Source_Query.Aggregrate_StorageQty
 		,NULL 
 		,1	
 	)		
@@ -59,7 +59,7 @@ USING (
 				,ItemsToIncreaseInTransitOutBound.intItemUOMId
 				,ItemsToIncreaseInTransitOutBound.intSubLocationId
 				,ItemsToIncreaseInTransitOutBound.intStorageLocationId
-				,Aggregrate_ReserveQty = SUM(ISNULL(dblQty, 0))
+				,Aggregrate_StorageQty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseOnStorage ItemsToIncreaseInTransitOutBound LEFT JOIN dbo.tblICItemUOM 
 					ON ItemsToIncreaseInTransitOutBound.intItemUOMId = tblICItemUOM.intItemUOMId
 		GROUP BY ItemsToIncreaseInTransitOutBound.intItemId
@@ -77,7 +77,7 @@ USING (
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblUnitStorage = CASE WHEN ISNULL(ItemStockUOM.dblUnitStorage, 0) + Source_Query.Aggregrate_ReserveQty < 0 THEN 0 ELSE ISNULL(ItemStockUOM.dblUnitStorage, 0) + Source_Query.Aggregrate_ReserveQty END 
+	SET		dblUnitStorage = ISNULL(ItemStockUOM.dblUnitStorage, 0) + Source_Query.Aggregrate_StorageQty 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -96,7 +96,7 @@ WHEN NOT MATCHED THEN
 		,Source_Query.intItemUOMId
 		,Source_Query.intSubLocationId
 		,Source_Query.intStorageLocationId
-		,Source_Query.Aggregrate_ReserveQty --CASE WHEN Source_Query.Aggregrate_ReserveQty < 0 THEN 0 ELSE Source_Query.Aggregrate_ReserveQty END
+		,Source_Query.Aggregrate_StorageQty --CASE WHEN Source_Query.Aggregrate_StorageQty < 0 THEN 0 ELSE Source_Query.Aggregrate_StorageQty END
 		,1	
 	)
 ;
