@@ -81,9 +81,6 @@ EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 --Committed QUatities
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
 
---On-Hand Quantities
-EXEC dbo.[uspARUpdateOnHand] @TransactionId, @post
-
 --Sales Order Status
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete
 
