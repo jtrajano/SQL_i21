@@ -3404,6 +3404,16 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromStorage2.sql">
       <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByLine.sql" />
+    <Build Include="dbo\Views\vyuHDCrmKeyword.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityProspect.sql" />
+    <Build Include="dbo\Tables\tblMFBuyingGroup.sql" />
+    <Build Include="dbo\Tables\tblMFForecastItemType.sql" />
+    <Build Include="dbo\Tables\tblMFForecastItemValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveForecast.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetForecastDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetCleanUncleanWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessGrainStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3493,6 +3503,7 @@
     <None Include="Scripts\Post-Deployment\EM\022_DefaultDataForContactTypeAndImport.sql" />
     <None Include="Scripts\Post-Deployment\MF\3_Pattern.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCreateEntityById.sql" />
+    <None Include="Scripts\Post-Deployment\MF\4_WMPattern.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

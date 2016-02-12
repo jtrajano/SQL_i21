@@ -162,7 +162,7 @@ END
 					,[dtmMaintenanceDate]					= NULL
 					,[dblMaintenanceAmount]					= NULL
 					,[dblLicenseAmount]						= NULL
-					,[intTaxGroupId]						= cfSiteItem.intTaxGroupMaster
+					,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
 					,[ysnRecomputeTax]						= 1
 					,[intSCInvoiceId]						= NULL
 					,[strSCInvoiceNumber]					= ''
@@ -185,6 +185,8 @@ END
 					,[ysnLeaseBilling]						= NULL
 					,[ysnVirtualMeterReading]				= NULL
 				FROM tblCFTransaction cfTrans
+				INNER JOIN tblCFNetwork cfNetwork
+				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
 				INNER JOIN (SELECT icfCards.intCardId
 								   ,icfAccount.intAccountId
 								   ,icfAccount.intSalesPersonId
@@ -195,23 +197,26 @@ END
 							ON icfCards.intAccountId = icfAccount.intAccountId)
 							AS cfCardAccount
 				ON cfTrans.intCardId = cfCardAccount.intCardId
-				INNER JOIN (SELECT icfSite.* 
+				INNER JOIN (SELECT  icfSite.* 
 									,icfItem.intItemId
 									,icfItem.intARItemId
-									,icfItem.intTaxGroupMaster
 									,iicItemLoc.intItemLocationId
 									,iicItemLoc.intIssueUOMId
 									,iicItem.strDescription
 							FROM tblCFSite icfSite
+							INNER JOIN tblCFNetwork icfNetwork
+							ON icfNetwork.intNetworkId = intSiteId
 							INNER JOIN tblCFItem icfItem
-							ON icfSite.intSiteId = icfItem.intSiteId
+							ON icfSite.intSiteId = icfItem.intSiteId 
+							OR icfNetwork.intNetworkId = icfItem.intNetworkId
 							INNER JOIN tblICItem iicItem
 							ON icfItem.intARItemId = iicItem.intItemId
 							INNER JOIN tblICItemLocation iicItemLoc
 							ON iicItemLoc.intLocationId = icfSite.intARLocationId 
-								AND iicItemLoc.intItemId = icfItem.intARItemId)
+							AND iicItemLoc.intItemId = icfItem.intARItemId)
 							AS cfSiteItem
 				ON cfTrans.intSiteId = cfSiteItem.intSiteId
+				OR cfNetwork.intNetworkId = cfSiteItem.intNetworkId
 				AND cfSiteItem.intARItemId = cfTrans.intARItemId
 				AND cfSiteItem.intItemId = cfTrans.intProductId
 				INNER JOIN (SELECT * 
@@ -219,8 +224,6 @@ END
 							WHERE strTransactionPriceId = 'Net Price')
 							AS cfTransPrice
 				ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
-				INNER JOIN tblCFNetwork cfNetwork
-				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
 				LEFT JOIN vyuCTContractDetailView ctContracts
 				ON cfTrans.intContractId = ctContracts.intContractDetailId
 				WHERE cfTrans.intTransactionId = @strRecord

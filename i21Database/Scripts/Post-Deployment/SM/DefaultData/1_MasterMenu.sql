@@ -1578,11 +1578,24 @@ UPDATE tblSMMasterMenu SET intSort = 23 WHERE strMenuName = 'Help Desk' AND strM
 DECLARE @HelpDeskParentMenuId INT
 SELECT @HelpDeskParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
 
+/* Start of Re-insert */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+BEGIN
+	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] ON
+
+	INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (144, N'Open Tickets', N'Help Desk', 141, N'Open Tickets', N'Activity', N'Screen', N'HelpDesk.view.TicketList', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+
+	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] OFF
+END
+/* End of Re-insert */
+		
+
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Ticket:searchConfigAll' WHERE strMenuName = N'Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
---IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
---UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.TicketList' WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.TicketList' WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Assigned to Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 --UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.TicketList' WHERE strMenuName = N'Tickets Assigned to Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
@@ -1614,11 +1627,11 @@ UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Product' WHERE strMenuNa
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Email Setup' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 --UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.HelpDeskEmailSetup' WHERE strMenuName = N'Email Setup' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
---	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
---	VALUES (N'Tickets Reported by Me', N'Help Desk', @HelpDeskParentMenuId, N'Tickets Reported by Me', N'Activity', N'Screen', N'HelpDesk.view.TicketList', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
---ELSE 
---	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.TicketList' WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Tickets Reported by Me', N'Help Desk', @HelpDeskParentMenuId, N'Tickets Reported by Me', N'Activity', N'Screen', N'HelpDesk.view.TicketList', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.TicketList' WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1658,9 +1671,9 @@ ELSE
 
 /* Start of delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Help Desk Settings' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 DELETE FROM tblSMMasterMenu  WHERE strMenuName = N'Tickets Assigned to Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 --DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 --DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Email Setup' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
@@ -2520,8 +2533,10 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage S
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.SettleStorage' WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
 
+/* Start of Delete */
 DELETE tblSMMasterMenu WHERE strMenuName = 'Storage Transfer' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
-DELETE tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+--DELETE tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+/* End of Delete */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'OffSite' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2891,6 +2906,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Productio
 	VALUES (N'Production Summary View', N'Manufacturing', @ManufacturingParentMenuId, N'Production Summary View', N'Activity', N'Screen', N'Manufacturing.view.ShiftActivityView?searchCommand=searchConfigProductionSummaryView', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ShiftActivityView?searchCommand=searchConfigProductionSummaryView' WHERE strMenuName = 'Production Summary View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Summary By Line View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Production Summary By Line View', N'Manufacturing', @ManufacturingParentMenuId, N'Production Summary By Line View', N'Activity', N'Screen', N'Manufacturing.view.ShiftActivityView?searchCommand=searchConfigProductionSummaryByLineView', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ShiftActivityView?searchCommand=searchConfigProductionSummaryByLineView' WHERE strMenuName = 'Production Summary By Line View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
 
 /* STORE */
@@ -3916,6 +3937,22 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TicketsMenuId)
 END
 
+DECLARE @OpenTicketsMenuId INT
+SELECT  @OpenTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @OpenTicketsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@OpenTicketsMenuId)
+END
+
+DECLARE @TicketsReportedByMeMenuId INT
+SELECT  @TicketsReportedByMeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TicketsReportedByMeMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TicketsReportedByMeMenuId)
+END
+
 DECLARE @ProjectListsMenuId INT
 SELECT  @ProjectListsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
@@ -3952,7 +3989,45 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CustomerContactListMenuId)
 END
 
-/* Purchasing */	
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Customer', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Customer', N'Activity', N'Screen', N'EntityManagement.view.Entity', N'small-menu-activity', 1, 0, 0, 1, NULL, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'EntityManagement.view.Entity' WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+
+DECLARE @CustomerMenuId INT
+SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CustomerMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CustomerMenuId)
+END
+
+/* Purchasing */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @AccountsPayableParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@AccountsPayableParentMenuId)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Vendor', N'Accounts Payable', @AccountsPayableParentMenuId, N'Vendor', N'Activity', N'Screen', N'EntityManagement.view.Entity', N'small-menu-activity', 1, 0, 0, 1, NULL, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'EntityManagement.view.Entity' WHERE strMenuName = 'Vendor' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+
+DECLARE @VendorMenuId INT
+SELECT  @VendorMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @VendorMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@VendorMenuId)
+END
+
+DECLARE @VouchersMenuId INT
+SELECT  @VouchersMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vouchers' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vouchers' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @VouchersMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@VouchersMenuId)
+END
 
 /* Scale */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ScaleInterfaceParentMenuId)
@@ -3977,7 +4052,6 @@ BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @StorageSettleMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@StorageSettleMenuId)
 END
-
 
 /* Logistic */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @LogisticsParentMenuId)

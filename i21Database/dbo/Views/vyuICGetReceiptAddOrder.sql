@@ -157,6 +157,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblAvailableQty = 0
 	FROM vyuLGShipmentContainerReceiptContracts LogisticsView
 	WHERE LogisticsView.dblBalanceToReceive > 0
+		AND LogisticsView.ysnDirectShipment = 0
 	
 	UNION ALL
 

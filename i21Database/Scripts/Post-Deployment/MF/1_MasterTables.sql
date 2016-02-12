@@ -1924,8 +1924,54 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFForecastItemType
+		WHERE intForecastItemTypeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFForecastItemType (
+		intForecastItemTypeId
+		,strType
+		,strBackColorName
+		)
+	SELECT 1
+		,'F'
+		,'bc-palegreen'
+END
 GO
-UPDATE tblMFCompanyPreference
-SET ysnIncludeWastageInProductionSummary = 1
-WHERE ysnIncludeWastageInProductionSummary IS NULL
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFForecastItemType
+		WHERE intForecastItemTypeId = 2
+		)
+BEGIN
+	INSERT INTO tblMFForecastItemType (
+		intForecastItemTypeId
+		,strType
+		,strBackColorName
+		)
+	SELECT 2
+		,'O'
+		,'bc-paleblue'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFForecastItemType
+		WHERE intForecastItemTypeId = 3
+		)
+BEGIN
+	INSERT INTO tblMFForecastItemType (
+		intForecastItemTypeId
+		,strType
+		,strBackColorName
+		)
+	SELECT 3
+		,'S'
+		,'bc-paleyellow'
+END
+
 GO

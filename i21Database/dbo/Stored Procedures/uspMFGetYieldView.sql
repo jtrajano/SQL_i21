@@ -68,7 +68,7 @@ BEGIN TRY
 
 	SELECT @strIFormula = strInputFormula
 		,@strOFormula = strOutputFormula
-	FROM tblMFYield
+	FROM dbo.tblMFYield
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 
 	IF OBJECT_ID('tempdb..##tblMFTransaction') IS NOT NULL
@@ -118,7 +118,7 @@ BEGIN TRY
 		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
 		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WI.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFShift S on S.intShiftId=WI.intShiftId
+		LEFT JOIN dbo.tblMFShift S on S.intShiftId=WI.intShiftId
 		WHERE W.intManufacturingProcessId = ' 
 		+ ltrim(@intManufacturingProcessId) + '
 			AND WI.dtmProductionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
@@ -128,7 +128,7 @@ BEGIN TRY
 		SELECT 4 AS intTransactionTypeId
 			,WP.dtmProductionDate
 			,S.strShiftName
-			,WP.dtmBusinessDate AS dtmTransactionDate
+			,WP.dtmProductionDate AS dtmTransactionDate
 			,''OUTPUT'' COLLATE Latin1_General_CI_AS AS strTransactionType
 			,WP.intWorkOrderProducedLotId AS intTransactionId
 			,I.intItemId
@@ -148,7 +148,7 @@ BEGIN TRY
 		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
 		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WP.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFShift S on S.intShiftId=WP.intShiftId
+		LEFT JOIN dbo.tblMFShift S on S.intShiftId=WP.intShiftId
 		WHERE W.intManufacturingProcessId = ' 
 		+ ltrim(@intManufacturingProcessId) + '
 			AND WP.dtmProductionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
@@ -157,9 +157,9 @@ BEGIN TRY
 		UNION
 
 		SELECT 36 AS intTransactionTypeId
-			,W.dtmPlannedDate
+			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 			,NULL strShiftName
-			,dtmPlannedDate AS dtmTransactionDate
+			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate) AS dtmTransactionDate
 			,strTransactionType
 			,intProductionSummaryId AS intTransactionId
 			,UnPvt.intItemId
@@ -185,14 +185,14 @@ BEGIN TRY
 		JOIN dbo.tblICItem I ON I.intItemId=UnPvt.intItemId
 		WHERE dblTransactionQuantity>0 and W.intManufacturingProcessId = ' 
 		+ ltrim(@intManufacturingProcessId) + '
-			AND W.dtmPlannedDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
+			AND ISNULL(W.dtmPlannedDate,W.dtmExpectedDate) BETWEEN ''' + ltrim(@dtmFromDate) + '''
 				AND ''' + ltrim(@dtmToDate) + 
 		'''
 		UNION
 
 		SELECT 
 			intTransactionTypeId
-			,W.dtmPlannedDate
+			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 			,S.strShiftName
 			,WLT.dtmTransactionDate
 			,strTransactionType
@@ -225,6 +225,19 @@ BEGIN TRY
 	--Select @strSQL
 	INSERT INTO ##tblMFTransaction
 	EXEC (@strSQL)
+
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Time based production'
+
+	SELECT @strTimeBasedProduction = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @strTimeBasedProduction IS NULL
+	SELECT @strTimeBasedProduction='False'
 
 	IF @strMode = 'Run'
 		OR @strMode = 'Both'
@@ -272,7 +285,7 @@ BEGIN TRY
 
 			SELECT @strRunNo = strWorkOrderNo
 				,@intItemId = intItemId
-				,@dtmRunDate = dtmPlannedDate
+				,@dtmRunDate = ISNULL(dtmPlannedDate,dtmExpectedDate)
 				,@intManufacturingProcessId = intManufacturingProcessId
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
@@ -326,16 +339,6 @@ BEGIN TRY
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'Empty Out Adj'
-
-			SELECT @intAttributeId = intAttributeId
-			FROM tblMFAttribute
-			WHERE strAttributeName = 'Time based production'
-
-			SELECT @strTimeBasedProduction = strAttributeValue
-			FROM tblMFManufacturingProcessAttribute
-			WHERE intManufacturingProcessId = @intManufacturingProcessId
-				AND intLocationId = @intLocationId
-				AND intAttributeId = @intAttributeId
 
 			IF @strTimeBasedProduction = 'True'
 			BEGIN
@@ -465,13 +468,13 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO ##tblMFTransactionByDate
 			SELECT DENSE_RANK() OVER (
-					ORDER BY W.dtmPlannedDate
+					ORDER BY ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 						,W.intItemId
 					) intRowNum
 				,strTransactionType
 				,I.strItemNo
 				,I.strDescription
-				,W.dtmPlannedDate
+				,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,CASE 
 					WHEN strTransactionType = 'Output'
 						THEN SUM(dblTransactionQuantity)
@@ -499,7 +502,7 @@ BEGIN TRY
 				WHERE intRecipeItemTypeId = 1
 				GROUP BY WRI.intWorkOrderId
 				) BM ON BM.intWorkOrderId = W.intWorkOrderId
-			GROUP BY W.dtmPlannedDate
+			GROUP BY ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,I.strItemNo
 				,I.strDescription
 				,W.intItemId
@@ -511,13 +514,13 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO ##tblMFTransactionByDate
 			SELECT DENSE_RANK() OVER (
-					ORDER BY W.dtmPlannedDate
+					ORDER BY ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 						,W.intItemId
 					) intRowNum
 				,strTransactionType
 				,I.strItemNo
 				,I.strDescription
-				,W.dtmPlannedDate
+				,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,CASE 
 					WHEN strTransactionType = 'Output'
 						THEN SUM(dblTransactionQuantity)
@@ -555,7 +558,7 @@ BEGIN TRY
 					,R.intItemId
 				) BM ON BM.intItemId = W.intItemId
 			GROUP BY BM.intRecipeId
-				,W.dtmPlannedDate
+				,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
 				,W.intItemId
 				,I.strItemNo
 				,I.strDescription

@@ -333,7 +333,8 @@ GO
 
 		PRINT N'GET TOTAL ROWS'
 		SET @currentRow = 1
-		SELECT @totalRows = Count(*) FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')
+		SELECT @totalRows = Count(*) FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')) a
+
 		--PRINT CONCAT(N'TOTAL ROWS ', @totalRows)
 
 		WHILE (@currentRow <= @totalRows)
@@ -341,9 +342,9 @@ GO
 
 		DECLARE @customerId INT
 		SELECT @customerId = intEntityId FROM (  
-			SELECT ROW_NUMBER() OVER(ORDER BY intEntityTypeId ASC) AS 'ROWID', *
-			FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')
-		) a
+			SELECT ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS 'ROWID', *
+			FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')) a
+		) b
 		WHERE ROWID = @currentRow
 		--PRINT CONCAT(N'CUSTOMER ID ', @customerId)
 
@@ -391,7 +392,7 @@ GO
 			BEGIN
 				PRINT N'INSERTING NEW ROLE'
 				INSERT INTO tblSMUserRole(strName, strDescription, strMenu, strMenuPermission, strForm, strRoleType, ysnAdmin)
-				SELECT @roleName as strName, @roleName as strDescription, strMenu, strMenuPermission, strForm, strRoleType, ysnAdmin 
+				SELECT @roleName as strName, @roleName as strDescription, strMenu, strMenuPermission, strForm, 'Contact', 0 
 				FROM tblSMUserRole 
 				WHERE intUserRoleID = @roleId
 
@@ -423,12 +424,12 @@ GO
 			IF @totalRows1 > 0
 			BEGIN
 
-				DECLARE @timeStamp VARCHAR(50)
-				select @timeStamp = SUBSTRING(REPLACE(REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, GETDATE(), 121), ' ', ''), '-', ''), ':', ''), '.', ''), 3, 15)
+				--DECLARE @timeStamp VARCHAR(50)
+				--select @timeStamp = SUBSTRING(REPLACE(REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, GETDATE(), 121), ' ', ''), '-', ''), ':', ''), '.', ''), 3, 15)
 				--PRINT CONCAT(N'TIMESTAMP ', @timeStamp)
 
 				DECLARE @contactAdminName VARCHAR(50)
-				SELECT @contactAdminName = CAST(@customerName AS VARCHAR) +  '-' + CAST(@timeStamp AS VARCHAR)
+				SELECT @contactAdminName = CAST(@customerName AS VARCHAR) +  '-' + CAST(@customerId AS VARCHAR)
 				--PRINT CONCAT(N'CONTACT ADMIN NAME ', @contactAdminName)
 
 				-- Create a role as contact admin (and Get all menus) ?

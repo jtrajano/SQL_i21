@@ -125,6 +125,7 @@ INSERT into @ReceiptStagingTable(
 		,intLocationId
 		,intShipFromId
 		,intShipViaId
+		,intDiscountSchedule
 				
 		-- Detail				
 		,intItemId
@@ -159,6 +160,7 @@ SELECT
 		,intLocationId				= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
 		,intShipFromId				= SC.intProcessingLocationId
 		,intShipViaId				= SC.intFreightCarrierId
+		,intDiscountSchedule		= SC.intDiscountId
 
 		--Detail
 		,intItemId					= SC.intItemId

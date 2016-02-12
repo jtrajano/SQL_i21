@@ -98,8 +98,8 @@ AS
 			  tblGLAccount.strDescription as strAccountDescription
 			 ,tblGLDetail.strTransactionId as strTransactionId
 			 ,tblGLDetail.strDescription as strDetailDescription
-			 ,ISNULL(dblDebit,0) as dblDebit
-			 ,ISNULL(dblCredit,0) as dblCredit
+			 ,ISNULL(ROUND(dblDebit,2),0) as dblDebit
+			 ,ISNULL(ROUND(dblCredit,2),0) as dblCredit
 			 ,ISNULL((Case When intAccountUnitId IS NULL Then dblDebitUnit
 				   Else
 					Case  When dblDebitUnit IS NULL Then ISNULL(dblDebitUnit,0)
@@ -164,7 +164,7 @@ RAWREPORT AS
 	,dblCreditUnit
 	,0 as dblTotalUnit
 	,A.dtmDate
-	,ISNULL(B.dblBeginBalance,0) AS dblBeginBalance
+	,ISNULL(ROUND(B.dblBeginBalance,2),0) AS dblBeginBalance
 	,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.dblBeginBalanceUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0
 			ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END
 	,intAccountUnitId

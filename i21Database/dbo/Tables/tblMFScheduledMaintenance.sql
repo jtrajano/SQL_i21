@@ -5,7 +5,7 @@
 	,dtmStartTime DATETIME NOT NULL
 	,dtmEndDate DATETIME NOT NULL
 	,dtmEndTime DATETIME NOT NULL
-	,strReason NVARCHAR(MAX) NULL
+	,strReason NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intLocationId int Not NULL
 	,dtmCreated DATETIME NOT NULL
 	,intCreatedUserId INT NOT NULL

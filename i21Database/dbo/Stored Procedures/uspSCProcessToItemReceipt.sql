@@ -44,6 +44,7 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @total AS INT
+DECLARE @DPStorage AS INT
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -234,46 +235,97 @@ BEGIN TRY
 		END
 		UPDATE @LineItems set intTicketId = @intTicketId
 		--DELETE FROM @ItemsForItemReceipt
+					-- Get the items to process
+			INSERT INTO @ItemsForItemReceipt (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+				,ysnIsStorage 
+			)
+			EXEC dbo.uspSCGetScaleItemForItemReceipt 
+				 @intTicketId
+				,@strSourceType
+				,@intUserId
+				,@dblNetUnits
+				,@dblCost
+				,@intEntityId
+				,@intContractId
+				,@strDistributionOption
+				,@LineItems
+
+		-- Validate the items to receive 
+		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+
+		SELECT @total = COUNT(*) FROM @ItemsForItemReceipt;
+		IF (@total = 0)
+			RETURN;
 		END
-
-	-- Get the items to process
-	INSERT INTO @ItemsForItemReceipt (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-		,ysnIsStorage 
-	)
-	EXEC dbo.uspSCGetScaleItemForItemReceipt 
-		 @intTicketId
-		,@strSourceType
-		,@intUserId
-		,@dblNetUnits
-		,@dblCost
-		,@intEntityId
-		,@intContractId
-		,@strDistributionOption
-		,@LineItems
-
-	-- Validate the items to receive 
-	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
-
-	SELECT @total = COUNT(*) FROM @ItemsForItemReceipt;
-	IF (@total = 0)
-		RETURN;
+	ELSE
+	BEGIN
+		SELECT @DPStorage = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractId
+		IF (@DPStorage = 5)
+			BEGIN
+				INSERT INTO @ItemsForItemReceipt (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+					,ysnIsStorage 
+				)
+				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intContractId
+			END
+		ELSE
+			BEGIN
+			INSERT INTO @ItemsForItemReceipt (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+					,ysnIsStorage 
+				)
+				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
+			END
+	END
 
 	-- Add the items to the item receipt 
 	--IF @strSourceType = @SourceType_Direct
