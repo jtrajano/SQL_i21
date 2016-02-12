@@ -189,6 +189,23 @@ BEGIN TRY
 								SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice 
 								WHERE ysnPosted = 0 
 								  AND intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd))
+
+
+								EXEC uspARReComputeInvoiceAmounts @intSplitInvoiceId
+
+								DECLARE @AddedInvoices AS [dbo].[Id]
+								INSERT INTO @AddedInvoices([intId])
+								SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd)
+								DECLARE @AddedInvoiceId INT
+
+								WHILE EXISTS (SELECT NULL FROM @AddedInvoices)
+									BEGIN
+										SELECT @AddedInvoiceId = [intId] FROM @AddedInvoices
+
+										EXEC uspARReComputeInvoiceAmounts @AddedInvoiceId
+
+										DELETE FROM @AddedInvoices WHERE [intId] = @AddedInvoiceId
+									END
 							END
 
 						DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
