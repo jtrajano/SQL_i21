@@ -10,7 +10,7 @@
 	[intTicketTypeId] [int] NOT NULL,
 	[intTicketStatusId] [int] NOT NULL,
 	[intLineOfBusinessId] [int] NULL,
-	[intTicketPriorityId] [int] NOT NULL,
+	[intTicketPriorityId] [int] NULL,
 	[intTicketProductId] [int] NULL,
 	[intModuleId] [int] NULL,
 	[intVersionId] [int] NULL,
