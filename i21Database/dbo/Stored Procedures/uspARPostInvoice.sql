@@ -253,6 +253,7 @@ END CATCH
 				INNER JOIN tblARInvoiceDetail detail on invoice.intInvoiceId = detail.intInvoiceId
 				INNER JOIN tblICItem item on item.intItemId = detail.intItemId
 				WHERE detail.intSiteId is null
+				AND item.ysnTankRequired = 1 
 				AND invoice.strType = 'Tank Delivery' 
 				
 
