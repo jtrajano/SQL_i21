@@ -30,7 +30,7 @@ BEGIN
 		,strZip
 		,strCity
 		,strState
-		,strZipSate
+		,strZipState
 		,intYear
 		,dblBoatsProceeds
 		,dblCropInsurance
@@ -61,7 +61,7 @@ BEGIN
 			,A.strZip
 			,A.strCity
 			,A.strState
-			,A.strZipSate
+			,A.strZipState
 			,A.intYear
 			,A.dblBoatsProceeds
 			,A.dblCropInsurance
@@ -98,35 +98,36 @@ BEGIN
 
 	SELECT
 		@totalPayees = (SELECT COUNT(*) FROM MISC1099)		,
-		@controlTotal1 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblRents) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblRents) AS DECIMAL(18,2)) AS NVARCHAR(100))),
-		@controlTotal2 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblRoyalties) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblRoyalties) AS DECIMAL(18,2)) AS NVARCHAR(100))),
-		@controlTotal3 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblOtherIncome) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblOtherIncome) AS DECIMAL(18,2)) AS NVARCHAR(100))),
-		@controlTotal4 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblFederalIncome) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblFederalIncome) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal5 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblBoatsProceeds) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblBoatsProceeds) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal6 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblMedicalPayments) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblMedicalPayments) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal7 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblNonemployeeCompensation) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblNonemployeeCompensation) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal8 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblSubstitutePayments) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblSubstitutePayments) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotal1 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblRents,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblRents,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))),
+		@controlTotal2 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblRoyalties,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblRoyalties,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))),
+		@controlTotal3 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblOtherIncome,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblOtherIncome,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))),
+		@controlTotal4 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblFederalIncome,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblFederalIncome,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotal5 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblBoatsProceeds,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblBoatsProceeds,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotal6 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblMedicalPayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblMedicalPayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotal7 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblNonemployeeCompensation,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblNonemployeeCompensation,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotal8 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblSubstitutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblSubstitutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
 		@controlTotal9 = REPLICATE('0',18)		,
-		@controlTotalA = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblCropInsurance) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblCropInsurance) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,	
-		@controlTotalB = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblParachutePayments) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblParachutePayments) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotalC = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblGrossProceedsAtty) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(A.dblGrossProceedsAtty) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotalA = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblCropInsurance,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblCropInsurance,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,	
+		@controlTotalB = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblParachutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblParachutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotalC = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblGrossProceedsAtty,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblGrossProceedsAtty,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
 		@controlTotalD = REPLICATE('0',18)		,
 		@controlTotalE = REPLICATE('0',18)		,
 		@controlTotalF = REPLICATE('0',18)		,
 		@controlTotalG = REPLICATE('0',18)		
 	FROM MISC1099 A
 
+	--PAGE 110
 	SELECT
 		@endOfMISC = 'C'
 		+ REPLICATE('0', 8 - LEN(CAST(COUNT(*) AS NVARCHAR(100)))) + CAST(COUNT(*) AS NVARCHAR(100))

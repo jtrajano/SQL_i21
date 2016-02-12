@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreate1099MISCFile]
+﻿CREATE PROCEDURE [dbo].[uspAPCreate1099BFile]
 	@vendorFrom NVARCHAR(100) = NULL,
 	@vendorTo NVARCHAR(100) = NULL,
 	@year INT,
@@ -16,7 +16,7 @@ SET ANSI_WARNINGS OFF;
 DECLARE @transmitter AS TABLE(strTransmitter NVARCHAR(1500))
 DECLARE @payer AS TABLE(strPayer NVARCHAR(1500))
 DECLARE @payee AS TABLE(strPayee NVARCHAR(MAX))
-DECLARE @endOfMISC AS TABLE(strEndOfMISC NVARCHAR(1500))
+DECLARE @endOfB AS TABLE(strEndOfB NVARCHAR(1500))
 DECLARE @endOfTransmitter AS TABLE(strEndOfTransmitter NVARCHAR(1500))
 DECLARE @totalPayee NVARCHAR(16)
 
@@ -28,10 +28,10 @@ INSERT INTO @payer
 SELECT dbo.[fnAP1099EFilePayer](@year, @test)
 
 INSERT INTO @payee
-SELECT * FROM dbo.fnAP1099EFileMISCPayee(@year, @reprint, @corrected, @vendorFrom, @vendorTo)
+SELECT * FROM dbo.fnAP1099EFileBPayee(@year, @reprint, @corrected, @vendorFrom, @vendorTo)
 
-INSERT INTO @endOfMISC
-SELECT dbo.fnAP1099EFileEndOfMISC(@year, @reprint, @corrected, @vendorFrom, @vendorTo)
+INSERT INTO @endOfB
+SELECT dbo.fnAP1099EFileEndOfB(@year, @reprint, @corrected, @vendorFrom, @vendorTo)
 
 INSERT INTO @endOfTransmitter
 SELECT [dbo].[fnAP1099EFileEndOfTransmitter](1)
@@ -48,6 +48,6 @@ SELECT * FROM @payer
 UNION ALL
 SELECT * FROM @payee
 UNION ALL
-SELECT * FROM @endOfMISC
+SELECT * FROM @endOfB
 UNION ALL 
 SELECT * FROM @endOfTransmitter

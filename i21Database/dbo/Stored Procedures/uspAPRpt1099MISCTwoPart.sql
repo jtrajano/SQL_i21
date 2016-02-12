@@ -168,6 +168,7 @@ WITH MISC1099 (
 	,strFederalTaxId
 	,strAddress
 	,strVendorCompanyName
+	,strPayeeName
 	,strVendorId
 	,strZip
 	,strCity

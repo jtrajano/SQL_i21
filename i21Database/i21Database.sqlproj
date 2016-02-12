@@ -3196,6 +3196,12 @@
     <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailAsOfDateReport.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileBPayee.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileINTPayee.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099INTFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfINT.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfB.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099BFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
