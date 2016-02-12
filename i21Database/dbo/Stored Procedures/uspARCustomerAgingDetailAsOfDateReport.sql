@@ -30,7 +30,7 @@ SELECT A.strInvoiceNumber
 	 , dbl90Days			= B.dbl90Days
 	 , dbl91Days			= B.dbl91Days
 	 , dblTotalDue			= B.dblTotalDue
-	 , dblAmountPaid		= B.dblAmountPaid
+	 , dblAmountPaid		= A.dblAmountPaid
 	 , dblInvoiceTotal		= A.dblInvoiceTotal
 	 , dblCredits			= B.dblAvailableCredit
 	 , dblPrepaids			= 0.000000
@@ -45,6 +45,7 @@ FROM
 	 , strRecordNumber		= NULL
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
+	 , intPaymentId			= 0
 	 , I.strBOLNumber
 	 , dblAmountPaid		= 0
      , dblInvoiceTotal		= ISNULL(I.dblInvoiceTotal,0)
@@ -87,6 +88,7 @@ SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
 	 , P.strRecordNumber
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
+	 , intPaymentId			= 0
 	 , I.strBOLNumber
      , dblAmountPaid		= 0
      , dblInvoiceTotal		= 0
@@ -131,6 +133,7 @@ SELECT DISTINCT
 	 , P.strRecordNumber
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
+	 , P.intPaymentId
 	 , I.strBOLNumber
 	 , dblAmountPaid		= ISNULL(PD.dblPayment,0)
      , dblInvoiceTotal		= 0    
@@ -172,7 +175,8 @@ LEFT JOIN
 (SELECT DISTINCT 
 	intEntityCustomerId
   , strInvoiceNumber
-  , intInvoiceId  
+  , intInvoiceId
+  , intPaymentId  
   , strBOLNumber
   , dblInvoiceTotal
   , dblAmountPaid
@@ -196,6 +200,7 @@ LEFT JOIN
 FROM
 (SELECT I.strInvoiceNumber
 	  , I.intInvoiceId
+	  , intPaymentId		= 0
 	  , I.strBOLNumber
       , dblAmountPaid		= 0
       , dblInvoiceTotal		= ISNULL(dblInvoiceTotal,0)
@@ -222,6 +227,7 @@ UNION ALL
 
 SELECT I.strInvoiceNumber
 	  , I.intInvoiceId
+	  , intPaymentId		= 0
 	  , I.strBOLNumber
       , dblAmountPaid		= 0
       , dblInvoiceTotal		= 0
@@ -229,7 +235,7 @@ SELECT I.strInvoiceNumber
 	  , dblDiscount			= 0
 	  , dblInterest			= 0    
 	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
-	  , P.dtmDatePaid
+	  , dtmDatePaid			= NULL
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
@@ -250,6 +256,7 @@ UNION ALL
 SELECT DISTINCT
     I.strInvoiceNumber
   , I.intInvoiceId
+  , P.intPaymentId
   , I.strBOLNumber
   , dblAmountPaid		= ISNULL(PD.dblPayment,0)
   , dblInvoiceTotal		= 0
@@ -280,3 +287,4 @@ AND A.intInvoiceId		 = B.intInvoiceId
 AND A.dblInvoiceTotal	 = B.dblInvoiceTotal
 AND A.dblAmountPaid		 = B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
+AND A.intPaymentId		 = B.intPaymentId
