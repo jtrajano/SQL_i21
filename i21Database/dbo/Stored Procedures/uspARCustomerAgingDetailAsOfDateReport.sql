@@ -89,7 +89,7 @@ SELECT dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
 	 , I.intInvoiceId
 	 , I.strBOLNumber
      , dblAmountPaid		= 0
-     , dblInvoiceTotal		= dblInvoiceTotal * -1
+     , dblInvoiceTotal		= 0
 	 , dblAmountDue			= 0    
 	 , dblDiscount			= 0
 	 , dblInterest			= 0
@@ -224,7 +224,7 @@ SELECT I.strInvoiceNumber
 	  , I.intInvoiceId
 	  , I.strBOLNumber
       , dblAmountPaid		= 0
-      , dblInvoiceTotal		= dblInvoiceTotal * -1
+      , dblInvoiceTotal		= 0
 	  , dblAmountDue		= 0    
 	  , dblDiscount			= 0
 	  , dblInterest			= 0    
