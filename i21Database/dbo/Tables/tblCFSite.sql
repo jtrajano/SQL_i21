@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCFSite] (
     [intSiteId]                      INT            IDENTITY (1, 1) NOT NULL,
     [intNetworkId]                   INT            NULL,
+    [intTaxGroupId]                  INT            NULL,
     [strSiteNumber]                  NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [intARLocationId]                INT            NULL,
     [intCardId]                      INT            NULL,
@@ -68,6 +69,8 @@
     CONSTRAINT [FK_tblCFSite_tblSMCompanyLocation] FOREIGN KEY ([intARLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCFSite_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );
+
+
 
 
 

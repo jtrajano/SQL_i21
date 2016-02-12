@@ -178,15 +178,16 @@ BEGIN
 		END
 	IF(@intSiteId = 0)
 		BEGIN
-			SET @intSiteId =(SELECT TOP 1 intSiteId
-							FROM tblCFSite
-							WHERE strSiteNumber = @strSiteId)
+			SELECT TOP 1 @intSiteId = intSiteId 
+						,@intTaxMasterId = intTaxGroupId
+						FROM tblCFSite
+						WHERE strSiteNumber = @strSiteId
 
 	IF(@intNetworkId = 0)
 		BEGIN
-			SET @intNetworkId = (SELECT TOP 1 intNetworkId 
-								FROM tblCFNetwork
-								WHERE strNetwork = @strNetworkId)
+			SELECT TOP 1 @intNetworkId = intNetworkId 
+			FROM tblCFNetwork
+			WHERE strNetwork = @strNetworkId
 	END
 	
 	------------------------------------------------------------
@@ -267,7 +268,6 @@ BEGIN
 		SELECT TOP 1 
 			 @intProductId = intItemId
 			,@intARItemId = intARItemId
-			,@intTaxMasterId = intTaxGroupMaster
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		ORDER BY intSiteId
@@ -286,7 +286,6 @@ BEGIN
 		SELECT TOP 1 
 			 @intProductId = intItemId
 			,@intARItemId = intARItemId
-			,@intTaxMasterId = intTaxGroupMaster
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		ORDER BY intNetworkId
@@ -699,7 +698,7 @@ BEGIN
 			FROM tblSMCompanyLocation 
 			WHERE intCompanyLocationId = @intARItemLocationId
 
-			SELECT @intTaxGroupId = @intTaxMasterId
+			SELECT @intTaxGroupId = @intTaxMasterId ----------HERE-------------
 
 		INSERT INTO @tblTaxTable
 		(
