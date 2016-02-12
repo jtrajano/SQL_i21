@@ -59,7 +59,7 @@ FROM tblARInvoice I
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType = 'Invoice'
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -97,7 +97,7 @@ FROM tblARInvoice I
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
-    AND I.ysnForgiven = 0
+    AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ISNULL(P.dtmDatePaid, I.dtmDate)))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -137,7 +137,7 @@ FROM tblARInvoice I
         LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId
         LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -180,7 +180,7 @@ FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType = 'Invoice'
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -204,7 +204,7 @@ FROM tblARInvoice I
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
-    AND I.ysnForgiven = 0
+    AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ISNULL(P.dtmDatePaid, I.dtmDate)))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -229,7 +229,7 @@ FROM tblARInvoice I
     LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId   
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted  = 1
-    AND I.ysnForgiven = 0
+    AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')

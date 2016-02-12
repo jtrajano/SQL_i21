@@ -55,7 +55,7 @@ FROM tblARInvoice I
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 	
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strTransactionType = 'Invoice'
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -92,7 +92,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ISNULL(P.dtmDatePaid, I.dtmDate)))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -129,7 +129,7 @@ FROM tblARInvoice I
 		INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 		LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId		
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -172,7 +172,7 @@ FROM
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId	
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strTransactionType = 'Invoice'
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -194,7 +194,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId	
 WHERE I.ysnPosted = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ISNULL(P.dtmDatePaid, I.dtmDate)))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -217,7 +217,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId		
 WHERE I.ysnPosted  = 1
-	AND I.ysnForgiven = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
