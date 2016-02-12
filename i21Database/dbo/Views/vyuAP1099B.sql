@@ -11,12 +11,14 @@ SELECT
 									, B.strCountry
 									, B.strPhone)
 	, B.strCompanyName
+	, A.strPayeeName
 	, strEIN = B.strEin--B.strFederalTaxID
 	, A.strAddress
 	, A.strVendorCompanyName
 	, A.strVendorId
 	, A.strZip
 	, A.strCity
+	, A.strState
 	, A.strZipState
 	, A.strFederalTaxId
 	, A.intYear
@@ -31,8 +33,10 @@ GROUP BY intYear, intEntityVendorId
 --,C.dbl1099B
 , A.strAddress
 , A.strVendorCompanyName
+, A.strPayeeName
 , A.strVendorId
 , A.strZip
 , A.strCity
+, A.strState
 , A.strZipState
 , A.strFederalTaxId
