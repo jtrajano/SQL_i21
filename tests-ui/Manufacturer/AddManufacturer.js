@@ -2,7 +2,6 @@
  * Created by RQuidato on 11/3/14.
  */
 
-
 StartTest (function (t) {
 
     var engine = new iRely.TestEngine();
@@ -10,12 +9,11 @@ StartTest (function (t) {
 
         /*Scenario 1. Add new records */
         /* 1.1. Open screen and check default controls' state */
-        .login('ssiadmin','summit','ag').wait(1500)
+        .login('irelyadmin','i21by2015','01').wait(1500)
         .addFunction(function(next){t.diag("Scenario 1. Add new records > 1. Open screen and check default controls' state"); next();}).wait(100)
         .expandMenu('Inventory').wait(100)
-        .expandMenu('Maintenance').wait(200)
         .openScreen('Manufacturer').wait(500)
-        .checkScreenShown ('manufacturer').wait(200)
+        .checkScreenShown ('manufacturer').wait(3000)
         .checkScreenWindow({alias: 'manufacturer', title: 'Manufacturer', collapse: true, maximize: true, minimize: false, restore: false, close: true })
         .checkToolbarButton({new: true, save: true, search: true, delete: true, undo: true, close: true})
 

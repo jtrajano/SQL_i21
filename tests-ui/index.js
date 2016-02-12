@@ -24,13 +24,31 @@ Harness.start(
     { group: 'Item',
         items: [
             {
-                url: 'Item/AddItem.js',
+                url: 'Item/AddItem_InventoryType.js',
                 preload: [
                     testEnginePath
                 ]
             },
             {
-                url: 'FuelCategory/DeleteFuelCategory.js',
+                url: 'Item/AddItem_RawMaterialType.js',
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Item/AddItem_FinishedGoodType.js',
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Item/AddItem_SoftwareType.js',
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Item/DeleteItem.js',
                 preload: [
                     testEnginePath
                 ]
@@ -364,6 +382,41 @@ Harness.start(
             }
         ]
     },
+    { group: 'Category',
+        items: [
+            {
+                url: 'Category/AddCategory.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Category/DeleteCategory.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            }
+        ]
+    },
+
+    { group: 'Commodity',
+        items: [
+            {
+                url: 'Commodity/AddCommodity.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'Commodity/DeleteCommodity.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            }
+        ]
+    },
+
+
     { group: 'PackType',
         items: [
             {
@@ -396,6 +449,22 @@ Harness.start(
             }
         ]
     },
+    { group: 'InventoryReceipt',
+        items: [
+            {
+                url: 'InventoryReceipt/AddInventoryReceiptDirect.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            },
+            {
+                url: 'InventoryReceipt/DeleteInventoryReceipt.js',  // url of the js file, containing actual test code
+                preload: [
+                    testEnginePath
+                ]
+            }
+        ]
+    },
     { group: 'LineOfBusiness',
         items: [
             {
@@ -411,6 +480,22 @@ Harness.start(
                 ]
             }
         ]
+    },
+{ group: 'StorageLocation',
+    items: [
+    {
+        url: 'StorageLocation/AddStorageLocation.js',  // url of the js file, containing actual test code
+        preload: [
+            testEnginePath
+        ]
+    },
+    {
+        url: 'StorageLocation/DeleteStorageLocation.js',  // url of the js file, containing actual test code
+        preload: [
+            testEnginePath
+        ]
     }
+]
+}
 
 )

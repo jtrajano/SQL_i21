@@ -378,7 +378,7 @@ Ext.define('iRely.TestEngine', {
     /**
      * Clicks a message box button.
      *
-     * @param {String} item Name of the button. ('yes', 'no', 'cancel', 'ok', 'x').
+     * @param {String} item Name of the button. ('yes', 'no', 'cancel', 'ok').
      *
      * @returns {iRely.TestEngine}
      */
@@ -387,23 +387,33 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
-            if (win) {
-                if (win.xtype === 'messagebox') {
-                    var button = item !== 'x' ? win.msgButtons[item] : win.down('tool');
-                    if (button) {
-                        t.click(button, next);
-                    } else {
-                        next();
-                    }
-                } else {
-                    next();
-                }
-            } else {
-                next();
-            }
-        };
+                btn;		
 
+			switch (item) {
+				case 'yes':
+					btn = Ext.query('.sweet-alert button.confirm');
+					break;
+				case 'no':
+					btn = Ext.query('.sweet-alert button.cancel');
+					break;
+				case 'cancel':
+					btn = Ext.query('.sweet-alert button.cancel2');
+					break;
+				case 'ok':
+					btn = Ext.query('.sweet-alert button.confirm');
+					break;
+			}
+				
+			if (btn) {
+				t.diag('Clicking ' + item);
+				t.click(btn[0], next);
+				
+			} 
+			else {
+				t.ok(false, item + ' is not found.');
+				next();
+			}							
+		};
         chain.push(fn);
         return this;
     },
@@ -1020,7 +1030,7 @@ Ext.define('iRely.TestEngine', {
                             },
                             {
                                 action: 'wait',
-                                delay: 1000
+                                delay: 3000
                             },
                             function(next){
                                 var grid =  win.down('#grdSearch'),
@@ -1373,7 +1383,7 @@ Ext.define('iRely.TestEngine', {
                             target: combo
                         },
                         function(next){
-                            t.selectText(combo, 0, 30);
+                            t.selectText(combo, 0, 50);
                             next();
                         },
                         function(next) {
@@ -2104,7 +2114,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Integer} row Index of the row in the grid.
      *
-     * @param {String} column Data Index or the Item Id of the column.
+     * @param {Object} column Data Index or the Item Id of the column.
      *
      * @param {Object} data Data to match with the control.
      *
@@ -2139,7 +2149,7 @@ Ext.define('iRely.TestEngine', {
                                     data = new Date(data).toLocaleDateString();
                                 }
                                 return value === data;
-                            });
+                            })();
                         t.ok(result, result ? 'Cell data is correct.' : 'Cell data is incorrect.');
 
                         next();
@@ -2148,11 +2158,11 @@ Ext.define('iRely.TestEngine', {
                         next();
                     }
                 } else {
-                    t.ok(false, 'Cell is not existing.');
+                    t.ok(false, 'Grid is not existing.');
                     next();
                 }
             } else {
-                t.ok(false, 'Cell is not existing.');
+                t.ok(false, 'No active window.');
                 next();
             }
         };
@@ -2816,7 +2826,7 @@ Ext.define('iRely.TestEngine', {
                     }
                 }
 
-                t.ok(icon, icon ? 'Screen icon is correct.' : 'Screen icon is incorrect.');
+                //t.ok(icon, icon ? 'Screen icon is correct.' : 'Screen icon is incorrect.');
                 t.ok(titleResult, titleResult ? 'Screen title is correct.' : 'Screen title is incorrect.');
 
                 if (collapseButton) {
@@ -2945,62 +2955,66 @@ Ext.define('iRely.TestEngine', {
                 win = Ext.WindowManager.getActive();
 
             t.diag('Checking Message Box.');
+			
+			if (win){
+				var msg = document.querySelector('.sweet-alert');
 
-            if (win) {
-                if (win.xtype === 'messagebox') {
-                    var xBtn = win.down('tool'),
-                        iconCls = '',
-                        xResult,
-                        titleResult,
-                        msgResult,
-                        buttonResult,
-                        iconResult;
+				if (msg){
+					var btn = function(button){
+							return msg.querySelector('button.' + button).style.display === 'inline-block';
+						},
+						titleResult,
+						msgResult,
+						buttonResult,
+						iconCls = '',
+						iconResult;
 
-                    t.ok(true, 'Message box is shown.');
+					t.ok(true, 'Message box is shown.');
+					t.ok(titleResult = (msg.querySelector('h2').innerHTML === title), titleResult ? 'Title is correct.' : 'Title is incorrect.');
+					t.ok(msgResult = (msg.querySelector('p').innerHTML === message), msgResult ? 'Message is correct.' : 'Message is incorrect.');
 
-                    t.ok(xResult = (xBtn.type === 'close'), xResult ? 'x button is displayed.' : 'x button is not displayed.');
-                    t.ok(titleResult = (win.title === title), titleResult ? 'Title is correct.' : 'Title is incorrect.');
-                    t.ok(msgResult = (win.msg.value === message), msgResult ?  'Message is correct.' : 'Message is incorrect.');
 
-                    switch (buttons) {
-                        case 'ok':
-                            buttonResult = win.msgButtons.yes.hidden && win.msgButtons.no.hidden && win.msgButtons.cancel.hidden;
-                            break;
+					switch (buttons) {
+						case 'ok':
+							buttonResult =  (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'none') && (msg.querySelector('button.cancel2').style.display === 'none');
+							break;
 						case 'okcancel':
-                            buttonResult = win.msgButtons.yes.hidden && win.msgButtons.no.hidden;
-                            break;
-                        case 'yesno':
-                            buttonResult = win.msgButtons.ok.hidden && win.msgButtons.cancel.hidden;
-                            break;
-                        case 'yesnocancel':
-                            buttonResult = win.msgButtons.ok.hidden;
-                            break;
-                    }
+							buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'none');
+							break;
+						case 'yesno':
+							buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'none');
+							break;
+						case 'yesnocancel':
+							buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'inline-block');
+							break;
+					}
 
-                    switch (icon) {
-                        case 'information':
-                            iconCls = 'large-dialog-box-information image-no-repeat';
-                            break;
-                        case 'question':
-                            iconCls = 'large-dialog-box-question image-no-repeat';
-                            break;
-                        case 'error':
-                            iconCls = 'large-dialog-box-error image-no-repeat';
-                            break;
-                        case 'warning':
-                            iconCls = 'large-dialog-box-warning image-no-repeat';
-                            break;
-                    }
+					switch (icon) {
+						case 'information':
+							iconResult = (msg.querySelector('.icon.info').style.display) === 'block';
+							break;
+						case 'question':
+							iconResult = (msg.querySelector('.icon.warning').style.display) === 'block';
+							break;
+						case 'error':
+							iconResult = (msg.querySelector('.icon.error').style.display) === 'block';
+							break;
+						case 'warning':
+							iconResult = (msg.querySelector('.icon.warning').style.display) === 'block';
+							break;
+					}
 
-                    t.ok(buttonResult, buttonResult ? 'Button is correct.' : 'Button is incorrect.');
-                    t.ok(iconResult = (win.messageIconCls === iconCls), iconResult ?  'Icon is correct.' : 'Icon is incorrect.');
-                } else {
-                    t.ok(false, 'Message box is not shown.');
-                }
-            } else {
-                t.ok(false, 'Message box is not shown.');
-            }
+					t.ok(buttonResult, buttonResult ? 'Button is correct.' : 'Button is incorrect.');
+					t.ok(iconResult = (msg.querySelector('.icon.' + icon).style.display === 'block'), iconResult ?  'Icon is correct.' : 'Icon is incorrect.');                
 
+				}
+				else {
+					t.ok(false, 'Message box is not shown.');                
+				}
+			}
+			else {
+				t.ok(false, 'No active window.');            
+			}		
             next();
         };
 
