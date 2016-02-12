@@ -72,7 +72,7 @@ UNION ALL
 SELECT dtmPostDate			= ISNULL(P.dtmDatePaid, I.dtmPostDate)
      , I.intInvoiceId
      , dblAmountPaid		= 0
-     , dblInvoiceTotal		= dblInvoiceTotal * -1
+     , dblInvoiceTotal		= 0
      , dblAmountDue			= 0    
      , dblDiscount			= 0
 	 , dblInterest			= 0
@@ -192,7 +192,7 @@ UNION ALL
 
 SELECT I.intInvoiceId
      , dblAmountPaid		= 0
-     , dblInvoiceTotal		= dblInvoiceTotal * -1
+     , dblInvoiceTotal		= 0
      , dblAmountDue			= 0    
      , dblDiscount			= 0    
 	 , dblInterest			= 0    
