@@ -1567,6 +1567,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Line of B
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.LineOfBusiness' WHERE strMenuName = 'Line of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Prospects' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Prospects', N'Help Desk', @CRMParentMenuId, N'Prospects', N'Activity', N'Screen', N'EntityManagement.view.Entity:searchEntityProspect', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.Entity:searchEntityProspect' WHERE strMenuName = 'Prospects' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+
 /* Start of delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 /* End of delete */
