@@ -1561,11 +1561,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pip
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.SalesPipeStatus' WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Line of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lines of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Line of Business', N'Help Desk', @CRMParentMenuId, N'Line of Business', N'Activity', N'Screen', N'HelpDesk.view.LineOfBusiness', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Lines of Business', N'Help Desk', @CRMParentMenuId, N'Lines of Business', N'Activity', N'Screen', N'HelpDesk.view.LineOfBusiness', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.LineOfBusiness' WHERE strMenuName = 'Line of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.LineOfBusiness' WHERE strMenuName = 'Lines of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Prospects' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
