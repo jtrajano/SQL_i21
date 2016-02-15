@@ -752,7 +752,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Chart of Accounts' AND strModu
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Chart of Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Maintenance'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Clone Account' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Chart of Accounts Adjustment' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Report'
-DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Report'
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId AND strCategory = 'Report'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Trial Balance Detail New' AND strModuleName = 'General Ledger'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger By Account ID Detail New' AND strModuleName = 'General Ledger'
 /* End of delete */
