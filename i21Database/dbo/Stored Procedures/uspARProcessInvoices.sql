@@ -671,7 +671,7 @@ BEGIN
 						DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 						INSERT INTO @TaxDetails
 							([intDetailId]
-							,[intInvoiceDetailTaxId]
+							,[intDetailTaxId]
 							,[intTaxGroupId]
 							,[intTaxCodeId]
 							,[intTaxClassId]
@@ -687,8 +687,8 @@ BEGIN
 							,[ysnTaxExempt]
 							,[strNotes])
 						SELECT
-							 [intDetailId]
-							,[intInvoiceDetailTaxId]
+							 @NewDetailId
+							,[intDetailTaxId]
 							,[intTaxGroupId]
 							,[intTaxCodeId]
 							,[intTaxClassId]
@@ -707,9 +707,7 @@ BEGIN
 							@LineItemTaxEntries
 						WHERE
 							[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
-
-						UPDATE @TaxDetails SET [intDetailId] = @NewDetailId
-							
+						
 						EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
 									 @TaxDetails	= @TaxDetails
 									,@UserId		= @EntityId
