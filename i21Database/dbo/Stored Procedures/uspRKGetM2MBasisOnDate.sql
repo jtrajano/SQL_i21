@@ -1,15 +1,17 @@
-﻿CREATE PROC uspRKGetM2MBasisOnDate
-	 @intM2MBasisId int
+﻿CREATE PROC [dbo].[uspRKGetM2MBasisOnDate]
+	 @intM2MBasisId INT,
+	 @intCommodityId INT= NULL
 
 AS
+
+
 SELECT bd.intM2MBasisDetailId, c.strCommodityCode,	i.strItemNo,		ca.strDescription as strOriginDest,		fm.strFutMarketName, '' as strFutureMonth,
 		bd.strPeriodTo,		strLocationName,		strMarketZoneCode,		strCurrency,		strPricingType,
 		strContractInventory,		strContractType,strUnitMeasure,
 		bd.intCommodityId,		bd.intItemId, bd.strOriginDest,		bd.intFutureMarketId,		bd.intFutureMonthId,
 		bd.intCompanyLocationId,		bd.intMarketZoneId,		bd.intCurrencyId,	bd.intPricingTypeId,		bd.strContractInventory,
-		bd.intContractTypeId,		bd.dblCashOrFuture,		bd.dblBasisOrDiscount,		bd.intUnitMeasureId	,0 as intConcurrencyId	
-FROM
- tblRKM2MBasis b
+		bd.intContractTypeId,		bd.dblCashOrFuture,		bd.dblBasisOrDiscount,		bd.intUnitMeasureId	,i.strMarketValuation ,0 as intConcurrencyId	
+FROM tblRKM2MBasis b
 JOIN tblRKM2MBasisDetail bd on b.intM2MBasisId=bd.intM2MBasisId
 LEFT JOIN tblICCommodity c on c.intCommodityId=bd.intCommodityId
 LEFT JOIN tblICItem i on i.intItemId=bd.intItemId	
@@ -21,5 +23,7 @@ LEFT JOIN tblCTPricingType pt on pt.intPricingTypeId=bd.intPricingTypeId
 LEFT JOIN tblCTContractType ct on ct.intContractTypeId=bd.intContractTypeId
 LEFT JOIN tblARMarketZone mz on mz.intMarketZoneId=bd.intMarketZoneId
 LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=bd.intUnitMeasureId
-WHERE b.intM2MBasisId= @intM2MBasisId and bd.intFutureMarketId is not null
-order by strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
+WHERE b.intM2MBasisId= @intM2MBasisId
+ and  c.intCommodityId=case when isnull(@intCommodityId,0) = 0 then c.intCommodityId else @intCommodityId end 
+order by i.strMarketValuation,fm.strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
+
