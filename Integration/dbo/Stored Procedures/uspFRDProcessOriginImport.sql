@@ -16,6 +16,51 @@ BEGIN
 		SET ANSI_NULLS ON
 		SET NOCOUNT ON	
 
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		-- GL COA VS ORIGIN CHECKING
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		
+		DECLARE @intOriginReportId INT
+
+		-- PRIMARY #1
+		SET @intOriginReportId = (SELECT TOP 1 glfsf_no FROM glfsfmst 
+				WHERE glfsf_grp_beg1_8 IS NOT NULL AND glfsf_grp_sub9_16 LIKE ''*%''
+				AND glfsf_grp_beg1_8 NOT IN (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')))
+
+		IF (@intOriginReportId IS NOT NULL)
+		BEGIN
+			SET @result = (SELECT TOP 1 ''INVALID_'' + glfsf_report_title FROM glfsfmst WHERE glfsf_no = @intOriginReportId AND glfsf_report_title IS NOT NULL)
+			GOTO Post_Exit;
+		END
+
+		-- PRIMARY #2
+		SET @intOriginReportId = (SELECT TOP 1 glfsf_no FROM glfsfmst 
+				WHERE glfsf_grp_end1_8 IS NOT NULL AND glfsf_grp_sub9_16 LIKE ''*%''
+				AND glfsf_grp_end1_8 NOT IN (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')))
+
+		IF (@intOriginReportId IS NOT NULL)
+		BEGIN
+			SET @result = (SELECT TOP 1 ''INVALID_'' + glfsf_report_title FROM glfsfmst WHERE glfsf_no = @intOriginReportId AND glfsf_report_title IS NOT NULL)
+			GOTO Post_Exit;
+		END
+
+		-- PRIMARY #3
+		SET @intOriginReportId = (SELECT TOP 1 glfsf_no FROM (
+		SELECT DISTINCT convert(varchar(20),glfsf_grp_beg1_8) + ''-'' + SUBSTRING(glfsf_grp_sub9_16,LEN(glfsf_grp_sub9_16) - (SELECT MAX(LEN(glact_acct9_16)) - 1 FROM glactmst),(SELECT MAX(LEN(glact_acct9_16)) FROM glactmst)) as strOriginAccountId, glfsf_no FROM glfsfmst 
+				WHERE glfsf_grp_end1_8 IS NOT NULL AND glfsf_grp_sub9_16 NOT LIKE ''*%''
+				) tblX WHERE strOriginAccountId COLLATE Latin1_General_CI_AS NOT IN (SELECT strAccountId FROM tblGLAccount))
+
+		IF (@intOriginReportId IS NOT NULL)
+		BEGIN
+			SET @result = (SELECT TOP 1 ''INVALID_'' + glfsf_report_title FROM glfsfmst WHERE glfsf_no = @intOriginReportId AND glfsf_report_title IS NOT NULL)
+			GOTO Post_Exit;
+		END
+
+
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		-- IMPORTING PROCESS
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 		DECLARE @GUID NVARCHAR(MAX) = NEWID()
 
 		SELECT * INTO #TempOrigin FROM (select DISTINCT glfsf_report_title, glfsf_no from glfsfmst WHERE glfsf_line_no = 0 AND glfsf_report_title IS NOT NULL AND CONVERT(varchar(20),glfsf_no) NOT IN (SELECT strDescription FROM tblFRRow)) tblA
@@ -35,15 +80,11 @@ BEGIN
 
 			DELETE #TempOrigin WHERE glfsf_no = @ID
 		END
+	
 
 		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-		-- DATA FIX (FROM DATAFIX SCRIPT)
-		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-		
-		--=====================================================================================================================================
 		-- 	ROW: CORRECT ORPHAN REFNO CALC
-		---------------------------------------------------------------------------------------------------------------------------------------
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		UPDATE tblFRRowDesignCalculation SET intRefNoCalc = (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)
 												,intRowId = (SELECT TOP 1 intRowId FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)
@@ -51,18 +92,18 @@ BEGIN
 									   AND intRefNoCalc NOT IN (SELECT intRefNo FROM tblFRRowDesign WHERE tblFRRowDesign.intRowDetailId = tblFRRowDesignCalculation.intRowDetailRefNo)
 
 
-		--=====================================================================================================================================
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		-- 	ROW: HIDDEN OPTION
-		---------------------------------------------------------------------------------------------------------------------------------------
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		UPDATE tblFRRowDesign SET ysnHidden = 0 WHERE strRowType <> ''Hidden'' AND ysnHidden IS NULL
 		UPDATE tblFRRowDesign SET ysnHidden = 1 WHERE strRowType = ''Hidden'' AND ysnHidden IS NULL
 		UPDATE tblFRRowDesign SET strRowType = ''Filter Accounts'' WHERE strRowType = ''Hidden''
 
 
-		--=====================================================================================================================================
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		-- 	COLUMN: OFFSET DATE
-		---------------------------------------------------------------------------------------------------------------------------------------
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		update tblFRColumn set dtmRunDate = GETDATE() WHERE dtmRunDate IS NULL
 
@@ -110,97 +151,23 @@ BEGIN
 		UPDATE tblFRColumnDesign SET strStartOffset = ''0'', strEndOffset = ''0'' WHERE strFilterType = ''Previous Year Period To Date'' AND strStartOffset IS NULL
 		UPDATE tblFRColumnDesign SET strStartOffset = ''0'', strEndOffset = ''0'' WHERE strFilterType = ''Period To Date'' AND strStartOffset IS NULL
 		UPDATE tblFRColumnDesign SET strStartOffset = ''0'', strEndOffset = ''0'' WHERE strFilterType = ''Next Year Period To Date'' AND strStartOffset IS NULL
+		 
 
-
-		--=====================================================================================================================================
-		-- 	ROW: DEFAULT DATA FOR ROW ACCOUNTS TYPE (strAccountsType)
-		---------------------------------------------------------------------------------------------------------------------------------------
-
-		CREATE TABLE #tempFRDGLAccount (
-				[strAccountType]	NVARCHAR(MAX)
-			);
-
-		SELECT * INTO #tempFRDRowDesign FROM tblFRRowDesign WHERE strAccountsType IS NULL AND LEN(strAccountsUsed) > 3
-
-		WHILE EXISTS(SELECT 1 FROM #tempFRDRowDesign)
-			BEGIN
-				DECLARE @RowDetailID INT  = (SELECT TOP 1 intRowDetailId FROM #tempFRDRowDesign)
-				DECLARE @AccountsUsed NVARCHAR(MAX)  = (SELECT TOP 1 strAccountsUsed FROM #tempFRDRowDesign)
-				DECLARE @queryString NVARCHAR(MAX) = ''''
-
-				SET @queryString = ''SELECT TOP 1 strAccountType FROM vyuGLAccountView where '' + REPLACE(REPLACE(REPLACE(REPLACE(@AccountsUsed,''[ID]'',''strAccountId''),''[Group]'',''strAccountGroup''),''[Type]'',''strAccountType''),''[Description]'',''strDescription'') + '' ORDER BY strAccountId''
-
-				BEGIN TRY
-					INSERT INTO #tempFRDGLAccount
-					EXEC (@queryString)
-				END TRY
-				BEGIN CATCH
-				END CATCH;
-
-				IF((ISNULL((SELECT TOP 1 1 FROM #tempFRDGLAccount),0) < 1) and (CHARINDEX(''strAccountGroup'',@queryString) > 0) and (CHARINDEX('' Or '',@queryString) < 1))
-				BEGIN
-					SET @queryString = ''SELECT TOP 1 strAccountType FROM tblGLAccountGroup where '' + REPLACE(REPLACE(REPLACE(REPLACE(@AccountsUsed,''[ID]'',''strAccountId''),''[Group]'',''strAccountGroup''),''[Type]'',''strAccountType''),''[Description]'',''strDescription'')
-
-					BEGIN TRY
-						INSERT INTO #tempFRDGLAccount
-						EXEC (@queryString)
-					END TRY
-					BEGIN CATCH
-					END CATCH;
-				END
-		
-				IF(ISNULL((SELECT TOP 1 1 FROM #tempFRDGLAccount),0) < 1)
-				BEGIN
-					UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
-				END
-
-				WHILE EXISTS(SELECT 1 FROM #tempFRDGLAccount)
-				BEGIN
-					DECLARE @strAccountType NVARCHAR(MAX) = ''''
-					SELECT TOP 1 @strAccountType = [strAccountType] FROM #tempFRDGLAccount
-
-					IF(@strAccountType = ''Asset'')
-					BEGIN
-						UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
-					END
-					ELSE IF(@strAccountType = ''Equity'')
-					BEGIN
-						UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
-					END
-					ELSE IF(@strAccountType = ''Expense'')
-					BEGIN
-						UPDATE tblFRRowDesign SET strAccountsType = ''IS'' WHERE intRowDetailId = @RowDetailID
-					END
-					ELSE IF(@strAccountType = ''Liability'')
-					BEGIN
-						UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
-					END
-					ELSE IF(@strAccountType = ''Revenue'')
-					BEGIN
-						UPDATE tblFRRowDesign SET strAccountsType = ''IS'' WHERE intRowDetailId = @RowDetailID
-					END
-					ELSE
-					BEGIN
-						UPDATE tblFRRowDesign SET strAccountsType = '''' WHERE intRowDetailId = @RowDetailID
-					END
-			
-					DELETE #tempFRDGLAccount
-				END
-
-				DELETE #tempFRDRowDesign WHERE intRowDetailId = @RowDetailID
-			END
-	
-		DROP TABLE #tempFRDRowDesign
-		DROP TABLE #tempFRDGLAccount
-
-		--=====================================================================================================================================
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		-- 	ROW: CHANGE Current Year Earnings and  Retained Earnings to  Filter Accounts
-		---------------------------------------------------------------------------------------------------------------------------------------
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		UPDATE tblFRRowDesign SET strRowType = ''Filter Accounts'' WHERE strRowType IN (''Current Year Earnings'',''Retained Earnings'')
-
+						
 		
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		-- 	FINALIZING STAGE
+		--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 		SELECT @result = @GUID
+
+		Post_Exit:
+
 
 	')
 
