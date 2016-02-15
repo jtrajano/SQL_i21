@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblHDProject]
 (
 	[intProjectId] [int] IDENTITY(1,1) NOT NULL,
-	[dtmCreated] [datetime] NULL,
 	[strProjectName] [nvarchar](255) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerId] [int] NOT NULL,
 	[intSalesPipeStatusId] [int] NULL,
 	[intCustomerContactId] [int] NOT NULL,
 	[intTicketTypeId] [int] NULL,
+	[dtmCreated] [datetime] NULL,
 	[dtmClose] [datetime] NULL,
 	[dtmGoLive] [datetime] NULL,
 	[intPercentComplete] [int] NULL,
