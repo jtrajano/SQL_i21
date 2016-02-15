@@ -91,6 +91,8 @@ BEGIN
 	INSERT INTO @DecreaseOnStorageQty (
 		intItemId
 		, intItemLocationId
+		, intSubLocationId
+		, intStorageLocationId
 		, intItemUOMId
 		, dtmDate
 		, dblQty
@@ -106,6 +108,8 @@ BEGIN
 	SELECT 		
 		intItemId
 		, intItemLocationId
+		, intSubLocationId
+		, intStorageLocationId
 		, intItemUOMId
 		, dtmDate
 		, dblQty * -1
@@ -296,6 +300,7 @@ BEGIN
 		,[intItemUOMId]
 		,[dblCost]
 		,[intTransactionId]
+		,[intTransactionDetailId]
 		,[strTransactionId]
 		,[intTransactionTypeId]
 		,[strBatchId]
@@ -317,6 +322,7 @@ BEGIN
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost
 			,[intTransactionId]			= ActualTransaction.intTransactionId
+			,[intTransactionDetailId]	= ActualTransaction.intTransactionDetailId
 			,[strTransactionId]			= ActualTransaction.strTransactionId
 			,[intTransactionTypeId]		= ActualTransaction.intTransactionTypeId
 			,[strBatchId]				= @strBatchId
@@ -352,6 +358,16 @@ BEGIN
 	WHERE	RelatedLotTransactions.intTransactionId = @intTransactionId
 			AND RelatedLotTransactions.strTransactionId = @strTransactionId
 			AND RelatedLotTransactions.ysnIsUnposted = 0
+
+	------------------------------------------
+	-- Update the Lot's Qty and Weights. 
+	------------------------------------------
+	UPDATE	Lot 
+	SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, ItemToUnpost.intItemUOMId, Lot.dblQty, Lot.dblWeight, ItemToUnpost.dblQty, Lot.dblWeightPerQty)
+			,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, ItemToUnpost.intItemUOMId, Lot.dblWeight, ItemToUnpost.dblQty, Lot.dblWeightPerQty)
+	FROM	dbo.tblICLot Lot INNER JOIN @ItemsToUnpost ItemToUnpost
+				ON Lot.intItemLocationId = ItemToUnpost.intItemLocationId
+				AND Lot.intLotId = ItemToUnpost.intLotId
 END
 
 -----------------------------------
