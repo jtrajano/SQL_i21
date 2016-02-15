@@ -13,7 +13,8 @@
 	@dtmDate9 datetime = null,
 	@dtmDate10 datetime = null,
 	@dtmDate11 datetime = null,
-	@dtmDate12 datetime = null
+	@dtmDate12 datetime = null,
+	@ysnSummary bit = null
 AS
 
 DECLARE @MonthList as TABLE (  
@@ -75,7 +76,8 @@ DECLARE @MonthList as TABLE (
 	 intOrderByOne INT,
 	 intOrderByTwo INT,
 	 dblRate  DECIMAL(24,10),
-	 ExRate DECIMAL(24,10)
+	 ExRate DECIMAL(24,10),
+	 strCurrencyExchangeRateType NVARCHAR(200)
 	 )   
 
 	 DECLARE @FinalList AS TABLE (  
@@ -99,12 +101,12 @@ DECLARE @MonthList as TABLE (
 	 intOrderByOne INT,
 	 intOrderByTwo INT,
 	 dblRate  DECIMAL(24,10),
-	 ExRate DECIMAL(24,10)      
+	 ExRate DECIMAL(24,10),
+	 strCurrencyExchangeRateType NVARCHAR(200)      
      )   
 
 	 DECLARE @Commodity AS TABLE 
-	 (
-		intCommodityIdentity INT IDENTITY(1,1) PRIMARY KEY , 
+	 (	intCommodityIdentity INT IDENTITY(1,1) PRIMARY KEY, 
 		intCommodity  INT
 	 )
 	 INSERT INTO @Commodity(intCommodity)
@@ -126,7 +128,7 @@ SELECT TOP 1 @MaxMonth=dtmMonth from @MonthList Order by intRowNumber desc
 IF @strGroupings= 'Contract Terms'
 BEGIN
 
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,isnull(dblFutures,0),isnull(dblBasis,0),isnull(dblCashPrice,0),
@@ -134,14 +136,21 @@ BEGIN
 					JOIN tblICItem i on cv.intItemId=i.intItemId WHERE cd.intContractDetailId=cv.intContractDetailId and strCostType='Freight'),0) dblRate,	
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -150,13 +159,13 @@ BEGIN
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,strContractBasis,dblFutures,dblBasis,dblCashPrice,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId
 
 	
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
 		
 
 		------------------Sale start --------------
 
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 		SELECT strCommodityCode as    [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,''),'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,isnull(dblFutures,0),isnull(dblBasis,0),isnull(dblCashPrice,0),
 		isnull((SELECT sum(cv.dblRate) FROM vyuCTContractCostView cv
@@ -164,42 +173,56 @@ BEGIN
 		,strLocationName
 		,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,strContractBasis,dblFutures,dblBasis,dblCashPrice,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId,strLocationName
 	
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,dblBalance dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Sale Quantity' 
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,dblBalance dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Sale Quantity' 
 	
 END
 
 IF @strGroupings= 'Market Zone'
 BEGIN
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strMarketZoneCode,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,dblFutures,dblBasis,dblCashPrice,
 				isnull((SELECT sum(cv.dblRate) FROM vyuCTContractCostView cv
 					JOIN tblICItem i on cv.intItemId=i.intItemId WHERE cd.intContractDetailId=cv.intContractDetailId and strCostType='Freight'),0) dblRate,	
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
@@ -207,26 +230,33 @@ BEGIN
 		AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,dblRate,dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId
 		
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
 
 		------------------Sale start --------------
 
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strMarketZoneCode,''),'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,dblFutures,dblBasis,dblCashPrice,
 		isnull((SELECT sum(cv.dblRate) FROM vyuCTContractCostView cv
 					JOIN tblICItem i on cv.intItemId=i.intItemId WHERE cd.intContractDetailId=cv.intContractDetailId and strCostType='Freight'),0) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
@@ -234,13 +264,13 @@ BEGIN
 			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId
 
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Sale Quantity' --group by strCommodity,strContractEndMonth
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Sale Quantity' --group by strCommodity,strContractEndMonth
 END
 
 IF @strGroupings= 'Market Zone and Contract Terms'
 BEGIN
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,'') + ' - ' + isnull(strMarketZoneCode,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,dblFutures,dblBasis,dblCashPrice,
@@ -248,40 +278,54 @@ BEGIN
 					JOIN tblICItem i on cv.intItemId=i.intItemId WHERE cd.intContractDetailId=cv.intContractDetailId and strCostType='Freight'),0) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))			
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,strContractBasis,dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId
 				
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Purchase Quantity'-- group by strCommodity,strContractEndMonth
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Purchase Quantity'-- group by strCommodity,strContractEndMonth
 
 		------------------Sale start --------------
 
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,'') + ' - ' + isnull(strMarketZoneCode,''),'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,dblFutures,dblBasis,dblCashPrice,
 		isnull((SELECT sum(cv.dblRate) FROM vyuCTContractCostView cv
 					JOIN tblICItem i on cv.intItemId=i.intItemId WHERE cd.intContractDetailId=cv.intContractDetailId and strCostType='Freight'),0) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -289,28 +333,35 @@ BEGIN
 			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,strContractBasis,dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId
 				
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Sale Quantity'-- group by strCommodity,strContractEndMonth
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Sale Quantity'-- group by strCommodity,strContractEndMonth
 
 END
 
 IF @strGroupings= 'By Item' 
 BEGIN
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType)
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + strItemNo,'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,dblFutures,dblBasis,dblCashPrice,
 		isnull((SELECT sum(cv.dblRate) FROM vyuCTContractCostView cv
 					JOIN tblICItem i on cv.intItemId=i.intItemId WHERE cd.intContractDetailId=cv.intContractDetailId and strCostType='Freight'),0) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,strItemNo,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -318,12 +369,12 @@ BEGIN
 			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,strItemNo,dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId
 
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
 
 		------------------Sale start --------------
 		
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate)
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType)
 	
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + strItemNo,'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		sum(isnull(dblBalance,0)) Balance,strMarketZoneCode,dblFutures,dblBasis,dblCashPrice,
@@ -331,14 +382,21 @@ BEGIN
 					JOIN tblICItem i on cv.intItemId=i.intItemId WHERE cd.intContractDetailId=cv.intContractDetailId and strCostType='Freight'),0) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,strItemNo,
 		(
-		SELECT case WHEN @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
+		SELECT case WHEN (@intCurrencyId <> c1.intCurrencyID and @intCurrencyId <> c.intCurrencyID) then null
+					 when @intCurrencyId = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
 		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate
+		) AS ExRate,
+		(
+		SELECT strCurrencyExchangeRateType
+		FROM tblCTContractDetail cd1
+		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		WHERE cd.intContractDetailId=cd1.intContractDetailId
+		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -346,8 +404,8 @@ BEGIN
 			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,strContractBasis,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,strMarketZoneCode,strItemNo,dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId
 	
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
-		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from @List where strSecondSubHeading='Sale Quantity' --group by strCommodity,strContractEndMonth
+		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
+		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Sale Quantity' --group by strCommodity,strContractEndMonth
 
 END
 
@@ -405,17 +463,17 @@ BEGIN
 SELECT @intMonth = intRowNumber,@Month=dtmMonth from @MonthList where intRowNumber=@count
 IF @count = 1
 BEGIN
-	 INSERT INTO @FinalList(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate)
+	 INSERT INTO @FinalList(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType)
 	 SELECT strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,
-	 dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate FROM @List  where (CONVERT(DATETIME,'01 '+strContractEndMonth)) = (CONVERT(DATETIME,'01 '+@Month)) 
+	 dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType FROM @List  where (CONVERT(DATETIME,'01 '+strContractEndMonth)) = (CONVERT(DATETIME,'01 '+@Month)) 
 END
 ELSE
 BEGIN 
 	 SELECT @PreviousMonth=dtmMonth from @MonthList where intRowNumber=@count -1
-	 INSERT INTO @FinalList(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate)
-	 SELECT strCommodity,strSubHeading,strSecondSubHeading,@Month strContractEndMonth,strContractBasis,sum(isnull(dblBalance,0)),strMarketZoneCode,sum(isnull(dblFuturesPrice,0)),sum(isnull(dblBasisPrice,0)),sum(isnull(dblCashPrice,0)),dblRate,strLocationName,strContractNumber,strItemNo,ExRate FROM @List
+	 INSERT INTO @FinalList(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType)
+	 SELECT strCommodity,strSubHeading,strSecondSubHeading,@Month strContractEndMonth,strContractBasis,sum(isnull(dblBalance,0)),strMarketZoneCode,sum(isnull(dblFuturesPrice,0)),sum(isnull(dblBasisPrice,0)),sum(isnull(dblCashPrice,0)),dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType FROM @List
 	 WHERE (CONVERT(DATETIME,'01 '+strContractEndMonth)) > (CONVERT(DATETIME,'01 '+@PreviousMonth)) and (CONVERT(DATETIME,'01 '+strContractEndMonth)) <= (CONVERT(DATETIME,'01 '+@Month)) 
-	 GROUP BY strCommodity,strSubHeading,strSecondSubHeading,strContractBasis,strMarketZoneCode,dblRate,strLocationName,strContractNumber,strItemNo,ExRate
+	 GROUP BY strCommodity,strSubHeading,strSecondSubHeading,strContractBasis,strMarketZoneCode,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType
 END
 
 SELECT @count = min(intRowNumber) from @MonthList where intRowNumber>@count 
@@ -424,20 +482,20 @@ END
 DECLARE @Month1 NVARCHAR(50)
 SELECT TOP 1 @Month1=dtmMonth from @MonthList Order by intRowNumber 
 -- Previous
-	 INSERT INTO @FinalList(intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate)
-	 SELECT intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,'Previous' strContractEndMonth,strContractBasis,sum(isnull(dblBalance,0)),strMarketZoneCode,sum(isnull(dblFuturesPrice,0)),sum(isnull(dblBasisPrice,0)),sum(isnull(dblCashPrice,0)),dblRate,strLocationName,strContractNumber,strItemNo,ExRate FROM @List
+	 INSERT INTO @FinalList(intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType)
+	 SELECT intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,'Previous' strContractEndMonth,strContractBasis,sum(isnull(dblBalance,0)),strMarketZoneCode,sum(isnull(dblFuturesPrice,0)),sum(isnull(dblBasisPrice,0)),sum(isnull(dblCashPrice,0)),dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType FROM @List
 	 WHERE (CONVERT(DATETIME,'01 '+strContractEndMonth)) < (CONVERT(DATETIME,'01 '+@Month1)) 
-	 GROUP BY intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractBasis,strMarketZoneCode,dblRate,strLocationName,strContractNumber,strItemNo,ExRate
+	 GROUP BY intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractBasis,strMarketZoneCode,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType
 
 ---- Future
 
 DECLARE @Month2 NVARCHAR(50)
 SELECT TOP 1 @Month2=dtmMonth from @MonthList Order by intRowNumber desc
 
-		 INSERT INTO @FinalList(intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate)
-		 SELECT intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,'Future' strContractEndMonth,strContractBasis,sum(isnull(dblBalance,0)),strMarketZoneCode,sum(isnull(dblFuturesPrice,0)),sum(isnull(dblBasisPrice,0)),sum(isnull(dblCashPrice,0)),dblRate,strLocationName,strContractNumber,strItemNo,ExRate FROM @List
+		 INSERT INTO @FinalList(intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType)
+		 SELECT intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,'Future' strContractEndMonth,strContractBasis,sum(isnull(dblBalance,0)),strMarketZoneCode,sum(isnull(dblFuturesPrice,0)),sum(isnull(dblBasisPrice,0)),sum(isnull(dblCashPrice,0)),dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType FROM @List
 		 WHERE (CONVERT(DATETIME,'01 '+strContractEndMonth)) > (CONVERT(DATETIME,'01 '+@Month2)) 
-		 GROUP BY intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractBasis,strMarketZoneCode,dblRate,strLocationName,strContractNumber,strItemNo,ExRate
+		 GROUP BY intRowNumber,strCommodity,strSubHeading,strSecondSubHeading,strContractBasis,strMarketZoneCode,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType
 	
 ------ Pulling from header details...
 
@@ -626,52 +684,54 @@ BEGIN
 BEGIN
 
 ----------Wt Avg --------------
-INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 
 SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Price' as strSecondSubHeading,strContractEndMonth,
 		dblBalance*dblFuturesPrice / sum(dblBalance) over (partition by strCommodity,strContractEndMonth,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from  @FinalList
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from  @FinalList
 WHERE (strSubHeading ='Futures - Long' OR  strSubHeading ='Futures - Short')  and strCommodity= @strCommodityCumulative
 )t 
 -------RK Module 
 
-INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate)
+INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 
 SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Futures' as strSecondSubHeading,strContractEndMonth,
 		dblBalance*dblFuturesPrice / sum(dblBalance) over (partition by strCommodity,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from  @FinalList
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from  @FinalList
 WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative
 )t 
 UNION
 SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Basis' as strSecondSubHeading,strContractEndMonth,
 		dblBalance*dblBasisPrice / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from  @FinalList
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from  @FinalList
 WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative
 )t 
 UNION
 SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Cash' as strSecondSubHeading,strContractEndMonth,
 		dblBalance*dblCashPrice / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from  @FinalList
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from  @FinalList
 WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative
 )t 
 
 UNION
 SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Freight' as strSecondSubHeading,strContractEndMonth,
-		dblBalance*dblRate / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading,ExRate) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from  @FinalList
+		dblBalance*dblRate / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading,ExRate,strCurrencyExchangeRateType) ,
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from  @FinalList
 WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative)t
 
 UNION
-SELECT strCommodity,strHeaderValue,strSubHeading, 'ExRate' as strSecondSubHeading,strContractEndMonth,
-		dblBalance*ExRate / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading) ,
-		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate FROM(
-SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate from  @FinalList
-WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative)t 
+SELECT strCommodity,strHeaderValue,strSubHeading, strCurrencyExchangeRateType as strSecondSubHeading,strContractEndMonth,
+		dblBalance*ExRate / sum(dblBalance) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strCurrencyExchangeRateType) ,
+		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType FROM(
+SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from  @FinalList
+WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative
+)t
+
 
  --end
 
@@ -765,7 +825,7 @@ update @FinalList set intOrderByTwo=2 Where strSecondSubHeading ='Wt./Avg Future
 update @FinalList set intOrderByTwo=3 Where strSecondSubHeading ='Wt./Avg Basis'
 update @FinalList set intOrderByTwo=4 Where strSecondSubHeading ='Wt./Avg Cash'
 update @FinalList set intOrderByTwo=5 Where strSecondSubHeading ='Wt./Avg Freight'
-update @FinalList set intOrderByTwo=6 Where strSecondSubHeading ='ExRate'
+update @FinalList set intOrderByTwo=6 Where strSecondSubHeading not in('Purchase Quantity','Wt./Avg Futures','Wt./Avg Basis','Wt./Avg Cash','Wt./Avg Freight')
 
 DELETE @List
 INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate) 
@@ -778,4 +838,13 @@ INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,
 SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate FROM @FinalList Where strContractEndMonth='Future'
 UPDATE @List set dblBalance = null where dblBalance = 0 
 
-SELECT * FROM @List where dblBalance IS NOT NULL order by intOrderByOne,intOrderByTwo
+IF ISNULL(@ysnSummary,0) = 0
+BEGIN
+	SELECT * FROM @List WHERE dblBalance IS NOT NULL 
+	ORDER BY intOrderByOne,intOrderByTwo,strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading
+END
+ELSE
+BEGIN
+	SELECT * FROM @List WHERE strSecondSubHeading not like '%Wt./Avg%' and  dblBalance IS NOT NULL 
+	ORDER BY intOrderByOne,intOrderByTwo,strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading
+END
