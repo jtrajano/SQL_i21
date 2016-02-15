@@ -26,11 +26,13 @@ BEGIN TRY
 
 	INSERT INTO tblCTSequenceUsageHistory
 	(
-			intContractDetailId,	strScreenName,			intExternalId,	strFieldName,
-			dblOldValue,			dblTransactionQuantity,	dblNewValue,	intUserId,		dtmTransactionDate
+			intContractDetailId,	strScreenName,				intExternalId,		strFieldName,
+			dblOldValue,			dblTransactionQuantity,		dblNewValue,		intUserId,		dtmTransactionDate,
+			intExternalHeaderId,	intContractHeaderId,		intContractSeq,		strNumber,		strUserName
 	)
-	SELECT	@intContractDetailId,	@strScreenName,			@intExternalId,	@strFieldName,
-			@dblOldValue,			@dblTransactionQuantity,@dblNewValue,	@intUserId,		GETDATE()
+	SELECT	@intContractDetailId,	@strScreenName,				@intExternalId,		@strFieldName,
+			@dblOldValue,			@dblTransactionQuantity,	@dblNewValue,		@intUserId,		GETDATE(),
+			@intExternalHeaderId,	@intContractHeaderId,		@intContractSeq,	@strNumber,		@strUserName
 	
 END TRY      
 BEGIN CATCH       

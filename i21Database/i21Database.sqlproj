@@ -3383,6 +3383,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetForecastDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetCleanUncleanWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessGrainStorage.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualCostingTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
