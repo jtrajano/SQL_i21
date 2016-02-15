@@ -187,6 +187,7 @@ BEGIN
 			SELECT	@Mail = @style + @newHTML
 			
 			SELECT  @strContractEventId = LTRIM(@intContractEventId)
+			SELECT	@strContractHeaderId	= 	@strContractHeaderId + LTRIM(@intContractHeaderId) + '|^|'
 
 			IF ISNULL(@strMailTo,'') <> '' AND (@strNotificationType = 'Mail' OR @strNotificationType = 'Both')
 			BEGIN
