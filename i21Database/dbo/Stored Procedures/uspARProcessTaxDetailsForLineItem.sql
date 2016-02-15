@@ -21,7 +21,7 @@ DECLARE @CurrentErrorMessage NVARCHAR(250)
 		
 SET @ZeroDecimal = 0.000000
 
-CREATE TABLE #EntriesForProcessing(
+DECLARE @EntriesForProcessing AS TABLE(
 	 [intId]						INT												NOT NULL
 	,[intInvoiceDetailId]			INT												NULL
 	,[intDetailTaxId]				INT												NULL
@@ -47,7 +47,7 @@ IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
 	
 	
-INSERT INTO #EntriesForProcessing
+INSERT INTO @EntriesForProcessing
 	(
 	 [intId]
 	,[intInvoiceDetailId]
@@ -131,7 +131,7 @@ DECLARE	@Id					INT
 
 --ADD
 BEGIN TRY
-	WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnAdded],0) = 0 AND ISNULL([intDetailTaxId],0) = 0)
+	WHILE EXISTS(SELECT NULL FROM @EntriesForProcessing WHERE ISNULL([ysnAdded],0) = 0 AND ISNULL([intDetailTaxId],0) = 0)
 	BEGIN
 	
 		SELECT
@@ -153,7 +153,7 @@ BEGIN TRY
 			,@TaxExempt				= [ysnTaxExempt]
 			,@Notes					= [strNotes]
 		FROM
-			#EntriesForProcessing 
+			@EntriesForProcessing 
 		WHERE
 			ISNULL([ysnAdded],0) = 0 
 			AND ISNULL([intDetailTaxId],0) = 0
@@ -181,7 +181,7 @@ BEGIN TRY
 				,@NewInvoiceTaxDetailId	= @NewInvoiceTaxDetailId	OUTPUT 
 			
 
-		UPDATE #EntriesForProcessing
+		UPDATE @EntriesForProcessing
 		SET
 			 [ysnAdded]					= 1
 			,[intDetailTaxId]	= @NewInvoiceTaxDetailId
@@ -223,7 +223,7 @@ BEGIN TRY
 	FROM
 		tblARInvoiceDetailTax
 	INNER JOIN
-		#EntriesForProcessing EFP
+		@EntriesForProcessing EFP
 			ON tblARInvoiceDetailTax.[intInvoiceDetailId] = EFP.[intInvoiceDetailId]
 			AND tblARInvoiceDetailTax.[intInvoiceDetailTaxId] = EFP.[intDetailTaxId]
 			AND ISNULL(EFP.[ysnUpdated],0) = 0
@@ -237,23 +237,23 @@ BEGIN TRY
 			ON EFP.[intTaxAccountId] = GLA.[intAccountId]
 			
 	UPDATE
-		#EntriesForProcessing
+		EFP
 	SET
-		[ysnUpdated] = 1
+		EFP.[ysnUpdated] = 1
 	FROM
-		#EntriesForProcessing
+		@EntriesForProcessing EFP
 	INNER JOIN
 		tblARInvoiceDetailTax ARIDT
-			ON #EntriesForProcessing.[intInvoiceDetailId] = ARIDT.[intInvoiceDetailId]
-			AND #EntriesForProcessing.[intDetailTaxId] = ARIDT.[intInvoiceDetailTaxId]
+			ON EFP.[intInvoiceDetailId] = ARIDT.[intInvoiceDetailId]
+			AND EFP.[intDetailTaxId] = ARIDT.[intInvoiceDetailTaxId]
 			AND ISNULL(ARIDT.[intInvoiceDetailId],0) <> 0
 			AND ISNULL(ARIDT.[intInvoiceDetailTaxId],0) <> 0			 			
 	INNER JOIN
 		tblSMTaxCode SMTC
-			ON #EntriesForProcessing.[intTaxCodeId] = SMTC.[intTaxCodeId]
+			ON EFP.[intTaxCodeId] = SMTC.[intTaxCodeId]
 	INNER JOIN
 		tblGLAccount GLA
-			ON #EntriesForProcessing.[intTaxAccountId] = GLA.[intAccountId]
+			ON EFP.[intTaxAccountId] = GLA.[intAccountId]
 		
 		
 END TRY
@@ -275,7 +275,7 @@ BEGIN TRY
 	FROM
 		tblARInvoiceDetail ARID
 	INNER JOIN
-		#EntriesForProcessing EFP
+		@EntriesForProcessing EFP
 			ON ARID.[intInvoiceDetailId] = EFP.[intInvoiceDetailId]
 			AND (ISNULL(EFP.[ysnAdded],0) = 1 OR ISNULL(EFP.[ysnUpdated],0) = 1) 
 	
@@ -306,7 +306,7 @@ DECLARE @AddedIds VARCHAR(MAX)
 SELECT
 	@AddedIds = COALESCE(@AddedIds + ',' ,'') + CAST([intDetailTaxId] AS NVARCHAR(250))
 FROM
-	#EntriesForProcessing
+	@EntriesForProcessing
 WHERE
 	ISNULL([ysnAdded],0) = 1
 	
@@ -317,7 +317,7 @@ DECLARE @UpdatedIds VARCHAR(MAX)
 SELECT
 	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intDetailTaxId] AS NVARCHAR(250))
 FROM
-	#EntriesForProcessing
+	@EntriesForProcessing
 WHERE
 	ISNULL([ysnUpdated],0) = 1
 	

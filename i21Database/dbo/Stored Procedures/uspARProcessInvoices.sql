@@ -120,6 +120,8 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
+DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
+
 DECLARE  @Id									INT
 		,@SourceTransaction						NVARCHAR(250)	
 		,@SourceId								INT	
@@ -668,7 +670,7 @@ BEGIN
 				IF ISNULL(@NewDetailId,0) <> 0					
 				BEGIN															
 					BEGIN TRY
-						DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
+						DELETE FROM @TaxDetails
 						INSERT INTO @TaxDetails
 							([intDetailId]
 							,[intDetailTaxId]
@@ -1151,6 +1153,76 @@ BEGIN TRY
 							,[intInvoiceDetailId]	= @NewExistingDetailId
 						WHERE
 							[intId] = @ForExistingDetailId
+					END
+					
+					IF ISNULL(@NewExistingDetailId,0) <> 0					
+					BEGIN															
+						BEGIN TRY
+							DELETE FROM @TaxDetails
+							INSERT INTO @TaxDetails
+								([intDetailId]
+								,[intDetailTaxId]
+								,[intTaxGroupId]
+								,[intTaxCodeId]
+								,[intTaxClassId]
+								,[strTaxableByOtherTaxes]
+								,[strCalculationMethod]
+								,[numRate]
+								,[intTaxAccountId]
+								,[dblTax]
+								,[dblAdjustedTax]
+								,[ysnTaxAdjusted]
+								,[ysnSeparateOnInvoice]
+								,[ysnCheckoffTax]
+								,[ysnTaxExempt]
+								,[strNotes])
+							SELECT
+								 @NewDetailId
+								,[intDetailTaxId]
+								,[intTaxGroupId]
+								,[intTaxCodeId]
+								,[intTaxClassId]
+								,[strTaxableByOtherTaxes]
+								,[strCalculationMethod]
+								,[numRate]
+								,[intTaxAccountId]
+								,[dblTax]
+								,[dblAdjustedTax]
+								,[ysnTaxAdjusted]
+								,[ysnSeparateOnInvoice]
+								,[ysnCheckoffTax]
+								,[ysnTaxExempt]
+								,[strNotes]
+							FROM
+								@LineItemTaxEntries
+							WHERE
+								[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
+						
+							EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
+										 @TaxDetails	= @TaxDetails
+										,@UserId		= @EntityId
+										,@ClearExisting	= @ClearDetailTaxes
+										,@RaiseError	= @RaiseError
+										,@ErrorMessage	= @CurrentErrorMessage OUTPUT
+
+							IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+								BEGIN
+									IF ISNULL(@RaiseError,0) = 0
+										ROLLBACK TRANSACTION
+									SET @ErrorMessage = @CurrentErrorMessage;
+									IF ISNULL(@RaiseError,0) = 1
+										RAISERROR(@ErrorMessage, 16, 1);
+									RETURN 0;
+								END
+						END TRY
+						BEGIN CATCH
+							IF ISNULL(@RaiseError,0) = 0
+								ROLLBACK TRANSACTION
+							SET @ErrorMessage = ERROR_MESSAGE();
+							IF ISNULL(@RaiseError,0) = 1
+								RAISERROR(@ErrorMessage, 16, 1);
+							RETURN 0;
+						END CATCH
 					END				
 						
 			END
@@ -1315,6 +1387,76 @@ BEGIN TRY
 						RAISERROR(@ErrorMessage, 16, 1);
 					RETURN 0;
 				END CATCH
+
+
+
+				BEGIN TRY
+					DELETE FROM @TaxDetails
+					INSERT INTO @TaxDetails
+						([intDetailId]
+						,[intDetailTaxId]
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[numRate]
+						,[intTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes])
+					SELECT
+						 [intDetailId]
+						,[intDetailTaxId]
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[numRate]
+						,[intTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes]
+					FROM
+						@LineItemTaxEntries
+					WHERE
+						[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
+						
+					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
+									@TaxDetails	= @TaxDetails
+								,@UserId		= @EntityId
+								,@ClearExisting	= @ClearDetailTaxes
+								,@RaiseError	= @RaiseError
+								,@ErrorMessage	= @CurrentErrorMessage OUTPUT
+
+					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+						BEGIN
+							IF ISNULL(@RaiseError,0) = 0
+								ROLLBACK TRANSACTION
+							SET @ErrorMessage = @CurrentErrorMessage;
+							IF ISNULL(@RaiseError,0) = 1
+								RAISERROR(@ErrorMessage, 16, 1);
+							RETURN 0;
+						END
+				END TRY
+				BEGIN CATCH
+					IF ISNULL(@RaiseError,0) = 0
+						ROLLBACK TRANSACTION
+					SET @ErrorMessage = ERROR_MESSAGE();
+					IF ISNULL(@RaiseError,0) = 1
+						RAISERROR(@ErrorMessage, 16, 1);
+					RETURN 0;
+				END CATCH
+		
 
 
 				UPDATE #EntriesForProcessing
