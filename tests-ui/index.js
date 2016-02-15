@@ -1,8 +1,9 @@
-/**
- * Created by RQuidato on 10/23/14.
- */
+
 var Harness = Siesta.Harness.Browser.ExtJS,
-    testEnginePath = '../../TestEngine/TestEngine.js';
+    testEnginePath = '../../TestEngine/TestEngine.js',
+    commonSM =  '../../i21/test-ui/CommonSM.js';
+
+
 
 
 Harness.configure({
@@ -26,31 +27,37 @@ Harness.start(
             {
                 url: 'Item/AddItem_InventoryType.js',
                 preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM
+
                 ]
             },
             {
                 url: 'Item/AddItem_RawMaterialType.js',
                 preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM
                 ]
             },
             {
                 url: 'Item/AddItem_FinishedGoodType.js',
                 preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM
                 ]
             },
             {
                 url: 'Item/AddItem_SoftwareType.js',
                 preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM
                 ]
             },
             {
                 url: 'Item/DeleteItem.js',
                 preload: [
-                    testEnginePath
+                    testEnginePath,
+                    commonSM
                 ]
             }
         ]

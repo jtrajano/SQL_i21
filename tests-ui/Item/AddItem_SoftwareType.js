@@ -1,14 +1,12 @@
-/**
- * Created by CCallado on 1/19/2016.
- */
 
 StartTest (function (t) {
 
-    var engine = new iRely.TestEngine();
+    var engine = new iRely.TestEngine(),
+        commonSM = Ext.create('SystemManager.CommonSM');
     engine.start(t)
 
         /*Add Item - Software Type Lot Tracked Yes Serial Number)*/
-        .login('irelyadmin', 'i21by2015', '01')
+        .addFunction(function (next) { commonSM.commonLogin(t, next); })
         .addFunction(function(next){t.diag("Scenario 1. Open screen and check default controls' state"); next();}).wait(100)
         .expandMenu('Inventory').wait(200)
         .openScreen('Items').wait(5000)
