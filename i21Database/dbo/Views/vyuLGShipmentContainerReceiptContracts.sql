@@ -51,7 +51,7 @@ SELECT
 	,strOtherMarks = NULL
 	,strSealNumber = NULL
 	,strContainerType = NULL
-
+	,intWeightItemUOMId
 FROM vyuLGShipmentPurchaseContracts WHERE intShipmentContractQtyId NOT IN (Select intShipmentContractQtyId FROM vyuLGShipmentContainerPurchaseContracts)
 
 UNION ALL
@@ -108,5 +108,5 @@ SELECT
 	,strOtherMarks
 	,strSealNumber
 	,strContainerType
-
+	,intWeightItemUOMId
 FROM vyuLGShipmentContainerPurchaseContracts
