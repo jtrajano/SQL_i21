@@ -3386,6 +3386,7 @@
     <Build Include="dbo\User Defined Types\ScaleManualCostingTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspSCManualDistribution.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotItemChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
