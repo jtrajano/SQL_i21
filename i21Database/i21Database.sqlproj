@@ -3202,6 +3202,7 @@
     <Build Include="dbo\Functions\fnAP1099EFileEndOfINT.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfB.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreate1099BFile.sql" />
+    <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
