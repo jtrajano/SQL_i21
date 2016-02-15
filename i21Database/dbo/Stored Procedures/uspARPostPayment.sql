@@ -507,6 +507,30 @@ SET @batchIdUsed = @batchId
 				WHERE
 					(A.dblAmountPaid) < (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
 					
+					
+				--Payment Date
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Payment Date(' + CONVERT(NVARCHAR(30),A.dtmDatePaid, 101) + ') cannot be earlier than the Invoice(' + C.strInvoiceNumber + ') Post Date(' + CONVERT(NVARCHAR(30),C.dtmPostDate, 101) + ')!'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblARPaymentDetail B
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblARInvoice C
+						ON B.intInvoiceId = C.intInvoiceId
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				WHERE
+					B.dblPayment <> 0
+					AND CAST(C.dtmPostDate AS DATE) > CAST(A.dtmDatePaid AS DATE)					
+					
 				--+overpayment
 				INSERT INTO
 					@AROverpayment
@@ -552,6 +576,7 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId
 				WHERE
 					A.ysnPosted = 1
+												
 
 				--RECEIVABLES(S) ALREADY PAID IN FULL
 				INSERT INTO
