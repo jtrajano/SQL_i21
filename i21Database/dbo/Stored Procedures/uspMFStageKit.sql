@@ -110,10 +110,11 @@ Begin
 	Select @dblPickedQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
 
 	SELECT @intRecipeId = intRecipeId
-	FROM tblMFRecipe
+	FROM tblMFWorkOrderRecipe
 	WHERE intItemId = @intBlendItemId
 		AND intLocationId = @intLocationId
 		AND ysnActive = 1
+		AND intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
 
 		INSERT INTO @tblInputItem (
 		intItemId
@@ -128,10 +129,11 @@ Begin
 		,0
 		,ri.intConsumptionMethodId
 		,ri.intStorageLocationId
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+	FROM tblMFWorkOrderRecipeItem ri
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
 
 	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,intConsumptionStorageLocationId)
 	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.intConsumptionStorageLocationId 

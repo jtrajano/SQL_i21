@@ -26,6 +26,8 @@ BEGIN TRY
 
 			@intVendorId            INT,
 
+			@dblLastCost            DECIMAL(18,6),
+
 			@intItemVendorXrefId    INT,
 
 			@strVendorProduct       NVARCHAR(50),
@@ -59,6 +61,8 @@ BEGIN TRY
 			@dblSalePrice        =   dblSalePrice,
 
 			@intVendorId         =   intVendorId,
+
+			@dblLastCost         =   dblLastCost,
 
 			@intItemVendorXrefId =   intItemVendorXrefId,
 
@@ -95,6 +99,8 @@ BEGIN TRY
 			dblSalePrice                DECIMAL(18,6),
 
 			intVendorId                 INT,
+
+			dblLastCost                 DECIMAL(18,6),
 
 			intItemVendorXrefId         INT,
 
@@ -141,17 +147,23 @@ BEGIN TRY
 	 UPDATE tblICItemPricing SET dblSalePrice = @dblSalePrice where intItemPricingId = @intItemPricingId
 
 
+	 --Update Last Cost
 
-	 ----Update Vendor Id
+	 UPDATE tblICItemPricing SET dblLastCost = @dblLastCost where intItemPricingId = @intItemPricingId
 
 
+     ----Update Vendor Id
 
 	 UPDATE tblICItemLocation SET intVendorId = @intVendorId where @intItemLocationId = @intItemLocationId and intItemId = @intItemId
-   
+
 
 	 SELECT @VendorXrefCount = COUNT(*) FROM tblICItemVendorXref 
 
 	 WHERE intItemVendorXrefId = @intItemVendorXrefId 
+
+	  
+
+     
 
 	 --Insert Vendor X-ref 
 
@@ -168,6 +180,7 @@ BEGIN TRY
 
 
 	 --Update Vendor X-ref 
+
 
 
 	 IF ((@strVendorProduct IS NOT NULL)

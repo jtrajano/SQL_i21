@@ -27,6 +27,7 @@
 			on special_price.intEntityCustomerId = ent.intEntityId
 		left join tblEntityLocation cus_location
 			on cus_location.intEntityId = special_price.intEntityCustomerId
+				and special_price.intCustomerLocationId = cus_location.intEntityLocationId
 		left join tblAPVendor vend
 			on vend.intEntityVendorId = special_price.intEntityVendorId	
 		left join tblAPVendor vend_rank
@@ -37,7 +38,9 @@
 			on item_rank.intItemId = special_price.intRackItemId
 		left join tblEntityLocation vend_location
 			on vend_location.intEntityId = vend.intEntityVendorId
+				and vend_location.intEntityLocationId = special_price.intEntityLocationId
 		left join tblEntityLocation vend_location_rank
 			on vend_location_rank.intEntityId = vend_rank.intEntityVendorId
+				and vend_location_rank.intEntityLocationId = special_price.intRackLocationId
 		left join tblICCategory category
 			on category.intCategoryId = special_price.intCategoryId

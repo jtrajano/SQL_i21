@@ -60,7 +60,7 @@ BEGIN
 	SELECT DISTINCT Top(1)
 		@intPurchaseSale = L.intPurchaseSale
 	FROM		vyuLGLoadView L
-	WHERE L.intLoadNumber = @xmlParam
+	WHERE L.[strLoadNumber] = @xmlParam
 
 	Insert into @LoadDetailTable
 		SELECT
@@ -100,7 +100,7 @@ BEGIN
 			'' as strOrignFullAddress,
 			'' as strDestinationFullAddress
 		FROM vyuLGLoadView L 
-		WHERE L.intLoadNumber = @xmlParam
+		WHERE L.[strLoadNumber] = @xmlParam
 
 	SELECT @total = count(*) from @LoadDetailTable;
 	SET @incval = 1 

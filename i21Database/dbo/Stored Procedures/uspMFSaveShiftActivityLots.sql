@@ -35,7 +35,7 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	UPDATE tblMFWorkOrderProducedLot
+	UPDATE dbo.tblMFWorkOrderProducedLot
 	SET intShiftActivityId = @intShiftActivityId
 	WHERE intLotId IN (
 			SELECT intLotId

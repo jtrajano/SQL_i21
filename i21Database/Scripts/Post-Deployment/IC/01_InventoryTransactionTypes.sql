@@ -134,6 +134,10 @@ USING	(
 		SELECT	id = 31
 				,name = 'Revalue Build Assembly'
 				,form = NULL 
+		UNION ALL 
+		SELECT	id = 32
+				,name = 'iProcess'
+				,form = 'iProcess' 
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

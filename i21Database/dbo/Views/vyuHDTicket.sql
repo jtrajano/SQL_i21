@@ -36,6 +36,9 @@ AS
 		,tic.intTicketProductId
 		,strTicketType = tic.strType
 		,strCustomerName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerId)
+		,tic.dtmLastCommented
+		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
+		,strLastCommentedBy = (select top 1 strName from tblEntity where intEntityId = tic.intLastCommentedByEntityId)
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId

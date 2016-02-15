@@ -2,7 +2,7 @@
 (
 [intLoadId] INT NOT NULL IDENTITY (1, 1),
 [intConcurrencyId] INT NOT NULL, 
-[intLoadNumber] INT NOT NULL, 
+[strLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
 [intCompanyLocationId] INT NULL,
 [intPurchaseSale] INT NOT NULL,
 [intItemId] INT NULL,
@@ -41,7 +41,7 @@
 [intLoadHeaderId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
-CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
+CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 CONSTRAINT [FK_tblLGLoad_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

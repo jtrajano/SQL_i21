@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetLoadMailMessage]
-		@intLoadNumber INT,
+		@strLoadNumber NVARCHAR(MAX),
 		@strMailMessage NVARCHAR(MAX) OUTPUT
 AS
 
@@ -9,7 +9,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
---DECLARE @intLoadNumber INT = 1433
+--DECLARE @strLoadNumber NVARCHAR(MAX) = '1433'
 --DECLARE @strMailMessage NVARCHAR(MAX)
 
 DECLARE @strCompanyName NVARCHAR(MAX), @strCompanyAddress NVARCHAR(MAX), @strCompanyCountry NVARCHAR(MAX), @strCompanyCity NVARCHAR(MAX), @strCompanyState NVARCHAR(MAX), @strCompanyZip NVARCHAR(MAX)
@@ -99,7 +99,7 @@ BEGIN
 	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
 	LEFT JOIN		tblEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
 	LEFT JOIN		tblSMUserSecurity	Dispatcher On				Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
-	WHERE L.intLoadNumber = @intLoadNumber
+	WHERE L.[strLoadNumber] = @strLoadNumber
 
 	Insert into @LoadDetailTable
 		SELECT
@@ -137,12 +137,12 @@ BEGIN
 			L.strItemNo,
 			L.strItemUOM	
 		FROM vyuLGLoadView L 
-		where L.intLoadNumber = @intLoadNumber
+		where L.[strLoadNumber] = @strLoadNumber
 
 	SET @strMailMessage =	N'<HTML> <BODY> <TABLE cellpadding=2 cellspacing=1 border=1>' + 
 								'<TR><FONT face=tahoma size=2>' +
 									'<TD size=210> <B> Load #: </B> </TD>' +
-									'<TD colspan=6>' +  LTRIM(@intLoadNumber) + '</TD>' +
+									'<TD colspan=6>' +  LTRIM(@strLoadNumber) + '</TD>' +
 								'</FONT></TR>'
 
 								IF IsNull(@strSupplierLoadNo, '') <> ''

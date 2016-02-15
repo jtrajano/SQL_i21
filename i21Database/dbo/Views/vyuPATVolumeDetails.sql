@@ -1,19 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuPATVolumeDetails]
 		 AS 
-	 SELECT CV.intCategoryVolumeId,
-			CV.intCustomerPatronId,
+	 SELECT	CV.intCustomerPatronId,
 			ENT.strName,
-			CV.intPatronageCategoryId,
-			PC.strCategoryCode,
-			PC.strPurchaseSale,
 			CV.intFiscalYear,
 			FY.strFiscalYear,
 			AR.strStockStatus,
 			TC.strTaxCode,
-			dblPurchase = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN CV.dblVolume ELSE 0 END,
-			dblSale = CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolume ELSE 0 END,
-			CV.dtmLastActivityDate,
-			CV.dblVolume,
+			dblPurchase = sum(CASE WHEN PC.strPurchaseSale = 'Purchase' THEN CV.dblVolume ELSE 0 END),
+			dblSale = sum(CASE WHEN PC.strPurchaseSale = 'Sale' THEN CV.dblVolume ELSE 0 END),
+			dtmLastActivityDate = max(CV.dtmLastActivityDate),
+			dblVolume = sum(CV.dblVolume),
 			CV.intConcurrencyId 
 	   FROM tblPATCustomerVolume CV
  INNER JOIN tblEntity ENT
@@ -26,5 +22,8 @@
 		 ON AR.intEntityCustomerId = CV.intCustomerPatronId
   LEFT JOIN tblSMTaxCode TC
 		 ON TC.intTaxCodeId = AR.intTaxCodeId
+		 group by CV.intCustomerPatronId,
+		 ENT.strName, CV.intFiscalYear,FY.strFiscalYear,
+		 AR.strStockStatus,TC.strTaxCode,CV.intConcurrencyId
 
 GO

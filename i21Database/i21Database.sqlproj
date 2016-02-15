@@ -3364,6 +3364,27 @@
     <Build Include="dbo\Stored Procedures\uspEMTogglePortalAccess.sql" />
     <Build Include="dbo\Functions\fnCFRemoteTaxes.sql" />
     <Build Include="dbo\Views\vyuMFGetBlendItemByLocation.sql" />
+    <Build Include="dbo\Tables\tblLGCompanyPreference.sql" />
+    <Build Include="dbo\Functions\fnCTGetSequenceUsageHistoryAdditionalParam.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityUnallocatedLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptAPTransactionByGLAccount.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityWastageTotal.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryWithWastage.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityProductionSummary.sql" />
+    <Build Include="dbo\Views\vyuCTEntityToContact.sql" />
+    <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByLine.sql" />
+    <Build Include="dbo\Views\vyuHDCrmKeyword.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityProspect.sql" />
+    <Build Include="dbo\Tables\tblMFBuyingGroup.sql" />
+    <Build Include="dbo\Tables\tblMFForecastItemType.sql" />
+    <Build Include="dbo\Tables\tblMFForecastItemValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveForecast.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetForecastDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetCleanUncleanWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessGrainStorage.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualCostingTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3452,6 +3473,8 @@
     <None Include="Scripts\Post-Deployment\EM\021_MoveCustomerMessageToEntity.sql" />
     <None Include="Scripts\Post-Deployment\EM\022_DefaultDataForContactTypeAndImport.sql" />
     <None Include="Scripts\Post-Deployment\MF\3_Pattern.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCreateEntityById.sql" />
+    <None Include="Scripts\Post-Deployment\MF\4_WMPattern.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

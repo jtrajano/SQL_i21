@@ -67,6 +67,7 @@ BEGIN TRY
 		,@strParentLotNumber nvarchar(50)
 		,@ysnIgnoreTolerance bit
 		,@intCategoryId int
+		,@dtmBusinessDate datetime
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -175,6 +176,11 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	SELECT @dtmCurrentDate = GetDate()
+
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
+
+	If @dtmPlannedDate Is NULL
+	Select @dtmPlannedDate=@dtmBusinessDate
 
 	SELECT @strLotTracking = strLotTracking
 			,@intCategoryId=intCategoryId

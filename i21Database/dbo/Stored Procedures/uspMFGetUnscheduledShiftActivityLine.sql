@@ -14,6 +14,7 @@ SET ANSI_WARNINGS OFF
 BEGIN
 	SELECT DISTINCT MC.intManufacturingCellId
 		,MC.strCellName
+		,MC.strDescription
 		,@dtmShiftDate AS dtmShiftDate
 		,@intShiftId AS intShiftId
 		,SH.dtmShiftStartTime
@@ -27,8 +28,8 @@ BEGIN
 		AND MC.ysnIncludeEfficiency = 1
 		AND MC.intManufacturingCellId NOT IN (
 			SELECT DISTINCT (SA.intManufacturingCellId)
-			FROM tblMFShiftActivity SA
-			JOIN tblMFManufacturingCell MC1 ON MC1.intManufacturingCellId = SA.intManufacturingCellId
+			FROM dbo.tblMFShiftActivity SA
+			JOIN dbo.tblMFManufacturingCell MC1 ON MC1.intManufacturingCellId = SA.intManufacturingCellId
 			WHERE SA.intShiftActivityStatusId IN (
 					2
 					,3

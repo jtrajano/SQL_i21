@@ -196,11 +196,16 @@ Begin
 		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
 		And mc.intManufacturingCellId=@intCellId
 
-		Select @strWorkOrderNo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  
-		from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
-
-		if ISNULL(@strWorkOrderNo,'')=''
-			Set @strWorkOrderNo=convert(varchar,@strDemandNo) + '01'
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		,@intItemId = @intItemId
+		,@intManufacturingId = @intCellId
+		,@intSubLocationId = 0
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = @intBlendRequirementId
+		,@intPatternCode = 93
+		,@ysnProposed = 0
+		,@strPatternString = @strWorkOrderNo OUTPUT
 
 		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
 		And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
@@ -216,8 +221,7 @@ Begin
 		Select @intWokrOrderId=SCOPE_IDENTITY()
 
 		--Copy Recipe
-		If @ysnKittingEnabled=0
-			Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWokrOrderId
+		Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWokrOrderId
 
 		Select @intMinWO=Min(intRowNo) From @tblWO Where intRowNo > @intMinWO
 	End
@@ -266,6 +270,11 @@ Begin
 		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,1,@intCellId,null,@intLocationId,@dtmDueDate,1,1,
 		null,0,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@intManufacturingProcessId,@intSalesOrderDetailId,
 		@dtmCurrentDate,@dtmDueDate,@intUserId,@intSubLocationId,@intCustomerId,@strSalesOrderNo,1
+
+		Select @intWokrOrderId=SCOPE_IDENTITY()
+		
+		--Copy Recipe
+		Exec uspMFCopyRecipe @intItemId,@intLocationId,@intUserId,@intWokrOrderId
 
 		Select @intMinWO=Min(intRowNo) From @tblWO Where intRowNo > @intMinWO
 	End

@@ -43,6 +43,7 @@ BEGIN TRY
 		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
 		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,	dblQty
 		FROM	@ItemsFromInventoryReceipt
+		WHERE	ISNULL(intLineNo,0) > 0
 	END
 	ELSE IF(@strReceiptType = 'Purchase Order')
 	BEGIN

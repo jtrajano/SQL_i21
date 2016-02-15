@@ -333,19 +333,20 @@ GO
 
 		PRINT N'GET TOTAL ROWS'
 		SET @currentRow = 1
-		SELECT @totalRows = Count(*) FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')
-		PRINT CONCAT(N'TOTAL ROWS ', @totalRows)
+		SELECT @totalRows = Count(*) FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')) a
+
+		--PRINT CONCAT(N'TOTAL ROWS ', @totalRows)
 
 		WHILE (@currentRow <= @totalRows)
 		BEGIN
 
 		DECLARE @customerId INT
 		SELECT @customerId = intEntityId FROM (  
-			SELECT ROW_NUMBER() OVER(ORDER BY intEntityTypeId ASC) AS 'ROWID', *
-			FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')
-		) a
+			SELECT ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS 'ROWID', *
+			FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')) a
+		) b
 		WHERE ROWID = @currentRow
-		PRINT CONCAT(N'CUSTOMER ID ', @customerId)
+		--PRINT CONCAT(N'CUSTOMER ID ', @customerId)
 
 		-- Loop through all contacts of the current customer with user role
 
@@ -355,7 +356,7 @@ GO
 			SET @currentRow1 = 1
 			SELECT @totalRows1 = Count(*) FROM [dbo].[tblEntityToContact] EntityToContact
 			WHERE EntityToContact.intEntityRoleId IS NOT NULL AND EntityToContact.intEntityId = @customerId
-			PRINT CONCAT(N'TOTAL NUMBER OF CONTACTS ', @totalRows1)
+			--PRINT CONCAT(N'TOTAL NUMBER OF CONTACTS ', @totalRows1)
 
 			WHILE (@currentRow1 <= @totalRows1)
 			BEGIN
@@ -367,23 +368,23 @@ GO
 				WHERE EntityToContact.intEntityRoleId IS NOT NULL AND EntityToContact.intEntityId = @customerId
 			) a
 			WHERE ROWID = @currentRow1
-			PRINT CONCAT(N'CONTACT ID ', @contactId)
+			--PRINT CONCAT(N'CONTACT ID ', @contactId)
 
 			-- Get role
 			DECLARE @roleId INT
 			SELECT @roleId = intEntityRoleId FROM tblEntityToContact WHERE intEntityContactId = @contactId
-			PRINT CONCAT(N'ROLE ID ', @roleId)
+			--PRINT CONCAT(N'ROLE ID ', @roleId)
 
 			-- Get customer name
 			DECLARE @customerName VARCHAR(50)	
 			SELECT @customerName = RTRIM(strName) FROM tblEntity WHERE intEntityId = @customerId
-			PRINT CONCAT(N'CUSTOMER NAME ', @customerName)
+			--PRINT CONCAT(N'CUSTOMER NAME ', @customerName)
 	
 			DECLARE @roleName VARCHAR(50)
-			SELECT @roleName = CONCAT(@customerName, '''s ', strName)
+			SELECT @roleName = CAST(@customerName AS VARCHAR) + '''s ' + strName
 			FROM tblSMUserRole 
 			WHERE intUserRoleID = @roleId
-			PRINT CONCAT(N'ROLE NAME ', @roleName)
+			--PRINT CONCAT(N'ROLE NAME ', @roleName)
 
 			DECLARE @newRoleId INT
 			-- Duplicate role
@@ -391,14 +392,14 @@ GO
 			BEGIN
 				PRINT N'INSERTING NEW ROLE'
 				INSERT INTO tblSMUserRole(strName, strDescription, strMenu, strMenuPermission, strForm, strRoleType, ysnAdmin)
-				SELECT @roleName as strName, @roleName as strDescription, strMenu, strMenuPermission, strForm, strRoleType, ysnAdmin 
+				SELECT @roleName as strName, @roleName as strDescription, strMenu, strMenuPermission, strForm, 'Contact', 0 
 				FROM tblSMUserRole 
 				WHERE intUserRoleID = @roleId
 
 				SELECT @newRoleId = SCOPE_IDENTITY()
-				PRINT CONCAT(N'NEW ROLE ID ', @newRoleId)
+				--PRINT CONCAT(N'NEW ROLE ID ', @newRoleId)
 
-				PRINT CONCAT(N'UPDATE USER ROLE MENUS FOR ROLE ID ', @newRoleId)
+				--PRINT CONCAT(N'UPDATE USER ROLE MENUS FOR ROLE ID ', @newRoleId)
 				EXEC uspSMUpdateUserRoleMenus @newRoleId, 1, 0
 
 				-- ENABLING EXISTING MENUS
@@ -414,7 +415,7 @@ GO
 			END
 
 			---- assign it back to respective contact
-			PRINT CONCAT(N'ASSIGNING THE ROLE ID ', @newRoleId, ' TO CONTACT ID ', @contactId)
+			--PRINT CONCAT(N'ASSIGNING THE ROLE ID ', @newRoleId, ' TO CONTACT ID ', @contactId)
 			UPDATE tblEntityToContact SET intEntityRoleId = @newRoleId WHERE intEntityContactId = @contactId
 
 			SET @currentRow1 = @currentRow1 + 1
@@ -423,22 +424,22 @@ GO
 			IF @totalRows1 > 0
 			BEGIN
 
-				DECLARE @timeStamp VARCHAR(50)
-				select @timeStamp = FORMAT(CURRENT_TIMESTAMP, 'yyMMddHHmmssmmm')
-				PRINT CONCAT(N'TIMESTAMP ', @timeStamp)
+				--DECLARE @timeStamp VARCHAR(50)
+				--select @timeStamp = SUBSTRING(REPLACE(REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, GETDATE(), 121), ' ', ''), '-', ''), ':', ''), '.', ''), 3, 15)
+				--PRINT CONCAT(N'TIMESTAMP ', @timeStamp)
 
 				DECLARE @contactAdminName VARCHAR(50)
-				SELECT @contactAdminName = CONCAT(@customerName, '-', @timeStamp)
-				PRINT CONCAT(N'CONTACT ADMIN NAME ', @contactAdminName)
+				SELECT @contactAdminName = CAST(@customerName AS VARCHAR) +  '-' + CAST(@customerId AS VARCHAR)
+				--PRINT CONCAT(N'CONTACT ADMIN NAME ', @contactAdminName)
 
 				-- Create a role as contact admin (and Get all menus) ?
-				PRINT CONCAT(N'INSERTING NEW CONTACT ADMIN NAMED ', @contactAdminName)
+				--PRINT CONCAT(N'INSERTING NEW CONTACT ADMIN NAMED ', @contactAdminName)
 				INSERT INTO tblSMUserRole(strName, strDescription, strRoleType, ysnAdmin)
 				VALUES(@contactAdminName, 'Contact Administrator', 'Contact Admin', 1)
 
 				DECLARE @contactAdminRoleId INT
 				SELECT @contactAdminRoleId = SCOPE_IDENTITY()
-				PRINT CONCAT(N'UPDATING NEW CONTACT ADMIN''S USER ROLE MENUS WITH ROLE ID ', @contactAdminRoleId)
+				--PRINT CONCAT(N'UPDATING NEW CONTACT ADMIN''S USER ROLE MENUS WITH ROLE ID ', @contactAdminRoleId)
 				EXEC uspSMUpdateUserRoleMenus @contactAdminRoleId, 1, 1
 
 				-- Get default contact and check if contact has portal permission
@@ -446,14 +447,14 @@ GO
 				IF EXISTS(SELECT TOP 1 1 FROM tblEntityToContact WHERE intEntityId = @customerId AND ysnDefaultContact = 1 AND ysnPortalAccess = 1)
 				BEGIN
 					-- if default contact has portal permission assign all the menus
-					PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO DEFAULT CONTACT ', @contactAdminRoleId)
+					--PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO DEFAULT CONTACT ', @contactAdminRoleId)
 					UPDATE tblEntityToContact SET intEntityRoleId = @contactAdminRoleId 
 					WHERE intEntityId = @customerId AND ysnDefaultContact = 1 AND ysnPortalAccess = 1
 				END
 				ELSE
 				BEGIN
 					-- else select top 1 and assign all the menus
-					PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO THE TOP 1 CONTACT ', @customerId, ' ', @contactAdminRoleId)
+					--PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO THE TOP 1 CONTACT ', @customerId, ' ', @contactAdminRoleId)
 					UPDATE tblEntityToContact SET intEntityRoleId = @contactAdminRoleId 
 					WHERE intEntityContactId = (SELECT TOP 1 intEntityContactId 
 												FROM tblEntityToContact 
@@ -475,8 +476,6 @@ GO
 		--					  AND intUserRoleID NOT IN (SELECT intEntityRoleId
 		--												FROM tblEntityToContact 
 		--												WHERE intEntityRoleId IS NOT NULL))
-		
-		
 				
 		PRINT N'ADD LOG TO tblMigrationLog'
 		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 

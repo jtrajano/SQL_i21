@@ -37,6 +37,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0       -- Fuel Surcharge	
 	,[ysnFreightInPrice] BIT NULL DEFAULT 0				-- Freight should be included In Price
 	,[intCostUOMId] INT NULL							-- Cost UOM
+	,[intDiscountSchedule] INT NULL						-- Discount Schedule field. (Quality module).
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	

@@ -18,6 +18,7 @@ BEGIN
 		SET @intCnt = @intCnt + 1
 	END
 
-	Select * from @tbl
+	Select t.*, Acc.strAccountId from @tbl t
+	LEFT JOIN dbo.tblGLAccount Acc ON Acc.intAccountId = t.intAccountId
 
 END

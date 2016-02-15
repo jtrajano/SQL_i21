@@ -100,7 +100,7 @@ SELECT LoadDetail.intLoadDetailId
 -- Load Header
 		,Load.intLoadId
 		,Load.intConcurrencyId
-		,Load.intLoadNumber
+		,Load.[strLoadNumber]
 		,Load.intPurchaseSale
 		,Load.intEquipmentTypeId
 		,Load.intHaulerEntityId

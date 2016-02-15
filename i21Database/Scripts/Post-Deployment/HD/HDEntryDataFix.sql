@@ -319,4 +319,28 @@ GO
 
 GO
 	PRINT N'End updating HD ticket closed date.'
+	PRINT N'Start updating HD ticket last commented date.'
+GO
+
+	update
+		tblHDTicket 
+	set
+		tblHDTicket.dtmLastCommented = (select max(tblHDTicketComment.dtmLastModified) from tblHDTicketComment where tblHDTicketComment.intTicketId = tblHDTicket.intTicketId)
+		,tblHDTicket.intLastCommentedByEntityId = (
+													select
+														top 1 tblHDTicketComment.intLastModifiedUserEntityId 
+													from
+														tblHDTicketComment 
+													where
+														tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
+														and tblHDTicketComment.dtmLastModified = (
+																									select max(tblHDTicketComment.dtmLastModified) 
+																									from tblHDTicketComment 
+																									where tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
+																								  )
+												  )
+	where tblHDTicket.dtmLastCommented is null
+
+GO
+	PRINT N'End updating HD ticket last commented date.'
 GO

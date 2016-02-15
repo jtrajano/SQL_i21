@@ -32,7 +32,7 @@ Declare @tblItemFinal AS table
 	strProcessName nvarchar(50),
 	intRecipeId int,
 	intWorkOrderId int,
-	strWorkOrderNo nvarchar(50),
+	strWorkOrderNo nvarchar(Max),
 	dblWOQty numeric(18,6),
 	dtmDueDate DateTime,
 	intCellId int,
@@ -90,10 +90,10 @@ From tblMFRecipeItem ri
 Join tblICItem i on ri.intItemId=i.intItemId
 Join tblICItemUOM iu on i.intItemId=iu.intItemId And iu.ysnStockUnit=1
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
-Join tblMFRecipe r on ri.intReferenceRecipeId=r.intRecipeId
+Join tblMFRecipe r on ri.intItemId=r.intItemId
 Join tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId
 --Left Join tblMFWorkOrder w on w.intItemId=r.intItemId And w.intSalesOrderLineItemId=@intSalesOrderDetailId
-Where r.intLocationId=@intLocationId And r.ysnActive=1 And ri.intRecipeId=@intRecipeId
+Where r.intLocationId=@intLocationId And r.ysnActive=1 And ri.intRecipeId=@intRecipeId And ri.intRecipeItemTypeId=1
 
 Select @intItemId=intItemId From @tblItemFinal Where intRowNo=2
 
