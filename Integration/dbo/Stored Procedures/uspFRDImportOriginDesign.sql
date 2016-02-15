@@ -38,7 +38,8 @@ BEGIN
 			[intRowId] [int] NOT NULL,
 			[intRefNo] [int] NOT NULL,
 			[strDescription] [nvarchar](250) NULL,
-			[strRowType] [nvarchar](50) NULL,
+			[strRowType] [nvarchar](50) NULL,			
+			[ysnPrintEach] [bit] NULL,
 			[strBalanceSide] [nvarchar](10) NULL,
 			[strRelatedRows] [nvarchar](max) NULL,
 			[strAccountsUsed] [nvarchar](max) NULL,
@@ -112,7 +113,7 @@ BEGIN
 		BEGIN
 			INSERT #irelyloadFRRowDesign
 			(	
-				intRowId, intRefNo, strDescription, strRowType, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
+				intRowId, intRefNo, strDescription, strRowType, ysnPrintEach, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
 				ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
 				strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId, glfsf_action_type, glfsf_action_crl, glfsf_tot_no, full_account, glfsf_grp_printall_yn,
 				full_account_end, isprimary, acct9_16, glfsf_no, glfsf_line_no, acct1_8, acct1_8end, acct9_16end
@@ -160,6 +161,9 @@ BEGIN
 					WHEN glfsf_action_type=''UL'' THEN ''Underscore''
 					WHEN glfsf_action_type=''LGN'' THEN ''Column Name''
 					ELSE NULL END AS strRowType,
+				CASE 
+					WHEN glfsf_action_type=''GRP'' AND glfsf_grp_printall_yn=''Y'' THEN 1
+					ELSE 0 END AS ysnPrintEach,
 				CASE 
 					WHEN glfsf_action_type=''NET'' THEN ''Credit''
 					ELSE
@@ -739,12 +743,12 @@ BEGIN
 
 			INSERT tblFRRowDesign 
 			(
-				intRowId, intRefNo, strDescription, strRowType, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
+				intRowId, intRefNo, strDescription, strRowType, ysnPrintEach, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
 				ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
 				strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId
 			)
 			SELECT 
-				intRowId, intRefNo, strDescription, strRowType, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
+				intRowId, intRefNo, strDescription, strRowType, ysnPrintEach, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
 				ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
 				strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId
 			FROM #irelyloadFRRowDesign ORDER BY intRowId, intRefNo
@@ -965,6 +969,9 @@ BEGIN
 			UPDATE tblFRRowDesign SET strSource = ''Column'' WHERE strRowType IN (''Hidden'',''Filter Accounts'',''Cash Flow Activity'',''Percentage'')
 			UPDATE tblFRRowDesign SET strSource = '''' WHERE strRowType NOT IN (''Hidden'',''Filter Accounts'',''Cash Flow Activity'',''Percentage'')
 			UPDATE tblFRRowDesignFilterAccount SET strJoin = ''Or'' WHERE strJoin = ''''
+			UPDATE tblFRRowDesign SET strAccountsType = '''' WHERE strAccountsType IS NULL
+			UPDATE tblFRRowDesign SET ysnPrintEach = 0 WHERE ysnPrintEach IS NULL
+			UPDATE tblFRRowDesign SET ysnPrintEach = 1 WHERE intRefNo IN (SELECT intRefNo FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''GRP'' AND glfsf_grp_printall_yn = ''Y'') AND intRowId = @introwiddet
  
 			SELECT * INTO #TempRowDesign FROM tblFRRowDesign where intRowId = @introwiddet order by intRefNo
  
@@ -995,6 +1002,97 @@ BEGIN
 
 		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#irelyloaddesigncalc'')) DROP TABLE #irelyloaddesigncalc
 		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#irelyloadFRRowDesign'')) DROP TABLE #irelyloadFRRowDesign
+
+
+
+		--=====================================================================================================================================
+		-- 	UPDATING STAGE: ROW: HIDDEN OPTION
+		---------------------------------------------------------------------------------------------------------------------------------------
+
+		UPDATE tblFRRowDesign SET ysnHidden = 0 WHERE strRowType <> ''Hidden'' AND ysnHidden IS NULL AND intRowId = @introwiddet
+		UPDATE tblFRRowDesign SET ysnHidden = 1 WHERE strRowType = ''Hidden'' AND ysnHidden IS NULL AND intRowId = @introwiddet
+		UPDATE tblFRRowDesign SET strRowType = ''Filter Accounts'' WHERE strRowType = ''Hidden'' AND intRowId = @introwiddet
+
+		--=====================================================================================================================================
+		-- 	UPDATING STAGE: ROW: ACCOUNT TYPE
+		---------------------------------------------------------------------------------------------------------------------------------------		
+		
+		CREATE TABLE #tempFRDGLAccount (
+				[strAccountType]	NVARCHAR(MAX)
+			);
+
+		SELECT * INTO #tempFRDRowDesign FROM tblFRRowDesign WHERE strAccountsType IS NULL AND LEN(strAccountsUsed) > 3 AND intRowId = @introwiddet
+
+		WHILE EXISTS(SELECT 1 FROM #tempFRDRowDesign)
+			BEGIN
+				DECLARE @RowDetailID INT  = (SELECT TOP 1 intRowDetailId FROM #tempFRDRowDesign)
+				DECLARE @AccountsUsed NVARCHAR(MAX)  = (SELECT TOP 1 strAccountsUsed FROM #tempFRDRowDesign)
+				DECLARE @queryString NVARCHAR(MAX) = ''''
+
+				SET @queryString = ''SELECT TOP 1 strAccountType FROM vyuGLAccountView where '' + REPLACE(REPLACE(REPLACE(REPLACE(@AccountsUsed,''[ID]'',''strAccountId''),''[Group]'',''strAccountGroup''),''[Type]'',''strAccountType''),''[Description]'',''strDescription'') + '' ORDER BY strAccountId''
+
+				BEGIN TRY
+					INSERT INTO #tempFRDGLAccount
+					EXEC (@queryString)
+				END TRY
+				BEGIN CATCH
+				END CATCH;
+
+				IF((ISNULL((SELECT TOP 1 1 FROM #tempFRDGLAccount),0) < 1) and (CHARINDEX(''strAccountGroup'',@queryString) > 0) and (CHARINDEX('' Or '',@queryString) < 1))
+				BEGIN
+					SET @queryString = ''SELECT TOP 1 strAccountType FROM tblGLAccountGroup where '' + REPLACE(REPLACE(REPLACE(REPLACE(@AccountsUsed,''[ID]'',''strAccountId''),''[Group]'',''strAccountGroup''),''[Type]'',''strAccountType''),''[Description]'',''strDescription'')
+
+					BEGIN TRY
+						INSERT INTO #tempFRDGLAccount
+						EXEC (@queryString)
+					END TRY
+					BEGIN CATCH
+					END CATCH;
+				END
+		
+				IF(ISNULL((SELECT TOP 1 1 FROM #tempFRDGLAccount),0) < 1)
+				BEGIN
+					UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
+				END
+
+				WHILE EXISTS(SELECT 1 FROM #tempFRDGLAccount)
+				BEGIN
+					DECLARE @strAccountType NVARCHAR(MAX) = ''''
+					SELECT TOP 1 @strAccountType = [strAccountType] FROM #tempFRDGLAccount
+
+					IF(@strAccountType = ''Asset'')
+					BEGIN
+						UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
+					END
+					ELSE IF(@strAccountType = ''Equity'')
+					BEGIN
+						UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
+					END
+					ELSE IF(@strAccountType = ''Expense'')
+					BEGIN
+						UPDATE tblFRRowDesign SET strAccountsType = ''IS'' WHERE intRowDetailId = @RowDetailID
+					END
+					ELSE IF(@strAccountType = ''Liability'')
+					BEGIN
+						UPDATE tblFRRowDesign SET strAccountsType = ''BS'' WHERE intRowDetailId = @RowDetailID
+					END
+					ELSE IF(@strAccountType = ''Revenue'')
+					BEGIN
+						UPDATE tblFRRowDesign SET strAccountsType = ''IS'' WHERE intRowDetailId = @RowDetailID
+					END
+					ELSE
+					BEGIN
+						UPDATE tblFRRowDesign SET strAccountsType = '''' WHERE intRowDetailId = @RowDetailID
+					END
+			
+					DELETE #tempFRDGLAccount
+				END
+
+				DELETE #tempFRDRowDesign WHERE intRowDetailId = @RowDetailID
+			END
+	
+		DROP TABLE #tempFRDRowDesign
+		DROP TABLE #tempFRDGLAccount
 
 
 		--GO
