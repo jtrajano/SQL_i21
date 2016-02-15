@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspRKM2MInquirySummary 
+﻿CREATE PROCEDURE [dbo].[uspRKM2MInquirySummary] 
 		@intM2MBasisId int = null,
 		@intFutureSettlementPriceId int = null,
 		@intQuantityUOMId int = null,
@@ -19,8 +19,8 @@ WHERE intM2MBasisId = @intM2MBasisId
 
 DECLARE @tblRow TABLE (
 	RowNumber INT IDENTITY(1, 1)
-	,intCommodityId INT
-	)
+	,intCommodityId INT)
+
 DECLARE @tblFinalDetail TABLE (
 	RowNumber INT IDENTITY(1, 1)
 	,strSummary NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -90,11 +90,6 @@ FROM (
 		,strCommodityCode
 	FROM @#tempSummary
 	
-	UNION
-	
-	SELECT DISTINCT intCommodityId
-		,strCommodityCode
-	FROM vyuRKUnrealizedPnL
 	) t
 ORDER BY strCommodityCode
 
@@ -204,4 +199,4 @@ BEGIN
 END
 
 SELECT *,0 as intConcurrencyId  
-FROM @tblFinalDetail	
+FROM @tblFinalDetail
