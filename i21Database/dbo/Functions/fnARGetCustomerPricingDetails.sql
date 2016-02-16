@@ -380,7 +380,7 @@ BEGIN
 											  END 
 								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
 									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
-								WHERE (vyuTRRackPrice.intItemId = intItemId OR vyuTRRackPrice.intItemId = intItemId)
+								WHERE vyuTRRackPrice.intItemId = @ItemId
 									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
 									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
@@ -389,12 +389,13 @@ BEGIN
 											  END 
 								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
 									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
-								WHERE (vyuTRRackPrice.intItemId = intItemId OR vyuTRRackPrice.intItemId = intItemId)
+								WHERE vyuTRRackPrice.intItemId = @ItemId
 									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
 									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
 		WHERE
-			strPriceBasis = 'O'	
+			strPriceBasis = 'O'
+			AND intItemId = @ItemId 
 						
 		DECLARE @SpecialGroupPricing TABLE(
 			intSpecialPriceId INT
