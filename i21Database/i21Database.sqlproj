@@ -3397,6 +3397,15 @@
     <Build Include="dbo\Stored Procedures\uspMFTransferProcessMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotByStorageLocation.sql" />
     <Build Include="dbo\Tables\tblSMEvents.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotsFromReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptFromContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentFromContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerFromInboundShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptFromContainer.sql" />
+    <Build Include="dbo\Views\vyuMFGetTraceabilityObject.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
