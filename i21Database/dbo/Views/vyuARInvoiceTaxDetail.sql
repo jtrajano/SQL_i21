@@ -13,7 +13,7 @@ SELECT
 	,ITX.intTaxCodeId 
 	,TC.strTaxCode
 	,ITX.strCalculationMethod 
-	,ITX.numRate
+	,ITX.dblRate
 	,D.dblQtyShipped 
 	,D.dblPrice 
 	,D.dblTotal

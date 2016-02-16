@@ -4760,4 +4760,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblDec" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5e9c1480-140c-4342-8622-6bef919068ab" ChangeDateTime="02/16/2016 13:18:13">
+    <Property Name="ElementName" Value="[dbo].[tblSMTaxCodeRate].[numRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMTaxCodeRate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblRate]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a4da4330-31aa-47c1-95f7-25b37c44e054" ChangeDateTime="02/16/2016 13:21:04">
+    <Property Name="ElementName" Value="[dbo].[tblSMCurrencyExchangeRateDetail].[numRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCurrencyExchangeRateDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblRate]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6ca40722-7a2d-44d7-9ea5-5dc324c0a780" ChangeDateTime="02/16/2016 13:24:49">
+    <Property Name="ElementName" Value="[dbo].[tblARInvoiceDetailTax].[numRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARInvoiceDetailTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblRate]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6c2b3604-9c45-4239-a45a-059a0087a5e6" ChangeDateTime="02/16/2016 13:28:06">
+    <Property Name="ElementName" Value="[dbo].[tblSOSalesOrderDetailTax].[numRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSOSalesOrderDetailTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblRate]" />
+  </Operation>
 </Operations>

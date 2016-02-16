@@ -52,8 +52,8 @@ BEGIN
 	BEGIN
 		SELECT	TOP 1 @dblResult = 
 				CASE	WHEN ER.intFromCurrencyId = @intCurrencyToConvertId  
-						THEN 1/RD.numRate 
-						ELSE RD.numRate
+						THEN 1/RD.[dblRate] 
+						ELSE RD.[dblRate]
 				END 
 		FROM	tblSMCurrencyExchangeRate ER
 		JOIN	tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId

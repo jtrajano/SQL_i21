@@ -17,7 +17,7 @@ SET @ZeroDecimal = 0.000000
 UPDATE
 	tblARInvoiceDetailTax
 SET
-	 [numRate]			= ISNULL([numRate], @ZeroDecimal)
+	 [dblRate]			= ISNULL([dblRate], @ZeroDecimal)
 	,[dblTax]			= ISNULL([dblTax], @ZeroDecimal)
 	,[dblAdjustedTax]	= ROUND(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,[ysnTaxAdjusted]	= ROUND(ISNULL([ysnTaxAdjusted], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())

@@ -74,13 +74,13 @@ BEGIN
 				+ (
 					TaxableOtherTaxes.dblCalculatedTaxAmount 
 					* (
-						SELECT	ISNULL( SUM (OtherTaxRate.numRate / 100), 0)
+						SELECT	ISNULL( SUM (OtherTaxRate.[dblRate] / 100), 0)
 						FROM	dbo.tblSMTaxCode OtherTax INNER JOIN dbo.tblSMTaxCodeRate OtherTaxRate
 									ON OtherTax.intTaxCodeId = OtherTaxRate.intTaxCodeId
 								INNER JOIN dbo.fnGetRowsFromDelimitedValues(TaxableOtherTaxes.strTaxableByOtherTaxes) AddOnTaxClass
 									ON AddOnTaxClass.intID = OtherTax.intTaxClassId
 						WHERE	OtherTax.intTaxCodeId <> TaxableOtherTaxes.intTaxCodeId
-								AND ISNULL(OtherTaxRate.numRate, 0) <> 0 
+								AND ISNULL(OtherTaxRate.[dblRate], 0) <> 0 
 								AND dbo.fnDateLessThanEquals(OtherTaxRate.dtmEffectiveDate, TaxableOtherTaxes.dtmDate) = 1
 								AND ISNULL(OtherTax.strZipCode, '') = ISNULL(TaxCode.strZipCode, '')
 								AND ISNULL(OtherTax.strCity, '') = ISNULL(TaxCode.strCity, '')
@@ -95,13 +95,13 @@ BEGIN
 				+ (
 					TaxableOtherTaxes.dblCalculatedTaxAmount 
 					* (
-						SELECT	ISNULL( SUM (OtherTaxRate.numRate), 0)
+						SELECT	ISNULL( SUM (OtherTaxRate.[dblRate]), 0)
 						FROM	dbo.tblSMTaxCode OtherTax INNER JOIN dbo.tblSMTaxCodeRate OtherTaxRate
 									ON OtherTax.intTaxCodeId = OtherTaxRate.intTaxCodeId
 								INNER JOIN dbo.fnGetRowsFromDelimitedValues(TaxableOtherTaxes.strTaxableByOtherTaxes) AddOnTaxClass
 									ON AddOnTaxClass.intID = OtherTax.intTaxClassId
 						WHERE	OtherTax.intTaxCodeId <> TaxableOtherTaxes.intTaxCodeId
-								AND ISNULL(OtherTaxRate.numRate, 0) <> 0 
+								AND ISNULL(OtherTaxRate.[dblRate], 0) <> 0 
 								AND dbo.fnDateLessThanEquals(OtherTaxRate.dtmEffectiveDate, TaxableOtherTaxes.dtmDate) = 1
 								AND ISNULL(OtherTax.strZipCode, '') = ISNULL(TaxCode.strZipCode, '')
 								AND ISNULL(OtherTax.strCity, '') = ISNULL(TaxCode.strCity, '')
