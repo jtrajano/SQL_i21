@@ -94,7 +94,7 @@ INSERT INTO @EntriesForInvoice(
 	,[intPerformerId]
 	,[ysnLeaseBilling]
 	,[ysnVirtualMeterReading]
-	--,[intTempDetailIdForTaxes]
+	,[intTempDetailIdForTaxes]
 )
 SELECT
 	 [strSourceTransaction]					= 'Card Fueling Transaction'
@@ -150,7 +150,7 @@ SELECT
     ,[dtmMaintenanceDate]					= NULL
     ,[dblMaintenanceAmount]					= NULL
     ,[dblLicenseAmount]						= NULL
-	,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
+	,[intTaxGroupId]						= NULL --cfSiteItem.intTaxGroupId
 	,[ysnRecomputeTax]						= 1
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= ''
@@ -172,7 +172,7 @@ SELECT
 	,[intPerformerId]						= NULL
 	,[ysnLeaseBilling]						= NULL
 	,[ysnVirtualMeterReading]				= NULL
-	--,[intTempDetailIdForTaxes]				= 7
+	,[intTempDetailIdForTaxes]				= 7
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
 ON cfTrans.intNetworkId = cfNetwork.intNetworkId
@@ -217,46 +217,53 @@ LEFT JOIN vyuCTContractDetailView ctContracts
 ON cfTrans.intContractId = ctContracts.intContractDetailId
 WHERE cfTrans.intTransactionId = @TransactionId
 
---DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
---INSERT INTO @TaxDetails
---							(
---							[intDetailId] 
---							,[intTaxGroupId]
---							,[intTaxCodeId]
---							,[intTaxClassId]
---							,[strTaxableByOtherTaxes]
---							,[strCalculationMethod]
---							,[numRate]
---							,[intTaxAccountId]
---							,[dblTax]
---							,[dblAdjustedTax]
---							,[ysnTaxAdjusted]
---							,[ysnSeparateOnInvoice]
---							,[ysnCheckoffTax]
---							,[ysnTaxExempt]
---							,[strNotes]
---							,[intTempDetailIdForTaxes])
---						SELECT
---							[intDetailId]				= 0
---							,[intTaxGroupId]			= NULL
---							,[intTaxCodeId]				= 3
---							,[intTaxClassId]			= 1
---							,[strTaxableByOtherTaxes]	= NULL
---							,[strCalculationMethod]		= 'Percentage'
---							,[numRate]					= 1.000000
---							,[intTaxAccountId]			= 194
---							,[dblTax]					= 12.12321
---							,[dblAdjustedTax]			= 13
---							,[ysnTaxAdjusted]			= NULL
---							,[ysnSeparateOnInvoice]		= 0
---							,[ysnCheckoffTax]			= 0
---							,[ysnTaxExempt]				= 0
---							,[strNotes]					= 1
---							,[intTempDetailIdForTaxes]	= 7
+DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
+INSERT INTO @TaxDetails
+	(
+	[intDetailId] 
+	,[intTaxGroupId]
+	,[intTaxCodeId]
+	,[intTaxClassId]
+	,[strTaxableByOtherTaxes]
+	,[strCalculationMethod]
+	,[numRate]
+	,[intTaxAccountId]
+	,[dblTax]
+	,[dblAdjustedTax]
+	,[ysnTaxAdjusted]
+	,[ysnSeparateOnInvoice]
+	,[ysnCheckoffTax]
+	,[ysnTaxExempt]
+	,[strNotes]
+	,[intTempDetailIdForTaxes])
+SELECT
+[intDetailId]				= 0
+,[intTaxGroupId]			= 0
+,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
+,[intTaxClassId]			= cfTaxCode.intTaxClassId
+,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
+,[strCalculationMethod]		= cfTaxCodeRate.strCalculationMethod
+,[numRate]					= cfTransactionTax.dblTaxRate
+,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
+,[dblTax]					= 0
+,[dblAdjustedTax]			= 0
+,[ysnTaxAdjusted]			= 0
+,[ysnSeparateOnInvoice]		= 0 
+,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
+,[ysnTaxExempt]				= 0
+,[strNotes]					= ''
+,[intTempDetailIdForTaxes]	= 0
+FROM 
+tblCFTransactionTax cfTransactionTax
+INNER JOIN tblSMTaxCode  cfTaxCode
+ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
+INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+WHERE cfTransactionTax.intTransactionId = @TransactionId
 
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries	= @EntriesForInvoice
-	--,@LineItemTaxEntries = @TaxDetails
+	,@LineItemTaxEntries = @TaxDetails
 	,@UserId			= @UserId
 	,@GroupingOption	= 11
 	,@RaiseError		= 1

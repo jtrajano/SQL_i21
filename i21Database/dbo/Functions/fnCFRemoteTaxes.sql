@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnCFRemoteTaxes] 
     (   
 		 @strTaxState					NVARCHAR(MAX)   = 'ALL'
+		,@strTaxCodeId					NVARCHAR(MAX)	= ''
 		,@FET							NUMERIC(18,6)	= 0.000000
 		,@SET							NUMERIC(18,6)	= 0.000000
 		,@SST							NUMERIC(18,6)	= 0.000000
@@ -69,6 +70,12 @@ BEGIN
 		,ysnTaxExempt					BIT
 		,strTaxExemptReason				NVARCHAR(MAX)
 		,strReason						NVARCHAR(MAX)
+	)
+
+	DECLARE @tblTaxCodeRecord TABLE
+	(
+		RecordKey   int ,  -- Array index
+		Record      varchar(1000)   
 	)
 
 	IF (@strTaxState IS NULL OR @strTaxState = '')
@@ -761,6 +768,73 @@ BEGIN
 			)
 		END
 	END
+
+
+	IF(@strTaxCodeId != '')
+	BEGIN
+		INSERT INTO @tblTaxCodeRecord(
+		 [Record]
+		,[RecordKey]
+		)
+		SELECT 
+		Record,
+		RecordKey
+		FROM [fnCFSplitString](@strTaxCodeId,',') 
+			
+			DECLARE @intCreatedRecordKey INT
+			DECLARE @intCreatedInvoiceId INT
+			WHILE (EXISTS(SELECT 1 FROM @tblTaxCodeRecord))
+			BEGIN
+				SELECT @intCreatedRecordKey = RecordKey FROM @tblTaxCodeRecord
+				SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM @tblTaxCodeRecord WHERE RecordKey = @intCreatedRecordKey
+				
+				IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
+				BEGIN 
+					INSERT INTO @tblTaxTable
+					SELECT TOP 1
+						 0
+						,0	
+						,0		
+						,0			
+						,[intTaxCodeId]				
+						,[intTaxClassId]			
+						,[strTaxableByOtherTaxes]	
+						,[strCalculationMethod]		
+						,@LC12					
+						,null					
+						,null			
+						,[intSalesTaxAccountId]			
+						,0		
+						,[ysnCheckoffTax]			
+						,[strTaxCode]				
+						,[ysnTaxExempt]				
+						,''				
+						,0				
+						,[strTaxExemptReason]		
+						,''			
+					FROM
+						@tblNetworkTaxMapping
+					WHERE [intTaxCodeId] = @intCreatedInvoiceId
+				END
+				ELSE
+				BEGIN
+					INSERT INTO @tblTaxTable(
+						 [ysnInvalid]
+						,[strReason]
+					)
+					VALUES(
+						 1
+						,'Unable to find match for ' + @strTaxState + ' state tax'
+					)
+				END
+
+				DELETE FROM @tblTaxCodeRecord WHERE RecordKey = @intCreatedRecordKey
+
+			END
+		
+	END
+
+
 
     RETURN
 END

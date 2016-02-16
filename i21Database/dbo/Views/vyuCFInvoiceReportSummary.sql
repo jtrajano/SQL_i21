@@ -18,19 +18,26 @@ FROM            dbo.vyuCFInvoice AS arInv INNER JOIN
                              (SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
                                WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTrans.intTransactionId = cfTransNetPrice.intTransactionId LEFT OUTER JOIN
-                             (SELECT        intTransactionTaxId, intTransactionId, strTransactionTaxId, dblTaxOriginalAmount, dblTaxCalculatedAmount, intConcurrencyId, strCalculationMethod, dblTaxRate
-                               FROM            dbo.tblCFTransactionTax
-                               WHERE        (strTransactionTaxId = 'FET')) AS FETTaxes ON cfTrans.intTransactionId = FETTaxes.intTransactionId LEFT OUTER JOIN
-                             (SELECT        intTransactionTaxId, intTransactionId, strTransactionTaxId, dblTaxOriginalAmount, dblTaxCalculatedAmount, intConcurrencyId, strCalculationMethod, dblTaxRate
-                               FROM            dbo.tblCFTransactionTax AS tblCFTransactionTax_3
-                               WHERE        (strTransactionTaxId = 'SET')) AS SETTaxes ON cfTrans.intTransactionId = SETTaxes.intTransactionId LEFT OUTER JOIN
-                             (SELECT        intTransactionTaxId, intTransactionId, strTransactionTaxId, dblTaxOriginalAmount, dblTaxCalculatedAmount, intConcurrencyId, strCalculationMethod, dblTaxRate
-                               FROM            dbo.tblCFTransactionTax AS tblCFTransactionTax_2
-                               WHERE        (strTransactionTaxId = 'SST')) AS SSTTaxes ON cfTrans.intTransactionId = SSTTaxes.intTransactionId LEFT OUTER JOIN
-                             (SELECT        intTransactionId, ISNULL(SUM(dblTaxOriginalAmount), 0) AS dblTaxOriginalAmount, ISNULL(SUM(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount, ISNULL(SUM(dblTaxRate), 0) 
-                                                         AS dblTaxRate
-                               FROM            dbo.tblCFTransactionTax AS tblCFTransactionTax_1
-                               WHERE        (strTransactionTaxId LIKE 'LC%')
-                               GROUP BY intTransactionId) AS LCTaxes ON cfTrans.intTransactionId = LCTaxes.intTransactionId
+                            (SELECT        icfTramsactionTax.intTransactionTaxId, icfTramsactionTax.intTransactionId, ismTaxCode.strTaxCode AS strTransactionTaxId, icfTramsactionTax.dblTaxOriginalAmount, 
+                                                         icfTramsactionTax.dblTaxCalculatedAmount, icfTramsactionTax.dblTaxRate
+                               FROM            dbo.tblCFTransactionTax AS icfTramsactionTax INNER JOIN
+                                                         dbo.tblSMTaxCode AS ismTaxCode ON icfTramsactionTax.intTaxCodeId = ismTaxCode.intTaxCodeId
+                               WHERE        (ismTaxCode.strTaxCode = 'FET')) AS FETTaxes ON cfTrans.intTransactionId = FETTaxes.intTransactionId LEFT OUTER JOIN
+                             (SELECT        icfTramsactionTax.intTransactionTaxId, icfTramsactionTax.intTransactionId, ismTaxCode.strTaxCode AS strTransactionTaxId, icfTramsactionTax.dblTaxOriginalAmount, 
+                                                         icfTramsactionTax.dblTaxCalculatedAmount, icfTramsactionTax.dblTaxRate
+                               FROM            dbo.tblCFTransactionTax AS icfTramsactionTax INNER JOIN
+                                                         dbo.tblSMTaxCode AS ismTaxCode ON icfTramsactionTax.intTaxCodeId = ismTaxCode.intTaxCodeId
+                               WHERE        (ismTaxCode.strTaxCode = 'SET')) AS SETTaxes ON cfTrans.intTransactionId = SETTaxes.intTransactionId LEFT OUTER JOIN
+                             (SELECT        icfTramsactionTax.intTransactionTaxId, icfTramsactionTax.intTransactionId, ismTaxCode.strTaxCode AS strTransactionTaxId, icfTramsactionTax.dblTaxOriginalAmount, 
+                                                         icfTramsactionTax.dblTaxCalculatedAmount, icfTramsactionTax.dblTaxRate
+                               FROM            dbo.tblCFTransactionTax AS icfTramsactionTax INNER JOIN
+                                                         dbo.tblSMTaxCode AS ismTaxCode ON icfTramsactionTax.intTaxCodeId = ismTaxCode.intTaxCodeId
+                               WHERE        (ismTaxCode.strTaxCode = 'SST')) AS SSTTaxes ON cfTrans.intTransactionId = SSTTaxes.intTransactionId LEFT OUTER JOIN
+                             (SELECT        icfTramsactionTax.intTransactionId, ISNULL(SUM(icfTramsactionTax.dblTaxOriginalAmount), 0) AS dblTaxOriginalAmount, ISNULL(SUM(icfTramsactionTax.dblTaxCalculatedAmount), 0) 
+                                                         AS dblTaxCalculatedAmount, ISNULL(SUM(icfTramsactionTax.dblTaxRate), 0) AS dblTaxRate
+                               FROM            dbo.tblCFTransactionTax AS icfTramsactionTax INNER JOIN
+                                                         dbo.tblSMTaxCode AS ismTaxCode ON icfTramsactionTax.intTaxCodeId = ismTaxCode.intTaxCodeId
+                               WHERE        (ismTaxCode.strTaxCode LIKE 'LC%')
+                               GROUP BY icfTramsactionTax.intTransactionId) AS LCTaxes ON cfTrans.intTransactionId = LCTaxes.intTransactionId
 GROUP BY cfCardAccount.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId, cfTrans.intProductId, cfCardAccount.strCardNumber, cfCardAccount.strCardDescription, cfTrans.intProductId, cfTrans.intARItemId, 
                          cfSiteItem.strProductNumber, cfSiteItem.strProductDescription, cfCardAccount.strDepartment

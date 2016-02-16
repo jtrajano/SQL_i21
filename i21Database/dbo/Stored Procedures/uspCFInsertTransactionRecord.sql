@@ -796,6 +796,7 @@ BEGIN
 		 FROM
 		 [dbo].[fnCFRemoteTaxes](
 			 @TaxState		
+			,''
 			,@FET	
 			,@SET	
 			,@SST	

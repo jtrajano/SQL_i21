@@ -6,6 +6,7 @@
 	,@intCustomerLocationId			INT
 	,@dtmTransactionDate			DATETIME
 	,@TaxState						NVARCHAR(MAX)
+	,@strTaxCodeId					NVARCHAR(MAX)	= ''
 	,@FET							NUMERIC(18,6)	= 0.000000
 	,@SET							NUMERIC(18,6)	= 0.000000
 	,@SST							NUMERIC(18,6)	= 0.000000
@@ -47,6 +48,7 @@ SELECT
 FROM
 	[dbo].[fnCFRemoteTaxes](
 	@TaxState		
+	,@strTaxCodeId
 	,@FET	
 	,@SET	
 	,@SST	
