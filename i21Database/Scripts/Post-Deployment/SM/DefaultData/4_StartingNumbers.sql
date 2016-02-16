@@ -880,7 +880,8 @@ GO
 	-- Update the intNumber to update what really should be the current value
 	UPDATE tblSMStartingNumber
 	SET intNumber = x.intNumber,
-	strPrefix = x.strPrefix
+	strPrefix = x.strPrefix,
+	ysnUseLocation = x.ysnUseLocation
 	FROM tmpSMStartingNumber x
 	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
 GO
