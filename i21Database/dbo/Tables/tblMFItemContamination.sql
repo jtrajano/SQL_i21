@@ -9,9 +9,8 @@ CREATE TABLE dbo.tblMFItemContamination (
 	,intLastModifiedUserId INT NOT NULL
 	,intConcurrencyId INT
 	,CONSTRAINT PK_tblMFItemContamination_intItemContaminationId PRIMARY KEY (intItemContaminationId)
-	,CONSTRAINT UQ_tblMFItemContamination_intItemId_intItemGroupId UNIQUE (
+	,CONSTRAINT UQ_tblMFItemContamination_intItemId UNIQUE (
 		intItemId
-		,intItemGroupId
 		)
 	,CONSTRAINT FK_tblMFItemContamination_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFItemContamination_tblMFItemGroup_intItemGroupId FOREIGN KEY (intItemGroupId) REFERENCES tblMFItemGroup(intItemGroupId)
