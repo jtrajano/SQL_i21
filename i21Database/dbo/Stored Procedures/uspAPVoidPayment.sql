@@ -128,7 +128,7 @@ BEGIN
 	--update the new payment
 	UPDATE A
 		SET A.dtmDatePaid = @voidDate
-		,A.strNotes = CASE WHEN ISNULL(A.strNotes,'') = '' THEN  @description + A.strPaymentRecordNum ELSE ' ' + @description + A.strPaymentRecordNum END
+		,A.strNotes = CASE WHEN ISNULL(A.strNotes,'') = '' THEN  @description + OldPayments.strPaymentRecordNum ELSE ' ' + @description + OldPayments.strPaymentRecordNum END
 		,A.strPaymentRecordNum = OldPayments.strPaymentRecordNum + 'V'
 		,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
 		,A.dblAmountPaid = A.dblAmountPaid * -1
@@ -191,8 +191,8 @@ BEGIN
 	FROM #tmpPayables WHERE intNewPaymentId IS NOT NULL
 	ORDER BY intNewPaymentId
 	INSERT INTO @GLEntries
-	SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
-	--SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
+	--SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
+	SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
 
 	--Reversed gl entries of void check should be posted
 	UPDATE A
