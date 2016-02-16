@@ -53,3 +53,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90009) EXEC sp_dropmessa
 SET @strmessage = 'Lots with different unit of measure cannot be merged.'
 EXEC sp_addmessage 90009,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90010) EXEC sp_dropmessage 90010, 'us_english'	
+SET @strmessage = 'Source storage location and destination storage location cannot be same.'
+EXEC sp_addmessage 90010,11,@strmessage,'us_english','False'
