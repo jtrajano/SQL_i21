@@ -3393,6 +3393,7 @@
     <Build Include="dbo\Tables\tblMFItemContaminationDetail.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteCategory.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetWeightLoss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
