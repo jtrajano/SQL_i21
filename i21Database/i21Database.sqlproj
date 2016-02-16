@@ -3396,6 +3396,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetWeightLoss.sql" />
     <Build Include="dbo\Stored Procedures\uspMFTransferProcessMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotByStorageLocation.sql" />
+    <Build Include="dbo\Tables\tblSMEvents.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
