@@ -200,7 +200,13 @@ BEGIN
 		A.dtmDate = @voidDate
 	FROM @GLEntries A
 
-	EXEC uspGLBookEntries @GLEntries, 1
+	BEGIN TRY
+		EXEC uspGLBookEntries @GLEntries, 1
+	END TRY
+	BEGIN CATCH
+		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR(@error, 16, 1);
+	END CATCH
 
 	--UPDATE Original Payments
 	UPDATE A
