@@ -2547,10 +2547,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('intItemId', po.get('intItemId'));
                         current.set('strItemNo', po.get('strItemNo'));
                         current.set('intUnitMeasureId', po.get('intItemUOMId'));
-                        current.set('intCostUOMId', po.get('intItemUOMId'));
+                        current.set('intCostUOMId', po.get('intPriceItemUOMId'));
                         current.set('strUnitMeasure', po.get('strItemUOM'));
                         current.set('strOrderUOM', po.get('strItemUOM'));
-                        current.set('strCostUOM', po.get('strItemUOM'));
+                        current.set('strCostUOM', po.get('strPriceUOM'));
 
                         if (po.get('strPricingType') === 'Index') {
                             CTFunctions.getIndexPrice(receipt.get('intEntityVendorId'),
