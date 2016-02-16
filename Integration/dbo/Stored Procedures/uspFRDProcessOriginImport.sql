@@ -46,7 +46,7 @@ BEGIN
 
 		-- PRIMARY #3
 		SET @intOriginReportId = (SELECT TOP 1 glfsf_no FROM (
-		SELECT DISTINCT convert(varchar(20),glfsf_grp_beg1_8) + ''-'' + SUBSTRING(glfsf_grp_sub9_16,LEN(glfsf_grp_sub9_16) - (SELECT MAX(LEN(glact_acct9_16)) - 1 FROM glactmst),(SELECT MAX(LEN(glact_acct9_16)) FROM glactmst)) as strOriginAccountId, glfsf_no FROM glfsfmst 
+		SELECT DISTINCT convert(varchar(20),glfsf_grp_beg1_8) + ''-'' + SUBSTRING(CAST(glfsf_grp_sub9_16 AS NVARCHAR(100)),LEN(glfsf_grp_sub9_16) - (SELECT MAX(LEN(glact_acct9_16)) - 1 FROM glactmst),(SELECT MAX(LEN(glact_acct9_16)) FROM glactmst)) as strOriginAccountId, glfsf_no FROM glfsfmst 
 				WHERE glfsf_grp_end1_8 IS NOT NULL AND glfsf_grp_sub9_16 NOT LIKE ''*%''
 				) tblX WHERE strOriginAccountId COLLATE Latin1_General_CI_AS NOT IN (SELECT strAccountId FROM tblGLAccount))
 
