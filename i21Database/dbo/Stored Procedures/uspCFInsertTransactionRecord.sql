@@ -92,6 +92,7 @@ BEGIN
 	DECLARE @intProductId			INT	= 0
 	DECLARE @intARItemId			INT	= NULL
 	DECLARE @intARItemLocationId	INT	= 0
+	DECLARE @intCustomerLocationId  INT	= 0
 	DECLARE @intTaxGroupId			INT = 0
 	DECLARE @intTaxMasterId			INT = 0
 	DECLARE @strCountry				NVARCHAR(MAX)
@@ -120,6 +121,7 @@ BEGIN
 		,[strTaxGroup]					NVARCHAR(100)
 		,[ysnInvalid]					BIT
 		,[strReason]					NVARCHAR(MAX)
+		,[strTaxExemptReason]			NVARCHAR(MAX)
 	)
 	DECLARE @tblTaxRateTable		TABLE
 	(
@@ -179,6 +181,7 @@ BEGIN
 	IF(@intSiteId = 0)
 		BEGIN
 			SELECT TOP 1 @intSiteId = intSiteId 
+						,@intCustomerLocationId = intARLocationId
 						,@intTaxMasterId = intTaxGroupId
 						FROM tblCFSite
 						WHERE strSiteNumber = @strSiteId
@@ -766,8 +769,9 @@ BEGIN
 			,[ysnTaxExempt]				
 			,[strTaxGroup]				
 			,[ysnInvalid]				
-			,[strReason]		
-		)		
+			,[strReason]
+			,[strTaxExemptReason]
+			)		
 		SELECT
 			 [intTransactionDetailTaxId]
 			,[intTransactionDetailId]  AS [intInvoiceDetailId]
@@ -788,6 +792,7 @@ BEGIN
 			,[strTaxGroup]
 			,[ysnInvalid]
 			,[strReason]
+			,[strTaxExemptReason]
 		 FROM
 		 [dbo].[fnCFRemoteTaxes](
 			 @TaxState		
@@ -806,9 +811,40 @@ BEGIN
 			,@LC10			
 			,@LC11			
 			,@LC12			
-			,@intNetworkId)
+			,@intNetworkId
+			,@intARItemId				
+			,@intARItemLocationId			
+			,@intCustomerId				
+			,@intCustomerLocationId		
+			,@dtmTransactionDate	)
 							
 		END
+
+		------------------------------------------------------------
+		--					NOTE FOR EXEMPTED TAX				  --
+		------------------------------------------------------------
+		INSERT INTO tblCFFailedImportedTransaction
+		(
+			intTransactionId
+			,strFailedReason
+		)
+		SELECT
+			@Pk 					 	
+			,'Tax code ' + strTaxCode + ' is checked off' 
+		FROM @tblTaxTable
+		WHERE ysnCheckoffTax = 1
+
+
+		INSERT INTO tblCFFailedImportedTransaction
+		(
+			intTransactionId
+			,strFailedReason
+		)
+		SELECT
+			@Pk 					 	
+			,strTaxExemptReason
+		FROM @tblTaxTable
+		WHERE ysnTaxExempt = 1
 		
 		------------------------------------------------------------
 		--			VALIDATION FOR UNMAPPED NETWORK TAX			  --
@@ -893,6 +929,8 @@ BEGIN
 		DECLARE @CPTax				NUMERIC(18,6) = 0	
 		DECLARE @Rate				NUMERIC(18,6)
 		DECLARE @CalculationMethod  NVARCHAR(MAX)
+		DECLARE @ysnLoopTaxExempt	BIT
+		DECLARE @ysnLoopTaxCheckOff	BIT
 
 		SET @QxOP = @dblQuantity * @dblPrcOriginalPrice
 		SET @QxCP = @dblQuantity * @dblPrcPriceOut
@@ -910,27 +948,28 @@ BEGIN
 			,@strLoopTaxCode = strTaxCode
 			,@Rate = numRate
 			,@CalculationMethod = strCalculationMethod
+			,@ysnLoopTaxExempt = ysnCheckoffTax
+			,@ysnLoopTaxExempt = ysnTaxExempt
 			FROM @tblTaxUnitTable
 
 			INSERT INTO tblCFTransactionTax(
 				 [intTransactionId]
-				,[strTransactionTaxId]
 				,[dblTaxOriginalAmount]
 				,[dblTaxCalculatedAmount]
-				,[strCalculationMethod]
 				,[dblTaxRate]
+				,[intTaxCodeId]
 			)
 			VALUES(
 				@Pk
-				,@strLoopTaxCode
 				,(CASE WHEN(@dblPrcOriginalPrice = 0 OR @dblPrcOriginalPrice IS NULL) 
 					THEN 0 
 					ELSE @QxT END)
-				,(CASE WHEN(@dblPrcPriceOut = 0 OR @dblPrcPriceOut IS NULL) 
-					THEN 0 
+				,(CASE 
+					WHEN((@dblPrcPriceOut = 0 OR @dblPrcPriceOut IS NULL) OR (@ysnLoopTaxCheckOff = 1 OR @ysnLoopTaxExempt = 1)) 
+				  THEN 0 
 					ELSE @QxT END)
-				,@CalculationMethod
 				,@Rate
+				,@intLoopTaxCodeID
 			)
 
 			DELETE FROM @tblTaxUnitTable 
@@ -958,19 +997,20 @@ BEGIN
 
 			INSERT INTO tblCFTransactionTax(
 				 [intTransactionId]
-				,[strTransactionTaxId]
 				,[dblTaxOriginalAmount]
 				,[dblTaxCalculatedAmount]
-				,[strCalculationMethod]
 				,[dblTaxRate]
+				,[intTaxCodeId]
 			)
 			VALUES(
-				@Pk
-				,@strLoopTaxCode
+				 @Pk
 				,@OPTax
-				,@CPTax
-				,@CalculationMethod
+				,(CASE 
+					WHEN(@ysnLoopTaxCheckOff = 1 OR @ysnLoopTaxExempt = 1) 
+				  THEN 0 
+					ELSE @CPTax END)
 				,@Rate
+				,@intLoopTaxCodeID
 			)
 
 			DELETE FROM @tblTaxRateTable 
