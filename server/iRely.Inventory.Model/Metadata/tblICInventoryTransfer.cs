@@ -74,7 +74,7 @@ namespace iRely.Inventory.Model
         public int? intFromSubLocationId { get; set; }
         public int? intToSubLocationId { get; set; }
         public int? intFromStorageLocationId { get; set; }
-        public int? intToStorageLocationId { get; set; }
+        public int? intToStorageLocationId { get; set; }        
         public decimal? dblQuantity { get; set; }
         public int? intItemUOMId { get; set; }
         public int? intItemWeightUOMId { get; set; }
@@ -88,6 +88,8 @@ namespace iRely.Inventory.Model
         public decimal? dblFreightAmount { get; set; }
         public int? intOwnershipType { get; set; }
         public int? intSort { get; set; }
+        public decimal? dblOriginalAvailableQty { get; set; }
+        public decimal? dblOriginalStorageQty { get; set; }
 
         private string _sourceNo;
         [NotMapped]

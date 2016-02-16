@@ -50,7 +50,10 @@ Ext.define('Inventory.model.TransferDetail', {
 
         { name: 'strItemNo', type: 'string' },
         { name: 'strUnitMeasure', type: 'string' },
-        { name: 'dblTaxAmount', type: 'float' }
+        { name: 'dblTaxAmount', type: 'float'},
+
+        { name: 'dblOriginalAvailableQty', type: 'float' },
+        { name: 'dblOriginalStorageQty', type: 'float' }
     ],
 
     validators: [

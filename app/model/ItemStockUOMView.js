@@ -26,6 +26,8 @@ Ext.define('Inventory.model.ItemStockUOMView', {
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
         { name: 'strStorageLocationName', type: 'string' },
         { name: 'dblOnHand', type: 'float' },
+        { name: 'dblAvailableQty', type: 'float' },
+        { name: 'dblStorageQty', type: 'float' },
         { name: 'dblOnOrder', type: 'float' },
         { name: 'ysnStockUnit', type: 'boolean' },
         { name: 'dblStockUnitCost', type: 'float' },

@@ -192,6 +192,19 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             else {
                 return true;
             }
+        },
+        getAvailableQty: function(get) {
+            var intOwnershipType = iRely.Functions.isEmpty(get('grdInventoryTransfer.selection.intOwnershipType'));
+            switch (intOwnershipType) {
+                case 1:
+                    return get('grdInventoryTransfer.selection.dblOriginalAvailableQty');
+                    break;
+                case 2:
+                    return get('grdInventoryTransfer.selection.dblOriginalStorageQty');
+                    break;
+                default:
+                    return get('grdInventoryTransfer.selection.dblOriginalStorageQty');
+            }
         }
     }
 

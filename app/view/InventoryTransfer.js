@@ -680,9 +680,15 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'dblOnHand',
+                                                                    dataIndex: 'dblAvailableQty',
                                                                     dataType: 'float',
                                                                     text: 'Available Qty',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblStorageQty',
+                                                                    dataType: 'float',
+                                                                    text: 'Storage Qty',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -737,15 +743,27 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location',
+                                                                    flex: 1
+                                                                },
+                                                                {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
                                                                     text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'dblOnHand',
+                                                                    dataIndex: 'dblAvailableQty',
                                                                     dataType: 'float',
                                                                     text: 'Available Qty',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblStorageQty',
+                                                                    dataType: 'float',
+                                                                    text: 'Storage Qty',
                                                                     flex: 1
                                                                 },
                                                                 {

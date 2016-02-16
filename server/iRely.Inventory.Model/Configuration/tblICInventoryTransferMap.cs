@@ -94,8 +94,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intFromSubLocationId).HasColumnName("intFromSubLocationId");
             this.Property(t => t.intToSubLocationId).HasColumnName("intToSubLocationId");
             this.Property(t => t.intFromStorageLocationId).HasColumnName("intFromStorageLocationId");
-            this.Property(t => t.intToStorageLocationId).HasColumnName("intToStorageLocationId");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.intToStorageLocationId).HasColumnName("intToStorageLocationId");            
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.intItemWeightUOMId).HasColumnName("intItemWeightUOMId");
             this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(18, 6);
@@ -108,6 +108,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblFreightAmount).HasColumnName("dblFreightAmount").HasPrecision(18, 6);
             this.Property(t => t.intOwnershipType).HasColumnName("intOwnershipType");
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.dblOriginalAvailableQty).HasColumnName("dblOriginalAvailableQty").HasPrecision(38, 20);
+            this.Property(t => t.dblOriginalStorageQty).HasColumnName("dblOriginalStorageQty").HasPrecision(38, 20);
 
             this.HasOptional(p => p.vyuICGetInventoryTransferDetail)
                 .WithRequired(p => p.tblICInventoryTransferDetail);
