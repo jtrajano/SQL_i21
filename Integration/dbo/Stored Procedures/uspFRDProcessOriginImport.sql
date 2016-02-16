@@ -25,7 +25,7 @@ BEGIN
 		-- PRIMARY #1
 		SET @intOriginReportId = (SELECT TOP 1 glfsf_no FROM glfsfmst 
 				WHERE glfsf_grp_beg1_8 IS NOT NULL AND glfsf_grp_sub9_16 LIKE ''*%''
-				AND glfsf_grp_beg1_8 NOT IN (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')))
+				AND CAST(glfsf_grp_beg1_8 as NVARCHAR(100)) NOT IN (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')))
 
 		IF (@intOriginReportId IS NOT NULL)
 		BEGIN
@@ -36,7 +36,7 @@ BEGIN
 		-- PRIMARY #2
 		SET @intOriginReportId = (SELECT TOP 1 glfsf_no FROM glfsfmst 
 				WHERE glfsf_grp_end1_8 IS NOT NULL AND glfsf_grp_sub9_16 LIKE ''*%''
-				AND glfsf_grp_end1_8 NOT IN (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')))
+				AND CAST(glfsf_grp_end1_8 as NVARCHAR(100)) NOT IN (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')))
 
 		IF (@intOriginReportId IS NOT NULL)
 		BEGIN
