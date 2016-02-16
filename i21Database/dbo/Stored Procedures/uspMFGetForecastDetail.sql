@@ -33,19 +33,19 @@ BEGIN
 			END AS strYearType
 		,FV.intYear
 		,FT.strType
-		,FV.intJAN
-		,FV.intFEB
-		,FV.intMAR
-		,FV.intAPR
-		,FV.intMAY
-		,FV.intJUN
-		,FV.intJUL
-		,FV.intAUG
-		,FV.intSEP
-		,FV.intOCT
-		,FV.intNOV
-		,FV.intDEC
-		,FV.intTotal
+		,FV.dblJan
+		,FV.dblFeb
+		,FV.dblMar
+		,FV.dblApr
+		,FV.dblMay
+		,FV.dblJun
+		,FV.dblJul
+		,FV.dblAug
+		,FV.dblSep
+		,FV.dblOct
+		,FV.dblNov
+		,FV.dblDec
+		,FV.dblTotal
 		,FV.dblMonthlyAvg
 	FROM dbo.tblMFForecastItemValue FV
 	JOIN dbo.tblMFForecastItemType FT ON FV.intForecastItemTypeId = FT.intForecastItemTypeId

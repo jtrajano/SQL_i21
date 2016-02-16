@@ -98,46 +98,46 @@ BEGIN TRY
 		BEGIN TRANSACTION
 
 	UPDATE dbo.tblMFForecastItemValue
-	SET intJAN = x.intJAN
-		,intFEB = x.intFEB
-		,intMAR = x.intMAR
-		,intAPR = x.intAPR
-		,intMAY = x.intMAY
-		,intJUN = x.intJUN
-		,intJUL = x.intJUL
-		,intAUG = x.intAUG
-		,intSEP = x.intSEP
-		,intOCT = x.intOCT
-		,intNOV = x.intNOV
-		,intDEC = x.intDEC
+	SET dblJan = x.intJAN
+		,dblFeb = x.intFEB
+		,dblMar = x.intMAR
+		,dblApr = x.intAPR
+		,dblMay = x.intMAY
+		,dblJun = x.intJUN
+		,dblJul = x.intJUL
+		,dblAug = x.intAUG
+		,dblSep = x.intSEP
+		,dblOct = x.intOCT
+		,dblNov = x.intNOV
+		,dblDec = x.intDEC
 		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	OUTPUT inserted.intForecastItemValueId
-		,deleted.intJAN
-		,inserted.intJAN
-		,deleted.intFEB
-		,inserted.intFEB
-		,deleted.intMAR
-		,inserted.intMAR
-		,deleted.intAPR
-		,inserted.intAPR
-		,deleted.intMAY
-		,inserted.intMAY
-		,deleted.intJUN
-		,inserted.intJUN
-		,deleted.intJUL
-		,inserted.intJUL
-		,deleted.intAUG
-		,inserted.intAUG
-		,deleted.intSEP
-		,inserted.intSEP
-		,deleted.intOCT
-		,inserted.intOCT
-		,deleted.intNOV
-		,inserted.intNOV
-		,deleted.intDEC
-		,inserted.intDEC
+		,deleted.dblJan
+		,inserted.dblJan
+		,deleted.dblFeb
+		,inserted.dblFeb
+		,deleted.dblMar
+		,inserted.dblMar
+		,deleted.dblApr
+		,inserted.dblApr
+		,deleted.dblMay
+		,inserted.dblMay
+		,deleted.dblJun
+		,inserted.dblJun
+		,deleted.dblJul
+		,inserted.dblJul
+		,deleted.dblAug
+		,inserted.dblAug
+		,deleted.dblSep
+		,inserted.dblSep
+		,deleted.dblOct
+		,inserted.dblOct
+		,deleted.dblNov
+		,inserted.dblNov
+		,deleted.dblDec
+		,inserted.dblDec
 	INTO @ForecastItemValue
 	FROM OPENXML(@idoc, 'root/ForecastItemValues/ForecastItemValue', 2) WITH (
 			intForecastItemValueId INT
