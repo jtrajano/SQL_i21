@@ -110,7 +110,7 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 DECLARE @intUnitMeasureId int=null
 DECLARE @intFromCommodityUnitMeasureId int=null
 DECLARE @intToCommodityUnitMeasureId int=null
-DECLARE @StrUnitMeasure nvarchar(50)=null
+DECLARE @strUnitMeasure nvarchar(50)=null
 
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 
@@ -122,12 +122,12 @@ BEGIN
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 	WHERE t.intCommodityId= @intCommodityId
-	SELECT @StrUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
+	SELECT @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
 END
 ELSE
 BEGIN
 
-	SELECT @StrUnitMeasure=c.strUnitMeasure,@intFromCommodityUnitMeasureId=l.intFromCommodityUnitMeasureId ,@intToCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId
+	SELECT @strUnitMeasure=c.strUnitMeasure,@intFromCommodityUnitMeasureId=l.intFromCommodityUnitMeasureId ,@intToCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId
 	FROM @List l 
 	JOIN tblICCommodity t on t.intCommodityId=l.intCommodityId
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
@@ -135,7 +135,7 @@ BEGIN
 	WHERE t.intCommodityId= @intCommodityId
 
 END
-UPDATE @List SET intFromCommodityUnitMeasureId=@intFromCommodityUnitMeasureId,intToCommodityUnitMeasureId=@intToCommodityUnitMeasureId,StrUnitMeasure=@StrUnitMeasure 
+UPDATE @List SET intFromCommodityUnitMeasureId=@intFromCommodityUnitMeasureId,intToCommodityUnitMeasureId=@intToCommodityUnitMeasureId,strUnitMeasure=@strUnitMeasure 
 WHERE intCommodityId= @intCommodityId
 END
 SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber	
