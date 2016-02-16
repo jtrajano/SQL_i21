@@ -70,8 +70,8 @@ BEGIN
 INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId)
 	SELECT strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,strContractType+ ' ' + strPricingType [strType]
-		,strLocationName,
-		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) 
+		,strLocationName
+		,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) 
 		,isnull(dblBalance, 0) AS dblTotal,intUnitMeasureId
 	FROM vyuCTContractDetailView  
 	WHERE intContractTypeId in(1,2) AND intPricingTypeId IN (1,2,3) and intCommodityId =@intCommodityId
@@ -104,16 +104,13 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 		INNER JOIN tblSMCompanyLocation l on f.intLocationId=l.intCompanyLocationId
 		LEFT JOIN tblRKMatchFuturesPSDetail psd ON f.intFutOptTransactionId = psd.intLFutOptTransactionId
 		WHERE f.strBuySell = 'Sell'
-			AND ic.intCommodityId =@intCommodityId
-			AND f.intLocationId= case when isnull(@intLocationId,0)=0 then f.intLocationId else @intLocationId end
-			
+			AND ic.intCommodityId =@intCommodityId AND f.intLocationId= case when isnull(@intLocationId,0)=0 then f.intLocationId else @intLocationId end			
 		) t
-
-
+		
 DECLARE @intUnitMeasureId int=null
 DECLARE @intFromCommodityUnitMeasureId int=null
 DECLARE @intToCommodityUnitMeasureId int=null
-DECLARE @strUnitMeasure nvarchar(50)=null
+DECLARE @StrUnitMeasure nvarchar(50)=null
 
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 
@@ -125,27 +122,27 @@ BEGIN
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 	WHERE t.intCommodityId= @intCommodityId
-	SELECT @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
+	SELECT @StrUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
 END
 ELSE
 BEGIN
 
-	SELECT @strUnitMeasure=c.strUnitMeasure,@intFromCommodityUnitMeasureId=l.intFromCommodityUnitMeasureId ,@intToCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId
+	SELECT @StrUnitMeasure=c.strUnitMeasure,@intFromCommodityUnitMeasureId=l.intFromCommodityUnitMeasureId ,@intToCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId
 	FROM @List l 
-	join tblICCommodity t on t.intCommodityId=l.intCommodityId
+	JOIN tblICCommodity t on t.intCommodityId=l.intCommodityId
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
-	join tblICUnitMeasure c on c.intUnitMeasureId=cuc.intUnitMeasureId 	
+	JOIN tblICUnitMeasure c on c.intUnitMeasureId=cuc.intUnitMeasureId 	
 	WHERE t.intCommodityId= @intCommodityId
 
 END
-UPDATE @List SET intFromCommodityUnitMeasureId=@intFromCommodityUnitMeasureId,intToCommodityUnitMeasureId=@intToCommodityUnitMeasureId,strUnitMeasure=@strUnitMeasure 
+UPDATE @List SET intFromCommodityUnitMeasureId=@intFromCommodityUnitMeasureId,intToCommodityUnitMeasureId=@intToCommodityUnitMeasureId,StrUnitMeasure=@StrUnitMeasure 
 WHERE intCommodityId= @intCommodityId
 END
 SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber	
 END
 END
 
-UPDATE @List set strContractEndMonth = 'Near By' where CONVERT(DATETIME,'01 '+ strContractEndMonth) < CONVERT(DATETIME,getdate())
+UPDATE @List set strContractEndMonth = 'Near By' WHERE CONVERT(DATETIME,'01 '+ strContractEndMonth,111) < CONVERT(VARCHAR(25),DATEADD(dd,-(DAY(GETDATE())-1),GETDATE()),111)
 
 INSERT INTO @FinalList (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure)
 SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth, strContractEndMonthNearBy,

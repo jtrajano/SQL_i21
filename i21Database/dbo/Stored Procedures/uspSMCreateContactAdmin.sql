@@ -10,7 +10,7 @@ BEGIN
 	
 	SELECT @entityName = strName FROM tblEntity where intEntityId = @entityId
 
-	SELECT @roleName = @entityName + '-' + @entityId
+	SELECT @roleName = @entityName + '-' + CAST(@entityId AS NVARCHAR)
 
 	INSERT INTO tblSMUserRole([strName], [strDescription], [strRoleType], [ysnAdmin])
 	SELECT @roleName, 'Contact Administrator',  'Contact Admin', 1
@@ -18,6 +18,9 @@ BEGIN
 	SELECT @contactAdminRoleId = SCOPE_IDENTITY()
 
 	EXEC uspSMUpdateUserRoleMenus @contactAdminRoleId, 1, 1
+
+	-- INSERT RECORD TO tblEMEntityRole
+	INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId) VALUES(@entityId, @contactAdminRoleId)
 
 	SELECT @helpDesk = @entityName + '''s Help Desk'
 
@@ -29,6 +32,9 @@ BEGIN
 		SELECT @helpDeskRoleId = SCOPE_IDENTITY()
 
 		EXEC uspSMUpdateUserRoleMenus @helpDeskRoleId, 1, 0
+
+		-- INSERT RECORD TO tblEMEntityRole
+		INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId) VALUES(@entityId, @helpDeskRoleId)
 	END
 
 
