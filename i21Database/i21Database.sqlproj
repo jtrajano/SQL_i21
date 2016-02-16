@@ -3391,6 +3391,8 @@
     <Build Include="dbo\Tables\tblMFItemGroup.sql" />
     <Build Include="dbo\Tables\tblMFItemContamination.sql" />
     <Build Include="dbo\Tables\tblMFItemContaminationDetail.sql" />
+    <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteCategory.sql" />
+    <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
