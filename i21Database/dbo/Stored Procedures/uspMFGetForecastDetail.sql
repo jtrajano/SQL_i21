@@ -47,6 +47,7 @@ BEGIN
 		,FV.dblDec
 		,FV.dblTotal
 		,FV.dblMonthlyAvg
+		,FV.intConcurrencyId
 	FROM dbo.tblMFForecastItemValue FV
 	JOIN dbo.tblMFForecastItemType FT ON FV.intForecastItemTypeId = FT.intForecastItemTypeId
 	JOIN dbo.tblICItem I ON I.intItemId = FV.intItemId
