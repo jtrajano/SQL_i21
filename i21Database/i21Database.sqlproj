@@ -3387,6 +3387,7 @@
     <Build Include="dbo\Stored Procedures\uspSCManualDistribution.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotItemChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateContactAdmin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
