@@ -89,15 +89,15 @@ AS
 						 						THEN
 						 							CASE WHEN SC.dblServiceChargeAPR > 0
 						 								THEN
-						 									CASE WHEN SC.dblMinimumCharge > ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 
+						 									CASE WHEN SC.dblMinimumCharge > ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, DATEADD(DAY, ISNULL(SC.intGracePeriod, 0), CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
 																																					THEN I.dtmDueDate 
 																																					ELSE I.dtmCalculated 
-																																				 END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
+																																				 END), ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
 						 		  								THEN SC.dblMinimumCharge
-						 		  								ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 
+						 		  								ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, DATEADD(DAY, ISNULL(SC.intGracePeriod, 0),CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
 																															  THEN I.dtmDueDate 
 																															  ELSE I.dtmCalculated 
-																														   END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
+																														   END), ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
 						 									END
 						 								ELSE 0
 						 							END
@@ -108,10 +108,7 @@ AS
 						INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
 						INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
 						LEFT JOIN (SELECT intInvoiceId
-										, dblAmountPaid = CASE WHEN SUM(ISNULL(PD.dblPayment, @zeroDecimal) + ISNULL(PD.dblInterest, @zeroDecimal)) = SUM(ISNULL(PD.dblInvoiceTotal, @zeroDecimal))
-																THEN @zeroDecimal
-																ELSE SUM(ISNULL(PD.dblPayment, @zeroDecimal) + ISNULL(PD.dblInterest, @zeroDecimal))
-														  END
+										, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
 										, dtmDatePaid   = MAX(dtmDatePaid)
 								   FROM tblARPaymentDetail PD INNER JOIN tblARPayment P 
 										ON PD.intPaymentId = P.intPaymentId 
@@ -124,8 +121,7 @@ AS
 						AND I.strType IN ('Standard', 'Transport Delivery')
 						AND I.intEntityCustomerId = @entityId
 						AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDueDate))) <= @asOfDate
-						AND CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END > intGracePeriod
-						AND (I.ysnCalculated = 0 OR I.ysnForgiven = 1)
+						AND CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 THEN I.dtmDueDate ELSE I.dtmCalculated END > intGracePeriod						
 						AND I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal) > @zeroDecimal
 					
 					--GET CUSTOMER BUDGET DUE
