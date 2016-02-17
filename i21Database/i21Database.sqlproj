@@ -3203,6 +3203,7 @@
     <Build Include="dbo\Functions\fnAP1099EFileEndOfB.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreate1099BFile.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
+    <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
