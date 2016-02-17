@@ -84,7 +84,7 @@ BEGIN
 
 	UPDATE tblARInvoice 
 	SET ysnSplitted			= 1
-	  , intSplitId			= NULL
+	  , intSplitId			= intSplitId
 	  , strInvoiceOriginId  = strInvoiceNumber
 	  , intEntityCustomerId = @intSplitEntityId
 	  , intShipToLocationId	= @newShipToId

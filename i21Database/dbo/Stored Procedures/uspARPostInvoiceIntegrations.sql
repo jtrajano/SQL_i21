@@ -80,8 +80,8 @@ END
 --Contracts
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 
---Committed Quantities
-EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId
+--Committed QUatities
+EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
 
 --In Transit Outbound Quantities 
 EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0

@@ -7,8 +7,8 @@
 	,@intStorageLocationId AS INT	
 	,@strLotNumber AS NVARCHAR(50)		
 	-- Parameters for the new values: 
-	,@dblAdjustByQuantity AS NUMERIC(18,6)
-	,@dblNewUnitCost AS NUMERIC(38, 20)
+	,@dblAdjustByQuantity AS NUMERIC(38,20)
+	,@dblNewUnitCost AS NUMERIC(38,20)
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT

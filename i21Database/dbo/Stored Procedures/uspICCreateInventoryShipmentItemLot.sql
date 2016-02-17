@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateInventoryShipmentItemLot]
 	@intInventoryShipmentItemId int,
 	@intLotId int,
-	@dblShipQty NUMERIC(18,6),
-	@dblGrossWgt NUMERIC(18,6) = 0,
-	@dblTareWgt NUMERIC(18,6) = 0
+	@dblShipQty NUMERIC(38,20),
+	@dblGrossWgt NUMERIC(38,20) = 0,
+	@dblTareWgt NUMERIC(38,20) = 0
 AS
 	
 SET QUOTED_IDENTIFIER OFF  
@@ -22,7 +22,7 @@ DECLARE
 	@LotTracked BIT = 0,
 
 	@LotNo NVARCHAR(50),
-	@AvailableQty NUMERIC(18, 6)
+	@AvailableQty NUMERIC(38,20)
 
 
 -- Check if Line Item exists

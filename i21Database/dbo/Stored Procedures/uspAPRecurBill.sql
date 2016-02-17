@@ -18,6 +18,7 @@ BEGIN
 
 	UPDATE A
 		SET A.dtmDate = @billDate
+		,A.dtmBillDate = @billDate
 		,A.dtmDueDate = dbo.fnGetDueDateBasedOnTerm(@billDate, A.intTermsId)
 		,A.intTransactionType = 1
 		,A.strVendorOrderNumber = A.strBillId

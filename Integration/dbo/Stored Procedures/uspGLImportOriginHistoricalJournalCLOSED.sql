@@ -149,7 +149,8 @@ SELECT
  glarc_src_seq,
  GETDATE() as gooddate,
  A4GLIdentity,
- NULL AS NegativeCreditUnits 
+ NULL AS NegativeCreditUnits ,
+ NULL AS NegativeDebitUnits 
  INTO #iRelyImptblGLJournalDetail
  FROM glarcmst
  INNER JOIN tblGLCOACrossReference ON
@@ -163,7 +164,9 @@ UPDATE
 A SET DebitUnits = 
 case
 	WHEN B.glarc_units < 0	THEN B.glarc_units * -1
-	ELSE B.glarc_units END
+	ELSE B.glarc_units END,
+	NegativeDebitUnits =
+			CASE WHEN B.glarc_units < 0	THEN 1 ELSE 0 END
 
 FROM
 #iRelyImptblGLJournalDetail A

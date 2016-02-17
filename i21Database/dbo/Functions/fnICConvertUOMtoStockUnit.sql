@@ -1,19 +1,20 @@
 ﻿CREATE FUNCTION [dbo].[fnICConvertUOMtoStockUnit]
 (
-	@ItemId int,
-	@UOM int,
-	@Qty NUMERIC(18,6)
+	@ItemId INT,
+	@UOM INT,
+	@Qty NUMERIC(38,20)
 )
-RETURNS DECIMAL(18, 6)
+RETURNS NUMERIC(38,20)
 AS
-BEGIN
-	
-	DECLARE @UOMQty NUMERIC(18, 6) = 0,
-		@IsStockUnit BIT = 0
+BEGIN	
+	DECLARE @UOMQty NUMERIC(38, 20) = 0
+			,@IsStockUnit BIT = 0
 
-	SELECT @UOMQty = dblUnitQty, @IsStockUnit = ysnStockUnit
-	FROM tblICItemUOM WHERE intItemId = @ItemId AND intItemUOMId = @UOM
-
+	SELECT	@UOMQty = dblUnitQty
+			, @IsStockUnit = ysnStockUnit
+	FROM	tblICItemUOM 
+	WHERE	intItemId = @ItemId 
+			AND intItemUOMId = @UOM
 
 	IF (@IsStockUnit = 1)
 	BEGIN
@@ -25,5 +26,4 @@ BEGIN
 	END
 
 	RETURN 0;
-
 END

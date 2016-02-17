@@ -118,10 +118,10 @@ BEGIN
 	SET @strItemNo = NULL 
 	SET @intItemId = NULL 
 
-	DECLARE @dblQuantityShipped AS NUMERIC(18,6)
-			--,@LotQty AS NUMERIC(18,6)
-			,@LotQtyInItemUOM AS NUMERIC(18,6)
-			,@QuantityShippedInItemUOM AS NUMERIC(18,6)
+	DECLARE @dblQuantityShipped AS NUMERIC(38,20)
+			--,@LotQty AS NUMERIC(38,20)
+			,@LotQtyInItemUOM AS NUMERIC(38,20)
+			,@QuantityShippedInItemUOM AS NUMERIC(38,20)
 
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
 	DECLARE @FormattedLotQty AS NVARCHAR(50)

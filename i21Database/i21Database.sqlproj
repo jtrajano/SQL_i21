@@ -3187,9 +3187,18 @@
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <Build Include="dbo\Views\vyuARCustomerGroup.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileTransmitter.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFilePayer.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileMISCPayee.sql" />
+    <Build Include="dbo\Functions\fnTRConcatString.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Tables\tblEntityGroup.sql" />
     <Build Include="dbo\Tables\tblEntityGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfMISC.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfTransmitter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUnpostCostAdjustmentGL.sql" />
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
@@ -3361,8 +3370,9 @@
     <Build Include="dbo\Tables\tblICInventoryLIFOStorageOut.sql" />
     <Build Include="dbo\Views\vyuWHTruckOrders.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlySUI.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRpt1096.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrual.sql" />
+    <Build Include="dbo\User Defined Types\LineItemTaxDetailStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostReturnCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostReturnAverageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICReturnStockInFIFO.sql" />
@@ -3373,6 +3383,9 @@
     <Build Include="dbo\Stored Procedures\uspICReturnStockInLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostReturnActualCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICReturnStockInActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInvoiceTaxDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateOnHand.sql" />
     <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorage2.sql" />
@@ -3437,8 +3450,17 @@
     <Build Include="dbo\Views\vyuMFGetTraceabilityObject.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailAsOfDateReport.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileBPayee.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileINTPayee.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099INTFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfINT.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfB.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099BFile.sql" />
+    <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
+    <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3524,15 +3546,13 @@
     <None Include="Scripts\Post-Deployment\EM\019_RemoveEmailToParentEntity.sql" />
     <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddPaycheckDirectDepositEntries.sql" />
-<<<<<<< HEAD
     <None Include="Scripts\Post-Deployment\EM\021_MoveCustomerMessageToEntity.sql" />
     <None Include="Scripts\Post-Deployment\EM\022_DefaultDataForContactTypeAndImport.sql" />
     <None Include="Scripts\Post-Deployment\MF\3_Pattern.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCreateEntityById.sql" />
     <None Include="Scripts\Post-Deployment\MF\4_WMPattern.sql" />
-=======
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\15_FixInvoiceDateForCredits.sql" />
->>>>>>> 15.4Prod
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

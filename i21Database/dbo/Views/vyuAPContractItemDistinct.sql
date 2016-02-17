@@ -22,7 +22,7 @@ INNER JOIN
 (
 	SELECT intContractHeaderId, 
 		   intItemId, 
-	MIN(dblCashPrice) dblCashPriceMin 
+	ISNULL(MIN(dblCashPrice),0) dblCashPriceMin 
 	FROM vyuCTContractDetailView 
 	GROUP BY 
 			intContractHeaderId, 

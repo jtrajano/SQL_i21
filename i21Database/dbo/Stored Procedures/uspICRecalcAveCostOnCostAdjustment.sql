@@ -5,8 +5,8 @@
 CREATE PROCEDURE [dbo].[uspICRecalcAveCostOnCostAdjustment]
 	@intItemId AS INT
 	,@intItemLocationId AS INT 
-	,@RevaluedQty AS NUMERIC(18, 6)
-	,@CostBucketUOMQty AS NUMERIC(18,6)
+	,@RevaluedQty AS NUMERIC(38,20)
+	,@CostBucketUOMQty AS NUMERIC(38,20)
 	,@dblNewCost AS NUMERIC(38,20)
 	,@CostBucketCost AS NUMERIC(38,20)
 AS
@@ -21,7 +21,7 @@ SET ANSI_WARNINGS OFF
 -- Update the average cost 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @CurrentStockQty AS NUMERIC(18,6)
+	DECLARE @CurrentStockQty AS NUMERIC(38,20)
 			,@CurrentAverageCost AS NUMERIC(38,20)
 
 	SELECT TOP 1 

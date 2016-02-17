@@ -144,8 +144,10 @@ WITH INT1099 (
 	,strEIN
 	,strAddress
 	,strVendorCompanyName
+	,strPayeeName
 	,strVendorId
 	,strCity
+	,strState
 	,strZip
 	,strZipState
 	,strFederalTaxId

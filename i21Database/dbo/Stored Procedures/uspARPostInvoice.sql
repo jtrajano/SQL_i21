@@ -49,6 +49,9 @@ DECLARE @InvalidInvoiceData TABLE  (
 	intTransactionId INT
 );
 
+DECLARE @PostDate AS DATETIME
+SET @PostDate = CAST(GETDATE() AS DATE)
+
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
 
@@ -60,12 +63,15 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 
 
-DECLARE @UserEntityID		INT
-		,@DiscountAccountId INT
-		,@ServiceChargesAccountId    INT
+DECLARE @UserEntityID				INT
+		,@DiscountAccountId			INT
+		,@ServiceChargesAccountId	INT
+		,@DeferredRevenueAccountId	INT
+
 SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)
+SET @DeferredRevenueAccountId = (SELECT TOP 1 intDeferredRevenueAccountId FROM tblARCompanyPreference WHERE intDeferredRevenueAccountId IS NOT NULL AND intDeferredRevenueAccountId <> 0)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 
@@ -115,42 +121,6 @@ IF(@beginTransaction IS NOT NULL)
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
 
---Process Split Invoice
-IF @post = 1 AND @recap = 0
-BEGIN
-	DECLARE @SplitInvoiceData TABLE(intInvoiceId INT)
-
-	INSERT INTO @SplitInvoiceData
-	SELECT intInvoiceId FROM tblARInvoice 
-	WHERE ysnSplitted = 0 
-	  AND ISNULL(intSplitId, 0) > 0
-	  AND intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-
-	IF(SELECT COUNT(*) FROM @SplitInvoiceData) > 0
-		BEGIN
-			WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
-				BEGIN
-					DECLARE @invoicesToAdd NVARCHAR(MAX) = NULL, @intSplitInvoiceId INT
-
-					SELECT TOP 1 @intSplitInvoiceId = intInvoiceId FROM @SplitInvoiceData ORDER BY intInvoiceId
-
-					EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @userId, @invoicesToAdd OUT
-
-					DELETE FROM @PostInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
-
-					IF (ISNULL(@invoicesToAdd, '') <> '')
-						BEGIN
-							INSERT INTO @PostInvoiceData 
-							SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice 
-							WHERE ysnPosted = 0 
-							  AND intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd))
-						END
-
-					DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
-				END
-		END
-END
-
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
 	BEGIN
@@ -188,6 +158,80 @@ IF(@batchId IS NULL)
 
 SET @batchIdUsed = @batchId
 
+
+--Process Split Invoice
+BEGIN TRY
+	IF @post = 1 AND @recap = 0
+	BEGIN
+		DECLARE @SplitInvoiceData TABLE(intInvoiceId INT)
+
+		INSERT INTO @SplitInvoiceData
+		SELECT intInvoiceId FROM tblARInvoice 
+		WHERE ysnSplitted = 0 
+		  AND ISNULL(intSplitId, 0) > 0
+		  AND intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+		IF(SELECT COUNT(*) FROM @SplitInvoiceData) > 0
+			BEGIN
+				WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
+					BEGIN
+						DECLARE @invoicesToAdd NVARCHAR(MAX) = NULL, @intSplitInvoiceId INT
+
+						SELECT TOP 1 @intSplitInvoiceId = intInvoiceId FROM @SplitInvoiceData ORDER BY intInvoiceId
+
+						EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @userId, @invoicesToAdd OUT
+
+						DELETE FROM @PostInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
+
+						IF (ISNULL(@invoicesToAdd, '') <> '')
+							BEGIN
+								INSERT INTO @PostInvoiceData 
+								SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice 
+								WHERE ysnPosted = 0 
+								  AND intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd))
+
+
+								EXEC uspARReComputeInvoiceAmounts @intSplitInvoiceId
+
+								DECLARE @AddedInvoices AS [dbo].[Id]
+								INSERT INTO @AddedInvoices([intId])
+								SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd)
+								DECLARE @AddedInvoiceId INT
+
+								WHILE EXISTS (SELECT NULL FROM @AddedInvoices)
+									BEGIN
+										SELECT @AddedInvoiceId = [intId] FROM @AddedInvoices
+
+										EXEC uspARReComputeInvoiceAmounts @AddedInvoiceId
+
+										DELETE FROM @AddedInvoices WHERE [intId] = @AddedInvoiceId
+									END
+							END
+
+						DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
+					END
+			END
+	END
+END TRY
+BEGIN CATCH
+	SELECT @ErrorMerssage = ERROR_MESSAGE()					
+	IF @raiseError = 0
+		BEGIN
+			ROLLBACK TRANSACTION							
+			BEGIN TRANSACTION
+			--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			--SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
+			EXEC uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param							
+			COMMIT TRANSACTION
+			--COMMIT TRAN @TransactionName
+		END						
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
+
+
 --------------------------------------------------------------------------------------------  
 -- Validations  
 ----------------------------------------------------------------------------------------------  
@@ -196,6 +240,23 @@ SET @batchIdUsed = @batchId
 		--Posting
 		IF @post = 1
 			BEGIN
+				-- Tank consumption site
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType,strTransactionId, strBatchNumber, intTransactionId)
+				SELECT TOP 1 
+					'Unable to find a tank consumption site for item no. ' + item.strItemNo,
+					invoice.strTransactionType,
+					invoice.strInvoiceNumber,
+					@batchId,
+					invoice.intInvoiceId
+				from tblARInvoice invoice 
+				INNER JOIN @PostInvoiceData B ON invoice.intInvoiceId = B.intInvoiceId
+				INNER JOIN tblARInvoiceDetail detail on invoice.intInvoiceId = detail.intInvoiceId
+				INNER JOIN tblICItem item on item.intItemId = detail.intItemId
+				WHERE detail.intSiteId is null
+				AND item.ysnTankRequired = 1 
+				AND invoice.strType = 'Tank Delivery' 
+				
+
 				--Fiscal Year
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
@@ -210,7 +271,7 @@ SET @batchIdUsed = @batchId
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
-					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
+					ISNULL(dbo.isOpenAccountingDate(ISNULL(A.dtmPostDate, A.dtmDate)), 0) = 0
 
 				--zero amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -427,7 +488,7 @@ SET @batchIdUsed = @batchId
 				--Service Charge Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The Service Charge account in the Company Preferences was not set.',
+					'The Service Charge account in the Company Configuration was not set.',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -445,6 +506,63 @@ SET @batchIdUsed = @batchId
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
 					AND D.dblTotal <> @ZeroDecimal
+
+				-- Accrual Not in Fiscal Year					
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					A.strInvoiceNumber + ' has an Accrual setup up to ' + CONVERT(NVARCHAR(30),DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), ISNULL(A.dtmPostDate, A.dtmDate)), 101) + ' which does not fall into a valid Fiscal Period.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				WHERE
+					ISNULL(A.intPeriodsToAccrue,0) > 1  
+					AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), ISNULL(A.dtmPostDate, A.dtmDate))), 0) = 0
+
+				--Service Deferred Revenue Account
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Deferred Revenue account in the Company Configuration was not set.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				WHERE
+					ISNULL(A.intPeriodsToAccrue,0) > 1
+					AND (@DeferredRevenueAccountId IS NULL OR @DeferredRevenueAccountId = 0)
+
+				--Invoice for accrual with Inventory Items				
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'Invoice : ' + A.strInvoiceNumber + ' is for accrual and must not include an inventory item : ' + I.strItemNo + '.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId	 				
+				WHERE
+					ISNULL(A.intPeriodsToAccrue,0) > 1
+					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 								
 				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -504,7 +622,7 @@ SET @batchIdUsed = @batchId
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					ISNULL(ISNULL(Acct.intMaintenanceSalesAccountId, Acct.intGeneralAccountId), 0) = 0
-					AND I.strType = 'Software'					
+					AND I.strType = 'Software'				
 					
 				--Other Charge Income Account	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -705,7 +823,7 @@ SET @batchIdUsed = @batchId
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE
-					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
+					ISNULL(dbo.isOpenAccountingDate(ISNULL(A.dtmPostDate, A.dtmDate)), 0) = 0
 					
 				--NOT POSTED
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -837,6 +955,7 @@ IF @post = 1
 				tblARInvoice Header
 					ON Detail.intInvoiceId = Header.intInvoiceId
 					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
+					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
 			INNER JOIN
 				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
@@ -904,12 +1023,42 @@ IF @post = 1
 					,@batchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@UserEntityID
-
+					
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
 		END CATCH
+		
+		-- Accruals
+		BEGIN TRY 
+			DECLARE @Accruals AS Id
+			INSERT INTO @Accruals(intId)
+			SELECT I.intInvoiceId 
+			FROM 
+				tblARInvoice I 
+			INNER JOIN 
+				@PostInvoiceData IP 
+					ON I.intInvoiceId = IP.intInvoiceId 
+			WHERE ISNULL(I.intPeriodsToAccrue,0) > 1
+
+			INSERT INTO @GLEntries 
+			EXEC	dbo.uspARGenerateEntriesForAccrual  
+						 @Invoices					= @Accruals
+						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
+						,@ServiceChargesAccountId	= @ServiceChargesAccountId
+						,@BatchId					= @batchId
+						,@Code						= @CODE
+						,@UserId					= @userId
+						,@UserEntityId				= @UserEntityID
+						,@ScreenName				= @SCREEN_NAME
+						,@ModuleName				= @MODULE_NAME
+
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH		
 		
 		BEGIN TRY
 			-- Call the post routine 
@@ -942,7 +1091,7 @@ IF @post = 1
 			)
 			--DEBIT Total
 			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
@@ -950,13 +1099,13 @@ IF @post = 1
 				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice'	THEN  
 																								(
 																								SELECT
-																									SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																								FROM
-																									tblARInvoice ARI 
-																								LEFT JOIN
-																									tblARInvoiceDetail ARID
-																										ON ARI.intInvoiceId = ARID.intInvoiceId	
+																									tblARInvoiceDetail ARID 
 																								INNER JOIN
+																									tblARInvoice ARI
+																										ON ARID.intInvoiceId = ARI.intInvoiceId	
+																								LEFT OUTER JOIN
 																									tblICItem I
 																										ON ARID.intItemId = I.intItemId
 																								LEFT OUTER JOIN
@@ -970,8 +1119,6 @@ IF @post = 1
 																								WHERE
 																									ARI.intInvoiceId = A.intInvoiceId
 																									AND ARID.dblTotal <> @ZeroDecimal  
-																									AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																									AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 																								)
 																							ELSE 
 																								0
@@ -981,13 +1128,13 @@ IF @post = 1
 																							ELSE 
 																								(
 																								SELECT
-																									SUM([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped))
+																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
 																								FROM
-																									tblARInvoice ARI 
-																								LEFT JOIN
-																									tblARInvoiceDetail ARID
-																										ON ARI.intInvoiceId = ARID.intInvoiceId	
+																									tblARInvoiceDetail ARID 
 																								INNER JOIN
+																									tblARInvoice ARI
+																										ON ARID.intInvoiceId = ARI.intInvoiceId	
+																								LEFT OUTER JOIN
 																									tblICItem I
 																										ON ARID.intItemId = I.intItemId
 																								LEFT OUTER JOIN
@@ -1001,8 +1148,6 @@ IF @post = 1
 																								WHERE
 																									ARI.intInvoiceId = A.intInvoiceId
 																									AND ARID.dblTotal <> @ZeroDecimal  
-																									AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
-																									AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 																								)
 																							END				
 				,strDescription				= A.strComments
@@ -1010,7 +1155,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
@@ -1027,15 +1172,17 @@ IF @post = 1
 				tblARInvoice A
 			LEFT JOIN 
 				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId 			
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId
 			INNER JOIN 
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
+			WHERE
+				ISNULL(A.intPeriodsToAccrue,0) <= 1
 					
 			--CREDIT MISC
 			UNION ALL 
 			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 													THEN
@@ -1051,14 +1198,14 @@ IF @post = 1
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblQtyShipped, 0.00) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblQtyShipped, 0.00) ELSE 0 END				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
 				,intJournalLineNo			= B.intInvoiceDetailId
@@ -1072,10 +1219,10 @@ IF @post = 1
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1	
 			FROM
-				tblARInvoice A 
-			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
+			INNER JOIN
+				tblARInvoice A 
+					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
@@ -1085,17 +1232,22 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON B.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 		
+					AND A.intCompanyLocationId = IST.intLocationId
+			LEFT OUTER JOIN
+				vyuICGetItemStock ICIS
+					ON B.intItemId = ICIS.intItemId 
+					AND A.intCompanyLocationId = ICIS.intLocationId 						
 			WHERE
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
 				AND A.strType <> 'Debit Memo'
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT SALES
 			UNION ALL 
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
@@ -1107,7 +1259,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
 				,intJournalLineNo			= B.intInvoiceDetailId
@@ -1121,10 +1273,10 @@ IF @post = 1
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1	
 			FROM
-				tblARInvoice A 
-			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
+			INNER JOIN
+				tblARInvoice A 
+					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
@@ -1147,11 +1299,12 @@ IF @post = 1
 				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				AND A.strType <> 'Debit Memo'
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
@@ -1163,7 +1316,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
 				,intJournalLineNo			= B.intInvoiceDetailId
@@ -1177,10 +1330,10 @@ IF @post = 1
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1	
 			FROM
-				tblARInvoice A 
-			LEFT JOIN
 				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
+			INNER JOIN
+				tblARInvoice A 
+					ON B.intInvoiceId = A.intInvoiceId					
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
@@ -1197,11 +1350,12 @@ IF @post = 1
 			WHERE
 				B.dblTotal <> @ZeroDecimal  
 				AND A.strType = 'Debit Memo'
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT Shipping
 			UNION ALL 
 			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE A.dblShipping END
@@ -1213,7 +1367,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
@@ -1243,7 +1397,7 @@ IF @post = 1
 		UNION ALL 
 			--CREDIT Tax
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
@@ -1255,7 +1409,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= DT.intInvoiceDetailTaxId
@@ -1291,7 +1445,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT Discount
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
@@ -1303,7 +1457,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1338,7 +1492,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT COGS - SHIPPED
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
@@ -1350,7 +1504,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1359,8 +1513,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= ICT.strTransactionForm
-				,strTransactionForm			= ICT.strTransactionForm
+				,strTransactionType			= @SCREEN_NAME
+				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1368,7 +1522,8 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
 			tblICItemUOM ItemUOM 
 				ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
@@ -1404,7 +1559,7 @@ IF @post = 1
 			UNION ALL 
 			--CREDIT Inventory In-Transit - SHIPPED
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
@@ -1416,7 +1571,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1425,8 +1580,8 @@ IF @post = 1
 				,intEntityId				= @UserEntityID				
 				,strTransactionId			= A.strInvoiceNumber
 				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= ICT.strTransactionForm
-				,strTransactionForm			= ICT.strTransactionForm
+				,strTransactionType			= @SCREEN_NAME
+				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
 			FROM
@@ -1434,9 +1589,10 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON D.intItemId = IST.intItemId 
@@ -1470,7 +1626,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT COGS - Inbound Shipment
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
@@ -1482,7 +1638,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1500,9 +1656,10 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON D.intItemId = IST.intItemId 
@@ -1537,7 +1694,7 @@ IF @post = 1
 			UNION ALL 
 			--CREDIT Inventory In-Transit - Inbound Shipment
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
@@ -1549,7 +1706,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1567,9 +1724,10 @@ IF @post = 1
 			INNER JOIN			
 				tblARInvoice A 
 					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
+					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = D.intItemUOMId
 			LEFT OUTER JOIN
 				vyuARGetItemAccount IST
 					ON D.intItemId = IST.intItemId 
@@ -1605,6 +1763,7 @@ IF @post = 1
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
 		END CATCH
+
 	END   
 
 --------------------------------------------------------------------------------------------  
@@ -1642,7 +1801,7 @@ IF @post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 GL.dtmDate
+				 GL.dtmDate 
 				,@batchId
 				,GL.intAccountId
 				,dblDebit						= GL.dblCredit
@@ -1897,6 +2056,7 @@ IF @recap = 0
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
 						,dblPayment = 0.000000
+						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 					FROM
 						tblARInvoice 
@@ -1995,7 +2155,8 @@ IF @recap = 0
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
 						,dblPayment = 0.000000
-						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
+						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 

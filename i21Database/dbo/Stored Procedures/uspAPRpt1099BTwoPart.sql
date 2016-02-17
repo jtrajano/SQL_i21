@@ -144,9 +144,11 @@ WITH B1099 (
 	,strEIN
 	,strAddress
 	,strVendorCompanyName
+	,strPayeeName
 	,strVendorId
 	,strZip
 	,strCity
+	,strState
 	,strZipState
 	,strFederalTaxId
 	,intYear
