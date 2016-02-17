@@ -190,7 +190,7 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,6)),
+		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)),
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
@@ -305,8 +305,8 @@ BEGIN
 	END
 	
 	UPDATE A
-		SET A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
-		,A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
+		SET --A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) AP-2116
+		A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
 	FROM tblAPBill A
 	WHERE intBillId = @generatedBillId
 

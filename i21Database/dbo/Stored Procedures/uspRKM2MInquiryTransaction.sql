@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKM2MInquiryTransaction]  
+﻿CREATE PROC uspRKM2MInquiryTransaction  
                   @intM2MBasisId int = null,
                   @intFutureSettlementPriceId int = null,
                   @intQuantityUOMId int = null,
@@ -335,8 +335,7 @@ CONVERT(DECIMAL(24,6),
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId ,null as intltemPrice,
 	(SELECT SUM(iv.dblPurchaseContractShippedQty)FROM vyuLGInboundShipmentView iv WHERE iv.intContractDetailId=cd.intContractDetailId
 	AND intContractStatusId<>3 AND CONVERT(DATETIME,CONVERT(VARCHAR, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)) as 
-	 InTransQty,
-	
+	 InTransQty,	
 		 
    (SELECT SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0)))
 			 FROM vyuCTContractCostView dc 
@@ -345,20 +344,6 @@ CONVERT(DECIMAL(24,6),
 			 WHERE  dc.intContractDetailId=cd.intContractDetailId
 			 group by cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId
 			 )dblCosts
-			
-
-	  --(select CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-			--			dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),SUM(cv.dblRate))
-			--		WHEN	CC.strCostMethod = 'Amount'		THEN
-			--			SUM(cv.dblRate)/dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-			--		WHEN	CC.strCostMethod = 'Percentage' THEN 
-			--			(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)*cd.dblCashPrice*SUM(cv.dblRate)/100)/
-			--			dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-			--		  * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) END
-			--		 from vyuCTContractCostView cv WHERE cd.intContractDetailId=cv.intContractDetailId 
-			--   AND cd.intContractDetailId=cd.intContractDetailId and ysnMTM = 1) dblCosts
-			
-	                    
 FROM vyuCTContractDetailView  cd
 JOIN vyuCTContractHeaderView ch on cd.intContractHeaderId= ch.intContractHeaderId and cd.dblBalance > 0 
             AND cd.intCommodityId= case when isnull(@intCommodityId,0)=0 then cd.intCommodityId else @intCommodityId end
@@ -790,7 +775,6 @@ convert(decimal(24,6),
                   cd.intPricingTypeId,
                   cd.strPricingType,
                   isnull(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN isnull(cd.dblBasis,0) ELSE 0 END,0) dblContractBasis,
-                  --isnull(cd.dblBasis,0) dblContractBasis,
                   (CASE WHEN cd.intPricingTypeId=1 THEN
                   (SELECT     (isnull(dblFutures,0)) 
                         FROM tblCTContractDetail  cdv                         
@@ -875,7 +859,6 @@ convert(decimal(24,6),
 			 WHERE  dc.intContractDetailId=cd.intContractDetailId
 			 group by cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId
 			 )dblCosts
-
 FROM vyuCTContractDetailView  cd
 JOIN vyuCTContractHeaderView ch on cd.intContractHeaderId= ch.intContractHeaderId and cd.dblBalance > 0 
             AND cd.intCommodityId= case when isnull(@intCommodityId,0)=0 then cd.intCommodityId else @intCommodityId end

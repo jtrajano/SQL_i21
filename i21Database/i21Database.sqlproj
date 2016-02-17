@@ -3437,6 +3437,8 @@
     <Build Include="dbo\Views\vyuMFGetTraceabilityObject.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailAsOfDateReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3522,11 +3524,15 @@
     <None Include="Scripts\Post-Deployment\EM\019_RemoveEmailToParentEntity.sql" />
     <None Include="Scripts\Post-Deployment\CT\3_Miscellaneous.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddPaycheckDirectDepositEntries.sql" />
+<<<<<<< HEAD
     <None Include="Scripts\Post-Deployment\EM\021_MoveCustomerMessageToEntity.sql" />
     <None Include="Scripts\Post-Deployment\EM\022_DefaultDataForContactTypeAndImport.sql" />
     <None Include="Scripts\Post-Deployment\MF\3_Pattern.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCreateEntityById.sql" />
     <None Include="Scripts\Post-Deployment\MF\4_WMPattern.sql" />
+=======
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\15_FixInvoiceDateForCredits.sql" />
+>>>>>>> 15.4Prod
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
