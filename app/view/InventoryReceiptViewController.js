@@ -3826,6 +3826,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                         ysnInventoryCost: false,
                                                         strCostMethod: otherCharge.strCostMethod,
                                                         dblRate: otherCharge.dblRate,
+                                                        dblExchangeRate: otherCharge.dblFx,
                                                         intCostUOMId: otherCharge.intItemUOMId,
                                                         intEntityVendorId: otherCharge.intVendorId,
                                                         dblAmount: 0,
