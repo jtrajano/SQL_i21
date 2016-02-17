@@ -50,27 +50,36 @@ Declare @strPickListNo nvarchar(50)
 Declare @strBlendItemNoDesc nvarchar(max)
 Declare @strWorkOrderNo nvarchar(max)
 Declare @dblTotalPickQty numeric(18,6)
+Declare @intWorkOrderId int
+Declare @intMinRemainingItem int
 
 DECLARE @tblInputItem TABLE (
+	intRowNo INT IDENTITY,
 	intItemId INT
 	,dblRequiredQty NUMERIC(18, 6)
 	,ysnIsSubstitute BIT
+	,intConsumptionMethodId INT
+	,intParentItemId INT
 	)
 
 Declare @tblRemainingPickedLots AS table
 ( 
 	intItemId int,
-	dblRemainingQuantity numeric(18,6)
+	dblRemainingQuantity numeric(18,6),
+	intConsumptionMethodId int,
+	ysnIsSubstitute bit,
+	intParentItemId int
 )
 
 Select @intLocationId=intLocationId,@strPickListNo=strPickListNo,@strWorkOrderNo=strWorkOrderNo from tblMFPickList Where intPickListId=@intPickListId
-Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')) 
+Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId  
 From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId Where intPickListId=@intPickListId
 Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
 
 	SELECT @intRecipeId = intRecipeId
-	FROM tblMFRecipe
-	WHERE intItemId = @intBlendItemId
+	FROM tblMFWorkOrderRecipe
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intItemId = @intBlendItemId
 		AND intLocationId = @intLocationId
 		AND ysnActive = 1
 
@@ -78,15 +87,20 @@ Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId
 		intItemId
 		,dblRequiredQty
 		,ysnIsSubstitute
+		,intConsumptionMethodId
+		,intParentItemId
 		)
 	SELECT 
 		ri.intItemId
 		,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
 		,0
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		,ri.intConsumptionMethodId
+		,0
+	FROM tblMFWorkOrderRecipeItem ri
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = @intWorkOrderId
 	
 	UNION
 	
@@ -94,16 +108,37 @@ Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId
 		rs.intSubstituteItemId AS intItemId
 		,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 		,1
-	FROM tblMFRecipeSubstituteItem rs
-	JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+		,0
+		,ri.intItemId
+	FROM tblMFWorkOrderRecipeSubstituteItem rs
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
+	JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
 	WHERE r.intRecipeId = @intRecipeId
 		AND rs.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = @intWorkOrderId
 
-	Insert Into @tblRemainingPickedLots(intItemId,dblRemainingQuantity)
-	Select tpl.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity 
+	Insert Into @tblRemainingPickedLots(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute,intParentItemId)
+	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute,ti.intParentItemId 
 	From @tblInputItem ti Left Join 
 	(Select intItemId,SUM(dblQuantity) AS dblQuantity From tblMFPickListDetail Where intPickListId=@intPickListId Group by intItemId) tpl on  ti.intItemId=tpl.intItemId
 	WHERE ROUND((ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)),0) > 0
+
+	--Remove main item if substitute is selected
+	Select @intMinRemainingItem=Min(intRowNo) From @tblInputItem Where ysnIsSubstitute=1
+	Declare @intRemainingSubItemId int
+	Declare @intRemainingParentItemId int
+	While(@intMinRemainingItem is not null)
+	Begin
+		Select @intRemainingSubItemId=intItemId,@intRemainingParentItemId=intParentItemId From @tblInputItem Where intRowNo=@intMinRemainingItem
+		
+		If Exists (Select 1 From tblMFPickListDetail Where intPickListId=@intPickListId And intItemId=@intRemainingSubItemId)
+			Delete From @tblRemainingPickedLots Where intItemId=@intRemainingParentItemId
+
+		Select @intMinRemainingItem=Min(intRowNo) From @tblInputItem Where intRowNo>@intMinRemainingItem And ysnIsSubstitute=1
+	End
+
+	--Remove sub item if main is selected
+	Delete a From @tblRemainingPickedLots a join tblMFPickListDetail b on a.intParentItemId=b.intItemId Where b.intPickListId=@intPickListId And a.ysnIsSubstitute=1
 
 	Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
 
