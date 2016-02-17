@@ -16,7 +16,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedFuelTaxClass',
         'Inventory.store.BufferedDocument',
         'Inventory.store.BufferedCertification',
-        'Inventory.store.BufferedMaterialNMFC',
+        'Warehouse.store.BufferedItemNMFC',
         'Inventory.store.BufferedCountGroup',
         'Inventory.store.BufferedCommodity',
         'Inventory.store.BufferedClassAttribute',
@@ -450,7 +450,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         materialNMFC: {
-            type: 'icbufferedmaterialnmfc'
+            type: 'whbuffereditemnmfc'
         },
         mfgDimensionUom: {
             type: 'icbuffereduom'
