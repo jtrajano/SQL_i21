@@ -917,6 +917,20 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     dataType: 'string',
                                                                     text: 'Description',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Sub Locationn Id',
+                                                                    flex: 1,
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location Name',
+                                                                    flex: 1,
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboToStorage',

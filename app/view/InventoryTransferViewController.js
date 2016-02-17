@@ -219,8 +219,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                                 conjunction: 'and'
                             },
                             {
-                                column: 'intSubLocationId',
-                                value: '{grdInventoryTransfer.selection.intToSubLocationId}',
+                                column: 'strSubLocationName',
+                                value: '{grdInventoryTransfer.selection.strToSubLocationName}',
                                 conjunction: 'and'
                             }
                         ]
@@ -409,8 +409,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             current.set('intItemUOMId', records[0].get('intStockUOMId'));
             current.set('dblAvailableQty', records[0].get('dblAvailable'));
             current.set('strAvailableUOM', records[0].get('strStockUOM'));
-
-
         }
         else if (combo.itemId === 'cboLot') {
             current.set('intLotId', records[0].get('intLotId'));
@@ -432,9 +430,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
         else if (combo.itemId === 'cboToSubLocation') {
             current.set('intToSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
+            current.set('intToStorageLocationId', null);
+            current.set('strToStorageLocationName', '');
         }
         else if (combo.itemId === 'cboToStorage') {
             current.set('intToStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('intToSubLocationId', records[0].get('intSubLocationId'));
+            current.set('strToSubLocationName', records[0].get('strSubLocationName'));
         }
         else if (combo.itemId === 'cboUOM') {
             current.set('intItemUOMId', records[0].get('intItemUOMId'));
