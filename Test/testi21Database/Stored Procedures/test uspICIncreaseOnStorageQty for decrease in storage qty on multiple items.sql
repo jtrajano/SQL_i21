@@ -45,15 +45,6 @@ BEGIN
 			,dblUnitStorage NUMERIC(18,6)
 		)
 
-		INSERT INTO expected (
-				intItemId
-				,intItemLocationId
-				,dblUnitStorage
-		)
-		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
-				,dblUnitStorage = 0 -- It should never go down to -450. When it goes negative, the order qty is set to zero. 
-
 		CREATE TABLE actual (
 			intItemId INT
 			,intItemLocationId INT
@@ -67,7 +58,7 @@ BEGIN
 		DECLARE @Items AS ItemCostingTableType;
 		
 		---------------------------------------------------
-		-- Setup the items to decrease the on-order qty
+		-- Setup the items to decrease the units storage qty
 		---------------------------------------------------
 		INSERT INTO @Items (
 				intItemId 
@@ -128,6 +119,18 @@ BEGIN
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICIncreaseOnStorageQty @Items
+	END 
+
+	-- Assert
+	BEGIN 
+		INSERT INTO expected (
+				intItemId
+				,intItemLocationId
+				,dblUnitStorage
+		)
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @Default_Location
+				,dblUnitStorage = -450.00 
 
 		INSERT INTO actual (
 				intItemId
@@ -140,10 +143,7 @@ BEGIN
 		FROM	tblICItemStock 
 		WHERE	intItemId = @WetGrains
 				AND intItemLocationId = @Default_Location
-	END 
 
-	-- Assert
-	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END
 
@@ -153,5 +153,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE expected
-
 END

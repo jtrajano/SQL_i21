@@ -196,7 +196,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItem', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItemLot', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentCharge', @Identity = 1;	
-
+	EXEC tSQLt.FakeTable 'dbo.tblSMUserPreference', @Identity = 1;	
 		
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
