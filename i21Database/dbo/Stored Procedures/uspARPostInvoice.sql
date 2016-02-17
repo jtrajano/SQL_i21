@@ -79,8 +79,12 @@ SET @recapId = '1'
 SET @success = 1
 
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
-DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
-SELECT @INVENTORY_SHIPMENT_TYPE = intTransactionTypeId FROM tblICInventoryTransactionType WHERE strName = @SCREEN_NAME
+
+DECLARE @INVENTORY_INVOICE_TYPE AS INT = 33
+
+SELECT	@INVENTORY_INVOICE_TYPE = intTransactionTypeId 
+FROM	tblICInventoryTransactionType 
+WHERE	strName = @SCREEN_NAME
 
 DECLARE @ZeroDecimal decimal(18,6)
 SET @ZeroDecimal = 0.000000	
@@ -944,7 +948,7 @@ IF @post = 1
 				,Header.intInvoiceId
 				,Detail.intInvoiceDetailId
 				,Header.strInvoiceNumber 
-				,@INVENTORY_SHIPMENT_TYPE
+				,@INVENTORY_INVOICE_TYPE
 				,NULL 
 				,NULL
 				,NULL
