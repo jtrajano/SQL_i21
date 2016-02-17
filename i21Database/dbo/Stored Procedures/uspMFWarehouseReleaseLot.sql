@@ -118,19 +118,19 @@ BEGIN TRY
 		SELECT @dblReleaseQty=dblQty FROM dbo.tblICLot WHERE intLotId=@intLotId
 	END
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM dbo.tblMFWorkOrderProducedLot
-			WHERE intLotId = @intLotId
-			)
-	BEGIN
-		RAISERROR (
-				51054
-				,11
-				,1
-				,@strLotNumber
-				)
-	END
+	--IF NOT EXISTS (
+	--		SELECT 1
+	--		FROM dbo.tblMFWorkOrderProducedLot
+	--		WHERE intLotId = @intLotId
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			51054
+	--			,11
+	--			,1
+	--			,@strLotNumber
+	--			)
+	--END
 
 	IF @dblQty = 0
 		OR EXISTS (
