@@ -197,7 +197,7 @@ BEGIN
 				,dtmDate = 'November 14, 2014'
 				,dblQty = 0
 				,dblCost = 0
-				,dblValue = (18.068182 * 275) - (100 * 22) - (100 * 14) - (75 * 18.25)
+				,dblValue = (18.06818181818182000000 * 275.0) - (100.0 * 22.0) - (100.0 * 14.0) - (75.0 * 18.25)
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -208,9 +208,10 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedUserId = 1
 				,intConcurrencyId = 1
-
+		WHERE ROUND((18.06818181818182000000 * 275.0) - (100.0 * 22.0) - (100.0 * 14.0) - (75.0 * 18.25), 6) <> 0 
 	END 
-	
+
+
 	-- Act
 	BEGIN 	
 		-- Call uspICPostCosting to post the costing and generate the g/l entries  
