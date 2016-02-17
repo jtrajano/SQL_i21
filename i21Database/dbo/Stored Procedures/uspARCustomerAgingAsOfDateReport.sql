@@ -32,7 +32,7 @@ SELECT A.strCustomerName
      , strSalespersonName   ='strSalespersonName' 
 FROM
 
-(SELECT I.dtmPostDate
+(SELECT I.dtmDate
     , I.intInvoiceId
     , dblAmountPaid		= 0
     , dblInvoiceTotal	= ISNULL(I.dblInvoiceTotal, 0)
@@ -61,7 +61,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType = 'Invoice'
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -105,7 +105,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -144,7 +144,7 @@ FROM tblARInvoice I
         LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -188,7 +188,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType = 'Invoice'
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -218,7 +218,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -242,7 +242,7 @@ FROM tblARInvoice I
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted  = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo
     AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
     AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
