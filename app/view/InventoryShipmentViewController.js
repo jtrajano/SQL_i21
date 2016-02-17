@@ -874,6 +874,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitPrice', records[0].get('dblSalePrice'));
+            current.set('intItemUOMId', records[0].get('intItemUnitMeasureId'));
         }
     },
 
