@@ -271,7 +271,7 @@ END CATCH
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
-					ISNULL(dbo.isOpenAccountingDate(ISNULL(A.dtmPostDate, A.dtmDate)), 0) = 0
+					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
 
 				--zero amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -510,7 +510,7 @@ END CATCH
 				-- Accrual Not in Fiscal Year					
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
-					A.strInvoiceNumber + ' has an Accrual setup up to ' + CONVERT(NVARCHAR(30),DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), ISNULL(A.dtmPostDate, A.dtmDate)), 101) + ' which does not fall into a valid Fiscal Period.',
+					A.strInvoiceNumber + ' has an Accrual setup up to ' + CONVERT(NVARCHAR(30),DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), A.dtmDate), 101) + ' which does not fall into a valid Fiscal Period.',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -522,7 +522,7 @@ END CATCH
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE
 					ISNULL(A.intPeriodsToAccrue,0) > 1  
-					AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), ISNULL(A.dtmPostDate, A.dtmDate))), 0) = 0
+					AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(A.intPeriodsToAccrue,1) - 1), A.dtmDate)), 0) = 0
 
 				--Service Deferred Revenue Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -823,7 +823,7 @@ END CATCH
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE
-					ISNULL(dbo.isOpenAccountingDate(ISNULL(A.dtmPostDate, A.dtmDate)), 0) = 0
+					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
 					
 				--NOT POSTED
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1091,7 +1091,7 @@ IF @post = 1
 			)
 			--DEBIT Total
 			SELECT
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
@@ -1182,7 +1182,7 @@ IF @post = 1
 			--CREDIT MISC
 			UNION ALL 
 			SELECT
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 													THEN
@@ -1247,7 +1247,7 @@ IF @post = 1
 			--CREDIT SALES
 			UNION ALL 
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
@@ -1304,7 +1304,7 @@ IF @post = 1
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
@@ -1355,7 +1355,7 @@ IF @post = 1
 			--CREDIT Shipping
 			UNION ALL 
 			SELECT
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE A.dblShipping END
@@ -1397,7 +1397,7 @@ IF @post = 1
 		UNION ALL 
 			--CREDIT Tax
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
@@ -1445,7 +1445,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT Discount
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
@@ -1492,7 +1492,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT COGS - SHIPPED
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
@@ -1559,7 +1559,7 @@ IF @post = 1
 			UNION ALL 
 			--CREDIT Inventory In-Transit - SHIPPED
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
@@ -1626,7 +1626,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT COGS - Inbound Shipment
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
@@ -1694,7 +1694,7 @@ IF @post = 1
 			UNION ALL 
 			--CREDIT Inventory In-Transit - Inbound Shipment
 			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
@@ -1801,7 +1801,7 @@ IF @post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 GL.dtmDate 
+				 @PostDate
 				,@batchId
 				,GL.intAccountId
 				,dblDebit						= GL.dblCredit
@@ -2056,7 +2056,7 @@ IF @recap = 0
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
 						,dblPayment = 0.000000
-						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
+						,dtmPostDate = @PostDate
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 					FROM
 						tblARInvoice 
@@ -2155,7 +2155,7 @@ IF @recap = 0
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
 						,dblPayment = 0.000000
-						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
+						,dtmPostDate = @PostDate
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
