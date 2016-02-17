@@ -67,6 +67,11 @@ BEGIN
 			set @CurTableName = 'tblARSalesperson'
 			set @CurTableKey = 'intEntitySalespersonId'
 		end
+		else if @CurMergeType = 'User'
+		begin
+			set @CurTableName = 'tblSMUserSecurity'
+			set @CurTableKey = 'intEntityUserSecurityId'
+		end
 
 		SELECT @Columns = COALESCE(@Columns + ', ', '') + name from syscolumns where id = object_id(@CurTableName) and name <> @CurTableKey
 		
@@ -100,6 +105,10 @@ BEGIN
 
 		BEGIN TRANSACTION
 		BEGIN TRY
+			if @CurMergeType = 'User'
+			BEGIN 
+				EXEC('alter table tblSMUserSecurity drop constraint AK_tblSMUserSecurity_strUserName')
+			END 
 			EXEC ( 'insert into tblEntityType ( intEntityId, strType, intConcurrencyId) values ('+ @PrimaryKeyString +','''+@CurMergeType+''',0 )
 					insert into '+ @CurTableName +'(' + @CurTableKey +@Columns + ') 
 							select '+ @PrimaryKeyString + @Columns + ' 
@@ -130,6 +139,11 @@ BEGIN
 			END 
 			
 			EXEC('delete from ' + @CurTableName + ' where ' + @CurTableKey + ' = ' + @CurMergeId )
+
+			if @CurMergeType = 'User'
+			BEGIN 
+				EXEC('ALTER TABLE tblSMUserSecurity ADD CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName])')
+			END 
 
 			COMMIT
 		END TRY

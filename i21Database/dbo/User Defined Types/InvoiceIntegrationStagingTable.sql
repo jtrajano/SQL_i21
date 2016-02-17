@@ -5,14 +5,26 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 (
 	 [intId]								INT				IDENTITY PRIMARY KEY CLUSTERED                        
 	 --Header
-	,[strSourceTransaction]					NVARCHAR(250)									NOT NULL	-- Valid values "Invoice", "Transport Load", "Inbound Shipment" AND "Card Fueling Transaction"
-	,[intSourceId]							INT												NOT NULL	-- Id of the source transaction
+	,[strSourceTransaction]					NVARCHAR(250)									NOT NULL	-- Valid values 
+																											-- 0. "Direct"
+																											-- 1. "Sales Order"
+																											-- 2. "Invoice", "Provisional Invoice", 
+																											-- 3. "Transport Load"
+																											-- 4. "Inbound Shipment"
+																											-- 4. "Inventory Shipment"
+																											-- 5. "Card Fueling Transaction"
+																											-- 6. "Transfer Storage"
+																											-- 7. "Sell OffSite"
+																											-- 8. "Settle Storage"
+																											-- 9. "Process Grain Storage"
+	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
-	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer	
-	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id
+	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
+	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
 	,[intCurrencyId]						INT												NOT NULL	-- Currency Id	
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
+	,[intPeriodsToAccrue]					INT												NULL		-- Default(1) Period to Accrue	
 	,[dtmDate]								DATETIME										NOT NULL	-- Invoice Date
 	,[dtmDueDate]							DATETIME										NULL		-- Due Date(If NULL will be computed base on Term) 	
 	,[dtmShipDate]							DATETIME										NULL		-- Ship Date
@@ -55,6 +67,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
     ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
+    ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
     ,[ysnRefreshPrice]						BIT												NULL		-- Indicate whether to recompute for Price based on the available pricing setup	
 	,[strMaintenanceType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
     ,[strFrequency]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
@@ -65,6 +78,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnRecomputeTax]						BIT												NULL		-- Indicate whether to recompute for Taxes based on the current Tax setup	
 	,[intSCInvoiceId]						INT												NULL		-- Service Charge Invoice Id
 	,[strSCInvoiceNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Service Charge Invoice Number	
+	,[intSCBudgetId]						INT												NULL		-- Service Charge Budget Id
+	,[strSCBudgetDescription]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Service Charge Budget Description	
 	,[intInventoryShipmentItemId]			INT												NULL		-- Key Value from tblICInventoryShipmentItem (Inventory Shipment)
 	,[strShipmentNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Inventory Shipment Number (Inventory Shipment)
 	,[intSalesOrderDetailId]				INT												NULL		-- Key Value from tblSOSalesOrderDetail (Sales Order)
@@ -89,5 +104,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intPerformerId]						INT												NULL		    		
 	,[ysnLeaseBilling]						BIT												NULL
 	,[ysnVirtualMeterReading]				BIT												NULL
+	,[ysnClearDetailTaxes]					BIT												NULL		-- Indicate whether to clear tax details before inserting tax details from LineItemTaxDetailStagingTable
+	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id for linking line item detail taxes (LineItemTaxDetailStagingTable) which are also fro processing
 
 )

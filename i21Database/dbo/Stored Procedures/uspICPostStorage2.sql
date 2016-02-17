@@ -1,21 +1,22 @@
-﻿
-/*
-	This is the stored procedure that handles the receiving and release of custodial items. 
+﻿/*
+	This is the stored procedure that handles the "posting" of items. 
 	
-	It uses a cursor to iterate over the list of records found in @ItemsStorage, a table-valued parameter (variable). 
-
+	It uses a cursor to iterate over the list of records found in @ItemsToStorage, a table-valued parameter (variable). 
+	
 	In each iteration, it does the following: 
 		1. Determines if a stock is for incoming or outgoing then calls the appropriate stored procedure. 
+		2. Adjust the stock quantity and current average cost. 
+		3. Calls another stored procedure that will return the generated G/L entries
 
 	Parameters: 
-	@ItemsStorage - A user-defined table type. This is a table variable that tells this SP what items to process. 	
+	@ItemsToStorage - A user-defined table type. This is a table variable that tells this SP what items to process. 	
 	
 	@strBatchId - The generated batch id from the calling code. This is the same batch id this SP will use when posting the financials of an item. 
 
 	@intEntityUserSecurityId - The user who is initiating the post. 
 */
 CREATE PROCEDURE [dbo].[uspICPostStorage]
-	@ItemsStorage AS ItemCostingTableType READONLY
+	@ItemsToStorage AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
 	,@intEntityUserSecurityId AS INT
 AS
@@ -32,8 +33,8 @@ DECLARE @intId AS INT
 		,@intItemLocationId AS INT 
 		,@intItemUOMId AS INT 
 		,@dtmDate AS DATETIME
-		,@dblQty AS NUMERIC(18, 6) 
-		,@dblUOMQty AS NUMERIC(18, 6)
+		,@dblQty AS NUMERIC(38, 20) 
+		,@dblUOMQty AS NUMERIC(38, 20)
 		,@dblCost AS NUMERIC(38, 20)
 		,@dblSalesPrice AS NUMERIC(18, 6)
 		,@intCurrencyId AS INT 
@@ -42,12 +43,13 @@ DECLARE @intId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
-		,@strTransactionForm AS NVARCHAR(255)
 		,@intLotId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
+		,@strActualCostId AS NVARCHAR(50)
 
 DECLARE @CostingMethod AS INT 
+		,@strTransactionForm AS NVARCHAR(255)
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -56,6 +58,11 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 
+-- Create the variables for the internal transaction types used by costing. 
+DECLARE @AUTO_NEGATIVE AS INT = 1
+		,@WRITE_OFF_SOLD AS INT = 2
+		,@REVALUE_SOLD AS INT = 3
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
@@ -63,9 +70,9 @@ BEGIN
 	DECLARE @returnValue AS INT 
 
 	EXEC @returnValue = dbo.uspICValidateCostingOnPostStorage
-		@ItemsToValidate = @ItemsStorage
+		@ItemsToValidate = @ItemsToStorage
 
-	IF @returnValue < 0 RETURN -1
+	IF @returnValue < 0 RETURN -1;
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -94,7 +101,8 @@ SELECT  intId
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
-FROM	@ItemsStorage
+		,strActualCostId
+FROM	@ItemsToStorage
 
 OPEN loopItems;
 
@@ -117,8 +125,9 @@ FETCH NEXT FROM loopItems INTO
 	,@intTransactionTypeId
 	,@intLotId
 	,@intSubLocationId
-	,@intStorageLocationId;
-
+	,@intStorageLocationId
+	,@strActualCostId;
+	
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
 -----------------------------------------------------------------------------------------------------------------------------
@@ -127,93 +136,110 @@ BEGIN
 	-- Initialize the costing method and negative inventory option. 
 	SET @CostingMethod = NULL;
 
-	SELECT TOP 1 
-			@strTransactionForm = strTransactionForm
+	-- Initialize the transaction form
+	SELECT	@strTransactionForm = strTransactionForm
 	FROM	dbo.tblICInventoryTransactionType
 	WHERE	intTransactionTypeId = @intTransactionTypeId
+			AND strTransactionForm IS NOT NULL 
 
 	-- Get the costing method of an item 
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 
+	-- Initialize the dblUOMQty
+	SELECT	@dblUOMQty = dblUnitQty
+	FROM	dbo.tblICItemUOM
+	WHERE	intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMId
+
+	--------------------------------------------------------------------------------
+	-- Call the SP that can process the item's costing method
+	--------------------------------------------------------------------------------
+	-- Average Cost
+	-- FIFO 
+	IF (@CostingMethod IN (@AVERAGECOST, @FIFO))
+	BEGIN 
+		EXEC dbo.uspICPostFIFOStorage
+			@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@dtmDate
+			,@dblQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@strTransactionForm
+			,@intEntityUserSecurityId
+	END
+
+	-- LIFO 
+	IF (@CostingMethod = @LIFO)
+	BEGIN 
+		EXEC dbo.uspICPostLIFOStorage
+			@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@dtmDate
+			,@dblQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@strTransactionForm
+			,@intEntityUserSecurityId;
+	END
+
 	-- LOT 
 	IF (@CostingMethod = @LOTCOST)
 	BEGIN 
 		EXEC dbo.uspICPostLotStorage
-				@intItemId
-				,@intItemLocationId
-				,@intItemUOMId
-				,@intSubLocationId
-				,@intStorageLocationId
-				,@dtmDate
-				,@intLotId
-				,@dblQty
-				,@dblUOMQty
-				,@dblCost
-				,@dblSalesPrice
-				,@intCurrencyId
-				,@dblExchangeRate
-				,@intTransactionId
-				,@intTransactionDetailId
-				,@strTransactionId
-				,@strBatchId
-				,@intTransactionTypeId
-				,@strTransactionForm
-				,@intEntityUserSecurityId
-	END
-	ELSE IF @CostingMethod IN (@FIFO, @AVERAGECOST)
-	BEGIN 
-		EXEC dbo.uspICPostFIFOStorage
-				@intItemId
-				,@intItemLocationId 
-				,@intItemUOMId 
-				,@intSubLocationId 
-				,@intStorageLocationId 
-				,@dtmDate 
-				,@dblQty 
-				,@dblUOMQty 
-				,@dblCost 
-				,@dblSalesPrice 
-				,@intCurrencyId 
-				,@dblExchangeRate 
-				,@intTransactionId 
-				,@intTransactionDetailId 
-				,@strTransactionId 
-				,@strBatchId 
-				,@intTransactionTypeId 
-				,@strTransactionForm
-				,@intEntityUserSecurityId 
-	END 
-	ELSE IF @CostingMethod IN (@LIFO)
-	BEGIN 
-		EXEC dbo.uspICPostLIFOStorage
-				@intItemId
-				,@intItemLocationId 
-				,@intItemUOMId 
-				,@intSubLocationId 
-				,@intStorageLocationId 
-				,@dtmDate 
-				,@dblQty 
-				,@dblUOMQty 
-				,@dblCost 
-				,@dblSalesPrice 
-				,@intCurrencyId 
-				,@dblExchangeRate 
-				,@intTransactionId 
-				,@intTransactionDetailId 
-				,@strTransactionId 
-				,@strBatchId 
-				,@intTransactionTypeId 
-				,@strTransactionForm
-				,@intEntityUserSecurityId 
+			@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@dtmDate
+			,@intLotId
+			,@dblQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@strTransactionForm
+			,@intEntityUserSecurityId;
 	END
 
+	--------------------------------------
 	-- Update the Lot's Qty and Weights. 
-	BEGIN 		
+	--------------------------------------
+	BEGIN 
 		UPDATE	Lot 
 		SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
 				,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-				,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN @dblCost ELSE Lot.dblLastCost END 
+				,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
 		FROM	dbo.tblICLot Lot
 		WHERE	Lot.intItemLocationId = @intItemLocationId
 				AND Lot.intLotId = @intLotId
@@ -239,6 +265,7 @@ BEGIN
 		,@intLotId
 		,@intSubLocationId
 		,@intStorageLocationId
+		,@strActualCostId 
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
@@ -251,4 +278,4 @@ DEALLOCATE loopItems;
 -- Update the Item Stock table
 -----------------------------------
 EXEC uspICIncreaseOnStorageQty
-	@ItemsStorage
+	@ItemsToStorage

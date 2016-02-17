@@ -34,29 +34,45 @@ BEGIN
 				,@intItemLocationId AS INT
 				,@intItemUOMId AS INT 
 				,@dtmDate AS DATETIME
-				,@dblQty NUMERIC(18,6) 
+				,@dblQty NUMERIC(38,20) 
 				,@dblCost AS NUMERIC(38, 20)
 				,@intEntityUserSecurityId AS INT
+				,@FullQty AS NUMERIC(38,20) 
+				,@TotalQtyOffset AS NUMERIC(38,20)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
 				,@intTransactionDetailId AS INT 
-				,@NewFifoStorageId AS INT 
+				,@RemainingQty AS NUMERIC(38,20) 
+				,@CostUsed AS NUMERIC(38,20)  
+				,@QtyOffset AS NUMERIC(38,20)  
+				,@NewFIFOStorageId AS INT  
+				,@UpdatedFIFOStorageId AS INT  
+				,@strRelatedTransactionId AS NVARCHAR(40) 
+				,@intRelatedTransactionId AS INT 
 	END 
 	
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICIncreaseStockInFIFOStorage
-				@intItemId 
+				@intItemId
 				,@intItemLocationId 
 				,@intItemUOMId 
 				,@dtmDate 
 				,@dblQty 
 				,@dblCost 
 				,@intEntityUserSecurityId 
+				,@FullQty 
+				,@TotalQtyOffset 
 				,@strTransactionId 
 				,@intTransactionId 
-				,@intTransactionDetailId
-				,@NewFifoStorageId OUTPUT 
+				,@intTransactionDetailId 
+				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT 
+				,@QtyOffset OUTPUT 
+				,@NewFIFOStorageId OUTPUT 
+				,@UpdatedFIFOStorageId OUTPUT 
+				,@strRelatedTransactionId OUTPUT
+				,@intRelatedTransactionId OUTPUT
 
 		INSERT INTO actual (
 				[intItemId] 
@@ -95,5 +111,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE expected
-
 END 

@@ -49,6 +49,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@ACH AS INT = 22
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -312,7 +313,7 @@ IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 DELETE tblCMBankTransaction
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH)		
 		AND (
 			-- Condition #1:
 			F.strReferenceNo IN (@CASH_PAYMENT)

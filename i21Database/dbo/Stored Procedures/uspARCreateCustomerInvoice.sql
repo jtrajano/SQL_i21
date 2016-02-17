@@ -31,7 +31,7 @@
 	,@PaymentId						INT				= NULL
 	,@SplitId						INT				= NULL
 	,@DistributionHeaderId			INT				= NULL
-	,@ActualCostId					NVARCHAR(50)	= ''			
+	,@ActualCostId					NVARCHAR(50)	= NULL			
 	,@ShipmentId					INT				= NULL
 	,@TransactionId					INT				= NULL
 	,@OriginalInvoiceId				INT				= NULL

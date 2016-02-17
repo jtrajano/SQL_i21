@@ -2,7 +2,7 @@
 (
 	[intInvoiceDetailTaxId] INT NOT NULL IDENTITY, 
     [intInvoiceDetailId] INT NOT NULL,     
-    [intTaxGroupId] INT NOT NULL, 
+    [intTaxGroupId] INT NULL, 
     [intTaxCodeId] INT NOT NULL, 
     [intTaxClassId] INT NOT NULL, 
 	[strTaxableByOtherTaxes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 

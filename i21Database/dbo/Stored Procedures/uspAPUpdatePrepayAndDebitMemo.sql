@@ -33,6 +33,7 @@ CROSS APPLY
 	FROM tblAPAppliedPrepaidAndDebit B
 	WHERE A.intBillId = B.intTransactionId
 	AND B.intBillId IN (SELECT intBillId FROM #tmpBillsId)
+	AND B.ysnApplied = 1
 	GROUP BY B.intTransactionId
 ) AppliedPayments
 WHERE A.intTransactionType IN (2,3,8)
@@ -40,19 +41,24 @@ AND 1 = CASE WHEN A.intTransactionType= 3 AND A.ysnPosted != 1 --DEBIT MEMO shou
 			 THEN 0 ELSE 1 END
 
 --VALIDATIONS
---MAKE SURE PAYMENT NOT GREATER THAN TO TOTAL
+--MAKE SURE PAYMENT IS CORRECT FOR CURRENT TRANSACTION
 DECLARE @error NVARCHAR(200);
 SELECT TOP 1
 	@error = A.strBillId + ' invalid amount applied.'
 FROM tblAPBill A
-WHERE A.intTransactionType IN (2,3,8)
-AND A.intBillId IN (SELECT intBillId FROM #tmpBillsId)
+WHERE (
+		(A.intBillId IN (SELECT intBillId FROM #tmpBillsId)) --Bill Transactions
+		OR
+		EXISTS(SELECT 1 FROM tblAPAppliedPrepaidAndDebit B WHERE B.intBillId IN (SELECT intBillId FROM #tmpBillsId) 
+					AND B.intTransactionId = A.intBillId AND B.ysnApplied = 1) --Prepay and Debit Memo transactions
+	)
 AND (
 	A.dblPayment > A.dblTotal
 	OR A.dblAmountDue < 0
 	OR A.dblAmountDue > A.dblTotal
 	OR A.dblPayment < 0
 )
+
 
 IF @error IS NOT NULL
 BEGIN

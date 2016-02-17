@@ -531,8 +531,8 @@ BEGIN
 					,@EntityId
 					,@TaxGroupId
 
-				DECLARE	@Amount	NUMERIC(18,6) 
-						,@Qty	NUMERIC(18,6)
+				DECLARE	@Amount	NUMERIC(38,20) 
+						,@Qty	NUMERIC(38,20)
 				-- Fields used in the calculation of the taxes
 
 				SELECT TOP 1
@@ -685,7 +685,7 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
-		SET		dblTax = ISNULL(Taxes.dblTaxPerLineItem, 0)
+		SET		dblTax = ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0), 2) 
 		FROM	dbo.tblICInventoryReceiptItem ReceiptItem LEFT JOIN (
 					SELECT	dblTaxPerLineItem = SUM(ReceiptItemTax.dblTax) 
 							,ReceiptItemTax.intInventoryReceiptItemId
@@ -699,7 +699,7 @@ BEGIN
 
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
-		SET		dblLineTotal = ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0)
+		SET		dblLineTotal = ROUND(ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0), 2)
 		FROM	dbo.tblICInventoryReceiptItem ReceiptItem
 		WHERE	intInventoryReceiptId = @inventoryReceiptId
 

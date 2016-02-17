@@ -58,9 +58,9 @@ DECLARE
 	,@intItemLocationId			AS INT 
 	,@intSubLocationId			AS INT 
 	,@intStorageLocationId		AS INT
-	,@dblQty					AS NUMERIC(18,6) 
+	,@dblQty					AS NUMERIC(38,20) 
 	,@intItemUOMId				AS INT 
-	,@dblWeight					AS NUMERIC(18,6)
+	,@dblWeight					AS NUMERIC(38,20)
 	,@intWeightUOMId			AS INT
 	,@dtmExpiryDate				AS DATETIME
 	,@dtmManufacturedDate		AS DATETIME
@@ -79,7 +79,7 @@ DECLARE
 	,@ysnProduced				AS BIT 
 	,@intDetailId				AS INT 
 	,@intOwnershipType			AS INT
-	,@dblGrossWeight			AS NUMERIC(18,6)
+	,@dblGrossWeight			AS NUMERIC(38,20)
 	,@strParentLotNumber		AS NVARCHAR(50) 
 	,@strParentLotAlias			AS NVARCHAR(50) 
 	,@intLotStatusId_ItemLotTable AS INT 
@@ -204,6 +204,9 @@ FETCH NEXT FROM loopLotItems INTO
 -----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 		
+	-- Clean-up blanks from the lot number field
+	SET @strLotNumber = RTRIM(LTRIM(ISNULL(@strLotNumber, ''))) 
+
 	-- Get the type of lot (if manual or serialized)
 	SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
 
@@ -213,7 +216,7 @@ BEGIN
 	WHERE	intItemLocationId = @intItemLocationId
 
 	-- Validate if the Manual lot item does not have a lot number. 
-	IF ISNULL(@strLotNumber, '') = '' AND @intLotTypeId = @LotType_Manual
+	IF @strLotNumber = '' AND @intLotTypeId = @LotType_Manual
 	BEGIN 
 		SELECT	@strItemNo = strItemNo
 		FROM	dbo.tblICItem Item
@@ -224,10 +227,17 @@ BEGIN
 		RETURN -2;
 	END 	
 	
-	-- Generate the next lot number - if it is blank AND it is a serial lot item. 
+	-- Generate the next lot number - if lot id is NULL AND it is a serial lot item. 
 	IF @intLotTypeId = @LotType_Serial AND @intLotId IS NULL 
-	BEGIN 		
-		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
+	BEGIN 		 
+		-- Generate a new lot id if: 
+		-- 1. Lot id is NULL. 
+		-- 2. Lot Number is blank. 
+		-- 3. and Lot Number was never used before for that item. If it was used, then user must be doing a lot move or merge for that serial number
+		IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICLot WHERE strLotNumber = @strLotNumber AND intItemId = @intItemId) 
+		BEGIN 
+			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
+		END 
 	END 
 
 	-- Validate if the Serial lot item does not have a lot number. 

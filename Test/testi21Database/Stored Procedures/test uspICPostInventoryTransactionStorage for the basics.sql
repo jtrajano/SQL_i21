@@ -5,29 +5,33 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;
 
-		DECLARE	@intItemId INT
-				,@intItemLocationId INT
-				,@intItemUOMId INT 
-				,@intSubLocationId INT
-				,@intStorageLocationId INT
-				,@dtmDate DATETIME
-				,@dblQty NUMERIC(18, 6)
-				,@dblUOMQty NUMERIC(18, 6)
-				,@dblCost NUMERIC(38, 20)
-				,@dblValue NUMERIC(18, 6)
-				,@dblSalesPrice NUMERIC(18, 6)	
-				,@intCurrencyId INT
-				,@dblExchangeRate NUMERIC (38, 20)
-				,@intTransactionId INT
-				,@intTransactionDetailId INT 
-				,@strTransactionId NVARCHAR(40)
-				,@strBatchId NVARCHAR(20)
-				,@intTransactionTypeId INT
-				,@intLotId INT
-				,@strTransactionForm NVARCHAR (255)
-				,@intEntityUserSecurityId INT
-				,@SourceCostBucketStorageId INT 
-				,@InventoryTransactionIdStorageId INT  
+		DECLARE 
+				@intItemId INT								
+				,@intItemLocationId INT						
+				,@intItemUOMId INT							
+				,@intSubLocationId INT						
+				,@intStorageLocationId INT					
+				,@dtmDate DATETIME							
+				,@dblQty NUMERIC(38,20)						
+				,@dblUOMQty NUMERIC(38,20)					
+				,@dblCost NUMERIC(38,20)					
+				,@dblValue NUMERIC(38,20)					
+				,@dblSalesPrice NUMERIC(18, 6)				
+				,@intCurrencyId INT							
+				,@dblExchangeRate NUMERIC (38,20)			
+				,@intTransactionId INT						
+				,@intTransactionDetailId INT				
+				,@strTransactionId NVARCHAR(40)				
+				,@strBatchId NVARCHAR(20)					
+				,@intTransactionTypeId INT					
+				,@intLotId INT								
+				,@intRelatedInventoryTransactionId INT		
+				,@intRelatedTransactionId INT				
+				,@strRelatedTransactionId NVARCHAR(40)		
+				,@strTransactionForm NVARCHAR (255)			
+				,@intEntityUserSecurityId INT				
+				,@intCostingMethod INT						
+				,@InventoryTransactionIdentityId INT		
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -37,59 +41,71 @@ BEGIN
 				,@HotGrains_BushelUOMId AS INT = 5
 
 		CREATE TABLE expected (
-			intInventoryTransactionId INT
-			,intItemId INT
-			,intItemLocationId INT
-			,intItemUOMId INT
-			,intSubLocationId INT
-			,intStorageLocationId INT
-			,dtmDate DATETIME
-			,dblQty NUMERIC(18, 6)
-			,dblCost NUMERIC(38, 20)
-			,dblValue NUMERIC(18, 6)
-			,dblSalesPrice NUMERIC(18, 6)
-			,intCurrencyId INT
-			,dblExchangeRate NUMERIC (38, 20)
-			,intTransactionId INT
-			,intTransactionDetailId INT
-			,strTransactionId NVARCHAR(40)
-			,strBatchId NVARCHAR(20)
-			,intTransactionTypeId INT
-			,intLotId INT
-			,ysnIsUnposted BIT
-			,intRelatedInventoryTransactionId INT
-			,intRelatedTransactionId INT
-			,strRelatedTransactionId NVARCHAR(40)
-			,strTransactionForm NVARCHAR (255)
-			,intUserId INT
+			[intInventoryTransactionStorageId] INT, 
+			[intItemId] INT,
+			[intItemLocationId] INT,
+			[intItemUOMId] INT,
+			[intSubLocationId] INT,
+			[intStorageLocationId] INT,
+			[intLotId] INT, 
+			[dtmDate] DATETIME,	
+			[dblQty] NUMERIC(38, 20), 
+			[dblUOMQty] NUMERIC(38, 20), 		
+			[dblCost] NUMERIC(38, 20), 
+			[dblValue] NUMERIC(38, 20), 
+			[dblSalesPrice] NUMERIC(18, 6), 
+			[intCurrencyId] INT,
+			[dblExchangeRate] DECIMAL (38, 20),
+			[intTransactionId] INT, 
+			[intTransactionDetailId] INT, 
+			[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
+			[intInventoryCostBucketStorageId] INT, 
+			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS, 
+			[intTransactionTypeId] INT, 		
+			[ysnIsUnposted] BIT,
+			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS,
+			[intRelatedInventoryTransactionId] INT, 
+			[intRelatedTransactionId] INT, 
+			[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
+			[intCostingMethod] INT, 
+			[dtmCreated] DATETIME, 
+			[intCreatedUserId] INT,
+			[intCreatedEntityId] INT,		
+			[intConcurrencyId] INT, 
 		)
 
 		CREATE TABLE actual (
-			intInventoryTransactionId INT
-			,intItemId INT
-			,intItemLocationId INT
-			,intItemUOMId INT
-			,intSubLocationId INT
-			,intStorageLocationId INT
-			,dtmDate DATETIME
-			,dblQty NUMERIC(18, 6)
-			,dblCost NUMERIC(38, 20)
-			,dblValue NUMERIC(18, 6)
-			,dblSalesPrice NUMERIC(18, 6)
-			,intCurrencyId INT
-			,dblExchangeRate NUMERIC (38, 20)
-			,intTransactionId INT
-			,intTransactionDetailId INT
-			,strTransactionId NVARCHAR(40)
-			,strBatchId NVARCHAR(20)
-			,intTransactionTypeId INT
-			,intLotId INT
-			,ysnIsUnposted BIT
-			,intRelatedInventoryTransactionId INT
-			,intRelatedTransactionId INT
-			,strRelatedTransactionId NVARCHAR(40)
-			,strTransactionForm NVARCHAR (255)
-			,intUserId INT
+			[intInventoryTransactionStorageId] INT, 
+			[intItemId] INT,
+			[intItemLocationId] INT,
+			[intItemUOMId] INT,
+			[intSubLocationId] INT,
+			[intStorageLocationId] INT,
+			[intLotId] INT, 
+			[dtmDate] DATETIME,	
+			[dblQty] NUMERIC(38, 20), 
+			[dblUOMQty] NUMERIC(38, 20), 		
+			[dblCost] NUMERIC(38, 20), 
+			[dblValue] NUMERIC(38, 20), 
+			[dblSalesPrice] NUMERIC(18, 6), 
+			[intCurrencyId] INT,
+			[dblExchangeRate] DECIMAL (38, 20),
+			[intTransactionId] INT, 
+			[intTransactionDetailId] INT, 
+			[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
+			[intInventoryCostBucketStorageId] INT, 
+			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS, 
+			[intTransactionTypeId] INT, 		
+			[ysnIsUnposted] BIT,
+			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS,
+			[intRelatedInventoryTransactionId] INT, 
+			[intRelatedTransactionId] INT, 
+			[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
+			[intCostingMethod] INT, 
+			[dtmCreated] DATETIME, 
+			[intCreatedUserId] INT,
+			[intCreatedEntityId] INT,		
+			[intConcurrencyId] INT, 
 		)
 	END 
 	
@@ -97,8 +113,8 @@ BEGIN
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
 		EXEC dbo.uspICPostInventoryTransactionStorage
-				@intItemId
-				,@intItemLocationId
+				@intItemId 
+				,@intItemLocationId 
 				,@intItemUOMId 
 				,@intSubLocationId 
 				,@intStorageLocationId 
@@ -116,10 +132,13 @@ BEGIN
 				,@strBatchId 
 				,@intTransactionTypeId 
 				,@intLotId 
+				,@intRelatedInventoryTransactionId 
+				,@intRelatedTransactionId 
+				,@strRelatedTransactionId 
 				,@strTransactionForm 
 				,@intEntityUserSecurityId 
-				,@SourceCostBucketStorageId 
-				,@InventoryTransactionIdStorageId OUTPUT 
+				,@intCostingMethod 
+				,@InventoryTransactionIdentityId OUTPUT 
 	END 
 
 	-- Assert

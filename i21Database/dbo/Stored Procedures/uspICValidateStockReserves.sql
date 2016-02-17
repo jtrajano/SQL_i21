@@ -12,8 +12,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @AllowNegativeInventory_NoOption AS INT = 3
 		
-DECLARE @dblReservedQty AS NUMERIC(18,6)
-		,@dblOnHandQty AS NUMERIC(18,6)
+DECLARE @dblReservedQty AS NUMERIC(38,20)
+		,@dblOnHandQty AS NUMERIC(38,20)
 		,@intLotId AS INT 
 
 SET @intInvalidItemId = NULL 

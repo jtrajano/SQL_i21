@@ -209,7 +209,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strLotNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 	,[intSubLocationId]			INT NULL
 	,[intStorageLocationId]		INT NULL
-	,[dblQty]					NUMERIC(18,6) DEFAULT ((0)) NOT NULL
+	,[dblQty]					NUMERIC(38, 20) DEFAULT ((0)) NOT NULL
 	,[dtmExpiryDate]			DATETIME NULL
 	,[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[intLotStatusId]			INT NOT NULL DEFAULT ((1))
@@ -217,8 +217,8 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strParentLotNumber]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strParentLotAlias]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[intSplitFromLotId]		INT NULL
-	,[dblGrossWeight]			NUMERIC(18,6) NULL
-	,[dblWeight]				NUMERIC(18,6) NULL DEFAULT ((0))
+	,[dblGrossWeight]			NUMERIC(38, 20) NULL
+	,[dblWeight]				NUMERIC(38, 20) NULL DEFAULT ((0))
 	,[intWeightUOMId]			INT NULL
 	,[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0))
 	,[intOriginId]				INT NULL

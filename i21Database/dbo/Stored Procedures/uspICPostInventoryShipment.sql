@@ -118,10 +118,10 @@ BEGIN
 	SET @strItemNo = NULL 
 	SET @intItemId = NULL 
 
-	DECLARE @dblQuantityShipped AS NUMERIC(18,6)
-			--,@LotQty AS NUMERIC(18,6)
-			,@LotQtyInItemUOM AS NUMERIC(18,6)
-			,@QuantityShippedInItemUOM AS NUMERIC(18,6)
+	DECLARE @dblQuantityShipped AS NUMERIC(38,20)
+			--,@LotQty AS NUMERIC(38,20)
+			,@LotQtyInItemUOM AS NUMERIC(38,20)
+			,@QuantityShippedInItemUOM AS NUMERIC(38,20)
 
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
 	DECLARE @FormattedLotQty AS NVARCHAR(50)
@@ -397,8 +397,6 @@ BEGIN
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
-				INNER JOIN vyuICGetShipmentItemSource ItemSource 
-					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
 

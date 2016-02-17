@@ -14,7 +14,10 @@ SELECT
 	, strEIN = B.strEin--B.strFederalTaxID
 	, A.strAddress
 	, A.strVendorCompanyName
+	, A.strPayeeName
 	, A.strVendorId
+	, A.strCity
+	, A.strState
 	, A.strZip
 	, A.strZipState
 	, A.strFederalTaxId
@@ -30,7 +33,10 @@ GROUP BY intYear, intEntityVendorId
 --,C.dbl1099INT
 , A.strAddress
 , A.strVendorCompanyName
+, A.strPayeeName
 , A.strVendorId
 , A.strZip
+, A.strCity
+, A.strState
 , A.strZipState
 , A.strFederalTaxId

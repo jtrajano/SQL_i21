@@ -252,5 +252,14 @@ GO
 	PRINT N'End Trim Account Description in tblGLAccount'
  GO
 	
+	PRINT N'Begin Updating NULL intCurrencyID in tblGLAccount'
+	--GL-2500
+GO
+	IF EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblGLAccount')) AND EXISTS (SELECT TOP 1 1 FROM sys.objects Where object_id = object_id('tblSMCompanyPreference'))
+	BEGIN
+		UPDATE tblGLAccount set intCurrencyID =  (select intDefaultCurrencyId from tblSMCompanyPreference) where intCurrencyID is NULL
+	END
+	
+	PRINT N'End Updating NULL intCurrencyID in tblGLAccount'
 
-
+GO

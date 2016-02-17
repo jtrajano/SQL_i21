@@ -1,34 +1,36 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessInvoices]
-	 @InvoiceEntries	InvoiceIntegrationStagingTable READONLY	
-	,@UserId			INT
-	,@GroupingOption	INT				= 0	-- 0  = [intId] - An Invoice will be created for each record in @InvoiceEntries
-											-- 1  = [intEntityCustomerId]
-											-- 2  = [intEntityCustomerId], [intSourceId]
-											-- 3  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId]
-											-- 4  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId]
-											-- 5  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate]
-											-- 6  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId]
-											-- 7  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId]
-											-- 8  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId]
-											-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]
-											-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
-											-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
-	,@RaiseError					BIT				= 0
-	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
-	,@CreatedIvoices				NVARCHAR(MAX)	= NULL			OUTPUT
-	,@UpdatedIvoices				NVARCHAR(MAX)	= NULL			OUTPUT
-	,@BatchIdForNewPost				NVARCHAR(50)	= NULL			OUTPUT
-	,@PostedNewCount				INT				= 0				OUTPUT
-	,@BatchIdForNewPostRecap		NVARCHAR(50)	= NULL			OUTPUT
-	,@RecapNewCount					INT				= 0				OUTPUT
-	,@BatchIdForExistingPost		NVARCHAR(50)	= NULL			OUTPUT
-	,@PostedExistingCount			INT				= 0				OUTPUT
-	,@BatchIdForExistingRecap		NVARCHAR(50)	= NULL			OUTPUT
-	,@RecapPostExistingCount		INT				= 0				OUTPUT
-	,@BatchIdForExistingUnPost		NVARCHAR(50)	= NULL			OUTPUT
-	,@UnPostedExistingCount			INT				= 0				OUTPUT
-	,@BatchIdForExistingUnPostRecap	NVARCHAR(50)	= NULL			OUTPUT
-	,@RecapUnPostedExistingCount	INT				= 0				OUTPUT
+	 @InvoiceEntries				InvoiceIntegrationStagingTable					READONLY	
+	,@LineItemTaxEntries			LineItemTaxDetailStagingTable					READONLY
+	,@UserId						INT
+	,@GroupingOption				INT								= 0	
+																	-- 0  = [intId] - An Invoice will be created for each record in @InvoiceEntries
+																	-- 1  = [intEntityCustomerId]
+																	-- 2  = [intEntityCustomerId], [intSourceId]
+																	-- 3  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId]
+																	-- 4  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId]
+																	-- 5  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate]
+																	-- 6  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId]
+																	-- 7  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId]
+																	-- 8  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId]
+																	-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]
+																	-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
+																	-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
+	,@RaiseError					BIT								= 0
+	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
+	,@CreatedIvoices				NVARCHAR(MAX)					= NULL			OUTPUT
+	,@UpdatedIvoices				NVARCHAR(MAX)					= NULL			OUTPUT
+	,@BatchIdForNewPost				NVARCHAR(50)					= NULL			OUTPUT
+	,@PostedNewCount				INT								= 0				OUTPUT
+	,@BatchIdForNewPostRecap		NVARCHAR(50)					= NULL			OUTPUT
+	,@RecapNewCount					INT								= 0				OUTPUT
+	,@BatchIdForExistingPost		NVARCHAR(50)					= NULL			OUTPUT
+	,@PostedExistingCount			INT								= 0				OUTPUT
+	,@BatchIdForExistingRecap		NVARCHAR(50)					= NULL			OUTPUT
+	,@RecapPostExistingCount		INT								= 0				OUTPUT
+	,@BatchIdForExistingUnPost		NVARCHAR(50)					= NULL			OUTPUT
+	,@UnPostedExistingCount			INT								= 0				OUTPUT
+	,@BatchIdForExistingUnPostRecap	NVARCHAR(50)					= NULL			OUTPUT
+	,@RecapUnPostedExistingCount	INT								= 0				OUTPUT
 AS
 
 BEGIN
@@ -118,6 +120,8 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
+DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
+
 DECLARE  @Id									INT
 		,@SourceTransaction						NVARCHAR(250)	
 		,@SourceId								INT	
@@ -201,6 +205,9 @@ DECLARE  @Id									INT
 		,@ItemPerformerId						INT
 		,@ItemLeaseBilling						BIT
 		,@ItemVirtualMeterReading				BIT
+		,@ClearDetailTaxes						BIT
+		,@TempDetailIdForTaxes					INT			
+		
 
 --INSERT
 BEGIN TRY
@@ -573,6 +580,8 @@ BEGIN
 					,@ItemPerformerId				= [intPerformerId]
 					,@ItemLeaseBilling				= [ysnLeaseBilling]
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
+					,@ClearDetailTaxes				= [ysnClearDetailTaxes]
+					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -648,14 +657,85 @@ BEGIN
 				END CATCH
 
 				IF ISNULL(@NewDetailId,0) <> 0					
-				BEGIN
+				BEGIN															
 					UPDATE #EntriesForProcessing
 					SET
 						 [ysnProcessed]			= 1
 						,[intInvoiceDetailId]	= @NewDetailId
 					WHERE
 						[intId] = @ForDetailId
-				END				
+				END
+
+
+				IF ISNULL(@NewDetailId,0) <> 0					
+				BEGIN															
+					BEGIN TRY
+						DELETE FROM @TaxDetails
+						INSERT INTO @TaxDetails
+							([intDetailId]
+							,[intDetailTaxId]
+							,[intTaxGroupId]
+							,[intTaxCodeId]
+							,[intTaxClassId]
+							,[strTaxableByOtherTaxes]
+							,[strCalculationMethod]
+							,[numRate]
+							,[intTaxAccountId]
+							,[dblTax]
+							,[dblAdjustedTax]
+							,[ysnTaxAdjusted]
+							,[ysnSeparateOnInvoice]
+							,[ysnCheckoffTax]
+							,[ysnTaxExempt]
+							,[strNotes])
+						SELECT
+							 @NewDetailId
+							,[intDetailTaxId]
+							,[intTaxGroupId]
+							,[intTaxCodeId]
+							,[intTaxClassId]
+							,[strTaxableByOtherTaxes]
+							,[strCalculationMethod]
+							,[numRate]
+							,[intTaxAccountId]
+							,[dblTax]
+							,[dblAdjustedTax]
+							,[ysnTaxAdjusted]
+							,[ysnSeparateOnInvoice]
+							,[ysnCheckoffTax]
+							,[ysnTaxExempt]
+							,[strNotes]
+						FROM
+							@LineItemTaxEntries
+						WHERE
+							[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
+						
+						EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
+									 @TaxDetails	= @TaxDetails
+									,@UserId		= @EntityId
+									,@ClearExisting	= @ClearDetailTaxes
+									,@RaiseError	= @RaiseError
+									,@ErrorMessage	= @CurrentErrorMessage OUTPUT
+
+						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+							BEGIN
+								IF ISNULL(@RaiseError,0) = 0
+									ROLLBACK TRANSACTION
+								SET @ErrorMessage = @CurrentErrorMessage;
+								IF ISNULL(@RaiseError,0) = 1
+									RAISERROR(@ErrorMessage, 16, 1);
+								RETURN 0;
+							END
+					END TRY
+					BEGIN CATCH
+						IF ISNULL(@RaiseError,0) = 0
+							ROLLBACK TRANSACTION
+						SET @ErrorMessage = ERROR_MESSAGE();
+						IF ISNULL(@RaiseError,0) = 1
+							RAISERROR(@ErrorMessage, 16, 1);
+						RETURN 0;
+					END CATCH
+				END
 					
 		END		
 	END
@@ -1073,6 +1153,76 @@ BEGIN TRY
 							,[intInvoiceDetailId]	= @NewExistingDetailId
 						WHERE
 							[intId] = @ForExistingDetailId
+					END
+					
+					IF ISNULL(@NewExistingDetailId,0) <> 0					
+					BEGIN															
+						BEGIN TRY
+							DELETE FROM @TaxDetails
+							INSERT INTO @TaxDetails
+								([intDetailId]
+								,[intDetailTaxId]
+								,[intTaxGroupId]
+								,[intTaxCodeId]
+								,[intTaxClassId]
+								,[strTaxableByOtherTaxes]
+								,[strCalculationMethod]
+								,[numRate]
+								,[intTaxAccountId]
+								,[dblTax]
+								,[dblAdjustedTax]
+								,[ysnTaxAdjusted]
+								,[ysnSeparateOnInvoice]
+								,[ysnCheckoffTax]
+								,[ysnTaxExempt]
+								,[strNotes])
+							SELECT
+								 @NewDetailId
+								,[intDetailTaxId]
+								,[intTaxGroupId]
+								,[intTaxCodeId]
+								,[intTaxClassId]
+								,[strTaxableByOtherTaxes]
+								,[strCalculationMethod]
+								,[numRate]
+								,[intTaxAccountId]
+								,[dblTax]
+								,[dblAdjustedTax]
+								,[ysnTaxAdjusted]
+								,[ysnSeparateOnInvoice]
+								,[ysnCheckoffTax]
+								,[ysnTaxExempt]
+								,[strNotes]
+							FROM
+								@LineItemTaxEntries
+							WHERE
+								[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
+						
+							EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
+										 @TaxDetails	= @TaxDetails
+										,@UserId		= @EntityId
+										,@ClearExisting	= @ClearDetailTaxes
+										,@RaiseError	= @RaiseError
+										,@ErrorMessage	= @CurrentErrorMessage OUTPUT
+
+							IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+								BEGIN
+									IF ISNULL(@RaiseError,0) = 0
+										ROLLBACK TRANSACTION
+									SET @ErrorMessage = @CurrentErrorMessage;
+									IF ISNULL(@RaiseError,0) = 1
+										RAISERROR(@ErrorMessage, 16, 1);
+									RETURN 0;
+								END
+						END TRY
+						BEGIN CATCH
+							IF ISNULL(@RaiseError,0) = 0
+								ROLLBACK TRANSACTION
+							SET @ErrorMessage = ERROR_MESSAGE();
+							IF ISNULL(@RaiseError,0) = 1
+								RAISERROR(@ErrorMessage, 16, 1);
+							RETURN 0;
+						END CATCH
 					END				
 						
 			END
@@ -1237,6 +1387,76 @@ BEGIN TRY
 						RAISERROR(@ErrorMessage, 16, 1);
 					RETURN 0;
 				END CATCH
+
+
+
+				BEGIN TRY
+					DELETE FROM @TaxDetails
+					INSERT INTO @TaxDetails
+						([intDetailId]
+						,[intDetailTaxId]
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[numRate]
+						,[intTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes])
+					SELECT
+						 [intDetailId]
+						,[intDetailTaxId]
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[numRate]
+						,[intTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes]
+					FROM
+						@LineItemTaxEntries
+					WHERE
+						[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
+						
+					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
+									@TaxDetails	= @TaxDetails
+								,@UserId		= @EntityId
+								,@ClearExisting	= @ClearDetailTaxes
+								,@RaiseError	= @RaiseError
+								,@ErrorMessage	= @CurrentErrorMessage OUTPUT
+
+					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+						BEGIN
+							IF ISNULL(@RaiseError,0) = 0
+								ROLLBACK TRANSACTION
+							SET @ErrorMessage = @CurrentErrorMessage;
+							IF ISNULL(@RaiseError,0) = 1
+								RAISERROR(@ErrorMessage, 16, 1);
+							RETURN 0;
+						END
+				END TRY
+				BEGIN CATCH
+					IF ISNULL(@RaiseError,0) = 0
+						ROLLBACK TRANSACTION
+					SET @ErrorMessage = ERROR_MESSAGE();
+					IF ISNULL(@RaiseError,0) = 1
+						RAISERROR(@ErrorMessage, 16, 1);
+					RETURN 0;
+				END CATCH
+		
 
 
 				UPDATE #EntriesForProcessing

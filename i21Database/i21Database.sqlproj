@@ -1620,14 +1620,12 @@
     <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotStorage.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostLotStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryLotTransactionStorage.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerByContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
     <Build Include="dbo\Tables\tblSMTaxCodeRate.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostPrepayment.sql" />
     <Build Include="dbo\Tables\tblCTContractCertification.sql" />
@@ -1704,7 +1702,6 @@
     <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateRecurringTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostFIFOStorage.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionStorage.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryTransactionStorage.sql" />
@@ -1727,7 +1724,6 @@
     <Build Include="dbo\Tables\tblSMCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblMFDepartment.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFOStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostLIFOStorage.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostStorageErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpostStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPostStorage.sql" />
@@ -2464,19 +2460,6 @@
     <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOnStorageQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFOStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICReduceStockInLotStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOInFromStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOOutFromStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOInFromStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOutFromStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
@@ -3204,9 +3187,18 @@
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <Build Include="dbo\Views\vyuARCustomerGroup.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileTransmitter.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFilePayer.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileMISCPayee.sql" />
+    <Build Include="dbo\Functions\fnTRConcatString.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
+    <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Tables\tblEntityGroup.sql" />
     <Build Include="dbo\Tables\tblEntityGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfMISC.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfTransmitter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUnpostCostAdjustmentGL.sql" />
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
@@ -3373,6 +3365,58 @@
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummary.sql" />
     <Build Include="dbo\Views\vyuCTEntityToContact.sql" />
     <Build Include="dbo\Functions\fnSMGetDefaultCurrency.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotStorageOut.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFOStorageOut.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFOStorageOut.sql" />
+    <Build Include="dbo\Views\vyuWHTruckOrders.sql" />
+    <Build Include="dbo\Views\vyuPRReportQuarterlySUI.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrual.sql" />
+    <Build Include="dbo\User Defined Types\LineItemTaxDetailStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostReturnActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReturnStockInActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInvoiceTaxDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateOnHand.sql" />
+    <Build Include="dbo\Functions\fnConvertFloatToNumeric.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostFIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLotStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLotStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOInFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostStorage2.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOOutFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOInFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOutFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromStorage2.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromStorage2.sql">
+      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByLine.sql" />
     <Build Include="dbo\Views\vyuHDCrmKeyword.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityProspect.sql" />
@@ -3406,6 +3450,17 @@
     <Build Include="dbo\Views\vyuMFGetTraceabilityObject.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailAsOfDateReport.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileBPayee.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileINTPayee.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099INTFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfINT.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfB.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099BFile.sql" />
+    <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
+    <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3496,6 +3551,8 @@
     <None Include="Scripts\Post-Deployment\MF\3_Pattern.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCreateEntityById.sql" />
     <None Include="Scripts\Post-Deployment\MF\4_WMPattern.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\15_FixInvoiceDateForCredits.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -6,7 +6,7 @@
 	,@intSubLocationId INT
 	,@intStorageLocationId INT
 	,@dtmDate DATETIME
-	,@dblQty NUMERIC(18, 6)
+	,@dblQty NUMERIC(38,20)
 	,@dblCost NUMERIC(38, 20)
 	,@intTransactionId INT
 	,@intTransactionDetailId INT 
@@ -59,7 +59,7 @@ SELECT	[intItemId]								= @intItemId
 		,[intSubLocationId]						= @intSubLocationId
 		,[intStorageLocationId]					= @intStorageLocationId
 		,[dtmDate]								= @dtmDate
-		,[dblQty]								= @dblQty
+		,[dblQty]								= ISNULL(@dblQty, 0)
 		,[intItemUOMId]							= @intItemUOMId
 		,[dblCost]								= ISNULL(@dblCost, 0)
 		,[intTransactionId]						= @intTransactionId

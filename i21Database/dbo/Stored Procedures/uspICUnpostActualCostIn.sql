@@ -19,7 +19,7 @@ BEGIN
 		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intRelatedTransactionId INT NULL 
 		,intTransactionTypeId INT NOT NULL
-		,dblQty NUMERIC(18,6) 
+		,dblQty NUMERIC(38,20) 
 	)
 END 
 

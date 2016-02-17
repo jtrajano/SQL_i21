@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateCommitted]
 	@InvoiceId		INT
 	,@Negate		BIT	= 0
-	,@UserId		INT = NULL     
+	,@UserId		INT = NULL
+	,@FromPosting	BIT = 0     
 AS
 BEGIN
 
@@ -75,7 +76,8 @@ BEGIN
 		AND Header.strTransactionType = 'Invoice'
 		AND Detail.intItemId = TD.intItemId		
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> TD.dblQtyShipped)
-		AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
+		AND (@FromPosting = 1 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0)
 
 	UNION ALL
 
@@ -120,7 +122,8 @@ BEGIN
 		Header.intInvoiceId = @InvoiceId
 		AND Header.strTransactionType = 'Invoice'
 		AND Detail.intItemId <> TD.intItemId				
-		AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
+		AND (@FromPosting = 1 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0)
 
 	UNION ALL
 
@@ -159,7 +162,8 @@ BEGIN
 	WHERE 
 		TD.intTransactionId = @InvoiceId
 		AND Header.strTransactionType = 'Invoice'
-		AND (TD.intInventoryShipmentItemId IS NULL OR TD.intInventoryShipmentItemId = 0)
+		AND ISNULL(TD.intInventoryShipmentItemId, 0) = 0
+		AND (@FromPosting = 1 AND ISNULL(TD.intSalesOrderDetailId, 0) > 0)
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 		
 	UNION ALL	
@@ -199,7 +203,8 @@ BEGIN
 	WHERE 
 		Detail.intInvoiceId = @InvoiceId
 		AND Header.strTransactionType = 'Invoice'
-		AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
+		AND (@FromPosting = 1 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0)
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
 		
 	UPDATE

@@ -1,17 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuSMBatchPosting]
 AS 
 SELECT CAST (ROW_NUMBER() OVER (ORDER BY BatchPosting.dtmDate DESC) AS INT)	AS	intBatchPostingId, 
-BatchPosting.strTransactionType		AS	strTransactionType, 
-intJournalId						AS	intTransactionId, 
-strJournalId						AS	strTransactionId, 
-BatchPosting.intEntityId			AS	intEntityId, 
-ISNULL(BatchPosting.dblAmount, 0.0)	AS	dblAmount,
-BatchPosting.strVendorInvoiceNumber	AS	strVendorInvoiceNumber,
-BatchPosting.intEntityVendorId		AS  intEntityVendorId,
-ISNULL(Entity.strName, '')			AS	strVendorName,
-UserSecurity.strUserName			AS	strUserName,
-BatchPosting.strDescription			AS	strDescription,
-BatchPosting.dtmDate				AS	dtmDate,
+BatchPosting.strTransactionType			AS	strTransactionType, 
+intJournalId							AS	intTransactionId, 
+strJournalId							AS	strTransactionId, 
+BatchPosting.intEntityId				AS	intEntityId, 
+ISNULL(BatchPosting.dblAmount, 0.0)		AS	dblAmount,
+BatchPosting.strVendorInvoiceNumber		AS	strVendorInvoiceNumber,
+BatchPosting.intEntityVendorId			AS  intEntityVendorId,
+ISNULL(Entity.strName, '')				AS	strVendorName,
+ISNULL(UserSecurity.strUserName, '')	AS	strUserName,
+BatchPosting.strDescription				AS	strDescription,
+BatchPosting.dtmDate					AS	dtmDate,
 CONVERT(NVARCHAR(100),ISNULL(Fiscal.guid, ForBatchPosting.strBatchId))	AS  strFiscalUniqueId
 FROM 
 (
@@ -19,7 +19,7 @@ FROM
 	FROM tblGLJournal Journal CROSS APPLY(SELECT SUM(dblDebit) dblDebit FROM tblGLJournalDetail Detail WHERE Detail.intJournalId = Journal.intJournalId) Total 
 	WHERE Journal.strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal') AND Journal.strTransactionType <> 'Recurring' AND Journal.ysnPosted = 0
 	UNION ALL
-	SELECT 'Voucher', intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE intTransactionType = 1 AND intTransactionType != 6 AND ysnForApproval != 1 AND ISNULL(ysnPosted, 0) = 0 OR (dtmApprovalDate IS NOT NULL AND ysnApproved = 1)
+	SELECT 'Voucher', intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE intTransactionType = 1 AND intTransactionType != 6 AND ysnForApproval != 1 AND ISNULL(ysnPosted, 0) = 0 AND intBillId NOT IN (SELECT intBillId FROM tblAPBill WHERE (dtmApprovalDate IS NOT NULL AND ysnApproved = 0 AND ysnForApprovalSubmitted = 1))
 	UNION ALL
 	SELECT 'Payable', intPaymentId, strPaymentRecordNum, dblAmountPaid, '' as strVendorInvoiceNumber, intEntityVendorId as intEntityVendorId, intEntityId, dtmDatePaid, strNotes as strReference FROM tblAPPayment WHERE ysnPosted = 0
 	UNION ALL
@@ -32,7 +32,7 @@ FROM
 	SELECT 'Card Fueling', intTransactionId, strTransactionId, dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmTransactionDate, strDescription FROM vyuCFBatchPostTransactions
 ) BatchPosting
 LEFT JOIN tblEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
-INNER JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
+LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
 LEFT JOIN tblGLForBatchPosting Fiscal on BatchPosting.intJournalId = Fiscal.intTransactionId
 LEFT JOIN tblSMForBatchPosting ForBatchPosting on BatchPosting.intJournalId = ForBatchPosting.intTransactionId
 GO

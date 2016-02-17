@@ -36,19 +36,16 @@ BEGIN
 				,@intItemLocationId AS INT
 				,@intItemUOMId AS INT 
 				,@dtmDate AS DATETIME
-				,@dblQty NUMERIC(18,6) 
+				,@dblQty NUMERIC(38,20) 
 				,@dblCost AS NUMERIC(38,20)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
+				,@intTransactionDetailId AS INT
 				,@intEntityUserSecurityId AS INT
-				,@RemainingQty AS NUMERIC(18,6) 
-				,@CostUsed AS NUMERIC(18,6) 
-				,@SourceInventoryFIFOStorageId AS INT 
-	END 
-	
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.ExpectException;
+				,@RemainingQty AS NUMERIC(38,20) 
+				,@CostUsed AS NUMERIC(38,20) 
+				,@QtyOffset AS NUMERIC(38,20)
+				,@FIFOStorageId AS INT 
 	END 
 
 	-- Act
@@ -59,14 +56,19 @@ BEGIN
 			,@intItemUOMId 
 			,@dtmDate 
 			,@dblQty 
-			,@dblCost
+			,@dblCost 
 			,@strTransactionId 
 			,@intTransactionId 
+			,@intTransactionDetailId 
 			,@intEntityUserSecurityId 
-			,@RemainingQty 
-			,@CostUsed 
-			,@SourceInventoryFIFOStorageId 
+			,@RemainingQty OUTPUT
+			,@CostUsed OUTPUT 
+			,@QtyOffset OUTPUT 
+			,@FIFOStorageId OUTPUT
+	END 
 
+	-- Assert
+	BEGIN 
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
@@ -93,10 +95,7 @@ BEGIN
 		FROM	tblICInventoryFIFO
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
-	END 
 
-	-- Assert
-	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END
 

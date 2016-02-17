@@ -34,29 +34,45 @@ BEGIN
 				,@intItemLocationId AS INT
 				,@intItemUOMId AS INT 
 				,@dtmDate AS DATETIME
-				,@dblQty NUMERIC(18,6) 
-				,@dblCost AS NUMERIC(38,20)
+				,@dblQty NUMERIC(38,20) 
+				,@dblCost AS NUMERIC(38, 20)
 				,@intEntityUserSecurityId AS INT
+				,@FullQty AS NUMERIC(38,20) 
+				,@TotalQtyOffset AS NUMERIC(38,20)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
 				,@intTransactionDetailId AS INT 
-				,@NewLIFOStorageId AS INT 
+				,@RemainingQty AS NUMERIC(38,20) 
+				,@CostUsed AS NUMERIC(38,20)  
+				,@QtyOffset AS NUMERIC(38,20)  
+				,@NewLIFOStorageId AS INT  
+				,@UpdatedFIFOStorageId AS INT  
+				,@strRelatedTransactionId AS NVARCHAR(40) 
+				,@intRelatedTransactionId AS INT 
 	END 
 	
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICIncreaseStockInLIFOStorage
-				@intItemId 
+				@intItemId
 				,@intItemLocationId 
 				,@intItemUOMId 
 				,@dtmDate 
 				,@dblQty 
 				,@dblCost 
 				,@intEntityUserSecurityId 
+				,@FullQty 
+				,@TotalQtyOffset 
 				,@strTransactionId 
 				,@intTransactionId 
-				,@intTransactionDetailId
+				,@intTransactionDetailId 
+				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT 
+				,@QtyOffset OUTPUT 
 				,@NewLIFOStorageId OUTPUT 
+				,@UpdatedFIFOStorageId OUTPUT 
+				,@strRelatedTransactionId OUTPUT
+				,@intRelatedTransactionId OUTPUT
 
 		INSERT INTO actual (
 				[intItemId] 
@@ -79,7 +95,7 @@ BEGIN
 				,[dtmCreated] 
 				,[intCreatedEntityId] 
 				,[intConcurrencyId]
-		FROM	tblICInventoryLIFO
+		FROM	tblICInventoryLIFOStorage
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
 	END 

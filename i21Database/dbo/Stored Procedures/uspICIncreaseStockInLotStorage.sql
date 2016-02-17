@@ -14,8 +14,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLotStorage
 	,@intSubLocationId AS INT
 	,@intStorageLocationId AS INT
 	,@dtmDate AS DATETIME 
-	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(38, 20)
+	,@dblQty NUMERIC(38,20) 
+	,@dblCost AS NUMERIC(38,20)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT 
 	,@intTransactionDetailId AS INT 

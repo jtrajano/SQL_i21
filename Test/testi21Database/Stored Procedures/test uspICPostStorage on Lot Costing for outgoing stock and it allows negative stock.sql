@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostStorage on Lot Costing for outgoing stock and it does not allow negative stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostStorage on Lot Costing for outgoing stock and it allows negative stock]
 AS
 
 -- Fake data Variables
@@ -12,6 +12,10 @@ BEGIN
 			,@ManualLotGrains AS INT = 6
 			,@SerializedLotGrains AS INT = 7
 			,@CornCommodity AS INT = 8
+			,@OtherCharges AS INT = 9
+			,@SurchargeOtherCharges AS INT = 10
+			,@SurchargeOnSurcharge AS INT = 11
+			,@SurchargeOnSurchargeOnSurcharge AS INT = 12
 			,@InvalidItem AS INT = -1
 
 	-- Declare the variables for location
@@ -64,6 +68,67 @@ BEGIN
 
 			,@ManualLotGrains_NewHaven AS INT = 21
 			,@SerializedLotGrains_NewHaven AS INT = 22
+
+			,@OtherCharges_DefaultLocation AS INT = 23
+			,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+			,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+			,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
+
+			,@OtherCharges_NewHaven AS INT = 27
+			,@SurchargeOtherCharges_NewHaven AS INT = 28
+			,@SurchargeOnSurcharge_NewHaven AS INT = 29
+			,@SurchargeOnSurchargeOnSurcharge_NewHaven AS INT = 30
+
+			,@OtherCharges_BetterHaven AS INT = 31
+			,@SurchargeOtherCharges_BetterHaven AS INT = 32
+			,@SurchargeOnSurcharge_BetterHaven AS INT = 33
+			,@SurchargeOnSurchargeOnSurcharge_BetterHaven AS INT = 34
+
+	DECLARE	@UOM_Bushel AS INT = 1
+			,@UOM_Pound AS INT = 2
+			,@UOM_Kg AS INT = 3
+			,@UOM_25KgBag AS INT = 4
+			,@UOM_10LbBag AS INT = 5
+			,@UOM_Ton AS INT = 6
+
+	DECLARE @BushelUnitQty AS NUMERIC(18,6) = 1
+			,@PoundUnitQty AS NUMERIC(18,6) = 1
+			,@KgUnitQty AS NUMERIC(18,6) = 2.20462
+			,@25KgBagUnitQty AS NUMERIC(18,6) = 55.1155
+			,@10LbBagUnitQty AS NUMERIC(18,6) = 10
+			,@TonUnitQty AS NUMERIC(18,6) = 2204.62
+
+	DECLARE @WetGrains_BushelUOM AS INT = 1,		@StickyGrains_BushelUOM AS INT = 2,		@PremiumGrains_BushelUOM AS INT = 3,
+			@ColdGrains_BushelUOM AS INT = 4,		@HotGrains_BushelUOM AS INT = 5,		@ManualGrains_BushelUOM AS INT = 6,
+			@SerializedGrains_BushelUOM AS INT = 7	
+
+	DECLARE @WetGrains_PoundUOM AS INT = 8,			@StickyGrains_PoundUOM AS INT = 9,		@PremiumGrains_PoundUOM AS INT = 10,
+			@ColdGrains_PoundUOM AS INT = 11,		@HotGrains_PoundUOM AS INT = 12,		@ManualGrains_PoundUOM AS INT = 13,
+			@SerializedGrains_PoundUOM AS INT = 14	
+
+	DECLARE @WetGrains_KgUOM AS INT = 15,			@StickyGrains_KgUOM AS INT = 16,		@PremiumGrains_KgUOM AS INT = 17,
+			@ColdGrains_KgUOM AS INT = 18,			@HotGrains_KgUOM AS INT = 19,			@ManualGrains_KgUOM AS INT = 20,
+			@SerializedGrains_KgUOM AS INT = 21
+
+	DECLARE @WetGrains_25KgBagUOM AS INT = 22,		@StickyGrains_25KgBagUOM AS INT = 23,	@PremiumGrains_25KgBagUOM AS INT = 24,
+			@ColdGrains_25KgBagUOM AS INT = 25,		@HotGrains_25KgBagUOM AS INT = 26,		@ManualGrains_25KgBagUOM AS INT = 27,
+			@SerializedGrains_25KgBagUOM AS INT = 28
+
+	DECLARE @WetGrains_10LbBagUOM AS INT = 29,		@StickyGrains_10LbBagUOM AS INT = 30,	@PremiumGrains_10LbBagUOM AS INT = 31,
+			@ColdGrains_10LbBagUOM AS INT = 32,		@HotGrains_10LbBagUOM AS INT = 33,		@ManualGrains_10LbBagUOM AS INT = 34,
+			@SerializedGrains_10LbBagUOM AS INT = 35
+
+	DECLARE @WetGrains_TonUOM AS INT = 36,			@StickyGrains_TonUOM AS INT = 37,		@PremiumGrains_TonUOM AS INT = 38,
+			@ColdGrains_TonUOM AS INT = 39,			@HotGrains_TonUOM AS INT = 40,			@ManualGrains_TonUOM AS INT = 41,
+			@SerializedGrains_TonUOM AS INT = 42
+
+	DECLARE @Corn_BushelUOM AS INT = 43,			@Corn_PoundUOM AS INT = 44,				@Corn_KgUOM AS INT = 45, 
+			@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
+
+	DECLARE @OtherCharges_PoundUOM AS INT = 49
+	DECLARE @SurchargeOtherCharges_PoundUOM AS INT = 50
+	DECLARE @SurchargeOnSurcharge_PoundUOM AS INT = 51
+	DECLARE @SurchargeOnSurchargeOnSurcharge_PoundUOM AS INT = 52
 
 	-- Declare the account ids
 	DECLARE @Inventory_Default AS INT = 1000
@@ -141,47 +206,6 @@ BEGIN
 	DECLARE @AllowNegativeStock AS INT = 1
 	DECLARE @AllowNegativeStockWithWriteOff AS INT = 2
 	DECLARE @DoNotAllowNegativeStock AS INT = 3
-
-		DECLARE	@UOM_Bushel AS INT = 1
-				,@UOM_Pound AS INT = 2
-				,@UOM_Kg AS INT = 3
-				,@UOM_25KgBag AS INT = 4
-				,@UOM_10LbBag AS INT = 5
-				,@UOM_Ton AS INT = 6
-
-		DECLARE @BushelUnitQty AS NUMERIC(18,6) = 1
-				,@PoundUnitQty AS NUMERIC(18,6) = 1
-				,@KgUnitQty AS NUMERIC(18,6) = 2.20462
-				,@25KgBagUnitQty AS NUMERIC(18,6) = 55.1155
-				,@10LbBagUnitQty AS NUMERIC(18,6) = 10
-				,@TonUnitQty AS NUMERIC(18,6) = 2204.62
-
-		DECLARE @WetGrains_BushelUOM AS INT = 1,		@StickyGrains_BushelUOM AS INT = 2,		@PremiumGrains_BushelUOM AS INT = 3,
-				@ColdGrains_BushelUOM AS INT = 4,		@HotGrains_BushelUOM AS INT = 5,		@ManualGrains_BushelUOM AS INT = 6,
-				@SerializedGrains_BushelUOM AS INT = 7	
-
-		DECLARE @WetGrains_PoundUOM AS INT = 8,			@StickyGrains_PoundUOM AS INT = 9,		@PremiumGrains_PoundUOM AS INT = 10,
-				@ColdGrains_PoundUOM AS INT = 11,		@HotGrains_PoundUOM AS INT = 12,		@ManualGrains_PoundUOM AS INT = 13,
-				@SerializedGrains_PoundUOM AS INT = 14	
-
-		DECLARE @WetGrains_KgUOM AS INT = 15,			@StickyGrains_KgUOM AS INT = 16,		@PremiumGrains_KgUOM AS INT = 17,
-				@ColdGrains_KgUOM AS INT = 18,			@HotGrains_KgUOM AS INT = 19,			@ManualGrains_KgUOM AS INT = 20,
-				@SerializedGrains_KgUOM AS INT = 21
-
-		DECLARE @WetGrains_25KgBagUOM AS INT = 22,		@StickyGrains_25KgBagUOM AS INT = 23,	@PremiumGrains_25KgBagUOM AS INT = 24,
-				@ColdGrains_25KgBagUOM AS INT = 25,		@HotGrains_25KgBagUOM AS INT = 26,		@ManualGrains_25KgBagUOM AS INT = 27,
-				@SerializedGrains_25KgBagUOM AS INT = 28
-
-		DECLARE @WetGrains_10LbBagUOM AS INT = 29,		@StickyGrains_10LbBagUOM AS INT = 30,	@PremiumGrains_10LbBagUOM AS INT = 31,
-				@ColdGrains_10LbBagUOM AS INT = 32,		@HotGrains_10LbBagUOM AS INT = 33,		@ManualGrains_10LbBagUOM AS INT = 34,
-				@SerializedGrains_10LbBagUOM AS INT = 35
-
-		DECLARE @WetGrains_TonUOM AS INT = 36,			@StickyGrains_TonUOM AS INT = 37,		@PremiumGrains_TonUOM AS INT = 38,
-				@ColdGrains_TonUOM AS INT = 39,			@HotGrains_TonUOM AS INT = 40,			@ManualGrains_TonUOM AS INT = 41,
-				@SerializedGrains_TonUOM AS INT = 42
-
-		DECLARE @Corn_BushelUOM AS INT = 43,			@Corn_PoundUOM AS INT = 44,				@Corn_KgUOM AS INT = 45, 
-				@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
 END 
 
 BEGIN
@@ -189,10 +213,6 @@ BEGIN
 	BEGIN 
 		-- Create the fake data
 		EXEC [testi21Database].[Fake transactions for item Storage]
-
-		-- Create the expected and actual tables. 
-		SELECT intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryLotStorage WHERE 1 = 0		
-		SELECT intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost INTO actual FROM dbo.tblICInventoryLotStorage WHERE 1 = 0
 
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
@@ -249,13 +269,6 @@ BEGIN
 				,ysnIsStorage			= 1
 	END 
 
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.ExpectException
-			--@ExpectedMessage = 'Negative stock quantity is not allowed.'
-			@ExpectedErrorNumber = 80003
-	END 
-
 	-- Act
 	BEGIN 	
 		-- Call uspICPostStorage to process stocks for Storage. 
@@ -264,4 +277,87 @@ BEGIN
 			,@strBatchId 
 			,@intEntityUserSecurityId
 	END 
+
+	-- Assert
+	BEGIN 
+		-- Create the expected and actual tables 
+		CREATE TABLE expected (
+			[intItemId] INT 
+			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
+			,[intLotId] INT
+			,[dtmDate] DATETIME
+			,[dblStockIn] NUMERIC(18,6)
+			,[dblStockOut] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
+			,[intCreatedEntityId] INT 
+			,[intConcurrencyId]	INT
+		)
+
+		CREATE TABLE actual (
+			[intItemId] INT 
+			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
+			,[intLotId] INT
+			,[dtmDate] DATETIME
+			,[dblStockIn] NUMERIC(18,6)
+			,[dblStockOut] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
+			,[intCreatedEntityId] INT 
+			,[intConcurrencyId]	INT
+		)
+
+		-- Setup the expected data.  
+		INSERT INTO expected (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[intLotId]
+				,[dtmDate]
+				,[dblStockIn] 
+				,[dblStockOut]
+				,[dblCost] 
+				,[intCreatedEntityId] 
+				,[intConcurrencyId]
+		)
+		SELECT	[intItemId]				= @ManualLotGrains
+				,[intItemLocationId]	= @ManualLotGrains_DefaultLocation
+				,[intItemUOMId]			= @ManualGrains_BushelUOM 
+				,[intLotId]				= @intNewLotId
+				,[@dtmDate]				= '2015-01-21'
+				,[dblStockIn]			= 0
+				,[dblStockOut]			= 10
+				,[dblCost]				= 12.00
+				,[intCreatedEntityId]	= @intEntityUserSecurityId
+				,[intConcurrencyId]		= 1
+
+		INSERT INTO actual (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[intLotId]
+				,[dtmDate]
+				,[dblStockIn] 
+				,[dblStockOut]
+				,[dblCost] 
+				,[intCreatedEntityId] 
+				,[intConcurrencyId]
+		)
+		SELECT
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[intLotId]
+				,[dtmDate]
+				,[dblStockIn] 
+				,[dblStockOut]
+				,[dblCost] 
+				,[intCreatedEntityId] 
+				,[intConcurrencyId]
+		FROM	dbo.tblICInventoryLotStorage
+		WHERE	intItemId = @ManualLotGrains
+				AND intItemLocationId = @ManualLotGrains_DefaultLocation
+
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+	END
 END 

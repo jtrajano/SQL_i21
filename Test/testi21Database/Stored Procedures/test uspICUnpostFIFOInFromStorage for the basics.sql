@@ -42,18 +42,18 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		CREATE TABLE expectedTransactionToReverse (
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20) 
 		)
 
 		-- Create the temp table 
@@ -61,9 +61,9 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;

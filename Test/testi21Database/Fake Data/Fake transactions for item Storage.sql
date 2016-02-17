@@ -194,6 +194,10 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionStorage', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
 
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOStorageOut', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOStorageOut', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotStorageOut', @Identity = 1;
+
 	-- Recreate the clustered indexes
 	CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFOStorage_Unit_Test]
 		ON [dbo].[tblICInventoryLIFOStorage]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOStorageId] DESC);
@@ -222,6 +226,8 @@ BEGIN
 				, dblStockIn
 				, dblStockOut
 				, dblCost
+				, intCreatedEntityId
+				, intConcurrencyId
 		) 
 		--------------------------------------------------------------
 		-- Lot Costing
@@ -234,6 +240,8 @@ BEGIN
 				, dblStockIn = 110 
 				, dblStockOut = 0 
 				, dblCost = 11.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_DefaultLocation
@@ -243,6 +251,8 @@ BEGIN
 				, dblStockIn = 220
 				, dblStockOut = 0 
 				, dblCost = 22.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_DefaultLocation
@@ -252,6 +262,8 @@ BEGIN
 				, dblStockIn = 330
 				, dblStockOut = 0 
 				, dblCost = 33.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_DefaultLocation
@@ -261,6 +273,8 @@ BEGIN
 				, dblStockIn = 440
 				, dblStockOut = 0 
 				, dblCost = 44.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_DefaultLocation
@@ -270,7 +284,8 @@ BEGIN
 				, dblStockIn = 550
 				, dblStockOut = 0 
 				, dblCost = 55.00
-
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 	END
 
 	-- Fake data for tblICInventoryFIFOStorage (the cost bucket for Storage items)
@@ -283,6 +298,8 @@ BEGIN
 				, dblStockIn
 				, dblStockOut
 				, dblCost
+				, intCreatedEntityId 
+				, intConcurrencyId
 		) 
 		--------------------------------------------------------------
 		-- FIFO 
@@ -294,6 +311,8 @@ BEGIN
 				, dblStockIn = 660 
 				, dblStockOut = 0 
 				, dblCost = 11.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_NewHaven
@@ -302,6 +321,8 @@ BEGIN
 				, dblStockIn = 770
 				, dblStockOut = 0 
 				, dblCost = 22.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_NewHaven
@@ -310,6 +331,8 @@ BEGIN
 				, dblStockIn = 880
 				, dblStockOut = 0 
 				, dblCost = 33.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_NewHaven
@@ -318,6 +341,8 @@ BEGIN
 				, dblStockIn = 990
 				, dblStockOut = 0 
 				, dblCost = 44.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_NewHaven
@@ -325,7 +350,9 @@ BEGIN
 				, dtmDate = 'May 2, 2015'
 				, dblStockIn = 1100
 				, dblStockOut = 0 
-				, dblCost = 55.00				
+				, dblCost = 55.00	
+				, intCreatedEntityId = 1			
+				, intConcurrencyId = 1
 	END 
 
 	-- Fake data for tblICInventoryLIFOStorage (the cost bucket for Storage items)
@@ -338,6 +365,8 @@ BEGIN
 				, dblStockIn
 				, dblStockOut
 				, dblCost
+				, intCreatedEntityId 
+				, intConcurrencyId 
 		) 
 		--------------------------------------------------------------
 		-- LIFO 
@@ -349,6 +378,8 @@ BEGIN
 				, dblStockIn = 1200 
 				, dblStockOut = 0 
 				, dblCost = 11.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_BetterHaven
@@ -357,6 +388,8 @@ BEGIN
 				, dblStockIn = 1300
 				, dblStockOut = 0 
 				, dblCost = 22.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_BetterHaven
@@ -365,6 +398,8 @@ BEGIN
 				, dblStockIn = 1400
 				, dblStockOut = 0 
 				, dblCost = 33.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_BetterHaven
@@ -373,6 +408,8 @@ BEGIN
 				, dblStockIn = 1500
 				, dblStockOut = 0 
 				, dblCost = 44.00
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_BetterHaven
@@ -381,7 +418,8 @@ BEGIN
 				, dblStockIn = 1600
 				, dblStockOut = 0 
 				, dblCost = 55.00	
-
+				, intCreatedEntityId = 1
+				, intConcurrencyId = 1
 	END 
 
 	-- Fake data for item stock table

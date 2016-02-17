@@ -21,7 +21,7 @@ CREATE TYPE [dbo].[InventoryTransferStagingTable] AS TABLE
 	,[intItemId]				INT NOT NULL									-- Item id to transfer
 	,[intLotId]					INT NULL										-- Existing Lot number to transfer
     ,[intItemUOMId]				INT NULL										-- UOM used for the transfer. Ex. Gallon
-    ,[dblQuantityToTransfer]	NUMERIC(18, 6) NULL								-- Qty to transfer related to the UOM. Ex. "10" gallons. 
+    ,[dblQuantityToTransfer]	NUMERIC(38, 20) NULL							-- Qty to transfer related to the UOM. Ex. "10" gallons. 
     ,[strNewLotId]				NVARCHAR(50) COLLATE Latin1_General_CI_AS		-- New lot number to use when stock is transferred to the new location.
 	,[intFromSubLocationId]		INT NULL										-- Source sub location of the item. 
     ,[intToSubLocationId]		INT NULL										-- Target sub location of the item. 

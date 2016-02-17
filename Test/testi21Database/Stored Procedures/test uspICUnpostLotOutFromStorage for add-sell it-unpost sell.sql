@@ -138,18 +138,18 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		CREATE TABLE expectedTransactionToReverse (
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		-- Create the temp table 
@@ -157,23 +157,22 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		-- Call the fake data stored procedure
-		EXEC testi21Database.[Fake inventory items]
-
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionStorage', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotStorage', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionStorage', @Identity = 1;	
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotStorageOut', @Identity = 1;	
 
 		-- Mark all item sa lot items
 		UPDATE dbo.tblICItem
 		SET strLotTracking = 'Yes - Manual'
 
-		-- Add fake data for tblICInventoryLot
+		-- Add fake data for tblICInventoryLotStorage
 		INSERT INTO dbo.tblICInventoryLotStorage (
 				intItemId   
 				,intItemLocationId 
@@ -195,7 +194,7 @@ BEGIN
 				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId		= @StorageSilo_RM_DL
 				,dblStockIn					= 25
-				,dblStockOut				= 0			-- < From 20, it will become 0. 
+				,dblStockOut				= 20			
 				,dblCost					= 3.00
 				,strTransactionId			= 'InvRcpt-0000001'
 				,intTransactionId			= 6
@@ -214,8 +213,23 @@ BEGIN
 				,intTransactionId			= 7
 				,ysnIsUnposted				= 0
 
-		-- Add fake data for tblICInventoryLotTransactionStorage
-		INSERT INTO dbo.tblICInventoryLotTransactionStorage (
+		-- Add fake data for tblICInventoryLotStorageOut
+		INSERT INTO tblICInventoryLotStorageOut (
+			[intInventoryLotStorageId] 
+			,[intInventoryTransactionStorageId] 
+			,[intRevalueLotId] 
+			,[dblQty] 
+			,[dblCostAdjustQty] 
+		)
+		SELECT 
+			[intInventoryLotStorageId]				= 1
+			,[intInventoryTransactionStorageId]		= 3
+			,[intRevalueLotId]						= NULL 
+			,[dblQty]								= 20
+			,[dblCostAdjustQty]						= 0
+
+		-- Add fake data for tblICInventoryTransactionStorage
+		INSERT INTO dbo.tblICInventoryTransactionStorage (
 				intItemId
 				,intItemLocationId
 				,intItemUOMId
@@ -286,7 +300,19 @@ BEGIN
 				,intTransactionTypeId			= @InventoryShipment
 				,ysnIsUnposted					= 0
 				,strTransactionForm				= 'Inventory Shipment'
+	END 
 
+	-- Act
+	BEGIN 
+		-- Call the uspICUnpostLotOutFromStorage
+		SET @strTransactionId = 'InvShip-0000002'
+		SET @intTransactionId = 8	
+
+		EXEC dbo.uspICUnpostLotOutFromStorage @strTransactionId, @intTransactionId
+	END 	
+
+	-- Assert
+	BEGIN 
 		INSERT INTO expectedLotStorage (
 				strTransactionId
 				,intTransactionId
@@ -309,51 +335,39 @@ BEGIN
 				,dblCost = 2.75
 				,intLotId = 12345
 
-		-- Setup the expected data to reverse
+		-- Setup the expected data for transactions to reverse 
 		INSERT INTO expectedTransactionToReverse (
 				intInventoryTransactionStorageId
 				,intTransactionId
-				,strTransactionId
-				,intTransactionTypeId
-				,intInventoryCostBucketStorageId
-				,dblQty
+				,strTransactionId 
+				,strRelatedTransactionId 
+				,intRelatedTransactionId 
+				,intTransactionTypeId 
 		)
-		SELECT	intInventoryLotStorageTransactionId	= 3
-				,intTransactionId						= 8
-				,strTransactionId						= 'InvShip-0000002'
-				,intTransactionTypeId					= @InventoryShipment
-				,intInventoryCostBucketStorageId		= 1
-				,dblQty									= -20
+		SELECT 
+				intInventoryTransactionStorageId	= 3
+				,intTransactionId					= 8
+				,strTransactionId					= 'InvShip-0000002'
+				,strRelatedTransactionId			= NULL 
+				,intRelatedTransactionId			= NULL 
+				,intTransactionTypeId				= @InventoryShipment
 
-	END 
-
-	-- Act
-	BEGIN 
-		-- Call the uspICUnpostLotOutFromStorage
-		SET @strTransactionId = 'InvShip-0000002'
-		SET @intTransactionId = 8	
-
-		EXEC dbo.uspICUnpostLotOutFromStorage @strTransactionId, @intTransactionId
-	END 	
-
-	-- Assert
-	BEGIN 
-
-		-- Get actual data from the temp table. 
+		-- Get the date from the temporary table. 
 		INSERT INTO actualTransactionToReverse (
 				intInventoryTransactionStorageId
 				,intTransactionId
-				,strTransactionId
-				,intTransactionTypeId
-				,intInventoryCostBucketStorageId
-				,dblQty
+				,strTransactionId 
+				,strRelatedTransactionId 
+				,intRelatedTransactionId 
+				,intTransactionTypeId 
 		)
-		SELECT	intInventoryTransactionStorageId
+		SELECT	
+				intInventoryTransactionStorageId
 				,intTransactionId
-				,strTransactionId
-				,intTransactionTypeId
-				,intInventoryCostBucketStorageId
-				,dblQty
+				,strTransactionId 
+				,strRelatedTransactionId 
+				,intRelatedTransactionId 
+				,intTransactionTypeId ty
 		FROM	#tmpInventoryTransactionStockToReverse
 				
 		-- Get actual Lot data
@@ -373,7 +387,8 @@ BEGIN
 				,intLotId
 		FROM	dbo.tblICInventoryLotStorage
 
-		EXEC tSQLt.AssertEqualsTable 'expectedLotStorage', 'actualLotStorage';
+		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse', 'Failed data on #tmpInventoryTransactionStockToReverse.';
+		EXEC tSQLt.AssertEqualsTable 'expectedLotStorage', 'actualLotStorage', 'failed data for lot cost bucket.';		
 	END
 
 	-- Clean-up: remove the tables used in the unit test

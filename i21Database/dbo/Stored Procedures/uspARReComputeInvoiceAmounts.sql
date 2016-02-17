@@ -115,7 +115,7 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	[dblInvoiceTotal]	= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount])
+	[dblInvoiceTotal]	= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping])
 	,[dblAmountDue]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount])
 WHERE
 	[intInvoiceId] = @InvoiceId

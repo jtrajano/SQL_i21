@@ -123,7 +123,7 @@ BEGIN
 			,intItemId				= SODetail.intItemId
 			,intSubLocationId		= NULL
 			,intStorageLocationId	= SODetail.intStorageLocationId
-			,dblQuantity			= SODetail.dblQtyOrdered - SODetail.dblQtyShipped
+			,dblQuantity			= SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)
 			,intItemUOMId			= SODetail.intItemUOMId
 			,dblUnitPrice			= SODetail.dblPrice
 			,intDockDoorId			= NULL
@@ -135,7 +135,10 @@ BEGIN
 				AND ItemUOM.intItemUOMId = SODetail.intItemUOMId
 			INNER JOIN dbo.tblICUnitMeasure UOM
 				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			LEFT OUTER JOIN 
+				(SELECT intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped FROM tblARInvoiceDetail ID GROUP BY ID.intSalesOrderDetailId) AS InvoiceDetail
+				ON InvoiceDetail.intSalesOrderDetailId = SODetail.intSalesOrderDetailId
 	WHERE	SODetail.intSalesOrderId = @SalesOrderId
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
-			AND (SODetail.dblQtyOrdered - SODetail.dblQtyShipped) > 0
+			AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0
 END 

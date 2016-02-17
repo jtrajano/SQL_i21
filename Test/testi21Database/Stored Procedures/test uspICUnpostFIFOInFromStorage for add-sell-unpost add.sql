@@ -250,18 +250,18 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		CREATE TABLE expectedTransactionToReverse (
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20) 
 		)
 
 		-- Create the temp table 
@@ -269,15 +269,16 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		-- Call the fake data stored procedure
 		EXEC testi21Database.[Fake inventory items]
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOStorage', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOStorageOut', @Identity = 1;				
 
 		-- Add fake data for tblICInventoryFIFOStorage
 		INSERT INTO dbo.tblICInventoryFIFOStorage (
@@ -300,6 +301,21 @@ BEGIN
 				,intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,ysnIsUnposted = 0 
+
+		-- Add fake data for tblICInventoryFIFOStorageOut
+		INSERT INTO tblICInventoryFIFOStorageOut (
+			[intInventoryFIFOStorageId] 
+			,[intInventoryTransactionStorageId] 
+			,[intRevalueFifoId] 
+			,[dblQty] 
+			,[dblCostAdjustQty] 
+		)
+		SELECT 
+			[intInventoryFIFOStorageId]				= 1
+			,[intInventoryTransactionStorageId]		= 2
+			,[intRevalueFifoId]						= NULL 
+			,[dblQty]								= 25
+			,[dblCostAdjustQty]						= 0
 
 		-- Add fake data for tblICInventoryTransactionStorage
 		INSERT INTO dbo.tblICInventoryTransactionStorage (
@@ -344,7 +360,19 @@ BEGIN
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,strBatchId = 'BATCH-0001'
 				,intInventoryCostBucketStorageId = 1
+	END 
 
+	-- Act
+	BEGIN 
+		-- Call the uspICUnpostFIFOOut
+		SET @strTransactionId = 'InvRcpt-0000001'
+		SET @intTransactionId = 1
+		
+		EXEC dbo.uspICUnpostFIFOInFromStorage @strTransactionId, @intTransactionId
+	END 
+
+	-- Assert
+	BEGIN 
 		-- Setup the expected data for FIFO
 		INSERT INTO expectedFIFO (
 				strTransactionId
@@ -357,34 +385,33 @@ BEGIN
 		SELECT	strTransactionId = 'InvRcpt-0000001'
 				,intTransactionId = 1
 				,dblStockIn = 100
+				,dblStockOut = 100
+				,dblCost = 2.15
+				,ysnIsUnposted = 1
+		UNION ALL 
+		SELECT	strTransactionId = 'InvShip-0000001'
+				,intTransactionId = 1
+				,dblStockIn = 0
 				,dblStockOut = 25
 				,dblCost = 2.15
-				,ysnIsUnposted = 0
+				,ysnIsUnposted = NULL 
 
 		-- Setup the expected data for transactions to reverse 
 		INSERT INTO expectedTransactionToReverse (
 			intInventoryTransactionStorageId
 			,intTransactionId
 			,strTransactionId
+			,strRelatedTransactionId
+			,intRelatedTransactionId
 			,intTransactionTypeId
-			,intInventoryCostBucketStorageId
-			,dblQty
 		)
-		SELECT	intInventoryTransactionStorageId	= 1
-				,intTransactionId					= 1
-				,strTransactionId					= 'InvRcpt-0000001'
-				,intTransactionTypeId				= @InventoryReceipt
-				,intInventoryCostBucketStorageId	= 1
-				,dblQty								= NULL 
-	END 
-	
-	-- Act
-	BEGIN 
-		-- Call the uspICUnpostFIFOOut
-		SET @strTransactionId = 'InvRcpt-0000001'
-		SET @intTransactionId = 1
-		
-		EXEC dbo.uspICUnpostFIFOInFromStorage @strTransactionId, @intTransactionId
+		SELECT 
+			intInventoryTransactionStorageId	= 1
+			,intTransactionId					= 1
+			,strTransactionId					= 'InvRcpt-0000001'
+			,strRelatedTransactionId			= NULL  
+			,intRelatedTransactionId			= NULL 
+			,intTransactionTypeId				= @InventoryReceipt
 
 		INSERT INTO actualTransactionToReverse
 		SELECT * FROM #tmpInventoryTransactionStockToReverse
@@ -404,13 +431,11 @@ BEGIN
 				,dblStockOut		
 				,dblCost
 				,ysnIsUnposted
-		FROM	dbo.tblICInventoryFIFOStorage		
-	END 
-	
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
+		FROM	dbo.tblICInventoryFIFOStorage	
+
+		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse', 'Failed data for #tmpInventoryTransactionStockToReverse.';
+		EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO', 'Failed data for fifo cost bucket.';
+
 	END
 
 	-- Clean-up: remove the tables used in the unit test

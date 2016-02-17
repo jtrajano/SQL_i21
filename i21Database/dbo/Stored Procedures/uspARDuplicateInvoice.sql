@@ -80,7 +80,7 @@ BEGIN
 	IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 				INNER JOIN tblICInventoryShipmentItem ISHI ON ID.intInventoryShipmentItemId = ISHI.intInventoryShipmentItemId AND ID.intSalesOrderDetailId = ISHI.intLineNo
 				WHERE ID.intInvoiceId = @InvoiceId
-				  AND ID.dblQtyShipped + ID.dblQtyShipped > ISNULL(ISHI.dblQuantity, @ZeroDecimal))
+				  AND ((ID.dblQtyShipped + ID.dblQtyShipped) * @dblSplitPercent) > ISNULL(ISHI.dblQuantity, @ZeroDecimal))
 		BEGIN
 			RAISERROR('There are items that will exceed the shipped quantity.', 11, 1)
 			RETURN 0
@@ -110,6 +110,7 @@ BEGIN
 		,intPaymentMethodId
 		,strComments
 		,intAccountId
+		,intSplitId
 		,dtmPostDate
 		,ysnPosted
 		,ysnPaid
@@ -130,10 +131,11 @@ BEGIN
 		,strBillToState
 		,strBillToZipCode
 		,strBillToCountry
+		,strBOLNumber
 		,intConcurrencyId
 		,intEntityId)
 	SELECT 
-		 CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN strInvoiceNumber ELSE strInvoiceOriginId END 
+		 strInvoiceNumber
 		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN @intSplitEntityId ELSE intEntityCustomerId END
 		,@InvoiceDate
 		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
@@ -154,8 +156,9 @@ BEGIN
 		,strTransactionType
 		,strType
 		,intPaymentMethodId
-		,strComments
+		,strComments + ' DUP: ' + strInvoiceNumber
 		,intAccountId
+		,intSplitId
 		,@InvoiceDate
 		,0
 		,0
@@ -176,6 +179,7 @@ BEGIN
 		,strBillToState
 		,strBillToZipCode
 		,strBillToCountry
+		,strBOLNumber
 		,0
 		,@EntityId
 	FROM 
@@ -361,7 +365,7 @@ BEGIN
 					SELECT
 						 @ItemId						= [intItemId]			
 						,@ItemUOMId						= [intItemUOMId]
-						,@ItemQtyOrdered				= [dblQtyShipped]
+						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDescription				= [strItemDescription]
 						,@ItemPrice						= [dblPrice]						
@@ -400,6 +404,7 @@ BEGIN
 						,@NewInvoiceDetailId			= @NewInvoiceDetailId	OUTPUT 
 						,@ErrorMessage					= @ErrorMessage	OUTPUT
 						,@ItemUOMId						= @ItemUOMId
+						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemPrice						= @ItemPrice
 						,@ItemDescription				= @ItemDescription

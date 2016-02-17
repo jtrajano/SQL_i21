@@ -8,7 +8,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnActualCosting]
 	,@intSubLocationId AS INT
 	,@intStorageLocationId AS INT 
 	,@intItemUOMId AS INT	
-	,@dblQty AS NUMERIC(18,6)
+	,@dblQty AS NUMERIC(38,20)
 	,@dblNewCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
@@ -40,9 +40,9 @@ BEGIN
 		,[intItemLocationId] INT NULL							-- The location where the item is stored.
 		,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
 		,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
-		,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
-		,[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 1			-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
-		,[dblNewCost] NUMERIC(38, 20) NOT NULL DEFAULT 0		-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
+		,[dblQty] NUMERIC(38,20) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
+		,[dblUOMQty] NUMERIC(38,20) NOT NULL DEFAULT 1			-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
+		,[dblNewCost] NUMERIC(38,20) NOT NULL DEFAULT 0		-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
 		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 		,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
@@ -93,9 +93,9 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 
 DECLARE @CostBucketId AS INT
 		,@CostBucketCost AS NUMERIC(38,20)
-		,@CostBucketStockInQty AS NUMERIC(18,6)
-		,@CostBucketStockOutQty AS NUMERIC(18,6)
-		,@CostBucketUOMQty AS NUMERIC(18,6)
+		,@CostBucketStockInQty AS NUMERIC(38,20)
+		,@CostBucketStockOutQty AS NUMERIC(38,20)
+		,@CostBucketUOMQty AS NUMERIC(38,20)
 		,@CostBucketIntTransactionId AS INT
 		,@CostBucketStrTransactionId AS NVARCHAR(40)
 
@@ -104,8 +104,8 @@ DECLARE @CostBucketId AS INT
 		,@dblNewCalculatedCost AS NUMERIC(38,20)
 
 DECLARE @InvTranId AS INT
-		,@InvTranQty AS NUMERIC(18,6)
-		,@InvTranUOMQty AS NUMERIC(18,6)
+		,@InvTranQty AS NUMERIC(38,20)
+		,@InvTranUOMQty AS NUMERIC(38,20)
 		,@InvTranCost AS NUMERIC(38,20)
 		,@InvTranValue AS NUMERIC(38,20)
 		,@InvTranSubLocationId AS INT
@@ -313,11 +313,11 @@ BEGIN
 			,@ActualCostOutInventoryActualCostId AS INT 
 			,@ActualCostOutInventoryTransactionId AS INT 
 			,@ActualCostOutRevalueActualCostId AS INT 
-			,@ActualCostOutQty AS NUMERIC(18, 6)
-			,@ActualCostAdjustQty AS NUMERIC(18, 6)
+			,@ActualCostOutQty AS NUMERIC(38,20)
+			,@ActualCostAdjustQty AS NUMERIC(38,20)
 
-			,@StockQtyAvailableToRevalue AS NUMERIC(18, 6) = @dblQty
-			,@StockQtyToRevalue AS NUMERIC(18, 6) = @dblQty
+			,@StockQtyAvailableToRevalue AS NUMERIC(38,20) = @dblQty
+			,@StockQtyToRevalue AS NUMERIC(38,20) = @dblQty
 
 	-----------------------------------------------------------------------------------------------------------------------------
 	-- Create the cursor

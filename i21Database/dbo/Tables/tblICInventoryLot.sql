@@ -24,12 +24,12 @@ Records must be maintained in this table even if the costing method for an item 
 	Maps: None
 
 
-* 	[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0
+* 	[dblStockIn] NUMERIC(38, 20) NOT NULL DEFAULT 0
 	Stock Qty, in base units, received from the transaction. 
 	Maps: None
 
 
-* 	[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0 
+* 	[dblStockOut] NUMERIC(38, 20) NOT NULL DEFAULT 0 
 	Stock Qty, in base units, sold to the transaction. 
 	Maps: None
 
@@ -84,8 +84,8 @@ Records must be maintained in this table even if the costing method for an item 
 		[intLotId] INT NOT NULL, 
 		[intSubLocationId] INT NULL,
 		[intStorageLocationId] INT NULL,
-		[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[dblStockIn] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblStockOut] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblNewCost] NUMERIC(38, 20) NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
