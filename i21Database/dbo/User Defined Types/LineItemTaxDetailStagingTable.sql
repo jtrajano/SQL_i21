@@ -12,7 +12,7 @@ CREATE TYPE [dbo].[LineItemTaxDetailStagingTable] AS TABLE
 	,[intTaxClassId]						INT												NULL		-- Key Value tblSMTaxClass.intTaxClassId
 	,[strTaxableByOtherTaxes]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL		
 	,[strCalculationMethod]					NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL		
-	,[numRate]								NUMERIC(18, 6)									NULL		-- Tax Rate
+	,[dblRate]								NUMERIC(18, 6)									NULL		-- Tax Rate
 	,[intTaxAccountId]						INT												NULL		-- Key Value tblGLAccount.intAccountId
 	,[dblTax]								NUMERIC(18, 6)									NULL		-- The computed tax amount based from the Tax Code setup
 	,[dblAdjustedTax]						NUMERIC(18, 6)									NULL		-- The tax adjusted amount either manually or programmatically
