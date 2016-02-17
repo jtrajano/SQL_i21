@@ -8,8 +8,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLIFOStorage
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
-	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(38, 20)
+	,@dblQty NUMERIC(38,20) 
+	,@dblCost AS NUMERIC(38,20)
 	,@intEntityUserSecurityId AS INT
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT 

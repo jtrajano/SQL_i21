@@ -19,23 +19,23 @@ This table holds stock information like quantity on hand and etc.
 	FK to the tblICItemLocation table. It an additional locator field where exactly the item is stored in a location. 
 	Maps: None
 
-*	[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblUnitOnHand] NUMERIC(38, 20) NULL DEFAULT ((0))
 	The number of stocks currently at hand. At hand means those transactions that has been posted in the system regardless of the transaction date. 
 	Maps: None
 
-*	[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblOrderCommitted] NUMERIC(38, 20) NULL DEFAULT ((0))
 	The number of stocks committed at the sales order transactions. When a sales order is created, this order committed goes up. If the sales order has been shipped, it goes down. 
 	Maps: None
 
-*	[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblOnOrder] NUMERIC(38, 20) NULL DEFAULT ((0))
 	The number of stocks at the purchase order transactions. When a purchase order is created, the On order qty goes up. If the purchase order has been received, it goes down. 
 	Maps: None
 
-*	[dblBackOrder] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblBackOrder] NUMERIC(38, 20) NULL DEFAULT ((0))
 	The number of stocks at the sales order that is not yet shipped. When a back order transaction is created, the back order qty goes up. When the back order is fulfilled, the back order qty goes down. 
 	Maps: None
 
-*	[dblLastCountRetail] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblLastCountRetail] NUMERIC(38, 20) NULL DEFAULT ((0))
 	The last physical count of the item at the retail stores. This can be edited by the end user. 
 	Maps: None
 

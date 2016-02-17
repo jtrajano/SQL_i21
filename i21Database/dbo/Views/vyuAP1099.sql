@@ -4,7 +4,8 @@ SELECT
       C.strVendorId
 	, C.intEntityVendorId
     , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrim(C2.str1099Name) ELSE dbo.fnTrim(C2.strName) END), '&', 'and'))      
-    , strAddress = REPLACE(REPLACE(dbo.fnTrim(D.strAddress), CHAR(10), ' ') , CHAR(13), ' ')         
+    , strAddress = REPLACE(REPLACE(dbo.fnTrim(D.strAddress), CHAR(10), ' ') , CHAR(13), ' ')       
+	, C2.strName AS strPayeeName  
 	, ISNULL(dbo.fnTrim(strCity), '') strCity
 	, ISNULL(dbo.fnTrim(strState), '') strState
 	, ISNULL(dbo.fnTrim(strZipCode), '') strZip

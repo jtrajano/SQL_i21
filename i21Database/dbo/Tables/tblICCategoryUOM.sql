@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[intCategoryUOMId] INT NOT NULL IDENTITY , 
 		[intCategoryId] INT NOT NULL,
 		[intUnitMeasureId] INT NOT NULL, 
-		[dblUnitQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitQty] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[ysnStockUnit] BIT NULL DEFAULT ((0)),
 		[ysnAllowPurchase] BIT NULL DEFAULT ((0)),
 		[ysnAllowSale] BIT NULL DEFAULT ((0)),

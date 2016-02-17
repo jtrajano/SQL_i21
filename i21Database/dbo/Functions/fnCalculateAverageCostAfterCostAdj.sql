@@ -4,7 +4,7 @@ CREATE FUNCTION [dbo].[fnCalculateAverageCostAfterCostAdj]
 (
 	@UnsoldQty AS NUMERIC(38,20)
 	,@CostDifference AS NUMERIC(38,20)
-	,@RunningQty AS NUMERIC(18,6)
+	,@RunningQty AS NUMERIC(38,20)
 	,@CurrentAverageCost AS NUMERIC(38,20)
 )
 RETURNS NUMERIC(38,20)

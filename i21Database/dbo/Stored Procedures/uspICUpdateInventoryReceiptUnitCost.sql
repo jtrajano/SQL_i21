@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUpdateInventoryReceiptUnitCost]
 	@intContractDetailId AS INT,
-	@newUnitCost AS NUMERIC(18,6)
+	@newUnitCost AS NUMERIC(38,20)
 AS
 BEGIN
 

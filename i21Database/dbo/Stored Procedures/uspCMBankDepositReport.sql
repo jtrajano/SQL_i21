@@ -114,6 +114,7 @@ SELECT  H.intBankAccountId
 		,strPaymentMethod = '' -- TODO: This is payment method used by the customer to pay a sales invoice. Retrieve it from the undeposited funds table. 
 		,strReceivedFrom = ISNULL(ED.strName, ISNULL(EH.strName, H.strPayee))
 		,strSourceTransactionId = ISNULL(UF.strSourceTransactionId, H.strTransactionId)
+		,COMPANY.strCompanyName
 FROM	[dbo].[tblCMBankTransaction] H INNER JOIN [dbo].[tblCMBankTransactionDetail] D
 			ON H.intTransactionId = D.intTransactionId
 		INNER JOIN [dbo].[tblCMBankAccount] BA
@@ -126,5 +127,7 @@ FROM	[dbo].[tblCMBankTransaction] H INNER JOIN [dbo].[tblCMBankTransactionDetail
 			ON D.intEntityId = ED.intEntityId
 		LEFT JOIN [dbo].[tblCMUndepositedFund] UF
 			ON D.intUndepositedFundId = UF.intUndepositedFundId
+		LEFT JOIN tblSMCompanySetup COMPANY 
+			ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 WHERE	H.intBankTransactionTypeId IN (@BANK_DEPOSIT)
 		AND H.strTransactionId BETWEEN ISNULL(@strTransactionIdFrom, H.strTransactionId) AND ISNULL(@strTransactionIdTo, H.strTransactionId)

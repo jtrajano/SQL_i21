@@ -7,7 +7,7 @@ SELECT
 		A.strContractNumber,
 		A.intEntityId,
 		A.intContractTypeId,
-		MIN(dblCashPrice) dblCashPriceMin ,
+		ISNULL(MIN(dblCashPrice),0) dblCashPriceMin ,
 		A.dblHeaderQuantity,
 		A.strContractStatus  
 	FROM vyuCTContractDetailView A

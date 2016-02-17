@@ -169,7 +169,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	(Detail.dblQtyOrdered - Detail.dblQtyShipped)
+		,[dblQty]					=	ISNULL(ISHI.dblQuantity,(Detail.dblQtyOrdered - Detail.dblQtyShipped))
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
@@ -195,6 +195,9 @@ BEGIN
 		vyuICGetItemStock IST
 			ON Detail.intItemId = IST.intItemId 
 			AND Header.intCompanyLocationId = IST.intLocationId 
+	LEFT JOIN 
+		tblICInventoryShipmentItem ISHI 
+			ON Detail.intSalesOrderDetailId = ISHI.intLineNo
 	WHERE 
 		Detail.intSalesOrderId = @SalesOrderId
 		AND Header.strTransactionType = 'Order'

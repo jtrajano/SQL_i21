@@ -146,7 +146,16 @@ END
 -- Check if the transaction is already cleared or reconciled
 IF @ysnPost = 0 AND @ysnRecap = 0
 BEGIN
-	SELECT TOP 1 @ysnTransactionClearedFlag = 1
+	DECLARE @intBankTransactionTypeId AS INT
+	DECLARE @clearedTransactionCount AS INT
+
+	SELECT TOP 1 @ysnTransactionClearedFlag = 1, @intBankTransactionTypeId = intBankTransactionTypeId
+	FROM	tblCMBankTransaction 
+	WHERE	strLink = @strTransactionId
+			AND ysnClr = 1
+			AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+
+	SELECT  @clearedTransactionCount = COUNT(intTransactionId)
 	FROM	tblCMBankTransaction 
 	WHERE	strLink = @strTransactionId
 			AND ysnClr = 1
@@ -155,8 +164,21 @@ BEGIN
 	IF @ysnTransactionClearedFlag = 1
 	BEGIN
 		-- 'The transaction is already cleared.'
-		RAISERROR(50009, 11, 1)
-		GOTO Post_Rollback
+		IF @clearedTransactionCount = 2
+		BEGIN
+			RAISERROR(50009, 11, 1)
+			GOTO Post_Rollback
+		END
+
+		IF @intBankTransactionTypeId = @BANK_TRANSFER_WD
+		BEGIN
+			RAISERROR('Transfer From transaction is already cleared.', 11, 1)
+			GOTO Post_Rollback
+		END
+		ELSE
+			RAISERROR('Transfer To transaction is already cleared.', 11, 1)
+			GOTO Post_Rollback
+		
 	END
 END
 
