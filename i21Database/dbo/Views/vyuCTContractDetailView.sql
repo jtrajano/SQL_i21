@@ -84,9 +84,9 @@ AS
 			END		AS strPricingStatus,
 			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)	AS intLoadReceived,
 			CAST(
-				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysPurchase,CD.dtmStartDate) AND CH.intContractTypeId = 1 
+				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),CD.dtmStartDate) AND CH.intContractTypeId = 1 
 						THEN	1
-						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-CP.intEarlyDaysSales,CD.dtmStartDate) AND CH.intContractTypeId = 2
+						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysSales,0),CD.dtmStartDate) AND CH.intContractTypeId = 2
 						THEN	1
 						ELSE	0
 				END		AS BIT
