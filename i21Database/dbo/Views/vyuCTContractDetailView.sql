@@ -34,7 +34,7 @@ AS
 			MZ.strMarketZoneCode,				OH.strContractOptDesc,			U3.strUnitMeasure				AS	strAdjUOM,
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
 			IX.strIndexType,					EF.strFieldNumber,				LP.strCity						AS	strLoadingPoint,	
-			SR.strScheduleDescription,											DP.strCity						AS	strDestinationPoint,
+			SR.strScheduleDescription,			IM.strShortName,				DP.strCity						AS	strDestinationPoint,
 																				DC.strCity						AS	strDestinationCity,
 																				PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
 																				U4.strUnitMeasure				AS	strStockItemUOM,
@@ -116,7 +116,8 @@ AS
 			CH.dblTolerancePct,					CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
 			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
-			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad
+			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad,
+			CH.strCropYear,						CH.ysnExported,					CH.dtmExported
 			
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP

@@ -17,7 +17,8 @@ AS
 			CH.ysnProvisional,				CH.ysnLoad,						CH.intCompanyLocationPricingLevelId,
 			CH.intNoOfLoad,					CH.dblQuantityPerLoad,			CH.intLoadUOMId,
 			CH.ysnCategory,					CH.ysnMultiplePriceFixation,	CH.intCategoryUnitMeasureId,
-			CH.intLoadCategoryUnitMeasureId,CH.intContractPlanId,
+			CH.intLoadCategoryUnitMeasureId,CH.intContractPlanId,			CH.ysnExported,
+			CH.dtmExported,
 
 			EY.intEntityId,					EY.strEntityName,				CY.strDescription			AS	strCommodityDescription,
 			EY.strEntityNumber,				EY.strEntityAddress,			U2.strUnitMeasure			AS	strHeaderUnitMeasure,
@@ -33,7 +34,7 @@ AS
 			PL.strPricingLevelName,			PT.strPricingType,				U5.strUnitMeasure			AS	strLoadCategoryUnitMeasure,				
 			CB.strINCOLocationType,			CH.dtmCreated,					CE.strName					AS	strCreatedBy,
 			CH.dtmLastModified,				CP.strContractPlan,				UE.strName					AS	strLastModifiedBy,					
-																		
+			YR.strCropYear,															
 																		
 			CASE WHEN strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
@@ -68,4 +69,5 @@ AS
 	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId			LEFT
 	JOIN	tblEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
 	JOIN	tblEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
-	JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId
+	JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
+	JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId				
