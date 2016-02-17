@@ -21,7 +21,7 @@ RETURNS @returntable TABLE
 	,[intTaxClassId]				INT
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
-	,[numRate]						NUMERIC(18,6)
+	,[dblRate]						NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[ysnSeparateOnInvoice]			BIT
@@ -48,7 +48,7 @@ BEGIN
 			,[intTaxClassId]				INT
 			,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 			,[strCalculationMethod]			NVARCHAR(30)
-			,[numRate]						NUMERIC(18,6)
+			,[dblRate]						NUMERIC(18,6)
 			,[dblTax]						NUMERIC(18,6)
 			,[dblAdjustedTax]				NUMERIC(18,6)
 			,[intTaxAccountId]				INT
@@ -79,7 +79,7 @@ BEGIN
 		,[intTaxClassId]
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
-		,[numRate]
+		,[dblRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
@@ -98,7 +98,7 @@ BEGIN
 		,[intTaxClassId]
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
-		,[numRate]
+		,[dblRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
@@ -139,7 +139,7 @@ BEGIN
 				,@TaxAdjusted		= ISNULL([ysnTaxAdjusted],0)
 				,@AdjustedTax		= [dblAdjustedTax]
 				,@Tax				= [dblTax]
-				,@Rate				= [numRate]
+				,@Rate				= [dblRate]
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
@@ -153,7 +153,7 @@ BEGIN
 				,[intTaxCodeId]				INT
 				,[strTaxableByOtherTaxes]	NVARCHAR(MAX)
 				,[strCalculationMethod]		NVARCHAR(30)
-				,[numRate]					NUMERIC(18,6)
+				,[dblRate]					NUMERIC(18,6)
 				,[dblAdjustedTax]			NUMERIC(18,6)
 				,[ysnTaxAdjusted]			BIT
 				,[ysnTaxExempt]				BIT
@@ -164,7 +164,7 @@ BEGIN
 				,intTaxCodeId
 				,strTaxableByOtherTaxes
 				,strCalculationMethod
-				,numRate
+				,dblRate
 				,dblAdjustedTax
 				,ysnTaxAdjusted	
 				,ysnTaxExempt	
@@ -174,7 +174,7 @@ BEGIN
 				,intTaxCodeId
 				,strTaxableByOtherTaxes
 				,strCalculationMethod
-				,numRate
+				,dblRate
 				,dblAdjustedTax
 				,ysnTaxAdjusted
 				,ysnTaxExempt
@@ -201,7 +201,7 @@ BEGIN
 						 @TaxTaxableByOtherTaxes	= [strTaxableByOtherTaxes]
 						,@TaxTaxAdjusted			= ISNULL([ysnTaxAdjusted],0)
 						,@TaxAdjustedTax			= [dblAdjustedTax]
-						,@TaxRate					= [numRate]
+						,@TaxRate					= [dblRate]
 						,@TaxCalculationMethod		= [strCalculationMethod]
 						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
 					FROM
@@ -264,7 +264,7 @@ BEGIN
 		,[intTaxClassId]
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
-		,[numRate]
+		,[dblRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]
@@ -284,7 +284,7 @@ BEGIN
 		,[intTaxClassId]
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
-		,[numRate]
+		,[dblRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]

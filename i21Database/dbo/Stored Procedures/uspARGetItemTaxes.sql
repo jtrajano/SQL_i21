@@ -30,7 +30,7 @@ AS
 				,[intTaxClassId]
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
-				,[numRate]
+				,[dblRate]
 				,[dblTax]
 				,[dblAdjustedTax]
 				,[intTaxAccountId]				AS [intSalesTaxAccountId]

@@ -2,7 +2,7 @@
 (
 	[intCurrencyExchangeRateDetailId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intCurrencyExchangeRateId] INT NOT NULL, 
-    [numRate] NUMERIC(18, 6) NOT NULL, 
+    [dblRate] NUMERIC(18, 6) NOT NULL, 
     [intRateTypeId] INT NOT NULL, 
     [dtmValidFromDate] DATETIME NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 

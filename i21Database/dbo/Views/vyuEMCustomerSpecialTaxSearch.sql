@@ -16,6 +16,7 @@
 			on special_tax.intEntityCustomerId = ent.intEntityId
 		left join tblEntityLocation cus_location
 			on cus_location.intEntityId = special_tax.intEntityCustomerId
+				and special_tax.intEntityCustomerLocationId = cus_location.intEntityLocationId
 		left join tblAPVendor vend 
 			on vend.intEntityVendorId = special_tax.intEntityVendorId
 		left join tblICItem item

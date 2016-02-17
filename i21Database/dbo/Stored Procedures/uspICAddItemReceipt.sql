@@ -49,7 +49,7 @@ CREATE TABLE #tmpComputeItemTaxes (
 	,intTaxClassId			INT
 	,strTaxableByOtherTaxes NVARCHAR(MAX) 
 	,strCalculationMethod	NVARCHAR(50)
-	,numRate				NUMERIC(18,6)
+	,dblRate				NUMERIC(18,6)
 	,dblTax					NUMERIC(18,6)
 	,dblAdjustedTax			NUMERIC(18,6)
 	,ysnCheckoffTax			BIT
@@ -460,7 +460,7 @@ BEGIN
 				,intTaxClassId			INT
 				,strTaxableByOtherTaxes NVARCHAR (MAX) 
 				,strCalculationMethod	NVARCHAR(50)
-				,numRate				NUMERIC(18,6)
+				,dblRate				NUMERIC(18,6)
 				,dblTax					NUMERIC(18,6)
 				,dblAdjustedTax			NUMERIC(18,6)
 				,intTaxAccountId		INT
@@ -512,7 +512,7 @@ BEGIN
 					,intTaxClassId
 					,strTaxableByOtherTaxes
 					,strCalculationMethod
-					,numRate
+					,dblRate
 					,dblTax
 					,dblAdjustedTax
 					,intTaxAccountId
@@ -571,7 +571,7 @@ BEGIN
 						,[intTaxClassId]				= [intTaxClassId]
 						,[strTaxableByOtherTaxes]		= [strTaxableByOtherTaxes]
 						,[strCalculationMethod]			= [strCalculationMethod]
-						,[dblRate]						= [numRate]
+						,[dblRate]						= [dblRate]
 						,[dblTax]						= [dblTax]
 						,[dblAdjustedTax]				= [dblAdjustedTax]
 						,[intTaxAccountId]				= [intTaxAccountId]
@@ -603,7 +603,7 @@ BEGIN
 						,intTaxClassId
 						,strTaxableByOtherTaxes
 						,strCalculationMethod
-						,numRate
+						,dblRate
 						,dblTax
 						,dblAdjustedTax
 						,ysnCheckoffTax
@@ -626,7 +626,7 @@ BEGIN
 						,intTaxClassId				= ItemTax.intTaxClassId
 						,strTaxableByOtherTaxes		= ItemTax.strTaxableByOtherTaxes
 						,strCalculationMethod		= ItemTax.strCalculationMethod
-						,numRate					= ItemTax.dblRate
+						,dblRate					= ItemTax.dblRate
 						,dblTax						= ItemTax.dblTax
 						,dblAdjustedTax				= ItemTax.dblAdjustedTax
 						,ysnCheckoffTax				= ItemTax.ysnCheckoffTax

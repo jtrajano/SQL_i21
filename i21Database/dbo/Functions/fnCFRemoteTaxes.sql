@@ -28,7 +28,7 @@ RETURNS @tblTaxTable TABLE
 		,[intTaxClassId]				INT
 		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 		,[strCalculationMethod]			NVARCHAR(30)
-		,[numRate]						NUMERIC(18,6)
+		,[dblRate]						NUMERIC(18,6)
 		,[dblTax]						NUMERIC(18,6)
 		,[dblAdjustedTax]				NUMERIC(18,6)
 		,[intTaxAccountId]				INT
@@ -56,7 +56,7 @@ BEGIN
 		,intTaxClassId					INT
 		,strTaxClass					NVARCHAR(MAX)
 		,strCalculationMethod			NVARCHAR(MAX)
-		,numRate						NUMERIC(18,6)
+		,dblRate						NUMERIC(18,6)
 		,strTaxableByOtherTaxes			NVARCHAR(MAX)
 		,intSalesTaxAccountId			INT
 		,ysnCheckoffTax					BIT
@@ -76,7 +76,7 @@ BEGIN
 		,smTaxCode.intTaxClassId			
 		,smTaxClass.strTaxClass			
 		,smTaxCodeRate.strCalculationMethod	
-		,smTaxCodeRate.numRate				
+		,smTaxCodeRate.[dblRate]				
 		,smTaxCode.strTaxableByOtherTaxes	
 		,smTaxCode.intSalesTaxAccountId	
 		,smTaxCode.ysnCheckoffTax			
@@ -98,7 +98,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'FET'
@@ -122,7 +122,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'SET'
@@ -146,7 +146,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'SST'
@@ -170,7 +170,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC1'
@@ -194,7 +194,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC2'
@@ -218,7 +218,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC3'
@@ -242,7 +242,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC4'
@@ -266,7 +266,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC5'
@@ -290,7 +290,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC6'
@@ -314,7 +314,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC7'
@@ -338,7 +338,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC8'
@@ -362,7 +362,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC9'
@@ -386,7 +386,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC10'
@@ -410,7 +410,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC11'
@@ -434,7 +434,7 @@ BEGIN
 		BEGIN 
 			INSERT INTO @tblTaxTable
 			SELECT TOP 1
-				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[numRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
+				 99,99,99,99,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],null,null,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],0,'',0,''
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'LC12'

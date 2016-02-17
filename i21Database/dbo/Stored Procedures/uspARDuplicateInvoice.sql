@@ -327,7 +327,7 @@ BEGIN
 								,[intTaxClassId]
 								,[strTaxableByOtherTaxes]
 								,[strCalculationMethod]
-								,[numRate]
+								,[dblRate]
 								,[intSalesTaxAccountId]
 								,[dblTax]
 								,[dblAdjustedTax]
@@ -343,7 +343,7 @@ BEGIN
 								,[intTaxClassId]
 								,[strTaxableByOtherTaxes]
 								,[strCalculationMethod]
-								,[numRate]
+								,[dblRate]
 								,[intSalesTaxAccountId]
 								,[dblTax] * @dblSplitPercent
 								,[dblAdjustedTax] * @dblSplitPercent

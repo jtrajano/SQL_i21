@@ -134,12 +134,12 @@ BEGIN
 		,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[strCalculationMethod] 
 						FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] 
 						AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@transactionDate AS DATE) 
-						ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 'Unit') AS [strCalculationMethod]
+						ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[dblRate] DESC), 'Unit') AS [strCalculationMethod]
 		,TC.strTaxCode
-		,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[numRate] 
+		,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[dblRate] 
 						FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] 
 						AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@transactionDate AS DATE) 
-						ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 0.00) AS [dblRate]
+						ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[dblRate] DESC), 0.00) AS [dblRate]
 		,TC.[intPurchaseTaxAccountId]		
 		,0.00 AS [dblTax]
 		,0.00 AS [dblAdjustedTax]	

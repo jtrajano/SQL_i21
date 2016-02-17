@@ -44,7 +44,7 @@ DECLARE @ItemTaxes AS TABLE(
 ,intTaxClassId			INT
 ,strTaxableByOtherTaxes	NVARCHAR(MAX)
 ,strCalculationMethod	NVARCHAR(30)
-,numRate				DECIMAL(18,6)
+,dblRate				DECIMAL(18,6)
 ,intSalesTaxAccountId	INT
 ,dblTax					DECIMAL(18,6)
 ,dblAdjustedTax			DECIMAL(18,6)
@@ -69,7 +69,7 @@ INSERT INTO @ItemTaxes (
 	,[intTaxClassId]
 	,[strTaxableByOtherTaxes]
 	,[strCalculationMethod]
-	,[numRate]
+	,[dblRate]
 	,[dblTax]
 	,[dblAdjustedTax]
 	,[intSalesTaxAccountId]
@@ -120,7 +120,7 @@ WHILE EXISTS(SELECT NULL FROM @ItemTaxes WHERE [intInvoiceDetailId] IS NULL OR [
 			,@TaxAdjusted		= [ysnTaxAdjusted]
 			,@AdjustedTax		= [dblAdjustedTax]
 			,@Tax				= [dblTax]
-			,@Rate				= [numRate]
+			,@Rate				= [dblRate]
 			,@CalculationMethod	= [strCalculationMethod]
 			,@CheckoffTax		= [ysnCheckoffTax]
 		FROM
@@ -133,7 +133,7 @@ WHILE EXISTS(SELECT NULL FROM @ItemTaxes WHERE [intInvoiceDetailId] IS NULL OR [
 			,intTaxClassId			INT
 			,strTaxableByOtherTaxes	NVARCHAR(MAX)
 			,strCalculationMethod	NVARCHAR(30)
-			,numRate				DECIMAL(18,6)
+			,dblRate				DECIMAL(18,6)
 			,dblAdjustedTax			DECIMAL(18,6)
 			,ysnTaxAdjusted			BIT
 			)
@@ -143,7 +143,7 @@ WHILE EXISTS(SELECT NULL FROM @ItemTaxes WHERE [intInvoiceDetailId] IS NULL OR [
 			,intTaxClassId
 			,strTaxableByOtherTaxes
 			,strCalculationMethod
-			,numRate
+			,dblRate
 			,dblAdjustedTax
 			,ysnTaxAdjusted	
 			)
@@ -152,7 +152,7 @@ WHILE EXISTS(SELECT NULL FROM @ItemTaxes WHERE [intInvoiceDetailId] IS NULL OR [
 			,intTaxClassId
 			,strTaxableByOtherTaxes
 			,strCalculationMethod
-			,numRate
+			,dblRate
 			,dblAdjustedTax
 			,ysnTaxAdjusted
 		FROM
@@ -176,7 +176,7 @@ WHILE EXISTS(SELECT NULL FROM @ItemTaxes WHERE [intInvoiceDetailId] IS NULL OR [
 					 @TaxTaxableByOtherTaxes	= [strTaxableByOtherTaxes]
 					,@TaxTaxAdjusted			= [ysnTaxAdjusted]
 					,@TaxAdjustedTax			= [dblAdjustedTax]
-					,@TaxRate					= [numRate]
+					,@TaxRate					= [dblRate]
 					,@TaxCalculationMethod		= [strCalculationMethod]
 					
 				FROM

@@ -20,6 +20,7 @@
 				on tax_exemption.intEntityCustomerId = ent.intEntityId
 		left join tblEntityLocation cus_location
 			on cus_location.intEntityId = tax_exemption.intEntityCustomerId	
+				and cus_location.intEntityLocationId = tax_exemption.intEntityCustomerLocationId
 		left join tblICItem item
 			on item.intItemId = tax_exemption.intItemId
 		left join tblICCategory category

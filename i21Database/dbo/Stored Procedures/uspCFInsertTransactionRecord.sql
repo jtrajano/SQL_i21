@@ -109,7 +109,7 @@ BEGIN
 		,[intTaxClassId]				INT
 		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 		,[strCalculationMethod]			NVARCHAR(30)
-		,[numRate]						NUMERIC(18,6)
+		,[dblRate]						NUMERIC(18,6)
 		,[dblTax]						NUMERIC(18,6)
 		,[dblAdjustedTax]				NUMERIC(18,6)
 		,[intTaxAccountId]				INT
@@ -131,7 +131,7 @@ BEGIN
 		,[intTaxClassId]				INT
 		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 		,[strCalculationMethod]			NVARCHAR(30)
-		,[numRate]						NUMERIC(18,6)
+		,[dblRate]						NUMERIC(18,6)
 		,[dblTax]						NUMERIC(18,6)
 		,[dblAdjustedTax]				NUMERIC(18,6)
 		,[intTaxAccountId]				INT
@@ -151,7 +151,7 @@ BEGIN
 		,[intTaxClassId]				INT
 		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 		,[strCalculationMethod]			NVARCHAR(30)
-		,[numRate]						NUMERIC(18,6)
+		,[dblRate]						NUMERIC(18,6)
 		,[dblTax]						NUMERIC(18,6)
 		,[dblAdjustedTax]				NUMERIC(18,6)
 		,[intTaxAccountId]				INT
@@ -710,7 +710,7 @@ BEGIN
 			,[intTaxClassId]			
 			,[strTaxableByOtherTaxes]	
 			,[strCalculationMethod]		
-			,[numRate]					
+			,[dblRate]					
 			,[dblTax]					
 			,[dblAdjustedTax]			
 			,[intTaxAccountId]			
@@ -729,7 +729,7 @@ BEGIN
 			,[intTaxClassId]
 			,[strTaxableByOtherTaxes]
 			,[strCalculationMethod]
-			,[numRate]
+			,[dblRate]
 			,[dblTax]
 			,[dblAdjustedTax]
 			,[intTaxAccountId]    AS [intSalesTaxAccountId]
@@ -756,7 +756,7 @@ BEGIN
 			,[intTaxClassId]			
 			,[strTaxableByOtherTaxes]	
 			,[strCalculationMethod]		
-			,[numRate]					
+			,[dblRate]					
 			,[dblTax]					
 			,[dblAdjustedTax]			
 			,[intTaxAccountId]			
@@ -777,7 +777,7 @@ BEGIN
 			,[intTaxClassId]
 			,[strTaxableByOtherTaxes]
 			,[strCalculationMethod]
-			,[numRate]
+			,[dblRate]
 			,[dblTax]
 			,[dblAdjustedTax]
 			,[intTaxAccountId]    AS [intSalesTaxAccountId]
@@ -841,7 +841,7 @@ BEGIN
 		,[intTaxClassId]
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
-		,[numRate]
+		,[dblRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]    AS [intSalesTaxAccountId]
@@ -862,7 +862,7 @@ BEGIN
 		,[intTaxClassId]
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
-		,[numRate]
+		,[dblRate]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]    AS [intSalesTaxAccountId]
@@ -903,12 +903,12 @@ BEGIN
 			 @intLoopTaxGroupID = intTaxGroupId
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
-			,@QxT = ROUND (@dblQuantity * numRate,2)
-			,@QxOP = ROUND (@QxOP - (@dblQuantity * numRate),2)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * numRate),2)
-			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  numRate,2)
+			,@QxT = ROUND (@dblQuantity * dblRate,2)
+			,@QxOP = ROUND (@QxOP - (@dblQuantity * dblRate),2)
+			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * dblRate),2)
+			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  dblRate,2)
 			,@strLoopTaxCode = strTaxCode
-			,@Rate = numRate
+			,@Rate = dblRate
 			,@CalculationMethod = strCalculationMethod
 			FROM @tblTaxUnitTable
 
@@ -947,12 +947,12 @@ BEGIN
 			 @intLoopTaxGroupID = intTaxGroupId
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
-			,@OPTax = ROUND (((@QxOP / (numRate/100 +1 )) * (numRate/100)),2)
-			,@CPTax = ROUND (@QxCP * (numRate/100),2)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (numRate/100 +1 )) * (numRate/100)),2)
-			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (numRate/100)),2)
+			,@OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
+			,@CPTax = ROUND (@QxCP * (dblRate/100),2)
+			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
+			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (dblRate/100)),2)
 			,@strLoopTaxCode = strTaxCode
-			,@Rate = numRate
+			,@Rate = dblRate
 			,@CalculationMethod = strCalculationMethod
 			FROM @tblTaxRateTable
 

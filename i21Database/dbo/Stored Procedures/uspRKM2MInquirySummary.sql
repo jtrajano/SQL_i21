@@ -90,11 +90,6 @@ FROM (
 		,strCommodityCode
 	FROM @#tempSummary
 	
-	UNION
-	
-	SELECT DISTINCT intCommodityId
-		,strCommodityCode
-	FROM vyuRKUnrealizedPnL where intCommodityId= @intCommodityId
 	) t
 ORDER BY strCommodityCode
 

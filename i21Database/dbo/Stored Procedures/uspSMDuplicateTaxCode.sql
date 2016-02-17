@@ -23,8 +23,8 @@ BEGIN
 	
 	SELECT @newTaxCodeId = SCOPE_IDENTITY();
 
-	INSERT INTO tblSMTaxCodeRate([intTaxCodeId], [strCalculationMethod], [numRate], [dtmEffectiveDate])
-	SELECT @newTaxCodeId, [strCalculationMethod], [numRate], [dtmEffectiveDate]
+	INSERT INTO tblSMTaxCodeRate([intTaxCodeId], [strCalculationMethod], [dblRate], [dtmEffectiveDate])
+	SELECT @newTaxCodeId, [strCalculationMethod], [dblRate], [dtmEffectiveDate]
 	FROM dbo.tblSMTaxCodeRate
 	WHERE [intTaxCodeId] = @intTaxCodeId
 

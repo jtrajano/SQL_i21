@@ -54,12 +54,14 @@ BEGIN
 		,[intOrderId] 
 		,[intSourceId] 
 		,[intLineNo] 
+		,[intLoadReceive]
 	)
 	EXEC dbo.uspICGetItemsFromItemReceipt
 		@intReceiptId = @intTransactionId
 
 	UPDATE @ItemsFromInventoryReceipt
 	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
+		,intLoadReceive = intLoadReceive * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
 END
 
 -- Get the receipt-type and source-type from tblICInventoryReceipt
