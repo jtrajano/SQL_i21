@@ -2250,6 +2250,14 @@ Ext.define('Inventory.view.Item', {
                                                                                                         labelWidth: 125,
                                                                                                         enforceMaxLength: true,
                                                                                                         maxLength: 50
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'numberfield',
+                                                                                                        itemId: 'txtMaxWeightPerPack',
+                                                                                                        fieldLabel: 'Max Wgt Per Pack',
+                                                                                                        labelWidth: 125,
+                                                                                                        fieldStyle: 'text-align:right',
+                                                                                                        hideTrigger: true
                                                                                                     }
                                                                                                 ]
                                                                                             }

@@ -15,10 +15,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemCommodityCostId).HasColumnName("intItemCommodityCostId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(18, 6);
-            this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost").HasPrecision(18, 6);
-            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost").HasPrecision(18, 6);
-            this.Property(t => t.dblEOMCost).HasColumnName("dblEOMCost").HasPrecision(18, 6);
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost").HasPrecision(38, 20);
+            this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost").HasPrecision(38, 20);
+            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost").HasPrecision(38, 20);
+            this.Property(t => t.dblEOMCost).HasColumnName("dblEOMCost").HasPrecision(38, 20);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)

@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using IdeaBlade.Linq;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -384,32 +385,161 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        /// <summary>
-        /// Return Inventory Valuation of Item and some of its details
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
+        ///// <summary>
+        ///// Return Inventory Valuation of Item and some of its details
+        ///// </summary>
+        ///// <param name="param"></param>
+        ///// <returns></returns>
+        //public async Task<SearchResult> GetInventoryValuation(GetParameter param)
+        //{
+        //    var query = _db.GetQuery<vyuICGetInventoryValuation>()
+        //        .Filter(param, true);
+
+        //    var sorts = new List<SearchSort>();
+        //    sorts.Add(new SearchSort() { property = "intItemId" });
+        //    sorts.Add(new SearchSort() { property = "intItemLocationId" });
+        //    sorts.Add(new SearchSort() { property = "dtmDate", direction = "DESC" });
+        //    sorts.Add(new SearchSort() { property = "intInventoryTransactionId", direction = "ASC" });
+        //    sorts.AddRange(param.sort.ToList());
+        //    param.sort = sorts;
+            
+        //    var data = await query.ExecuteProjection(param, "intInventoryValuationKeyId").ToListAsync();
+
+        //    return new SearchResult()
+        //    {
+        //        data = data.AsQueryable(),
+        //        total = await query.CountAsync()
+        //    };
+        //}
+
         public async Task<SearchResult> GetInventoryValuation(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetInventoryValuation>()
-                .Filter(param, true);
+            // Setup the default sort. 
+            List<SearchSort> addDefaultSortList = new List<SearchSort>();
+            var defaultLocationSort = new SearchSort() { property = "strLocationName", direction = "ASC" }; 
+            var defaultDateSort = new SearchSort(){property = "dtmDate", direction = "ASC"};
+            var defaultItemSort = new SearchSort() { property = "strItemNo", direction = "ASC" };
 
-            var sorts = new List<SearchSort>();
-            sorts.Add(new SearchSort() { property = "intItemId" });
-            sorts.Add(new SearchSort() { property = "intItemLocationId" });
-            sorts.Add(new SearchSort() { property = "dtmDate", direction = "DESC" });
-            sorts.Add(new SearchSort() { property = "intInventoryTransactionId", direction = "DESC" });
-            sorts.AddRange(param.sort.ToList());
-            param.sort = sorts;
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "dtmdate")
+                {
+                    defaultDateSort.direction = ps.direction;
+                }
+
+                // Use the direction specified by the caller. 
+                else if (ps.property.ToLower() == "strlocationname")
+                {
+                    defaultLocationSort.direction = ps.direction;
+                }
+
+                // Use the direction specified by the caller. 
+                else if (ps.property.ToLower() == "stritemno")
+                {
+                    defaultItemSort.direction = ps.direction;
+                }
+
+                // Add any additional sorting specified by the caller. 
+                else
+                {
+                    addDefaultSortList.Add(
+                        new SearchSort()
+                        {
+                            direction = ps.direction,
+                            property = ps.property
+                        }
+                    );
+                }                
+            }
+
+            // Make sure item, location and date are the first in the sorting order.             
+            addDefaultSortList.Insert(0, defaultDateSort);
+            addDefaultSortList.Insert(0, defaultLocationSort);
+            addDefaultSortList.Insert(0, defaultItemSort);
             
-            var data = await query.ExecuteProjection(param, "intInventoryValuationKeyId").ToListAsync();
+            IEnumerable<SearchSort> enDefaultSort = addDefaultSortList;
+            var sort = ExpressionBuilder.GetSortSelector(enDefaultSort);
+            param.sort = addDefaultSortList;
+                              
+            // Create a reverse sort
+            List<SearchSort> reverseSortList = new List<SearchSort>();
+            foreach (var x in enDefaultSort)
+            {
+                reverseSortList.Add(
+                    new SearchSort() { 
+                        direction = x.direction.ToLower() == "asc" ? "DESC" : "ASC", 
+                        property = x.property
+                    }
+                ); 
+            }
+            IEnumerable<SearchSort> enReverseSort = reverseSortList;
+            var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort); 
+            var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
+            
+            // Assemble the query. 
+            var query = (
+                from v in _db.GetQuery<vyuICGetInventoryValuation>()
+                select v
+            ).Filter(param, true);                     
 
+            // Initialize the beginning and running balances.     
+            decimal? dblBeginningBalance = 0;
+            decimal? dblRunningBalance = 0;
+            decimal? dblBeginningQty = 0;
+            decimal? dblRunningQty = 0;
+            string locationFromPreviousPage = ""; 
+
+            // If it is not the starting page, retrieve the previous page data. 
+            if (param.start > 0)
+            {
+                // Get the last location used from the previous page. 
+                var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault(); 
+                locationFromPreviousPage = previousPage.strLocationName;
+
+                // Get the beginning qty and balances
+                dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblValue);
+                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblQuantity);
+            }
+
+            // Get the page. Convert it into a list for the loop below. 
+            var paged_data = await query.PagingBySelector(param).ToListAsync();
+
+            // Loop thru the List, calculate, and assign the running qty and balance for each record. 
+            string currentLocation = locationFromPreviousPage;
+            string lastLocation = locationFromPreviousPage; 
+            foreach (var row in paged_data)
+            {
+                // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
+                currentLocation = row.strLocationName;
+                if (lastLocation != currentLocation)
+                {
+                    // Reset the qty and balances back to zero. 
+                    dblBeginningBalance = 0;
+                    dblBeginningQty = 0; 
+                    lastLocation = currentLocation;
+                }
+
+                // Calculate beginning and running balance
+                row.dblBeginningBalance = dblBeginningBalance;
+                dblRunningBalance = dblBeginningBalance + row.dblValue;
+                row.dblRunningBalance = dblRunningBalance;
+                dblBeginningBalance = dblRunningBalance;
+
+                // Calculate the beginning and running quantity
+                row.dblBeginningQtyBalance = dblBeginningQty;
+                dblRunningQty = dblBeginningQty + row.dblQuantity;
+                row.dblRunningQtyBalance = dblRunningQty;
+                dblBeginningQty = dblRunningQty;                
+            }
+            
             return new SearchResult()
             {
-                data = data.AsQueryable(),
+                data = paged_data.AsQueryable().Select(selector),
                 total = await query.CountAsync()
             };
         }
+
 
         /// <summary>
         /// Return Inventory Valuation of Item and some of its details

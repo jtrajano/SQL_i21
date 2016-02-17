@@ -81,19 +81,19 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intNewLotId).HasColumnName("intNewLotId");
             this.Property(t => t.strNewLotNumber).HasColumnName("strNewLotNumber");
 
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
-            this.Property(t => t.dblNewQuantity).HasColumnName("dblNewQuantity").HasPrecision(18, 6);
-            this.Property(t => t.dblAdjustByQuantity).HasColumnName("dblAdjustByQuantity").HasPrecision(18, 6);
-            this.Property(t => t.dblNewSplitLotQuantity).HasColumnName("dblNewSplitLotQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
+            this.Property(t => t.dblNewQuantity).HasColumnName("dblNewQuantity").HasPrecision(38, 20);
+            this.Property(t => t.dblAdjustByQuantity).HasColumnName("dblAdjustByQuantity").HasPrecision(38, 20);
+            this.Property(t => t.dblNewSplitLotQuantity).HasColumnName("dblNewSplitLotQuantity").HasPrecision(38, 20);
 
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.intNewItemUOMId).HasColumnName("intNewItemUOMId");
 
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
-            this.Property(t => t.intNewWeightUOMId).HasColumnName("intNewWeightUOMId");            
+            this.Property(t => t.intNewWeightUOMId).HasColumnName("intNewWeightUOMId");
 
-            this.Property(t => t.dblWeight).HasColumnName("dblWeight").HasPrecision(18, 6);
-            this.Property(t => t.dblNewWeight).HasColumnName("dblNewWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblWeight).HasColumnName("dblWeight").HasPrecision(38, 20);
+            this.Property(t => t.dblNewWeight).HasColumnName("dblNewWeight").HasPrecision(38, 20);
 
             this.Property(t => t.dblWeightPerQty).HasColumnName("dblWeightPerQty").HasPrecision(38, 20);
             this.Property(t => t.dblNewWeightPerQty).HasColumnName("dblNewWeightPerQty").HasPrecision(38, 20);
