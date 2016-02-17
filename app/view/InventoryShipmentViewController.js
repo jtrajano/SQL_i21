@@ -1964,6 +1964,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var CustomerId = currentRecord.get('intEntityCustomerId').toString();
         var OrderType = cboOrderType.getRawValue().toString();
         var SourceType = cboSourceType.getRawValue().toString();
+        var ContractStore = win.viewModel.storeInfo.salesContractList;
         var me = this;
         var showAddScreen = function () {
             var search = i21.ModuleMgr.Search;
@@ -2056,6 +2057,64 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             intCommodityId: order.get('intCommodityId')
                         };
                         currentVM.tblICInventoryShipmentItems().add(newRecord);
+
+                        ContractStore.load({
+                            filters: [
+                                {
+                                    column: 'intContractDetailId',
+                                    value: order.get('intLineNo'),
+                                    conjunction: 'and'
+                                },
+                                {
+                                    column: 'intContractHeaderId',
+                                    value: order.get('intOrderId'),
+                                    conjunction: 'and'
+                                }
+                            ],
+                            callback: function (result) {
+                                if (result) {
+                                    Ext.each(result, function (contract) {
+                                        var contractCosts = contract.get('tblCTContractCosts');
+                                        if (contractCosts) {
+                                            Ext.each(contractCosts, function (otherCharge) {
+                                                var shipmentCharges = currentVM.tblICInventoryShipmentCharges().data.items;
+                                                var exists = Ext.Array.findBy(shipmentCharges, function (row) {
+                                                    if ((row.get('intContractId') === order.get('intOrderId')
+                                                        && row.get('intChargeId') === otherCharge.intItemId)) {
+                                                        return true;
+                                                    }
+                                                });
+
+                                                if (!exists) {
+                                                    var newCost = Ext.create('Inventory.model.ShipmentCharge', {
+                                                        intInventoryReceiptId: currentVM.get('intInventoryShipmentId'),
+                                                        intContractId: order.get('intOrderId'),
+                                                        intChargeId: otherCharge.intItemId,
+                                                        ysnInventoryCost: false,
+                                                        strCostMethod: otherCharge.strCostMethod,
+                                                        dblRate: otherCharge.dblRate,
+                                                        dblExchangeRate: otherCharge.dblFx,
+                                                        intCostUOMId: otherCharge.intItemUOMId,
+                                                        intEntityVendorId: otherCharge.intVendorId,
+                                                        dblAmount: 0,
+                                                        strAllocateCostBy: '',
+                                                        ysnAccrue: otherCharge.ysnAccrue,
+                                                        ysnPrice: otherCharge.ysnPrice,
+                                                        strItemNo: otherCharge.strItemNo,
+                                                        intCurrencyId: otherCharge.intCurrencyId,
+                                                        strCurrency: otherCharge.strCurrency,
+                                                        strCostUOM: otherCharge.strUOM,
+                                                        strVendorId: otherCharge.strVendorName,
+                                                        strContractNumber: order.get('strOrderNumber')
+                                                    });
+                                                    currentVM.tblICInventoryShipmentCharges().add(newCost);
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                        });
                     });
                     search.close();
                     win.context.data.saveRecord();

@@ -20,6 +20,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'EntityManagement.store.VendorBuffered',
         'AccountsReceivable.store.SalesOrderDetailCompactBuffered',
         'ContractManagement.store.ContractDetailViewBuffered',
+        'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
         'i21.store.CurrencyBuffered'
     ],
@@ -116,6 +117,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         salesContract: {
             type: 'ctcontractdetailviewbuffered'
+        },
+        salesContractList: {
+            type: 'ctcontractdetailview'
         },
         items: {
             type: 'icbuffereditemstockdetailview'
