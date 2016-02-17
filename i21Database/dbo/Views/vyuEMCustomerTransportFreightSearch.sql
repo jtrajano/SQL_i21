@@ -22,7 +22,8 @@
 			inner join tblEntity ent
 				on xref.intEntityCustomerId = ent.intEntityId
 			left join tblEntityLocation cus_location
-				on cus_location.intEntityId = xref.intEntityCustomerId					
+				on cus_location.intEntityId = xref.intEntityCustomerId	
+					and cus_location.intEntityLocationId = xref.intEntityLocationId				
 			left join tblICCategory category
 				on category.intCategoryId = xref.intCategoryId
 			left join tblSMShipVia ship_via

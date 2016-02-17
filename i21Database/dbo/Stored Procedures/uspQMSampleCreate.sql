@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMSampleCreate]
-	@strXml NVARCHAR(Max)
+     @strXml NVARCHAR(Max)
 	,@strSampleNumber NVARCHAR(30) OUTPUT
 	,@intSampleId INT OUTPUT
 AS
@@ -30,8 +30,18 @@ BEGIN TRY
 			OR @strSampleNumber IS NULL
 			)
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 62
-			,@strSampleNumber OUTPUT
+		--EXEC dbo.uspSMGetStartingNumber 62
+		--	,@strSampleNumber OUTPUT
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+			,@intItemId = NULL
+			,@intManufacturingId = NULL
+			,@intSubLocationId = NULL
+			,@intLocationId = NULL
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 62
+			,@ysnProposed = 0
+			,@strPatternString = @strSampleNumber OUTPUT
 	END
 
 	IF EXISTS (

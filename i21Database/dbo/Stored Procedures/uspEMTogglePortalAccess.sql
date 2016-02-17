@@ -15,6 +15,12 @@ BEGIN
 	end
 	else
 	begin
+
+		if not exists(select top 1 1 from tblEMEntityToRole where intEntityId = @intEntityId)
+		begin
+			exec [uspSMCreateContactAdmin] @entityId = @intEntityId
+		end 
+
 		declare @roleId int
 		select @roleId = a.intEntityRoleId 
 			from tblEMEntityToRole a
@@ -23,6 +29,12 @@ BEGIN
 			 where intEntityId = @intEntityId and b.ysnAdmin = 1
 		declare @userName nvarchar(200)
 		select @userName = strEmail from tblEntity where intEntityId = @intEntityContactId
+
+		if(@roleId is null or @roleId < 0)
+		begin
+			set @message =  'User role is not yet created'
+			return 0
+		end
 
 		if(@userName is null or @userName = '')
 		begin

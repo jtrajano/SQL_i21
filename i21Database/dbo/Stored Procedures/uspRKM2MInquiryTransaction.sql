@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKM2MInquiryTransaction  
+﻿CREATE PROC [dbo].[uspRKM2MInquiryTransaction]  
                   @intM2MBasisId int = null,
                   @intFutureSettlementPriceId int = null,
                   @intQuantityUOMId int = null,
@@ -333,21 +333,31 @@ CONVERT(DECIMAL(24,6),
                   cd.dblRate,
                   cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId ,null as intltemPrice,
- (SELECT SUM(iv.dblPurchaseContractShippedQty)-- OVER (PARTITION BY iv.intContractDetailId)                       
-	FROM vyuLGInboundShipmentView iv WHERE iv.intContractDetailId=cd.intContractDetailId
-	AND intContractStatusId<>3 AND convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)) as 
+	(SELECT SUM(iv.dblPurchaseContractShippedQty)FROM vyuLGInboundShipmentView iv WHERE iv.intContractDetailId=cd.intContractDetailId
+	AND intContractStatusId<>3 AND CONVERT(DATETIME,CONVERT(VARCHAR, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)) as 
 	 InTransQty,
+	
+		 
+   (SELECT SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0)))
+			 FROM vyuCTContractCostView dc 
+			 LEFT JOIN tblICCommodityUnitMeasure cu1 on cd.intCommodityId=cu1.intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
+			 LEFT JOIN tblICCommodityUnitMeasure cu on cd.intCommodityId=cu.intCommodityId and cu.intUnitMeasureId=@intPriceUOMId
+			 WHERE  dc.intContractDetailId=cd.intContractDetailId
+			 group by cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId
+			 )dblCosts
+			
 
-	  (select CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-						dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),SUM(cv.dblRate))
-					WHEN	CC.strCostMethod = 'Amount'		THEN
-						SUM(cv.dblRate)/dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-					WHEN	CC.strCostMethod = 'Percentage' THEN 
-						(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)*cd.dblCashPrice*SUM(cv.dblRate)/100)/
-						dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-					END -- * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1)
-					 from vyuCTContractCostView cv WHERE cd.intContractDetailId=cv.intContractDetailId 
-			   AND cd.intContractDetailId=cd.intContractDetailId and ysnMTM = 1) dblCosts
+	  --(select CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
+			--			dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),SUM(cv.dblRate))
+			--		WHEN	CC.strCostMethod = 'Amount'		THEN
+			--			SUM(cv.dblRate)/dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
+			--		WHEN	CC.strCostMethod = 'Percentage' THEN 
+			--			(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)*cd.dblCashPrice*SUM(cv.dblRate)/100)/
+			--			dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
+			--		  * dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1) END
+			--		 from vyuCTContractCostView cv WHERE cd.intContractDetailId=cv.intContractDetailId 
+			--   AND cd.intContractDetailId=cd.intContractDetailId and ysnMTM = 1) dblCosts
+			
 	                    
 FROM vyuCTContractDetailView  cd
 JOIN vyuCTContractHeaderView ch on cd.intContractHeaderId= ch.intContractHeaderId and cd.dblBalance > 0 
@@ -360,6 +370,7 @@ LEFT JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId 
 LEFT JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId=@intQuantityUOMId
 LEFT JOIN tblICCommodityUnitMeasure cuc3 on cd.intCommodityId=cuc3.intCommodityId and cuc3.intUnitMeasureId=cd.intPriceUnitMeasureId
 LEFT JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityId and cuc2.intUnitMeasureId=@intPriceUOMId
+LEFT JOIN tblICCommodityUnitMeasure CostUom on cd.intCommodityId=cuc2.intCommodityId and cuc2.intUnitMeasureId=@intPriceUOMId
 LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId 
 WHERE  intContractStatusId<>3 and convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t
 )t)t1
@@ -501,7 +512,7 @@ convert(decimal(24,6),
 			end dblAdjustedContractPrice,
         dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId,isnull(dblMarketBasisUOM,PriceSourceUOMId),dblFuturesClosingPrice1) as dblFuturesClosingPrice,
         dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId,isnull(dblMarketBasisUOM,PriceSourceUOMId),dblFuturePrice1) as dblFuturePrice,
-       isnull( convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblOpenQty else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intQuantityUOMId,intCommodityUnitMeasureId),dblOpenQty)end),0) as dblOpenQty1
+       isnull( convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblOpenQty1 else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,isnull(intQuantityUOMId,intCommodityUnitMeasureId),dblOpenQty1)end),0) as dblOpenQty
   FROM
 (SELECT   distinct  cd.intContractDetailId,
                   'Inventory'+'(P)' as strContractOrInventoryType,
@@ -586,22 +597,18 @@ convert(decimal(24,6),
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice1,
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,                              
                   convert(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
-                  SUM(isnull(ri.dblOpenReceive,0)) OVER (PARTITION BY cd.intContractDetailId) dblOpenQty,                  
+                  (select SUM(isnull(sri.dblOpenReceive,0)) from tblICInventoryReceiptItem sri where ir.intInventoryReceiptId=sri.intInventoryReceiptId)  dblOpenQty1,                  
                   cd.dblRate,
                   cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId,null as intltemPrice,
 
-				    (select
-				  	CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-						dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,CC.intUnitMeasureId,@intPriceUOMId,SUM(cv.dblRate))
-					WHEN	CC.strCostMethod = 'Amount'		THEN
-						SUM(cv.dblRate)/dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-					WHEN	CC.strCostMethod = 'Percentage' THEN 
-						(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)*cd.dblCashPrice*SUM(cv.dblRate)/100)/
-						dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-					END  
-					FROM vyuCTContractCostView cv WHERE cd.intContractDetailId=cv.intContractDetailId 
-			   AND cd.intContractDetailId=cd.intContractDetailId and ysnMTM = 1) dblCosts
+				   (SELECT SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0)))
+			 FROM vyuCTContractCostView dc 
+			 LEFT JOIN tblICCommodityUnitMeasure cu1 on cd.intCommodityId=cu1.intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
+			 LEFT JOIN tblICCommodityUnitMeasure cu on cd.intCommodityId=cu.intCommodityId and cu.intUnitMeasureId=@intPriceUOMId
+			 WHERE  dc.intContractDetailId=cd.intContractDetailId
+			 group by cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId
+			 )dblCosts
 
 FROM vyuCTContractDetailView  cd
 JOIN vyuCTContractHeaderView ch on cd.intContractHeaderId= ch.intContractHeaderId 
@@ -861,16 +868,13 @@ convert(decimal(24,6),
                       cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId ,null as intltemPrice,
 
-				    (select 
-				  	CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-						dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),SUM(cv.dblRate))
-					WHEN	CC.strCostMethod = 'Amount'		THEN
-						SUM(cv.dblRate)/dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-					WHEN	CC.strCostMethod = 'Percentage' THEN 
-						(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)*cd.dblCashPrice*SUM(cv.dblRate)/100)/
-						dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,isnull(cuc2.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId),cd.dblDetailQuantity)
-					END   from vyuCTContractCostView cv WHERE cd.intContractDetailId=cv.intContractDetailId 
-			   AND cd.intContractDetailId=cd.intContractDetailId and ysnMTM = 1) dblCosts
+			(SELECT SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,isnull(dc.dblRate,0)))
+			 FROM vyuCTContractCostView dc 
+			 LEFT JOIN tblICCommodityUnitMeasure cu1 on cd.intCommodityId=cu1.intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
+			 LEFT JOIN tblICCommodityUnitMeasure cu on cd.intCommodityId=cu.intCommodityId and cu.intUnitMeasureId=@intPriceUOMId
+			 WHERE  dc.intContractDetailId=cd.intContractDetailId
+			 group by cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId
+			 )dblCosts
 
 FROM vyuCTContractDetailView  cd
 JOIN vyuCTContractHeaderView ch on cd.intContractHeaderId= ch.intContractHeaderId and cd.dblBalance > 0 
@@ -1141,7 +1145,8 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
             end)
             as dblFutures,             
             convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblCash)) as dblCash, 
-           	dblCosts,
+           	--convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblCosts)) 
+			dblCosts,
             convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblMarketBasis)) as dblMarketBasis, 
             convert(decimal(24,6),dblFuturesClosingPrice) dblFuturesClosingPrice,              
             CONVERT(int,intContractTypeId) as intContractTypeId,CONVERT(int,0) as intConcurrencyId,            

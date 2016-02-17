@@ -3,16 +3,16 @@
 
 SELECT TransferDetail.intInventoryTransferId
 	, TransferDetail.intInventoryTransferDetailId
-	, Transfer.intFromLocationId
-	, Transfer.intToLocationId
-	, Transfer.strTransferNo
+	, [Transfer].intFromLocationId
+	, [Transfer].intToLocationId
+	, [Transfer].strTransferNo
 	, TransferDetail.intSourceId
 	, strSourceNumber = (
-		CASE WHEN Transfer.intSourceType = 1 -- Scale
+		CASE WHEN [Transfer].intSourceType = 1 -- Scale
 				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = TransferDetail.intSourceId)
-			WHEN Transfer.intSourceType = 2 -- Inbound Shipment
+			WHEN [Transfer].intSourceType = 2 -- Inbound Shipment
 				THEN (SELECT CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50)) FROM tblLGShipment WHERE intShipmentId = TransferDetail.intSourceId)
-			WHEN Transfer.intSourceType = 3 -- Transports
+			WHEN [Transfer].intSourceType = 3 -- Transports
 				THEN (SELECT CAST(ISNULL(TransportView.strTransaction, 'Transport not found!')AS NVARCHAR(50)) FROM vyuTRTransportReceipt TransportView WHERE TransportView.intTransportReceiptId = TransferDetail.intSourceId)
 			ELSE NULL
 			END
@@ -45,7 +45,26 @@ SELECT TransferDetail.intInventoryTransferId
 	, StockFrom.dblOnHand
 	, StockFrom.dblOnOrder
 	, StockFrom.dblReservedQty
-	, dblAvailableQty = CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN StockFrom.dblAvailableQty ELSE Lot.dblQty END
+	, dblAvailableQty = 
+			CASE	WHEN [Transfer].ysnPosted = 1 THEN 						
+						CASE	WHEN TransferDetail.intOwnershipType = 1 THEN -- Own
+									TransferDetail.dblOriginalAvailableQty
+								WHEN TransferDetail.intOwnershipType = 2 THEN -- Storage
+									TransferDetail.dblOriginalStorageQty
+								ELSE	-- Consigned Purchase
+									TransferDetail.dblOriginalAvailableQty
+						END
+					ELSE	
+						CASE	WHEN Lot.intLotId IS NOT NULL THEN 
+										Lot.dblQty										
+								ELSE	
+									CASE WHEN TransferDetail.intOwnershipType = 1 THEN 
+											StockFrom.dblAvailableQty
+										ELSE 
+											StockFrom.dblStorageQty
+									END 
+						END
+			END 
 	, TransferDetail.dblQuantity
 	, TransferDetail.intOwnershipType
 	, strOwnershipType = (CASE WHEN TransferDetail.intOwnershipType = 1 THEN 'Own'
@@ -54,7 +73,7 @@ SELECT TransferDetail.intInventoryTransferId
 								ELSE NULL END)
 	, ysnPosted
 FROM tblICInventoryTransferDetail TransferDetail
-	LEFT JOIN tblICInventoryTransfer Transfer ON Transfer.intInventoryTransferId = TransferDetail.intInventoryTransferId
+	LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 	LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
 	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = TransferDetail.intLotId
 	LEFT JOIN tblSMCompanyLocationSubLocation FromSubLocation ON FromSubLocation.intCompanyLocationSubLocationId = TransferDetail.intFromSubLocationId
@@ -67,7 +86,7 @@ FROM tblICInventoryTransferDetail TransferDetail
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = TransferDetail.intTaxCodeId
 	LEFT JOIN vyuICGetItemStockUOM StockFrom ON StockFrom.intItemId = TransferDetail.intItemId
-		AND StockFrom.intLocationId = Transfer.intFromLocationId
+		AND StockFrom.intLocationId = [Transfer].intFromLocationId
 		AND StockFrom.intItemUOMId = TransferDetail.intItemUOMId
 		AND ISNULL(StockFrom.intSubLocationId, 0) = ISNULL(TransferDetail.intFromSubLocationId, 0)
 		AND ISNULL(StockFrom.intStorageLocationId, 0) = ISNULL(TransferDetail.intFromStorageLocationId, 0)

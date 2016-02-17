@@ -1,12 +1,30 @@
-﻿
-CREATE PROCEDURE uspSMGetStartingNumber
+﻿CREATE PROCEDURE uspSMGetStartingNumber
 	@intStartingNumberId INT = NULL,
+	@intCompanyLocationId INT = NULL,
 	@strID	NVARCHAR(40) = NULL OUTPUT
-
 AS
 
+DECLARE @locationNumber VARCHAR(5)
+SET @locationNumber = ''
+
+IF @intCompanyLocationId IS NOT NULL
+BEGIN
+	-- Check if starting number does not requires company location id
+	DECLARE @ysnUseLocation BIT
+	SELECT @ysnUseLocation = ysnUseLocation FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
+
+	IF @ysnUseLocation = 1
+	BEGIN
+		SELECT @locationNumber = strLocationNumber + '-' FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+		IF @locationNumber = '-'
+		BEGIN
+			SET @locationNumber = ''
+		END
+	END
+END
+
 -- Assemble the string ID. 
-SELECT	@strID = strPrefix + CAST(intNumber AS NVARCHAR(20))
+SELECT	@strID = strPrefix + @locationNumber + CAST(intNumber AS NVARCHAR(20))
 FROM	tblSMStartingNumber
 WHERE	intStartingNumberId = @intStartingNumberId
 

@@ -44,14 +44,13 @@ BEGIN
 	IF @statusId = 1 --OPEN
 	BEGIN
 		--Allow to open if no item receipt or bill or from cancelled or short closed status
-		IF (@hasItemReceipt = 1 OR
-			 @hasBill = 1 OR
+		IF ((@hasItemReceipt = 1 OR @hasBill = 1) AND
 			 EXISTS(SELECT 1 FROM (SELECT intOrderStatusId FROM tblPOOrderStatus WHERE intOrderStatusId IN (4,6)) POStatus 
 																	WHERE intOrderStatusId = @currentStatus))
 					AND @currentStatus != 1
 		BEGIN
 			SET @success = 0;
-			SET @errorMsg = 'You cannot open a purchase order with created item receipt or bill.';
+			SET @errorMsg = 'You cannot open a purchase order with created item receipt or Voucher.';
 		END
 	END
 	ELSE IF @statusId = 2 --PARTIAL
@@ -59,7 +58,7 @@ BEGIN
 		IF EXISTS(SELECT 1 FROM vyuPOStatus WHERE intPurchaseId = @poId AND dblQtyReceived > 0) AND @currentStatus != 2 AND @currentStatus != 6
 		BEGIN
 			SET @success = 0;
-			SET @errorMsg = 'Purchase order will automatically set to "Partial" when at least 1 item have been received/billed.';
+			SET @errorMsg = 'Purchase order will automatically set to "Partial" when at least 1 item have been received/Vouchered.';
 		END
 	END
 	ELSE IF @statusId = 3 --CLOSED
@@ -67,7 +66,7 @@ BEGIN
 		IF (@fullyReceived = 0 OR @fullyBilled = 0) AND @currentStatus != 3
 		BEGIN
 			SET @success = 0;
-			SET @errorMsg = 'Purchase order will automatically set to "Closed" when all items have been received/billed.';
+			SET @errorMsg = 'Purchase order will automatically set to "Closed" when all items have been received/Vouchered.';
 		END
 	END
 	ELSE IF @statusId = 4 --CANCELLED
@@ -82,7 +81,7 @@ BEGIN
 			IF (dbo.fnPOHasItemReceipt(@poId, 0) = 1 OR dbo.fnPOHasBill(@poId, 0) = 1)
 			BEGIN
 				SET @success = 0;
-				SET @errorMsg = 'You cannot cancel this PO. Please delete the open receipt/bill before cancelling.';
+				SET @errorMsg = 'You cannot cancel this PO. Please delete the open receipt/voucher before cancelling.';
 			END
 		END
 	END
@@ -99,7 +98,7 @@ BEGIN
 		IF @hasItemReceipt = 0 AND @hasBill = 0 AND @currentStatus != 7
 		BEGIN
 			SET @success = 0;
-			SET @errorMsg = 'This purchase order will automatically set to ''Pending'' after processing to item receipt or bill.';
+			SET @errorMsg = 'This purchase order will automatically set to ''Pending'' after processing to item receipt or voucher.';
 		END
 	END
 	ELSE

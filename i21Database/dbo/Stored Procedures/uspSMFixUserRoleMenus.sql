@@ -103,6 +103,13 @@ BEGIN TRY
 					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @VendorMenuId AND intUserRoleId = @UserRoleID
 				END
 
+				DECLARE @VendorContactListMenuId INT
+				SELECT  @VendorContactListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+				BEGIN
+					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @VendorContactListMenuId AND intUserRoleId = @UserRoleID
+				END
+
 				/* SALES */
 				DECLARE @AccountsReceivableParentMenuId INT
 				SELECT @AccountsReceivableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0

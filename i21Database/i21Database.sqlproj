@@ -3414,6 +3414,29 @@
     <Build Include="dbo\Stored Procedures\uspMFGetForecastDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetCleanUncleanWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessGrainStorage.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualCostingTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistribution.sql" />
+    <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotItemChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateContactAdmin.sql" />
+    <Build Include="dbo\Tables\tblMFItemGroup.sql" />
+    <Build Include="dbo\Tables\tblMFItemContamination.sql" />
+    <Build Include="dbo\Tables\tblMFItemContaminationDetail.sql" />
+    <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteCategory.sql" />
+    <Build Include="dbo\Functions\fnEMGetCustomerTransportQuoteItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetWeightLoss.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransferProcessMovement.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotByStorageLocation.sql" />
+    <Build Include="dbo\Tables\tblSMEvents.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotsFromReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptFromContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentFromContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerFromInboundShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptFromContainer.sql" />
+    <Build Include="dbo\Views\vyuMFGetTraceabilityObject.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
