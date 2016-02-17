@@ -3791,63 +3791,65 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         };
                         currentVM.tblICInventoryReceiptItems().add(newRecord);
 
-                        ContractStore.load({
-                            filters: [
-                                {
-                                    column: 'intContractDetailId',
-                                    value: order.get('intLineNo'),
-                                    conjunction: 'and'
-                                },
-                                {
-                                    column: 'intContractHeaderId',
-                                    value: order.get('intOrderId'),
-                                    conjunction: 'and'
-                                }
-                            ],
-                            callback: function (result) {
-                                if (result) {
-                                    Ext.each(result, function (contract) {
-                                        var contractCosts = contract.get('tblCTContractCosts');
-                                        if (contractCosts) {
-                                            Ext.each(contractCosts, function (otherCharge) {
-                                                var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
-                                                var exists = Ext.Array.findBy(receiptCharges, function (row) {
-                                                    if ((row.get('intContractId') === order.get('intOrderId')
-                                                        && row.get('intChargeId') === otherCharge.intItemId)) {
-                                                        return true;
+                        if (ReceiptType === 'Purchase Contract') {
+                            ContractStore.load({
+                                filters: [
+                                    {
+                                        column: 'intContractDetailId',
+                                        value: order.get('intLineNo'),
+                                        conjunction: 'and'
+                                    },
+                                    {
+                                        column: 'intContractHeaderId',
+                                        value: order.get('intOrderId'),
+                                        conjunction: 'and'
+                                    }
+                                ],
+                                callback: function (result) {
+                                    if (result) {
+                                        Ext.each(result, function (contract) {
+                                            var contractCosts = contract.get('tblCTContractCosts');
+                                            if (contractCosts) {
+                                                Ext.each(contractCosts, function (otherCharge) {
+                                                    var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
+                                                    var exists = Ext.Array.findBy(receiptCharges, function (row) {
+                                                        if ((row.get('intContractId') === order.get('intOrderId')
+                                                            && row.get('intChargeId') === otherCharge.intItemId)) {
+                                                            return true;
+                                                        }
+                                                    });
+
+                                                    if (!exists) {
+                                                        var newCost = Ext.create('Inventory.model.ReceiptCharge', {
+                                                            intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
+                                                            intContractId: order.get('intOrderId'),
+                                                            intChargeId: otherCharge.intItemId,
+                                                            ysnInventoryCost: false,
+                                                            strCostMethod: otherCharge.strCostMethod,
+                                                            dblRate: otherCharge.dblRate,
+                                                            dblExchangeRate: otherCharge.dblFx,
+                                                            intCostUOMId: otherCharge.intItemUOMId,
+                                                            intEntityVendorId: otherCharge.intVendorId,
+                                                            dblAmount: 0,
+                                                            strAllocateCostBy: '',
+                                                            ysnAccrue: otherCharge.ysnAccrue,
+                                                            ysnPrice: otherCharge.ysnPrice,
+                                                            strItemNo: otherCharge.strItemNo,
+                                                            intCurrencyId: otherCharge.intCurrencyId,
+                                                            strCurrency: otherCharge.strCurrency,
+                                                            strCostUOM: otherCharge.strUOM,
+                                                            strVendorId: otherCharge.strVendorName,
+                                                            strContractNumber: order.get('strOrderNumber')
+                                                        });
+                                                        currentVM.tblICInventoryReceiptCharges().add(newCost);
                                                     }
                                                 });
-
-                                                if (!exists) {
-                                                    var newCost = Ext.create('Inventory.model.ReceiptCharge', {
-                                                        intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
-                                                        intContractId: order.get('intOrderId'),
-                                                        intChargeId: otherCharge.intItemId,
-                                                        ysnInventoryCost: false,
-                                                        strCostMethod: otherCharge.strCostMethod,
-                                                        dblRate: otherCharge.dblRate,
-                                                        dblExchangeRate: otherCharge.dblFx,
-                                                        intCostUOMId: otherCharge.intItemUOMId,
-                                                        intEntityVendorId: otherCharge.intVendorId,
-                                                        dblAmount: 0,
-                                                        strAllocateCostBy: '',
-                                                        ysnAccrue: otherCharge.ysnAccrue,
-                                                        ysnPrice: otherCharge.ysnPrice,
-                                                        strItemNo: otherCharge.strItemNo,
-                                                        intCurrencyId: otherCharge.intCurrencyId,
-                                                        strCurrency: otherCharge.strCurrency,
-                                                        strCostUOM: otherCharge.strUOM,
-                                                        strVendorId: otherCharge.strVendorName,
-                                                        strContractNumber: order.get('strOrderNumber')
-                                                    });
-                                                    currentVM.tblICInventoryReceiptCharges().add(newCost);
-                                                }
-                                            });
-                                        }
-                                    });
+                                            }
+                                        });
+                                    }
                                 }
-                            }
-                        })
+                            });
+                        }
                     });
                     search.close();
                     win.context.data.saveRecord();
