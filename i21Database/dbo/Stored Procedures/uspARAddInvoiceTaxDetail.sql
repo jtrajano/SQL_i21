@@ -110,7 +110,7 @@ BEGIN TRY
 		,[intTaxClassId]
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
-		,[numRate]
+		,[dblRate]
 		,[intSalesTaxAccountId]
 		,[dblTax]
 		,[dblAdjustedTax]
@@ -127,7 +127,7 @@ BEGIN TRY
 		,intTaxClassId			= CASE WHEN ISNULL(@TaxClassId,0) <> 0 THEN @TaxClassId ELSE [intTaxClassId] END
 		,strTaxableByOtherTaxes	= CASE WHEN ISNULL(@TaxableByOtherTaxes,'') <> '' THEN ISNULL(@TaxableByOtherTaxes,'') ELSE ISNULL([strTaxableByOtherTaxes],'') END
 		,strCalculationMethod	= CASE WHEN ISNULL(@CalculationMethod,'') <> '' THEN @CalculationMethod ELSE TRD.[strCalculationMethod] END
-		,numRate				= CASE WHEN ISNULL(@Rate,0) <> 0 THEN @Rate ELSE TRD.numRate END
+		,dblRate				= CASE WHEN ISNULL(@Rate,0) <> 0 THEN @Rate ELSE TRD.dblRate END
 		,intSalesTaxAccountId	= CASE WHEN ISNULL(@SalesTaxAccountId,0) <> 0 THEN @SalesTaxAccountId ELSE intSalesTaxAccountId END
 		,dblTax					= ISNULL(@Tax, @ZeroDecimal)
 		,dblAdjustedTax			= ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal))
