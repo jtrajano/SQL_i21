@@ -3462,6 +3462,13 @@
     <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
     <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReopenScaleTicket.sql" />
+    <Build Include="dbo\Tables\tblCTReassign.sql" />
+    <Build Include="dbo\Tables\tblCTReassignDetail.sql" />
+    <Build Include="dbo\Tables\tblCTReassignAllocation.sql" />
+    <Build Include="dbo\Tables\tblCTReassignPricing.sql" />
+    <Build Include="dbo\Tables\tblCTReassignSummary.sql" />
+    <Build Include="dbo\Tables\tblCTReassignFuture.sql" />
+    <Build Include="dbo\Views\vyuCTReassign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
