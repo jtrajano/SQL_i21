@@ -47,7 +47,7 @@ IF ISNULL(@ysnPost, 0) = 0
 							,GETDATE() as dtmDate
 							,@intEntityId
 							,@strJournalType
-					FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@ysnPost)
+					FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@strJournalType,@ysnPost)
 					OUTER APPLY(SELECT TOP 1 B.intJournalId,B.strJournalId FROM @tmpPostJournals A JOIN tblGLJournal B ON A.intJournalId = B.intJournalId) j
 			END
 
@@ -85,7 +85,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
 			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intEntityId,@strJournalType
 			FROM 
-			(SELECT * FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@ysnPost))tmpBatchResults
+			(SELECT * FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@strJournalType,@ysnPost))tmpBatchResults
 			LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalId = tblB.intJournalId
 	END
 
@@ -545,3 +545,4 @@ Post_Rollback:
 	GOTO Post_Exit
 
 Post_Exit:
+
