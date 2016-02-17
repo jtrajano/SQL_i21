@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspSMGetStartingNumber
 	@intStartingNumberId INT = NULL,
-	@intCompanyLocationId INT = NULL,
-	@strID	NVARCHAR(40) = NULL OUTPUT
+	@strID	NVARCHAR(40) = NULL OUTPUT,
+	@intCompanyLocationId INT = NULL
 AS
 
 DECLARE @locationNumber VARCHAR(5)
