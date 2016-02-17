@@ -24,7 +24,7 @@ BEGIN
 END
 
 -- Assemble the string ID. 
-SELECT	@strID = strPrefix + @locationNumber + CAST(intNumber AS NVARCHAR(20))
+SELECT	@strID = @locationNumber + strPrefix + CAST(intNumber AS NVARCHAR(20))
 FROM	tblSMStartingNumber
 WHERE	intStartingNumberId = @intStartingNumberId
 
