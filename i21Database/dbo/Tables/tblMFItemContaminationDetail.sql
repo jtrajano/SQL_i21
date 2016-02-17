@@ -13,6 +13,6 @@
 		intItemContaminationId
 		,intItemGroupId
 		)
-	,CONSTRAINT FK_tblMFItemContaminationDetail_tblMFItemContamination_intItemContaminationId FOREIGN KEY (intItemContaminationId) REFERENCES tblMFItemContamination(intItemContaminationId)
+	,CONSTRAINT FK_tblMFItemContaminationDetail_tblMFItemContamination_intItemContaminationId FOREIGN KEY (intItemContaminationId) REFERENCES tblMFItemContamination(intItemContaminationId) ON DELETE CASCADE
 	,CONSTRAINT FK_tblMFItemContaminationDetail_tblMFItemGroup_intItemGroupId FOREIGN KEY (intItemGroupId) REFERENCES tblMFItemGroup(intItemGroupId)
 	)
