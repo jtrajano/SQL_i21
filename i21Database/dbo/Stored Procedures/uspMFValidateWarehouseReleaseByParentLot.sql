@@ -24,6 +24,7 @@ BEGIN TRY
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strParentLotNumber
 		AND intLocationId = @intLocationId
+		AND dblQty>0
 
 	IF @intLotId IS NULL
 	BEGIN
@@ -35,6 +36,7 @@ BEGIN TRY
 		FROM dbo.tblICLot
 		WHERE intParentLotId = @intParentLotId
 			AND intLocationId = @intLocationId
+			AND dblQty>0
 	END
 
 	SELECT @intManufacturingProcessId =intManufacturingProcessId
