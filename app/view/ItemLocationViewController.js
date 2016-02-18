@@ -283,10 +283,21 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'DepositPLU');
     },
 
+    onLocationSelect: function (combo, records) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            current.set('intSubLocationId', null);
+            current.set('intStorageLocationId', null);
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboLocation": {
-                drilldown: this.onLocationDrilldown
+                drilldown: this.onLocationDrilldown,
+                select: this.onLocationSelect
             },
             "#cboDefaultVendor": {
                 drilldown: this.onVendorDrilldown
