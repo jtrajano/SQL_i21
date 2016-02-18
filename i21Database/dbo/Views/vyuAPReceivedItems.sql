@@ -334,6 +334,55 @@ FROM
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
+
+	UNION ALL
+
+	SELECT
+		[intEntityVendorId]							=	CC.intVendorId
+		,[dtmDate]									=	CD.dtmStartDate
+		,[strReference]								=	'' --?
+		,[strSourceNumber]							=	LTRIM(CD.strContractNumber)
+		,[strPurchaseOrderNumber]					=	NULL
+		,[intPurchaseDetailId]						=	NULL
+		,[intItemId]								=	CC.intItemId
+		,[strMiscDescription]						=	CC.strItemDescription
+		,[strItemNo]								=	CC.strItemNo
+		,[strDescription]							=	CC.strItemDescription
+		,[intPurchaseTaxGroupId]					=	NULL
+		,[dblOrderQty]								=	CD.dblAvailableQty
+		,[dblPOOpenReceive]							=	0
+		,[dblOpenReceive]							=	CD.dblAvailableQty
+		,[dblQuantityToBill]						=	CD.dblAvailableQty
+		,[dblQuantityBilled]						=	0
+		,[intLineNo]								=	CD.intContractDetailId
+		,[intInventoryReceiptItemId]				=	NULL
+		,[intInventoryReceiptChargeId]				=	NULL
+		,[dblUnitCost]								=	CD.dblCashPrice
+		,[dblTax]									=	0
+		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strName]									=	CC.strVendorName
+		,[strVendorId]								=	LTRIM(CC.intVendorId)
+		,[strShipVia]								=	NULL
+		,[strTerm]									=	NULL
+		,[strContractNumber]						=	CD.strContractNumber
+		,[strBillOfLading]							=	NULL
+		,[intContractHeaderId]						=	CD.intContractHeaderId
+		,[intContractDetailId]						=	CD.intContractDetailId
+		,[intScaleTicketId]							=	NULL
+		,[strScaleTicketNumber]						=	NULL
+		,[intShipmentContractQtyId]					=	NULL
+		,[intUnitMeasureId]							=	CC.intUnitMeasureId
+		,[intWeightUOMId]							=	CD.intNetWeightUOMId
+		,[intCostUOMId]								=	CC.intItemUOMId
+		,[dblNetWeight]								=	ISNULL(CD.dblNetWeight,0)      
+		,[strCostUOM]								=	CC.strUOM
+		,[strgrossNetUOM]							=	CC.strUOM
+		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
+	FROM vyuCTContractCostView		CC
+	JOIN vyuCTContractDetailView	CD	ON CC.intContractDetailId = CC.intContractDetailId
+	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = CC.intItemId and ItemLoc.intLocationId = CD.intCompanyLocationId
+	WHERE CD.intContractDetailId NOT IN (SELECT IsNull(intContractDetailId, 0) FROM tblAPBillDetail)
 ) Items
 
 
