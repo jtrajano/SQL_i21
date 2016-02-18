@@ -639,6 +639,7 @@ BEGIN TRY
 		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
 	END
 	
+	BEGIN
 	--INSERT INTO @ItemsForItemReceipt (
 	--			 intItemId
 	--			,intItemLocationId
@@ -707,20 +708,20 @@ BEGIN TRY
 		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 
-		BEGIN
-	   	SELECT	@ysnDPStorage = ST.ysnDPOwnedType
-		FROM	dbo.tblGRStorageType ST	        
-		WHERE	ST.intStorageScheduleTypeId = @intGRStorageId
-		IF @ysnDPStorage = 1
-		BEGIN
-			 EXEC dbo.uspCTUpdationFromTicketDistribution 
-			 @intTicketId
-			,@intEntityId
-			,@dblNetUnits
-			,@intDPContractId
-			,@intUserId
-			,1
-		END
+		--BEGIN
+	 --  	SELECT	@ysnDPStorage = ST.ysnDPOwnedType
+		--FROM	dbo.tblGRStorageType ST	        
+		--WHERE	ST.intStorageScheduleTypeId = @intGRStorageId
+		--IF @ysnDPStorage = 1
+		--BEGIN
+		--	 EXEC dbo.uspCTUpdationFromTicketDistribution 
+		--	 @intTicketId
+		--	,@intEntityId
+		--	,@dblNetUnits
+		--	,@intDPContractId
+		--	,@intUserId
+		--	,1
+		--END
 	END
 	
 	CONTINUEISH:
