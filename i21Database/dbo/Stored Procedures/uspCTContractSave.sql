@@ -42,6 +42,7 @@ BEGIN TRY
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
 	END
 	
+	EXEC uspCTUpdateAdditionalCost @intContractHeaderId
 
 END TRY
 
