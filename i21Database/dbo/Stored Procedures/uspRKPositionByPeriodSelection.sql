@@ -821,11 +821,12 @@ update @FinalList set intOrderByOne=16 Where strSubHeading = 'Net Futures'
 update @FinalList set intOrderByOne=17 Where strSubHeading = 'Cash Exposure'
 update @FinalList set intOrderByOne=18 Where strSubHeading = 'Basis Exposure'
 update @FinalList set intOrderByTwo=1 Where strSecondSubHeading ='Purchase Quantity'
+update @FinalList set intOrderByTwo=1 Where strSecondSubHeading ='Sale Quantity'
 update @FinalList set intOrderByTwo=2 Where strSecondSubHeading ='Wt./Avg Futures'
 update @FinalList set intOrderByTwo=3 Where strSecondSubHeading ='Wt./Avg Basis'
 update @FinalList set intOrderByTwo=4 Where strSecondSubHeading ='Wt./Avg Cash'
 update @FinalList set intOrderByTwo=5 Where strSecondSubHeading ='Wt./Avg Freight'
-update @FinalList set intOrderByTwo=6 Where strSecondSubHeading not in('Purchase Quantity','Wt./Avg Futures','Wt./Avg Basis','Wt./Avg Cash','Wt./Avg Freight')
+--update @FinalList set intOrderByTwo=6 Where strSecondSubHeading not in('Purchase Quantity','Wt./Avg Futures','Wt./Avg Basis','Wt./Avg Cash','Wt./Avg Freight')
 
 DELETE @List
 INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate) 

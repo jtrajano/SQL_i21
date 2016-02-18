@@ -22,6 +22,7 @@ Type the overview for the table here.
 		[intShipFromLocationId] INT NOT NULL, 
 		[intEntityCustomerId] INT NULL, 
 		[intShipToLocationId] INT NULL, 
+		[intShipToCompanyLocationId] INT NULL, 
 		[intFreightTermId] INT NOT NULL, 
 		[strBOLNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intShipViaId] INT NULL, 
@@ -42,11 +43,12 @@ Type the overview for the table here.
 		[intCreatedUserId] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryShipment] PRIMARY KEY ([intInventoryShipmentId]), 
-		CONSTRAINT [FK_tblICInventoryShipment_tblSMCompanyLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+		--CONSTRAINT [FK_tblICInventoryShipment_tblSMCompanyLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_ShipFromLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblEntityLocation] FOREIGN KEY ([intShipToLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]), 
+		CONSTRAINT [FK_tblICInventoryShipment_ShipToCompanyLocation] FOREIGN KEY ([intShipToCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [AK_tblICInventoryShipment_strShipmentNumber] UNIQUE ([strShipmentNumber]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
 	)

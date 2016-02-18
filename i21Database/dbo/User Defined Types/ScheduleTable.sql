@@ -35,4 +35,14 @@
 	,ysnPicked bit
 	,intLocationId int
 	,intDemandRatio int
+	,dtmEarliestDate DATETIME
+	,dtmLatestDate DATETIME
+	,dtmTargetDate DATETIME
+	,intTargetDateId int
+	,intTargetPreferenceCellId INT
+	,intFirstPreferenceCellId INT
+	,intSecondPreferenceCellId INT
+	,intThirdPreferenceCellId INT
+	,intNoOfFlushes int
+	,intScheduleId int
 )

@@ -16,7 +16,7 @@ AS
 			CD.dblScheduleQty,					CD.strPackingDescription,		CD.intPriceItemUOMId,
 			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
 			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
-			CD.intShipperId,													CD.strVendorLotID,
+			CD.intShipperId,					CD.intNetWeightUOMId,			CD.strVendorLotID,
 			CD.strInvoiceNo,					CD.dblNoOfLots,					CD.intUnitsPerLayer,
 			CD.intLayersPerPallet,				CD.dtmEventStartDate,			CD.dtmPlannedAvailabilityDate,
 			CD.dtmUpdatedAvailabilityDate,		CD.intBookId,					CD.intSubBookId,
@@ -27,6 +27,7 @@ AS
 			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
 			CD.strDestinationPointType,			CD.intItemContractId,			CD.intNoOfLoad,
 			CD.dblQuantityPerLoad,				CD.strReference,				CD.intStorageScheduleRuleId,
+			CD.dblNetWeight,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
