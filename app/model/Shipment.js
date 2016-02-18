@@ -44,25 +44,45 @@ Ext.define('Inventory.model.Shipment', {
 
         { name: 'strOrderType', type: 'string'},
         { name: 'strShipFromAddress', type: 'string'},
-        { name: 'strShipToAddress', type: 'string'}
+        { name: 'strShipToAddress', type: 'string'},
+        { name: 'intShipToCompanyLocationId', type: 'int', allowNull: true }
     ],
 
     validators: [
         {type: 'presence', field: 'dtmShipDate'},
         {type: 'presence', field: 'intOrderType'},
         {type: 'presence', field: 'intShipFromLocationId'},
-        {type: 'presence', field: 'intShipToLocationId'},
+        //{type: 'presence', field: 'intShipToLocationId'},
         {type: 'presence', field: 'intFreightTermId'}
     ],
 
     validate: function(options) {
         var errors = this.callParent(arguments);
+
+        // If not Transfer order, require to add a customer.
         if (this.get('intOrderType') !== 3 && iRely.Functions.isEmpty(this.get('intEntityCustomerId'))) {
             errors.add({
                 field: 'intEntityCustomerId',
                 message: 'Customer must not be empty.'
             })
         }
+
+        // If not Transfer order, require to add a Ship To Location.
+        if (this.get('intOrderType') !== 3 && iRely.Functions.isEmpty(this.get('intShipToLocationId'))) {
+            errors.add({
+                field: 'intShipToLocationId',
+                message: 'Ship To must not be empty.'
+            })
+        }
+
+        // If it is a Transfer Order, require the Ship To Company Location Id
+        if (this.get('intOrderType') === 3 && iRely.Functions.isEmpty(this.get('intShipToCompanyLocationId'))) {
+            errors.add({
+                field: 'intShipToCompanyLocationId',
+                message: 'Ship To must not be empty.'
+            })
+        }
+
         return errors;
     }
 });

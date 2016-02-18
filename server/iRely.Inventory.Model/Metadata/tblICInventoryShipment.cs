@@ -46,6 +46,7 @@ namespace iRely.Inventory.Model
         public bool? ysnPosted { get; set; }
         public int? intEntityId { get; set; }
         public int? intCreatedUserId { get; set; }
+        public int? intShipToCompanyLocationId { get; set; }
 
         private string _shipFromAddress;
         [NotMapped]

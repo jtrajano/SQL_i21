@@ -109,6 +109,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         shipToLocation: {
             type: 'emlocationbuffered'
         },
+        shipToCompanyLocation: {
+            type: 'companylocationbuffered'
+        },
         shipVia: {
             type: 'emshipviabuffered'
         },
@@ -410,6 +413,22 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 default :
                     return 'Add Orders';
                     break;
+            }
+        },
+        hideShipToLocation: function(get) {
+            if (get('current.intOrderType') === 3) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+        hideShipToCompanyLocation: function(get) {
+            if (get('current.intOrderType') === 3) {
+                return false;
+            }
+            else {
+                return true;
             }
         }
     }

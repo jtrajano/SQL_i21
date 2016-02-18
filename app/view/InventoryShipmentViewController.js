@@ -210,7 +210,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 defaultFilters: [{
                     column: 'intEntityId',
                     value: '{current.intEntityCustomerId}'
-                }]
+                }],
+                hidden: '{hideShipToLocation}'
+            },
+            cboShipToCompanyAddress: {
+                value: '{current.intShipToCompanyLocationId}',
+                store: '{shipToCompanyLocation}',
+                readOnly: '{current.ysnPosted}',
+                defaultFilters: [
+                    {
+                        column: 'intCompanyLocationId',
+                        value: '{current.intShipFromLocationId}',
+                        conjunction: 'and',
+                        condition: 'noteq'
+                    }
+                ],
+                hidden: '{hideShipToCompanyLocation}'
             },
             txtShipToAddress: '{current.strShipToAddress}',
             txtDeliveryInstructions: {
@@ -698,6 +713,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strShipFromAddress', records[0].get('strAddress'));
             }
             else if (combo.itemId === 'cboShipToAddress'){
+                current.set('strShipToAddress', records[0].get('strAddress'));
+            }
+            else if (combo.itemId === 'cboShipToCompanyAddress'){
                 current.set('strShipToAddress', records[0].get('strAddress'));
             }
         }
@@ -2132,6 +2150,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         showAddScreen();
     },
 
+    onOrderTypeSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current){
+            current.set('intShipToCompanyLocationId', null);
+            current.set('intShipToLocationId', null);
+            current.set('strShipToAddress', null);
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -2199,6 +2231,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboChargeCurrency": {
                 select: this.onChargeSelect
+            },
+            "#cboShipToCompanyAddress": {
+                select: this.onShipLocationSelect
+            },
+            "#cboOrderType": {
+                select: this.onOrderTypeSelect
             }
         })
     }
