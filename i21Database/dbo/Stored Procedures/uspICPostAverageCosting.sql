@@ -231,7 +231,7 @@ BEGIN
 			IF @QtyOffset IS NOT NULL
 			BEGIN 				
 				-- Add Write-Off Sold				
-				SELECT @dblValue = @QtyOffset * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
+				SELECT @dblValue = @QtyOffset * ISNULL(@CostUsed, 0) --dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
