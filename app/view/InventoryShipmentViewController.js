@@ -713,6 +713,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             else if (combo.itemId === 'cboShipToAddress'){
                 current.set('strShipToAddress', records[0].get('strAddress'));
             }
+            else if (combo.itemId === 'cboShipToCompanyAddress'){
+                current.set('strShipToAddress', records[0].get('strAddress'));
+            }
         }
     },
 
