@@ -969,7 +969,6 @@ IF @post = 1
 			WHERE
 				Detail.dblTotal <> @ZeroDecimal
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
