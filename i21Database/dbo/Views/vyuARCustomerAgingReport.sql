@@ -18,13 +18,13 @@ SELECT A.strCustomerName
 	 , dblPrepaids			= 0.000000
 FROM
 
-(SELECT I.dtmDate
+(SELECT dtmDate				= dtmPostDate
 	 , I.intInvoiceId
-	 , dblAmountPaid	= 0   
-     , dblInvoiceTotal	= ISNULL(I.dblInvoiceTotal,0)
-	 , dblAmountDue		= ISNULL(I.dblAmountDue,0)
-	 , dblDiscount		= 0
-	 , dblInterest		= 0
+	 , dblAmountPaid		= 0   
+     , dblInvoiceTotal		= ISNULL(I.dblInvoiceTotal,0)
+	 , dblAmountDue			= ISNULL(I.dblAmountDue,0)
+	 , dblDiscount			= 0
+	 , dblInterest			= 0
 	 , I.strTransactionType    
 	 , I.intEntityCustomerId
 	 , I.dtmDueDate    
@@ -46,7 +46,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
   AND I.strTransactionType = 'Invoice'
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) <= GETDATE()
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) <= GETDATE()
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -88,7 +88,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
- AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) <= GETDATE()
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -97,7 +97,7 @@ UNION ALL
       
 SELECT I.dtmPostDate      
      , I.intInvoiceId
-	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) + ISNULL(PD.dblDiscount,0) - ISNULL(PD.dblInterest,0) END
+	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) END
      , dblInvoiceTotal		= 0    
 	 , I.dblAmountDue     
 	 , dblDiscount			= ISNULL(I.dblDiscount, 0)
@@ -123,7 +123,7 @@ FROM tblARInvoice I
 	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
- AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) <= GETDATE()
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -136,7 +136,7 @@ LEFT JOIN
   , intInvoiceId  
   , dblInvoiceTotal
   , dblAmountPaid
-  , (dblInvoiceTotal) - (dblAmountPaid) AS dblTotalDue
+  , (dblInvoiceTotal) - (dblAmountPaid) - (dblDiscount) + (dblInterest) AS dblTotalDue
   , dblDiscount
   , dblAvailableCredit
   , CASE WHEN DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,GETDATE())<=10
@@ -164,7 +164,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType = 'Invoice'
- AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) <= GETDATE()
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -192,7 +192,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
- AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) <= GETDATE()
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')
@@ -200,7 +200,7 @@ WHERE I.ysnPosted = 1
 UNION ALL      
       
 SELECT I.intInvoiceId
-  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) + ISNULL(PD.dblDiscount,0) - ISNULL(PD.dblInterest,0) END
+  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) END
   , dblInvoiceTotal			= 0
   , dblAmountDue			= 0
   , dblDiscount				= ISNULL(I.dblDiscount, 0)
@@ -214,7 +214,7 @@ FROM tblARInvoice I
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
- AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) <= GETDATE()
+ AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId

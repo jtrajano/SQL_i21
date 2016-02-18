@@ -109,7 +109,7 @@ SELECT dtmDate				= I.dtmPostDate
 	 , I.intCompanyLocationId
 	 , I.intInvoiceId
 	 , I.strBOLNumber
-	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) + ISNULL(PD.dblDiscount,0) - ISNULL(PD.dblInterest,0) END
+	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) END
      , dblInvoiceTotal		= 0    
 	 , I.dblAmountDue     
 	 , dblDiscount			= ISNULL(I.dblDiscount, 0)    
@@ -149,7 +149,7 @@ LEFT JOIN
   , strBOLNumber
   , dblInvoiceTotal
   , dblAmountPaid
-  , (dblInvoiceTotal) - (dblAmountPaid) AS dblTotalDue
+  , (dblInvoiceTotal) - (dblAmountPaid) - (dblDiscount) + (dblInterest) AS dblTotalDue
   , dblDiscount
   , dblInterest
   , dblAvailableCredit
@@ -222,7 +222,7 @@ UNION ALL
 SELECT I.strInvoiceNumber
   , I.intInvoiceId
   , I.strBOLNumber
-  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) + ISNULL(PD.dblDiscount,0) - ISNULL(PD.dblInterest,0) END
+  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) END
   , dblInvoiceTotal			= 0
   , dblAmountDue			= 0
   , dblDiscount				= ISNULL(I.dblDiscount, 0)
