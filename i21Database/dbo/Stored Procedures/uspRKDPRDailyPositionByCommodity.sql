@@ -20,8 +20,7 @@ SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
               
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then OffSite else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
-   dblCollatralSales  + SlsBasisDeliveries         
-            AS CashExposure,              
+   dblCollatralSales  + SlsBasisDeliveries + DeltaOption AS CashExposure,              
    ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty,
       (invQty)- isnull(ReserveQty,0)  + isnull(dblGrainBalance,0)  AS InHouse     
 FROM(  
@@ -81,10 +80,10 @@ SELECT DISTINCT c.intCommodityId,
    WHERE otr.intCommodityId=c.intCommodityId GROUP BY rfm.intFutureMarketId,rfm.dblContractSize) dblContractSize     
               
  ,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
-     WHERE otr.strBuySell='Sell' AND otr.intCommodityId=c.intCommodityId) FutSBalTransQty     
+     WHERE otr.strBuySell='Sell' and intInstrumentTypeId=1 AND otr.intCommodityId=c.intCommodityId) FutSBalTransQty     
   
  ,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
-  WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId) as FutLBalTransQty,          
+  WHERE otr.strBuySell='Buy' and intInstrumentTypeId=1 AND otr.intCommodityId=c.intCommodityId) as FutLBalTransQty,          
            
 (SELECT SUM(psd.dblMatchQty) from tblRKMatchFuturesPSHeader psh            
 JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId            
@@ -122,8 +121,25 @@ WHERE intCommodityId=c.intCommodityId) FutMatchedQty
  INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId  
  WHERE ch.intCommodityId = c.intCommodityId) as SlsBasisDeliveries ,
  
- (SELECT SUM(Balance)	FROM vyuGRGetStorageDetail WHERE ysnCustomerStorage <> 1 AND intCommodityId = c.intCommodityId ) dblGrainBalance   
-           
+ (SELECT SUM(Balance)	FROM vyuGRGetStorageDetail WHERE ysnCustomerStorage <> 1 AND intCommodityId = c.intCommodityId ) dblGrainBalance,
+ 
+ (SELECT sum(isnull(dblNoOfContract,0)) dblNoOfContract from (SELECT  (CASE WHEN ft.strBuySell = 'Buy' THEN (
+						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
+						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) END * (
+						SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						ORDER BY dtmPriceDate DESC
+				))*m.dblContractSize  AS dblNoOfContract
+	FROM tblRKFutOptTransaction ft
+	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
+	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
+	WHERE ft.intCommodityId = 8 AND intFutOptTransactionId NOT IN (
+			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired))t
+	) DeltaOption       
 FROM tblICCommodity c              
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId              
 JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId and ysnDefault=1             
