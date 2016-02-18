@@ -100,7 +100,12 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             },
             cboProductCode: {
                 value: '{current.intProductCodeId}',
-                store: '{productCode}'
+                store: '{productCode}',
+                defaultFilters: [{
+                    column: 'intCompanyLocationId',
+                    value: '{current.intLocationId}',
+                    conjunction: 'and'
+                }]
             },
             txtPassportFuelId1: '{current.strPassportFuelId1}',
             txtPassportFuelId2: '{current.strPassportFuelId2}',
