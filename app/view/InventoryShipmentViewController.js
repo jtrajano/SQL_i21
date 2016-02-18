@@ -217,14 +217,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 value: '{current.intShipToCompanyLocationId}',
                 store: '{shipToCompanyLocation}',
                 readOnly: '{current.ysnPosted}',
-                defaultFilters: [
-                    {
-                        column: 'intCompanyLocationId',
-                        value: '{current.intShipFromLocationId}',
-                        conjunction: 'and',
-                        condition: 'noteq'
-                    }
-                ],
+                defaultFilters: [{
+                    column: 'intCompanyLocationId',
+                    value: '{current.intShipFromLocationId}',
+                    conjunction: 'and',
+                    condition: 'noteq'
+                }],
                 hidden: '{hideShipToCompanyLocation}'
             },
             txtShipToAddress: '{current.strShipToAddress}',
@@ -597,9 +595,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             enableComment: true,
             enableAudit: true,
             include: 'vyuICGetInventoryShipment, ' +
-                'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
-                'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
-                'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot',
+            'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
+            'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
+            'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot',
             createRecord: me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {
@@ -713,9 +711,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strShipFromAddress', records[0].get('strAddress'));
             }
             else if (combo.itemId === 'cboShipToAddress'){
-                current.set('strShipToAddress', records[0].get('strAddress'));
-            }
-            else if (combo.itemId === 'cboShipToCompanyAddress'){
                 current.set('strShipToAddress', records[0].get('strAddress'));
             }
         }
@@ -892,7 +887,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitPrice', records[0].get('dblSalePrice'));
-            current.set('intItemUOMId', records[0].get('intItemUnitMeasureId'));
         }
     },
 
@@ -1825,21 +1819,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onPrintBOLClick: function(button, e, eOpts) {
         var win = button.up('window');
+        var vm = win.viewModel;
+        var current = vm.data.current;
+
+        var filters = [{
+            Name: 'strShipmentNumber',
+            Type: 'string',
+            Condition: 'EQUAL TO',
+            From: current.get('strShipmentNumber'),
+            Operator: 'AND'
+        }];
 
         // Save has data changes first before doing the post.
         win.context.data.saveRecord({
             callbackFn: function() {
-                var vm = win.viewModel;
-                var current = vm.data.current;
-
-                var filters = [{
-                    Name: 'strShipmentNumber',
-                    Type: 'string',
-                    Condition: 'EQUAL TO',
-                    From: current.get('strShipmentNumber'),
-                    Operator: 'AND'
-                }];
-                
                 iRely.Functions.openScreen('Reporting.view.ReportViewer', {
                     selectedReport: 'BillOfLading',
                     selectedGroup: 'Inventory',
