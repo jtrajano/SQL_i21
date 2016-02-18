@@ -24,6 +24,7 @@ BEGIN TRY
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strLotNumber
 		AND intLocationId = @intLocationId
+		AND dblQty>0
 
 	IF @intLotId IS NULL
 	BEGIN
