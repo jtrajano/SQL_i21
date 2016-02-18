@@ -44,13 +44,19 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @total AS INT
-DECLARE @DPStorage AS INT
+DECLARE @ysnDPStorage AS BIT
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
+END
+
+BEGIN
+	SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
+	FROM dbo.tblGRStorageType ST WHERE 
+	ST.strStorageTypeCode = @strDistributionOption
 END
 
 DECLARE @ErrMsg                    NVARCHAR(MAX),
@@ -155,7 +161,7 @@ BEGIN TRY
 			SELECT	@intTicketItemUOMId = UM.intItemUOMId
 				FROM	dbo.tblICItemUOM UM	
 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+			WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
 		END
 
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
@@ -194,7 +200,7 @@ BEGIN TRY
 				   -- example).
 				   IF	ISNULL(@intLoopContractId,0) != 0
 				   EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
-
+				   
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -233,9 +239,9 @@ BEGIN TRY
 			IF (@dblRemainingUnits = @dblNetUnits)
 			RETURN
 		END
-		UPDATE @LineItems set intTicketId = @intTicketId
-		--DELETE FROM @ItemsForItemReceipt
-					-- Get the items to process
+			UPDATE @LineItems set intTicketId = @intTicketId
+			--DELETE FROM @ItemsForItemReceipt
+			-- Get the items to process
 			INSERT INTO @ItemsForItemReceipt (
 				intItemId
 				,intItemLocationId
@@ -276,10 +282,43 @@ BEGIN TRY
 		END
 	ELSE
 	BEGIN
-		SELECT @DPStorage = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractId
-		IF (@DPStorage = 5)
-			BEGIN
-				INSERT INTO @ItemsForItemReceipt (
+	IF @ysnDPStorage = 1
+		BEGIN
+				INSERT INTO @LineItems (
+				intContractDetailId,
+				dblUnitsDistributed,
+				dblUnitsRemaining,
+				dblCost)
+				EXEC dbo.uspCTUpdationFromTicketDistribution 
+				 @intTicketId
+				,@intEntityId
+				,@dblNetUnits
+				,@intContractId
+				,@intUserId
+				,0
+
+				DECLARE @intDPContractId INT;
+				DECLARE @dblDPContractUnits NUMERIC(12,4);
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intContractDetailId, dblUnitsDistributed
+				FROM @LineItems;
+
+				OPEN intListCursor;
+
+				-- Initial fetch attempt
+				FETCH NEXT FROM intListCursor INTO @intDPContractId, @dblDPContractUnits;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+				   -- Here we do some kind of action that requires us to 
+				   -- process the table variable row-by-row. This example simply
+				   -- uses a PRINT statement as that action (not a very good
+				   -- example).
+				   IF	ISNULL(@intDPContractId,0) != 0
+				   EXEC uspCTUpdateScheduleQuantity @intDPContractId, @dblDPContractUnits, @intUserId, @intTicketId, 'Scale'
+				   
+				    INSERT INTO @ItemsForItemReceipt (
 					intItemId
 					,intItemLocationId
 					,intItemUOMId
@@ -298,11 +337,19 @@ BEGIN TRY
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage 
-				)
-				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intContractId
-			END
-		ELSE
-			BEGIN
+					)
+					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
+					EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
+
+				   -- Attempt to fetch next row from cursor
+				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				END;
+
+				CLOSE intListCursor;
+				DEALLOCATE intListCursor;
+		END
+	ELSE
+		BEGIN
 			INSERT INTO @ItemsForItemReceipt (
 					intItemId
 					,intItemLocationId
@@ -322,9 +369,9 @@ BEGIN TRY
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage 
-				)
-				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
-			END
+			)
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
+		END
 	END
 
 	-- Add the items to the item receipt 
