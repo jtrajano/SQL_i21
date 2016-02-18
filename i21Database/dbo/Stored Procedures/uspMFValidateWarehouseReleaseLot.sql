@@ -13,6 +13,7 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intAttributeId INT
 		,@strAttributeValue NVARCHAR(50)
+		,@intItemId int
 
 	IF @strLotNumber = ''
 		OR @strLotNumber IS NULL
@@ -29,6 +30,7 @@ BEGIN TRY
 	SELECT @intLotId = intLotId
 		,@dblQty = dblQty
 		,@intLotStatusId = intLotStatusId
+		,@intItemId=intItemId
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strLotNumber
 		AND intLocationId = @intLocationId
@@ -44,21 +46,21 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM dbo.tblMFWorkOrderProducedLot
-			WHERE intLotId = @intLotId
-			)
-	BEGIN
-		RAISERROR (
-				51054
-				,11
-				,1
-				,@strLotNumber
-				)
+	--IF NOT EXISTS (
+	--		SELECT 1
+	--		FROM dbo.tblMFWorkOrderProducedLot
+	--		WHERE intLotId = @intLotId
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			51054
+	--			,11
+	--			,1
+	--			,@strLotNumber
+	--			)
 
-		RETURN
-	END
+	--	RETURN
+	--END
 
 	IF @dblQty = 0
 		OR EXISTS (
@@ -112,27 +114,26 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @intManufacturingProcessId = intManufacturingProcessId
-	FROM tblMFWorkOrderProducedLot WPL
-	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-	WHERE WPL.intLotId = @intLotId
+	SELECT @intManufacturingProcessId =intManufacturingProcessId
+	FROM tblMFRecipe 
+	WHERE intItemId=@intItemId AND intLocationId=@intLocationId AND ysnActive =1
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM dbo.tblMFRecipe R
-			JOIN dbo.tblICLot L ON L.intItemId = R.intItemId
-				AND R.intLocationId = @intLocationId
-				AND R.intManufacturingProcessId = @intManufacturingProcessId
-			)
-	BEGIN
-		RAISERROR (
-				51057
-				,11
-				,1
-				)
+	--IF NOT EXISTS (
+	--		SELECT 1
+	--		FROM dbo.tblMFRecipe R
+	--		JOIN dbo.tblICLot L ON L.intItemId = R.intItemId
+	--			AND R.intLocationId = @intLocationId
+	--			AND R.intManufacturingProcessId = @intManufacturingProcessId
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			51057
+	--			,11
+	--			,1
+	--			)
 
-		RETURN
-	END
+	--	RETURN
+	--END
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -144,10 +145,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
-	IF @strAttributeValue = 'False'
+	IF @strAttributeValue = 'False' 
 	BEGIN
-		SELECT W.intWorkOrderId
-			,W.strWorkOrderNo
+		SELECT ISNULL(W.intWorkOrderId,0) AS intWorkOrderId
+			,ISNULL(W.strWorkOrderNo,'') AS strWorkOrderNo
 			,L.intLocationId
 			,L.intParentLotId
 			,PL.strParentLotNumber
@@ -159,15 +160,16 @@ BEGIN TRY
 			,IU.intItemUOMId
 			,U.strUnitMeasure
 			,U.intUnitMeasureId
-			,W.intManufacturingProcessId
+			,R.intManufacturingProcessId
 			,@strAttributeValue as strWarehouseReleaseLotByBatch
 		FROM tblICLot L
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 		JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+		JOIN dbo.tblMFRecipe R ON R.intItemId=I.intItemId AND R.intLocationId=@intLocationId AND R.ysnActive =1
+		LEFT JOIN dbo.tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
+		LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 		WHERE L.intLotId = @intLotId
 	END
 END TRY
