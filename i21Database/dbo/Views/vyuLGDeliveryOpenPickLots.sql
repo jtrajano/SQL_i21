@@ -9,6 +9,7 @@ AS
 			PL.intSubLocationId,
 			PL.intWeightUnitMeasureId,
 			EN.strName as strCustomer,
+			EN.strEntityNo as strCustomerNo,
 			CL.strLocationName,
 			CO.strDescription as strCommodity,
 			SubLocation.strSubLocationName as strWarehouse,

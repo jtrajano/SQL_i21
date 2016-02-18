@@ -47,7 +47,11 @@ SELECT PL.intPickLotDetailId,
   SaleUOM.strUnitType as strSaleUnitType,
   Lot.intOwnershipType,
   Lot.strOwnershipType,
-  Lot.dblAvailableQty
+  Lot.dblAvailableQty,
+  dblItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemUOMId = Lot.intItemUOMId),
+  dblWeightItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId),
+  PLH.strCustomerNo
+
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLots PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 LEFT JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
