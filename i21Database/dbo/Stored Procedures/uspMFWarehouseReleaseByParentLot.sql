@@ -24,6 +24,7 @@ BEGIN
 	FROM dbo.tblICLot L
 	WHERE L.intParentLotId = @intParentLotId
 		AND L.intLotStatusId = 3
+		AND L.dblQty>0
 
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFParentLot

@@ -61,6 +61,7 @@ BEGIN TRY
 		JOIN dbo.tblICParentLot PL ON L.intParentLotId = PL.intParentLotId
 		WHERE PL.strParentLotNumber = @strParentLotNumber
 			AND L.intLotStatusId = 3
+			AND L.dblQty>0 
 	END
 	ELSE
 	BEGIN
@@ -130,7 +131,7 @@ BEGIN TRY
 		JOIN dbo.tblMFRecipe R ON R.intItemId=I.intItemId AND R.intLocationId=@intLocationId AND R.ysnActive =1
 		LEFT JOIN dbo.tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
 		LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-		WHERE PL.strParentLotNumber = @strParentLotNumber
+		WHERE PL.strParentLotNumber = @strParentLotNumber AND L.dblQty>0 
 			AND L.intLotStatusId = 3
 		GROUP BY W.intWorkOrderId
 			,W.strWorkOrderNo
