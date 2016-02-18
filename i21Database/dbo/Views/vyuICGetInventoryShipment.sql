@@ -25,8 +25,9 @@ SELECT Shipment.intInventoryShipmentId
 , Customer.strCustomerNumber
 , strCustomerName = Customer.strName
 , Shipment.intShipToLocationId
+, Shipment.intShipToCompanyLocationId
 , strShipToLocation = ShipToLocation.strLocationName
-, strShipToAddress = ShipToLocation.strAddress
+, strShipToAddress = ISNULL(ShipToLocation.strAddress,ShipToCompanyLocation.strAddress) 
 , Shipment.intFreightTermId
 , FreightTerm.strFreightTerm
 , FreightTerm.strFobPoint
@@ -49,8 +50,9 @@ SELECT Shipment.intInventoryShipmentId
 , WarehouseInstruction.intWarehouseInstructionHeaderId
 FROM tblICInventoryShipment Shipment
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shipment.intShipFromLocationId
-	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Shipment.intEntityCustomerId
+	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Shipment.intEntityCustomerId	
 	LEFT JOIN tblEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Shipment.intShipToLocationId
+	LEFT JOIN tblSMCompanyLocation ShipToCompanyLocation ON ShipToCompanyLocation.intCompanyLocationId = Shipment.intShipToCompanyLocationId
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Shipment.intShipViaId
 	LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
 	LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
