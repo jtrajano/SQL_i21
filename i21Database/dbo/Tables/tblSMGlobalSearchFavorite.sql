@@ -1,0 +1,12 @@
+﻿CREATE TABLE [dbo].[tblSMGlobalSearchFavorite]
+(
+	[intGSFavoriteId] INT Identity(1,1) NOT NULL ,
+	[intGSIndexId] INT NOT NULL,
+	[intEntityId] INT NOT NULL,
+	dtmDateEntered DATETIME NOT NULL,
+	[intVisitCount] INT NOT NULL DEFAULT 0,
+	[intConcurrencyId] INT NOT NULL DEFAULT 0, 
+	CONSTRAINT [PK_tblSMGlobalSearchFavorite] Primary key clustered (intGSFavoriteId ASC),
+	CONSTRAINT [FK_tblSMGlobalSearchFavorite_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
+
+)
