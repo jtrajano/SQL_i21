@@ -853,6 +853,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
+                case 'Software':
                     this.data.current.set('intCommodityId', null);
                     return true;
                     break;
