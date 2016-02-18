@@ -12,32 +12,36 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intAttributeId INT
 		,@strAttributeValue NVARCHAR(50)
+		,@intItemId int
+
 	DECLARE @tblMFParentLot TABLE (
 		intRecordId INT identity(1, 1)
 		,strLotNumber NVARCHAR(50)
 		)
 
-	SELECT @intLotId = intLotId
+	SELECT @intLotId = intLotId,
+			@intItemId=intItemId
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strParentLotNumber
 		AND intLocationId = @intLocationId
 
 	IF @intLotId IS NULL
 	BEGIN
-		SELECT @intParentLotId = intParentLotId
+		SELECT @intParentLotId = intParentLotId,@intItemId=intItemId
 		FROM dbo.tblICParentLot
 		WHERE strParentLotNumber = @strParentLotNumber
 
-		SELECT @intLotId = intLotId
+		SELECT @intLotId = intLotId,@intItemId=intItemId
 		FROM dbo.tblICLot
 		WHERE intParentLotId = @intParentLotId
 			AND intLocationId = @intLocationId
 	END
 
-	SELECT @intManufacturingProcessId = intManufacturingProcessId
-	FROM tblMFWorkOrderProducedLot WPL
-	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-	WHERE WPL.intLotId = @intLotId
+	SELECT @intManufacturingProcessId =intManufacturingProcessId
+	FROM tblMFRecipe 
+	WHERE intItemId=@intItemId 
+	AND intLocationId=@intLocationId 
+	AND ysnActive =1
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -65,6 +69,7 @@ BEGIN TRY
 		FROM dbo.tblICLot L
 		WHERE L.strLotNumber = @strParentLotNumber
 			AND L.intLotStatusId = 3
+			AND L.dblQty>0 
 	END
 
 	IF NOT EXISTS (
@@ -102,8 +107,8 @@ BEGIN TRY
 
 	IF @strAttributeValue = 'True'
 	BEGIN
-		SELECT W.intWorkOrderId
-			,W.strWorkOrderNo
+		SELECT ISNULL(W.intWorkOrderId,0) AS intWorkOrderId
+			,ISNULL(W.strWorkOrderNo,'') AS strWorkOrderNo
 			,L.intLocationId
 			,L.intParentLotId
 			,PL.strParentLotNumber
@@ -115,15 +120,16 @@ BEGIN TRY
 			,IU.intItemUOMId
 			,U.strUnitMeasure
 			,U.intUnitMeasureId
-			,W.intManufacturingProcessId
+			,R.intManufacturingProcessId
 			,@strAttributeValue AS strWarehouseReleaseLotByBatch
 		FROM tblICLot L
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
-		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 		JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+		JOIN dbo.tblMFRecipe R ON R.intItemId=I.intItemId AND R.intLocationId=@intLocationId AND R.ysnActive =1
+		LEFT JOIN dbo.tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
+		LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 		WHERE PL.strParentLotNumber = @strParentLotNumber
 			AND L.intLotStatusId = 3
 		GROUP BY W.intWorkOrderId
@@ -136,7 +142,7 @@ BEGIN TRY
 			,IU.intItemUOMId
 			,U.strUnitMeasure
 			,U.intUnitMeasureId
-			,W.intManufacturingProcessId
+			,R.intManufacturingProcessId
 	END
 END TRY
 
