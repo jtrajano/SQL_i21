@@ -1137,6 +1137,21 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        itemId: 'pgeAudit',
+                                        layout: 'fit',
+                                        title: 'Audit Log',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'pgeAudit'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'auditlogtree'
+                                            }
+                                        ]
                                     }
                                 ]
                             }
