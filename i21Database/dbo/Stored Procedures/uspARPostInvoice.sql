@@ -49,6 +49,9 @@ DECLARE @InvalidInvoiceData TABLE  (
 	intTransactionId INT
 );
 
+DECLARE @PostDate AS DATETIME
+SET @PostDate = CAST(GETDATE() AS DATE)
+
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
 
@@ -1091,7 +1094,7 @@ IF @post = 1
 			)
 			--DEBIT Total
 			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
@@ -1155,7 +1158,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
@@ -1182,7 +1185,7 @@ IF @post = 1
 			--CREDIT MISC
 			UNION ALL 
 			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 													THEN
@@ -1205,7 +1208,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
 				,intJournalLineNo			= B.intInvoiceDetailId
@@ -1247,7 +1250,7 @@ IF @post = 1
 			--CREDIT SALES
 			UNION ALL 
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
@@ -1259,7 +1262,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
 				,intJournalLineNo			= B.intInvoiceDetailId
@@ -1304,7 +1307,7 @@ IF @post = 1
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
@@ -1316,7 +1319,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
 				,intJournalLineNo			= B.intInvoiceDetailId
@@ -1355,7 +1358,7 @@ IF @post = 1
 			--CREDIT Shipping
 			UNION ALL 
 			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE A.dblShipping END
@@ -1367,7 +1370,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
@@ -1397,7 +1400,7 @@ IF @post = 1
 		UNION ALL 
 			--CREDIT Tax
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
@@ -1409,7 +1412,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= DT.intInvoiceDetailTaxId
@@ -1445,7 +1448,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT Discount
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
@@ -1457,7 +1460,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1492,7 +1495,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT COGS - SHIPPED
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
@@ -1504,7 +1507,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1559,7 +1562,7 @@ IF @post = 1
 			UNION ALL 
 			--CREDIT Inventory In-Transit - SHIPPED
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
@@ -1571,7 +1574,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1626,7 +1629,7 @@ IF @post = 1
 			UNION ALL 
 			--DEBIT COGS - Inbound Shipment
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
@@ -1638,7 +1641,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1694,7 +1697,7 @@ IF @post = 1
 			UNION ALL 
 			--CREDIT Inventory In-Transit - Inbound Shipment
 			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
+				 dtmDate					= @PostDate
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
@@ -1706,7 +1709,7 @@ IF @post = 1
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
 				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
+				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= D.strItemDescription
 				,intJournalLineNo			= D.intInvoiceDetailId
@@ -1801,7 +1804,7 @@ IF @post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 GL.dtmDate
+				 @PostDate
 				,@batchId
 				,GL.intAccountId
 				,dblDebit						= GL.dblCredit
@@ -2056,6 +2059,7 @@ IF @recap = 0
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
 						,dblPayment = 0.000000
+						,dtmPostDate = @PostDate
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 					FROM
 						tblARInvoice 
@@ -2154,7 +2158,8 @@ IF @recap = 0
 						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
 						,dblPayment = 0.000000
-						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+						,dtmPostDate = @PostDate
+						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 
