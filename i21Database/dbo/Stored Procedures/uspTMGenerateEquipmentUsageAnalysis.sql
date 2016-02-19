@@ -193,6 +193,10 @@ SELECT
 							 ELSE
 								0
 						END
+	,intSiteId = E.intSiteID
+	,intTMCustomerId = E.intCustomerID
+	,intEntityId = G.intEntityId
+	,intLeaseId = A.intLeaseId
 FROM tblTMLease A
 INNER JOIN tblTMLeaseCode B
 	ON A.intLeaseCodeId = B.intLeaseCodeId
