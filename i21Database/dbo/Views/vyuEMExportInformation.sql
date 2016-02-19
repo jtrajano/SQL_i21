@@ -4,6 +4,7 @@
 	select 
 --Entity
 	id				= a.intEntityId
+	,ent_no			= a.strEntityNo
 	,name			= a.strName
 	,website		= a.strWebsite
 	,type			= case when e.intEntityVendorId is not null then 'vendor,' else '' end + 
