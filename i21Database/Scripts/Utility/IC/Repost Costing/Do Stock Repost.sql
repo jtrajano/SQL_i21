@@ -11,6 +11,7 @@ END
 
 UPDATE tblGLFiscalYearPeriod
 SET ysnOpen = 1
+	,ysnINVOpen = 1
 
 GO
 
@@ -567,8 +568,9 @@ GO
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Re-close the fiscal year periods
 ------------------------------------------------------------------------------------------------------------------------------------
-UPDATE FYPeriod
-SET ysnOpen = FYPeriodOriginal.ysnOpen
+UPDATE	FYPeriod
+SET		ysnOpen = FYPeriodOriginal.ysnOpen
+		,ysnINVOpen = FYPeriodOriginal.ysnINVOpen
 FROM	tblGLFiscalYearPeriod FYPeriod INNER JOIN tblGLFiscalYearPeriodOriginal FYPeriodOriginal
 			ON FYPeriod.intGLFiscalYearPeriodId = FYPeriodOriginal.intGLFiscalYearPeriodId
 
