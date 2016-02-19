@@ -3472,6 +3472,7 @@
     <Build Include="dbo\Tables\tblSMGlobalSearch.sql" />
     <Build Include="dbo\Tables\tblSMGlobalSearchTag.sql" />
     <Build Include="dbo\Tables\tblSMGlobalSearchFavorite.sql" />
+    <Build Include="dbo\Tables\tblSMGlobalSearchConfig.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateAdditionalCost.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRescheduleWorkOrderByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCheckContamination.sql" />
