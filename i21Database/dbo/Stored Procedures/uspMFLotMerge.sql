@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [uspMFLotMerge] 
  @intLotId INT,     
  @intNewLotId INT,  
- @dblMergeQty NUMERIC(18,6),
+ @dblMergeQty NUMERIC(38,20),
  @intUserId INT
 
 AS
@@ -30,7 +30,7 @@ BEGIN TRY
 	DECLARE @intNewLotStatusId INT
 	DECLARE @dblNewLotWeightPerUnit NUMERIC(38,20)
 	DECLARE @strNewLotNumber NVARCHAR(100)
-	DECLARE @dblAdjustByQuantity NUMERIC(18,6)
+	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
