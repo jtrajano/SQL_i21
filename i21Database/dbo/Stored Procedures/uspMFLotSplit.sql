@@ -2,7 +2,7 @@
  @intLotId INT,       
  @intSplitSubLocationId INT,  
  @intSplitStorageLocationId INT,  
- @dblSplitQty NUMERIC(16,8),  
+ @dblSplitQty NUMERIC(38,20),  
  @intUserId INT,
  @strSplitLotNumber NVARCHAR(100)=NULL OUTPUT,
  @strNewLotNumber NVARCHAR(100) = NULL,    
@@ -31,7 +31,7 @@ BEGIN TRY
 	DECLARE @intNewSubLocationId INT
 	DECLARE @intNewStorageLocationId INT	
 	DECLARE @intNewItemUOMId INT
-	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
+	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @strLotTracking NVARCHAR(50)
 			,@intCategoryId int
 	

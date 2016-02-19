@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [uspMFLotMove] @intLotId INT
 	,@intNewSubLocationId INT
 	,@intNewStorageLocationId INT
-	,@dblMoveQty NUMERIC(16, 8)
+	,@dblMoveQty NUMERIC(38,20)
 	,@intUserId INT
 AS
 BEGIN TRY
