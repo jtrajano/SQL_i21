@@ -26,7 +26,7 @@
 	,loc_state			= d.strState
 	,loc_zipcode		= d.strZipCode
 	,loc_country		= d.strCountry
-	,loc_termsId		= d.intTermsId
+	,loc_termsId		= h.strTerm
 	,loc_pricelevel		= d.strPricingLevel
 	,loc_warehouse		= k.strLocationName
 	
