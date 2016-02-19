@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].uspMFValidateConsumeLot (
 	@intLotId INT
-	,@dblConsumeQty NUMERIC(18, 6)
+	,@dblConsumeQty NUMERIC(38, 20)
 	,@intConsumeUOMKey INT
 	,@intUserId INT
 	,@intWorkOrderId INT
@@ -23,16 +23,16 @@ BEGIN TRY
 		,@intLocationId INT
 		,@intStatusId INT
 		,@intWOLocationId INT
-		,@dblOnHand NUMERIC(18, 6)
+		,@dblOnHand NUMERIC(38, 20)
 		,@strName NVARCHAR(50)
 		,@strUnitMeasure NVARCHAR(50)
 		,@intItemId INT
 		,@strItemNo NVARCHAR(50)
 		,@intProductId INT
-		,@dblQuantity NUMERIC(18, 6)
+		,@dblQuantity NUMERIC(38, 20)
 		,@strProductItemNo NVARCHAR(50)
-		,@dblTotalQtyToBeConsumed NUMERIC(18, 6)
-		,@dblQtyConsumedSoFar NUMERIC(18, 6)
+		,@dblTotalQtyToBeConsumed NUMERIC(38, 20)
+		,@dblQtyConsumedSoFar NUMERIC(38, 20)
 		,@strStatus NVARCHAR(50)
 		,@strConsumeQty nvarchar(50)
 		,@strOnHand nvarchar(50)

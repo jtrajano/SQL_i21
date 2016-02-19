@@ -9,7 +9,7 @@ BEGIN TRY
 		,@strSecondaryStatus NVARCHAR(50)
 		,@strPrimaryStatus NVARCHAR(50)
 		,@intManufacturingProcessId INT
-		,@dblQty NUMERIC(18, 6)
+		,@dblQty NUMERIC(38, 20)
 		,@ErrMsg NVARCHAR(MAX)
 		,@intAttributeId INT
 		,@strAttributeValue NVARCHAR(50)
