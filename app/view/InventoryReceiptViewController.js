@@ -154,6 +154,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     columns: [
                         {dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
                         {dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
+                        {dataIndex: 'strBillId', text: 'Voucher No', flex: 1, dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
+                        {dataIndex: 'dtmBillDate', text: 'Voucher Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
+
                         {dataIndex: 'strVendor', text: 'Vendor', flex: 1, dataType: 'string' },
                         {dataIndex: 'strLocationName', text: 'Destination', flex: 1, dataType: 'string' },
                         {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string' },
@@ -1821,6 +1824,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onViewReceiptNo: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'ReceiptNo');
+    },
+
+    onViewVoucher: function (value, record) {
+        if (value === 'New Voucher') {
+            iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                action: 'new',
+                showAddReceipt: false
+            });
+        }
+        else {
+            iRely.Functions.openScreen('AccountsPayable.view.Voucher', {
+                filters: [
+                    {
+                        column: 'strBillId',
+                        value: value
+                    }
+                ],
+                action: 'view',
+                showAddReceipt: false
+            });
+        }
     },
 
     onViewVendorName: function (value, record) {

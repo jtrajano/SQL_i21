@@ -111,7 +111,6 @@
     <Compile Include="Configuration\tblICTagMap.cs" />
     <Compile Include="Configuration\tblICUnitMeasureMap.cs" />
     <Compile Include="InventoryEntities.cs" />
-    <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\tblICParentLot.cs" />
     <Compile Include="Metadata\tblICItemMotorFuelTax.cs" />
     <Compile Include="Metadata\tblICStorageMeasurementReading.cs" />

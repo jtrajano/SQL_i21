@@ -563,7 +563,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblQtyVouchered).HasColumnName("dblQtyVouchered").HasPrecision(18, 6);
             this.Property(t => t.dblVoucherAmount).HasColumnName("dblVoucherAmount").HasPrecision(18, 6);
             this.Property(t => t.dblQtyToVoucher).HasColumnName("dblQtyToVoucher").HasPrecision(38, 20);
-            this.Property(t => t.dblAmountToVoucher).HasColumnName("dblAmountToVoucher").HasPrecision(38, 20);
+            this.Property(t => t.dblAmountToVoucher).HasColumnName("dblAmountToVoucher").HasPrecision(38, 6);
+            this.Property(t => t.strBillId).HasColumnName("strBillId");
+            this.Property(t => t.dtmBillDate).HasColumnName("dtmBillDate");
         }
     }
 

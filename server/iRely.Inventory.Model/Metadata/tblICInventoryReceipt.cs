@@ -1478,8 +1478,8 @@ namespace iRely.Inventory.Model
 
     public class vyuICGetInventoryReceiptVoucher
     {
-        public int? intInventoryReceiptId { get; set; }
-        public int? intInventoryReceiptItemId { get; set; }
+        public int intInventoryReceiptId { get; set; }
+        public int intInventoryReceiptItemId { get; set; }
         public string strVendor { get; set; }
         public string strLocationName { get; set; }
         public string strReceiptNumber { get; set; }
@@ -1495,5 +1495,7 @@ namespace iRely.Inventory.Model
         public decimal? dblVoucherAmount { get; set; }
         public decimal? dblQtyToVoucher { get; set; }
         public decimal? dblAmountToVoucher { get; set; }
+        public string strBillId { get; set; }
+        public DateTime? dtmBillDate { get; set; }
     }
 }
