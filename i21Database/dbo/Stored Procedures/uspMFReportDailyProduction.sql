@@ -92,7 +92,7 @@ BEGIN TRY
 		,strName NVARCHAR(50)
 		,strItemNo NVARCHAR(50)
 		,strDescription NVARCHAR(250)
-		,dblQty NUMERIC(18, 6)
+		,dblQty NUMERIC(38, 20)
 		,strUnitMeasure NVARCHAR(50)
 		,strStorageLocationName NVARCHAR(50)
 		,strCompanyName NVARCHAR(50)

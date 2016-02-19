@@ -9,7 +9,7 @@ BEGIN
 		intRecordId INT IDENTITY(1, 1)
 		,intLocationId INT
 		,dblDemandQty NUMERIC(18, 6)
-		,dblQOH NUMERIC(18, 6)
+		,dblQOH NUMERIC(38, 20)
 		,dblOrderQty NUMERIC(18, 6)
 		)
 	DECLARE @intRecordId INT
@@ -17,22 +17,22 @@ BEGIN
 		,@intItemId INT
 		,@intExecutionOrder INT
 		,@dblPriorQuantity NUMERIC(18, 6)
-		,@dblTotalShortage NUMERIC(18, 6)
-		,@dblShortage NUMERIC(18, 6)
-		,@dblAvailQty NUMERIC(18, 6)
-		,@dblLogonLocationAvl NUMERIC(18, 6)
+		,@dblTotalShortage NUMERIC(38, 20)
+		,@dblShortage NUMERIC(38, 20)
+		,@dblAvailQty NUMERIC(38, 20)
+		,@dblLogonLocationAvl NUMERIC(38, 20)
 		,@intRatio INT
 		,@intRatioCalc INT
-		,@dblTotalQOH NUMERIC(18, 6)
+		,@dblTotalQOH NUMERIC(38, 20)
 		,@intInvRecordId INT
 		,@intLocationId INT
 		,@intLogonLocationId INT
 		,@dblDemandQty NUMERIC(18, 6)
-		,@dblQOH NUMERIC(18, 6)
+		,@dblQOH NUMERIC(38, 20)
 		,@dblOrderQty NUMERIC(18, 6)
 		,@intDemandRatio INT
-		,@dblLogonLocationShortage NUMERIC(18, 6)
-		,@dblOnHand NUMERIC(18, 6)
+		,@dblLogonLocationShortage NUMERIC(38, 20)
+		,@dblOnHand NUMERIC(38, 20)
 		,@dblOnOrderQty NUMERIC(18, 6)
 		,@dblReorderPoint NUMERIC(18, 6)
 
