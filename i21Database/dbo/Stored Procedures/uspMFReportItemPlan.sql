@@ -164,12 +164,12 @@ BEGIN
 		,strDescription NVARCHAR(100) collate Latin1_General_CI_AS
 		,intCompanyLocationId INT
 		,strCompanyLocationName NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblItemRequired NUMERIC(18, 6)
+		,dblItemRequired NUMERIC(38, 20)
 		,strOwner NVARCHAR(50) collate Latin1_General_CI_AS
 		,dtmPlannedDate DATETIME
 		,strComments NVARCHAR(MAX) collate Latin1_General_CI_AS
 		,strQtyType NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblQuantity NUMERIC(18, 6)
+		,dblQuantity NUMERIC(38, 20)
 		,intDisplayOrder INT
 		)
 	DECLARE @tblMFWIPItem_Initial TABLE (
@@ -183,12 +183,12 @@ BEGIN
 		,strDescription NVARCHAR(100) collate Latin1_General_CI_AS
 		,intCompanyLocationId INT
 		,strCompanyLocationName NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblItemRequired NUMERIC(18, 6)
+		,dblItemRequired NUMERIC(38, 20)
 		,strOwner NVARCHAR(50) collate Latin1_General_CI_AS
 		,dtmPlannedDate DATETIME
 		,strComments NVARCHAR(MAX) collate Latin1_General_CI_AS
 		,strQtyType NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblQuantity NUMERIC(18, 6)
+		,dblQuantity NUMERIC(38, 20)
 		,intDisplayOrder INT
 		)
 	DECLARE @tblICItem TABLE (
@@ -463,10 +463,10 @@ BEGIN
 		,dtmPlannedDate DATETIME
 		,intCompanyLocationId INT
 		,strCompanyLocationName NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblQOH NUMERIC(18, 6)
-		,dblQtyInProduction NUMERIC(18, 6)
-		,dblDemandQty NUMERIC(18, 6)
-		,dbltDemandQty NUMERIC(18, 6)
+		,dblQOH NUMERIC(38, 20)
+		,dblQtyInProduction NUMERIC(38, 20)
+		,dblDemandQty NUMERIC(38, 20)
+		,dbltDemandQty NUMERIC(38, 20)
 		)
 
 	INSERT INTO @tblMFRequiredItemByLocation
@@ -478,10 +478,10 @@ BEGIN
 		,dtmPlannedDate
 		,CL.intCompanyLocationId
 		,RI.strCompanyLocationName
-		,CAST(NULL AS NUMERIC(18, 6)) dblQOH
-		,CAST(NULL AS NUMERIC(18, 6)) dblQtyInProduction
-		,CAST(NULL AS NUMERIC(18, 6)) dblDemandQty
-		,CAST(NULL AS NUMERIC(18, 6)) dbltDemandQty
+		,CAST(NULL AS NUMERIC(38, 20)) dblQOH
+		,CAST(NULL AS NUMERIC(38, 20)) dblQtyInProduction
+		,CAST(NULL AS NUMERIC(38, 20)) dblDemandQty
+		,CAST(NULL AS NUMERIC(38, 20)) dbltDemandQty
 	FROM @tblMFRequiredItem RI
 		,@tblMFWIPRequiredDate RD
 		,tblSMCompanyLocation CL
@@ -498,7 +498,7 @@ BEGIN
 	DECLARE @tblMFQtyOnHand TABLE (
 		intCompanyLocationId INT
 		,intItemId INT
-		,dblWeight NUMERIC(18, 6)
+		,dblWeight NUMERIC(38, 20)
 		)
 
 	INSERT INTO @tblMFQtyOnHand
@@ -553,7 +553,7 @@ BEGIN
 	DECLARE @tblMFQtyInProduction TABLE (
 		intCompanyLocationId INT
 		,intItemId INT
-		,dblWeight NUMERIC(18, 6)
+		,dblWeight NUMERIC(38, 20)
 		)
 
 	INSERT INTO @tblMFQtyInProduction
@@ -947,12 +947,12 @@ BEGIN
 		,dtmPlannedDateTime DATETIME
 		,intCompanyLocationId INT
 		,strCompanyLocationName NVARCHAR(50) collate Latin1_General_CI_AS
-		,dblItemRequired NUMERIC(18, 6)
+		,dblItemRequired NUMERIC(38, 20)
 		,strOwner NVARCHAR(50) collate Latin1_General_CI_AS
 		,dtmPlannedDate DATETIME
 		,strComments NVARCHAR(MAX) collate Latin1_General_CI_AS
 		,intNoOfDays NVARCHAR(MAX) collate Latin1_General_CI_AS
-		,dblQuantity NUMERIC(18, 6)
+		,dblQuantity NUMERIC(38, 20)
 		,intDays INT
 		,strQtyType NVARCHAR(50) collate Latin1_General_CI_AS
 		,intDisplayOrder INT

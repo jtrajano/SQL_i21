@@ -14,9 +14,9 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intInputLotId INT
 		,@intInputItemId INT
-		,@dblWeight NUMERIC(18, 6)
-		,@dblInputWeight NUMERIC(18, 6)
-		,@dblReadingQuantity NUMERIC(18, 6)
+		,@dblWeight NUMERIC(38, 20)
+		,@dblInputWeight NUMERIC(38, 20)
+		,@dblReadingQuantity NUMERIC(38, 20)
 		,@intInputWeightUOMId INT
 		,@intUserId INT
 		,@ysnEmptyOut BIT
@@ -30,8 +30,8 @@ BEGIN TRY
 		,@strInputItemNo NVARCHAR(50)
 		,@intConsumptionMethodId INT
 		,@intConsumptionStorageLocationId INT
-		,@dblDefaultResidueQty NUMERIC(18, 6)
-		,@dblNewWeight NUMERIC(18, 6)
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@dblNewWeight NUMERIC(38, 20)
 		,@intDestinationLotId int
 		,@strLotNumber nvarchar(50)
 		,@strLotTracking nvarchar(50)
@@ -92,8 +92,8 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,intInputLotId INT
 			,intInputItemId INT
-			,dblInputWeight NUMERIC(18, 6)
-			,dblReadingQuantity NUMERIC(18, 6)
+			,dblInputWeight NUMERIC(38, 20)
+			,dblReadingQuantity NUMERIC(38, 20)
 			,intInputWeightUOMId INT
 			,intUserId INT
 			,ysnEmptyOut BIT
@@ -103,7 +103,7 @@ BEGIN TRY
 			,intShiftId INT
 			,ysnNegativeQuantityAllowed BIT
 			,ysnExcessConsumptionAllowed BIT
-			,dblDefaultResidueQty NUMERIC(18, 6)
+			,dblDefaultResidueQty NUMERIC(38, 20)
 			)
 
 	IF @intInputLotId IS NULL

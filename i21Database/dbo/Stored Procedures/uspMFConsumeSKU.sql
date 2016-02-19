@@ -4,30 +4,30 @@ BEGIN
 	DECLARE @intOrderHeaderId INT
 		--,@strBlendProductionStagingLocation NVARCHAR(50)
 		--,@intStagingLocationId INT
-		,@dblRequiredWeight NUMERIC(18, 6)
+		,@dblRequiredWeight NUMERIC(38, 20)
 		,@intSKUId INT
 		,@intRecordId INT
 		,@strSourceContainerNo NVARCHAR(50)
 		,@intContainerId INT
 		,@intDestinationContainerId INT
-		,@dblSplitQty NUMERIC(18, 6)
+		,@dblSplitQty NUMERIC(38, 20)
 		,@strDestinationContainerNo NVARCHAR(50)
 		,@intNewSKUId INT
 		,@ysnSanitizationInboundPutaway BIT
 		,@intItemUnitMeasureId INT
 		,@intWeightUnitMeasureId INT
 		,@intUOMId INT
-		,@dblWeightperUnit NUMERIC(18, 6)
+		,@dblWeightperUnit NUMERIC(38, 20)
 		,@strUserName NVARCHAR(50)
 		,@intUserId INT
 		,@intLocationId INT
-		,@dblWeight NUMERIC(18, 6)
+		,@dblWeight NUMERIC(38, 20)
 		,@intBusinessShiftId INT
 		,@dtmCreated DATETIME
 		,@ysnGeneratePickTask BIT
 		,@intLotRecordId INT
 		,@intLotId INT
-		,@dblQuantity NUMERIC(18, 6)
+		,@dblQuantity NUMERIC(38, 20)
 		,@strSKUNo NVARCHAR(50)
 		,@intBlendProductionStagingUnitId int
 
@@ -54,7 +54,7 @@ BEGIN
 	DECLARE @tblICLot TABLE (
 		intLotRecordId INT IDENTITY(1, 1)
 		,intLotId INT
-		,dblWeight NUMERIC(18, 6)
+		,dblWeight NUMERIC(38, 20)
 		)
 	DECLARE @tblWHSKU TABLE (
 		intRecordId INT IDENTITY(1, 1)
