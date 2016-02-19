@@ -3212,6 +3212,7 @@
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
+    <Build Include="dbo\Views\vyuAROrderUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
