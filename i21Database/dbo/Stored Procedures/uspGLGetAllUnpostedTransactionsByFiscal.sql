@@ -5,7 +5,7 @@
 -- Description:	Gets all unposted transaction (GL,CM,AP,IC,AR) 
 -- JIRA Key:	GL-1923
 -- =============================================
-ALTER PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
+CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
  @intFiscalYearId INT,
  @intEntityId INT,
  @intFiscalYearPeriodId INT = 0,
