@@ -52,6 +52,11 @@ SELECT
 	,strSealNumber = NULL
 	,strContainerType = NULL
 	,intWeightItemUOMId
+	,strCurrency
+	,strMainCurrency
+	,ysnSubCurrency
+	,dblMainCashPrice
+
 FROM vyuLGShipmentPurchaseContracts WHERE intShipmentContractQtyId NOT IN (Select intShipmentContractQtyId FROM vyuLGShipmentContainerPurchaseContracts)
 
 UNION ALL
@@ -109,4 +114,8 @@ SELECT
 	,strSealNumber
 	,strContainerType
 	,intWeightItemUOMId
+	,strCurrency
+	,strMainCurrency
+	,ysnSubCurrency
+	,dblMainCashPrice
 FROM vyuLGShipmentContainerPurchaseContracts

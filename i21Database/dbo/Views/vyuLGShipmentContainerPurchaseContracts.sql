@@ -51,6 +51,10 @@ SELECT
 	   ,strCostUOM = CT.strPriceUOM
 	   ,dblCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId),0)
 	   ,intWeightItemUOMId = (SELECT WeightItem.intItemUOMId FROM tblICItemUOM WeightItem WHERE WeightItem.intItemId=SCQ.intItemId AND WeightItem.intUnitMeasureId=S.intWeightUnitMeasureId)
+	   ,CT.strCurrency
+	   ,CT.strMainCurrency
+	   ,CT.ysnSubCurrency
+	   ,CT.dblMainCashPrice
 
 FROM tblLGShipmentBLContainerContract SC
 LEFT JOIN tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
