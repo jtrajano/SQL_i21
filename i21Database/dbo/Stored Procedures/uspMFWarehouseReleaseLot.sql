@@ -4,7 +4,7 @@ BEGIN TRY
 	DECLARE @intLotId INT
 		,@strLotNumber NVARCHAR(50)
 		,@strGTINCaseBarCode NVARCHAR(50)
-		,@dblQty NUMERIC(18, 6)
+		,@dblQty NUMERIC(38, 20)
 		,@intLocationId INT
 		,@intItemId INT
 		,@strItemNo NVARCHAR(50)
@@ -12,8 +12,8 @@ BEGIN TRY
 		,@strSecondaryStatus NVARCHAR(50)
 		,@strPrimaryStatus NVARCHAR(50)
 		,@CasesPerPallet INT
-		,@dblProduceQty NUMERIC(18, 6)
-		,@dblReleaseQty NUMERIC(18, 6)
+		,@dblProduceQty NUMERIC(38, 20)
+		,@dblReleaseQty NUMERIC(38, 20)
 		,@intProduceUnitMeasureId INT
 		,@CurrentDate DATETIME
 		,@intShiftId INT
@@ -39,7 +39,7 @@ BEGIN TRY
 		,@intInventoryAdjustmentId INT
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
-		,@dblAdjustByQuantity NUMERIC(18, 6)
+		,@dblAdjustByQuantity NUMERIC(38, 20)
 		,@intAttributeIdByBatch INT
 		,@strAttributeValueByBatch NVARCHAR(50)
 		,@intCategoryId int
@@ -60,7 +60,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLotId INT
 			,strGTINCaseBarCode NVARCHAR(50)
-			,dblReleaseQty NUMERIC(18, 6)
+			,dblReleaseQty NUMERIC(38, 20)
 			,intManufacturingProcessId INT
 			,intUserId INT
 			,strComment NVARCHAR(MAX)

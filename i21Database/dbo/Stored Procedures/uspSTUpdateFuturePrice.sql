@@ -14,6 +14,7 @@ BEGIN
 	        @UPCCode          INT,
 			@DblFactor        DECIMAL(18,6),
 	        @DblSalePrice     DECIMAL(18,6),
+			@DblLastCost      DECIMAL(18,6),
 			@SalesStartDate   DATETIME,
 			@SalesEndDate     DATETIME,
 		    @Location         INT,
@@ -30,8 +31,9 @@ BEGIN
 
 
 	set @TodaysDate = (SELECT CONVERT(NVARCHAR(12), CONVERT(DATETIME,GetDate()),112))
-	
+
 	select @RecCount = count(*) from tblSTRetailPriceAdjustment where dtmEffectiveDate = @TodaysDate
+
 
 	if (@RecCount > 0)
 	BEGIN
@@ -41,6 +43,7 @@ BEGIN
 		   ,UPCCode INT
 		   ,DblFactor    DECIMAL(18,6)  
 		   ,DblSalePrice DECIMAL(18,6)
+		   ,dblLastCost  DECIMAL(18,6)
 		   ,SalesStartDate DATETIME
 		   ,SalesEndDate   DATETIME
 		   ,Location    INT
@@ -56,12 +59,13 @@ BEGIN
 	       ) 
 
      	INSERT INTO @UPCData (
-	 	UPCCode,DblFactor,DblSalePrice,
+	 	UPCCode,DblFactor,DblSalePrice,dblLastCost,
 		SalesStartDate,SalesEndDate,
 		Location,Vendor,Category,
 		Family,Class,Region,Destrict,PriceType, PriceMethod ,DetailID
 		)
-		select adj1.intItemUOMId, adj1.dblFactor, adj1.dblPrice, adj1.dtmSalesStartDate,adj1.dtmSalesEndDate,
+		select adj1.intItemUOMId, adj1.dblFactor, adj1.dblPrice,adj1.dblLastCost,
+		adj1.dtmSalesStartDate,adj1.dtmSalesEndDate,
 		adj1.intCompanyLocationId,adj1.intVendorId,adj1.intCategoryId,adj1.intFamilyId,
 		adj1.intClassId,adj1.strRegion,adj1.strDestrict,adj1.strPriceType, 
 		adj1.strPriceMethod, adj1.intRetailPriceAdjustmentDetailId
@@ -75,7 +79,8 @@ BEGIN
 	    FROM @UPCData
 	    WHILE (@DataKey > 0)
 	       BEGIN
-		       SELECT @UPCCode=UPCCode, @DblFactor = DblFactor, @DblSalePrice = DblSalePrice,
+		       SELECT @UPCCode=UPCCode, @DblFactor = DblFactor,
+			   @DblSalePrice = DblSalePrice, @DblLastCost = dblLastCost,
 			   @SalesStartDate = SalesStartDate, @SalesEndDate = SalesEndDate,
 			   @Location  = Location, @Vendor = Vendor,
 			   @Category  = Category, @Family = Family, @Class = Class,
@@ -196,6 +201,7 @@ BEGIN
    		              set @SQL1 = ' update tblICItemPricing set '
 
     		   	      set @SQL1 = @SQL1 + '  dblSalePrice = ''' + LTRIM(@DblSalePrice) + ''''
+					  + ', dblLastCost = ''' + LTRIM(@DblLastCost) + '''' 
 
 					  set @SQL1 = @SQL1 + ' where 1=1 ' 
 

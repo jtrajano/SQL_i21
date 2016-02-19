@@ -69,18 +69,18 @@ BEGIN
 		,strItemNo NVARCHAR(50)
 		,strDescription NVARCHAR(100)
 		,strCompanyLocationName NVARCHAR(50)
-		,dblMaxPoundsRequired NUMERIC(18, 6)
+		,dblMaxPoundsRequired NUMERIC(38, 20)
 		,intItemId INT
-		,dblSafetyStockPounds NUMERIC(18, 6)
-		,dblUnPackedPounds NUMERIC(18, 6)
-		,dblPoundsAvailable NUMERIC(18, 6)
-		,dblTotalPoundsAvailable NUMERIC(18, 6)
+		,dblSafetyStockPounds NUMERIC(38, 20)
+		,dblUnPackedPounds NUMERIC(38, 20)
+		,dblPoundsAvailable NUMERIC(38, 20)
+		,dblTotalPoundsAvailable NUMERIC(38, 20)
 		,strComments NVARCHAR(250)
-		,dblRunningTotal NUMERIC(18, 6)
-		,dblAvlQtyBreakUp NUMERIC(18, 6)
+		,dblRunningTotal NUMERIC(38, 20)
+		,dblAvlQtyBreakUp NUMERIC(38, 20)
 		,intCompanyLocationId INT
-		,dblUnpackedBreakUp NUMERIC(18, 6)
-		,dblAvlBreakup NUMERIC(18, 6)
+		,dblUnpackedBreakUp NUMERIC(38, 20)
+		,dblAvlBreakup NUMERIC(38, 20)
 		,strStartingYear NVARCHAR(50)
 		)
 
@@ -142,7 +142,7 @@ BEGIN
 	DECLARE @tblMFQtyOnHand TABLE (
 		intCompanyLocationId INT
 		,intItemId INT
-		,dblWeight NUMERIC(18, 6)
+		,dblWeight NUMERIC(38, 20)
 		)
 
 	INSERT INTO @tblMFQtyOnHand
@@ -167,7 +167,7 @@ BEGIN
 	DECLARE @tblMFQtyInProduction TABLE (
 		intCompanyLocationId INT
 		,intItemId INT
-		,dblWeight NUMERIC(18, 6)
+		,dblWeight NUMERIC(38, 20)
 		)
 
 	INSERT INTO @tblMFQtyInProduction

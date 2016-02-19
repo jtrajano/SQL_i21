@@ -52,6 +52,10 @@ SELECT
 	   ,intCostUOMId = CT.intPriceItemUOMId
 	   ,strCostUOM = CT.strPriceUOM
 	   ,dblCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId),0)
+	   ,CT.strCurrency
+	   ,CT.strMainCurrency
+	   ,CT.ysnSubCurrency
+	   ,CT.dblMainCashPrice
 
 FROM tblLGShipmentContractQty SCQ
 JOIN tblLGShipment S ON S.intShipmentId = SCQ.intShipmentId

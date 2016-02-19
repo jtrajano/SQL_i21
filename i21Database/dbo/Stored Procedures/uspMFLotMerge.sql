@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [uspMFLotMerge] 
  @intLotId INT,     
  @intNewLotId INT,  
- @dblMergeQty NUMERIC(18,6),
+ @dblMergeQty NUMERIC(38,20),
  @intUserId INT
 
 AS
@@ -22,7 +22,6 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	
 	DECLARE @intNewLocationId INT
 	DECLARE @intNewSubLocationId INT
 	DECLARE @intNewStorageLocationId INT	
@@ -32,7 +31,7 @@ BEGIN TRY
 	DECLARE @strNewLotNumber NVARCHAR(100)
 	DECLARE @intSourceLotWeightUOM INT
 	DECLARE @intDestinationLotWeightUOM INT
-	DECLARE @dblAdjustByQuantity NUMERIC(18,6)
+	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -106,6 +105,18 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	IF (SELECT dblWeight
+		FROM dbo.tblICLot
+		WHERE intLotId = @intLotId)<0.01
+		BEGIN
+			--EXEC dbo.uspMFLotAdjustQty
+			-- @intLotId =@intLotId,       
+			-- @dblNewLotQty =0,
+			-- @intUserId=@intUserId ,
+			-- @strReasonCode ='Residue qty clean up',
+			-- @strNotes ='Residue qty clean up'
+			UPDATE tblICLot SET dblWeight=0,dblQty=0 WHERE intLotId = @intLotId
+		END
 
 
 END TRY  

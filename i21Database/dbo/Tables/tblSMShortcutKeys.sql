@@ -6,7 +6,7 @@
 	[ysnShift] [bit] NULL,
 	[ysnAlt] [bit] NULL,
 	[ysnEnabled] [bit] NULL,
-	[intConcurrencyId] [int] NULL,
+	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [FK_tblSMScreen_tblSMShortcutKeys] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId])
 ) ON [PRIMARY]
 

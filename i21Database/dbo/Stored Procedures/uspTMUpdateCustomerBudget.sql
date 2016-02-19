@@ -23,7 +23,7 @@ BEGIN
 			,@intEntityCustomerId = intEntityCustomerId
 		FROM #tmpCustomerBudget
 
-		EXEC uspEMUpdateCustomerTable 'dblBudgetAmountForBudgetBilling', @strBudgetAmountForBudgetBilling, @intEntityCustomerId, @EntityId
+		EXEC uspEMUpdateCustomerTable 'dblMonthlyBudget', @strBudgetAmountForBudgetBilling, @intEntityCustomerId, @EntityId
 
 		DELETE FROM #tmpCustomerBudget WHERE intEntityCustomerId = @intEntityCustomerId
 	END

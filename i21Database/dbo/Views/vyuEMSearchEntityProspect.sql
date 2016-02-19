@@ -10,11 +10,12 @@ SELECT
         e.strAddress,  
         e.strCity,  
         e.strState,  
-        e.strZipCode
+        e.strZipCode,
+		b.strType
     FROM         
             tblEntity a
         join tblEntityType b
-            on b.intEntityId = a.intEntityId and b.strType = 'Prospect'
+            on b.intEntityId = a.intEntityId and b.strType IN ('Prospect', 'Customer')
         join tblARCustomer c
             on c.intEntityCustomerId= a.intEntityId
         left join tblEntityLocation e  

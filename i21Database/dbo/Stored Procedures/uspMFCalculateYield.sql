@@ -227,8 +227,8 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@strLotNumber NVARCHAR(MAX)
 		,@intLotId INT
-		,@dblQty NUMERIC(18, 6)
-		,@dblNewQty NUMERIC(18, 6)
+		,@dblQty NUMERIC(38, 20)
+		,@dblNewQty NUMERIC(38, 20)
 		,@intItemUOMId INT
 		,@intInventoryAdjustmentId INT
 		,@dblAdjustByQuantity NUMERIC(18, 6)

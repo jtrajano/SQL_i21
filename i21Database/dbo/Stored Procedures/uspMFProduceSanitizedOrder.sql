@@ -4,13 +4,13 @@ BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
-		,@dblInputWeight NUMERIC(18, 6)
+		,@dblInputWeight NUMERIC(38, 20)
 		,@strOutputLotNumber NVARCHAR(50)
 		,@intItemId INT
-		,@dblQty NUMERIC(18, 6)
+		,@dblQty NUMERIC(38, 20)
 		,@intItemUOMId INT
-		,@dblWeightPerQty NUMERIC(18, 6)
-		,@dblWeight NUMERIC(18, 6)
+		,@dblWeightPerQty NUMERIC(38, 20)
+		,@dblWeight NUMERIC(38, 20)
 		,@intWeightUOMId INT
 		,@intStorageLocationId INT
 		,@intUserId INT
@@ -27,11 +27,11 @@ BEGIN TRY
 		,@intSubLocationId INT
 		,@intInputLotId INT
 		,@intInputStorageLocationId INT
-		,@dblInputWeightPerQty NUMERIC(18, 6)
+		,@dblInputWeightPerQty NUMERIC(38, 20)
 		,@strDefaultStatusForSanitizedLot NVARCHAR(50)
 		,@intLotStatusId INT
 		,@intCasesPerPallet INT
-		,@SKUQuantity NUMERIC(18, 6)
+		,@SKUQuantity NUMERIC(38, 20)
 		,@intUnitMeasureId INT
 		,@ysnGeneratePickTask INT
 		,@intOwnerId INT
@@ -82,10 +82,10 @@ BEGIN TRY
 			,intOutputLotId INT
 			,strOutputLotNumber NVARCHAR(50)
 			,intItemId INT
-			,dblQty NUMERIC(18, 6)
+			,dblQty NUMERIC(38, 20)
 			,intItemUOMId INT
-			,dblWeightPerQty NUMERIC(18, 6)
-			,dblWeight NUMERIC(18, 6)
+			,dblWeightPerQty NUMERIC(38, 20)
+			,dblWeight NUMERIC(38, 20)
 			,intWeightUOMId INT
 			,intStorageLocationId INT
 			,intSubLocationId INT
@@ -297,20 +297,20 @@ BEGIN TRY
 	DECLARE @intOrderHeaderId INT
 		,@strSanitizationStagingLocation NVARCHAR(50)
 		,@intStagingLocationId INT
-		,@dblRequiredWeight NUMERIC(18, 6)
+		,@dblRequiredWeight NUMERIC(38, 20)
 		,@intSKUId INT
 		,@intRecordId INT
 		,@strSourceContainerNo NVARCHAR(50)
 		,@intContainerId INT
 		,@intDestinationContainerId INT
-		,@dblSplitQty NUMERIC(18, 6)
+		,@dblSplitQty NUMERIC(38, 20)
 		,@strDestinationContainerNo NVARCHAR(50)
 		,@intNewSKUId INT
 		,@ysnSanitizationInboundPutaway BIT
 		,@intItemUnitMeasureId INT
 		,@intWeightUnitMeasureId INT
 		,@intUOMId INT
-		,@dblWeightperUnit NUMERIC(18, 6)
+		,@dblWeightperUnit NUMERIC(38, 20)
 		,@strSKUNo NVARCHAR(50)
 		,@intSanitizationStagingUnitId int
 

@@ -6,7 +6,7 @@
 	intPickListDetailId INT,
 	intPickListLotId INT,
 	intPickedLotId INT,
-	dblPickListQty NUMERIC(18,6),
-	dblPickedQty NUMERIC(18,6), 
+	dblPickListQty NUMERIC(38,20),
+	dblPickedQty NUMERIC(38,20), 
 	intUserId INT
 )

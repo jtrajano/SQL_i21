@@ -24,6 +24,9 @@ BEGIN TRY
 	DECLARE @intBlendItemId INT
 	DECLARE @dblTotalRequiredQtyToStage NUMERIC(18,6)
 	DECLARE @dblTotalPickedQty NUMERIC(18,6)	
+	DECLARE @intItemUOMId INT
+	DECLARE @intItemIssuedUOMId INT
+	DECLARE @dblPickedLotWeightPerUnit NUMERIC(38,20)
 
 	SELECT @intPickListId = pl.intPickListId, @strPickListNo = pl.strPickListNo, @intPickListLotId = pld.intStageLotId, @dblPickListQty = pld.dblPickQuantity, @intPickListDetailId = pld.intPickListDetailId
 	FROM tblMFPickList pl
@@ -31,6 +34,24 @@ BEGIN TRY
 	WHERE intPickListDetailId = @intPickListDetailId
 
 	BEGIN TRANSACTION
+
+	SELECT @intItemUOMId = intItemUOMId
+		  ,@intItemIssuedUOMId = intItemIssuedUOMId
+	FROM tblMFPickListDetail
+	WHERE intPickListDetailId = @intPickListDetailId
+
+	SELECT @dblPickedLotWeightPerUnit = CASE 
+			WHEN ISNULL(dblWeightPerQty, 0) = 0
+				THEN 1
+			ELSE dblWeightPerQty
+			END
+	FROM tblICLot
+	WHERE intLotId = @intPickedLotId
+
+	IF @intItemUOMId = @intItemIssuedUOMId
+	BEGIN
+		SET @dblPickedQty = @dblPickedQty/@dblPickedLotWeightPerUnit
+	END
 
 	INSERT INTO tblWHPickForKitting (intPickListId, strPickListNo, intPickListDetailId, intPickListLotId, intPickedLotId, dblPickListQty, dblPickedQty, intUserId)
 	VALUES (@intPickListId, @strPickListNo, @intPickListDetailId, @intPickListLotId, @intPickedLotId, @dblPickListQty, @dblPickedQty, @intUserId)

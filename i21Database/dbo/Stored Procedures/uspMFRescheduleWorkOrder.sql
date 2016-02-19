@@ -1252,9 +1252,10 @@ BEGIN TRY
 	JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 	WHERE W.intLocationId = @intLocationId
 		AND MC.intManufacturingCellId = @intManufacturingCellId
-		AND SL.dtmPlannedStartDate >= @dtmFromDate
-		AND SL.dtmPlannedEndDate <= @dtmToDate
-	
+	AND (@dtmFromDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate 
+		OR @dtmToDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate
+		    OR (SL.dtmPlannedStartDate >= @dtmFromDate
+			AND SL.dtmPlannedEndDate <= @dtmToDate))
 	UNION
 	
 	SELECT W.intManufacturingCellId
@@ -1307,8 +1308,10 @@ BEGIN TRY
 				ELSE @intManufacturingCellId
 				END
 			)
-		AND SC.dtmChangeoverStartDate >= @dtmFromDate
-		AND SC.dtmChangeoverEndDate <= @dtmToDate
+		AND (@dtmFromDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate 
+		OR @dtmToDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate
+		    OR (SC.dtmChangeoverStartDate >= @dtmFromDate
+			AND SC.dtmChangeoverEndDate <= @dtmToDate))
 	ORDER BY SL.intExecutionOrder
 
 	SELECT R.intScheduleRuleId
