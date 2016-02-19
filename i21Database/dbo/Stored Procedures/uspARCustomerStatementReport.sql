@@ -128,11 +128,11 @@ SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
 IF UPPER(@condition) = UPPER('As Of')
 	BEGIN		
-		SET @innerQuery = 'AND I.dtmDate <= '+ @strDateTo +''
+		SET @innerQuery = 'AND I.dtmPostDate <= '+ @strDateTo +''
 	END
 ELSE
 	BEGIN
-		SET @innerQuery = 'AND I.dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo+''
+		SET @innerQuery = 'AND I.dtmPostDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo+''
 	END
 
 INSERT INTO @temp_aging_table
@@ -160,7 +160,7 @@ SET @query = 'SELECT * FROM
 	 , I.strTransactionType
 	 , I.intEntityCustomerId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'') THEN NULL ELSE I.dtmDueDate END
-	 , I.dtmDate
+	 , I.dtmPostDate
 	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
 	 , dblTotalAmount = CASE WHEN I.strTransactionType <> ''Invoice'' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblAmountPaid = CASE WHEN I.strTransactionType <> ''Invoice'' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
