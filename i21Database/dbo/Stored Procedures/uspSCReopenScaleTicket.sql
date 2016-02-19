@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCReopenScaleTicket]
 	@intSourceId AS INT
+	,@intModuleId AS INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,15 +12,17 @@ DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
-DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @total AS INT
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @strTransactionId NVARCHAR(40) = NULL
-
+--1 - inventory receipt
+--2 - inventory shipment
+--3 - inventory transfer
 BEGIN TRY
-	
-	UPDATE dbo.tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intSourceId;
-
+	IF @intModuleId = 1
+		UPDATE dbo.tblSCTicket SET strTicketStatus = 'R', intInventoryReceiptId = null WHERE intTicketId = @intSourceId;
+	IF @intModuleId = 2
+		UPDATE dbo.tblSCTicket SET strTicketStatus = 'R', intInventoryTransferId = null WHERE intTicketId = @intSourceId;
 	_Exit:
 END TRY
 BEGIN CATCH
