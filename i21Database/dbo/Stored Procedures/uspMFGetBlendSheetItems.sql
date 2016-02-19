@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetItems]
 	@intItemId int,
 	@intLocationId int,
-	@dblQtyToProduce decimal(18,6),
+	@dblQtyToProduce decimal(38,20),
 	@dtmDueDate DateTime
 AS
 
@@ -35,19 +35,19 @@ SELECT @intDayOfYear = DATEPART(dy, @dtmDate)
 Declare @tblRequiredQty table
 (
 	intItemId int,
-	dblRequiredQty numeric(18,6),
+	dblRequiredQty numeric(38,20),
 	ysnIsSubstitute bit,
 	intParentItemId int,
 	ysnHasSubstitute bit,
 	intRecipeItemId int,
 	intParentRecipeItemId int,
 	strGroupName nVarchar(50),
-	dblLowerToleranceQty numeric(18,6),
-	dblUpperToleranceQty numeric(18,6),
+	dblLowerToleranceQty numeric(38,20),
+	dblUpperToleranceQty numeric(38,20),
 	ysnMinorIngredient bit,
 	ysnScaled bit,
-	dblRecipeQty numeric(18,6),
-	dblRecipeItemQty numeric(18,6),
+	dblRecipeQty numeric(38,20),
+	dblRecipeItemQty numeric(38,20),
 	strRecipeItemUOM nvarchar(50),
 	strConsumptionStorageLocation nvarchar(50),
 	intConsumptionMethodId int
@@ -87,7 +87,7 @@ Update a Set a.ysnHasSubstitute=1 from @tblRequiredQty a Join @tblRequiredQty b 
 Declare @tblPhysicalQty table
 (
 	intItemId int,
-	dblPhysicalQty numeric(18,6),
+	dblPhysicalQty numeric(38,20),
 	dblWeightPerUnit numeric(38,20)
 )
 
@@ -111,7 +111,7 @@ group by rs.intSubstituteItemId
 Declare @tblReservedQty table
 (
 	intItemId int,
-	dblReservedQty numeric(18,6)
+	dblReservedQty numeric(38,20)
 )
 
 Insert into @tblReservedQty

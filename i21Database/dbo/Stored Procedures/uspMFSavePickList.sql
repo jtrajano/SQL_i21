@@ -25,10 +25,10 @@ DECLARE @strLotNumber nvarchar(50)
 DECLARE @strParentLotNumber nvarchar(50)
 DECLARE @intLotId int
 DECLARE @intParentLotId int
-DECLARE @dblReqQtySum numeric(18,6)
-DECLARE @dblPickQtySum numeric(18,6)
-DECLARE @dblPickQty numeric(18,6)
-DECLARE @dblAvailableUnit numeric(18,6)
+DECLARE @dblReqQtySum numeric(38,20)
+DECLARE @dblPickQtySum numeric(38,20)
+DECLARE @dblPickQty numeric(38,20)
+DECLARE @dblAvailableUnit numeric(38,20)
 Declare @ysnBlendSheetRequired bit
 Declare @intLocationId int
 Declare @intBlendItemId int
@@ -60,11 +60,11 @@ Declare @tblPickListDetail table
 	intParentLotId int,
 	intItemId int,
 	intStorageLocationId int,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
-	dblIssuedQuantity  numeric(18,6),
+	dblIssuedQuantity  numeric(38,20),
 	intItemIssuedUOMId int,
-	dblPickQuantity numeric(18,6),
+	dblPickQuantity numeric(38,20),
 	intPickUOMId int,
 	intUserId int
 )
@@ -95,11 +95,11 @@ INSERT INTO @tblPickListDetail(
 	intParentLotId int,
 	intItemId int,
 	intStorageLocationId int,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
-	dblIssuedQuantity  numeric(18,6),
+	dblIssuedQuantity  numeric(38,20),
 	intItemIssuedUOMId int,
-	dblPickQuantity numeric(18,6),
+	dblPickQuantity numeric(38,20),
 	intPickUOMId int,
 	intUserId int
 	)

@@ -19,7 +19,7 @@ Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyP
 Declare @tblReservedQty table
 (
 	intLotId int,
-	dblReservedQty numeric(18,6)
+	dblReservedQty numeric(38,20)
 )
 
 If @ysnEnableParentLot=0

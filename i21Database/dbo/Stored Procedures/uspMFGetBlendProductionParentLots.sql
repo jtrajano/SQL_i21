@@ -8,7 +8,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 Declare @ysnEnableParentLot bit=0
-Declare @dblWOQty Numeric(18,6)
+Declare @dblWOQty Numeric(38,20)
 Declare @intItemId int
 Declare @strLotTracking nvarchar(50)
 
@@ -17,10 +17,10 @@ Declare @tblItemQty table
 	intParentLotId int,
 	strParentLotNumber nvarchar(50),
 	intItemId int,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50),
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
 	strIssuedUOM nvarchar(50)
 )
@@ -29,7 +29,7 @@ Declare @tblItemConfirmQty table
 (
 	intParentLotId int,
 	intItemId int,
-	dblQuantity numeric(18,6)
+	dblQuantity numeric(38,20)
 )
 
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference

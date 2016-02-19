@@ -10,24 +10,24 @@ Declare @intLocationId int
 Declare @intMinLot int
 Declare @intLotId int
 Declare @intNewSubLocationId int
-Declare @dblMoveQty numeric(18,6)
+Declare @dblMoveQty numeric(38,20)
 Declare @strLotNumber nvarchar(50)
 Declare @intNewLotId int
 Declare @intItemId int
 Declare @intPickListDetailId int
 Declare @ErrMsg nvarchar(max)
 Declare @dtmCurrentDateTime DateTime=GETDATE()
-Declare @dblPhysicalQty numeric(18,6)
-Declare @dblWeightPerQty numeric(18,6)
+Declare @dblPhysicalQty numeric(38,20)
+Declare @dblWeightPerQty numeric(38,20)
 Declare @strUOM nvarchar(50)
 Declare @intKitStatusId int
 Declare @ysnBlendSheetRequired bit
 Declare @intRecipeId int
-Declare @dblQtyToProduce numeric(18,6)
+Declare @dblQtyToProduce numeric(38,20)
 Declare @intBlendItemId int
 Declare @intBlendStagingLocationId int
-Declare @dblPickedQty numeric(18,6)
-Declare @dblQuantity numeric(18,6)
+Declare @dblPickedQty numeric(38,20)
+Declare @dblQuantity numeric(38,20)
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -68,18 +68,18 @@ Declare @tblPickListDetail table
 	intParentLotId int,
 	intItemId int,
 	intStorageLocationId int,
-	dblPickQuantity numeric(18,6),
+	dblPickQuantity numeric(38,20),
 	intPickUOMId int,
-	dblPhysicalQty numeric(18,6),
-	dblWeightPerQty numeric(18,6),
+	dblPhysicalQty numeric(38,20),
+	dblWeightPerQty numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
-	dblQuantity numeric(18,6)
+	dblQuantity numeric(38,20)
 )
 
 DECLARE @tblInputItem TABLE (
 	intItemId INT
-	,dblRequiredQty NUMERIC(18, 6)
+	,dblRequiredQty NUMERIC(38,20)
 	,ysnIsSubstitute BIT
 	,intConsumptionMethodId INT
 	,intConsumptionStorageLocationId INT
@@ -89,7 +89,7 @@ Declare @tblRemainingPickedItems AS table
 ( 
 	intRowNo int IDENTITY,
 	intItemId int,
-	dblRemainingQuantity numeric(18,6),
+	dblRemainingQuantity numeric(38,20),
 	intConsumptionMethodId int,
 	intConsumptionStorageLocationId int
 )
@@ -160,8 +160,8 @@ Begin
 		Declare @intConsumptionMethodId int
 		Declare @intConsumptionStorageLocationId int
 		Declare @intBulkItemId int
-		Declare @dblBulkAvailableQty numeric(18,6)
-		Declare @dblBulkRemainingQty numeric(18,6)
+		Declare @dblBulkAvailableQty numeric(38,20)
+		Declare @dblBulkRemainingQty numeric(38,20)
 
 		Select @intBulkMinItemCount=Min(intRowNo) From @tblRemainingPickedItems
 

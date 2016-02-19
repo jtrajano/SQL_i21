@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheetFIFO] @intLocationId INT
 	,@intBlendRequirementId INT
-	,@dblQtyToProduce NUMERIC(18, 6)
+	,@dblQtyToProduce NUMERIC(38,20)
 	,@strXml NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
@@ -13,20 +13,20 @@ BEGIN TRY
 
 	DECLARE @intBlendItemId INT
 	DECLARE @strBlendItemNo NVARCHAR(50)
-	DECLARE @dblRequiredQty NUMERIC(18, 6)
+	DECLARE @dblRequiredQty NUMERIC(38,20)
 	DECLARE @intMinRowNo INT
 	DECLARE @intRecipeItemId INT
 	DECLARE @intRawItemId INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intIssuedUOMTypeId INT
 	DECLARE @ysnMinorIngredient BIT
-	DECLARE @dblPercentageIncrease NUMERIC(18, 6) = 0
+	DECLARE @dblPercentageIncrease NUMERIC(38,20) = 0
 	DECLARE @intNoOfSheets INT = 1
 	DECLARE @intStorageLocationId INT
 	DECLARE @intRecipeId INT
 	DECLARE @strBlenderName NVARCHAR(50)
 	DECLARE @strLotNumber NVARCHAR(50)
-	DECLARE @dblAvailableQty NUMERIC(18, 6)
+	DECLARE @dblAvailableQty NUMERIC(38,20)
 	DECLARE @intEstNoOfSheets INT
 	DECLARE @dblWeightPerQty NUMERIC(38, 20)
 	DECLARE @intMachineId INT
@@ -39,15 +39,15 @@ BEGIN TRY
 	DECLARE @intDayOfYear INT
 	DECLARE @dtmDate DATETIME
 	DECLARE @dtmDueDate DATETIME
-	DECLARE @dblOriginalRequiredQty NUMERIC(18, 6)
-	DECLARE @dblPartialQuantity NUMERIC(18, 6)
-	DECLARE @dblRemainingRequiredQty NUMERIC(18, 6)
+	DECLARE @dblOriginalRequiredQty NUMERIC(38,20)
+	DECLARE @dblPartialQuantity NUMERIC(38,20)
+	DECLARE @dblRemainingRequiredQty NUMERIC(38,20)
 	DECLARE @intPartialQuantityStorageLocationId INT
 	DECLARE @intOriginalIssuedUOMTypeId INT
 	DECLARE @intKitStagingLocationId INT
 	DECLARE @intBlendStagingLocationId INT
 	DECLARE @intMinPartialQtyLotRowNo INT
-	DECLARE @dblAvailablePartialQty NUMERIC(18, 6)
+	DECLARE @dblAvailablePartialQty NUMERIC(38,20)
 	DECLARE @idoc int 
 	DECLARE @intConsumptionMethodId INT
 	DECLARE @intConsumptionStoragelocationId INT
@@ -153,7 +153,7 @@ BEGIN TRY
 		,intRecipeId INT
 		,intRecipeItemId INT
 		,intItemId INT
-		,dblRequiredQty NUMERIC(18, 6)
+		,dblRequiredQty NUMERIC(38,20)
 		,ysnIsSubstitute BIT
 		,ysnMinorIngredient BIT
 		,intConsumptionMethodId INT
@@ -167,9 +167,9 @@ BEGIN TRY
 	CREATE TABLE #tblBlendSheetLot (
 		intParentLotId INT
 		,intItemId INT
-		,dblQuantity NUMERIC(18, 6)
+		,dblQuantity NUMERIC(38,20)
 		,intItemUOMId INT
-		,dblIssuedQuantity NUMERIC(18, 6)
+		,dblIssuedQuantity NUMERIC(38,20)
 		,intItemIssuedUOMId INT
 		,intRecipeItemId INT
 		,intStorageLocationId INT
@@ -182,9 +182,9 @@ BEGIN TRY
 	CREATE TABLE #tblBlendSheetLotFinal (
 		intParentLotId INT
 		,intItemId INT
-		,dblQuantity NUMERIC(18, 6)
+		,dblQuantity NUMERIC(38,20)
 		,intItemUOMId INT
-		,dblIssuedQuantity NUMERIC(18, 6)
+		,dblIssuedQuantity NUMERIC(38,20)
 		,intItemIssuedUOMId INT
 		,intRecipeItemId INT
 		,intStorageLocationId INT
@@ -199,19 +199,19 @@ BEGIN TRY
 		strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 		strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 		strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
-		dblQuantity numeric(18,6),
+		dblQuantity numeric(38,20),
 		intItemUOMId int,
 		strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-		dblIssuedQuantity numeric(18,6),
+		dblIssuedQuantity numeric(38,20),
 		intItemIssuedUOMId int,
 		strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 		intItemId int,
 		intRecipeItemId int,
-		dblUnitCost numeric(18,6),
-		dblDensity numeric(18,6),
-		dblRequiredQtyPerSheet numeric(18,6),
-		dblWeightPerUnit numeric(18,6),
-		dblRiskScore numeric(18,6),
+		dblUnitCost numeric(38,20),
+		dblDensity numeric(38,20),
+		dblRequiredQtyPerSheet numeric(38,20),
+		dblWeightPerUnit numeric(38,20),
+		dblRiskScore numeric(38,20),
 		intStorageLocationId int,
 		strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 		strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -365,7 +365,7 @@ BEGIN TRY
 			intRecipeId int, 
 			intRecipeItemId int,
 			intItemId int,
-			dblRequiredQty numeric(18,6),
+			dblRequiredQty numeric(38,20),
 			ysnIsSubstitute bit,
 			intConsumptionMethodId int,
 			intConsumptionStoragelocationId int,
@@ -415,9 +415,9 @@ BEGIN TRY
 	BEGIN
 		SET @strSQL = ''
 
-		DECLARE @dblQuantityTaken NUMERIC(18, 6)
+		DECLARE @dblQuantityTaken NUMERIC(38,20)
 		DECLARE @ysnPercResetRequired BIT = 0
-		DECLARE @sRequiredQty NUMERIC(18, 6)
+		DECLARE @sRequiredQty NUMERIC(38,20)
 
 		SELECT @intMinRowNo = MIN(intRowNo)
 		FROM @tblInputItem
@@ -468,13 +468,13 @@ BEGIN TRY
 				intLotId INT
 				,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intItemId INT
-				,dblQty NUMERIC(18, 6)
+				,dblQty NUMERIC(38,20)
 				,intLocationId INT
 				,intSubLocationId INT
 				,intStorageLocationId INT
 				,dtmCreateDate DATETIME
 				,dtmExpiryDate DATETIME
-				,dblUnitCost NUMERIC(18, 6)
+				,dblUnitCost NUMERIC(38,20)
 				,dblWeightPerQty NUMERIC(38, 20)
 				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intParentLotId INT
@@ -489,13 +489,13 @@ BEGIN TRY
 				intParentLotId INT
 				,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intItemId INT
-				,dblQty NUMERIC(18, 6)
+				,dblQty NUMERIC(38,20)
 				,intLocationId INT
 				,intSubLocationId INT
 				,intStorageLocationId INT
 				,dtmCreateDate DATETIME
 				,dtmExpiryDate DATETIME
-				,dblUnitCost NUMERIC(18, 6)
+				,dblUnitCost NUMERIC(38,20)
 				,dblWeightPerQty NUMERIC(38, 20)
 				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intItemUOMId INT
@@ -509,12 +509,12 @@ BEGIN TRY
 				intParentLotId INT
 				,--NVARCHAR(50) COLLATE Latin1_General_CI_AS, --Review
 				intItemId INT
-				,dblAvailableQty NUMERIC(18, 6)
+				,dblAvailableQty NUMERIC(38,20)
 				,intStorageLocationId INT
 				,dblWeightPerQty NUMERIC(38, 20)
 				,dtmCreateDate DATETIME
 				,dtmExpiryDate DATETIME
-				,dblUnitCost NUMERIC(18, 6)
+				,dblUnitCost NUMERIC(38,20)
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				)
@@ -526,7 +526,7 @@ BEGIN TRY
 				intParentLotId INT
 				,--NVARCHAR(50) COLLATE Latin1_General_CI_AS, --Review
 				intItemId INT
-				,dblAvailableQty NUMERIC(18, 6)
+				,dblAvailableQty NUMERIC(38,20)
 				,intStorageLocationId INT
 				,dblWeightPerQty NUMERIC(38, 20)
 				,intItemUOMId INT
@@ -540,7 +540,7 @@ BEGIN TRY
 				intRowNo INT IDENTITY(1, 1)
 				,intLotId INT
 				,intItemId INT
-				,dblAvailableQty NUMERIC(18, 6)
+				,dblAvailableQty NUMERIC(38,20)
 				,intStorageLocationId INT
 				,dblWeightPerQty NUMERIC(38, 20)
 				,intItemUOMId INT
@@ -897,7 +897,7 @@ BEGIN TRY
 												CASE 
 													WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
 														THEN 1
-													ELSE Convert(numeric(18,6),Floor(@dblRequiredQty / L.dblWeightPerQty))
+													ELSE Convert(numeric(38,20),Floor(@dblRequiredQty / L.dblWeightPerQty))
 													END
 												)
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
@@ -947,7 +947,7 @@ BEGIN TRY
 												CASE 
 													WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
 														THEN 1
-													ELSE Convert(numeric(18,6),Floor(@dblRequiredQty / L.dblWeightPerQty))
+													ELSE Convert(numeric(38,20),Floor(@dblRequiredQty / L.dblWeightPerQty))
 													END
 												)
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
@@ -1007,7 +1007,7 @@ BEGIN TRY
 												CASE 
 													WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
 														THEN 1
-													ELSE Convert(numeric(18,6),Floor(@dblAvailableQty / L.dblWeightPerQty))
+													ELSE Convert(numeric(38,20),Floor(@dblAvailableQty / L.dblWeightPerQty))
 													END
 												)
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
@@ -1057,7 +1057,7 @@ BEGIN TRY
 												CASE 
 													WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
 														THEN 1
-													ELSE Convert(numeric(18,6),Floor(@dblAvailableQty / L.dblWeightPerQty))
+													ELSE Convert(numeric(38,20),Floor(@dblAvailableQty / L.dblWeightPerQty))
 													END
 												)
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
@@ -1360,7 +1360,7 @@ BEGIN TRY
 			,BS.intRecipeItemId
 			,L.dblLastCost AS dblUnitCost
 			--,(
-			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(18,6))) AS PropertyValue
+			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(38,20))) AS PropertyValue
 			--	FROM dbo.QM_TestResult AS TR
 			--	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
 			--	WHERE ProductObjectKey = PL.MainLotKey
@@ -1418,7 +1418,7 @@ BEGIN TRY
 			,BS.intRecipeItemId
 			,0.0 AS dblUnitCost -- Review
 			--,(
-			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(18,6))) AS PropertyValue
+			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(38,20))) AS PropertyValue
 			--	FROM dbo.QM_TestResult AS TR
 			--	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
 			--	WHERE ProductObjectKey = PL.MainLotKey
@@ -1470,7 +1470,7 @@ BEGIN TRY
 			,BS.intRecipeItemId
 			,0.0 AS dblUnitCost -- Review
 			--,(
-			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(18,6))) AS PropertyValue
+			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(38,20))) AS PropertyValue
 			--	FROM dbo.QM_TestResult AS TR
 			--	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
 			--	WHERE ProductObjectKey = PL.MainLotKey
