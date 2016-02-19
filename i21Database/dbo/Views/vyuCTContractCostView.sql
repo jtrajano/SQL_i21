@@ -16,6 +16,7 @@ AS
 			CC.ysnMTM,
 			CC.ysnPrice ,
 			IM.strItemNo,
+			IM.strDescription strItemDescription,
 			UM.strUnitMeasure AS strUOM,
 			EY.strEntityName AS strVendorName,
 			CD.intContractHeaderId,

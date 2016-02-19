@@ -110,7 +110,8 @@ INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,strLocationName,st
 				UNION
 				SELECT 1 AS intSeqId,@strDescription,'In-House' AS [strType],(ISNULL(Balance,0)),strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId
 				FROM vyuGRGetStorageDetail 
-				WHERE ysnCustomerStorage <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(0,0)=0 then intCompanyLocationId else 0 end
+				WHERE ysnCustomerStorage <> 1 AND
+				 intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(0,0)=0 then intCompanyLocationId else 0 end
 
 INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId ,strLocationName ,dtmDeliveryDate ,strTicket ,
 					strCustomerReference,strDPAReceiptNo ,dblDiscDue ,dblStorageDue , dtmLastStorageAccrueDate ,strScheduleId,intFromCommodityUnitMeasureId)
@@ -173,7 +174,7 @@ INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCollateralId,st
 		SELECT 8, @strDescription,'Collateral Receipts - Sales' ,isnull(dblRemainingQuantity,0), c.intCollateralId,cl.strLocationName,ch.strEntityName,c.intReceiptNo,ch.intContractHeaderId,
 		ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,
 		c.dtmOpenDate,
-		isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,@intCommodityId,ch.intUnitMeasureId	
+		isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,@intCommodityId,c.intUnitMeasureId
 		FROM tblRKCollateral c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
@@ -184,7 +185,7 @@ INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCollateralId,st
 INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCollateralId,strLocationName,strCustomer,intReceiptNo,intContractHeaderId,strContractNumber,dtmOpenDate,dblOriginalQuantity,dblRemainingQuantity,intCommodityId,intFromCommodityUnitMeasureId)
 		SELECT 9, @strDescription,'Collateral Receipts - Purchase' ,isnull(dblRemainingQuantity,0), c.intCollateralId,cl.strLocationName,ch.strEntityName,c.intReceiptNo,ch.intContractHeaderId,
 		ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,c.dtmOpenDate,
-		isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,@intCommodityId,ch.intUnitMeasureId	
+		isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,@intCommodityId,c.intUnitMeasureId	
 		FROM tblRKCollateral c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
@@ -289,7 +290,7 @@ INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,intCommodityId,int
 
 SELECT 15 AS intSeqId,@strDescription
 		,'Company Titled Stock' AS [strType]
-		,ISNULL(invQty, 0) - ISNULL(ReserveQty, 0) + isnull(dblBalance, 0) + (isnull(CollateralSale, 0) - isnull(CollateralPurchases, 0)) AS dblTotal,@intCommodityId,@intCommodityUnitMeasureId
+		,ISNULL(invQty, 0) - ISNULL(ReserveQty, 0) + isnull(dblBalance, 0) + (isnull(CollateralPurchases, 0) - isnull(CollateralSale, 0)) AS dblTotal,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
 		SELECT isnull((
 					SELECT isnull(sum(isnull(it1.dblUnitOnHand, 0)), 0)
@@ -356,7 +357,7 @@ DECLARE @intToCommodityUnitMeasureId int=null
 DECLARE @strUnitMeasure nvarchar(50)=null
 
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-
+	--select * from @Final
 IF ISNULL(@intUnitMeasureId,'') <> ''
 BEGIN
 
@@ -370,9 +371,10 @@ END
 ELSE
 BEGIN
 
-	SELECT @strUnitMeasure=c.strUnitMeasure, @intToCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId FROM
-	tblICCommodity t 
+	SELECT @strUnitMeasure=c.strUnitMeasure,@intFromCommodityUnitMeasureId=cuc1.intCommodityUnitMeasureId, @intToCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId 
+	FROM @Final t 
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
+	JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId=t.intFromCommodityUnitMeasureId
 	JOIN tblICUnitMeasure c on c.intUnitMeasureId=cuc.intUnitMeasureId 	
 	WHERE t.intCommodityId= @intCommodityId
 
@@ -380,38 +382,21 @@ END
 UPDATE @Final SET intFromCommodityUnitMeasureId=@intFromCommodityUnitMeasureId,intToCommodityUnitMeasureId=@intToCommodityUnitMeasureId,strUnitMeasure=@strUnitMeasure 
 WHERE intCommodityId= @intCommodityId
 
-IF ISNULL(@intUnitMeasureId,'') <> ''
+--IF ISNULL(@intUnitMeasureId,'') <> ''
 	BEGIN
-			
 	INSERT INTO @FinalTable (intSeqId, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
 					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
 					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 					dtmDeliveryDate ,dtmTicketDateTime,strItemNo  )
 
 			SELECT	intSeqId, strCommodityCode ,strType ,
-					Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal)) dblTotal ,
+					dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,isnull(dblTotal,0)) dblTotal ,
 					 @strUnitMeasure as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
 					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
 					strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
 					dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 					dtmDeliveryDate ,dtmTicketDateTime,strItemNo  
 			FROM @Final WHERE intCommodityId= @intCommodityId 
-	END
-	ELSE
-	BEGIN
-
-		INSERT INTO @FinalTable (intSeqId, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,
-					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
-					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
-					dtmDeliveryDate ,dtmTicketDateTime,strItemNo)
-
-			SELECT	intSeqId, strCommodityCode ,strType ,Convert(decimal(24,10),dblTotal) dblTotal ,
-					 @strUnitMeasure as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
-					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
-					strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
-					dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
-					dtmDeliveryDate ,dtmTicketDateTime,strItemNo  
-			FROM @Final WHERE intCommodityId= @intCommodityId --AND isnull(dblTotal,0) <> 0
 	END
 
 END

@@ -11,6 +11,8 @@ SELECT
  ,B.intStorageLocationId
  ,B.intSubLocationId
  ,B.intLocationId
+ ,I.strLocationName AS strShipToLocation
+ ,J.strLocationName AS strShipFromLocation
  ,B.dblQtyOrdered
  ,B.dblQtyReceived
  ,B.dblQtyContract
@@ -50,4 +52,6 @@ FROM tblPOPurchase A
  LEFT JOIN tblICUnitMeasure H ON E.intUnitMeasureId = H.intUnitMeasureId
  LEFT JOIN tblSMCompanyLocationSubLocation F ON B.intSubLocationId = F.intCompanyLocationSubLocationId
  LEFT JOIN tblICStorageLocation G ON B.intStorageLocationId = G.intStorageLocationId
+ INNER JOIN dbo.tblSMCompanyLocation I ON A.intShipToId = I.intCompanyLocationId
+ LEFT JOIN tblEntityLocation J ON A.intEntityVendorId = J.intEntityId
  WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')

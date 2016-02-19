@@ -22,7 +22,7 @@ dblInboundPrice = CASE
 	                               ,LG.intItemId 
                                   )  
 						END,
-LG.strCustomer as strTerminalName,
+LG.strVendor as strTerminalName,
 (select strLocationName from tblEntityLocation EM where EM.intEntityLocationId = LG.intVendorEntityLocationId) as strSupplyPoint,
 LG.strPLocationName strLocationName,
 IsNull(LG.strItemNo,(select strItemNo from tblICItem IC where IC.intItemId = LG.intItemId)) as strInboundItemNo,

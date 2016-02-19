@@ -29,7 +29,7 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
             +(((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1)) +              
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then OffSite else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
-   dblCollatralSales  + SlsBasisDeliveries           
+   dblCollatralSales  + SlsBasisDeliveries+DeltaOption           
             AS CashExposure,              
    ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty,
    (invQty)- isnull(ReserveQty,0)  + isnull(dblGrainBalance ,0)
@@ -86,11 +86,11 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
    WHERE otr.intCommodityId=c.intCommodityId and otr.intLocationId=cl.intCompanyLocationId) dblContractSize     
               
  ,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
-     WHERE otr.strBuySell='Sell' AND otr.intCommodityId=c.intCommodityId  
+     WHERE otr.strBuySell='Sell' AND otr.intCommodityId=c.intCommodityId  and intInstrumentTypeId=1
      and otr.intLocationId=cl.intCompanyLocationId ) FutSBalTransQty     
   
  ,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
-  WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId and otr.intLocationId=cl.intCompanyLocationId) as FutLBalTransQty,          
+  WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId and intInstrumentTypeId=1 and otr.intLocationId=cl.intCompanyLocationId) as FutLBalTransQty,          
            
  (SELECT SUM(psd.dblMatchQty) from tblRKMatchFuturesPSHeader psh            
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId            
@@ -137,8 +137,24 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
   WHERE ch.intCommodityId = c.intCommodityId AND ysnDPOwnedType=1 and ch.intCompanyLocationId=cl.intCompanyLocationId) as DP,
   (	SELECT SUM(Balance)	FROM vyuGRGetStorageDetail
 				WHERE ysnCustomerStorage <> 1 AND intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) 
-				AND intCompanyLocationId =cl.intCompanyLocationId) dblGrainBalance  
-    
+				AND intCompanyLocationId =cl.intCompanyLocationId) dblGrainBalance,  
+  (select sum(isnull(dblNoOfContract,0)) dblNoOfContract from (SELECT  (CASE WHEN ft.strBuySell = 'Buy' THEN (
+						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
+						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) END * (
+						SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						ORDER BY dtmPriceDate DESC
+				))*m.dblContractSize  AS dblNoOfContract
+	FROM tblRKFutOptTransaction ft
+	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
+	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
+	WHERE ft.intCommodityId = c.intCommodityId and ft.intLocationId =cl.intCompanyLocationId AND intFutOptTransactionId NOT IN (
+			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired))t
+	) DeltaOption   
            
   FROM tblSMCompanyLocation cl  
 JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId     
