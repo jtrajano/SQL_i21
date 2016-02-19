@@ -3569,6 +3569,7 @@
     <None Include="Scripts\Post-Deployment\MF\4_WMPattern.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\15_FixInvoiceDateForCredits.sql" />
+    <Build Include="dbo\Views\vyuSMGlobalSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
