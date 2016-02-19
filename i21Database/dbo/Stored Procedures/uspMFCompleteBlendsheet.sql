@@ -5,11 +5,11 @@ BEGIN TRY
 		,@strErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
 		,@intItemId INT
-		,@dblQtyToProduce NUMERIC(18, 6)
+		,@dblQtyToProduce NUMERIC(38,20)
 		,@intItemUOMId INT
-		,@dblIssuedQuantity NUMERIC(18, 6)
+		,@dblIssuedQuantity NUMERIC(38,20)
 		,@intItemIssuedUOMId INT
-		,@dblWeightPerUnit NUMERIC(18, 6)
+		,@dblWeightPerUnit NUMERIC(38,20)
 		,@intUserId INT
 		,@strRetBatchId NVARCHAR(40)
 		,@intStatusId INT
@@ -46,11 +46,11 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
-			,dblQtyToProduce NUMERIC(18, 6)
+			,dblQtyToProduce NUMERIC(38,20)
 			,intItemUOMId INT
-			,dblIssuedQuantity NUMERIC(18, 6)
+			,dblIssuedQuantity NUMERIC(38,20)
 			,intItemIssuedUOMId INT
-			,dblWeightPerUnit NUMERIC(18, 6)
+			,dblWeightPerUnit NUMERIC(38,20)
 			,intUserId INT
 			,intLocationId INT
 			,intStorageLocationId INT
