@@ -80,7 +80,7 @@ BEGIN
 	IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 				INNER JOIN tblICInventoryShipmentItem ISHI ON ID.intInventoryShipmentItemId = ISHI.intInventoryShipmentItemId AND ID.intSalesOrderDetailId = ISHI.intLineNo
 				WHERE ID.intInvoiceId = @InvoiceId
-				  AND ((ID.dblQtyShipped + ID.dblQtyShipped) * @dblSplitPercent) > ISNULL(ISHI.dblQuantity, @ZeroDecimal))
+				  AND ((ID.dblQtyShipped + ID.dblQtyShipped) * @dblSplitPercent) > ISNULL(ISHI.dblQuantity, @ZeroDecimal)) AND ISNULL(@SplitDetailId, 0) = 0
 		BEGIN
 			RAISERROR('There are items that will exceed the shipped quantity.', 11, 1)
 			RETURN 0
