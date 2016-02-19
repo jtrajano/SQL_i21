@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTMUpdateCustomerBudget]
+	@EntityId INT
 AS
 BEGIN	
 	DECLARE @strBudgetAmountForBudgetBilling NVARCHAR(50)
