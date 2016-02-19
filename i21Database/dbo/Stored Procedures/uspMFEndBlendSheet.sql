@@ -9,8 +9,8 @@ BEGIN TRY
 		,@strErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
 		,@intItemId int
-		,@dblQtyToProduce NUMERIC(18, 6)
-		,@dblWOQty NUMERIC(18, 6)
+		,@dblQtyToProduce NUMERIC(38,20)
+		,@dblWOQty NUMERIC(38,20)
 		,@intItemUOMId INT
 		,@intUserId INT
 		,@strRetBatchId nVarchar(40)
@@ -36,7 +36,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			 intWorkOrderId INT
 			,intItemId int
-			,dblQtyToProduce NUMERIC(18, 6)
+			,dblQtyToProduce NUMERIC(38,20)
 			,intItemUOMId INT
 			,intUserId INT
 			,intLocationId int

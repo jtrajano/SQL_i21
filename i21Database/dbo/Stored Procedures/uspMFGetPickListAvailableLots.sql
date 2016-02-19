@@ -12,7 +12,7 @@ SET ANSI_WARNINGS OFF
 Declare @tblReservedQty table
 (
 	intLotId int,
-	dblReservedQty numeric(18,6)
+	dblReservedQty numeric(38,20)
 )
 
 Select l.intLotId,l.strLotNumber,l.intItemId,i.strItemNo,i.strDescription,ISNULL(l.strLotAlias,'') AS strLotAlias,l.dblWeight AS dblPhysicalQty,

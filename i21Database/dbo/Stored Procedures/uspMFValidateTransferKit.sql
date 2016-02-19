@@ -11,11 +11,11 @@ Declare @ErrMsg nvarchar(max)
 Declare @intMinParentLot int
 Declare @intPickListId int
 Declare @intParentLotId int
-Declare @dblReqQty numeric(18,6)
-Declare @dblReqUnit numeric(18,6)
-Declare @dblAvailableQty numeric(18,6)
-Declare @dblAvailableUnit numeric(18,6)
-Declare @dblWeightPerUnit numeric(18,6)
+Declare @dblReqQty numeric(38,20)
+Declare @dblReqUnit numeric(38,20)
+Declare @dblAvailableQty numeric(38,20)
+Declare @dblAvailableUnit numeric(38,20)
+Declare @dblWeightPerUnit numeric(38,20)
 Declare @strIssuedUOM nvarchar(50)
 Declare @strLotAlias nvarchar(50)
 Declare @strItemNo nvarchar(50)
@@ -41,7 +41,7 @@ Declare @tblParentLot table
 	intRowNo int Identity(1,1),
 	intWorkOrderId int,
 	intParentLotId int,
-	dblReqQty numeric(18,6),
+	dblReqQty numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int
 )

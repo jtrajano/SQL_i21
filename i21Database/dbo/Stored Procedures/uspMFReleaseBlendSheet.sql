@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFReleaseBlendSheet] @strXml NVARCHAR(Max)
 	,@strWorkOrderNoOut NVARCHAR(50) = '' OUT
-	,@dblBalancedQtyToProduceOut NUMERIC(18, 6) = 0 OUTPUT
+	,@dblBalancedQtyToProduceOut NUMERIC(38,20) = 0 OUTPUT
 	,@intWorkOrderIdOut INT = 0 OUTPUT
 AS
 BEGIN TRY
@@ -19,7 +19,7 @@ BEGIN TRY
 	DECLARE @intLocationId INT
 	DECLARE @intCellId INT
 	DECLARE @intUserId INT
-	DECLARE @dblQtyToProduce NUMERIC(18, 6)
+	DECLARE @dblQtyToProduce NUMERIC(38,20)
 	DECLARE @dtmDueDate DATETIME
 	DECLARE @intExecutionOrder INT = 1
 	DECLARE @intBlendItemId INT
@@ -30,18 +30,18 @@ BEGIN TRY
 	DECLARE @ysnEnableParentLot BIT = 0
 	DECLARE @intRecipeId INT
 	DECLARE @intManufacturingProcessId INT
-	DECLARE @dblBinSize NUMERIC(18, 6)
+	DECLARE @dblBinSize NUMERIC(38,20)
 	DECLARE @intNoOfSheet INT
 	DECLARE @intNoOfSheetOriginal INT
-	DECLARE @dblRemainingQtyToProduce NUMERIC(18, 6)
-	DECLARE @PerBlendSheetQty NUMERIC(18, 6)
+	DECLARE @dblRemainingQtyToProduce NUMERIC(38,20)
+	DECLARE @PerBlendSheetQty NUMERIC(38,20)
 	DECLARE @ysnCalculateNoSheetUsingBinSize BIT = 0
 	DECLARE @ysnKittingEnabled BIT
 	DECLARE @ysnRequireCustomerApproval BIT
 	DECLARE @intWorkOrderStatusId INT
 	DECLARE @intKitStatusId INT = NULL
-	DECLARE @dblBulkReqQuantity NUMERIC(18, 6)
-	DECLARE @dblPlannedQuantity NUMERIC(18, 6)
+	DECLARE @dblBulkReqQuantity NUMERIC(38,20)
+	DECLARE @dblPlannedQuantity NUMERIC(38,20)
 			,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
 		,@dtmCurrentDateTime DATETIME
@@ -68,9 +68,9 @@ BEGIN TRY
 		,intCellId INT
 		,intMachineId INT
 		,dtmDueDate DATETIME
-		,dblQtyToProduce NUMERIC(18, 6)
-		,dblPlannedQuantity NUMERIC(18, 6)
-		,dblBinSize NUMERIC(18, 6)
+		,dblQtyToProduce NUMERIC(38,20)
+		,dblPlannedQuantity NUMERIC(38,20)
+		,dblBinSize NUMERIC(38,20)
 		,strComment NVARCHAR(Max)
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
@@ -82,15 +82,15 @@ BEGIN TRY
 	DECLARE @tblItem TABLE (
 		intRowNo INT Identity(1, 1)
 		,intItemId INT
-		,dblReqQty NUMERIC(18, 6)
+		,dblReqQty NUMERIC(38,20)
 		)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
 		,intLotId INT
 		,intItemId INT
-		,dblQty NUMERIC(18, 6)
-		,dblIssuedQuantity NUMERIC(18, 6)
-		,dblWeightPerUnit NUMERIC(18, 6)
+		,dblQty NUMERIC(38,20)
+		,dblIssuedQuantity NUMERIC(38,20)
+		,dblWeightPerUnit NUMERIC(38,20)
 		,intItemUOMId INT
 		,intItemIssuedUOMId INT
 		,intUserId INT
@@ -102,11 +102,11 @@ BEGIN TRY
 	DECLARE @tblBSLot TABLE (
 		intLotId INT
 		,intItemId INT
-		,dblQty NUMERIC(18, 6)
+		,dblQty NUMERIC(38,20)
 		,intUOMId INT
-		,dblIssuedQuantity NUMERIC(18, 6)
+		,dblIssuedQuantity NUMERIC(38,20)
 		,intIssuedUOMId INT
-		,dblWeightPerUnit NUMERIC(18, 6)
+		,dblWeightPerUnit NUMERIC(38,20)
 		,intRecipeItemId INT
 		,intLocationId INT
 		,intStorageLocationId INT
@@ -150,9 +150,9 @@ BEGIN TRY
 			,intCellId INT
 			,intMachineId INT
 			,dtmDueDate DATETIME
-			,dblQtyToProduce NUMERIC(18, 6)
-			,dblPlannedQuantity NUMERIC(18, 6)
-			,dblBinSize NUMERIC(18, 6)
+			,dblQtyToProduce NUMERIC(38,20)
+			,dblPlannedQuantity NUMERIC(38,20)
+			,dblBinSize NUMERIC(38,20)
 			,strComment NVARCHAR(Max)
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
@@ -191,10 +191,10 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
-			,dblQty NUMERIC(18, 6)
-			,dblIssuedQuantity NUMERIC(18, 6)
-			,dblPickedQuantity NUMERIC(18, 6)
-			,dblWeightPerUnit NUMERIC(18, 6)
+			,dblQty NUMERIC(38,20)
+			,dblIssuedQuantity NUMERIC(38,20)
+			,dblPickedQuantity NUMERIC(38,20)
+			,dblWeightPerUnit NUMERIC(38,20)
 			,intItemUOMId INT
 			,intItemIssuedUOMId INT
 			,intUserId INT
@@ -340,9 +340,9 @@ BEGIN TRY
 	DECLARE @intItemCount INT
 		,@intLotCount INT
 		,@intItemId INT
-		,@dblReqQty NUMERIC(18, 6)
+		,@dblReqQty NUMERIC(38,20)
 		,@intLotId INT
-		,@dblQty NUMERIC(18, 6)
+		,@dblQty NUMERIC(38,20)
 
 	SELECT @intExecutionOrder = Count(1)
 	FROM tblMFWorkOrder
