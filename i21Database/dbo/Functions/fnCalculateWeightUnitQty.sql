@@ -15,8 +15,8 @@ BEGIN
 			CASE		WHEN ISNULL(@dblQty, 0) = 0 THEN 
 						0.0
 					ELSE
-						CAST(ISNULL(@dblTotalWeight, 0.00) AS FLOAT) / CAST(@dblQty AS FLOAT) 
+						dbo.fnDivide(ISNULL(@dblTotalWeight, 0), ISNULL(@dblQty, 0)) 
 			END
 
-	RETURN dbo.fnConvertFloatToNumeric(@calculatedValue) 			
+	RETURN @calculatedValue; 
 END

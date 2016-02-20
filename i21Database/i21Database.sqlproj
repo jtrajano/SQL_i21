@@ -3206,6 +3206,8 @@
     <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
     <Build Include="dbo\Views\vyuAROrderUOM.sql" />
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
+    <Build Include="dbo\Functions\fnDivide.sql" />
+    <Build Include="dbo\Functions\fnMultiply.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

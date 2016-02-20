@@ -12,25 +12,27 @@ CREATE FUNCTION [dbo].[fnCalculateLotQty](
 RETURNS NUMERIC(38,20)
 AS 
 BEGIN
-	DECLARE @calculatedValue AS FLOAT
+	DECLARE @calculatedValue AS NUMERIC(38,20)
 
 	SET @calculatedValue = 
 			CASE	WHEN @intLotItemUOMId = @intCostingItemUOMId THEN 
 						-- @dblCostingQty is in Lot UOM. 
-						CAST(ISNULL(@dblLotQty, 0)  AS FLOAT) 
-						+ CAST(ISNULL(@dblCostingQty, 0) AS FLOAT) 
+						ISNULL(@dblLotQty, 0)
+						+ ISNULL(@dblCostingQty, 0)
 					ELSE 
 						-- @dblCostingQty is in Weight. Since it is a weight, need to convert it into Qty. 						
 						CASE	WHEN ISNULL(@dblLotWeightPerQty, 0) = 0 THEN 
 									@dblLotQty
 								ELSE 
-									(
-										CAST(ISNULL(@dblLotWeight, 0) AS FLOAT)
-										+ CAST(ISNULL(@dblCostingQty, 0) AS FLOAT)
-									) 
-									/ CAST(@dblLotWeightPerQty AS FLOAT) 
+									dbo.fnDivide (
+										(
+											ISNULL(@dblLotWeight, 0)
+											+ ISNULL(@dblCostingQty, 0) 
+										)
+										,@dblLotWeightPerQty 
+									)
 						END 
 			END
 
-	RETURN dbo.fnConvertFloatToNumeric(@calculatedValue) 	
+	RETURN @calculatedValue
 END

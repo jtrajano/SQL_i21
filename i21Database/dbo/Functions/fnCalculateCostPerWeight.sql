@@ -7,14 +7,14 @@ CREATE FUNCTION [dbo].[fnCalculateCostPerWeight] (
 RETURNS NUMERIC(38,20)
 AS
 BEGIN 
-	DECLARE @result AS FLOAT
+	DECLARE @result AS NUMERIC(38,20)
 
 	-- formula is:
 	-- Overall Value / Weight
 	SET @result =	CASE	WHEN ISNULL(@dblWeight, 0) = 0 THEN 
 								0 
 							ELSE 
-								CAST(ISNULL(@dblItemOverallValue, 0) AS FLOAT) / CAST(ISNULL(@dblWeight, 0)  AS FLOAT) 
+								dbo.fnDivide(@dblItemOverallValue, @dblWeight)
 					END 
-	RETURN dbo.fnConvertFloatToNumeric(ISNULL(@result, 0));
+	RETURN ISNULL(@result, 0);
 END

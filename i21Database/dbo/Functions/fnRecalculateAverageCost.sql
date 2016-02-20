@@ -12,17 +12,21 @@ BEGIN
 	 
 	SELECT	@dblTotalQty = SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)) 
 			,@dblTotalInventoryValue = SUM(
-					dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)
-					* dbo.fnCalculateStockUnitQty(dblCost, dblUOMQty)
+					dbo.fnMultiply(
+						dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)
+						,dbo.fnCalculateStockUnitQty(dblCost, dblUOMQty)
+					)
 					+ ISNULL(dblValue, 0)			
 				)
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intItemId = @intItemId
 			AND intItemLocationId = @intItemLocationId
 
-	RETURN dbo.fnConvertFloatToNumeric(
-		CASE	WHEN @dblTotalQty <> 0 THEN CAST(@dblTotalInventoryValue AS FLOAT) / CAST(@dblTotalQty AS FLOAT) 
-				ELSE NULL 
+	RETURN (
+		CASE	WHEN @dblTotalQty <> 0 THEN 
+					dbo.fnDivide(@dblTotalInventoryValue, @dblTotalQty)
+				ELSE 
+					NULL 
 		END 	
 	)	
 END

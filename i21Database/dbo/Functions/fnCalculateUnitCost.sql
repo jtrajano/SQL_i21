@@ -6,15 +6,18 @@ CREATE FUNCTION [dbo].[fnCalculateUnitCost] (
 RETURNS NUMERIC(38,20)
 AS
 BEGIN 
-	DECLARE @result AS FLOAT
+	DECLARE @result AS NUMERIC(38,20)
 
 	-- formula is cost  / unit qty
 	-- If unit qty is zero, return cost. 
 	SET @result =	CASE	WHEN ISNULL(@dblUnitQty, 0) = 0 THEN 
-								CAST(@dblCost AS FLOAT) 
+								@dblCost 
 							ELSE	
-								CAST(ISNULL(@dblCost, 0) AS FLOAT) / CAST(@dblUnitQty AS FLOAT) 
+								dbo.fnDivide (
+									@dblCost
+									,@dblUnitQty
+								)
 					END 
 
-	RETURN dbo.fnConvertFloatToNumeric(ISNULL(@result, 0));
+	RETURN ISNULL(@result, 0);
 END

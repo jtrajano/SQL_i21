@@ -9,16 +9,16 @@ BEGIN
 		,@50LB_BAG AS INT = 3
 		,@20KG_BAG AS INT = 4	
 		
-		,@LBS_UnitQty AS FLOAT = 1
-		,@KGS_UnitQty AS FLOAT = 0.453592
-		,@50LBBag_UnitQty AS FLOAT = 50.00
-		,@20KGBag_UnitQty AS FLOAT = 44.0925
+		,@LBS_UnitQty AS NUMERIC(38,20) = 1
+		,@KGS_UnitQty AS NUMERIC(38,20) = 0.453592
+		,@50LBBag_UnitQty AS NUMERIC(38,20) = 50.00
+		,@20KGBag_UnitQty AS NUMERIC(38,20) = 44.0925
 
 	-- Arrange
-	DECLARE @dblCost AS FLOAT = 25.00
+	DECLARE @dblCost AS NUMERIC(38,20) = 25.00
 
 	DECLARE @result AS NUMERIC(38,20) 
-	DECLARE @expected AS NUMERIC(38,20) = CAST((@dblCost / @KGS_UnitQty * @LBS_UnitQty) AS NUMERIC(38, 14)) -- Equals 55.11561050459444. Rounded to 14 decimal places to match windows standard calculator result. 
+	DECLARE @expected AS NUMERIC(38,20) = 55.11561050459440000000 -- 25 / 0.453592 * 1 = 55.11561050459440000000. Rounded to 14 decimal places to match windows standard calculator result. 
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostBetweenUOM(@KGS, @LBS, @dblCost)

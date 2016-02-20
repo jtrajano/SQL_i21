@@ -13,7 +13,7 @@ BEGIN
 			,@dblLotWeight AS NUMERIC(18,6) = 250.75									-- Actual weight of all bags is 250.75 Lb. 
 			,@dblCostingQty AS NUMERIC(38, 20) = -70										-- Take away 70 lb
 			,@dblLotWeightPerQty AS NUMERIC(38,20) = 35.821428571428571428571428571429	-- Each bag is 35.xxxx Lb.  
-			,@Expected AS NUMERIC(18,6) = (250.75 - 70) / 35.821428571428571428571428571429	-- expected result is a change in Qty to 5.xxx bags.
+			,@Expected AS NUMERIC(18,6) = 5.045800 -- (250.75 - 70) / 35.821428571428571428571428571429	-- expected result is a change in Qty to 5.xxx bags.
 			,@result AS NUMERIC(18,6)
 	
 	-- Act

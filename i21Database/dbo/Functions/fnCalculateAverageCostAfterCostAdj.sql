@@ -10,16 +10,15 @@ CREATE FUNCTION [dbo].[fnCalculateAverageCostAfterCostAdj]
 RETURNS NUMERIC(38,20)
 AS
 BEGIN
-	DECLARE @calculatedValue AS FLOAT 
+	DECLARE @calculatedValue AS NUMERIC(38,20) 
 
 	IF ISNULL(@RunningQty, 0) <= 0 
 		RETURN @CurrentAverageCost
 	
-	SET @calculatedValue = 
-		CAST(@UnsoldQty AS FLOAT) * 
-		CAST(@CostDifference AS FLOAT) / 
-		CAST(@RunningQty AS FLOAT) 
-		+ CAST(@CurrentAverageCost AS FLOAT) 
+	SET @calculatedValue = dbo.fnDivide (
+			dbo.fnMultiply(@UnsoldQty, @CostDifference)
+			,@RunningQty
+		) + @CurrentAverageCost
 
-	RETURN dbo.fnConvertFloatToNumeric(@calculatedValue); 
+	RETURN @calculatedValue; 
 END
