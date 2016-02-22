@@ -6,8 +6,9 @@
 	,@RaiseError					BIT				= 0	
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL		
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@ItemUOMId						INT				= NULL
+	,@OrderUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
@@ -172,8 +173,9 @@ BEGIN TRY
 				,[intItemId]
 				,[strDocumentNumber]
 				,[strItemDescription]
-				,[intItemUOMId]
+				,[intOrderUOMId]
 				,[dblQtyOrdered]
+				,[intItemUOMId]
 				,[dblQtyShipped]
 				,[dblDiscount]
 				,[dblPrice]
@@ -224,8 +226,9 @@ BEGIN TRY
 				,[intItemId]						= IC.[intItemId] 
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
-				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
+				,[intOrderUOMId]					= @OrderUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
+				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
