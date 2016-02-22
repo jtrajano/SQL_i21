@@ -237,12 +237,11 @@ SELECT @sqlCte += dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,'cteRetain2',
 SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  CASE WHEN @Where <> 'Where' THEN  @Where END +' )'-- UNION ALL SELECT ' + @cols + ' from cteRetain2 )'
 SELECT @sqlCte+= ',cteBase as (SELECT '+ @cols +' from cteBase1 UNION ALL SELECT ' + @cols + ' FROM  cteRetain2)'
 
-
-
-
-
-IF @dtmDateFrom <> ''
+IF @dtmDateFrom = '' OR (@strAccountIdFrom = '' AND @strPrimaryCodeFrom = '')
+	SELECT @sqlCte +=	' select * from cteBase '
+ELSE
 BEGIN
+	
 	DECLARE @cols1 NVARCHAR(MAX) = ''
 	SELECT @cols1 = REPLACE (@cols,'dtmDate','''' + @dtmDateFrom  + '''' + ' as dtmDate')
 	SELECT @cols1 = REPLACE (@cols1,'dblDebit,','0 as dblDebit,')
@@ -252,71 +251,13 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'dblTotal,','0 as dblTotal,')
 	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
-
-	IF @strAccountIdFrom = '' AND @strPrimaryCodeFrom = ''
-	BEGIN
-	SET @sqlCte +=
-		',cteInactive (accountId,id)AS
-		(
-			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId NOT IN(SELECT strAccountId FROM cteBase)
-			GROUP BY strAccountId
-		),
-		cte1 
-		AS(
-			SELECT * FROM RAWREPORT	A join cteInactive B
-			ON B.accountId = A.strAccountId 
-			AND B.id = A.intGLDetailId
-		)'
-		
-	END
-
-	IF @strAccountIdFrom <> ''  AND @strPrimaryCodeFrom = ''
-	BEGIN
-
-
-	SET @sqlCte +=
-		',cteInactive (accountId,id)AS
-		(
-			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + @strAccountIdTo + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
-			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
-			GROUP BY strAccountId
-		),
-		cte1 
-		AS(
-			SELECT * FROM RAWREPORT	A join cteInactive B
-			ON B.accountId = A.strAccountId 
-			AND B.id = A.intGLDetailId
-		
-		)'
-		
-	END
-	IF @strAccountIdFrom IS NULL  AND @strPrimaryCodeFrom IS NOT NULL
-	BEGIN
-	SET @sqlCte +=
-		',cteInactive (accountId,id)AS
-		(
-			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + @strPrimaryCodeTo + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
-			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
-			GROUP BY strAccountId
-		),
-		cte1 
-		AS(
-			SELECT * FROM RAWREPORT	A join cteInactive B
-			ON B.accountId = A.strAccountId 
-			AND B.id = A.intGLDetailId
-		
-		)'
-		
-	END
-	select @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
-
+	SELECT @cols1 = REPLACE (@cols1,'strCode,',''''' as strCode,')
+	IF @strAccountIdFrom <> ''  SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase)'
+	IF @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END  +  ' [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)'
+	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + @Where1 + ' GROUP BY strAccountId),
+		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
+	SELECT @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
 END
-ELSE
-BEGIN
-	SET @sqlCte += 'SELECT * FROM cteBase'
-END
-	EXEC (@sqlCte)
+
+EXEC (@sqlCte)
 END
