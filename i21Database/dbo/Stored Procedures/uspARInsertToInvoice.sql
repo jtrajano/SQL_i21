@@ -307,8 +307,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					([intInvoiceId]
 					,[intItemId]
 					,[strItemDescription]
-					,[intItemUOMId]
+					,[intOrderUOMId]
 					,[dblQtyOrdered]
+					,[intItemUOMId]					
 					,[dblQtyShipped]
 					,[dblDiscount]
 					,[dblPrice]
@@ -332,8 +333,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
 					,[strItemDescription]		--[strItemDescription]
-					,[intItemUOMId]				--[intItemUOMId]
+					,[intItemUOMId]				--[intOrderUOMId]					
 					,[dblQtyOrdered]			--[dblQtyOrdered]
+					,[intItemUOMId]				--[intItemUOMId]					
 					,[dblQtyOrdered]			--[dblQtyShipped]
 					,0							--[dblDiscount]
 					,[dblMaintenanceAmount]		--[dblPrice]
@@ -424,6 +426,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@ItemIsInventory		BIT,
 						@NewDetailId			INT,
 						@ItemDescription		NVARCHAR(100),
+						@OrderUOMId				INT,
 						@ItemUOMId				INT,
 						@ItemContractHeaderId	INT,
 						@ItemContractDetailId	INT,
@@ -441,7 +444,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 						@intItemToInvoiceId		= intItemToInvoiceId,
 						@ItemId					= intItemId,
 						@ItemIsInventory		= ysnIsInventory,
-						@ItemDescription		= strItemDescription,						
+						@ItemDescription		= strItemDescription,
+						@OrderUOMId				= intItemUOMId,	
 						@ItemUOMId				= intItemUOMId,
 						@ItemContractHeaderId	= intContractHeaderId,
 						@ItemContractDetailId	= intContractDetailId,
@@ -465,6 +469,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 							,@RaiseError					= @RaiseError
 							,@ItemDescription				= @ItemDescription
 							,@ItemDocumentNumber			= @ItemSalesOrderNumber
+							,@OrderUOMId					= @OrderUOMId
 							,@ItemUOMId						= @ItemUOMId
 							,@ItemContractHeaderId			= @ItemContractHeaderId
 							,@ItemContractDetailId		    = @ItemContractDetailId

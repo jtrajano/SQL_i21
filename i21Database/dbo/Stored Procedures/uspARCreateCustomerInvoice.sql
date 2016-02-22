@@ -40,8 +40,9 @@
 	,@ItemIsInventory				BIT				= 0
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@ItemUOMId						INT				= NULL
+	,@OrderUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
@@ -369,8 +370,9 @@ BEGIN TRY
 		,@RaiseError					= @RaiseError
 		,@ItemDocumentNumber			= @ItemDocumentNumber
 		,@ItemDescription				= @ItemDescription
-		,@ItemUOMId						= @ItemUOMId
+		,@OrderUOMId					= @OrderUOMId
 		,@ItemQtyOrdered				= @ItemQtyShipped
+		,@ItemUOMId						= @ItemUOMId
 		,@ItemQtyShipped				= @ItemQtyShipped
 		,@ItemDiscount					= @ItemDiscount
 		,@ItemPrice						= @ItemPrice
