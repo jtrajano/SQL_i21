@@ -48,6 +48,7 @@
 	[strShipFromCountry] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipFromPhone] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId] INT NULL , 
+	[intPayToAddressId] INT NULL,
 	[intShipToId] INT NULL , 
 	[intShipViaId] INT NULL , 
     [intStoreLocationId] INT NULL , 

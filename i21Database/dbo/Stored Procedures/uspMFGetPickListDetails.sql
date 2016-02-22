@@ -6,7 +6,7 @@ Declare @intKitStatusId int
 Declare @intRecipeId int
 Declare @intBlendItemId int
 Declare @intLocationId int
-Declare @dblQtyToProduce numeric(18,6)
+Declare @dblQtyToProduce numeric(38,20)
 Declare @intBlendRequirementId int
 Declare @strXml nvarchar(max)
 Declare @strWorkOrderIds nvarchar(max)
@@ -16,7 +16,7 @@ Declare @intWorkOrderId int
 Declare @intMinItemCount int,
 		@intRecipeItemId int,
 		@intRawItemId int,
-		@dblRequiredQty numeric(18,6),
+		@dblRequiredQty numeric(38,20),
 		@intConsumptionMethodId int,
 		@intConsumptionStoragelocationId int,
 		@ysnIsSubstitute bit,
@@ -40,13 +40,13 @@ and at.strAttributeName='Kit Staging Location'
 Declare @tblReservedQty table
 (
 	intLotId int,
-	dblReservedQty numeric(18,6)
+	dblReservedQty numeric(38,20)
 )
 
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY,
 	intItemId INT
-	,dblRequiredQty NUMERIC(18, 6)
+	,dblRequiredQty NUMERIC(38,20)
 	,ysnIsSubstitute BIT
 	,intConsumptionMethodId INT
 	,intParentItemId INT
@@ -65,21 +65,21 @@ DECLARE @tblPickList TABLE (
 	strDescription nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intStorageLocationId int,
 	strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
 	strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblAvailableQty numeric(18,6),
-	dblReservedQty numeric(18,6),
-	dblPickQuantity numeric(18,6),
+	dblAvailableQty numeric(38,20),
+	dblReservedQty numeric(38,20),
+	dblPickQuantity numeric(38,20),
 	intPickUOMId int,
 	strPickUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intStageLotId int,
-	dblAvailableUnit numeric(18,6),
+	dblAvailableUnit numeric(38,20),
 	strAvailableUnitUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblWeightPerUnit numeric(18,6),
+	dblWeightPerUnit numeric(38,20),
 	strStatus nvarchar(50) COLLATE Latin1_General_CI_AS
 )
 
@@ -87,7 +87,7 @@ Declare @tblRemainingPickedItems AS table
 ( 
 	intRowNo int IDENTITY,
 	intItemId int,
-	dblRemainingQuantity numeric(18,6),
+	dblRemainingQuantity numeric(38,20),
 	intConsumptionMethodId int,
 	ysnIsSubstitute bit,
 	intParentItemId int
@@ -97,7 +97,7 @@ Declare @tblChildLot AS table
 (
 	intLotId int,
 	intStorageLocationId int,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	dblWeightPerUnit numeric(38,20)
 )
@@ -110,19 +110,19 @@ Declare @tblRemainingPickedLots AS table
 	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
 	strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intItemId int,
 	intRecipeItemId int,
-	dblUnitCost numeric(18,6),
-	dblDensity numeric(18,6),
-	dblRequiredQtyPerSheet numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
-	dblRiskScore numeric(18,6),
+	dblUnitCost numeric(38,20),
+	dblDensity numeric(38,20),
+	dblRequiredQtyPerSheet numeric(38,20),
+	dblWeightPerUnit numeric(38,20),
+	dblRiskScore numeric(38,20),
 	intStorageLocationId int,
 	strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -142,19 +142,19 @@ Declare @tblPickedLots AS table
 	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
 	strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intItemId int,
 	intRecipeItemId int,
-	dblUnitCost numeric(18,6),
-	dblDensity numeric(18,6),
-	dblRequiredQtyPerSheet numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
-	dblRiskScore numeric(18,6),
+	dblUnitCost numeric(38,20),
+	dblDensity numeric(38,20),
+	dblRequiredQtyPerSheet numeric(38,20),
+	dblWeightPerUnit numeric(38,20),
+	dblRiskScore numeric(38,20),
 	intStorageLocationId int,
 	strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -172,19 +172,19 @@ Declare @tblPickedLotsFinal AS table
 	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
 	strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intItemId int,
 	intRecipeItemId int,
-	dblUnitCost numeric(18,6),
-	dblDensity numeric(18,6),
-	dblRequiredQtyPerSheet numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
-	dblRiskScore numeric(18,6),
+	dblUnitCost numeric(38,20),
+	dblDensity numeric(38,20),
+	dblRequiredQtyPerSheet numeric(38,20),
+	dblWeightPerUnit numeric(38,20),
+	dblRiskScore numeric(38,20),
 	intStorageLocationId int,
 	strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -193,11 +193,11 @@ Declare @tblPickedLotsFinal AS table
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblAvailableQty numeric(18,6),
-	dblReservedQty numeric(18,6),
-	dblAvailableUnit numeric(18,6),
+	dblAvailableQty numeric(38,20),
+	dblReservedQty numeric(38,20),
+	dblAvailableUnit numeric(38,20),
 	strAvailableUnitUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
-	dblPickQuantity numeric(18,6),
+	dblPickQuantity numeric(38,20),
 	intPickUOMId int,
 	strPickUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intParentLotId int,

@@ -13,8 +13,8 @@ BEGIN TRY
 	DECLARE @ysnEnableParentLot BIT = 0
 	DECLARE @intBlendItemId INT
 	DECLARE @intLocationId INT
-	DECLARE @dblPlannedQuantity NUMERIC(18, 6)
-	DECLARE @dblBulkReqQuantity NUMERIC(18, 6)
+	DECLARE @dblPlannedQuantity NUMERIC(38,20)
+	DECLARE @dblBulkReqQuantity NUMERIC(38,20)
 	Declare @intCategoryId int
 	Declare @intCellId int
 
@@ -31,10 +31,10 @@ BEGIN TRY
 		,intCellId INT
 		,intMachineId INT
 		,dtmDueDate DATETIME
-		,dblQtyToProduce NUMERIC(18, 6)
-		,dblPlannedQuantity NUMERIC(18, 6)
+		,dblQtyToProduce NUMERIC(38,20)
+		,dblPlannedQuantity NUMERIC(38,20)
 		,intItemUOMId INT
-		,dblBinSize NUMERIC(18, 6)
+		,dblBinSize NUMERIC(38,20)
 		,strComment NVARCHAR(Max)
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
@@ -47,11 +47,11 @@ BEGIN TRY
 		,intWorkOrderInputLotId INT
 		,intLotId INT
 		,intItemId INT
-		,dblQty NUMERIC(18, 6)
+		,dblQty NUMERIC(38,20)
 		,intItemUOMId INT
-		,dblIssuedQuantity NUMERIC(18, 6)
+		,dblIssuedQuantity NUMERIC(38,20)
 		,intItemIssuedUOMId INT
-		,dblWeightPerUnit NUMERIC(18, 6)
+		,dblWeightPerUnit NUMERIC(38,20)
 		,intUserId INT
 		,strRowState NVARCHAR(50)
 		,intRecipeItemId INT
@@ -104,10 +104,10 @@ BEGIN TRY
 			,intCellId INT
 			,intMachineId INT
 			,dtmDueDate DATETIME
-			,dblQtyToProduce NUMERIC(18, 6)
-			,dblPlannedQuantity NUMERIC(18, 6)
+			,dblQtyToProduce NUMERIC(38,20)
+			,dblPlannedQuantity NUMERIC(38,20)
 			,intItemUOMId INT
-			,dblBinSize NUMERIC(18, 6)
+			,dblBinSize NUMERIC(38,20)
 			,strComment NVARCHAR(Max)
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
@@ -150,11 +150,11 @@ BEGIN TRY
 			intWorkOrderInputLotId INT
 			,intLotId INT
 			,intItemId INT
-			,dblQty NUMERIC(18, 6)
+			,dblQty NUMERIC(38,20)
 			,intItemUOMId INT
-			,dblIssuedQuantity NUMERIC(18, 6)
+			,dblIssuedQuantity NUMERIC(38,20)
 			,intItemIssuedUOMId INT
-			,dblWeightPerUnit NUMERIC(18, 6)
+			,dblWeightPerUnit NUMERIC(38,20)
 			,intUserId INT
 			,strRowState NVARCHAR(50)
 			,intRecipeItemId INT

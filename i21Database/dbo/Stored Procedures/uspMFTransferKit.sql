@@ -22,15 +22,15 @@ Declare @intMinParentLot int
 Declare @intMinChildLot int
 Declare @intWorkOrderId int
 Declare @intParentLotId int
-Declare @dblReqQty numeric(18,6)
-Declare @dblAvailableQty numeric(18,6)
+Declare @dblReqQty numeric(38,20)
+Declare @dblAvailableQty numeric(38,20)
 Declare @dtmCurrentDateTime DateTime=GETDATE()
 Declare @index int
 Declare @id int
 Declare @ysnBlendSheetRequired bit
 Declare @intBlendItemId int
-Declare @dblWeightPerUnit numeric(18,6)
-Declare @dblMoveQty numeric(18,6)
+Declare @dblWeightPerUnit numeric(38,20)
+Declare @dblMoveQty numeric(38,20)
 Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
  
@@ -62,10 +62,10 @@ Declare @tblParentLot table
 	intRowNo int Identity(1,1),
 	intWorkOrderId int,
 	intParentLotId int,
-	dblReqQty numeric(18,6),
+	dblReqQty numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(18,6)
+	dblWeightPerUnit numeric(38,20)
 )
 
 Declare @tblChildLot table
@@ -74,10 +74,10 @@ Declare @tblChildLot table
 	intStageLotId int,
 	strStageLotNumber nvarchar(50),
 	intItemId int,
-	dblAvailableQty numeric(18,6),
+	dblAvailableQty numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(18,6)
+	dblWeightPerUnit numeric(38,20)
 )
 
 --Get the Comma Separated Work Order Ids into a table

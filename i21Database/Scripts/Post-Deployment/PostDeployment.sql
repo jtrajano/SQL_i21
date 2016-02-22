@@ -193,11 +193,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
-:r .\AP\UpdatePOAddressInfo.sql
+--:r .\AP\UpdatePOAddressInfo.sql
 :r .\AP\UpdateApprovalRecords.sql
-:r .\AP\UpdateBillStatus.sql
+--:r .\AP\UpdateBillStatus.sql
 :r .\AP\RemoveBillTemplate.sql
 :r .\AP\UpdateVoucherForApproval.sql
+:r .\AP\UpdateBillPayToAddress.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
