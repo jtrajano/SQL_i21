@@ -48,7 +48,7 @@ BEGIN
 	c.strAccountType from cteRetain a
 	join tblGLAccount b on a.intAccountId = b.intAccountId
 	join tblGLAccountGroup c on b.intAccountGroupId = c.intAccountGroupId
-	OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnitRE(b.strAccountId,''' + @dtmDateFrom1 + ''') D
+	OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnitRE(b.strAccountId,''' + @dtmDateFrom + ''') D
 	OUTER APPLY (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup) E
 	where c.strAccountType in (''Revenue'', ''Expense'')  
 	group by  DATENAME(MONTH,dtmDate) ,DATENAME(YEAR,dtmDate),MONTH(dtmDate) ,strAccountType, year(dtmDate),D.beginBalance,D.beginBalanceUnit,strCompanyName),' + 
