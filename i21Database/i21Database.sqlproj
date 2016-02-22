@@ -3205,6 +3205,7 @@
     <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
     <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
     <Build Include="dbo\Views\vyuAROrderUOM.sql" />
+    <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
