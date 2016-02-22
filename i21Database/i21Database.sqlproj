@@ -3478,6 +3478,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRescheduleAndSaveWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSTDuplicateRetailPriceAdjustment.sql" />
     <Build Include="dbo\tblPRForm941.sql" />
+    <Build Include="dbo\Views\vyuHDProjectSearchSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
