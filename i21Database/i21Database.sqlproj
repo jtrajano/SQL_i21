@@ -3294,6 +3294,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddPaycheckDirectDepositEntries.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\15_FixInvoiceDateForCredits.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\16_FixInvoicePostDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

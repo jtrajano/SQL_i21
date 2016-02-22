@@ -116,7 +116,7 @@ UNION ALL
       
 SELECT I.dtmPostDate      
         , I.intInvoiceId
-		, dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) END
+		, dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) * -1 ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
         , dblInvoiceTotal		= 0    
         , I.dblAmountDue		 
         , dblDiscount			= ISNULL(I.dblDiscount, 0)
@@ -162,16 +162,16 @@ LEFT JOIN
     , dblDiscount
 	, dblInterest
     , dblAvailableCredit
-    , CASE WHEN DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,@dtmDateTo)<=10
-                THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl10Days
-    , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,@dtmDateTo)>10 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,@dtmDateTo)<=30
-                THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl30Days
-    , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,@dtmDateTo)>30 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,@dtmDateTo)<=60    
-                THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl60Days
-    , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,@dtmDateTo)>60 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,@dtmDateTo)<=90     
-                THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl90Days    
-    , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,@dtmDateTo)>90      
-                THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl91Days    
+    , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <=10
+            THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl10Days
+    , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) > 10 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <= 30
+            THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest),0) ELSE 0 END dbl30Days
+    , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) > 30 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <= 60    
+            THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest),0) ELSE 0 END dbl60Days
+    , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) > 60 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) <= 90     
+            THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl90Days    
+    , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, @dtmDateTo) > 90      
+            THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl91Days    
 FROM
 (SELECT I.intInvoiceId
         , dblAmountPaid		= 0
@@ -227,11 +227,11 @@ WHERE I.ysnPosted = 1
 UNION ALL      
             
 SELECT I.intInvoiceId
-    , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN 0 ELSE ISNULL(PD.dblPayment,0) END
+    , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) * -1 ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
     , dblInvoiceTotal		= 0
     , dblAmountDue			= 0
-    , dblDiscount			= ISNULL(I.dblDiscount, 0)
-	, dblInterest			= ISNULL(I.dblInterest, 0)
+    , dblDiscount			= ISNULL(PD.dblDiscount, 0)
+	, dblInterest			= ISNULL(PD.dblInterest, 0)
     , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
     , I.intEntityCustomerId
     , dblAvailableCredit	= 0
