@@ -1,4 +1,4 @@
-﻿	DELETE FROM tblSMShortcutKeys WHERE ISNULL(intScreenId, 0) = 0
+﻿	DELETE FROM tblSMShortcutKeys WHERE ISNULL(intMenuId, 0) = 0
 GO
     PRINT N'END INSERT DEFAULT SHORCUTKEY'
 GO
