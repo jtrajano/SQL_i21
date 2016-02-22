@@ -114,17 +114,12 @@ BEGIN
 			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', '', 1, 1, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
 				
 			SET @intRefNo = @intRefNo + 1
-			SET @intSort = @intSort + 1
-
-			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
-								
-			SET @intRefNo = @intRefNo + 1
-			SET @intSort = @intSort + 1	
+			SET @intSort = @intSort + 1			
 			SET @strRelatedRows = ''
 
 		END
 
-	UPDATE tblFRRowDesign SET strBalanceSide = 'Debit' WHERE strRowType = 'Filter Accounts' AND intRowId = @intRowId
+	UPDATE tblFRRowDesign SET strBalanceSide = 'Debit' WHERE strRowType = 'Filter Accounts' AND intRowId = @intRowId AND strDescription LIKE 'Trial Balance %'
 
 END
 

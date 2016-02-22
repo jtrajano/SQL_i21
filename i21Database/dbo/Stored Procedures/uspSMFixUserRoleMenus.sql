@@ -61,36 +61,36 @@ BEGIN TRY
 				-- DELETE CONTACT MENUS
 
 				/* HELP DESK */
-				DECLARE @HelpDeskParentMenuId INT
-				SELECT @HelpDeskParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
+				--DECLARE @HelpDeskParentMenuId INT
+				--SELECT @HelpDeskParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
 
-				DECLARE @CreateTicketId INT
-				SELECT @CreateTicketId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @CreateTicketId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @CreateTicketId INT
+				--SELECT @CreateTicketId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @CreateTicketId AND intUserRoleId = @UserRoleID
+				--END
 				
-				DECLARE @OpenTicketsMenuId INT
-				SELECT  @OpenTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @OpenTicketsMenuId AND intUserRoleId = @UserRoleID
-				END					
+				--DECLARE @OpenTicketsMenuId INT
+				--SELECT  @OpenTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @OpenTicketsMenuId AND intUserRoleId = @UserRoleID
+				--END					
 				
-				DECLARE @TicketsReportedByMeMenuId INT
-				SELECT  @TicketsReportedByMeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @TicketsReportedByMeMenuId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @TicketsReportedByMeMenuId INT
+				--SELECT  @TicketsReportedByMeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @TicketsReportedByMeMenuId AND intUserRoleId = @UserRoleID
+				--END
 
-				DECLARE @ProjectListsId INT
-				SELECT @ProjectListsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-				BEGIN
-					DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @ProjectListsId AND intUserRoleId = @UserRoleID
-				END
+				--DECLARE @ProjectListsId INT
+				--SELECT @ProjectListsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+				--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+				--BEGIN
+				--	DELETE FROM tblSMUserRoleMenu WHERE intMenuId = @ProjectListsId AND intUserRoleId = @UserRoleID
+				--END
 
 				/* PURCHASING */
 				DECLARE @AccountsPayableParentMenuId INT

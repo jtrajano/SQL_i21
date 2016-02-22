@@ -123,7 +123,7 @@ BEGIN
 
 		END
 
-	UPDATE tblFRRowDesign SET strBalanceSide = 'Debit' WHERE strRowType = 'Filter Accounts' AND intRowId = @intRowId
+	UPDATE tblFRRowDesign SET strBalanceSide = 'Debit' WHERE strRowType = 'Filter Accounts' AND intRowId = @intRowId AND strDescription LIKE 'Trial Balance %'
 
 END
 

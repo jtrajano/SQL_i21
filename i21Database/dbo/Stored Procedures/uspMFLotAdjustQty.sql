@@ -1,8 +1,10 @@
-﻿CREATE PROCEDURE [uspMFLotAdjustQty] @intLotId INT
-	,@dblNewLotQty NUMERIC(18, 6)
-	,@intUserId INT
-	,@strReasonCode NVARCHAR(1000)
-	,@strNotes NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE [uspMFLotAdjustQty]
+ @intLotId INT,       
+ @dblNewLotQty numeric(38,20),
+ @intUserId INT ,
+ @strReasonCode NVARCHAR(1000),
+ @strNotes NVARCHAR(MAX)=NULL
+
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -13,9 +15,9 @@ BEGIN TRY
 	DECLARE @strLotNumber NVARCHAR(50)
 	DECLARE @intSourceId INT
 	DECLARE @intSourceTransactionTypeId INT
-	DECLARE @dblLotQty NUMERIC(18, 6)
-	DECLARE @dblAdjustByQuantity NUMERIC(18, 6)
-	DECLARE @dblNewUnitCost NUMERIC(18, 6)
+	DECLARE @dblLotQty NUMERIC(38,20)
+	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
+	DECLARE @dblNewUnitCost NUMERIC(38,20)
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)

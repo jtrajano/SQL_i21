@@ -36,10 +36,10 @@ BEGIN TRY
 		,@intNewLocationId INT
 		,@intNewSubLocationId INT
 		,@intNewStorageLocationId INT
-		,@dblNewWeight NUMERIC(18, 6)
+		,@dblNewWeight NUMERIC(38, 20)
 		,@intNewItemUOMId INT
-		,@dblWeightPerQty NUMERIC(18, 6)
-		,@dblAdjustByQuantity NUMERIC(18, 6)
+		,@dblWeightPerQty NUMERIC(38, 20)
+		,@dblAdjustByQuantity NUMERIC(38, 20)
 		,@intInventoryAdjustmentId INT
 		,@intItemId INT
 		,@intLocationId INT

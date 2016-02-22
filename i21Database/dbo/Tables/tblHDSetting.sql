@@ -7,6 +7,7 @@
 	[strTimeZone] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intTicketStatusId] [int] NULL,
 	[intTicketTypeId] [int] NULL,
+	[intTemplateStatusId] [int] NULL,
 	[intBillingIncrement] [int] NOT NULL DEFAULT 0,
 	[strFromName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strSubjectPrefix] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,

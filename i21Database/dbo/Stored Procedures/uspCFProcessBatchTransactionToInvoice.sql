@@ -16,6 +16,10 @@ DECLARE @intRecordKey INT
 DECLARE @strRecord INT
 DECLARE @UserEntityId INT
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
+DECLARE @ysnRemoteTransaction INT
+
+
 
 SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId),@UserId)
 
@@ -29,8 +33,20 @@ END
 
 	WHILE (EXISTS(SELECT 1 FROM #tmpTransactionId ))
 			BEGIN
+
+				
+				
 				SELECT @intRecordKey = RecordKey FROM #tmpTransactionId
 				SET @strRecord = @intRecordKey
+
+				SELECT 
+				@ysnRemoteTransaction = (CASE 
+											WHEN strTransactionType = 'Extended Remote' OR strTransactionType = 'Remote'
+											THEN 1
+											ELSE 0
+										END)
+				from tblCFTransaction 
+				where intTransactionId = @strRecord
 		
 				INSERT INTO @EntriesForInvoice(
 					 [strSourceTransaction]
@@ -68,7 +84,6 @@ END
 					,[intEntityId]
 					,[ysnResetDetails]
 					,[ysnPost]
-					,[ysnRecap]
 					,[intInvoiceDetailId]
 					,[intItemId]
 					,[ysnInventory]
@@ -106,12 +121,14 @@ END
 					,[intPerformerId]
 					,[ysnLeaseBilling]
 					,[ysnVirtualMeterReading]
+					,[ysnClearDetailTaxes]					
+					,[intTempDetailIdForTaxes]
 				)
 				SELECT
 					 [strSourceTransaction]					= 'Card Fueling Transaction'
 					,[intSourceId]							= cfTrans.intTransactionId
-					,[strSourceId]							= ''
-					,[intInvoiceId]							= cfTrans.intInvoiceId --NULL Value will create new invoice
+					,[strSourceId]							= cfTrans.strTransactionId
+					,[intInvoiceId]							= NULL --NULL Value will create new invoice
 					,[intEntityCustomerId]					= cfCardAccount.intCustomerId
 					,[intCompanyLocationId]					= cfSiteItem.intARLocationId
 					,[intCurrencyId]						= 1
@@ -132,7 +149,7 @@ END
 					,[intBillToLocationId]					= NULL
 					,[ysnTemplate]							= 0
 					,[ysnForgiven]							= 0
-					,[ysnCalculated]						= 1
+					,[ysnCalculated]						= 0  --0 OS
 					,[ysnSplitted]							= 0
 					,[intPaymentId]							= NULL
 					,[intSplitId]							= NULL
@@ -143,11 +160,8 @@ END
 					,[intEntityId]							= @UserEntityId
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
-					,[ysnRecap]								= @Recap
 	
-					,[intInvoiceDetailId]					= (SELECT TOP 1 intInvoiceDetailId 
-																FROM tblARInvoiceDetail 
-																WHERE intInvoiceId = cfTrans.intInvoiceId)
+					,[intInvoiceDetailId]					= NULL
 					,[intItemId]							= cfSiteItem.intARItemId
 					,[ysnInventory]							= 1
 					,[strItemDescription]					= cfSiteItem.strDescription 
@@ -163,7 +177,11 @@ END
 					,[dblMaintenanceAmount]					= NULL
 					,[dblLicenseAmount]						= NULL
 					,[intTaxGroupId]						= cfSiteItem.intTaxGroupId
-					,[ysnRecomputeTax]						= 1
+					,[ysnRecomputeTax]						= (CASE 
+																	WHEN @ysnRemoteTransaction = 1
+																	THEN 0
+																	ELSE 1
+															   END)
 					,[intSCInvoiceId]						= NULL
 					,[strSCInvoiceNumber]					= ''
 					,[intInventoryShipmentItemId]			= NULL
@@ -184,6 +202,8 @@ END
 					,[intPerformerId]						= NULL
 					,[ysnLeaseBilling]						= NULL
 					,[ysnVirtualMeterReading]				= NULL
+					,[ysnClearDetailTaxes]					= 0
+					,[intTempDetailIdForTaxes]				= @strRecord
 				FROM tblCFTransaction cfTrans
 				INNER JOIN tblCFNetwork cfNetwork
 				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
@@ -205,7 +225,7 @@ END
 									,iicItem.strDescription
 							FROM tblCFSite icfSite
 							INNER JOIN tblCFNetwork icfNetwork
-							ON icfNetwork.intNetworkId = intSiteId
+							ON icfNetwork.intNetworkId = icfSite.intNetworkId
 							INNER JOIN tblCFItem icfItem
 							ON icfSite.intSiteId = icfItem.intSiteId 
 							OR icfNetwork.intNetworkId = icfItem.intNetworkId
@@ -215,8 +235,7 @@ END
 							ON iicItemLoc.intLocationId = icfSite.intARLocationId 
 							AND iicItemLoc.intItemId = icfItem.intARItemId)
 							AS cfSiteItem
-				ON cfTrans.intSiteId = cfSiteItem.intSiteId
-				OR cfNetwork.intNetworkId = cfSiteItem.intNetworkId
+				ON (cfTrans.intSiteId = cfSiteItem.intSiteId OR cfTrans.intNetworkId = cfSiteItem.intNetworkId)
 				AND cfSiteItem.intARItemId = cfTrans.intARItemId
 				AND cfSiteItem.intItemId = cfTrans.intProductId
 				INNER JOIN (SELECT * 
@@ -228,6 +247,56 @@ END
 				ON cfTrans.intContractId = ctContracts.intContractDetailId
 				WHERE cfTrans.intTransactionId = @strRecord
 
+
+				IF (@ysnRemoteTransaction = 1)
+				BEGIN
+					INSERT INTO @TaxDetails
+						(
+						[intDetailId] 
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[dblRate]
+						,[intTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes]
+						,[intTempDetailIdForTaxes])
+					SELECT
+					[intDetailId]				= NULL
+					,[intTaxGroupId]			= NULL
+					,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
+					,[intTaxClassId]			= cfTaxCode.intTaxClassId
+					,[strTaxableByOtherTaxes]	= cfTaxCode.strTaxableByOtherTaxes
+					,[strCalculationMethod]		= cfTaxCodeRate.strCalculationMethod
+					,[dblRate]					= cfTransactionTax.dblTaxRate
+					,[intTaxAccountId]			= cfTaxCode.intSalesTaxAccountId
+					,[dblTax]					= 0
+					,[dblAdjustedTax]			= (cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+					,[ysnTaxAdjusted]			= 1
+					,[ysnSeparateOnInvoice]		= 0 
+					,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
+					,[ysnTaxExempt]				= 0
+					,[strNotes]					= ''
+					,[intTempDetailIdForTaxes]	= @strRecord
+					FROM 
+					tblCFTransaction cfTransaction
+					INNER JOIN tblCFTransactionTax cfTransactionTax
+					ON cfTransaction.intTransactionId = cfTransactionTax.intTransactionId
+					INNER JOIN tblSMTaxCode  cfTaxCode
+					ON cfTransactionTax.intTaxCodeId = cfTaxCode.intTaxCodeId
+					INNER JOIN tblSMTaxCodeRate cfTaxCodeRate
+					ON cfTaxCode.intTaxCodeId = cfTaxCodeRate.intTaxCodeId
+					WHERE cfTransactionTax.intTransactionId = @strRecord
+
+				END
+
 				DELETE FROM #tmpTransactionId WHERE RecordKey = @intRecordKey
 			
 			END
@@ -238,17 +307,19 @@ END
 	--return
 	
 	BEGIN TRANSACTION
+
 	EXEC [dbo].[uspARProcessInvoices]
-		 @InvoiceEntries			= @EntriesForInvoice
-		,@UserId					= @UserId
-		,@GroupingOption			= 0
-		,@RaiseError				= 1
-		,@ErrorMessage				= @ErrorMessage OUTPUT
-		,@CreatedIvoices			= @CreatedIvoices OUTPUT
-		,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
-		,@BatchIdForNewPost			= @BatchId OUTPUT
-		,@BatchIdForNewPostRecap	= @BatchId OUTPUT
-		
+		@InvoiceEntries	= @EntriesForInvoice
+	,@LineItemTaxEntries = @TaxDetails
+	,@UserId					= @UserId
+	,@GroupingOption			= 0
+	,@RaiseError				= 1
+	,@ErrorMessage				= @ErrorMessage OUTPUT
+	,@CreatedIvoices			= @CreatedIvoices OUTPUT
+	,@UpdatedIvoices			= @UpdatedIvoices OUTPUT
+	,@BatchIdForNewPost			= @BatchId OUTPUT
+	,@BatchIdForNewPostRecap	= @BatchId OUTPUT
+
 
 	DECLARE @intCreatedRecordKey INT
 	DECLARE @intCreatedInvoiceId INT

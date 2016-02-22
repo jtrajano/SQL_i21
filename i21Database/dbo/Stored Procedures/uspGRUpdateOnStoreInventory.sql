@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @dblCurrentOpenBalance NUMERIC(24, 10)
 	DECLARE @intItemId AS INT
 	DECLARE @intCompanyLocationId INT
+	DECLARE @intSubLocationId INT
 	DECLARE @strStorageTicketNumber Nvarchar(40)
 
 	IF EXISTS ( SELECT 1 FROM [tblGRCustomerStorage] WHERE intCustomerStorageId = @intCustomerStorageId AND dblOpenBalance <> @dblOpenBalance)
@@ -19,6 +20,7 @@ BEGIN TRY
 			,@dblCurrentOpenBalance = dblOpenBalance
 			,@intCompanyLocationId = intCompanyLocationId
 			,@strStorageTicketNumber = strStorageTicketNumber
+			,@intSubLocationId=intCompanyLocationSubLocationId
 		FROM [tblGRCustomerStorage]
 		WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -51,6 +53,7 @@ BEGIN TRY
 			,[intTransactionId]
 			,[strTransactionId]
 			,[intTransactionTypeId]
+			,[intSubLocationId]
 		)
 		SELECT [intItemId] = @intItemId
 			,[intItemLocationId] = @intItemLocationId
@@ -65,6 +68,7 @@ BEGIN TRY
 			,[intTransactionId] = @intCustomerStorageId
 			,[strTransactionId] = LTRIM(@strStorageTicketNumber)
 			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intSubLocationId]=@intSubLocationId
 
 		EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
 	END

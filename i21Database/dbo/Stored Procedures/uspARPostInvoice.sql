@@ -79,6 +79,8 @@ SET @recapId = '1'
 SET @success = 1
 
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
+DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
+SELECT @INVENTORY_SHIPMENT_TYPE = intTransactionTypeId FROM tblICInventoryTransactionType WHERE strName = @SCREEN_NAME
 
 DECLARE @INVENTORY_INVOICE_TYPE AS INT = 33
 
@@ -910,130 +912,6 @@ if @recap = 1 AND @raiseError = 0
 --------------------------------------------------------------------------------------------  
 IF @post = 1  
 	BEGIN  
-	
-		BEGIN TRY	
-			-- Get the items to post  
-			DECLARE @ItemsForPost AS ItemCostingTableType  
-			INSERT INTO @ItemsForPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId 
-				,intTransactionDetailId
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-				,strActualCostId
-			) 
-			SELECT 
-				Detail.intItemId  
-				,IST.intItemLocationId
-				,Detail.intItemUOMId  
-				,Header.dtmShipDate
-				,Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)
-				,ItemUOM.dblUnitQty
-				,IST.dblLastCost
-				,Detail.dblPrice 
-				,Header.intCurrencyId
-				,1.00
-				,Header.intInvoiceId
-				,Detail.intInvoiceDetailId
-				,Header.strInvoiceNumber 
-				,@INVENTORY_INVOICE_TYPE
-				,NULL 
-				,NULL
-				,NULL
-				,strActualCostId = Header.strActualCostId
-			FROM 
-				tblARInvoiceDetail Detail
-			INNER JOIN
-				tblARInvoice Header
-					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
-					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
-			INNER JOIN
-				@PostInvoiceData P
-					ON Header.intInvoiceId = P.intInvoiceId	
-			INNER JOIN
-				tblICItemUOM ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-			LEFT OUTER JOIN
-				vyuICGetItemStock IST
-					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId 
-			WHERE
-				Detail.dblTotal <> @ZeroDecimal
-				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
-				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
-				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
-				AND Header.strType <> 'Debit Memo'
-
-			
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
-	  
-		-- Call the post routine 
-		BEGIN TRY 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-			)
-			EXEC	dbo.uspICPostCosting  
-					@ItemsForPost  
-					,@batchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@UserEntityID
-					
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
-		
 		-- Accruals
 		BEGIN TRY 
 			DECLARE @Accruals AS Id
@@ -2040,6 +1918,130 @@ IF @recap = 1
 --------------------------------------------------------------------------------------------  
 IF @recap = 0
 	BEGIN
+
+		--Update onhand
+		BEGIN TRY	
+			-- Get the items to post  
+			DECLARE @ItemsForPost AS ItemCostingTableType  
+			INSERT INTO @ItemsForPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId 
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+				,strActualCostId
+			) 
+			SELECT 
+				Detail.intItemId  
+				,IST.intItemLocationId
+				,Detail.intItemUOMId  
+				,Header.dtmShipDate
+				,(Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,ItemUOM.dblUnitQty
+				,IST.dblLastCost
+				,Detail.dblPrice 
+				,Header.intCurrencyId
+				,1.00
+				,Header.intInvoiceId
+				,Detail.intInvoiceDetailId
+				,Header.strInvoiceNumber 
+				,@INVENTORY_SHIPMENT_TYPE
+				,NULL 
+				,NULL
+				,NULL
+				,strActualCostId = Header.strActualCostId
+			FROM 
+				tblARInvoiceDetail Detail
+			INNER JOIN
+				tblARInvoice Header
+					ON Detail.intInvoiceId = Header.intInvoiceId
+					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
+					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				@PostInvoiceData P
+					ON Header.intInvoiceId = P.intInvoiceId	
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+			LEFT OUTER JOIN
+				vyuICGetItemStock IST
+					ON Detail.intItemId = IST.intItemId 
+					AND Header.intCompanyLocationId = IST.intLocationId 
+			WHERE
+				Detail.dblTotal <> @ZeroDecimal
+				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
+				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND Header.strType <> 'Debit Memo'
+
+			
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()
+			GOTO Do_Rollback
+		END CATCH
+
+		-- Call the post routine 
+		BEGIN TRY 
+			-- Call the post routine 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+			)
+			EXEC	dbo.uspICPostCosting  
+					@ItemsForPost  
+					,@batchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@UserEntityID
+					
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH
+
 		BEGIN TRY 
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY

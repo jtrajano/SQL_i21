@@ -48,7 +48,13 @@ SELECT
 		S.dtmETAPOD,
 		S.dtmActualArrivalDate,
 		S.dtmActualDischargeDate,
-		S.strComments
+		S.strComments,
+		CASE WHEN (SELECT IsNull(SUM(SC.dblReceivedQty), 0) FROM tblLGShipmentContractQty SC GROUP BY SC.intShipmentId HAVING SC.intShipmentId = S.intShipmentId) > 0 THEN 
+					CAST (1 as Bit) 
+				ELSE 
+					CAST (0 as Bit) 
+				END AS ysnReceived
+
 
 FROM tblLGShipment S 
 JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = S.intWeightUnitMeasureId
