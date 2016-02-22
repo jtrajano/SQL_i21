@@ -2,7 +2,8 @@
 AS
 SELECT DISTINCT a.intStorageScheduleTypeId  
  ,a.strStorageTypeDescription
- ,b.intCurrencyID  
+ ,b.intCurrencyID
+ ,a.ysnDPOwnedType  
 FROM tblGRStorageType a  
 JOIN tblGRStorageScheduleRule b ON b.intStorageType = a.intStorageScheduleTypeId  
 WHERE a.ysnActive=1 AND a.ysnCustomerStorage=0 
