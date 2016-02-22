@@ -357,7 +357,7 @@ FROM
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
-		,[dblUnitCost]								=	CD.dblCashPrice
+		,[dblUnitCost]								=	ISNULL(CD.dblCashPrice,0)
 		,[dblTax]									=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
