@@ -1608,15 +1608,15 @@ DECLARE @HelpDeskParentMenuId INT
 SELECT @HelpDeskParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
 
 /* Start of Re-insert */
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-BEGIN
-	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] ON
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--BEGIN
+--	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] ON
 
-	INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (144, N'Open Tickets', N'Help Desk', 141, N'Open Tickets', N'Activity', N'Screen', N'HelpDesk.view.TicketList', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+--	INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (144, N'Open Tickets', N'Help Desk', 141, N'Open Tickets', N'Activity', N'Screen', N'HelpDesk.view.TicketList', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
 
-	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] OFF
-END
+--	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] OFF
+--END
 /* End of Re-insert */
 		
 
@@ -1656,11 +1656,11 @@ UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Product' WHERE strMenuNa
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Email Setup' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 --UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.HelpDeskEmailSetup' WHERE strMenuName = N'Email Setup' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Tickets Reported by Me', N'Help Desk', @HelpDeskParentMenuId, N'Tickets Reported by Me', N'Activity', N'Screen', N'HelpDesk.view.TicketList', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.TicketList' WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Tickets Reported by Me', N'Help Desk', @HelpDeskParentMenuId, N'Tickets Reported by Me', N'Activity', N'Screen', N'HelpDesk.view.TicketList', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.TicketList' WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1668,11 +1668,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Ho
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.ExportHoursWorked' WHERE strMenuName = 'Export Hours Worked' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Project Lists', N'Help Desk', @HelpDeskParentMenuId, N'Project Lists', N'Activity', N'Screen', N'HelpDesk.view.ProjectList', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.ProjectList' WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Project Lists', N'Help Desk', @HelpDeskParentMenuId, N'Project Lists', N'Activity', N'Screen', N'HelpDesk.view.ProjectList', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.ProjectList' WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 	
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reminder Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1700,11 +1700,11 @@ ELSE
 
 /* Start of delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Help Desk Settings' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 DELETE FROM tblSMMasterMenu  WHERE strMenuName = N'Tickets Assigned to Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Email Setup' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 /* End of delete */
 
@@ -3981,13 +3981,13 @@ END
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @HelpDeskParentMenuId)
 INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@HelpDeskParentMenuId)
 
-DECLARE @CreateTicketMenuId INT
-SELECT  @CreateTicketMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CreateTicketMenuId)
-	DELETE FROM tblSMContactMenu WHERE intMasterMenuId = @CreateTicketMenuId--INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CreateTicketMenuId)
-END
+--DECLARE @CreateTicketMenuId INT
+--SELECT  @CreateTicketMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--BEGIN
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CreateTicketMenuId)
+--	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CreateTicketMenuId)
+--END
 
 DECLARE @TicketsMenuId INT
 SELECT  @TicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
@@ -3997,29 +3997,29 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TicketsMenuId)
 END
 
-DECLARE @OpenTicketsMenuId INT
-SELECT  @OpenTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @OpenTicketsMenuId)
-	DELETE FROM tblSMContactMenu WHERE intMasterMenuId = @OpenTicketsMenuId--INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@OpenTicketsMenuId)
-END
+--DECLARE @OpenTicketsMenuId INT
+--SELECT  @OpenTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--BEGIN
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @OpenTicketsMenuId)
+--	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@OpenTicketsMenuId)
+--END
 
-DECLARE @TicketsReportedByMeMenuId INT
-SELECT  @TicketsReportedByMeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TicketsReportedByMeMenuId)
-	DELETE FROM tblSMContactMenu WHERE intMasterMenuId = @TicketsReportedByMeMenuId--INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TicketsReportedByMeMenuId)
-END
+--DECLARE @TicketsReportedByMeMenuId INT
+--SELECT  @TicketsReportedByMeMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Tickets Reported by Me' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--BEGIN
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TicketsReportedByMeMenuId)
+--	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@TicketsReportedByMeMenuId)
+--END
 
-DECLARE @ProjectListsMenuId INT
-SELECT  @ProjectListsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ProjectListsMenuId)
-	DELETE FROM tblSMContactMenu WHERE intMasterMenuId = @ProjectListsMenuId--INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@ProjectListsMenuId)
-END
+--DECLARE @ProjectListsMenuId INT
+--SELECT  @ProjectListsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Project Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--BEGIN
+--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ProjectListsMenuId)
+--	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@ProjectListsMenuId)
+--END
 
 DECLARE @ReminderListsMenuId INT
 SELECT  @ReminderListsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Reminder Lists' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
