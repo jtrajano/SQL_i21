@@ -22,7 +22,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
-        'i21.store.CurrencyBuffered'
+        'i21.store.CurrencyBuffered',
+        'Logistics.store.PickedLots'
     ],
 
     data: {
@@ -200,6 +201,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         chargeCurrency: {
             type: 'currencybuffered'
+        },
+        pickedLotList: {
+            type: 'lgpickedlots'
         }
     },
 
@@ -397,23 +401,6 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
 
             return isHidden;
-        },
-        textAddOrderPickLot: function(get) {
-            switch (get('current.intOrderType')) {
-                case 1:
-                    switch (get('current.intSourceType')) {
-                        case 3:
-                            return 'Pick Lot';
-                            break;
-                        default:
-                            return 'Add Orders';
-                            break;
-                    }
-                    break;
-                default :
-                    return 'Add Orders';
-                    break;
-            }
         },
         hideShipToLocation: function(get) {
             if (get('current.intOrderType') === 3) {

@@ -159,8 +159,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 hidden: '{!current.ysnPosted}'
             },
             btnAddOrders: {
-                hidden: '{checkHiddenAddOrders}',
-                text: '{textAddOrderPickLot}'
+                hidden: '{checkHiddenAddOrders}'
             },
 
             txtShipmentNo: '{current.strShipmentNumber}',
@@ -1859,73 +1858,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         if (win) {
                             if (win.AddPickLots) {
                                 if (current) {
-                                    Ext.Array.each(win.AddPickLots, function (pickLot) {
-                                        if (pickLot.vyuLGDeliveryOpenPickLotDetails) {
-                                            Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lot) {
-                                                var exists = Ext.Array.findBy(current.tblICInventoryShipmentItems().data.items, function (row) {
-                                                    if (lot.get('intSContractHeaderId') === row.get('intOrderId') &&
-                                                        lot.get('intPickLotHeaderId') === row.get('intSourceId')) {
-                                                        return true;
-                                                    }
-                                                });
-                                                if (!exists) {
-                                                    var newItem = Ext.create('Inventory.model.ShipmentItem', {
-                                                        intOrderId: lot.get('intSContractHeaderId'),
-                                                        strOrderNumber: lot.get('strSContractNumber'),
-                                                        intSourceId: lot.get('intPickLotHeaderId'),
-                                                        strSourceNumber: lot.get('intReferenceNumber'),
-                                                        intLineNo: lot.get('intPickLotDetailId'),
-                                                        intItemId: lot.get('intItemId'),
-                                                        strItemNo: lot.get('strItemNo'),
-                                                        strItemDescription: lot.get('strItemDescription'),
-                                                        strLotTracking: lot.get('strLotTracking'),
-                                                        intCommodityId: lot.get('intCommodityId'),
-                                                        intItemUOMId: lot.get('intItemUOMId'),
-                                                        strUnitMeasure: lot.get('strSaleUnitMeasure'),
-                                                        intWeightUOMId: lot.get('intWeightItemUOMId'),
-                                                        strWeightUOM: lot.get('strWeightUnitMeasure'),
-                                                        dblQuantity: 0,
-                                                        strOrderUOM: lot.get('strSaleUnitMeasure'),
-                                                        dblQtyOrdered: lot.get('dblSalesOrderedQty'),
-                                                        dblUnitPrice: lot.get('dblCashPrice'),
-                                                        intOwnershipType: lot.get('intOwnershipType'),
-                                                        strOwnershipType: lot.get('strOwnershipType'),
-                                                        intSubLocationId: lot.get('intSubLocationId'),
-                                                        intStorageLocationId: lot.get('intStorageLocationId'),
-                                                        strSubLocationName: lot.get('strSubLocationName'),
-                                                        strStorageLocationName: lot.get('strStorageLocation')
-                                                    });
 
-                                                    var totalQty = 0;
-                                                    Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lotDetails) {
-                                                        if (lotDetails.get('intSContractHeaderId') === lot.get('intSContractHeaderId') &&
-                                                            lotDetails.get('intPickLotHeaderId') === lot.get('intPickLotHeaderId')) {
-                                                            totalQty += lotDetails.get('dblLotPickedQty');
-                                                            var newItemLot = Ext.create('Inventory.model.ShipmentItemLot', {
-                                                                intLotId: lotDetails.get('intLotId'),
-                                                                strLotId: lotDetails.get('strLotNumber'),
-                                                                dblLotQty: lotDetails.get('dblLotPickedQty'),
-                                                                dblAvailableQty: lotDetails.get('dblLotPickedQty'),
-                                                                dblQuantityShipped: lotDetails.get('dblLotPickedQty'),
-                                                                strUnitMeasure: lotDetails.get('strLotUnitMeasure'),
-                                                                strWeightUOM: lotDetails.get('strWeightUnitMeasure'),
-                                                                dblGrossWeight: lotDetails.get('dblGrossWt'),
-                                                                dblTareWeight: lotDetails.get('dblTareWt'),
-                                                                dblNetWeight: lotDetails.get('dblNetWt'),
-                                                                strStorageLocation: lotDetails.get('strStorageLocation')
-                                                            });
-                                                            newItem.tblICInventoryShipmentItemLots().add(newItemLot);
-                                                        }
-                                                    });
-
-                                                    newItem.set('dblQuantity', totalQty);
-
-                                                    current.tblICInventoryShipmentItems().add(newItem);
-                                                }
-                                            });
-                                        }
-
-                                    });
                                 }
                             }
                         }
@@ -2035,44 +1968,129 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 openselectedclick: function (button, e, result) {
                     var win = this.getView();
                     var currentVM = this.getViewModel().data.current;
+                    var pickLotList = win.viewModel.storeInfo.pickedLotList;
 
                     Ext.each(result, function (order) {
-                        var newRecord = {
-                            intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
-                            intOrderId: order.get('intOrderId'),
-                            intSourceId: order.get('intSourceId'),
-                            intLineNo: order.get('intLineNo'),
-                            intItemId: order.get('intItemId'),
-                            intSubLocationId: order.get('intSubLocationId'),
-                            intStorageLocationId: order.get('intStorageLocationId'),
-                            dblQuantity: order.get('dblQtyToShip'),
-                            intItemUOMId: order.get('intItemUOMId'),
-                            intWeightUOMId: order.get('intWeightUOMId'),
-                            dblUnitPrice: order.get('dblUnitPrice'),
-                            strItemNo: order.get('strItemNo'),
-                            strUnitMeasure: order.get('strItemUOM'),
-                            strWeightUOM: order.get('strWeightUOM'),
-                            strSubLocationName: order.get('strSubLocationName'),
-                            strStorageLocationName: order.get('strStorageLocationName'),
-                            strOrderNumber: order.get('strOrderNumber'),
-                            strSourceNumber: order.get('strSourceNumber'),
-                            strItemDescription: order.get('strItemDescription'),
-                            strGrade: order.get('strGrade'),
-                            dblQtyOrdered: order.get('dblQtyOrdered'),
-                            strOrderUOM: order.get('strOrderUOM'),
-                            dblLineTotal: order.get('dblLineTotal'),
-                            dblQtyAllocated: order.get('dblQtyAllocated'),
-                            dblOrderUnitPrice: order.get('dblPrice'),
-                            dblOrderDiscount: order.get('dblDiscount'),
-                            dblOrderTotal: order.get('dblTotal'),
-                            strLotTracking: order.get('strLotTracking'),
-                            dblItemUOMConv: order.get('dblItemUOMConv'),
-                            dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
-                            strOwnershipType: 'Own',
-                            intOwnershipType: 1,
-                            intCommodityId: order.get('intCommodityId')
-                        };
-                        currentVM.tblICInventoryShipmentItems().add(newRecord);
+                        if (SourceType === 'Pick Lot') {
+                            pickLotList.load({
+                                filters: [
+                                    {
+                                        column: 'intPickLotHeaderId',
+                                        value: order.get('intSourceId'),
+                                        conjunction: 'and'
+                                    },
+                                    {
+                                        column: 'intSContractHeaderId',
+                                        value: order.get('intOrderId'),
+                                        conjunction: 'and'
+                                    }
+                                ],
+                                callback: function (result) {
+                                    Ext.each(result, function (pickLot) {
+                                        if (pickLot.vyuLGDeliveryOpenPickLotDetails) {
+                                            Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lot) {
+                                                var exists = Ext.Array.findBy(currentVM.tblICInventoryShipmentItems().data.items, function (row) {
+                                                    if (lot.get('intSContractHeaderId') === row.get('intOrderId') &&
+                                                        lot.get('intPickLotHeaderId') === row.get('intSourceId')) {
+                                                        return true;
+                                                    }
+                                                });
+                                                if (!exists) {
+                                                    var newItem = Ext.create('Inventory.model.ShipmentItem', {
+                                                        intOrderId: lot.get('intSContractHeaderId'),
+                                                        strOrderNumber: lot.get('strSContractNumber'),
+                                                        intSourceId: lot.get('intPickLotHeaderId'),
+                                                        strSourceNumber: lot.get('intReferenceNumber'),
+                                                        intLineNo: lot.get('intPickLotDetailId'),
+                                                        intItemId: lot.get('intItemId'),
+                                                        strItemNo: lot.get('strItemNo'),
+                                                        strItemDescription: lot.get('strItemDescription'),
+                                                        strLotTracking: lot.get('strLotTracking'),
+                                                        intCommodityId: lot.get('intCommodityId'),
+                                                        intItemUOMId: lot.get('intItemUOMId'),
+                                                        strUnitMeasure: lot.get('strSaleUnitMeasure'),
+                                                        intWeightUOMId: lot.get('intWeightItemUOMId'),
+                                                        strWeightUOM: lot.get('strWeightUnitMeasure'),
+                                                        dblQuantity: 0,
+                                                        strOrderUOM: lot.get('strSaleUnitMeasure'),
+                                                        dblQtyOrdered: lot.get('dblSalesOrderedQty'),
+                                                        dblUnitPrice: lot.get('dblCashPrice'),
+                                                        intOwnershipType: lot.get('intOwnershipType'),
+                                                        strOwnershipType: lot.get('strOwnershipType'),
+                                                        intSubLocationId: lot.get('intSubLocationId'),
+                                                        intStorageLocationId: lot.get('intStorageLocationId'),
+                                                        strSubLocationName: lot.get('strSubLocationName'),
+                                                        strStorageLocationName: lot.get('strStorageLocation')
+                                                    });
+
+                                                    var totalQty = 0;
+                                                    Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lotDetails) {
+                                                        if (lotDetails.get('intSContractHeaderId') === lot.get('intSContractHeaderId') &&
+                                                            lotDetails.get('intPickLotHeaderId') === lot.get('intPickLotHeaderId')) {
+                                                            totalQty += lotDetails.get('dblLotPickedQty');
+                                                            var newItemLot = Ext.create('Inventory.model.ShipmentItemLot', {
+                                                                intLotId: lotDetails.get('intLotId'),
+                                                                strLotId: lotDetails.get('strLotNumber'),
+                                                                dblLotQty: lotDetails.get('dblLotPickedQty'),
+                                                                dblAvailableQty: lotDetails.get('dblLotPickedQty'),
+                                                                dblQuantityShipped: lotDetails.get('dblLotPickedQty'),
+                                                                strUnitMeasure: lotDetails.get('strLotUnitMeasure'),
+                                                                strWeightUOM: lotDetails.get('strWeightUnitMeasure'),
+                                                                dblGrossWeight: lotDetails.get('dblGrossWt'),
+                                                                dblTareWeight: lotDetails.get('dblTareWt'),
+                                                                dblNetWeight: lotDetails.get('dblNetWt'),
+                                                                strStorageLocation: lotDetails.get('strStorageLocation')
+                                                            });
+                                                            newItem.tblICInventoryShipmentItemLots().add(newItemLot);
+                                                        }
+                                                    });
+                                                    newItem.set('dblQuantity', totalQty);
+                                                    currentVM.tblICInventoryShipmentItems().add(newItem);
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            var newRecord = {
+                                intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
+                                intOrderId: order.get('intOrderId'),
+                                intSourceId: order.get('intSourceId'),
+                                intLineNo: order.get('intLineNo'),
+                                intItemId: order.get('intItemId'),
+                                intSubLocationId: order.get('intSubLocationId'),
+                                intStorageLocationId: order.get('intStorageLocationId'),
+                                dblQuantity: order.get('dblQtyToShip'),
+                                intItemUOMId: order.get('intItemUOMId'),
+                                intWeightUOMId: order.get('intWeightUOMId'),
+                                dblUnitPrice: order.get('dblUnitPrice'),
+                                strItemNo: order.get('strItemNo'),
+                                strUnitMeasure: order.get('strItemUOM'),
+                                strWeightUOM: order.get('strWeightUOM'),
+                                strSubLocationName: order.get('strSubLocationName'),
+                                strStorageLocationName: order.get('strStorageLocationName'),
+                                strOrderNumber: order.get('strOrderNumber'),
+                                strSourceNumber: order.get('strSourceNumber'),
+                                strItemDescription: order.get('strItemDescription'),
+                                strGrade: order.get('strGrade'),
+                                dblQtyOrdered: order.get('dblQtyOrdered'),
+                                strOrderUOM: order.get('strOrderUOM'),
+                                dblLineTotal: order.get('dblLineTotal'),
+                                dblQtyAllocated: order.get('dblQtyAllocated'),
+                                dblOrderUnitPrice: order.get('dblPrice'),
+                                dblOrderDiscount: order.get('dblDiscount'),
+                                dblOrderTotal: order.get('dblTotal'),
+                                strLotTracking: order.get('strLotTracking'),
+                                dblItemUOMConv: order.get('dblItemUOMConv'),
+                                dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
+                                strOwnershipType: 'Own',
+                                intOwnershipType: 1,
+                                intCommodityId: order.get('intCommodityId')
+                            };
+                            currentVM.tblICInventoryShipmentItems().add(newRecord);
+                        }
 
                         if (OrderType === 'Sales Contract') {
                             ContractStore.load({
@@ -2132,6 +2150,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                     }
                                 }
                             });
+
                         }
                     });
                     search.close();
