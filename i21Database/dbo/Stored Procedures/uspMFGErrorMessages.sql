@@ -70,5 +70,6 @@ SET @strmessage = 'This product is not configured for processing on this line: %
 EXEC sp_addmessage 90013,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90014) EXEC sp_dropmessage 90014, 'us_english'	
-SET @strmessage = 'This product is not configured for processing on this line: %s'
+SET @strmessage = 'Frozen/Released/started wokorder cannot be moved.'
 EXEC sp_addmessage 90014,11,@strmessage,'us_english','False'
+
