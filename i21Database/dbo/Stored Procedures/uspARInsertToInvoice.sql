@@ -503,6 +503,23 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice)
 --UPDATE OTHER TABLE INTEGRATIONS
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN
+
+		IF ISNULL(@NewInvoiceId, 0) <> 0
+		BEGIN
+			DECLARE @InvoiceNumber NVARCHAR(250)
+					,@SourceScreen NVARCHAR(250)
+			SELECT @InvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId
+			SET	@SourceScreen = 'Sales Order to Invoice'
+			EXEC dbo.uspSMAuditLog 
+				 @keyValue			= @NewInvoiceId						-- Primary Key Value of the Invoice. 
+				,@screenName		= 'AccountsReceivable.view.Invoice'	-- Screen Namespace
+				,@entityId			= @UserId							-- Entity Id.
+				,@actionType		= 'Processed'						-- Action Type
+				,@changeDescription	= @SourceScreen						-- Description
+				,@fromValue			= @SalesOrderNumber					-- Previous Value
+				,@toValue			= @InvoiceNumber					-- New Value	
+		END	
+
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId

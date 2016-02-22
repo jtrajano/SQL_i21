@@ -250,7 +250,7 @@ SELECT
 	,[intItemId]						= SOD.[intItemId]	
 	,[strItemNo]						= I.[strItemNo] 
 	,[strItemDescription]				= SOD.[strItemDescription]
-	,[intItemUOMId]						= SOD.[intItemUOMId]
+	,[intItemUOMId]						= SHP.[intItemUOMId]
 	,[strUnitMeasure]					= U.[strUnitMeasure]
 	,[intOrderUOMId]					= SOD.[intItemUOMId]
 	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
