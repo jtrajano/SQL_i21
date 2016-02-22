@@ -490,7 +490,7 @@ BEGIN
 				,dblQty = 0
 				,dblUOMQty = 1
 				,dblCost = 0
-				,dblValue = 341.00
+				,dblValue = 396.00
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -542,11 +542,33 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
+		UNION ALL 
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @Default_Location
+				,intItemUOMId = NULL 
+				,dtmDate = 'November 17, 2014'
+				,dblQty = 0
+				,dblUOMQty = 0
+				,dblCost = 0
+				,dblValue = -55
+				,dblSalesPrice = 0 
+				,intCurrencyId = @USD
+				,dblExchangeRate = 1
+				,intTransactionId = 1
+				,strTransactionId = 'PURCHASE-000001'
+				,strBatchId = 'BATCH-000001'
+				,intTransactionTypeId = @AUTO_NEGATIVE
+				,intLotId = NULL
+				,intCreatedEntityId = 1
+				,intConcurrencyId = 1
 	END 
 	
 	-- Act
 	BEGIN 	
 		-- Call uspICPostCosting to post the costing and generate the g/l entries  
+		DECLARE @glDetail AS RecapTableType 
+
+		INSERT INTO @glDetail
 		EXEC dbo.uspICPostCosting
 			@ItemsToPost
 			,@strBatchId 
