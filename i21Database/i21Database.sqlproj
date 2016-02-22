@@ -3480,6 +3480,8 @@
     <Build Include="dbo\Stored Procedures\uspSTDuplicateRetailPriceAdjustment.sql" />
     <Build Include="dbo\tblPRForm941.sql" />
     <Build Include="dbo\Views\vyuHDProjectSearchSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleByLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDragAndDropWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
