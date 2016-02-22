@@ -37,12 +37,13 @@ BEGIN
 		INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId) VALUES(@entityId, @helpDeskRoleId)
 	END
 
-
 	-- Enable all help desk menus
+	DECLARE @HelpDeskParentMenuId INT
+	SELECT @HelpDeskParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
+
 	UPDATE tblSMUserRoleMenu SET ysnVisible = 1
 	FROM tblSMUserRoleMenu RoleMenu
 	INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
-	WHERE MasterMenu.strModuleName = 'Help Desk'
+	WHERE MasterMenu.intMenuID = @HelpDeskParentMenuId OR MasterMenu.intParentMenuID = @HelpDeskParentMenuId
 	AND RoleMenu.intUserRoleId = @helpDeskRoleId
-
 END
