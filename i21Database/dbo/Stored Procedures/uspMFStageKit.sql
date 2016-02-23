@@ -28,6 +28,7 @@ Declare @intBlendItemId int
 Declare @intBlendStagingLocationId int
 Declare @dblPickedQty numeric(38,20)
 Declare @dblQuantity numeric(38,20)
+Declare @strRemItems nvarchar(max)=''
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -151,6 +152,14 @@ Begin
 	--	RaisError(@ErrMsg,16,1)
 	--End
 
+	--For Lot Items
+	If (Select COUNT(1) From @tblRemainingPickedItems Where intConsumptionMethodId=1)>0
+		SELECT  @strRemItems = STUFF(( SELECT ',' + i.strItemNo
+		FROM @tblRemainingPickedItems tpl Join tblICItem i on tpl.intItemId=i.intItemId Where tpl.intConsumptionMethodId=1
+		FOR
+		XML PATH('')
+		), 1, 1, '')
+
 	--For Bulk Items there in Recipe
 	If Exists (Select 1 From @tblRemainingPickedItems Where intConsumptionMethodId in (2,3))
 	Begin
@@ -200,7 +209,14 @@ Begin
 
 			If @dblBulkAvailableQty < @dblBulkRemainingQty
 			Begin
-				Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
+				SET @strRemItems=''
+				SELECT  @strRemItems = STUFF(( SELECT ',' + i.strItemNo
+                FROM @tblRemainingPickedItems tpl Join tblICItem i on tpl.intItemId=i.intItemId Where tpl.intItemId=@intBulkItemId
+				  FOR
+					XML PATH('')
+				  ), 1, 1, '')
+
+				Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory and save the pick list before staging.'
 				RaisError(@ErrMsg,16,1)
 			End
 
@@ -212,7 +228,7 @@ Begin
 	Begin
 		if @dblPickedQty < (@dblQtyToProduce - (Select ISNULL(SUM(dblRemainingQuantity),0) From @tblRemainingPickedItems Where intConsumptionMethodId in (2,3)))
 		Begin
-			Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
+			Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory and save the pick list before staging.'
 			RaisError(@ErrMsg,16,1)
 		End
 	End
