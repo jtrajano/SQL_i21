@@ -69,12 +69,12 @@ AS
 			((l.dblWeight-ISNULL((SELECT SUM(dblQty) FROM tblICStockReservation WHERE intLotId = l.intLotId),0))/CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END) dblAvailableNoOfPacks,
 			'' strReservedQtyUOM
 	FROM tblICLot l
-	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
-	LEFT JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
-	LEFT JOIN tblICLotStatus ls ON ls.intLotStatusId=l.intLotStatusId
+	JOIN tblICItem i ON i.intItemId = l.intItemId
+	JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
+	JOIN tblICLotStatus ls ON ls.intLotStatusId=l.intLotStatusId
 	LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = l.intCreatedUserId
-	LEFT JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
-	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+	JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
+	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLocationId
