@@ -241,7 +241,6 @@ IF @dtmDateFrom = '' OR (@strAccountIdFrom = '' AND @strPrimaryCodeFrom = '')
 	SELECT @sqlCte +=	' select * from cteBase '
 ELSE
 BEGIN
-	
 	DECLARE @cols1 NVARCHAR(MAX) = ''
 	SELECT @cols1 = REPLACE (@cols,'dtmDate','''' + @dtmDateFrom  + '''' + ' as dtmDate')
 	SELECT @cols1 = REPLACE (@cols1,'dblDebit,','0 as dblDebit,')
@@ -252,6 +251,13 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'strCode,',''''' as strCode,')
+	SELECT @cols1 = REPLACE (@cols1,'strReferenceDetail,',''''' as strReferenceDetail,')
+	SELECT @cols1 = REPLACE (@cols1,'strDocument,',''''' as strDocument,')
+	SELECT @cols1 = REPLACE (@cols1,'strBatchId,',''''' as strBatchId,')
+	SELECT @cols1 = REPLACE (@cols1,'strReference,',''''' as strReference,')
+	SELECT @cols1 = REPLACE (@cols1,'strUOMCode,',''''' as strUOMCode,')
+	SELECT @cols1 = REPLACE (@cols1,'Location,',''''' as Location,')
+
 	IF @strAccountIdFrom <> ''  SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase)'
 	IF @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END  +  ' [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)'
 	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + @Where1 + ' GROUP BY strAccountId),
