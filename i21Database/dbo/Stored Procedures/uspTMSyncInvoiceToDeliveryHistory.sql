@@ -295,7 +295,7 @@ BEGIN
 					BEGIN
 						UPDATE tblTMSite
 						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal 
-							,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.0)
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.0)
 						FROM(
 							SELECT dblQuantityTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - SUM(ISNULL(dblQtyShipped,0)) ELSE SUM(ISNULL(dblQtyShipped,0)) END
 								,dblSalesTotal = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))) ELSE SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0)) END
