@@ -254,7 +254,7 @@ Begin
 		Select @strUOM=um.strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
 		Where iu.intItemUOMId=(Select intItemUOMId From @tblPickListDetail Where intRowNo=@intMinLot)
 
-		Set @ErrMsg='Required qty of ' + Convert(varchar,(@dblMoveQty * @dblWeightPerQty)) + ' ' + @strUOM + ' is not available from lot ' + @strLotNumber + '.'
+		Set @ErrMsg='Required qty of ' + Convert(varchar,@dblQuantity) + ' ' + @strUOM + ' is not available from lot ' + @strLotNumber + '.'
 		RaisError(@ErrMsg,16,1)
 	End
 
@@ -267,7 +267,7 @@ Begin
 			Exec [uspMFLotMove] @intLotId=@intLotId,
 								@intNewSubLocationId=@intNewSubLocationId,
 								@intNewStorageLocationId=@intKitStagingLocationId,
-								@dblMoveQty=@dblMoveQty,
+								@dblMoveQty=@dblQuantity,
 								@intUserId=@intUserId
 
 			Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
@@ -277,7 +277,7 @@ Begin
 	Else
 		Exec [uspMFLotMerge] @intLotId=@intLotId,
 					@intNewLotId=@intNewLotId,
-					@dblMergeQty=@dblMoveQty,
+					@dblMergeQty=@dblQuantity,
 					@intUserId=@intUserId
 
 	Update tblMFPickListDetail Set intStageLotId=@intNewLotId,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime
