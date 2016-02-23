@@ -50,6 +50,25 @@ BEGIN
 			RETURN;
 		END
 	END
+		--Validate if PO is not cancelled, or short closed
+	BEGIN 
+		DECLARE @poId AS NVARCHAR(50)
+
+		SELECT TOP 1 
+				@poId = A.strPurchaseOrderNumber
+		FROM tblPOPurchase A
+		INNER JOIN @ItemsFromInventoryReceipt B
+			ON A.intPurchaseId = B.intOrderId
+		WHERE A.intOrderStatusId IN (3,4,6)
+
+		IF(@poId <> NULL)
+		BEGIN
+			DECLARE @error NVARCHAR(500);
+			SET @error = 'Unable to update PO. Please check status of ' + @poId;
+			RAISERROR(@error, 11, 1); 
+			RETURN;
+		END
+	END
 END
 
 -- Update the On-Order Qty
