@@ -1474,6 +1474,7 @@ namespace iRely.Inventory.Model
         public string strLifeTimeType { get; set; }
         public int? ysnLoad { get; set; }
         public int? dblAvailableQty { get; set; }
+        public string strBOL { get; set; }
     }
 
     public class vyuICGetInventoryReceiptVoucher

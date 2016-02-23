@@ -3751,7 +3751,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'strLifeTimeType', text: 'Lifetime Type', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'ysnLoad', text: 'Load Contract', width: 100, dataType: 'boolean', xtype: 'checkcolumn' },
                 { xtype: 'numbercolumn', dataIndex: 'dblAvailableQty', text: 'Available Qty', width: 100, dataType: 'float'},
-
+                {dataIndex: 'strBOL', text: 'BOL', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true},
                 {dataIndex: 'intEntityVendorId', text: 'Vendor Id', width: 100, dataType: 'numeric', hidden: true},
                 {dataIndex: 'strVendorId', text: 'Vendor', width: 100, dataType: 'string', hidden: true},
@@ -3830,6 +3830,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             intOwnershipType: 1,
                             strOwnershipType: 'Own'
                         };
+                        currentVM.set('strBillOfLading', order.get('strBOL'));
                         currentVM.tblICInventoryReceiptItems().add(newRecord);
 
                         if (ReceiptType === 'Purchase Contract') {

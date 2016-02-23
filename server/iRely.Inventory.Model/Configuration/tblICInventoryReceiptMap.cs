@@ -535,6 +535,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
             this.Property(t => t.ysnLoad).HasColumnName("ysnLoad");
             this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty");
+            this.Property(t => t.strBOL).HasColumnName("strBOL");
         }
     }
 
