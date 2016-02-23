@@ -1,6 +1,10 @@
 Ext.define('Inventory.view.InventoryCountViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icinventorycount',
+    requires: [
+        'CashManagement.common.Text',
+        'CashManagement.common.BusinessRules'
+    ],
 
     config: {
         searchConfig: {

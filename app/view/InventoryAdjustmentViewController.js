@@ -1,6 +1,10 @@
 Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icinventoryadjustment',
+    requires: [
+        'CashManagement.common.Text',
+        'CashManagement.common.BusinessRules'
+    ],
 
     config: {
         searchConfig: {

@@ -1,6 +1,10 @@
 Ext.define('Inventory.view.InventoryTransferViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icinventorytransfer',
+    requires: [
+        'CashManagement.common.Text',
+        'CashManagement.common.BusinessRules'
+    ],
 
     config: {
         searchConfig: {

@@ -1,6 +1,11 @@
 Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icbuildassemblyblend',
+    requires: [
+        'CashManagement.common.Text',
+        'CashManagement.common.BusinessRules'
+    ],
+
 
     config: {
         searchConfig: {

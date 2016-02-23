@@ -1,6 +1,10 @@
 Ext.define('Inventory.view.InventoryReceiptViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icinventoryreceipt',
+    requires: [
+        'CashManagement.common.Text',
+        'CashManagement.common.BusinessRules'
+    ],
 
     config: {
         helpURL: '/display/DOC/Inventory+Receipts',
