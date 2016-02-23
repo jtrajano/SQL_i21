@@ -296,6 +296,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\3_FileFieldMapping_PromotionCombo.sql
 :r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
 :r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
+:r .\ST\6_Checkout_Radiant_ISM.sql
+:r .\ST\7_Checkout_Radiant_MCM.sql
+:r .\ST\8_Checkout_Radiant_FGM.sql
+:r .\ST\9_Checkout_Radiant_MSM.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\_TaxAuthority.sql
