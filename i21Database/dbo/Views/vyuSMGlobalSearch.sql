@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMGlobalSearch] WITH SCHEMABINDING
 AS
-SELECT ROW_NUMBER() over(order by Id) as intGSIndexId, strNamespace, strDisplayTitle, strValueField, strValueData, strDisplayData, strTag
+SELECT ROW_NUMBER() over(order by Id) as intGSIndexId, strNamespace, strDisplayTitle, strValueField, strValueData, strDisplayData, strTag, strSearchCommand
 FROM
 (	
 	--ENTITY--
@@ -12,7 +12,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityVendor' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Vendor'
 	union	
@@ -24,7 +25,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityCustomer' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Customer'
 	union
@@ -36,7 +38,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntitySalesperson' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Salesperson'
 	union
@@ -48,7 +51,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityFuturesBroker' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'FuturesBroker'
 	union
@@ -60,7 +64,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityForwardingAgent' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'ForwardingAgent'
 	union
@@ -72,7 +77,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityTerminal' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Terminal'
 	union
@@ -84,7 +90,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityShippingLine' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'ShippingLine'
 	union
@@ -96,7 +103,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityTrucker' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Trucker'
 	union
@@ -108,7 +116,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityShipVia' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'ShipVia'
 	union
@@ -120,7 +129,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityInsurer' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Insurer'
 	union
@@ -132,7 +142,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityEmployee' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Employee'
 	union
@@ -144,7 +155,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityProducer' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Producer'
 	union
@@ -156,7 +168,8 @@ FROM
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
+		'searchEntityUser' as strSearchCommand
 	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'User'
 	union
@@ -169,7 +182,8 @@ FROM
 		'intPurchaseId' as strValueField,
 		CONVERT(NVARCHAR(10), po.[intPurchaseId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strPurchaseOrderNumber],'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL([strPurchaseOrderNumber],'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strPurchaseOrderNumber],'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblPOPurchase] as po
 	union
 
@@ -181,7 +195,8 @@ FROM
 		'intBillId' as strValueField,
 		CONVERT(NVARCHAR(10), v.intBillId) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL(strBillId,'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL(strBillId,'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL(strBillId,'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblAPBill] as v
 	union
 
@@ -193,7 +208,8 @@ FROM
 		'intSalesOrderId' as strValueField,
 		CONVERT(NVARCHAR(10), so.[intSalesOrderId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL(strSalesOrderNumber,'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL(strSalesOrderNumber,'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL(strSalesOrderNumber,'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblSOSalesOrder] as so
 	union
 
@@ -205,7 +221,8 @@ FROM
 		'intInvoiceId' as strValueField,
 		CONVERT(NVARCHAR(10), invoice.[intInvoiceId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL(strInvoiceNumber,'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL(strInvoiceNumber,'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL(strInvoiceNumber,'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblARInvoice] as invoice
 	union
 
@@ -217,7 +234,8 @@ FROM
 		'intContractHeaderId' as strValueField,
 		CONVERT(NVARCHAR(10), ct.[intContractHeaderId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL(strContractNumber,'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL(strContractNumber,'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL(strContractNumber,'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblCTContractHeader] as ct
 	union
 
@@ -229,7 +247,8 @@ FROM
 		'intInventoryReceiptId' as strValueField,
 		CONVERT(NVARCHAR(10), ir.[intInventoryReceiptId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL(strReceiptNumber,'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL(strReceiptNumber,'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL(strReceiptNumber,'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblICInventoryReceipt] as ir
 	union
 
@@ -241,7 +260,8 @@ FROM
 		'intInventoryReceiptId' as strValueField,
 		CONVERT(NVARCHAR(10), [intInventoryShipmentId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL(strShipmentNumber,'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL(strShipmentNumber,'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL(strShipmentNumber,'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblICInventoryShipment]
 	union
 
@@ -253,7 +273,8 @@ FROM
 		'intInventoryAdjustmentId' as strValueField,
 		CONVERT(NVARCHAR(10), [intInventoryAdjustmentId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL(strAdjustmentNo,'')) as strDisplayData,
-		CONVERT(NVARCHAR(MAX), ISNULL(strAdjustmentNo,'')) as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL(strAdjustmentNo,'')) as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblICInventoryAdjustment]
 	union
 
@@ -267,7 +288,8 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strItemNo],'')) as strDisplayData,			
 		CONVERT(NVARCHAR(MAX), ISNULL([strItemNo],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strType],'')) + ', ' + 
-		CONVERT(NVARCHAR(MAX), ISNULL([strDescription],''))   as strTag
+		CONVERT(NVARCHAR(MAX), ISNULL([strDescription],''))   as strTag,
+		'' as strSearchCommand
 	from [dbo].[tblICItem] as item
 
 

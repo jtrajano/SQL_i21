@@ -2,18 +2,19 @@
 AS
 SELECT W.intManufacturingCellId
 	,W.intWorkOrderId
-	,ISNULL(SL.intScheduleId, 0) intScheduleId
+	,SL.intScheduleId
 	,W.dblQuantity
-	,W.dtmEarliestDate
+	,ISNULL(W.dtmEarliestDate, W.dtmExpectedDate) AS dtmEarliestDate
 	,W.dtmExpectedDate
-	,W.dtmLatestDate
-	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
+	,ISNULL(W.dtmLatestDate, W.dtmExpectedDate) AS dtmLatestDate
+	,ISNULL(SL.dtmTargetDate, dtmExpectedDate) AS dtmTargetDate
+	,CASE WHEN W.dblQuantity - W.dblProducedQuantity>0 THEN W.dblQuantity - W.dblProducedQuantity ELSE 0 END AS dblBalanceQuantity
 	,I.intItemId
 	,IU.intItemUOMId
 	,IU.intUnitMeasureId
-	,WS.intStatusId
+	,W.intStatusId
 	,SL.intScheduleWorkOrderId
-	,Convert(INT, Row_number() OVER (
+	,CONVERT(INT, ROW_NUMBER() OVER (
 			ORDER BY CASE 
 					WHEN W.intStatusId IN (
 							1
@@ -39,9 +40,9 @@ SELECT W.intManufacturingCellId
 					ELSE SL.intExecutionOrder
 					END
 			)) AS intExecutionOrder
-	,SL.ysnFrozen
+	,ISNULL(SL.ysnFrozen, 0) AS ysnFrozen
 	,I.intPackTypeId
-	,Isnull(SL.intConcurrencyId, 0) AS intConcurrencyId
+	,ISNULL(SL.intConcurrencyId, 0) AS intConcurrencyId
 	,CONVERT(BIT, 0) AS ysnEOModified
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -49,6 +50,8 @@ JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	AND W.intLocationId = @intLocationId
 	AND W.intManufacturingCellId IS NOT NULL
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+	AND MC.ysnIncludeSchedule = 1
 LEFT JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	AND SL.intScheduleId IN (
 		SELECT S.intScheduleId
@@ -57,7 +60,6 @@ LEFT JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 			AND S.ysnStandard = 1
 			AND intLocationId = @intLocationId
 		)
-LEFT JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = IsNULL(SL.intStatusId, W.intStatusId)
 ORDER BY CASE 
 		WHEN W.intStatusId IN (
 				1
@@ -82,4 +84,3 @@ ORDER BY CASE
 			THEN W.intItemId
 		ELSE SL.intExecutionOrder
 		END
-
