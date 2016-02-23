@@ -32,7 +32,10 @@ BEGIN TRY
 	DECLARE @intSourceLotWeightUOM INT
 	DECLARE @intDestinationLotWeightUOM INT
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
-	
+			,@intWeightUOMId INT
+			,@intItemStockUOMId INT
+
+
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
 		   @intSubLocationId = intSubLocationId,
@@ -41,9 +44,20 @@ BEGIN TRY
 		   @intLotStatusId = intLotStatusId,
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
-		   @intSourceLotWeightUOM = intWeightUOMId
+		   @intSourceLotWeightUOM = intWeightUOMId,
+		   @intWeightUOMId = intWeightUOMId
 	FROM tblICLot WHERE intLotId = @intLotId
-	
+
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
+
+	IF @intItemStockUOMId = @intWeightUOMId
+	BEGIN
+		SELECT @dblMergeQty = dbo.fnDivide(@dblMergeQty, @dblLotWeightPerUnit)
+	END
+
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
 	
 	SELECT @intNewLocationId = intLocationId ,

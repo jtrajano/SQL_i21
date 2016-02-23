@@ -23,18 +23,34 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intItemUOMId INT
 	DECLARE @intShiftId INT
+			,@dblWeightPerQty NUMERIC(38, 20)
+			,@intWeightUOMId INT
+			,@intItemStockUOMId INT
+			,@dblWeight NUMERIC(38, 20)
 
-	SELECT @intItemId = intItemId
-		,@intLocationId = intLocationId
-		,@intSubLocationId = intSubLocationId
-		,@intStorageLocationId = intStorageLocationId
-		,@strLotNumber = strLotNumber
-		,@dblLotQty = dblQty
-		,@intItemUOMId = intItemUOMId
-	FROM tblICLot
-	WHERE intLotId = @intLotId
+	
+	SELECT @intItemId = intItemId, 
+		   @intLocationId = intLocationId,
+		   @intSubLocationId = intSubLocationId,
+		   @intStorageLocationId = intStorageLocationId, 
+		   @strLotNumber = strLotNumber,
+		   @dblLotQty = dblQty,
+			@dblWeight=dblWeight,
+			@dblWeightPerQty = dblWeightPerQty,
+			@intWeightUOMId = intWeightUOMId
+	FROM tblICLot WHERE intLotId = @intLotId
+	
+	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblWeight
 
-	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotQty
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
+
+	IF @intItemStockUOMId = @intWeightUOMId
+	BEGIN
+		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	END
 
 	SELECT @dtmDate = GETDATE()
 
