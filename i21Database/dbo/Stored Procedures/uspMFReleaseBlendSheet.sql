@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFReleaseBlendSheet]
 @strXml nVarchar(Max),
 @strWorkOrderNoOut nvarchar(50)='' OUT,
-@dblBalancedQtyToProduceOut numeric(18,6) = 0 OUTPUT,
+@dblBalancedQtyToProduceOut numeric(38,20) = 0 OUTPUT,
 @intWorkOrderIdOut int=0 OUTPUT 
 AS
 Begin Try
@@ -21,7 +21,7 @@ Declare @ErrMsg nVarchar(Max)
 Declare @intLocationId int
 Declare @intCellId int
 Declare @intUserId int
-Declare @dblQtyToProduce numeric(18,6)
+Declare @dblQtyToProduce numeric(38,20)
 Declare @dtmDueDate datetime
 Declare @intExecutionOrder int=1
 Declare @intBlendItemId int
@@ -32,18 +32,18 @@ Declare @strInputItemStatus nVarchar(50)
 Declare @ysnEnableParentLot bit=0
 Declare @intRecipeId int
 Declare @intManufacturingProcessId int
-Declare @dblBinSize numeric(18,6)
+Declare @dblBinSize numeric(38,20)
 Declare @intNoOfSheet int
 Declare @intNoOfSheetOriginal int
-Declare @dblRemainingQtyToProduce numeric(18,6)
-Declare @PerBlendSheetQty  numeric(18,6)
+Declare @dblRemainingQtyToProduce numeric(38,20)
+Declare @PerBlendSheetQty  numeric(38,20)
 Declare @ysnCalculateNoSheetUsingBinSize bit=0
 Declare @ysnKittingEnabled bit
 Declare @ysnRequireCustomerApproval bit
 Declare @intWorkOrderStatusId INT
 Declare @intKitStatusId INT=NULL
-Declare @dblBulkReqQuantity numeric(18,6)
-Declare @dblPlannedQuantity numeric(18,6)
+Declare @dblBulkReqQuantity numeric(38,20)
+Declare @dblPlannedQuantity numeric(38,20)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -56,9 +56,9 @@ Declare @tblBlendSheet table
 	intCellId int,
 	intMachineId int,
 	dtmDueDate DateTime,
-	dblQtyToProduce numeric(18,6),
-	dblPlannedQuantity  numeric(18,6),
-	dblBinSize numeric(18,6),
+	dblQtyToProduce numeric(38,20),
+	dblPlannedQuantity  numeric(38,20),
+	dblBinSize numeric(38,20),
 	strComment nVarchar(Max),
 	ysnUseTemplate bit,
 	ysnKittingEnabled bit,
@@ -72,7 +72,7 @@ Declare @tblItem table
 (
 	intRowNo int Identity(1,1),
 	intItemId int,
-	dblReqQty numeric(18,6)
+	dblReqQty numeric(38,20)
 )
 
 Declare @tblLot table
@@ -80,9 +80,9 @@ Declare @tblLot table
 	intRowNo int Identity(1,1),
 	intLotId int,
 	intItemId int,
-	dblQty numeric(18,6),
-	dblIssuedQuantity numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
+	dblQty numeric(38,20),
+	dblIssuedQuantity numeric(38,20),
+	dblWeightPerUnit numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
 	intUserId int,
@@ -96,11 +96,11 @@ Declare @tblBSLot table
 (
 	intLotId int,
 	intItemId int,
-	dblQty numeric(18,6),
+	dblQty numeric(38,20),
 	intUOMId int,
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intIssuedUOMId int,
-	dblWeightPerUnit numeric(18,6),
+	dblWeightPerUnit numeric(38,20),
 	intRecipeItemId int,
 	intLocationId int,
 	intStorageLocationId int
@@ -118,9 +118,9 @@ INSERT INTO @tblBlendSheet(
 	intCellId int,
 	intMachineId int,
 	dtmDueDate DateTime,
-	dblQtyToProduce numeric(18,6),
-	dblPlannedQuantity  numeric(18,6),
-	dblBinSize numeric(18,6),
+	dblQtyToProduce numeric(38,20),
+	dblPlannedQuantity  numeric(38,20),
+	dblBinSize numeric(38,20),
 	strComment nVarchar(Max),
 	ysnUseTemplate bit,
 	ysnKittingEnabled bit,
@@ -137,10 +137,10 @@ INSERT INTO @tblLot(
  WITH (  
 	intLotId int,
 	intItemId int,
-	dblQty numeric(18,6),
-	dblIssuedQuantity numeric(18,6),
-	dblPickedQuantity numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
+	dblQty numeric(38,20),
+	dblIssuedQuantity numeric(38,20),
+	dblPickedQuantity numeric(38,20),
+	dblWeightPerUnit numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
 	intUserId int,
@@ -230,9 +230,9 @@ If Exists (Select 1 From tblMFWorkOrder where intWorkOrderId=@intWorkOrderId)
 Declare @intItemCount int,
 		@intLotCount int,
 		@intItemId int,
-		@dblReqQty numeric(18,6),
+		@dblReqQty numeric(38,20),
 		@intLotId int,
-		@dblQty numeric(18,6)
+		@dblQty numeric(38,20)
 
 Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
 And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null

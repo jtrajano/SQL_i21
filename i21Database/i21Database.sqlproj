@@ -3204,6 +3204,8 @@
     <Build Include="dbo\Stored Procedures\uspAPCreate1099BFile.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
     <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
+    <Build Include="dbo\Functions\fnDivide.sql" />
+    <Build Include="dbo\Functions\fnMultiply.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

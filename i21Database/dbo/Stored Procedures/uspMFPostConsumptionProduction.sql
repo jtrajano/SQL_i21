@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPostConsumptionProduction] @intWorkOrderId INT
 	,@intItemId INT
 	,@strLotNumber NVARCHAR(50)
-	,@dblWeight NUMERIC(18, 6)
+	,@dblWeight NUMERIC(38,20)
 	,@intWeightUOMId INT
-	,@dblUnitQty NUMERIC(18, 6) = NULL
-	,@dblQty NUMERIC(18, 6)
+	,@dblUnitQty NUMERIC(38,20) = NULL
+	,@dblQty NUMERIC(38,20)
 	,@intItemUOMId INT
 	,@intUserId INT = NULL
 	,@intBatchId INT
@@ -32,8 +32,8 @@ BEGIN
 		,@strItemNo AS NVARCHAR(50)
 		,@intLocationId INT
 		,@intSubLocationId INT
-		,@dblNewCost NUMERIC(18, 6)
-		,@dblNewUnitCost NUMERIC(18, 6)
+		,@dblNewCost NUMERIC(38,20)
+		,@dblNewUnitCost NUMERIC(38,20)
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
 		,@dtmExpiryDate DATETIME
@@ -125,7 +125,7 @@ BEGIN
 	SET @dblNewCost = ABS(@dblNewCost)
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
 
-	DECLARE @dblCostPerStockUOM NUMERIC(18, 6)
+	DECLARE @dblCostPerStockUOM NUMERIC(38,20)
 
 	IF @intItemStockUOMId = @intItemUOMId
 	BEGIN

@@ -16,8 +16,8 @@ Declare @ErrMsg nVarchar(Max)
 Declare @ysnEnableParentLot bit=0
 Declare @intBlendItemId int
 Declare @intLocationId int
-Declare @dblPlannedQuantity numeric(18,6)
-Declare @dblBulkReqQuantity numeric(18,6)
+Declare @dblPlannedQuantity numeric(38,20)
+Declare @dblBulkReqQuantity numeric(38,20)
 
 Set @intWorkOrderId=0;
 
@@ -32,10 +32,10 @@ Declare @tblBlendSheet table
 	intCellId int,
 	intMachineId int,
 	dtmDueDate DateTime,
-	dblQtyToProduce numeric(18,6),
-	dblPlannedQuantity numeric(18,6),
+	dblQtyToProduce numeric(38,20),
+	dblPlannedQuantity numeric(38,20),
 	intItemUOMId int,
-	dblBinSize numeric(18,6),
+	dblBinSize numeric(38,20),
 	strComment nVarchar(Max),
 	ysnUseTemplate bit,
 	ysnKittingEnabled bit,
@@ -50,11 +50,11 @@ Declare @tblLot table
 	intWorkOrderInputLotId int,
 	intLotId int,
 	intItemId int,
-	dblQty numeric(18,6),
+	dblQty numeric(38,20),
 	intItemUOMId int,
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(18,6),
+	dblWeightPerUnit numeric(38,20),
 	intUserId int,
 	strRowState nVarchar(50),
 	intRecipeItemId int,
@@ -78,10 +78,10 @@ INSERT INTO @tblBlendSheet(intWorkOrderId,strWorkOrderNo,intBlendRequirementId,
 	intCellId int,
 	intMachineId int,
 	dtmDueDate DateTime,
-	dblQtyToProduce numeric(18,6),
-	dblPlannedQuantity  numeric(18,6),
+	dblQtyToProduce numeric(38,20),
+	dblPlannedQuantity  numeric(38,20),
 	intItemUOMId int,
-	dblBinSize numeric(18,6),
+	dblBinSize numeric(38,20),
 	strComment nVarchar(Max),
 	ysnUseTemplate bit,
 	ysnKittingEnabled bit,
@@ -98,11 +98,11 @@ INSERT INTO @tblLot(
 	intWorkOrderInputLotId int,
 	intLotId int,
 	intItemId int,
-	dblQty numeric(18,6),
+	dblQty numeric(38,20),
 	intItemUOMId int,
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(18,6),
+	dblWeightPerUnit numeric(38,20),
 	intUserId int,
 	strRowState nVarchar(50),
 	intRecipeItemId int,

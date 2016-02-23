@@ -18,7 +18,7 @@ Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 DECLARE @tblReservedQty TABLE (
 	intLotId INT
-	,dblReservedQty NUMERIC(18, 6)
+	,dblReservedQty NUMERIC(38,20)
 	)
 
 INSERT INTO @tblReservedQty
@@ -44,8 +44,8 @@ GROUP BY cl.intLotId
 
 DECLARE @tblMFStagedLot TABLE (
 	intLotId INT
-	,dblRequiredQty NUMERIC(18, 6)
-	,dblStagedQty NUMERIC(18, 6)
+	,dblRequiredQty NUMERIC(38,20)
+	,dblStagedQty NUMERIC(38,20)
 	)
 Declare @intBlendProductionStagingUnitId int
 
@@ -147,7 +147,7 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,i.dblRiskScore
 	,ISNULL(wcl.ysnStaged, 0) AS ysnStaged
 	,(ISNULL(l.dblWeight, 0) - ISNULL(rq.dblReservedQty, 0)) AS dblAvailableQty
-	,ISNULL(l.dblWeightPerQty, 0) AS dblWeightPerUnit
+	,CASE WHEN wcl.intItemUOMId=wcl.intItemIssuedUOMId THEN 1 ELSE ISNULL(l.dblWeightPerQty, 1) END AS dblWeightPerUnit
 	,wcl.intRecipeItemId
 	,l.intParentLotId
 	,pl.strParentLotNumber

@@ -12,7 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 Declare @intRecipeId int
-Declare @dblRecipeQty numeric(18,6)
+Declare @dblRecipeQty numeric(38,20)
 Declare @intManufacturingProcessId int
 Declare @ysnShowOtherFactoryLots bit
 Declare @ysnShowAvailableLotsByStorageLocation bit
@@ -71,7 +71,7 @@ where ri.intItemId=@intItemId and ri.intRecipeItemId=@intRecipeItemId and r.intL
 Declare @tblReservedQty table
 (
 	intLotId int,
-	dblReservedQty numeric(18,6)
+	dblReservedQty numeric(38,20)
 )
 
 If @ysnEnableParentLot=0

@@ -870,7 +870,7 @@ BEGIN
 				dtmDate  = 'November 17, 2014'  
 				,strBatchId = 'BATCH-000001'  
 				,intAccountId = @Inventory_Default  
-				,dblDebit = 341.00 -- (15.50 x 22)  
+				,dblDebit = 22 * 18.00 -- 396.00 -- (22 x $18.00)  
 				,dblCredit = 0  
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
@@ -899,7 +899,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'  
 				,intAccountId = @WriteOffSold_Default  
 				,dblDebit = 0  
-				,dblCredit = 341.00 -- (15.50 x 22)  
+				,dblCredit = 22 * 18.00 -- 396.00 -- (22 x $18.00)  
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
 				,strDescription = tblGLAccount.strDescription  
@@ -978,8 +978,6 @@ BEGIN
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @RevalueSold_Default  
 		 
-		-- Nothing to auto-negative since stock is zero.   
-		 
 		-- 100 stock in for $18.00  
 		UNION ALL   
 		SELECT   
@@ -1036,6 +1034,63 @@ BEGIN
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @CostOfGoods_Default  
+
+		-- Auto Negative
+		UNION ALL   
+		SELECT   
+				dtmDate  = 'November 17, 2014'  
+				,strBatchId = 'BATCH-000001'  
+				,intAccountId = @AutoNegative_Default  
+				,dblDebit = 55.00  
+				,dblCredit = 0  
+				,dblDebitUnit = 0  
+				,dblCreditUnit = 0  
+				,strDescription = tblGLAccount.strDescription  
+				,strCode = 'IAN' 
+				,strReference = '' 
+				,intCurrencyId = @USD  
+				,dblExchangeRate  = 1  
+				,dtmTransactionDate  = 'November 17, 2014'  
+				,strJournalLineDescription = '' 
+				,intJournalLineNo  = 19
+				,ysnIsUnposted = 0  
+				,intEntityId = 1 
+				,strTransactionId  = 'PURCHASE-000001'  
+				,intTransactionId  = 1  
+				,strTransactionType  = 'Inventory Auto Negative'  
+				,strTransactionForm  = 'Inventory Receipt'  
+				,strModuleName = @MODULENAME  
+				,intConcurrencyId  = 1  
+		FROM dbo.tblGLAccount   
+		WHERE tblGLAccount.intAccountId = @AutoNegative_Default  
+
+		UNION ALL   
+		SELECT   
+				dtmDate  = 'November 17, 2014'  
+				,strBatchId = 'BATCH-000001'  
+				,intAccountId = @Inventory_Default  
+				,dblDebit = 0  
+				,dblCredit = 55.00  
+				,dblDebitUnit = 0  
+				,dblCreditUnit = 0  
+				,strDescription = tblGLAccount.strDescription  
+				,strCode = 'IAN' 
+				,strReference = '' 
+				,intCurrencyId = @USD  
+				,dblExchangeRate  = 1  
+				,dtmTransactionDate  = 'November 17, 2014'  
+				,strJournalLineDescription = '' 
+				,intJournalLineNo  = 19
+				,ysnIsUnposted = 0  
+				,intEntityId = 1 
+				,strTransactionId  = 'PURCHASE-000001'  
+				,intTransactionId  = 1  
+				,strTransactionType  = 'Inventory Auto Negative'  
+				,strTransactionForm  = 'Inventory Receipt'  
+				,strModuleName = @MODULENAME  
+				,intConcurrencyId  = 1  
+		FROM dbo.tblGLAccount   
+		WHERE tblGLAccount.intAccountId = @Inventory_Default  
 	END   
 
 	-- Act  
@@ -1043,15 +1098,17 @@ BEGIN
 		-- Call uspICPostCosting to post the costing and generate the g/l entries   
 		INSERT INTO actual   
 		EXEC dbo.uspICPostCosting  
-		@ItemsToPost  
-		,@strBatchId   
-		,@strAccountToCounterInventory  
-		,@intEntityUserSecurityId  
+			@ItemsToPost  
+			,@strBatchId   
+			,@strAccountToCounterInventory  
+			,@intEntityUserSecurityId  
 
 		-- Remove the column dtmDateEntered. We don't need to assert it.   
 		ALTER TABLE actual   
 		DROP COLUMN dtmDateEntered  
 	END   
+
+	SELECT 'debug tblICInventoryTransaction 2', * FROM tblICInventoryTransaction
 
 	-- Assert  
 	BEGIN   
