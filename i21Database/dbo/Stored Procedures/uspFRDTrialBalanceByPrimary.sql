@@ -119,7 +119,7 @@ BEGIN
 
 		END
 
-	UPDATE tblFRRowDesign SET strBalanceSide = 'Debit' WHERE strRowType = 'Filter Accounts' AND intRowId = @intRowId AND strDescription LIKE 'Trial Balance %'
+	UPDATE tblFRRowDesign SET strBalanceSide = 'Debit' WHERE strRowType = 'Filter Accounts' AND intRowId = (SELECT TOP 1 intRowId FROM tblFRRow WHERE strDescription LIKE '%Trial Balance%' AND intRowId = @intRowId)
 
 END
 
