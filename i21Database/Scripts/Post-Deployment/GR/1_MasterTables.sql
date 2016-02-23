@@ -47,3 +47,12 @@ BEGIN
 	SELECT 3,'Price Shrink',1	
 END
 GO
+
+IF EXISTS(SELECT intUnitMeasureId FROM tblSCScaleSetup)
+BEGIN
+	declare @intUnitMeasureId int
+	SELECT @intUnitMeasureId = intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol LIKE '%LB%' OR strUnitMeasure LIKE '%Pound%'
+	IF @intUnitMeasureId != NULL
+		UPDATE tblSCScaleSetup SET intUnitMeasureId = @intUnitMeasureId
+END
+GO

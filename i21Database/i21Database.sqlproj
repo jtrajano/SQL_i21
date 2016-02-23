@@ -3487,6 +3487,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantFGM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMSM.sql" />
+    <Build Include="dbo\Views\vyuSCTicketView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
