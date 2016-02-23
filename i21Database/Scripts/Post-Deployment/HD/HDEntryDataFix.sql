@@ -343,4 +343,16 @@ GO
 
 GO
 	PRINT N'End updating HD ticket last commented date.'
+	PRINT N'Start updating HD Project Type.'
+GO
+
+	update
+		tblHDProject 
+	set
+		tblHDProject.strType = 'HD'
+	where
+		tblHDProject.strType is null or tblHDProject.strType = ''
+
+GO
+	PRINT N'End updating HD Project Type.'
 GO
