@@ -297,7 +297,7 @@ BEGIN TRY
 					--additional records (months increased)
 					SELECT CAST([FCQty] AS NVARCHAR(30))
 						,intItemId
-					FROM #TEMPFORECASTEDCONSUMPTION
+					FROM #TempForecastedConsumption
 					WHERE intItemId = @intItemId
 					
 					EXCEPT
