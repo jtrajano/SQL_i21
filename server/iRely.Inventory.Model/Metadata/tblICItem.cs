@@ -409,7 +409,7 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitReserved { get; set; }
         public decimal? dblLastCountRetail { get; set; }
         public decimal? dblAvailable { get; set; }
-        public decimal? dblStorageQty { get; set; }
+        //public decimal? dblStorageQty { get; set; }
         public decimal? dblDefaultFull { get; set; }
         public bool? ysnAvailableTM { get; set; }
         public decimal? dblMaintenanceRate { get; set; }
