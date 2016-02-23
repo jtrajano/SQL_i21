@@ -9,7 +9,7 @@ CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
  @intFiscalYearId INT,
  @intEntityId INT,
  @intFiscalYearPeriodId INT = 0,
- @strModule NVARCHAR(2)
+ @strModule NVARCHAR(3)
  
 AS
 BEGIN
@@ -19,7 +19,7 @@ BEGIN
 		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		strTransactionType NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 		dtmDate DATETIME,
-		strModule NVARCHAR(2)COLLATE Latin1_General_CI_AS NULL
+		strModule NVARCHAR(3)COLLATE Latin1_General_CI_AS NULL
 		
 	)
 	DECLARE @tblTransactions TABLE(
@@ -30,7 +30,7 @@ BEGIN
 		strDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 		strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		intEntityId	INT,
-		strModule NVARCHAR(2)  COLLATE Latin1_General_CI_AS NULL
+		strModule NVARCHAR(3)  COLLATE Latin1_General_CI_AS NULL
 	)
 	--END TABLE VARIABLE DECLARATIONS
 
@@ -45,15 +45,17 @@ BEGIN
 	
 	--BEGIN OPEN GL UNPOSTED SCREEN
 	--EXCLUDED IC AND PR SINCE THEY DO NOT HAVE BATCH POSTING FEATURE
-	IF @strModule = 'IC' -- SHOW ONLY IC TRANSACTIONS
+	IF @strModule = 'INV' -- SHOW ONLY IC TRANSACTIONS
 			INSERT INTO @tblOriginTransactions
 			SELECT  strTransactionId,strTransactionType, dtmDate ,@strModule from [vyuICGetUnpostedTransactions]
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+			
 
 	ELSE IF @strModule = 'PR' -- SHOW ONLY PR TRANSACTIONS
 			INSERT INTO @tblOriginTransactions
 			SELECT  strTransactionId,strTransactionType, dtmDate,@strModule  from vyuPRUnpostedTransactions
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+			
 	ELSE
 	BEGIN
 		--SHOW PR IC AND ORIGIN TRANSACTIONS
@@ -93,11 +95,12 @@ BEGIN
 		END
 		
 		INSERT INTO @tblOriginTransactions
-			SELECT  strTransactionId,strTransactionType, dtmDate ,'IC' from [vyuICGetUnpostedTransactions]
+			SELECT  strTransactionId,strTransactionType, dtmDate ,'INV' from [vyuICGetUnpostedTransactions]
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		UNION ALL
 			SELECT  strTransactionId,strTransactionType, dtmDate ,'PR' from vyuPRUnpostedTransactions
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+		
 	END
 	
 	IF EXISTS (SELECT TOP 1 1 FROM @tblOriginTransactions)
@@ -110,7 +113,7 @@ BEGIN
 
 	-- SHOW BATCH POSTING SCREEN IF THERE ARE NO ORIGIN UNSPOSTED TRANSACTIONS
 	-- BEGIN OPEN BATCH POSTING SCREEN	
-	DECLARE @tblModule TABLE(strModule NVARCHAR(2) COLLATE Latin1_General_CI_AS NULL)
+	DECLARE @tblModule TABLE(strModule NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL)
 	IF @strModule <>  'GL' INSERT INTO @tblModule SELECT @strModule
 	ELSE INSERT INTO @tblModule SELECT 'GL' UNION ALL SELECT 'AP' UNION ALL SELECT 'CM' UNION ALL SELECT 'AR'
 
