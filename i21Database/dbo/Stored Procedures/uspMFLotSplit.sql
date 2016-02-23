@@ -33,6 +33,9 @@ BEGIN TRY
 	DECLARE @intNewItemUOMId INT
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @strLotTracking NVARCHAR(50)
+			,@dblWeightPerQty NUMERIC(38, 20)
+			,@intWeightUOMId INT
+			,@intItemStockUOMId INT
 	
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
@@ -42,14 +45,26 @@ BEGIN TRY
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
 		   @intLotStatusId = intLotStatusId,
-		   @intItemUOMId = intItemUOMId	   
+		   @intItemUOMId = intItemUOMId,	 
+		   @dblWeightPerQty = dblWeightPerQty,
+			@intWeightUOMId = intWeightUOMId  
 	FROM tblICLot WHERE intLotId = @intLotId
+
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
 	
 	SELECT @dblAdjustByQuantity = - @dblSplitQty, 
 		   @intNewItemUOMId = @intItemUOMId, 
 		   @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
+
+	IF @intItemStockUOMId = @intWeightUOMId
+	BEGIN
+		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	END
 	
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
