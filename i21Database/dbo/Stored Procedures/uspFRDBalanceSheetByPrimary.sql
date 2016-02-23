@@ -84,11 +84,11 @@ BEGIN
 			SET @strAccountsType_Row = 'IS'
 		END
 
-		SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearId = (SELECT TOP 1 intFiscalYearId FROM tblGLCurrentFiscalYear)))
+		SET @REAccount = (SELECT TOP 1 ISNULL([Primary Account],'') from vyuGLAccountView WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearId = (SELECT TOP 1 intFiscalYearId FROM tblGLCurrentFiscalYear)))
 
 		IF(@REAccount = '')
 		BEGIN
-			SET @REAccount = (SELECT TOP 1 ISNULL(strAccountId,'') FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear))
+			SET @REAccount = (SELECT TOP 1 ISNULL([Primary Account],'') from vyuGLAccountView WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear))
 		END
 
 		IF(@REAccount = @strAccountId)
