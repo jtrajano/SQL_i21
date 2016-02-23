@@ -102,7 +102,8 @@
        "tblEntity"."strName",
        "tblSCListTicketTypes"."strTicketType",
 	   "tblSMCompanyLocation"."strLocationName",
-	   "tblSMCompanyLocationSubLocation"."strSubLocationName"
+	   "tblSMCompanyLocationSubLocation"."strSubLocationName",
+	   "tblGRStorageType"."strStorageTypeDescription"
   from (("dbo"."tblSCTicket" "tblSCTicket"
   inner join "dbo"."tblEntity" "tblEntity"
        on ("tblEntity"."intEntityId" = "tblSCTicket"."intEntityId")
@@ -112,6 +113,9 @@
   inner join "dbo"."tblSCListTicketTypes"
        "tblSCListTicketTypes"
        on ("tblSCListTicketTypes"."intTicketType" = "tblSCTicket"."intTicketType" AND "tblSCListTicketTypes".strInOutIndicator = "tblSCTicket".strInOutFlag)
+  full join "dbo"."tblGRStorageType"
+       "tblGRStorageType"
+       on ("tblGRStorageType"."strStorageTypeCode" = "tblSCTicket"."strDistributionOption")
   inner join "dbo"."tblSMCompanyLocationSubLocation"
        "tblSMCompanyLocationSubLocation"
        on ("tblSMCompanyLocationSubLocation".intCompanyLocationId = "tblSCTicket"."intProcessingLocationId"))
