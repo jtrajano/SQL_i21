@@ -1912,6 +1912,11 @@ IF @recap = 1
 --------------------------------------------------------------------------------------------  
 IF @recap = 0
 	BEGIN
+		DECLARE @AVERAGECOST AS INT = 1
+				,@FIFO AS INT = 2
+				,@LIFO AS INT = 3
+				,@LOTCOST AS INT = 4
+				,@ACTUALCOST AS INT = 5
 
 		--Update onhand
 		BEGIN TRY	
@@ -1944,7 +1949,16 @@ IF @recap = 0
 				,Header.dtmShipDate
 				,(Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
 				,ItemUOM.dblUnitQty
-				,IST.dblLastCost
+				-- If item is using average costing, it must use the average cost. 
+				-- Otherwise, it must use the last cost value of the item. 
+				,dblCost =	dbo.fnMultiply (				
+								CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
+											dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
+										ELSE 
+											IST.dblLastCost  
+								END 
+								,ItemUOM.dblUnitQty
+							)
 				,Detail.dblPrice 
 				,Header.intCurrencyId
 				,1.00
