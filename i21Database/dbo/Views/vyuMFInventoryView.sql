@@ -6,7 +6,7 @@ AS
 			l.dtmDateCreated,        
 			l.dtmExpiryDate,        
 			l.strLotAlias,        
-			CASE WHEN ISNULL(l.dblWeight,0) = 0 THEN 0 ELSE l.dblQty END AS dblQty,        
+			l.dblQty,        
 			l.dblWeightPerQty,        
 			l.strVendorLotNo,        
           
@@ -19,7 +19,7 @@ AS
 			l.intLotStatusId,
 			l.intParentLotId,
 			l.intSplitFromLotId,
-			CASE WHEN ISNULL(l.dblWeight,0) = 0 THEN l.dblQty ELSE l.dblWeight END AS  dblWeight,
+			CASE WHEN l.intWeightUOMId IS NULL THEN l.dblQty ELSE l.dblWeight END AS  dblWeight,
 			l.intWeightUOMId,
 			l.intOriginId,
 			l.strBOLNo,
@@ -50,13 +50,13 @@ AS
 			ls.strPrimaryStatus,         
 			ls.strSecondaryStatus,        
 			us.strUserName,        
-			CASE WHEN ISNULL(l.dblWeight,0) = 0 THEN NULL ELSE um.strUnitMeasure END AS  strQtyUOM,
+			um.strUnitMeasure AS strQtyUOM,
 			clsl.strSubLocationName,        
 			clsl.intCompanyLocationSubLocationId,      
 			sl.strName strStorageLocationName,        
 			cl.strLocationName strCompanyLocationName ,        
 			cl.intCompanyLocationId,      
-			CASE WHEN ISNULL(l.dblWeight,0) = 0 THEN um.strUnitMeasure ELSE um1.strUnitMeasure END AS  strWeightUOM,
+			um1.strUnitMeasure AS strWeightUOM,
 			pl.strParentLotNumber,
 			c1.strCustomerNumber strOwner,    
 		    '' AS strCurrency,    
@@ -78,7 +78,7 @@ AS
 	LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLocationId
-	LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = l.intWeightUOMId
+	LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = ISNULL(l.intWeightUOMId,l.intItemUOMId)
 	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
 	LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 	LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId
