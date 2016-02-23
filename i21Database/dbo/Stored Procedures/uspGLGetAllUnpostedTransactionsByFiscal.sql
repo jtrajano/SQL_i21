@@ -10,7 +10,7 @@ CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
  @intEntityId INT,
  @intFiscalYearPeriodId INT = 0,
  @strModule NVARCHAR(3)
- 
+
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -20,7 +20,7 @@ BEGIN
 		strTransactionType NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 		dtmDate DATETIME,
 		strModule NVARCHAR(3)COLLATE Latin1_General_CI_AS NULL
-		
+
 	)
 	DECLARE @tblTransactions TABLE(
 		intTransactionId INT,
@@ -32,51 +32,54 @@ BEGIN
 		intEntityId	INT,
 		strModule NVARCHAR(3)  COLLATE Latin1_General_CI_AS NULL
 	)
+	DECLARE @transactionType  NVARCHAR(30)= ''
+	DECLARE @msg NVARCHAR(2) = ''
+	DECLARE @guid UNIQUEIDENTIFIER
 	--END TABLE VARIABLE DECLARATIONS
 
 	--GETS THE DATE CRITERIA BASE ON THE FISCAL YEAR
 	DECLARE @dtmDateFrom DATETIME
 	DECLARE @dtmDateTo DATETIME
-	IF @intFiscalYearPeriodId > 0 
+	IF @intFiscalYearPeriodId > 0
 		SELECT TOP 1 @dtmDateFrom= dtmStartDate,@dtmDateTo= dtmEndDate FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalYearPeriodId
 	ELSE
 		SELECT TOP 1 @dtmDateFrom= dtmDateFrom,@dtmDateTo= dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId
-	
-	
+
+
 	--BEGIN OPEN GL UNPOSTED SCREEN
 	--EXCLUDED IC AND PR SINCE THEY DO NOT HAVE BATCH POSTING FEATURE
 	IF @strModule = 'INV' -- SHOW ONLY IC TRANSACTIONS
 			INSERT INTO @tblOriginTransactions
 			SELECT  strTransactionId,strTransactionType, dtmDate ,@strModule from [vyuICGetUnpostedTransactions]
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
-			
+
 
 	ELSE IF @strModule = 'PR' -- SHOW ONLY PR TRANSACTIONS
 			INSERT INTO @tblOriginTransactions
 			SELECT  strTransactionId,strTransactionType, dtmDate,@strModule  from vyuPRUnpostedTransactions
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
-			
+
 	ELSE
 	BEGIN
 		--SHOW PR IC AND ORIGIN TRANSACTIONS
 		DECLARE @blnLegacyIntegration BIT = 0
-		SELECT TOP 1 @blnLegacyIntegration = ISNULL(ysnLegacyIntegration,0) FROM tblSMCompanyPreference 
+		SELECT TOP 1 @blnLegacyIntegration = ISNULL(ysnLegacyIntegration,0) FROM tblSMCompanyPreference
 		IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glijemst]') AND type IN (N'U'))
 			AND  @blnLegacyIntegration = 1
 		BEGIN
 			;WITH GLORIGIN(strTransactionId,strTransactionType,dtmDate)
 			as
 			(
-				SELECT glije_src_no as strTransactionId, 
-				'Origin - ' + glije_src_sys as strTransactionType,	
-				CAST(SUBSTRING(CAST(glije_date AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
+				SELECT glije_src_no as strTransactionId,
+				'Origin - ' + glije_src_sys as strTransactionType,
+				CAST(SUBSTRING(CAST(glije_date AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),7,2) AS DATE) as dtmDate
 				FROM glijemst group by glije_src_no,glije_src_sys,glije_date
 
 			)
 			INSERT INTO @tblOriginTransactions
 			SELECT strTransactionId,strTransactionType,dtmDate,'OG' FROM GLORIGIN
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
-		
+
 		END
 
 		IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aptrxmst]') AND type IN (N'U'))
@@ -85,34 +88,34 @@ BEGIN
 			;WITH APORIGIN(strTransactionId,strTransactionType,dtmDate)
 			as
 			(
-				SELECT aptrx_ivc_no as strTransactionId, 'Origin - AP' as strTransactionType, CAST(SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
-				FROM aptrxmst 
+				SELECT aptrx_ivc_no as strTransactionId, 'Origin - AP' as strTransactionType, CAST(SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),7,2) AS DATE) as dtmDate
+				FROM aptrxmst
 				GROUP BY aptrx_ivc_no, aptrx_gl_rev_dt
 			)
 			INSERT INTO @tblOriginTransactions
 			SELECT strTransactionId,strTransactionType,dtmDate,'OG' FROM APORIGIN
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		END
-		
+
 		INSERT INTO @tblOriginTransactions
 			SELECT  strTransactionId,strTransactionType, dtmDate ,'INV' from [vyuICGetUnpostedTransactions]
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		UNION ALL
 			SELECT  strTransactionId,strTransactionType, dtmDate ,'PR' from vyuPRUnpostedTransactions
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
-		
+
 	END
-	
+
 	IF EXISTS (SELECT TOP 1 1 FROM @tblOriginTransactions)
 	BEGIN
-		SELECT  TransactionType ='Origin' 
+		SELECT  @transactionType ='Origin'
 		SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
 		RETURN --SHOW GL SCREEN IF THERE ARE TRANSACTION THEN EXIT
 	END
 	-- END OPEN GL UNPOSTED SCREEN
 
 	-- SHOW BATCH POSTING SCREEN IF THERE ARE NO ORIGIN UNSPOSTED TRANSACTIONS
-	-- BEGIN OPEN BATCH POSTING SCREEN	
+	-- BEGIN OPEN BATCH POSTING SCREEN
 	DECLARE @tblModule TABLE(strModule NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL)
 	IF @strModule <>  'GL' INSERT INTO @tblModule SELECT @strModule
 	ELSE INSERT INTO @tblModule SELECT 'GL' UNION ALL SELECT 'AP' UNION ALL SELECT 'CM' UNION ALL SELECT 'AR'
@@ -138,35 +141,34 @@ BEGIN
 		WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
 		BEGIN
-			DECLARE @guid UNIQUEIDENTIFIER
 			DECLARE @intCount INT
 			DECLARE @intAACount INT
 			DECLARE @ysnAllowUserSelfPost BIT
 
-			DELETE FROM tblGLForBatchPosting 
+			DELETE FROM tblGLForBatchPosting
 			SELECT @guid = NEWID()
-			SELECT  TransactionType ='NonOrigin' 
-			
+			SELECT  @transactionType ='NonOrigin'
+
 			INSERT INTO tblGLForBatchPosting (intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName, intEntityId, dtmDate,[guid])
 				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,@guid FROM @tblTransactions
 			SELECT @intAACount = COUNT(1) FROM @tblTransactions WHERE strTransactionType = 'Audit Adjustment'
 			SELECT @intCount = COUNT(1) FROM @tblTransactions
-			
+
 			SELECT @ysnAllowUserSelfPost= ISNULL(ysnAllowUserSelfPost,0)  FROM [tblSMUserPreference] where intEntityUserSecurityId = @intEntityId
-			
+
 			IF @ysnAllowUserSelfPost = 1
 			BEGIN
 				IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLForBatchPosting WHERE intEntityId = @intEntityId)
-					SELECT  TransactionType ='OtherUserTransaction' 
+					SELECT  @transactionType ='OtherUserTransaction'
 			END
 
-			SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
-			SELECT  @guid as batchGUID
+			SELECT @msg = CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END
 		END
 		--END OPEN BATCH POSTING SCREEN
 		ELSE
 		BEGIN
 			-- ANY SCREEN IS NOT OPENED.
-			SELECT  TransactionType ='Empty' 
+			SELECT  @transactionType ='Empty'
 		END
+		SELECT TransactionType = @transactionType , message = @msg ,batchGUID = @guid
 END
