@@ -44,8 +44,8 @@ BEGIN
 	IF @statusId = 1 --OPEN
 	BEGIN
 		--Allow to open if no item receipt or bill or from cancelled or short closed status
-		IF (@hasItemReceipt = 1 OR
-			 @hasBill = 1 OR
+		IF ((@hasItemReceipt = 1 OR
+			 @hasBill = 1) AND
 			 EXISTS(SELECT 1 FROM (SELECT intOrderStatusId FROM tblPOOrderStatus WHERE intOrderStatusId IN (4,6)) POStatus 
 																	WHERE intOrderStatusId = @currentStatus))
 					AND @currentStatus != 1
