@@ -1685,14 +1685,14 @@ IF @post = 1
 				,ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost =	dbo.fnMultiply (				
+				,dblCost =	ISNULL(dbo.fnMultiply (				
 								CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
 											dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
 										ELSE 
 											IST.dblLastCost  
 								END 
 								,ItemUOM.dblUnitQty
-							)
+							),@ZeroDecimal)
 				,Detail.dblPrice 
 				,Header.intCurrencyId
 				,1.00
