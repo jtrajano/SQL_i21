@@ -288,6 +288,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEntityPreferences
 
 :r .\EM\022_DefaultDataForContactTypeAndImport.sql
+:r .\EM\023_RenameEntityContactEmailDistribution.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

@@ -3590,6 +3590,7 @@
     <None Include="Scripts\Post-Deployment\ST\7_Checkout_Radiant_MCM.sql" />
     <None Include="Scripts\Post-Deployment\ST\8_Checkout_Radiant_FGM.sql" />
     <None Include="Scripts\Post-Deployment\ST\9_Checkout_Radiant_MSM.sql" />
+    <None Include="Scripts\Post-Deployment\EM\023_RenameEntityContactEmailDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
