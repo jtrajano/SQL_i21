@@ -12,7 +12,6 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @UserSecurityID INT
 DECLARE @IsAdmin BIT
-DECLARE @IsContact BIT
 
 BEGIN TRANSACTION
 
@@ -26,7 +25,6 @@ BEGIN TRY
 
 	-- Get whether User Role has administrative rights
 	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-	SELECT @IsContact = CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
 		
 	-- Check whether or not to build the specified user role according to the Master Menus
 	IF (@BuildUserRole = 1)
@@ -35,10 +33,6 @@ BEGIN TRY
 		DELETE FROM tblSMUserRoleMenu
 		WHERE intUserRoleId = @UserRoleID
 		AND intMenuId NOT IN (SELECT intMenuID FROM tblSMMasterMenu)
-
-		-- Force Visibility if Contact Admin
-		IF @IsAdmin = 1 AND @IsContact = 1
-		SET @ForceVisibility = 1
 		
 		-- Iterate through all affected user roles and apply Master Menus
 		INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
