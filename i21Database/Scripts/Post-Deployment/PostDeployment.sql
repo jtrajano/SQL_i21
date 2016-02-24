@@ -282,6 +282,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\019_RemoveEmailToParentEntity.sql
 :r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEntityPreferences
 
+:r .\EM\023_RenameEntityContactEmailDistribution.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
