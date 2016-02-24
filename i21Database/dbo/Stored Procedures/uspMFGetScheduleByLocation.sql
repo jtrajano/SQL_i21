@@ -7,7 +7,7 @@ SELECT W.intManufacturingCellId
 	,ISNULL(W.dtmEarliestDate, W.dtmExpectedDate) AS dtmEarliestDate
 	,W.dtmExpectedDate
 	,ISNULL(W.dtmLatestDate, W.dtmExpectedDate) AS dtmLatestDate
-	,ISNULL(SL.dtmTargetDate, dtmExpectedDate) AS dtmTargetDate
+	,ISNULL(SL.dtmTargetDate, W.dtmExpectedDate) AS dtmTargetDate
 	,CASE WHEN W.dblQuantity - W.dblProducedQuantity>0 THEN W.dblQuantity - W.dblProducedQuantity ELSE 0 END AS dblBalanceQuantity
 	,I.intItemId
 	,IU.intItemUOMId

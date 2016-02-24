@@ -17,38 +17,7 @@ BEGIN TRY
 
 	SELECT @dtmCurrentDate = GetDate()
 
-	DECLARE @tblMFScheduleWorkOrder TABLE (
-		intRecordId INT identity(1, 1)
-		,intManufacturingCellId INT
-		,intWorkOrderId INT
-		,intItemId INT
-		,intItemUOMId INT
-		,intUnitMeasureId INT
-		,dblQuantity NUMERIC(18, 6)
-		,dblBalance NUMERIC(18, 6)
-		,dtmExpectedDate DATETIME
-		,intStatusId INT
-		,intExecutionOrder INT
-		,strComments NVARCHAR(MAX)
-		,strNote NVARCHAR(MAX)
-		,strAdditionalComments NVARCHAR(MAX)
-		,intNoOfSelectedMachine INT
-		,dtmEarliestStartDate DATETIME
-		,intPackTypeId INT
-		,dtmPlannedStartDate DATETIME
-		,dtmPlannedEndDate DATETIME
-		,intPlannedShiftId INT
-		,intDuration INT
-		,intChangeoverDuration INT
-		,intScheduleWorkOrderId INT
-		,intSetupDuration INT
-		,dtmChangeoverStartDate DATETIME
-		,dtmChangeoverEndDate DATETIME
-		,ysnFrozen BIT
-		,intConcurrencyId INT
-		,intSequenceId INT
-		,intDemandRatio INT
-		)
+	DECLARE @tblMFScheduleWorkOrder ScheduleTable
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -204,41 +173,7 @@ BEGIN TRY
 				)
 	END
 
-	IF NOT EXISTS (
-			SELECT *
-			FROM @tblMFScheduleWorkOrder
-			WHERE intWorkOrderId = @intDraggedWorkOrder
-			)
-		--AND (
-		--	intFirstPreferenceCellId = @intDroppedManufacturingCell
-		--	OR intSecondPreferenceCellId = @intDroppedManufacturingCell
-		--	OR intThirdPreferenceCellId = @intDroppedManufacturingCell
-		--	)
-	BEGIN
-		RAISERROR (
-				90013
-				,14
-				,1
-				)
-	END
-
-	IF EXISTS (
-			SELECT *
-			FROM @tblMFScheduleWorkOrder
-			WHERE intWorkOrderId = @intDraggedWorkOrder
-				AND intStatusId IN (
-					4
-					,9
-					,10
-					)
-			)
-	BEGIN
-		RAISERROR (
-				90014
-				,14
-				,1
-				)
-	END
+	
 
 	INSERT INTO @tblMFScheduleWorkOrder (
 		intManufacturingCellId
@@ -255,7 +190,7 @@ BEGIN TRY
 		,intScheduleWorkOrderId
 		,ysnFrozen
 		,intConcurrencyId
-		,intSequenceId
+		--,intSequenceId
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -275,7 +210,7 @@ BEGIN TRY
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
-		,x.intSequenceNo
+		--,x.intSequenceNo
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -290,70 +225,56 @@ BEGIN TRY
 			,intPackTypeId INT
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
-			,intSequenceNo INT
+			--,intSequenceNo INT
 			,ysnEOModified BIT
 			) x
 	WHERE x.intStatusId <> 1
 	ORDER BY x.intExecutionOrder
+	
+	IF NOT EXISTS (
+			SELECT *
+			FROM @tblMFScheduleWorkOrder
+			WHERE intWorkOrderId = @intDraggedWorkOrder
+			)
+		--AND (
+		--	intFirstPreferenceCellId = @intDroppedManufacturingCell
+		--	OR intSecondPreferenceCellId = @intDroppedManufacturingCell
+		--	OR intThirdPreferenceCellId = @intDroppedManufacturingCell
+		--	)
+	BEGIN
+		RAISERROR (
+				90013
+				,14
+				,1
+				)
+	END
 
-	INSERT INTO @tblMFScheduleWorkOrder (
-		intManufacturingCellId
-		,intWorkOrderId
-		,intItemId
-		,intItemUOMId
-		,intUnitMeasureId
-		,dblQuantity
-		,dblBalance
-		,dtmExpectedDate
-		,intStatusId
-		,intExecutionOrder
-		,intPackTypeId
-		,intScheduleWorkOrderId
-		,ysnFrozen
-		,intConcurrencyId
-		,intSequenceId
-		)
-	SELECT x.intManufacturingCellId
-		,x.intWorkOrderId
-		,x.intItemId
-		,x.intItemUOMId
-		,x.intUnitMeasureId
-		,x.dblQuantity
-		,x.dblBalance
-		,x.dtmExpectedDate
-		,x.intStatusId
-		,x.intExecutionOrder
-		,x.intPackTypeId
-		,x.intScheduleWorkOrderId
-		,x.ysnFrozen
-		,@intConcurrencyId
-		,x.intSequenceNo
-	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
-			intManufacturingCellId INT
-			,intWorkOrderId INT
-			,intItemId INT
-			,intUnitMeasureId INT
-			,intItemUOMId INT
-			,dblQuantity NUMERIC(18, 6)
-			,dblBalance NUMERIC(18, 6)
-			,dtmExpectedDate DATETIME
-			,intStatusId INT
-			,intExecutionOrder INT
-			,intPackTypeId INT
-			,intScheduleWorkOrderId INT
-			,ysnFrozen BIT
-			,intSequenceNo INT
-			) x
-	WHERE x.intStatusId = 1
-	ORDER BY x.intExecutionOrder
+	--IF EXISTS (
+	--		SELECT *
+	--		FROM @tblMFScheduleWorkOrder
+	--		WHERE intWorkOrderId = @intDraggedWorkOrder
+	--			AND intStatusId IN (
+	--				4
+	--				,9
+	--				,10
+	--				)
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			90014
+	--			,14
+	--			,1
+	--			)
+	--END
 
 	SELECT W.intManufacturingCellId
 		,W.intWorkOrderId
 		--,SL.intScheduleId
 		,W.dblQuantity
-		,W.dtmEarliestDate
+		,ISNULL(W.dtmEarliestDate, W.dtmExpectedDate) AS dtmEarliestDate
 		,W.dtmExpectedDate
-		,W.dtmLatestDate
+		,ISNULL(W.dtmLatestDate, W.dtmExpectedDate) AS dtmLatestDate
+		,ISNULL(SL.dtmTargetDate, W.dtmExpectedDate) AS dtmTargetDate
 		,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
 		,I.intItemId
 		,IU.intItemUOMId
@@ -370,6 +291,8 @@ BEGIN TRY
 		AND W.intStatusId <> 13
 		AND W.intLocationId = @intLocationId
 		AND W.intManufacturingCellId IS NOT NULL
+	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+	AND MC.ysnIncludeSchedule = 1
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	LEFT JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	ORDER BY SL.intExecutionOrder
