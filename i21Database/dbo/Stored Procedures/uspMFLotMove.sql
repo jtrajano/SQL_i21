@@ -88,7 +88,7 @@ BEGIN TRY
 
 	UPDATE dbo.tblICLot
 	SET dblWeightPerQty = @dblWeightPerQty
-	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND @strLotNumber=@strNewLotNumber
+	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 		
 	IF EXISTS (
 			SELECT *

@@ -102,6 +102,9 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblWeightPerQty
+	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
 	
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
