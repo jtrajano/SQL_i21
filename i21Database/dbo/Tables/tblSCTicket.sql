@@ -35,7 +35,7 @@
     [intTareUserId] INT NULL, 
     [dblGrossUnits] DECIMAL(13, 3) NULL, 
     [dblNetUnits] DECIMAL(13, 3) NULL, 
-    [strItemNumber] NVARCHAR(13) COLLATE Latin1_General_CI_AS NULL, 
+    [strItemNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strItemUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intCustomerId] INT NULL, 
     [intSplitId] INT NULL, 
