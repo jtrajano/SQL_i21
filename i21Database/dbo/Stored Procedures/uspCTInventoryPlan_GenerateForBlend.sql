@@ -284,10 +284,15 @@ BEGIN TRY
 
 		SELECT SS.intItemId
 			,SS.dtmUpdatedAvailabilityDate
-			,ISNULL(SUM(IV.dblQtyInStockUOM), 0) AS IntransitPurchaseQty
+			,ISNULL(SUM(CASE 
+						WHEN @TargetUOMKey = IUOM.intUnitMeasureId
+							THEN IV.dblQtyInStockUOM
+						ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, IV.dblQtyInStockUOM)
+						END), 0) AS IntransitPurchaseQty
 		INTO #IntransitPurchases
 		FROM [dbo].[vyuLGInventoryView] IV
 		JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+		JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 		WHERE SS.intContractStatusId = 1
 			AND IV.strStatus = 'In-transit'
 		GROUP BY SS.intItemId

@@ -260,9 +260,14 @@ BEGIN TRY
 		DECLARE @PastDueIntransitPurchases DECIMAL(24, 6)
 
 		SET @PastDueIntransitPurchases = ISNULL((
-					SELECT SUM(IV.dblQtyInStockUOM)
+					SELECT SUM(CASE 
+								WHEN @TargetUOMKey = IUOM.intUnitMeasureId
+									THEN IV.dblQtyInStockUOM
+								ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, IV.dblQtyInStockUOM)
+								END)
 					FROM [dbo].[vyuLGInventoryView] IV
 					JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 					WHERE IV.intItemId = @intItemId
 						AND IV.strStatus = 'In-transit'
 						AND SS.intContractStatusId = 1
@@ -882,9 +887,14 @@ BEGIN TRY
 							DECLARE @SQL_IntransitPurchases_Exec_Ext NVARCHAR(MAX)
 
 							SET @SQL_IntransitPurchases_Exec_Ext = 'SELECT @IntransitPurchases = ' + CAST(ISNULL((
-											SELECT SUM(IV.dblQtyInStockUOM)
+											SELECT SUM(CASE 
+														WHEN @TargetUOMKey = IUOM.intUnitMeasureId
+															THEN IV.dblQtyInStockUOM
+														ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, IV.dblQtyInStockUOM)
+														END)
 											FROM [dbo].[vyuLGInventoryView] IV
 											JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+											JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 											WHERE IV.intItemId = @intItemId
 												AND IV.strStatus = 'In-transit'
 												AND SS.intContractStatusId = 1
@@ -1380,9 +1390,14 @@ BEGIN TRY
 						DECLARE @SQL_IntransitPurchases_Exec NVARCHAR(MAX)
 
 						SET @SQL_IntransitPurchases_Exec = 'SELECT @IntransitPurchases = ' + CAST(ISNULL((
-										SELECT SUM(IV.dblQtyInStockUOM)
+										SELECT SUM(CASE 
+													WHEN @TargetUOMKey = IUOM.intUnitMeasureId
+														THEN IV.dblQtyInStockUOM
+													ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, IV.dblQtyInStockUOM)
+													END)
 										FROM [dbo].[vyuLGInventoryView] IV
 										JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+										JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 										WHERE IV.intItemId = @intItemId
 											AND IV.strStatus = 'In-transit'
 											AND SS.intContractStatusId = 1
