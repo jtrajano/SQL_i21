@@ -447,10 +447,10 @@ namespace iRely.Inventory.BusinessLayer
                 }                
             }
 
-            // Make sure item, location and inv transaction id are the first in the sorting order.             
-            addDefaultSortList.Insert(0, defaultItemSort);
-            addDefaultSortList.Insert(0, defaultLocationSort);
+            // Make sure item, location and inv transaction id are the first in the sorting order.
             addDefaultSortList.Insert(0, defaultInventoryTransactionId);
+            addDefaultSortList.Insert(0, defaultLocationSort);
+            addDefaultSortList.Insert(0, defaultItemSort);
             
             IEnumerable<SearchSort> enDefaultSort = addDefaultSortList;
             var sort = ExpressionBuilder.GetSortSelector(enDefaultSort);
