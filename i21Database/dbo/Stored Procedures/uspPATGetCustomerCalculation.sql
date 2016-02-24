@@ -59,26 +59,13 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee END,
 			   dblTotalVolume = Total.dblVolume,
 			   dblTotalRefund = Total.dblTotalRefund
-		   FROM tblPATCustomerVolume CV
-     INNER JOIN tblPATRefundRateDetail RRD
-			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
-     INNER JOIN tblPATRefundRate RR
-             ON RR.intRefundTypeId = RRD.intRefundTypeId
-	 INNER JOIN tblARCustomer AC
-			 ON AC.intEntityCustomerId = CV.intCustomerPatronId
-	  LEFT JOIN tblSMTaxCode TC
-			 ON TC.intTaxCodeId = AC.intTaxCodeId
-	 INNER JOIN tblEntity ENT
-			 ON ENT.intEntityId = CV.intCustomerPatronId
-	 INNER JOIN tblPATPatronageCategory PC
-			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-	 INNER JOIN (
-	 SELECT DISTINCT B.intCustomerPatronId AS intCustomerId,
+		  FROM (
+		  SELECT DISTINCT B.intCustomerPatronId AS intCustomerId,
 				    dblTotalPurchases = SUM(CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END),
 					dblTotalSales = SUM(CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END),
-					(CASE WHEN SUM(RRD.dblRate) * SUM(dblVolume) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate) * SUM(dblVolume) END) AS dblRefundAmount,
-					(SUM(RRD.dblRate) * SUM(dblVolume) * (SUM(RR.dblCashPayout)/100)) AS dblCashRefund,
-					(((SUM(RRD.dblRate) * SUM(dblVolume)) * (RR.dblCashPayout/100)) * (@FWT/100)) AS dbLessFWT,
+					(CASE WHEN SUM(RRD.dblRate * dblVolume) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
+					(SUM(RRD.dblRate * dblVolume) * (SUM(RR.dblCashPayout)/100)) AS dblCashRefund,
+					(((SUM(RRD.dblRate * dblVolume)) * (RR.dblCashPayout/100)) * (@FWT/100)) AS dbLessFWT,
 					@LessService AS dblLessServiceFee,
 					dblVolume = SUM(dblVolume),
 					dblTotalRefund = SUM(RRD.dblRate)
@@ -98,9 +85,24 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   WHERE B.intCustomerPatronId = B.intCustomerPatronId
 		   GROUP BY B.intCustomerPatronId,
 					RR.dblCashPayout,
-					AC.ysnSubjectToFWT
-	   ) Total
-				 ON intCustomerId = Total.intCustomerId
+					AC.ysnSubjectToFWT,
+					RRD.dblRate
+			) Total
+	   LEFT JOIN tblPATCustomerVolume CV
+		    ON CV.intCustomerPatronId = Total.intCustomerId
+     INNER JOIN tblPATRefundRateDetail RRD
+			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
+     INNER JOIN tblPATRefundRate RR
+             ON RR.intRefundTypeId = RRD.intRefundTypeId
+	 INNER JOIN tblARCustomer AC
+			 ON AC.intEntityCustomerId = CV.intCustomerPatronId
+	  LEFT JOIN tblSMTaxCode TC
+			 ON TC.intTaxCodeId = AC.intTaxCodeId
+	 INNER JOIN tblEntity ENT
+			 ON ENT.intEntityId = CV.intCustomerPatronId
+	 INNER JOIN tblPATPatronageCategory PC
+			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
+	 
 	   WHERE CV.intFiscalYear = @intFiscalYearId
 	   GROUP BY CV.intCustomerPatronId, 
 				ENT.strName, 
@@ -113,7 +115,8 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 				Total.dbLessFWT,
 				Total.dblLessServiceFee,
 				Total.dblVolume,
-				Total.dblTotalRefund
+				Total.dblTotalRefund,
+				Total.intCustomerId
 	   
 
 	   DROP TABLE #statusTable
