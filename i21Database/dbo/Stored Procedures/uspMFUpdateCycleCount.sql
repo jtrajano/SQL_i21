@@ -25,7 +25,7 @@ BEGIN TRY
 		,intLastModifiedUserId = x.intUserId
 	FROM OPENXML(@idoc, 'root/CycleCounts/CycleCount', 2) WITH (
 			intCycleCountId INT
-			,dblQuantity NUMERIC(18, 6)
+			,dblQuantity NUMERIC(38, 20)
 			,intUserId INT
 			) x
 	WHERE tblMFProcessCycleCount.intCycleCountId = x.intCycleCountId
