@@ -333,7 +333,7 @@ GO
 
 		PRINT N'GET TOTAL ROWS'
 		SET @currentRow = 1
-		SELECT @totalRows = Count(*) FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')) a
+		SELECT @totalRows = Count(*) FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
 
 		--PRINT CONCAT(N'TOTAL ROWS ', @totalRows)
 
@@ -343,7 +343,7 @@ GO
 		DECLARE @customerId INT
 		SELECT @customerId = intEntityId FROM (  
 			SELECT ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS 'ROWID', *
-			FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType] where strType IN ('Customer', 'Vendor')) a
+			FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
 		) b
 		WHERE ROWID = @currentRow
 		--PRINT CONCAT(N'CUSTOMER ID ', @customerId)
@@ -467,6 +467,30 @@ GO
 	
 		SET @currentRow = @currentRow + 1
 		END
+
+		DECLARE @CRMParentMenuId INT
+		SELECT @CRMParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'Help Desk'
+
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 0 FROM tblEntityType EntityType
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
+		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
+		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE (MasterMenu.intMenuID = @CRMParentMenuId OR MasterMenu.intParentMenuID = @CRMParentMenuId)
+		AND EntityType.strType <> 'Salesperson'
+
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 1 FROM tblEntityType EntityType
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
+		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
+		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE (MasterMenu.intMenuID = @CRMParentMenuId OR MasterMenu.intParentMenuID = @CRMParentMenuId)
+		AND EntityType.strType = 'Salesperson'
+
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 0
+		FROM tblEntityType EntityType
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
+		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
+		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE MasterMenu.strModuleName IN ('Scale', 'Grain', 'Logistics')
 
 		-- delete all un-assigned contact role (except for Help Desk) ?
 		PRINT N'DELETING UN-ASSIGNED CONTACTS USER ROLES'
