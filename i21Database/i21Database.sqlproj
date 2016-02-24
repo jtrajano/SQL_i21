@@ -3493,6 +3493,7 @@
     <Build Include="dbo\Functions\fnAPGetImportedBillsNotEqualToDetailTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixVoucher.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentActual.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
