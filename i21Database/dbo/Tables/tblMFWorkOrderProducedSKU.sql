@@ -3,11 +3,11 @@
 	,intWorkOrderId INT NOT NULL
 	,intItemId INT NOT NULL
 	,intLotId INT NOT NULL
-	,intSKUId NUMERIC(18, 6) NOT NULL
+	,intSKUId INT NOT NULL
 	,intContainerId INT NOT NULL
-	,dblQuantity NUMERIC(18, 6) NOT NULL
+	,dblQuantity NUMERIC(38, 20) NOT NULL
 	,intItemUOMId INT NOT NULL
-	,dblIssuedQuantity NUMERIC(18, 6) NOT NULL
+	,dblIssuedQuantity NUMERIC(38, 20) NOT NULL
 	,intItemIssuedUOMId INT NOT NULL
 	,intBatchId INT NOT NULL
 	,intShiftId INT NOT NULL

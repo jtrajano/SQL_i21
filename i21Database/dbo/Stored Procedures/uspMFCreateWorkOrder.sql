@@ -216,9 +216,9 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
-			,dblWeight NUMERIC(18, 6)
+			,dblWeight NUMERIC(38, 20)
 			,intWeightUOMId INT
-			,dblQty NUMERIC(18, 6)
+			,dblQty NUMERIC(38, 20)
 			,intItemUOMId INT
 			,intUserId INT
 			) x
@@ -254,9 +254,9 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
-			,dblWeight NUMERIC(18, 6)
+			,dblWeight NUMERIC(38, 20)
 			,intWeightUOMId INT
-			,dblQty NUMERIC(18, 6)
+			,dblQty NUMERIC(38, 20)
 			,intItemUOMId INT
 			,intUserId INT
 			) x
