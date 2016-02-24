@@ -1,8 +1,4 @@
 ﻿CREATE PROCEDURE dbo.uspMFRescheduleWorkOrderByLocation (@strXML NVARCHAR(MAX)
-	,@intLocationId INT
-	,@dtmFromDate DATETIME
-	,@dtmToDate DATETIME
-	,@intUserId INT
 	)
 AS
 BEGIN TRY
@@ -11,7 +7,11 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@tblMFWorkOrder AS ScheduleTable
 		,@idoc INT
-		
+		,@intLocationId INT
+		,@dtmFromDate DATETIME
+		,@dtmToDate DATETIME
+		,@intUserId INT
+
 	DECLARE @tblMFSequence TABLE (
 		intWorkOrderId INT
 		,intExecutionOrder INT
