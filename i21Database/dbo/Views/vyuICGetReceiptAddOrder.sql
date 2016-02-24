@@ -50,6 +50,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strLifeTimeType
 		, 0 AS ysnLoad
 		, 0 AS dblAvailableQty
+		, strBOL = NULL
 	FROM vyuPODetails POView
 	WHERE ysnCompleted = 0
 
@@ -102,6 +103,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strLifeTimeType
 		, 0 AS ysnLoad
 		, 0 AS dblAvailableQty
+		, strBOL = NULL
 	FROM vyuCTContractDetailView ContractView
 	WHERE ysnAllowedToShow = 1
 		AND strContractType = 'Purchase'
@@ -155,6 +157,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strLifeTimeType
 		, ysnLoad = 0
 		, dblAvailableQty = 0
+		, strBOL = LogisticsView.strBLNumber
 	FROM vyuLGShipmentContainerReceiptContracts LogisticsView
 	WHERE LogisticsView.dblBalanceToReceive > 0
 		AND LogisticsView.ysnDirectShipment = 0
@@ -208,6 +211,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strLifeTimeType
 		, ysnLoad = 0
 		, dblAvailableQty = 0
+		, strBOL = NULL
 	FROM vyuICGetInventoryTransferDetail TransferView
 	WHERE TransferView.ysnPosted = 1)
 tblAddOrders
