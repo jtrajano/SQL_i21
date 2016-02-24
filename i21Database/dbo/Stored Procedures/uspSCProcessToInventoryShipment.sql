@@ -227,7 +227,7 @@ BEGIN TRY
 			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 			END
 
-			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
+			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 		END
 		IF (@dblRemainingUnits = @dblNetUnits)
 		RETURN
@@ -288,7 +288,7 @@ BEGIN TRY
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	END
 
-	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
+	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
 	_Exit:
 
