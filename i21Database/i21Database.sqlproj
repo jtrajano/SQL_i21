@@ -3490,6 +3490,9 @@
     <Build Include="dbo\Views\vyuSCTicketView.sql" />
     <Build Include="dbo\Functions\fnMultiply.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillGLEntriesRecords.sql" />
+    <Build Include="dbo\Functions\fnAPGetImportedBillsNotEqualToDetailTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPBillPaymentActual.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
