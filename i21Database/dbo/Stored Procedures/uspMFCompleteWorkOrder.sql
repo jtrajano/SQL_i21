@@ -4,7 +4,7 @@ BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
-		,@dblProduceQty NUMERIC(18, 6)
+		,@dblProduceQty NUMERIC(38, 20)
 		,@intProduceUnitMeasureId INT
 		,@strVesselNo NVARCHAR(50)
 		,@intUserId INT
@@ -21,13 +21,13 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intStorageLocationId INT
 		,@intContainerId INT
-		,@dblTareWeight NUMERIC(18, 6)
-		,@dblUnitQty NUMERIC(18, 6)
-		,@dblPhysicalCount NUMERIC(18, 6)
+		,@dblTareWeight NUMERIC(38, 20)
+		,@dblUnitQty NUMERIC(38, 20)
+		,@dblPhysicalCount NUMERIC(38, 20)
 		,@intPhysicalItemUOMId INT
 		,@ysnEmptyOutSource BIT
 		,@intExecutionOrder INT
-		,@dblInputWeight NUMERIC(18, 6)
+		,@dblInputWeight NUMERIC(38, 20)
 		,@intBatchId INT
 		,@dtmCurrentDate DATETIME
 		,@intSubLocationId INT
@@ -84,7 +84,7 @@ BEGIN TRY
 		,@intProduceUnitMeasureId = intProduceUnitMeasureId
 		,@dblTareWeight = dblTareWeight
 		,@dblUnitQty = dblUnitQty
-		,@dblPhysicalCount = dblPhysicalCount
+		,@dblPhysicalCount = (Case When @intWorkOrderId=0 Then dbo.fnDivide(dblProduceQty,dblUnitQty) Else dblPhysicalCount End)
 		,@intPhysicalItemUOMId = (
 			CASE 
 				WHEN intPhysicalItemUOMId = 0
@@ -124,18 +124,18 @@ BEGIN TRY
 			,intPlannedShiftId INT
 			,intStatusId int
 			,intItemId INT
-			,dblProduceQty NUMERIC(18, 6)
+			,dblProduceQty NUMERIC(38, 20)
 			,intProduceUnitMeasureId INT
-			,dblTareWeight NUMERIC(18, 6)
-			,dblUnitQty NUMERIC(18, 6)
-			,dblPhysicalCount NUMERIC(18, 6)
+			,dblTareWeight NUMERIC(38, 20)
+			,dblUnitQty NUMERIC(38, 20)
+			,dblPhysicalCount NUMERIC(38, 20)
 			,intPhysicalItemUOMId INT
 			,strVesselNo NVARCHAR(50)
 			,intUserId INT
 			,strOutputLotNumber NVARCHAR(50)
 			,strVendorLotNo NVARCHAR(50)
 			,intInputLotId INT
-			,dblInputWeight NUMERIC(18, 6)
+			,dblInputWeight NUMERIC(38, 20)
 			,intLocationId INT
 			,intSubLocationId INT
 			,intStorageLocationId INT
