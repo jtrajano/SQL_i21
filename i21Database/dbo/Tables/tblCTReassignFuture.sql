@@ -21,5 +21,5 @@
     CONSTRAINT [FK_tblCTReassignFuture_tblRKFutOptTransaction_intFutOptTransactionId] FOREIGN KEY (intFutOptTransactionId) REFERENCES tblRKFutOptTransaction(intFutOptTransactionId),
 	CONSTRAINT [FK_tblCTReassignFuture_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 	CONSTRAINT [FK_tblCTReassignFuture_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),    
-	CONSTRAINT [FK_tblCTReassignFuture_tblICItemUOM_intPriceUOMId_intItemUOMId] FOREIGN KEY ([intPriceUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+	CONSTRAINT [FK_tblCTReassignFuture_tblICUnitMeasure_intPriceUOMId_intUnitMeasureId] FOREIGN KEY ([intPriceUOMId]) REFERENCES tblICUnitMeasure(intUnitMeasureId)
 )
