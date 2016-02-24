@@ -121,7 +121,7 @@ BEGIN TRY
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 	UPDATE dbo.tblICLot
 	SET dblWeightPerQty = @dblNewLotWeightPerUnit
-	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND @strLotNumber=@strNewLotNumber
+	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 	IF (SELECT dblWeight
 		FROM dbo.tblICLot
