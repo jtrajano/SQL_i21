@@ -23,7 +23,7 @@
 		,strFullName = en.strName
 		,strEmail = en.strEmail
 		,intEntityId = us.intEntitySalespersonId
-		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then 1 else 0 end)
+		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then convert(bit, 1) else convert(bit, 0) end)
 	from
 		tblARSalesperson us, tblEntityToContact etc, tblEntity en, tblEntityCredential ec
 	where
