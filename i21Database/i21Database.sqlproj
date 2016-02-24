@@ -3489,6 +3489,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMSM.sql" />
     <Build Include="dbo\Views\vyuSCTicketView.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
+    <Build Include="dbo\Functions\fnMultiply.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

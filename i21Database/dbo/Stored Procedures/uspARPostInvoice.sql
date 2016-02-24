@@ -1646,6 +1646,152 @@ IF @post = 1
 			GOTO Do_Rollback
 		END CATCH
 
+		DECLARE @AVERAGECOST AS INT = 1
+				,@FIFO AS INT = 2
+				,@LIFO AS INT = 3
+				,@LOTCOST AS INT = 4
+				,@ACTUALCOST AS INT = 5
+
+		--Update onhand
+		BEGIN TRY	
+			-- Get the items to post  
+			DECLARE @ItemsForPost AS ItemCostingTableType  
+			INSERT INTO @ItemsForPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId 
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+				,strActualCostId
+			) 
+			SELECT 
+				Detail.intItemId  
+				,IST.intItemLocationId
+				,Detail.intItemUOMId  
+				,Header.dtmShipDate
+				,(Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,ItemUOM.dblUnitQty
+				-- If item is using average costing, it must use the average cost. 
+				-- Otherwise, it must use the last cost value of the item. 
+				,dblCost =	dbo.fnMultiply (				
+								CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
+											dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
+										ELSE 
+											IST.dblLastCost  
+								END 
+								,ItemUOM.dblUnitQty
+							)
+				,Detail.dblPrice 
+				,Header.intCurrencyId
+				,1.00
+				,Header.intInvoiceId
+				,Detail.intInvoiceDetailId
+				,Header.strInvoiceNumber 
+				,@INVENTORY_SHIPMENT_TYPE
+				,NULL 
+				,NULL
+				,NULL
+				,strActualCostId = Header.strActualCostId
+			FROM 
+				tblARInvoiceDetail Detail
+			INNER JOIN
+				tblARInvoice Header
+					ON Detail.intInvoiceId = Header.intInvoiceId
+					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
+					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
+			INNER JOIN
+				@PostInvoiceData P
+					ON Header.intInvoiceId = P.intInvoiceId	
+			INNER JOIN
+				tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+			LEFT OUTER JOIN
+				vyuICGetItemStock IST
+					ON Detail.intItemId = IST.intItemId 
+					AND Header.intCompanyLocationId = IST.intLocationId 
+			WHERE
+				Detail.dblTotal <> @ZeroDecimal
+				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
+				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND Header.strType <> 'Debit Memo'
+
+			
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()
+			GOTO Do_Rollback
+		END CATCH
+
+		-- Call the post routine 
+		BEGIN TRY 
+			-- Call the post routine 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+			)
+			EXEC	dbo.uspICPostCosting  
+					@ItemsForPost  
+					,@batchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@UserEntityID
+					
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH
+
+		BEGIN TRY 
+			EXEC dbo.uspGLBookEntries @GLEntries, @post
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH
+
 	END   
 
 --------------------------------------------------------------------------------------------  
@@ -1917,153 +2063,7 @@ IF @recap = 1
 -- 3. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @recap = 0
-	BEGIN
-		DECLARE @AVERAGECOST AS INT = 1
-				,@FIFO AS INT = 2
-				,@LIFO AS INT = 3
-				,@LOTCOST AS INT = 4
-				,@ACTUALCOST AS INT = 5
-
-		--Update onhand
-		BEGIN TRY	
-			-- Get the items to post  
-			DECLARE @ItemsForPost AS ItemCostingTableType  
-			INSERT INTO @ItemsForPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId 
-				,intTransactionDetailId
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-				,strActualCostId
-			) 
-			SELECT 
-				Detail.intItemId  
-				,IST.intItemLocationId
-				,Detail.intItemUOMId  
-				,Header.dtmShipDate
-				,(Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
-				,ItemUOM.dblUnitQty
-				-- If item is using average costing, it must use the average cost. 
-				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost =	dbo.fnMultiply (				
-								CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-											dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
-										ELSE 
-											IST.dblLastCost  
-								END 
-								,ItemUOM.dblUnitQty
-							)
-				,Detail.dblPrice 
-				,Header.intCurrencyId
-				,1.00
-				,Header.intInvoiceId
-				,Detail.intInvoiceDetailId
-				,Header.strInvoiceNumber 
-				,@INVENTORY_SHIPMENT_TYPE
-				,NULL 
-				,NULL
-				,NULL
-				,strActualCostId = Header.strActualCostId
-			FROM 
-				tblARInvoiceDetail Detail
-			INNER JOIN
-				tblARInvoice Header
-					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
-					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
-			INNER JOIN
-				@PostInvoiceData P
-					ON Header.intInvoiceId = P.intInvoiceId	
-			INNER JOIN
-				tblICItemUOM ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-			LEFT OUTER JOIN
-				vyuICGetItemStock IST
-					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId 
-			WHERE
-				Detail.dblTotal <> @ZeroDecimal
-				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
-				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
-				AND Header.strType <> 'Debit Memo'
-
-			
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			GOTO Do_Rollback
-		END CATCH
-
-		-- Call the post routine 
-		BEGIN TRY 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-			)
-			EXEC	dbo.uspICPostCosting  
-					@ItemsForPost  
-					,@batchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@UserEntityID
-					
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
-
-		BEGIN TRY 
-			EXEC dbo.uspGLBookEntries @GLEntries, @post
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH
-		 
+	BEGIN			 
 		BEGIN TRY 
 			IF @post = 0
 				BEGIN
