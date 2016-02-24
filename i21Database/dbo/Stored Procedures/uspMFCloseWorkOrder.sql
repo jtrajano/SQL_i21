@@ -9,7 +9,7 @@ BEGIN TRY
 		,@strBatchId NVARCHAR(40)
 		,@intTransactionId INT
 		,@strTransactionId NVARCHAR(50)
-		,@dblQuantity NUMERIC(18, 6)
+		,@dblQuantity NUMERIC(38, 20)
 		,@RecordKey INT
 		,@dtmCurrentDate DATETIME
 		,@strLotNumber nvarchar(50)
