@@ -42,7 +42,7 @@ AS
 BEGIN
 
 	DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
-	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Voucher'
+	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 
 	DECLARE @tmpTransacions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
@@ -69,7 +69,7 @@ BEGIN
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Voucher'
+		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
 												WHEN intTransactionType = 2 THEN 'Posted Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Posted Debit Memo'
 											ELSE 'NONE' END,
@@ -79,7 +79,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -180,7 +180,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -234,7 +234,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -290,7 +290,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -346,7 +346,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Voucher',
+		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      
