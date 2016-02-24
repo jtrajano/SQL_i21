@@ -3,7 +3,7 @@ AS
 BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
-		,@dblProduceQty NUMERIC(18, 6)
+		,@dblProduceQty NUMERIC(38, 20)
 		,@intItemUOMId INT
 		,@strRetBatchId NVARCHAR(40)
 		,@intBatchId INT

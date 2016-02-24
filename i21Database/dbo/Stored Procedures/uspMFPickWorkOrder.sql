@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPickWorkOrder] @intWorkOrderId INT
-	,@dblProduceQty NUMERIC(18, 6)
+	,@dblProduceQty NUMERIC(38, 20)
 	,@intProduceUOMKey INT = NULL
 	,@intUserId INT
 	,@intBatchId INT
 	,@PickPreference NVARCHAR(50) = ''
 	,@ysnExcessConsumptionAllowed BIT = 0
-	,@dblUnitQty NUMERIC(18, 6)
+	,@dblUnitQty NUMERIC(38, 20)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF

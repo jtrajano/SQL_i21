@@ -13,13 +13,13 @@ BEGIN TRY
 		,@intRecordId INT
 		,@strLotNumber NVARCHAR(50)
 		,@intLotId INT
-		,@dblQuantity NUMERIC(18, 6)
+		,@dblQuantity NUMERIC(38, 20)
 		,@intItemUOMId INT
 		,@intBatchId INT
-		,@dblProducedQuantity NUMERIC(18, 6)
+		,@dblProducedQuantity NUMERIC(38, 20)
 		,@strProducedQuantity NVARCHAR(50)
-		,@dblOutputQtyTolerancePercentage NUMERIC(18, 6)
-		,@dblCalculatedInputLotToleranceQty NUMERIC(18, 6)
+		,@dblOutputQtyTolerancePercentage NUMERIC(38, 20)
+		,@dblCalculatedInputLotToleranceQty NUMERIC(38, 20)
 		,@strCalculatedInputLotToleranceQty nvarchar(50)
 		,@intUnitMeasureId INT
 		,@strUnitMeasure NVARCHAR(50)
@@ -29,7 +29,7 @@ BEGIN TRY
 	DECLARE @tblMFWorkOrderConsumedLot TABLE (
 		intRecordId INT identity(1, 1)
 		,intLotId INT
-		,dblQuantity NUMERIC(18, 6)
+		,dblQuantity NUMERIC(38, 20)
 		,intItemUOMId INT
 		,intBatchId INT
 		)
