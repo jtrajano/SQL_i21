@@ -107,6 +107,10 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblNewLotWeightPerUnit
+	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND @strLotNumber=@strNewLotNumber
+
 	IF (SELECT dblWeight
 		FROM dbo.tblICLot
 		WHERE intLotId = @intLotId)<0.01
