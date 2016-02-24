@@ -199,6 +199,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\RemoveBillTemplate.sql
 :r .\AP\UpdateVoucherForApproval.sql
 :r .\AP\UpdateBillPayToAddress.sql
+:r .\AP\UpdateBillGLEntriesRecords.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
