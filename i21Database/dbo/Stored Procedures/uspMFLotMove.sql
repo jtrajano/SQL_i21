@@ -91,6 +91,10 @@ BEGIN TRY
 		,@intUserId
 		,@intInventoryAdjustmentId
 
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblWeightPerQty
+	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND @strLotNumber=@strNewLotNumber
+		
 	IF EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrderProducedLot
