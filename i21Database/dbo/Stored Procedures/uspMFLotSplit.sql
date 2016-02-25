@@ -125,6 +125,24 @@ BEGIN TRY
 	
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
+
+	IF (
+			SELECT dblWeight
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+			) < 0.01
+	BEGIN
+		--EXEC dbo.uspMFLotAdjustQty
+		-- @intLotId =@intLotId,       
+		-- @dblNewLotQty =0,
+		-- @intUserId=@intUserId ,
+		-- @strReasonCode ='Residue qty clean up',
+		-- @strNotes ='Residue qty clean up'
+		UPDATE tblICLot
+		SET dblWeight = 0
+			,dblQty = 0
+		WHERE intLotId = @intLotId
+	END
 													 
 END TRY  
   
