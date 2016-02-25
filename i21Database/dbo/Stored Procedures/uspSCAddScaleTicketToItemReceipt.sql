@@ -183,8 +183,8 @@ SELECT
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= CASE 
-										WHEN LI.intTransactionDetailId IS NULL THEN 0
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN 1
+										WHEN LI.intTransactionDetailId IS NOT NULL THEN 0 -- own
+                                        WHEN LI.intTransactionDetailId IS NULL THEN 1 -- storage
 									  END
 		,dblFreightRate				= SC.dblFreightRate
 		,dblGross					= SC.dblGrossWeight
