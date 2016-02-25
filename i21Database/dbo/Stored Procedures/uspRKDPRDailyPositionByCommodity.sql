@@ -3,20 +3,24 @@ AS
           
 SELECT OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,isnull(CompanyTitled,0) as dblCompanyTitled,  
 isnull(CashExposure,0) as dblCaseExposure,              
-(isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) as dblBasisExposure ,             
-(isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,    
+(isnull(CompanyTitledNonDP,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) as dblBasisExposure ,             
+(isnull(CompanyTitledNonDP,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,    
 isnull(InHouse,0) as dblInHouse,  OpenPurQty,    OpenSalQty   into #temp     
  FROM(              
 SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,  
    (invQty)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
    CASE WHEN (SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then OffSite else 0 end +  
    CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
-   dblCollatralSales  + SlsBasisDeliveries  
+   (isnull(dblCollatralPurchase,0)-isnull(dblCollatralSales,0))  + SlsBasisDeliveries  
    AS CompanyTitled,  
+      (invQty)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
+   CASE WHEN (SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then OffSite else 0 end +  
+   (isnull(dblCollatralPurchase,0)-isnull(dblCollatralSales,0))  + SlsBasisDeliveries  
+   AS CompanyTitledNonDP,  
     OpenSalQty,   
             (isnull(invQty,0)-isnull(ReserveQty,0)) +             
             (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))              
-            +(((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1))+  
+            +(((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1))+ 
               
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then OffSite else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
@@ -98,21 +102,25 @@ WHERE intCommodityId=c.intCommodityId) FutMatchedQty
  FROM tblICItem i1   
  JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId     
  JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId     
- WHERE i1.intCommodityId=c.intCommodityId ) as ReserveQty  
-   
-, (SELECT isnull(SUM(dblOriginalQuantity),0) - isnull(sum(dblAdjustmentAmount),0) as dblCollatralSales  
- FROM (  
-  SELECT SUM(dblAdjustmentAmount) dblAdjustmentAmount  
-   ,intContractHeaderId  
-   ,isnull(SUM(dblOriginalQuantity),0) dblOriginalQuantity  
-  FROM tblRKCollateral c1  
-  INNER JOIN tblRKCollateralAdjustment ca ON c1.intCollateralId = ca.intCollateralId  
-  WHERE strType = 'Sale'  
-   AND c1.intCommodityId = c.intCommodityId  
-  GROUP BY intContractHeaderId  
-  ) t WHERE dblAdjustmentAmount <> dblOriginalQuantity) as dblCollatralSales  
-   
-, (SELECT isnull(SUM(isnull(ri.dblQuantity, 0)),0) AS SlsBasisDeliveries  
+ WHERE i1.intCommodityId=c.intCommodityId ) as ReserveQty , 
+ 
+ isnull((SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
+		FROM (SELECT isnull(SUM(dblAdjustmentAmount), 0) dblAdjustmentAmount,intContractHeaderId,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
+				FROM tblRKCollateral c1
+				LEFT JOIN tblRKCollateralAdjustment ca ON c1.intCollateralId = ca.intCollateralId
+				WHERE strType = 'Sale' AND c1.intCommodityId = c.intCommodityId 
+				GROUP BY intContractHeaderId) t 	WHERE dblAdjustmentAmount <> dblOriginalQuantity
+		), 0) AS dblCollatralSales,
+
+ isnull((SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
+		FROM (SELECT isnull(SUM(dblAdjustmentAmount), 0) dblAdjustmentAmount,intContractHeaderId,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
+				FROM tblRKCollateral c1
+				LEFT JOIN tblRKCollateralAdjustment ca ON c1.intCollateralId = ca.intCollateralId
+				WHERE strType = 'Purchase' AND c1.intCommodityId = c.intCommodityId 
+				GROUP BY intContractHeaderId) t 	WHERE dblAdjustmentAmount <> dblOriginalQuantity
+		), 0) AS dblCollatralPurchase,
+			  
+ (SELECT isnull(SUM(isnull(ri.dblQuantity, 0)),0) AS SlsBasisDeliveries  
  FROM tblICInventoryShipment r  
  INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId  
  INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo  
@@ -127,17 +135,18 @@ WHERE intCommodityId=c.intCommodityId) FutMatchedQty
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
 						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
 						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) END * (
+						) END * isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
-				))*m.dblContractSize  AS dblNoOfContract
+				),0))*m.dblContractSize  AS dblNoOfContract
 	FROM tblRKFutOptTransaction ft
 	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-	WHERE ft.intCommodityId = 8 AND intFutOptTransactionId NOT IN (
+	WHERE ft.intCommodityId = ft.intCommodityId AND intFutOptTransactionId NOT IN (
 			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired))t
 	) DeltaOption       
 FROM tblICCommodity c              
