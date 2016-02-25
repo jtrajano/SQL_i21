@@ -147,25 +147,27 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
 						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
 						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) END * (
+						) END * isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
-				)*m.dblContractSize AS dblNoOfContract, m.intUnitMeasureId,ft.intCommodityId,				
+				),0)*m.dblContractSize AS dblNoOfContract, m.intUnitMeasureId,ft.intCommodityId,				
 		e.strName + '-' + strAccountNumber AS strAccountNumber, 		
 		strBuySell AS TranType, 
 		CASE WHEN ft.strBuySell = 'Buy' THEN (
 					ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
 					ELSE - (ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)
 				) END AS dblNoOfLot, 
-		(SELECT TOP 1 dblDelta
+		isnull((SELECT TOP 1 dblDelta
 		FROM tblRKFuturesSettlementPrice sp
 		INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 		WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+		AND ft.dblStrike = mm.dblStrike
 		ORDER BY dtmPriceDate DESC
-		) AS dblDelta,ft.intBrokerageAccountId,case when ft.intInstrumentTypeId  = 1 then 'Futures' else 'Options ' end as strInstrumentType
+		),0) AS dblDelta,ft.intBrokerageAccountId,case when ft.intInstrumentTypeId  = 1 then 'Futures' else 'Options ' end as strInstrumentType
 	FROM tblRKFutOptTransaction ft
 	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
 	INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
@@ -196,38 +198,25 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 				INNER JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId
 				INNER JOIN tblICItemLocation ic ON ic.intItemLocationId = it1.intItemLocationId
 				INNER JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId
-				WHERE i1.intCommodityId  = @intCommodityId
-					AND ic.intLocationId= case when isnull(@intLocationId,0)=0 then ic.intLocationId else @intLocationId end
+				WHERE i1.intCommodityId  = @intCommodityId AND ic.intLocationId= case when isnull(@intLocationId,0)=0 then ic.intLocationId else @intLocationId end
 				) AS ReserveQty
 			,(
 				SELECT isnull(Sum(CD.dblBalance), 0) AS Qty
 				FROM tblCTContractDetail CD
 				INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					AND CH.intContractTypeId = 1
-				INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
-					AND PT.intPricingTypeId IN (
-						1
-						,3
-						)
+				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CH.intContractTypeId = 1
+				INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId	AND PT.intPricingTypeId IN (1,3)
 				INNER JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
-				WHERE CH.intCommodityId  = @intCommodityId
-					AND CD.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end
+				WHERE CH.intCommodityId  = @intCommodityId AND CD.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end
 				) AS OpenPurQty
 			,(
 				SELECT isnull(Sum(CD.dblBalance), 0) AS Qty
 				FROM tblCTContractDetail CD
 				INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					AND CH.intContractTypeId = 2
-				INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
-					AND PT.intPricingTypeId IN (
-						1
-						,3
-						)
+				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CH.intContractTypeId = 2
+				INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId	AND PT.intPricingTypeId IN (1,3)
 				INNER JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
-				WHERE CH.intCommodityId  = @intCommodityId
-					AND CD.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end
+				WHERE CH.intCommodityId  = @intCommodityId AND CD.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CD.intCompanyLocationId else @intLocationId end
 				) AS OpenSalQty
 			,(
 				SELECT TOP 1 rfm.dblContractSize AS dblContractSize
@@ -241,21 +230,20 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 			,(
 				SELECT SUM(intNoOfContract)
 				FROM tblRKFutOptTransaction otr
-				WHERE otr.strBuySell = 'Sell' and intInstrumentTypeId=1
+				WHERE otr.strBuySell = 'Sell' and intInstrumentTypeId=1 
 					AND otr.intCommodityId  = @intCommodityId
 					AND otr.intLocationId= case when isnull(@intLocationId,0)=0 then otr.intLocationId else @intLocationId end
 				) FutSBalTransQty
 			,(
 				SELECT SUM(intNoOfContract)
 				FROM tblRKFutOptTransaction otr
-				WHERE otr.strBuySell = 'Buy' and intInstrumentTypeId=1
+				WHERE otr.strBuySell = 'Buy' and intInstrumentTypeId=1 
 					AND otr.intCommodityId  = @intCommodityId
 					AND otr.intLocationId= case when isnull(@intLocationId,0)=0 then otr.intLocationId else @intLocationId end
 				) AS FutLBalTransQty
-			,(
-				SELECT SUM(psd.dblMatchQty)
+			,(	SELECT SUM(psd.dblMatchQty)
 				FROM tblRKMatchFuturesPSHeader psh
-				INNER JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId
+				INNER JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId 
 				WHERE psh.intCommodityId  = @intCommodityId				
 					AND psh.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then psh.intCompanyLocationId else @intLocationId end
 				) FutMatchedQty
@@ -271,13 +259,14 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
 						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
 						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) END * (
+						) END * isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
-				)*m.dblContractSize AS dblNoOfContract, m.intUnitMeasureId,ft.intCommodityId
+				),0)*m.dblContractSize AS dblNoOfContract, m.intUnitMeasureId,ft.intCommodityId
 	FROM tblRKFutOptTransaction ft
 	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
 	INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
