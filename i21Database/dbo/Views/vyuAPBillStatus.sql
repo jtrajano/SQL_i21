@@ -28,5 +28,5 @@ SELECT
 			THEN 'Invalid Paid Status. Bill was already fully paid.'
 			ELSE 'OK' END AS strStatus
 FROM tblAPBill A
-	INNER JOIN vyuAPBillPaymentActual B ON A.intBillId = B.intBillId
+	INNER JOIN vyuAPBillPayment B ON A.intBillId = B.intBillId
 WHERE A.intTransactionType = 1
