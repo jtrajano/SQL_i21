@@ -43,10 +43,10 @@ End
 --End
 
 	-- Validate the reservation 
-	EXEC dbo.uspICValidateStockReserves 
-		@ItemsToReserve
-		,@strInvalidItemNo OUTPUT 
-		,@intInvalidItemId OUTPUT 
+	--EXEC dbo.uspICValidateStockReserves 
+	--	@ItemsToReserve
+	--	,@strInvalidItemNo OUTPUT 
+	--	,@intInvalidItemId OUTPUT 
 
 	-- If there are enough stocks, let the system create the reservations
 	IF (@intInvalidItemId IS NULL)	
