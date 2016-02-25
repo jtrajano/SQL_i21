@@ -248,7 +248,7 @@ BEGIN TRY
 					SELECT SUM(CASE 
 								WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 									THEN SS.dblQuantity
-								ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
+								ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 								END)
 					FROM [dbo].[tblCTContractDetail] SS
 					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
@@ -567,7 +567,7 @@ BEGIN TRY
 					--				), 0)
 					--		)
 					--SET @ForecastedConsumption = (
-					--		ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+					--		ISNULL((SELECT SUM(RI.dblCalculatedQuantity * BD.dblQuantity)
 					--		FROM tblMFRecipeItem RI
 					--		JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
 					--			AND R.ysnActive = 1
@@ -604,7 +604,7 @@ BEGIN TRY
 				--				), 0)
 				--		)
 				--SET @ForecastedConsumption = (
-				--			ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+				--			ISNULL((SELECT SUM(RI.dblCalculatedQuantity * BD.dblQuantity)
 				--			FROM tblMFRecipeItem RI
 				--			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
 				--				AND R.ysnActive = 1
@@ -860,7 +860,7 @@ BEGIN TRY
 											SELECT SUM(CASE 
 														WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 															THEN SS.dblQuantity
-														ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
+														ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 														END)
 											FROM [dbo].[tblCTContractDetail] SS
 											JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
@@ -1363,7 +1363,7 @@ BEGIN TRY
 										SELECT SUM(CASE 
 													WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 														THEN SS.dblQuantity
-													ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
+													ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 													END)
 										FROM [dbo].[tblCTContractDetail] SS
 										JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId

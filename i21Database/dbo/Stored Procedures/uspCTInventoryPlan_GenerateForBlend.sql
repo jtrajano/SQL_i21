@@ -236,12 +236,13 @@ BEGIN TRY
 
 		IF @ysnIncludeInventory = 1
 			SET @OpeningInventory = (
-					SELECT ISNULL(SUM(RI.dblQuantity * OI.opInvQty), 0)
+					SELECT ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, RI.dblCalculatedQuantity * OI.opInvQty)), 0)
 					FROM [dbo].[tblMFRecipeItem] RI
 					JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 						AND R.ysnActive = 1
 						AND RI.intRecipeItemTypeId = 1
 					JOIN #OpeningInventory OI ON OI.intItemId = R.intItemId
+					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemId = OI.intItemId AND IUOM.ysnStockUnit = 1
 					WHERE RI.intItemId = @intItemId
 					)
 		ELSE
@@ -257,7 +258,7 @@ BEGIN TRY
 			,ISNULL(SUM(CASE 
 						WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 							THEN SS.dblQuantity
-						ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
+						ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 						END), 0) AS ExistPurchaseQty
 		INTO #ExistingPurchases
 		FROM [dbo].[tblCTContractDetail] SS
@@ -267,7 +268,7 @@ BEGIN TRY
 			,SS.dtmUpdatedAvailabilityDate
 
 		SET @PastDueExistingPurchases = (
-				SELECT ISNULL(SUM(RI.dblQuantity * EP.ExistPurchaseQty), 0)
+				SELECT ISNULL(SUM(RI.dblCalculatedQuantity * EP.ExistPurchaseQty), 0)
 				FROM [dbo].[tblMFRecipeItem] RI
 				JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 					AND R.ysnActive = 1
@@ -299,7 +300,7 @@ BEGIN TRY
 			,SS.dtmUpdatedAvailabilityDate
 
 		SET @PastDueIntransitPurchases = (
-				SELECT ISNULL(SUM(RI.dblQuantity * IP.IntransitPurchaseQty), 0)
+				SELECT ISNULL(SUM(RI.dblCalculatedQuantity * IP.IntransitPurchaseQty), 0)
 				FROM [dbo].[tblMFRecipeItem] RI
 				JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 					AND R.ysnActive = 1
@@ -446,7 +447,7 @@ BEGIN TRY
 								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
 							)
 						--SET @ForecastedConsumption = (
-						--		ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+						--		ISNULL((SELECT SUM(RI.dblCalculatedQuantity * BD.dblQuantity)
 						--		FROM tblMFRecipeItem RI
 						--		JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
 						--			AND R.ysnActive = 1
@@ -479,7 +480,7 @@ BEGIN TRY
 							AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
 						)
 					--SET @ForecastedConsumption = (
-					--			ISNULL((SELECT SUM(RI.dblQuantity * BD.dblQuantity)
+					--			ISNULL((SELECT SUM(RI.dblCalculatedQuantity * BD.dblQuantity)
 					--			FROM tblMFRecipeItem RI
 					--			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
 					--				AND R.ysnActive = 1
@@ -724,7 +725,7 @@ BEGIN TRY
 							DECLARE @SQL_ExistingPurchases_Exec_Ext NVARCHAR(MAX)
 
 							SET @SQL_ExistingPurchases_Exec_Ext = 'SELECT @ExistingPurchases = ' + CAST((
-										SELECT ISNULL(SUM(RI.dblQuantity * EP.ExistPurchaseQty), 0)
+										SELECT ISNULL(SUM(RI.dblCalculatedQuantity * EP.ExistPurchaseQty), 0)
 										FROM [dbo].[tblMFRecipeItem] RI
 										JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 											AND R.ysnActive = 1
@@ -739,7 +740,7 @@ BEGIN TRY
 							--				SELECT SUM(CASE 
 							--							WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 							--								THEN SS.dblQuantity
-							--							ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
+							--							ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 							--							END)
 							--				FROM [dbo].[tblCTContractDetail] SS
 							--				JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
@@ -765,7 +766,7 @@ BEGIN TRY
 							DECLARE @SQL_IntransitPurchases_Exec_Ext NVARCHAR(MAX)
 
 							SET @SQL_IntransitPurchases_Exec_Ext = 'SELECT @IntransitPurchases = ' + CAST((
-										SELECT ISNULL(SUM(RI.dblQuantity * IP.IntransitPurchaseQty), 0)
+										SELECT ISNULL(SUM(RI.dblCalculatedQuantity * IP.IntransitPurchaseQty), 0)
 										FROM [dbo].[tblMFRecipeItem] RI
 										JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 											AND R.ysnActive = 1
@@ -1244,7 +1245,7 @@ BEGIN TRY
 						DECLARE @SQL_ExistingPurchases_Exec NVARCHAR(MAX)
 
 						SET @SQL_ExistingPurchases_Exec = 'SELECT @ExistingPurchases = ' + CAST((
-									SELECT ISNULL(SUM(RI.dblQuantity * EP.ExistPurchaseQty), 0)
+									SELECT ISNULL(SUM(RI.dblCalculatedQuantity * EP.ExistPurchaseQty), 0)
 									FROM [dbo].[tblMFRecipeItem] RI
 									JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 										AND R.ysnActive = 1
@@ -1259,7 +1260,7 @@ BEGIN TRY
 						--				SELECT SUM(CASE 
 						--							WHEN @TargetUOMKey = IUOM.intUnitMeasureId
 						--								THEN SS.dblQuantity
-						--							ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblQuantity)
+						--							ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 						--							END)
 						--				FROM [dbo].[tblCTContractDetail] SS
 						--				JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
@@ -1285,7 +1286,7 @@ BEGIN TRY
 						DECLARE @SQL_IntransitPurchases_Exec NVARCHAR(MAX)
 
 						SET @SQL_IntransitPurchases_Exec = 'SELECT @IntransitPurchases = ' + CAST((
-									SELECT ISNULL(SUM(RI.dblQuantity * IP.IntransitPurchaseQty), 0)
+									SELECT ISNULL(SUM(RI.dblCalculatedQuantity * IP.IntransitPurchaseQty), 0)
 									FROM [dbo].[tblMFRecipeItem] RI
 									JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 										AND R.ysnActive = 1
