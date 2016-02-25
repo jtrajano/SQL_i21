@@ -204,7 +204,8 @@ SELECT wcl.intWorkOrderConsumedLotId
 						) AS DT
 					)
 			END
-		) dblStagedQty
+		) dblStagedQty,
+		ls.strSecondaryStatus AS strLotStatus
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICLot l ON wcl.intLotId = l.intLotId
@@ -217,4 +218,5 @@ JOIN tblICUnitMeasure iu2 ON iu1.intUnitMeasureId = iu2.intUnitMeasureId
 LEFT JOIN tblICStorageLocation sl ON l.intStorageLocationId = sl.intStorageLocationId
 LEFT JOIN tblICParentLot pl ON l.intParentLotId = pl.intParentLotId
 LEFT JOIN @tblReservedQty rq ON l.intLotId = rq.intLotId
+LEFT JOIN tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
 WHERE wcl.intWorkOrderId = @intWorkOrderId

@@ -8,7 +8,8 @@ If @intKitStatusId = -1 and @intWorkOrderId = -1
 	Select w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
 	w.dblQuantity,um.strUnitMeasure AS strUOM,w.intBlendRequirementId,br.strDemandNo,w.dtmExpectedDate AS dtmDueDate,
 	w.intLocationId,cl.strLocationName,w.intStatusId,ws.strName AS strBlendSheetStatus,w.intKitStatusId,ks.strName AS strKitStatus,
-	mc.strCellName,w.intExecutionOrder, ISNULL(pl.intPickListId,0) AS intPickListId, pl.strPickListNo , sl.strName AS strStagingLocationName, w.dtmStagedDate AS dtmTransferDate 
+	mc.strCellName,w.intExecutionOrder, ISNULL(pl.intPickListId,0) AS intPickListId, pl.strPickListNo , sl.strName AS strStagingLocationName, w.dtmStagedDate AS dtmTransferDate,
+	mc.intManufacturingCellId 
 	from tblMFWorkOrder w 
 	Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId 
 	Join tblICItem i on w.intItemId=i.intItemId
@@ -27,7 +28,8 @@ If @intKitStatusId = -1 and @intWorkOrderId > 0
 	Select w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
 	w.dblQuantity,um.strUnitMeasure AS strUOM,w.intBlendRequirementId,br.strDemandNo,w.dtmExpectedDate AS dtmDueDate,
 	w.intLocationId,cl.strLocationName,w.intStatusId,ws.strName AS strBlendSheetStatus,w.intKitStatusId,ks.strName AS strKitStatus,
-	mc.strCellName,w.intExecutionOrder, ISNULL(pl.intPickListId,0) AS intPickListId, pl.strPickListNo , sl.strName AS strStagingLocationName, w.dtmStagedDate AS dtmTransferDate 
+	mc.strCellName,w.intExecutionOrder, ISNULL(pl.intPickListId,0) AS intPickListId, pl.strPickListNo , sl.strName AS strStagingLocationName, w.dtmStagedDate AS dtmTransferDate,
+	mc.intManufacturingCellId 
 	from tblMFWorkOrder w 
 	Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId 
 	Join tblICItem i on w.intItemId=i.intItemId
@@ -46,7 +48,8 @@ If @intKitStatusId > 0 and @intWorkOrderId = -1
 	Select w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
 	w.dblQuantity,um.strUnitMeasure AS strUOM,w.intBlendRequirementId,br.strDemandNo,w.dtmExpectedDate AS dtmDueDate,
 	w.intLocationId,cl.strLocationName,w.intStatusId,ws.strName AS strBlendSheetStatus,w.intKitStatusId,ks.strName AS strKitStatus,
-	mc.strCellName,w.intExecutionOrder, ISNULL(pl.intPickListId,0) AS intPickListId, pl.strPickListNo , sl.strName AS strStagingLocationName, w.dtmStagedDate AS dtmTransferDate 
+	mc.strCellName,w.intExecutionOrder, ISNULL(pl.intPickListId,0) AS intPickListId, pl.strPickListNo , sl.strName AS strStagingLocationName, w.dtmStagedDate AS dtmTransferDate,
+	mc.intManufacturingCellId 
 	from tblMFWorkOrder w 
 	Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId 
 	Join tblICItem i on w.intItemId=i.intItemId
