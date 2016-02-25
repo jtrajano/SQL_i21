@@ -128,6 +128,11 @@ BEGIN TRY
 						BEGIN
 							UPDATE tblMFPickList SET intKitStatusId = 12 WHERE intPickListId = @intPickListId
 							UPDATE tblMFWorkOrder SET intKitStatusId = 12 WHERE intPickListId = @intPickListId
+
+							UPDATE tblICStockReservation
+							SET intLotId = @intNewLotId
+							WHERE intLotId = @intPickedLotId
+								AND strTransactionId = @strPickListNo
 						END
 					END
 	

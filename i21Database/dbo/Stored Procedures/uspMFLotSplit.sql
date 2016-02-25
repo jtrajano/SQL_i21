@@ -33,9 +33,11 @@ BEGIN TRY
 	DECLARE @intNewItemUOMId INT
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @strLotTracking NVARCHAR(50)
-			,@dblWeightPerQty NUMERIC(38, 20)
-			,@intWeightUOMId INT
-			,@intItemStockUOMId INT
+	DECLARE @dblWeightPerQty NUMERIC(38, 20)
+	DECLARE @intWeightUOMId INT
+	DECLARE @intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
 	
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
@@ -47,7 +49,8 @@ BEGIN TRY
 		   @intLotStatusId = intLotStatusId,
 		   @intItemUOMId = intItemUOMId,	 
 		   @dblWeightPerQty = dblWeightPerQty,
-			@intWeightUOMId = intWeightUOMId  
+		   @intWeightUOMId = intWeightUOMId,
+		   @dblWeight = dblWeight
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
@@ -60,6 +63,13 @@ BEGIN TRY
 		   @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
+	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	
+	IF (@dblWeight + @dblAdjustByQuantity) < @dblLotReservedQty
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
 
 	IF @intItemStockUOMId = @intWeightUOMId
 	BEGIN
