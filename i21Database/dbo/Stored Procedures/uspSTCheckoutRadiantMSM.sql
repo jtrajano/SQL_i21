@@ -3,12 +3,15 @@
 AS
 BEGIN
 
-	DECLARE @tbl TABLE (intCnt int, intAccountId int, strAccountId nvarchar(100))
-	INSERT into @tbl
-	EXEC uspSTGetSalesTaxTotalsPreload 0
+	IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
+	BEGIN
+		DECLARE @tbl TABLE (intCnt int, intAccountId int, strAccountId nvarchar(100))
+		INSERT into @tbl
+		EXEC uspSTGetSalesTaxTotalsPreload 0
 
-	INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
-	Select @intCheckoutId, intCnt, NULL, NULL, NULL, intAccountId, 0 from @tbl
+		INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
+		Select @intCheckoutId, intCnt, NULL, NULL, NULL, intAccountId, 0 from @tbl
+	END
 	
 	UPDATE dbo.tblSTCheckoutSalesTaxTotals
 	SET dblTaxableSales = CASE WHEN intTaxNo = 1 THEN (SELECT MiscellaneousSummaryAmount FROM #tempCheckoutInsert 
@@ -48,31 +51,31 @@ BEGIN
 	WHERE intCheckoutId = @intCheckoutId AND intTaxNo IN (1, 2, 3, 4)
 
 	UPDATE dbo.tblSTCheckoutHeader 
-	SET dblCustomerCount = (SELECT SUM(TenderTransactionsCount) FROM #tempCheckoutInsert) 
+	SET dblCustomerCount = (SELECT SUM(CAST(TenderTransactionsCount as int)) FROM #tempCheckoutInsert) 
 	WHERE intCheckoutId = @intCheckoutId
 	
 	UPDATE dbo.tblSTCheckoutHeader 
-	SET intTotalNoSalesCount = (SELECT SUM(MiscellaneousSummaryCount) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =4) 
+	SET intTotalNoSalesCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =4) 
 	WHERE intCheckoutId = @intCheckoutId
 	
 	UPDATE dbo.tblSTCheckoutHeader 
-	SET intFuelAdjustmentCount = (SELECT SUM(MiscellaneousSummaryCount) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
+	SET intFuelAdjustmentCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
 	WHERE intCheckoutId = @intCheckoutId
 	
 	UPDATE dbo.tblSTCheckoutHeader 
-	SET dblFuelAdjustmentAmount = (SELECT SUM(MiscellaneousSummaryAmount) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
+	SET dblFuelAdjustmentAmount = (SELECT SUM(CAST(MiscellaneousSummaryAmount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 7 AND MiscellaneousSummarySubCode =12) 
 	WHERE intCheckoutId = @intCheckoutId
 	
 	UPDATE dbo.tblSTCheckoutHeader 
-	SET intTotalRefundCount = (SELECT SUM(MiscellaneousSummaryCount) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
+	SET intTotalRefundCount = (SELECT SUM(CAST(MiscellaneousSummaryCount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
 	WHERE intCheckoutId = @intCheckoutId
 	
 	UPDATE dbo.tblSTCheckoutHeader 
-	SET dblTotalRefundAmount = (SELECT SUM(MiscellaneousSummaryAmount) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
+	SET dblTotalRefundAmount = (SELECT SUM(CAST(MiscellaneousSummaryAmount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 3 AND MiscellaneousSummarySubCode =0) 
 	WHERE intCheckoutId = @intCheckoutId
 	
 	UPDATE dbo.tblSTCheckoutHeader 
-	SET dblTotalPaidOuts = (SELECT SUM(MiscellaneousSummaryAmount) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 4 AND MiscellaneousSummarySubCode =0) 
+	SET dblTotalPaidOuts = (SELECT SUM(CAST(MiscellaneousSummaryAmount as int)) FROM #tempCheckoutInsert WHERE MiscellaneousSummaryCode = 4 AND MiscellaneousSummarySubCode =0) 
 	WHERE intCheckoutId = @intCheckoutId
 
 
@@ -83,7 +86,8 @@ BEGIN
 							--AND MiscellaneousSummarySubCodeModifier <> 0
 	WHILE(@intCnt <= @intMaxCnt)
 	BEGIN
-		INSERT INTO dbo.tblSTCheckoutRegisterHourlyActivity ([intCheckoutId],[intHourNo]) VALUES (@intCheckoutId, @intCnt)
+		INSERT INTO dbo.tblSTCheckoutRegisterHourlyActivity ([intCheckoutId]
+           ,[intHourNo]) VALUES (@intCheckoutId, @intCnt)
 		
 		UPDATE  dbo.tblSTCheckoutRegisterHourlyActivity 
 		SET intFuelMerchandiseCustomerCount = (SELECT MiscellaneousSummaryCount FROM #tempCheckoutInsert 
