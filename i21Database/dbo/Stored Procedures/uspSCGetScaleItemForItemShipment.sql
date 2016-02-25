@@ -102,7 +102,7 @@ BEGIN TRY
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsStorage = 0
+						,ysnIsStorage = 1
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ScaleTicket.intItemId = ItemUOM.intItemId
@@ -128,10 +128,4 @@ END CATCH
 
 -- TODO: IF @strSourceType = @@ReceiptType_TransferOrder
 -- TODO: IF @strSourceType = @@ReceiptType_TransferOrder
-
-
-
-
 GO
-
-
