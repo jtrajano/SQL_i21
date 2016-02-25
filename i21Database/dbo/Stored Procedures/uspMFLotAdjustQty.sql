@@ -23,11 +23,11 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intItemUOMId INT
 	DECLARE @intShiftId INT
-			,@dblWeightPerQty NUMERIC(38, 20)
-			,@intWeightUOMId INT
-			,@intItemStockUOMId INT
-			,@dblWeight NUMERIC(38, 20)
-
+	DECLARE @dblWeightPerQty NUMERIC(38, 20)
+	DECLARE @intWeightUOMId INT
+	DECLARE @intItemStockUOMId INT
+	DECLARE @dblWeight NUMERIC(38, 20)
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -35,9 +35,9 @@ BEGIN TRY
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
 		   @dblLotQty = dblQty,
-			@dblWeight=dblWeight,
-			@dblWeightPerQty = dblWeightPerQty,
-			@intWeightUOMId = intWeightUOMId
+		   @dblWeight=dblWeight,
+		   @dblWeightPerQty = dblWeightPerQty,
+		   @intWeightUOMId = intWeightUOMId
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblWeight
@@ -47,6 +47,13 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
 
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	
+	IF (@dblWeight + @dblAdjustByQuantity) < @dblLotReservedQty
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
+		
 	IF @intItemStockUOMId = @intWeightUOMId
 	BEGIN
 		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
