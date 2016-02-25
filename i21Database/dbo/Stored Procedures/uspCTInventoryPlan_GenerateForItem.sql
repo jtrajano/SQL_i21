@@ -225,19 +225,23 @@ BEGIN TRY
 		IF @ysnIncludeInventory = 1
 			SET @OpeningInventory = (
 					--SELECT SUM(dblQty)
-					SELECT SUM(CASE 
-								WHEN intWeightUOMId IS NOT NULL
-									THEN dblWeight
-								ELSE dblQty
-								END)
-					FROM tblICLot
-					WHERE intItemId IN (
-							SELECT M.intItemId
-							FROM tblICItem M
-							WHERE M.intItemId = @intItemId
-								--JOIN tblICItemContract CMM ON CMM.intItemId = M.intItemId
-								--AND CMM.intItemContractId = @intItemId
-							)
+					SELECT ISNULL(SUM(CASE 
+								  WHEN L.intWeightUOMId IS NOT NULL
+										THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, L.dblWeight)
+								  ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM1.intUnitMeasureId, @TargetUOMKey, L.dblQty)
+								  END), 0)
+					FROM dbo.tblICLot L
+					JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+						AND L.intItemId = @intItemId
+					LEFT JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intWeightUOMId
+					JOIN dbo.tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = L.intItemUOMId
+					--WHERE intItemId IN (
+					--		SELECT M.intItemId
+					--		FROM tblICItem M
+					--		WHERE M.intItemId = @intItemId
+					--			--JOIN tblICItemContract CMM ON CMM.intItemId = M.intItemId
+					--			--AND CMM.intItemContractId = @intItemId
+					--		)
 					)
 		ELSE
 			SET @OpeningInventory = 0
@@ -247,7 +251,7 @@ BEGIN TRY
 		SET @PastDueExistingPurchases = ISNULL((
 					SELECT SUM(CASE 
 								WHEN @TargetUOMKey = IUOM.intUnitMeasureId
-									THEN SS.dblQuantity
+									THEN SS.dblBalance
 								ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 								END)
 					FROM [dbo].[tblCTContractDetail] SS
@@ -859,7 +863,7 @@ BEGIN TRY
 							SET @SQL_ExistingPurchases_Exec_Ext = 'SELECT @ExistingPurchases = ' + CAST(ISNULL((
 											SELECT SUM(CASE 
 														WHEN @TargetUOMKey = IUOM.intUnitMeasureId
-															THEN SS.dblQuantity
+															THEN SS.dblBalance
 														ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 														END)
 											FROM [dbo].[tblCTContractDetail] SS
@@ -1362,7 +1366,7 @@ BEGIN TRY
 						SET @SQL_ExistingPurchases_Exec = 'SELECT @ExistingPurchases = ' + CAST(ISNULL((
 										SELECT SUM(CASE 
 													WHEN @TargetUOMKey = IUOM.intUnitMeasureId
-														THEN SS.dblQuantity
+														THEN SS.dblBalance
 													ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 													END)
 										FROM [dbo].[tblCTContractDetail] SS
