@@ -117,7 +117,8 @@ BEGIN
 		[intTransactionType],
 		[dblDiscount],
 		[dblWithheld],
-		[intStoreLocationId]
+		[intStoreLocationId],
+		[intPayToAddressId]
 	)
 	OUTPUT inserted.intBillId, @receiptId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId)
 	SELECT
@@ -143,7 +144,8 @@ BEGIN
 		[intTransactionType]	=	1,
 		[dblDiscount]			=	0,
 		[dblWithheld]			=	0,
-		[intStoreLocationId]	=	A.intLocationId
+		[intStoreLocationId]	=	A.intLocationId,
+		[intPayToAddressId]		=	A.intShipFromId
 	FROM tblICInventoryReceipt A
 	OUTER APPLY 
 	(
