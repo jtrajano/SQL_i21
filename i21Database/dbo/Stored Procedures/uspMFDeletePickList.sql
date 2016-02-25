@@ -117,6 +117,8 @@ Begin Tran
 
 		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
 
+		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
+
 		--Restore the Reservation to Parent Lot
 	End
 Commit Tran

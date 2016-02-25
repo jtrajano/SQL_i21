@@ -49,7 +49,7 @@ DECLARE @intWorkOrderId int
 			,intLotId = pld.intStageLotId
 			,intSubLocationId = l.intSubLocationId
 			,intStorageLocationId = l.intStorageLocationId
-			,dblQty = CASE WHEN pld.intItemUOMId=pld.intItemIssuedUOMId THEN  pld.dblPickQuantity ELSE pld.dblPickQuantity * (CASE WHEN ISNULL(l.dblWeightPerQty,0) = 0 THEN 1 ELSE l.dblWeightPerQty END) END
+			,dblQty = pld.dblQuantity
 			,intTransactionId = pld.intPickListId
 			,strTransactionId = pl.strPickListNo
 			,intTransactionTypeId = @intInventoryTransactionType
@@ -59,10 +59,10 @@ DECLARE @intWorkOrderId int
 	WHERE	pld.intPickListId = @intPickListId
 
 	-- Validate the reservation 
-	EXEC dbo.uspICValidateStockReserves 
-		@ItemsToReserve
-		,@strInvalidItemNo OUTPUT 
-		,@intInvalidItemId OUTPUT 
+	--EXEC dbo.uspICValidateStockReserves 
+	--	@ItemsToReserve
+	--	,@strInvalidItemNo OUTPUT 
+	--	,@intInvalidItemId OUTPUT 
 
 	-- If there are enough stocks, let the system create the reservations
 	IF (@intInvalidItemId IS NULL)	
