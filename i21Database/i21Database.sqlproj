@@ -3494,6 +3494,7 @@
     <Build Include="dbo\Stored Procedures\uspAPFixVoucher.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentActual.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
+    <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
