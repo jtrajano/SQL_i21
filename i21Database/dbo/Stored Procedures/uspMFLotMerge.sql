@@ -31,9 +31,10 @@ BEGIN TRY
 	DECLARE @dblNewLotWeightPerUnit NUMERIC(38,20)
 	DECLARE @strNewLotNumber NVARCHAR(100)
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
-			,@intWeightUOMId INT
-			,@intItemStockUOMId INT
-
+	DECLARE @intWeightUOMId INT
+	DECLARE @intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -43,7 +44,8 @@ BEGIN TRY
 		   @intLotStatusId = intLotStatusId,
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
-		   @intWeightUOMId = intWeightUOMId
+		   @intWeightUOMId = intWeightUOMId,
+		   @dblWeight = dblWeight
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
@@ -51,12 +53,19 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
 
+	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	
+	IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
+
 	IF @intItemStockUOMId = @intWeightUOMId
 	BEGIN
 		SELECT @dblMergeQty = dbo.fnDivide(@dblMergeQty, @dblLotWeightPerUnit)
 	END
 
-	
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
 	
 	SELECT @intNewLocationId = intLocationId ,
