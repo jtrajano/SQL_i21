@@ -523,7 +523,7 @@ Begin
 	Select pld.intPickListDetailId,pld.intPickListId,pld.intStageLotId AS intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
 	l.intItemId,i.strItemNo,i.strDescription,pld.intStorageLocationId,sl.strName AS strStorageLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
-	((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) + ISNULL(pld.dblQuantity,0) AS dblReservedQty,
+	((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
 	pld.intStageLotId,((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity)/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
 	um1.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId=@intKitStagingLocationId Then 'Staged' Else '' End AS strStatus
