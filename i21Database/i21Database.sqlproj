@@ -3491,6 +3491,7 @@
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
     <Build Include="dbo\Functions\fnMultiply.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
+    <Build Include="dbo\Views\vyuLGWeightLoss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

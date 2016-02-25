@@ -28,6 +28,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.dblUnitCost
 	, ReceiptItem.dblTax
 	, ReceiptItem.dblLineTotal
+	, dblGrossWgt = ReceiptItem.dblGross
+	, dblNetWgt = ReceiptItem.dblNet
 	, Item.strLotTracking
 	, Item.intCommodityId
 	, ReceiptItem.intContainerId
