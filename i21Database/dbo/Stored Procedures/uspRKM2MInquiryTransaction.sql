@@ -82,7 +82,7 @@ DECLARE @tblFinalDetail TABLE (
 	,dblResultBasis NUMERIC(24, 10)
 	)
 
- INSERT INTO @tblFinalDetail (
+INSERT INTO @tblFinalDetail (
     intContractDetailId 
 	,strContractOrInventoryType 
 	,strContractSeq 
@@ -359,7 +359,6 @@ LEFT JOIN tblICCommodityUnitMeasure CostUom on cd.intCommodityId=cuc2.intCommodi
 LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId 
 WHERE  intContractStatusId<>3 and convert(datetime,convert(varchar, ch.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t
 )t)t1
-
 
 INSERT INTO @tblFinalDetail (
      intContractDetailId 
@@ -1035,7 +1034,7 @@ JOIN tblICItem i on iv.intItemId=i.intItemId and i.strLotTracking='No'
 JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId
 JOIN tblICCommodityUnitMeasure cuc on c.intCommodityId=cuc.intCommodityId 
 WHERE i.intCommodityId= case when isnull(@intCommodityId,0)=0 then i.intCommodityId else @intCommodityId end
-AND strLocationName= case when isnull(@strLocationName,0)=0 then strLocationName else @strLocationName end
+AND strLocationName= case when isnull(@strLocationName,'')='' then strLocationName else @strLocationName end
 
 UNION
 
@@ -1059,7 +1058,7 @@ JOIN tblICItem i on iv.intItemId=i.intItemId and i.strLotTracking='No'
 JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId
 JOIN tblICCommodityUnitMeasure cuc on c.intCommodityId=cuc.intCommodityId 
 WHERE i.intCommodityId= case when isnull(@intCommodityId,0)=0 then i.intCommodityId else @intCommodityId end
-AND strLocationName= case when isnull(@strLocationName,0)=0 then strLocationName else @strLocationName end)t1
+AND strLocationName= case when isnull(@strLocationName,'')='' then strLocationName else @strLocationName end)t1
 group by  strContractOrInventoryType,strCommodityCode,intCommodityId, strItemNo, intItemId,strPricingType,intltemPrice
 
 )t WHERE strContractOrInventoryType= case when @ysnIncludeInventoryM2M = 1 then strContractOrInventoryType else '' end )t2

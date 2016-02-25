@@ -3491,6 +3491,7 @@
     <Build Include="dbo\Functions\fnMultiply.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillGLEntriesRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
+    <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
