@@ -257,7 +257,7 @@ BEGIN TRY
 			,SS.dtmUpdatedAvailabilityDate
 			,ISNULL(SUM(CASE 
 						WHEN @TargetUOMKey = IUOM.intUnitMeasureId
-							THEN SS.dblQuantity
+							THEN SS.dblBalance
 						ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 						END), 0) AS ExistPurchaseQty
 		INTO #ExistingPurchases
@@ -739,7 +739,7 @@ BEGIN TRY
 							--SET @SQL_ExistingPurchases_Exec_Ext = 'SELECT @ExistingPurchases = ' + CAST(ISNULL((
 							--				SELECT SUM(CASE 
 							--							WHEN @TargetUOMKey = IUOM.intUnitMeasureId
-							--								THEN SS.dblQuantity
+							--								THEN SS.dblBalance
 							--							ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 							--							END)
 							--				FROM [dbo].[tblCTContractDetail] SS
@@ -1259,7 +1259,7 @@ BEGIN TRY
 						--SET @SQL_ExistingPurchases_Exec = 'SELECT @ExistingPurchases = ' + CAST(ISNULL((
 						--				SELECT SUM(CASE 
 						--							WHEN @TargetUOMKey = IUOM.intUnitMeasureId
-						--								THEN SS.dblQuantity
+						--								THEN SS.dblBalance
 						--							ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, SS.dblBalance)
 						--							END)
 						--				FROM [dbo].[tblCTContractDetail] SS
