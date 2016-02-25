@@ -126,7 +126,8 @@ BEGIN
 		WITH	(HOLDLOCK) 
 		AS		InventoryTransfer 
 		USING (
-			SELECT	RawData.*
+			SELECT	TOP 1 
+					RawData.*
 			FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData
 						ON RawHeaderData.TransferType = RawData.strTransferType
 						AND RawHeaderData.SourceType = RawData.intSourceType

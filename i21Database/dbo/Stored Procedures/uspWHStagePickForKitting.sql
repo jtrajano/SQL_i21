@@ -80,7 +80,7 @@ BEGIN TRY
 	--SELECT @intPickedLotId intPickedLotId, @intSubLocationId intSubLocationId, @intStorageLocationId intStorageLocationId, @dblPickedQty dblPickedQty, @intUserId intUserId
 
 	
-	EXEC uspMFLotMove @intLotId = @intPickedLotId, 
+	EXEC uspWHLotMove @intLotId = @intPickedLotId, 
 					  @intNewSubLocationId = @intSubLocationId,
 					  @intNewStorageLocationId = @intStorageLocationId, 
 					  @dblMoveQty = @dblPickedQty, 
