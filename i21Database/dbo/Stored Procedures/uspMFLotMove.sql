@@ -22,6 +22,8 @@ BEGIN TRY
 		,@dblWeightPerQty NUMERIC(38, 20)
 		,@intWeightUOMId INT
 		,@intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -32,6 +34,7 @@ BEGIN TRY
 		,@intNewLocationId = intLocationId
 		,@dblWeightPerQty = dblWeightPerQty
 		,@intWeightUOMId = intWeightUOMId
+		,@dblWeight = dblWeight
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -63,6 +66,13 @@ BEGIN TRY
 				,11
 				,1
 				)
+	END
+	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+
+	IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 	END
 
 	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)

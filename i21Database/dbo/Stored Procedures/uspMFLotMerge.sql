@@ -32,9 +32,10 @@ BEGIN TRY
 	DECLARE @intSourceLotWeightUOM INT
 	DECLARE @intDestinationLotWeightUOM INT
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
-			,@intWeightUOMId INT
-			,@intItemStockUOMId INT
-
+	DECLARE @intWeightUOMId INT
+	DECLARE @intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -45,13 +46,22 @@ BEGIN TRY
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intSourceLotWeightUOM = intWeightUOMId,
-		   @intWeightUOMId = intWeightUOMId
+		   @intWeightUOMId = intWeightUOMId,
+		   @dblWeight = dblWeight
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
+
+	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	
+	IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
 
 	IF @intItemStockUOMId = @intWeightUOMId
 	BEGIN
