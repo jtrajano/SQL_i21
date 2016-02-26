@@ -9,6 +9,6 @@
     [dblAmount] DECIMAL(18, 6) NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutPumpTotals_intPumpTotalsId] PRIMARY KEY ([intPumpTotalsId]), 
-    CONSTRAINT [FK_tblSTCheckoutPumpTotals_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]), 
+    CONSTRAINT [FK_tblSTCheckoutPumpTotals_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSTCheckoutPumpTotals_tblICItemUOM] FOREIGN KEY ([intPumpCardCouponId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
 )

@@ -12,5 +12,5 @@
     CONSTRAINT [PK_tblSTCheckoutPaymentOptions_intPaymentOptionsId] PRIMARY KEY ([intPaymentOptionsPrimId]), 
     CONSTRAINT [FK_tblSTCheckoutPaymentOptions_tblSTPaymentOption] FOREIGN KEY ([intPaymentOptionId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
     CONSTRAINT [FK_tblSTCheckoutPaymentOptions_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-    CONSTRAINT [FK_tblSTCheckoutPaymentOptions_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) 
+    CONSTRAINT [FK_tblSTCheckoutPaymentOptions_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE 
 )
