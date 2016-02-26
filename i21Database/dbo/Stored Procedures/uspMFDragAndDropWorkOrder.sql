@@ -7,6 +7,7 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@intUserId INT
 		,@intConcurrencyId INT
+		,@intManufacturingCellId int
 		,@intDraggedManufacturingCellId INT
 		,@intDraggedWorkOrder INT
 		,@intDraggedItemId INT
@@ -14,6 +15,8 @@ BEGIN TRY
 		,@intDroppedManufacturingCell INT
 		,@intDroppedBeforeExecutionOrder INT
 		,@intLocationId INT
+		,@dtmFromDate datetime
+		,@dtmToDate datetime
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -22,28 +25,33 @@ BEGIN TRY
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
-	SELECT @intScheduleId = intScheduleId
-		,@intConcurrencyId = intConcurrencyId
-		,@intUserId = intUserId
-		,@intLocationId = intLocationId
+	SELECT @intManufacturingCellId=intManufacturingCellId
 		,@intDraggedManufacturingCellId = intDraggedManufacturingCellId
 		,@intDraggedWorkOrder = intDraggedWorkOrder
 		,@intDraggedItemId = intDraggedItemId
 		,@intDraggedExecutionOrder = intDraggedExecutionOrder
 		,@intDroppedManufacturingCell = intDroppedManufacturingCell
 		,@intDroppedBeforeExecutionOrder = intDroppedBeforeExecutionOrder
+		,@intScheduleId = intScheduleId
+		,@intConcurrencyId = intConcurrencyId
+		,@intUserId = intUserId
 		,@intLocationId = intLocationId
+		,@dtmFromDate=dtmFromDate
+		,@dtmToDate =dtmToDate
 	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intScheduleId INT
-			,intConcurrencyId INT
-			,intUserId INT
+			intManufacturingCellId int
 			,intDraggedManufacturingCellId INT
 			,intDraggedWorkOrder INT
 			,intDraggedItemId INT
 			,intDraggedExecutionOrder INT
 			,intDroppedManufacturingCell INT
 			,intDroppedBeforeExecutionOrder INT
+			,intScheduleId INT
+			,intConcurrencyId INT
+			,intUserId INT
 			,intLocationId INT
+			,dtmFromDate datetime
+			,dtmToDate datetime
 			)
 
 	DECLARE @intItemId1 INT
@@ -191,6 +199,8 @@ BEGIN TRY
 		,ysnFrozen
 		,intConcurrencyId
 		--,intSequenceId
+		,intScheduleId
+		,intLocationId 
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -211,6 +221,8 @@ BEGIN TRY
 		,x.ysnFrozen
 		,@intConcurrencyId
 		--,x.intSequenceNo
+		,x.intScheduleId
+		,@intLocationId
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -227,6 +239,7 @@ BEGIN TRY
 			,ysnFrozen BIT
 			--,intSequenceNo INT
 			,ysnEOModified BIT
+			,intScheduleId int
 			) x
 	WHERE x.intStatusId <> 1
 	ORDER BY x.intExecutionOrder
@@ -266,36 +279,48 @@ BEGIN TRY
 	--			,1
 	--			)
 	--END
+	EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFScheduleWorkOrder
+		,@dtmFromDate = @dtmFromDate
+		,@dtmToDate = @dtmToDate
+		,@intUserId = @intUserId
+		,@intChartManufacturingCellId=@intManufacturingCellId
 
-	SELECT W.intManufacturingCellId
-		,W.intWorkOrderId
-		--,SL.intScheduleId
-		,W.dblQuantity
-		,ISNULL(W.dtmEarliestDate, W.dtmExpectedDate) AS dtmEarliestDate
-		,W.dtmExpectedDate
-		,ISNULL(W.dtmLatestDate, W.dtmExpectedDate) AS dtmLatestDate
-		,ISNULL(SL.dtmTargetDate, W.dtmExpectedDate) AS dtmTargetDate
-		,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
-		,I.intItemId
-		,IU.intItemUOMId
-		,IU.intUnitMeasureId
-		,W.intStatusId
-		,SL.intScheduleWorkOrderId
-		,SL.intExecutionOrder
-		,SL.ysnFrozen
-		,I.intPackTypeId
-		,ISNULL(SL.intConcurrencyId, 0) AS intConcurrencyId
-		,CONVERT(BIT, 0) AS ysnEOModified
-	FROM tblMFWorkOrder W
-	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-		AND W.intStatusId <> 13
-		AND W.intLocationId = @intLocationId
-		AND W.intManufacturingCellId IS NOT NULL
-	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
-	AND MC.ysnIncludeSchedule = 1
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
-	LEFT JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
-	ORDER BY SL.intExecutionOrder
+	--SELECT W.intManufacturingCellId
+	--	,W.intWorkOrderId
+	--	,W.strWorkOrderNo
+	--	,SL.intScheduleId
+	--	,W.dblQuantity
+	--	,ISNULL(W.dtmEarliestDate, W.dtmExpectedDate) AS dtmEarliestDate
+	--	,W.dtmExpectedDate
+	--	,ISNULL(W.dtmLatestDate, W.dtmExpectedDate) AS dtmLatestDate
+	--	,ISNULL(SL.dtmTargetDate, W.dtmExpectedDate) AS dtmTargetDate
+	--	,CASE WHEN W.dblQuantity - W.dblProducedQuantity>0 THEN W.dblQuantity - W.dblProducedQuantity ELSE 0 END AS dblBalanceQuantity
+	--	,I.intItemId
+	--	,IU.intItemUOMId
+	--	,IU.intUnitMeasureId
+	--	,W.intStatusId
+	--	,SL.intScheduleWorkOrderId
+	--	,SL.intExecutionOrder
+	--	,SL.ysnFrozen
+	--	,I.intPackTypeId
+	--	,ISNULL(SL.intConcurrencyId, 0) AS intConcurrencyId
+	--	,CONVERT(BIT, 0) AS ysnEOModified
+	--FROM tblMFWorkOrder W
+	--JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
+	--	AND W.intStatusId <> 13
+	--	AND W.intLocationId = @intLocationId
+	--	AND W.intManufacturingCellId IS NOT NULL
+	--JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+	--AND MC.ysnIncludeSchedule = 1
+	--JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
+	--LEFT JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
+	--ORDER BY SL.intExecutionOrder
+
+	--EXEC dbo.uspMFGetScheduleDetail @intManufacturingCellId = @intManufacturingCellId
+	--			,@dtmPlannedStartDate = @dtmFromDate
+	--			,@dtmPlannedEndDate = @dtmToDate
+	--			,@intLocationId = @intLocationId
+	--			,@intScheduleId = 0
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
