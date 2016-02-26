@@ -11,6 +11,8 @@ BEGIN TRY
 		,@dtmFromDate DATETIME
 		,@dtmToDate DATETIME
 		,@intUserId INT
+		,@intManufacturingCellId int
+
 
 	DECLARE @tblMFSequence TABLE (
 		intWorkOrderId INT
@@ -25,11 +27,13 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@dtmFromDate = dtmFromDate
 		,@dtmToDate = dtmToDate
+		,@intManufacturingCellId=intManufacturingCellId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intUserId INT
 			,intLocationId INT
 			,dtmFromDate DATETIME
 			,dtmToDate DATETIME
+			,intManufacturingCellId INT
 			)
 
 	INSERT INTO @tblMFWorkOrder (
@@ -56,6 +60,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intUnitMeasureId
 		,intScheduleId
+		,ysnFrozen
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -80,6 +85,7 @@ BEGIN TRY
 		,x.intItemUOMId
 		,x.intUnitMeasureId
 		,x.intScheduleId
+		,x.ysnFrozen
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -130,6 +136,7 @@ BEGIN TRY
 		,@dtmFromDate = @dtmFromDate
 		,@dtmToDate = @dtmToDate
 		,@intUserId = @intUserId
+		,@intChartManufacturingCellId=@intManufacturingCellId
 END TRY
 
 BEGIN CATCH

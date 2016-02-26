@@ -56,7 +56,14 @@ SELECT SC.intWorkOrderId
 FROM tblMFScheduleConstraintDetail SC
 JOIN tblMFWorkOrder W ON W.intWorkOrderId = SC.intWorkOrderId
 JOIN dbo.tblMFScheduleRule SR ON SR.intScheduleRuleId = SC.intScheduleRuleId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId and MC.ysnIncludeSchedule =1
+JOIN dbo.tblMFSchedule S ON S.intScheduleId = SC.intScheduleId AND S.ysnStandard=(
+		CASE 
+			WHEN @intScheduleId = 0
+				THEN 1
+			ELSE S.ysnStandard
+			END
+		)
 WHERE ((SC.dtmChangeoverStartDate >= @dtmPlannedStartDate
     AND SC.dtmChangeoverEndDate <= @dtmPlannedEndDate)
 	OR @dtmPlannedStartDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate OR @dtmPlannedEndDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate)
@@ -132,13 +139,20 @@ JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 	AND IU.ysnStockUnit = 1
 JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId and MC.ysnIncludeSchedule =1
 JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	AND intScheduleId = (
 		CASE 
 			WHEN @intScheduleId = 0
 				THEN SL.intScheduleId
 			ELSE @intScheduleId
+			END
+		)
+JOIN dbo.tblMFSchedule S ON S.intScheduleId = SL.intScheduleId AND S.ysnStandard=(
+		CASE 
+			WHEN @intScheduleId = 0
+				THEN 1
+			ELSE S.ysnStandard
 			END
 		)
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
@@ -196,4 +210,4 @@ SELECT SC.intManufacturingCellId
 	,NULL AS strCustomer
 	,strRowId
 FROM @tblMFScheduleConstraintDetail SC
-ORDER BY intExecutionOrder
+ORDER BY intManufacturingCellId,intExecutionOrder
