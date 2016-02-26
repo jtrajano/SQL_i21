@@ -11,6 +11,6 @@
     [strComment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutCustomerPayments_intCustPaymentsId] PRIMARY KEY ([intCustPaymentsId]), 
-	CONSTRAINT [FK_tblSTCheckoutCustomerPayments_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ,
+	CONSTRAINT [FK_tblSTCheckoutCustomerPayments_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE ,
     CONSTRAINT [FK_tblSTCheckoutCustomerPayments_tblEntity] FOREIGN KEY ([intCustomerId]) REFERENCES [tblEntity]([intEntityId]) 
 )

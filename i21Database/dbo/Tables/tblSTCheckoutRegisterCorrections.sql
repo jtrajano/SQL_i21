@@ -10,7 +10,7 @@
     [dblAmount] DECIMAL(18, 6) NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutRegisterCorrections_intCorrectionId] PRIMARY KEY ([intCorrectionId]), 
-    CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]), 
+    CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
     CONSTRAINT [FK_tblSTCheckoutRegisterCorrections_tblSTPaymentOption] FOREIGN KEY ([intPaymentOptionId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]) 
 )
