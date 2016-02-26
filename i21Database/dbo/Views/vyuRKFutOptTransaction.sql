@@ -1,7 +1,7 @@
 ﻿CREATE View vyuRKFutOptTransaction
 
 AS  
-SELECT *,isnull(dblHedgeQty1,0) as dblHedgeQty FROM (
+SELECT *,isnull(dblContractSize,0)*intOpenContract as dblHedgeQty FROM (
 SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId], 
 			ft.[intFutOptTransactionHeaderId] AS [intFutOptTransactionHeaderId], 
 			fom.[strFutMarketName] AS [strFutMarketName], 
@@ -15,7 +15,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			e.[strName] AS [strName], 
 			acc.[strAccountNumber] AS [strBrokerageAccount], 
 			CASE WHEN (N'Sell' = ft.[strBuySell]) THEN  -(ft.[intNoOfContract]) ELSE ft.[intNoOfContract] END AS [intGetNoOfContract], 
-			(CASE WHEN (N'Sell' = ft.[strBuySell]) THEN  -(ft.[intNoOfContract]*fot.dblContractSize) ELSE ft.[intNoOfContract]*fot.dblContractSize END) as dblHedgeQty1,
+			fot.dblContractSize as dblContractSize,
 			(SELECT CONVERT(DECIMAL,SUM(intOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId=ft.intFutOptTransactionId) as intOpenContract,
 			um.[strUnitMeasure] AS [strUnitMeasure], 
 			ft.[strBuySell] AS [strBuySell], 
