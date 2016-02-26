@@ -2,7 +2,7 @@
 AS
 Select r.intRecipeId,i.strItemNo,i.strDescription,
 r.dblQuantity,um.strUnitMeasure AS strUOM,r.intVersionNo,r.ysnActive,
-cl.strLocationName,mc.strCellName,mp.strProcessName,cs.strCustomerNumber AS strCustomer
+cl.strLocationName,mc.strCellName,mp.strProcessName,cs.strCustomerNumber AS strCustomer,r.strName
 from tblMFRecipe r
 Join tblICItem i on r.intItemId=i.intItemId 
 Join tblICItemUOM iu on r.intItemUOMId=iu.intItemUOMId
