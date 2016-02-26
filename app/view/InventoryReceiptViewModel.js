@@ -701,24 +701,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return false;
             }
         },
-        checkWeightLossHide: function (get) {
-            if (get('weightLoss')) {
-                if(get('weightLoss') > 0) {
-                    return false;
-                }
-                else {
-                    return true;
-                }
-            }
-        },
         getWeightLossText: function (get) {
-            if (get('weightLoss')) {
-                if(get('weightLoss') > 0) {
-                    return 'Weight Loss: ' + Ext.util.Format.number(get('weightLoss'), '0,000.00');
-                }
-                else {
-                    return '';
-                }
+            if (get('weightLoss') !== 0) {
+                return 'Weight Gain/Loss: ' + Ext.util.Format.number(get('weightLoss'), '0,000.00');
+            }
+            else {
+                return 'Weight Gain/Loss: 0.00';
             }
         }
     }

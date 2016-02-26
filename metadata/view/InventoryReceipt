@@ -1595,7 +1595,6 @@
                                                                                     },
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
-                                                                                        "hidden": true,
                                                                                         "itemId": "lblWeightLossMsg",
                                                                                         "style": "{ color: red }",
                                                                                         "text": "My Label"
