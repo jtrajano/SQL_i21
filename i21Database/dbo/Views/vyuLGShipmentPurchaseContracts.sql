@@ -56,6 +56,7 @@ SELECT
 	   ,CT.strMainCurrency
 	   ,CT.ysnSubCurrency
 	   ,CT.dblMainCashPrice
+	   ,dblFranchise = CASE WHEN WG.dblFranchise > 0 THEN WG.dblFranchise / 100 ELSE 0 END
 
 FROM tblLGShipmentContractQty SCQ
 JOIN tblLGShipment S ON S.intShipmentId = SCQ.intShipmentId
@@ -65,4 +66,5 @@ JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = SCQ.intUnitMeasureId
 JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = S.intWeightUnitMeasureId
 LEFT JOIN tblICItem Item ON Item.intItemId = SCQ.intItemId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = S.intSubLocationId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CT.intWeightId
 ) t1
