@@ -35,7 +35,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     ],
 
     data: {
-        forceSelection: false
+        forceSelection: false,
+        weightLoss: 0
     },
 
 
@@ -698,6 +699,26 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             else {
                 return false;
+            }
+        },
+        checkWeightLossHide: function (get) {
+            if (get('weightLoss')) {
+                if(get('weightLoss') > 0) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+        },
+        getWeightLossText: function (get) {
+            if (get('weightLoss')) {
+                if(get('weightLoss') > 0) {
+                    return 'Weight Loss: ' + Ext.util.Format.number(get('weightLoss'), '0,000.00');
+                }
+                else {
+                    return '';
+                }
             }
         }
     }

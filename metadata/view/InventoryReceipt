@@ -1566,9 +1566,47 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter11",
+                                                                            "name": "filter14",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.container.Container",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "container|align": "stretch",
+                                                                                "container|pack": "end",
+                                                                                "layout": "hbox",
+                                                                                "layout|flex": 1,
+                                                                                "margin": "0 5 0 0"
+                                                                            },
+                                                                            "name": "MyContainer4",
+                                                                            "designerId": "bb433911-8db3-4c5d-8019-15a110959a84",
+                                                                            "cn": [
+                                                                                {
+                                                                                    "type": "Ext.form.Label",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "hidden": true,
+                                                                                        "itemId": "lblWeightLossMsg",
+                                                                                        "style": "{ color: red }",
+                                                                                        "text": "My Label"
+                                                                                    },
+                                                                                    "name": "MyLabel8",
+                                                                                    "configAlternates": {
+                                                                                        "style": "string"
+                                                                                    },
+                                                                                    "designerId": "ab69e307-c7ba-4fe7-8807-5c496262f7dd"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -2571,7 +2609,6 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "strTax",
                                                                         "itemId": "colTax",
-                                                                        "summaryType": "sum",
                                                                         "text": "Tax",
                                                                         "width": 85
                                                                     },
@@ -2761,7 +2798,6 @@
                                                                         "dataType": null,
                                                                         "format": null,
                                                                         "itemId": "colLineTotal",
-                                                                        "summaryType": "sum",
                                                                         "text": "Line Total",
                                                                         "width": 85
                                                                     },
@@ -3057,7 +3093,6 @@
                                                                         "dataType": null,
                                                                         "format": null,
                                                                         "itemId": "colGrossMargin",
-                                                                        "summaryType": "sum",
                                                                         "text": "Gross Margin",
                                                                         "width": 100
                                                                     },
@@ -3191,17 +3226,132 @@
                                                                     "designerId": "8e2c5111-0905-47f1-9aa8-877b2ea634b9"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.feature.Summary",
+                                                                    "type": "Ext.container.Container",
                                                                     "reference": {
-                                                                        "name": "features",
+                                                                        "name": "dockedItems",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "dock": "bottom"
+                                                                        "container|align": "stretch",
+                                                                        "container|pack": "end",
+                                                                        "dock": "bottom",
+                                                                        "itemId": "grpFooter",
+                                                                        "layout": "hbox",
+                                                                        "width": 100
                                                                     },
-                                                                    "name": "MySummaryFeature",
-                                                                    "designerId": "7ceab85b-8d24-44af-ac2f-5c35c6a4cb1a"
+                                                                    "name": "MyContainer",
+                                                                    "designerId": "8297aaee-7f04-4772-8e09-5cdbc0b57976",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblSubTotal",
+                                                                                "text": "SubTotal",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel3",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "c9bafd10-c343-4b9d-a904-f04040ec6b12"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblTax",
+                                                                                "text": "Tax",
+                                                                                "width": 120
+                                                                            },
+                                                                            "name": "MyLabel4",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "bd5905c1-1122-46fd-8a44-d91600b247d7"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblCharges",
+                                                                                "text": "Charges",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel2",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "bc94ae1c-8df6-4e57-ab2f-4353f0159e76"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblGrossWgt",
+                                                                                "text": "Gross Wgt",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel5",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "fca7feef-7ec3-465d-94e3-b75ecb85f67e"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblNetWgt",
+                                                                                "text": "Net Wgt",
+                                                                                "width": 150
+                                                                            },
+                                                                            "name": "MyLabel6",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "98da0e64-6701-466f-ba6c-51b01bf5997c"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.Label",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "lblTotal",
+                                                                                "text": "Total",
+                                                                                "width": 180
+                                                                            },
+                                                                            "name": "MyLabel7",
+                                                                            "configAlternates": {
+                                                                                "style": "string"
+                                                                            },
+                                                                            "designerId": "fc56d20e-a083-48bc-98b5-6399ecbb3f8e"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         }
@@ -3357,7 +3507,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter12",
+                                                                            "name": "filter15",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4675,7 +4825,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter13",
+                                                            "name": "filter16",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -4970,6 +5120,7 @@
                                                         "flex": 1,
                                                         "format": "0,000.000000",
                                                         "itemId": "colRate",
+                                                        "modelValidation": true,
                                                         "text": "Rate"
                                                     },
                                                     "name": "MyNumberColumn45",
@@ -4983,7 +5134,8 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "designer|createAlias": "numericfield"
+                                                                "designer|createAlias": "numericfield",
+                                                                "modelValidation": true
                                                             },
                                                             "name": "MyNumberField60",
                                                             "designerId": "deaa7036-c826-4da4-ad4d-ef151babc91c"
@@ -5101,7 +5253,9 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "dataIndex": "dblAmount",
                                                         "flex": 1,
+                                                        "format": "0,000.00####",
                                                         "itemId": "colChargeAmount",
                                                         "text": "Amount"
                                                     },
@@ -5116,7 +5270,8 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "designer|createAlias": "numericfield"
+                                                                "designer|createAlias": "numericfield",
+                                                                "modelValidation": true
                                                             },
                                                             "name": "MyNumberField61",
                                                             "designerId": "2eeba050-620f-45cf-bce8-33840e54938d"
@@ -5687,7 +5842,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter17",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6156,7 +6311,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter18",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

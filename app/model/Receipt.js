@@ -52,7 +52,8 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'intTaxGroupId', type: 'int', allowNull: true },
         { name: 'ysnPosted', type: 'boolean' },
         { name: 'intCreatedUserId', type: 'int', allowNull: true },
-        { name: 'intEntityId', type: 'int', allowNull: true }
+        { name: 'intEntityId', type: 'int', allowNull: true },
+        { name: 'dblClaimableWt', type: 'float' },
     ],
 
     validators: [

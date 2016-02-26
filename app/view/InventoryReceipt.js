@@ -26,13 +26,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.form.field.Date',
         'Ext.form.field.Number',
         'Ext.grid.Panel',
+        'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Check',
         'Ext.grid.column.Number',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
-        'Ext.grid.feature.Summary',
-        'Ext.form.Label',
         'Ext.grid.column.Date',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Time',
@@ -729,6 +728,74 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'filter1'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'container',
+                                                                                        flex: 1,
+                                                                                        margin: '0 5 0 0',
+                                                                                        layout: {
+                                                                                            type: 'hbox',
+                                                                                            align: 'stretch',
+                                                                                            pack: 'end'
+                                                                                        },
+                                                                                        items: [
+                                                                                            {
+                                                                                                xtype: 'label',
+                                                                                                hidden: true,
+                                                                                                itemId: 'lblWeightLossMsg',
+                                                                                                style: '{ color: red }',
+                                                                                                text: 'My Label'
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                xtype: 'container',
+                                                                                dock: 'bottom',
+                                                                                itemId: 'grpFooter',
+                                                                                width: 100,
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    align: 'stretch',
+                                                                                    pack: 'end'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'label',
+                                                                                        itemId: 'lblSubTotal',
+                                                                                        width: 150,
+                                                                                        text: 'SubTotal'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'label',
+                                                                                        itemId: 'lblTax',
+                                                                                        width: 120,
+                                                                                        text: 'Tax'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'label',
+                                                                                        itemId: 'lblCharges',
+                                                                                        width: 150,
+                                                                                        text: 'Charges'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'label',
+                                                                                        itemId: 'lblGrossWgt',
+                                                                                        width: 150,
+                                                                                        text: 'Gross Wgt'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'label',
+                                                                                        itemId: 'lblNetWgt',
+                                                                                        width: 150,
+                                                                                        text: 'Net Wgt'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'label',
+                                                                                        itemId: 'lblTotal',
+                                                                                        width: 180,
+                                                                                        text: 'Total'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -1330,7 +1397,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
-                                                                                summaryType: 'sum',
                                                                                 itemId: 'colTax',
                                                                                 width: 85,
                                                                                 dataIndex: 'strTax',
@@ -1409,7 +1475,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
-                                                                                summaryType: 'sum',
                                                                                 itemId: 'colLineTotal',
                                                                                 width: 85,
                                                                                 dataIndex: 'dblLineTotal',
@@ -1548,7 +1613,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
-                                                                                summaryType: 'sum',
                                                                                 itemId: 'colGrossMargin',
                                                                                 width: 100,
                                                                                 dataIndex: 'dblGrossMargin',
@@ -1603,13 +1667,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         ],
                                                                         viewConfig: {
                                                                             itemId: 'grvInventoryReceipt'
-                                                                        },
-                                                                        features: [
-                                                                            {
-                                                                                ftype: 'summary',
-                                                                                dock: 'bottom'
-                                                                            }
-                                                                        ]
+                                                                        }
                                                                     }
                                                                 ]
                                                             },
@@ -2400,11 +2458,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'numbercolumn',
                                                                 itemId: 'colRate',
+                                                                modelValidation: true,
                                                                 text: 'Rate',
                                                                 flex: 1,
                                                                 format: '0,000.000000',
                                                                 editor: {
-                                                                    xtype: 'numericfield'
+                                                                    xtype: 'numericfield',
+                                                                    modelValidation: true
                                                                 }
                                                             },
                                                             {
@@ -2459,10 +2519,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'numbercolumn',
                                                                 itemId: 'colChargeAmount',
+                                                                dataIndex: 'dblAmount',
                                                                 text: 'Amount',
                                                                 flex: 1,
+                                                                format: '0,000.00####',
                                                                 editor: {
-                                                                    xtype: 'numericfield'
+                                                                    xtype: 'numericfield',
+                                                                    modelValidation: true
                                                                 }
                                                             },
                                                             {
