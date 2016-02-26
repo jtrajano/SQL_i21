@@ -27,7 +27,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 -- Start the transaction 
-BEGIN TRANSACTION
+BEGIN TRY
 
 IF @userId IS NULL
 BEGIN
@@ -49,6 +49,12 @@ CREATE TABLE #tmpPayableInvalidData (
 );
 
 --DECLARRE VARIABLES
+DECLARE @ErrorSeverity INT,
+            @ErrorNumber   INT,
+            @ErrorMessage nvarchar(4000),
+            @ErrorState INT,
+            @ErrorLine  INT,
+            @ErrorProc nvarchar(200);
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
@@ -150,20 +156,26 @@ BEGIN
 
 	END
 
-
 	DECLARE @totalRecords INT
 	SELECT @totalRecords = COUNT(*) FROM #tmpPayablePostData
-
-	COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 	IF(@totalRecords = 0)  
 	BEGIN
 		SET @success = 0
-		GOTO Post_Exit
+		RETURN;
 	END
 
-	BEGIN TRANSACTION
 END
+
+--DOUBLE VALIDATE, MAKE SURE TO NOT CONTINUE POSTING WHEN NOT RECORDS TO POST
+IF @totalRecords = 0
+BEGIN
+	RAISERROR('No payment to post.', 16, 1);
+END
+
+--START THE TRANSACTION HERE, WE WANT THE ABOVE RESULT TO BE SAVED.. IT WILL USED BY THE POST RESULT SCREEN;
+DECLARE @transCount INT = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
 
 --CREATE TEMP GL ENTRIES
 SELECT @validPaymentIds = COALESCE(@validPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intPaymentId)
@@ -187,23 +199,7 @@ END
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
-	BEGIN TRY
-		--GROUP GL ENTRIES (NOTE: ASK THE DEVELOPER TO DO THIS ON uspGLBookEntries
-		EXEC uspGLBookEntries @GLEntries, @post
-	END TRY
-	BEGIN CATCH
-		DECLARE
-		  @ErrorMessage   varchar(2000)
-		 ,@ErrorSeverity  tinyint
-		 ,@ErrorState     tinyint;
-
-		 SET @ErrorMessage  = ERROR_MESSAGE()
-		SET @ErrorSeverity = ERROR_SEVERITY()
-		SET @ErrorState    = ERROR_STATE()
-		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
-
-		GOTO Post_Rollback;
-	END CATCH
+	EXEC uspGLBookEntries @GLEntries, @post
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -256,6 +252,11 @@ BEGIN
 		-- Calling the stored procedure
 		EXEC dbo.uspCMBankTransactionReversal @userId, DEFAULT, @isSuccessful OUTPUT
 
+		IF @isSuccessful = 0
+		BEGIN
+			RAISERROR('Failed to reverse bank transaction.', 16, 1);
+		END
+
 		--update payment record based on record from tblCMBankTransaction
 		UPDATE tblAPPayment
 			SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
@@ -286,9 +287,6 @@ BEGIN
 		FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
 		WHERE B.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND A.intTransactionType = 8
-
-		GOTO Audit_Log_Invoke;
-		IF @@ERROR <> 0 OR @isSuccessful = 0 GOTO Post_Rollback;
 
 	END
 	ELSE
@@ -433,12 +431,9 @@ BEGIN
 			SET @payId = NULL;
 			SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
 		END
-
-		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 
 	--UPDATE 1099 Information
-	GOTO Audit_Log_Invoke;
 	EXEC [uspAPUpdateBill1099] @param
 
 END
@@ -509,76 +504,45 @@ ELSE
 			ON B.intAccountGroupId = C.intAccountGroupId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit;
-
-		IF @@ERROR <> 0	GOTO Post_Rollback;
-		GOTO Audit_Log_Invoke;
-		GOTO Post_Commit;
 	END
 
-IF @@ERROR <> 0	GOTO Post_Rollback;
-
---=====================================================================================================================================
--- 	FINALIZING STAGE
----------------------------------------------------------------------------------------------------------------------------------------
-Audit_Log_Invoke:
-DECLARE @strDescription AS NVARCHAR(100) 
-  ,@actionType AS NVARCHAR(50)
-  ,@PaymentId AS NVARCHAR(50)
-
-SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
-SELECT @PaymentId = (SELECT intPaymentId FROM #tmpPayablePostData)
-EXEC dbo.uspSMAuditLog 
-   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
-  ,@keyValue = @PaymentId								-- Primary Key Value of the Voucher. 
-  ,@entityId = @userId									-- Entity Id.
-  ,@actionType = @actionType                        -- Action Type
-  ,@changeDescription = @strDescription				-- Description
-  ,@fromValue = ''									-- Previous Value
-  ,@toValue = ''									-- New Value
-
-Post_Commit:
-	COMMIT TRANSACTION
-	SET @success = 1
-	SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpPayablePostData) --only support recap per record
-	SET @successfulCount = @totalRecords
-	GOTO Post_Cleanup
-	GOTO Post_Exit
-
-Post_Rollback:
-	ROLLBACK TRANSACTION		            
-	SET @success = 0
-	GOTO Post_Exit
-
-Post_Cleanup:
-	IF(ISNULL(@recap,0) = 0)
-	BEGIN
-		----DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
-
-		IF(@post = 1)
-		BEGIN		
-			DELETE FROM tblAPPaymentDetail
-			WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-			AND dblPayment = 0
-		END
-
-		----IF(@post = 1)
-		----BEGIN
-
-		----	----clean gl detail recap after posting
-		----	--DELETE FROM tblGLDetailRecap
-		----	--FROM tblGLDetailRecap A
-		----	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
-
-		
-		----	----removed from tblAPInvalidTransaction the successful records
-		----	--DELETE FROM tblAPInvalidTransaction
-		----	--FROM tblAPInvalidTransaction A
-		----	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
-
-		----END
-
+IF(ISNULL(@recap,0) = 0)
+BEGIN
+----DELETE PAYMENT DETAIL WITHOUT PAYMENT AMOUNT
+	IF(@post = 1)
+	BEGIN		
+		DELETE FROM tblAPPaymentDetail
+		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND dblPayment = 0
 	END
+END
 
-Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
+SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpPayablePostData) --only support recap per record
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
+
+IF @transCount = 0 COMMIT TRANSACTION
+SET @success = 1
+SET @successfulCount = @totalRecords
+
+END TRY
+BEGIN CATCH
+        -- Grab error information from SQL functions
+    SET @ErrorSeverity = ERROR_SEVERITY()
+    SET @ErrorNumber   = ERROR_NUMBER()
+    SET @ErrorMessage  = ERROR_MESSAGE()
+    SET @ErrorState    = ERROR_STATE()
+    SET @ErrorLine     = ERROR_LINE()
+    SET @ErrorProc     = ERROR_PROCEDURE()
+    SET @ErrorMessage  = 'Problem posting payment.' + CHAR(13) + 
+			'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
+			' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
+    -- Not all errors generate an error state, to set to 1 if it's zero
+    IF @ErrorState  = 0
+    SET @ErrorState = 1
+    -- If the error renders the transaction as uncommittable or we have open transactions, we may want to rollback
+    IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+	SET @success = 0;
+    RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+END CATCH

@@ -9,6 +9,7 @@ SELECT
 	A.strVendorOrderNumber,
 	A.intBillId,
 	A.dtmDate,
+	A.ysnPosted,
 	B.intBillDetailId,
 	A.intEntityVendorId,
 	C.strItemNo,

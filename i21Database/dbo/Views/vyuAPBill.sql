@@ -4,9 +4,9 @@ AS
 SELECT
 	A.intBillId,
 	A.strBillId,
-	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
-	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	A.intSubCurrencyCents,
+	CASE WHEN (A.intTransactionType IN (3,8)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
+	CASE WHEN (A.intTransactionType IN (33,8)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	A.ysnPosted,
 	A.ysnPaid,
 	A.ysnReadyForPayment,
