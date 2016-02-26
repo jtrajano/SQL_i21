@@ -29,7 +29,7 @@
     [ysnDisableOutScale] BIT NULL, 
     [ysnShowOutScale] BIT NULL, 
 	[ysnAllowZeroWeights] BIT NULL,
-    [strWeightDescription] NVARCHAR(5) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strWeightDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	intUnitMeasureId INT NULL, 
     [intGraderDeviceId] INT NULL, 
     [intAlternateGraderDeviceId] INT NULL, 
