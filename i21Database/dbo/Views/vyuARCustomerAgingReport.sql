@@ -97,7 +97,7 @@ UNION ALL
       
 SELECT I.dtmPostDate      
      , I.intInvoiceId
-	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
+	 , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) * -1 ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
      , dblInvoiceTotal		= 0    
 	 , I.dblAmountDue     
 	 , dblDiscount			= ISNULL(I.dblDiscount, 0)
@@ -200,7 +200,7 @@ WHERE I.ysnPosted = 1
 UNION ALL      
       
 SELECT I.intInvoiceId
-  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
+  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment') THEN CASE WHEN ISNULL(P.dblAmountPaid, 0) < 0 THEN ISNULL(P.dblAmountPaid, 0) * -1 ELSE 0 END ELSE ISNULL(PD.dblPayment,0) END
   , dblInvoiceTotal			= 0
   , dblAmountDue			= 0
   , dblDiscount				= ISNULL(PD.dblDiscount, 0)
