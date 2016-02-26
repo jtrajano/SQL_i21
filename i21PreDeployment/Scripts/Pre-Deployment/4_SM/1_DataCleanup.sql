@@ -58,7 +58,7 @@ GO
 
 			PRINT N''DELETE ALL ACTIVITIES, MAINTENANCE AND REPORTS FOLDER''
 	
-			DELETE FROM tblSMMasterMenu WHERE strType = ''Folder'' AND strModuleName <> '''' AND strMenuName in (''Activity'', ''Activities'', ''Maintenance'', ''Reports'')
+			DELETE FROM tblSMMasterMenu WHERE strType = ''Folder'' AND strModuleName <> '''' AND strMenuName in (''Activity'', ''Activities'', ''Maintenance'') --, ''Reports''
 
 			PRINT N''UPDATE PAYROLL AND INVENTORY SUBFOLDERS''
 			UPDATE child SET intParentMenuID = parent.intParentMenuID,
