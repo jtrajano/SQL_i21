@@ -768,6 +768,38 @@ namespace iRely.Inventory.Model
                 _currency = value;
             }
         }
+        private decimal _franchise;
+        [NotMapped]
+        public decimal dblFranchise
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblFranchise ?? 0;
+                else
+                    return _franchise;
+            }
+            set
+            {
+                _franchise = value;
+            }
+        }
+        private decimal _containerWeightPerQty;
+        [NotMapped]
+        public decimal dblContainerWeightPerQty
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblContainerWeightPerQty ?? 0;
+                else
+                    return _containerWeightPerQty;
+            }
+            set
+            {
+                _containerWeightPerQty = value;
+            }
+        }
         
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
@@ -806,6 +838,8 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitCost { get; set; }
         public decimal? dblTax { get; set; }
         public decimal? dblLineTotal { get; set; }
+        public decimal? dblGrossWgt { get; set; }
+        public decimal? dblNetWgt { get; set; }
         public string strLotTracking { get; set; }
         public int? intCommodityId { get; set; }
         public int? intContainerId { get; set; }
@@ -837,6 +871,8 @@ namespace iRely.Inventory.Model
         public string strDiscountSchedule { get; set; }
         public bool? ysnExported { get; set; }
         public DateTime? dtmExportedDate { get; set; }
+        public decimal? dblFranchise { get; set; }
+        public decimal? dblContainerWeightPerQty { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
@@ -1475,6 +1511,8 @@ namespace iRely.Inventory.Model
         public int? ysnLoad { get; set; }
         public int? dblAvailableQty { get; set; }
         public string strBOL { get; set; }
+        public decimal? dblFranchise { get; set; }
+        public decimal? dblContainerWeightPerQty { get; set; }
     }
 
     public class vyuICGetInventoryReceiptVoucher

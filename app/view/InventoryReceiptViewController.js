@@ -342,6 +342,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{current.ysnPosted}'
             },
 
+            lblWeightLossMsg: {
+                hidden: '{checkWeightLossHide}',
+                text: '{getWeightLossText}'
+            },
             grdInventoryReceipt: {
                 readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
@@ -997,6 +1001,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (cepItem) {
             cepItem.on({
                 validateedit: me.onEditItem,
+                edit: me.onEditChargeItem,
                 scope: me
             });
         }
@@ -1005,41 +1010,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (cepCharges) {
             cepCharges.on({
                 validateedit: me.onEditCharge,
+                edit: me.onEditChargeItem,
                 scope: me
             });
-        }
-
-        var colTax = grdInventoryReceipt.columns[10];
-        if (colTax) {
-            colTax.summaryRenderer = function (val, params, data) {
-                return Ext.util.Format.number(val, '0,000.00');
-            }
-        }
-
-        var colGross = grdInventoryReceipt.columns[13];
-        if (colGross) {
-            colGross.summaryRenderer = function (val, params, data) {
-                var win = me.getView();
-                var current = win.viewModel.data.current;
-
-                var value = me.calculateCharges(current);
-                var finalValue = Ext.util.Format.number(value, '0,000.00');
-
-                return 'Total Charges: ' + finalValue + '';
-            }
-        }
-        var colNet = grdInventoryReceipt.columns[14];
-        if (colNet) {
-            colNet.summaryRenderer = function (val, params, data) {
-                var win = me.getView();
-                var current = win.viewModel.data.current;
-
-                var charges = me.calculateCharges(current);
-                var lineItems = me.calculateTotalLineItems(current);
-                var finalValue = Ext.util.Format.number((lineItems + charges), '0,000.00');
-
-                return 'Grand Total: ' + finalValue + '';
-            }
         }
 
         var colReceived = grdInventoryReceipt.columns[5];
@@ -1052,6 +1025,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (txtUnitCost) {
             txtUnitCost.on('change', me.onCalculateTotalAmount);
         }
+
+        me.calculateTotalLineItems(win);
+        me.calculateCharges(win);
 
         return win.context;
     },
@@ -1730,8 +1706,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         currentRecord.set('dblLineTotal', i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2));
     },
 
-    calculateTotalLineItems: function (current) {
+    calculateTotalLineItems: function (win) {
+        var current = win.viewModel.data.current;
+        var lblSubTotal = win.down('#lblSubTotal');
+        var lblTax = win.down('#lblTax');
+        var lblGrossWgt = win.down('#lblGrossWgt');
+        var lblNetWgt = win.down('#lblNetWgt');
+        var lblTotal = win.down('#lblTotal');
+
         var totalAmount = 0;
+        var totalTax = 0;
+        var totalGross = 0;
+        var totalNet = 0;
         if (current) {
             var items = current.tblICInventoryReceiptItems();
             if (items) {
@@ -1739,10 +1725,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!item.dummy) {
                         var amount = item.get('dblLineTotal');
                         totalAmount += amount;
+                        var tax = item.get('dblTax');
+                        totalTax += tax;
+                        var gross = item.get('dblGross');
+                        totalGross += gross;
+                        var net = item.get('dblNet');
+                        totalNet += net;
                     }
                 });
             }
         }
+        lblSubTotal.setText('SubTotal: ' + Ext.util.Format.number(totalAmount, '0,000.00'));
+        lblTax.setText('Tax: ' + Ext.util.Format.number(totalTax, '0,000.00'));
+        lblGrossWgt.setText('Gross Wgt: ' + Ext.util.Format.number(totalGross, '0,000.00'));
+        lblNetWgt.setText('Net Wgt: ' + Ext.util.Format.number(totalNet, '0,000.00'));
+        var totalCharges = this.calculateCharges(win);
+        var grandTotal = totalAmount + totalCharges;
+        lblTotal.setText('Total: ' + Ext.util.Format.number(grandTotal, '0,000.00'));
+
         return totalAmount;
     },
 
@@ -1769,12 +1769,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return taxableAmount;
     },
 
-    calculateCharges: function (current) {
+    calculateCharges: function (win) {
+        var current = win.viewModel.data.current;
+        var lblCharges = win.down('#lblCharges');
         var totalCharges = 0;
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             if (charges) {
-
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         var amount = charge.get('dblAmount');
@@ -1783,6 +1784,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
+        lblCharges.setText('Charges: ' + Ext.util.Format.number(totalCharges, '0,000.00'));
         return totalCharges;
     },
 
@@ -2339,12 +2341,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return actualCost;
     },
 
-
-
     onEditItem: function (editor, context, eOpts) {
         var win = editor.grid.up('window');
         var me = win.controller;
-        var win = context.grid.up('window');
         var vw = win.viewModel;
 
         if (context.field === 'dblOpenReceive' || context.field === 'dblUnitCost') {
@@ -2362,7 +2361,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 context.record.set('dblGrossMargin', grossMargin);
             }
         }
-
         context.record.set(context.field, context.value);
         me.calculateGrossWeight(context.record);
 
@@ -2374,7 +2372,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         context.record.set('dblLineTotal', value);
 
         vw.data.currentReceiptItem = context.record;
+
+        if (context.field === 'dblGross' || context.field === 'dblNet') {
+            me.validateWeightLoss(win)
+        }
         me.calculateItemTaxes();
+        me.calculateTotalLineItems(win);
     },
 
     onEditLots: function (editor, context, eOpts) {
@@ -2426,11 +2429,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onEditCharge: function (editor, context, eOpts) {
+        var win = editor.grid.up('window');
+        var me = win.controller;
         if (context.field === 'dblAmount') {
             var amount = i21.ModuleMgr.Inventory.roundDecimalFormat(context.value, 2);
             context.record.set('dblAmount', amount);
+            me.calculateCharges(win);
             return false;
         }
+    },
+
+    onEditChargeItem: function (editor, context, eOpts) {
+        var win = editor.grid.up('window');
+        var me = win.controller;
+
+        me.calculateTotalLineItems(win);
+        me.calculateCharges(win);
     },
 
     onShipFromBeforeQuery: function (obj) {
@@ -3627,25 +3641,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onColumnBeforeRender: function (column) {
-        "use strict";
-
-        if (column.itemId === 'colUnitCost') {
-            column.summaryRenderer = function (val) {
-                return '<div style="text-align:right;">Total:</div>';
-            }
-        }
-        else {
-            column.summaryRenderer = function (val) {
-                var value = (!Ext.isNumber(val) ? 0.00 : val).toFixed(2).replace(/./g, function (c, i, a) {
-                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-                });
-                ;
-                return value;
-            };
-        }
-    },
-
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnAccrue') {
             var grid = obj.up('grid');
@@ -3769,7 +3764,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'string', hidden: true},
-                {dataIndex: 'intCostUOMId', text: 'Cost UOM Id', width: 100, dataType: 'numeric', hidden: true}
+                {dataIndex: 'intCostUOMId', text: 'Cost UOM Id', width: 100, dataType: 'numeric', hidden: true},
+                { xtype: 'numbercolumn', dataIndex: 'dblFranchise', text: 'Franchise', width: 100, dataType: 'float', hidden: true},
+                { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true}
 
             ];
             search.title = "Add Orders";
@@ -3828,7 +3825,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             ysnLoad: order.get('ysnLoad'),
                             dblAvailableQty: order.get('dblAvailableQty'),
                             intOwnershipType: 1,
-                            strOwnershipType: 'Own'
+                            strOwnershipType: 'Own',
+                            dblFranchise: order.get('dblFranchise'),
+                            dblContainerWeightPerQty: order.get('dblContainerWeightPerQty')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
                         currentVM.tblICInventoryReceiptItems().add(newRecord);
@@ -4046,6 +4045,42 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         iRely.Functions.openScreen('i21.view.Currency', {viewConfig: { modal: true }});
     },
 
+    getWeightLoss: function(ReceiptItems, action)
+    {
+        var dblWeightLoss = 0;
+        var dblNetShippedWt = 0;
+        var dblNetReceivedWt = 0;
+        var dblFranchise = 0;
+
+        Ext.Array.each(ReceiptItems, function (item)
+        {
+            dblFranchise = item.data.dblFranchise;
+            dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
+            dblNetReceivedWt = item.data.dblNetWt;
+
+            if (dblFranchise > 0)
+                dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
+            if ((dblNetReceivedWt - dblNetShippedWt) > 0)
+                dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
+        });
+
+        action (dblWeightLoss);
+    },
+
+    validateWeightLoss: function(win, ReceiptItems) {
+        win.viewModel.data.weightLoss = 0;
+        var action = function(weightLoss) {
+            win.viewModel.data.weightLoss = weightLoss;
+        };
+
+        var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
+
+        if (ReceiptItems) {
+            this.getWeightLoss(ReceiptItems.data.items, action);
+        }
+
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -4175,15 +4210,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboOtherCharge": {
                 select: this.onChargeSelect
-            },
-            "#colLineTotal": {
-                beforerender: this.onColumnBeforeRender
-            },
-            "#colGrossMargin": {
-                beforerender: this.onColumnBeforeRender
-            },
-            "#colUnitCost": {
-                beforerender: this.onColumnBeforeRender
             },
             "#colAccrue": {
                 beforecheckchange: this.onAccrueCheckChange

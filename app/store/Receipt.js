@@ -17,7 +17,9 @@ Ext.define('Inventory.store.Receipt', {
             storeId: 'Receipt',
             pageSize: 50,
             batchActions: true,
+            timeout: 600000,
             proxy: {
+                timeout: 600000,
                 type: 'rest',
                 api: {
                     read: '../Inventory/api/InventoryReceipt/Get',
