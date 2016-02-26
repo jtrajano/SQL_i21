@@ -289,7 +289,7 @@ BEGIN TRY
 				,ri.intRecipeItemId
 				,ri.intItemId
 				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
-				,0
+				,0 AS ysnIsSubstitute
 				,ri.ysnMinorIngredient
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
@@ -317,7 +317,7 @@ BEGIN TRY
 				,rs.intRecipeSubstituteItemId
 				,rs.intSubstituteItemId AS intItemId
 				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
-				,1
+				,1 AS ysnIsSubstitute
 				,0
 				,1
 				,0
@@ -327,7 +327,7 @@ BEGIN TRY
 			JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
 			WHERE r.intRecipeId = @intRecipeId
 				AND rs.intRecipeItemTypeId = 1
-			ORDER BY ysnMinorIngredient
+			ORDER BY ysnIsSubstitute,ysnMinorIngredient
 		End
 
 		IF (
@@ -1250,9 +1250,8 @@ BEGIN TRY
 				END
 			END
 
-			IF --@intIssuedUOMTypeId = 2
-				--AND 
-				ISNULL(@intPartialQuantityStorageLocationId, 0) > 0 --'BAG' 
+			--Pick Substitute 
+			IF @ysnIsSubstitute=0
 			BEGIN
 				SELECT @dblRemainingRequiredQty=@dblOriginalRequiredQty - ISNULL(SUM(ISNULL(dblQuantity,0)),0) From #tblBlendSheetLot Where intItemId=@intRawItemId
 				IF @dblRemainingRequiredQty > 0
@@ -1261,18 +1260,19 @@ BEGIN TRY
 					If Exists(Select 1 From @tblInputItem Where intParentItemId=@intRawItemId And ysnIsSubstitute=1)
 						Update @tblInputItem Set dblRequiredQty=@dblRemainingRequiredQty Where intParentItemId=@intRawItemId And ysnIsSubstitute=1
 					Else --substitute does not exists then show 0 for main item
-						INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
-						intItemUOMId,	strUOM,	dblIssuedQuantity,	intItemIssuedUOMId,	strIssuedUOM,	intItemId,	intRecipeItemId,	
-						dblUnitCost,	dblDensity,	dblRequiredQtyPerSheet,	dblWeightPerUnit,	dblRiskScore,	intStorageLocationId,	
-						strStorageLocationName,	strLocationName,	intLocationId,	strSubLocationName,	strLotAlias,	ysnParentLot,	strRowState)
-						Select TOP 1 0,0,'',i.strItemNo,i.strDescription,@dblRemainingRequiredQty,l.intWeightUOMId,um.strUnitMeasure,@dblRemainingRequiredQty, l.intWeightUOMId,um.strUnitMeasure,--l.intItemUOMId,um1.strUnitMeasure, 
-						@intRawItemId,0,0.0,0.0,0.0,l.dblWeightPerQty,0.0,0,'','',@intLocationId,'','',0,'Added'
-						From tblICLot l Join tblICItem i on l.intItemId=i.intItemId 
-						Join tblICItemUOM iu on l.intWeightUOMId=iu.intItemUOMId
-						Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-						Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
-						Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
-						Where i.intItemId=@intRawItemId ORDER BY l.intLotId DESC
+						If ISNULL(@intPartialQuantityStorageLocationId, 0) > 0
+							INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
+							intItemUOMId,	strUOM,	dblIssuedQuantity,	intItemIssuedUOMId,	strIssuedUOM,	intItemId,	intRecipeItemId,	
+							dblUnitCost,	dblDensity,	dblRequiredQtyPerSheet,	dblWeightPerUnit,	dblRiskScore,	intStorageLocationId,	
+							strStorageLocationName,	strLocationName,	intLocationId,	strSubLocationName,	strLotAlias,	ysnParentLot,	strRowState)
+							Select TOP 1 0,0,'',i.strItemNo,i.strDescription,@dblRemainingRequiredQty,l.intWeightUOMId,um.strUnitMeasure,@dblRemainingRequiredQty, l.intWeightUOMId,um.strUnitMeasure,--l.intItemUOMId,um1.strUnitMeasure, 
+							@intRawItemId,0,0.0,0.0,0.0,l.dblWeightPerQty,0.0,0,'','',@intLocationId,'','',0,'Added'
+							From tblICLot l Join tblICItem i on l.intItemId=i.intItemId 
+							Join tblICItemUOM iu on l.intWeightUOMId=iu.intItemUOMId
+							Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+							Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
+							Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+							Where i.intItemId=@intRawItemId ORDER BY l.intLotId DESC
 				End
 				Else
 				Begin
