@@ -164,7 +164,7 @@ BEGIN TRY
 			WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
 		END
 
-		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 			INSERT INTO @LineItems (
 			intContractDetailId,
@@ -236,8 +236,8 @@ BEGIN TRY
 				,ysnIsStorage 
 			)
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
-			IF (@dblRemainingUnits = @dblNetUnits)
-			RETURN
+			--IF (@dblRemainingUnits = @dblNetUnits)
+			--RETURN
 		END
 			UPDATE @LineItems set intTicketId = @intTicketId
 			--DELETE FROM @ItemsForItemReceipt
@@ -282,15 +282,15 @@ BEGIN TRY
 		END
 	ELSE
 	BEGIN
-	IF @ysnDPStorage = 1
-		BEGIN
+		IF @ysnDPStorage = 1
+			BEGIN
 				INSERT INTO @LineItems (
 				intContractDetailId,
 				dblUnitsDistributed,
 				dblUnitsRemaining,
 				dblCost)
 				EXEC dbo.uspCTUpdationFromTicketDistribution 
-				 @intTicketId
+					@intTicketId
 				,@intEntityId
 				,@dblNetUnits
 				,@intContractId
@@ -311,14 +311,14 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-				   -- Here we do some kind of action that requires us to 
-				   -- process the table variable row-by-row. This example simply
-				   -- uses a PRINT statement as that action (not a very good
-				   -- example).
-				   IF	ISNULL(@intDPContractId,0) != 0
-				   EXEC uspCTUpdateScheduleQuantity @intDPContractId, @dblDPContractUnits, @intUserId, @intTicketId, 'Scale'
+					-- Here we do some kind of action that requires us to 
+					-- process the table variable row-by-row. This example simply
+					-- uses a PRINT statement as that action (not a very good
+					-- example).
+					IF	ISNULL(@intDPContractId,0) != 0
+					EXEC uspCTUpdateScheduleQuantity @intDPContractId, @dblDPContractUnits, @intUserId, @intTicketId, 'Scale'
 				   
-				    INSERT INTO @ItemsForItemReceipt (
+					INSERT INTO @ItemsForItemReceipt (
 					intItemId
 					,intItemLocationId
 					,intItemUOMId
@@ -341,37 +341,37 @@ BEGIN TRY
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
 					EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
 
-				   -- Attempt to fetch next row from cursor
-				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+					-- Attempt to fetch next row from cursor
+					FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
 
 				CLOSE intListCursor;
 				DEALLOCATE intListCursor;
-		END
-	ELSE
-		BEGIN
-			INSERT INTO @ItemsForItemReceipt (
-					intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,intTransactionDetailId
-					,strTransactionId
-					,intTransactionTypeId
-					,intLotId
-					,intSubLocationId
-					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-					,ysnIsStorage 
-			)
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
-		END
+			END
+		ELSE
+			BEGIN
+				INSERT INTO @ItemsForItemReceipt (
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+						,ysnIsStorage 
+				)
+				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
+			END
 	END
 
 	-- Add the items to the item receipt 
