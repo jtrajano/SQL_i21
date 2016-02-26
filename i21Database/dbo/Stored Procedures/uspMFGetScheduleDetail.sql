@@ -210,4 +210,4 @@ SELECT SC.intManufacturingCellId
 	,NULL AS strCustomer
 	,strRowId
 FROM @tblMFScheduleConstraintDetail SC
-ORDER BY intExecutionOrder
+ORDER BY intManufacturingCellId,intExecutionOrder
