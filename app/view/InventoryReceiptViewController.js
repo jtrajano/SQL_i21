@@ -343,7 +343,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             lblWeightLossMsg: {
-                hidden: '{checkWeightLossHide}',
+                hidden: false,
                 text: '{getWeightLossText}'
             },
             grdInventoryReceipt: {
@@ -937,6 +937,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             store: store,
             createRecord: me.createRecord,
             validateRecord: me.validateRecord,
+            onPageChange: me.onPageChange,
             binding: me.config.binding,
             enableComment: true,
             enableAudit: true,
@@ -1094,6 +1095,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             me.setupAdditionalBinding(win);
         }
+    },
+
+    onPageChange: function(pagingStatusBar, record, eOpts) {
+        var win = pagingStatusBar.up('window');
+        var me = win.controller;
+        var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
+
+        me.validateWeightLoss(win, ReceiptItems.data.items);
     },
 
     createRecord: function (config, action) {
@@ -4054,23 +4063,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         Ext.Array.each(ReceiptItems, function (item)
         {
-            dblFranchise = item.data.dblFranchise;
-            dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
-            dblNetReceivedWt = item.data.dblNetWt;
+            if (item.dummy) {
 
-            if (dblFranchise > 0)
-                dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
-            if ((dblNetReceivedWt - dblNetShippedWt) > 0)
-                dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
+            }
+            else {
+                dblFranchise = item.data.dblFranchise;
+                dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
+                dblNetReceivedWt = item.data.dblNet;
+
+                if (dblFranchise > 0)
+                    dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
+                if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
+                    dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
+            }
         });
 
-        action (dblWeightLoss);
+        action(dblWeightLoss);
     },
 
     validateWeightLoss: function(win, ReceiptItems) {
         win.viewModel.data.weightLoss = 0;
         var action = function(weightLoss) {
-            win.viewModel.data.weightLoss = weightLoss;
+            win.viewModel.set('weightLoss', weightLoss);
         };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();

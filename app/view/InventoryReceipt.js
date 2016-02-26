@@ -741,7 +741,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         items: [
                                                                                             {
                                                                                                 xtype: 'label',
-                                                                                                hidden: true,
                                                                                                 itemId: 'lblWeightLossMsg',
                                                                                                 style: '{ color: red }',
                                                                                                 text: 'My Label'
