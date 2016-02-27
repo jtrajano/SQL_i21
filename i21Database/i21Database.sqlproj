@@ -171,6 +171,7 @@
     <Folder Include="Scripts\Post-Deployment\TR" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports\SubReports" />
+    <Folder Include="Scripts\Utility\IC\Stock Unit" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3209,6 +3210,7 @@
     <Build Include="dbo\Functions\fnDivide.sql" />
     <Build Include="dbo\Functions\fnMultiply.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
+    <Build Include="Scripts\Utility\IC\Stock Unit\uspICChangeItemStockUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
