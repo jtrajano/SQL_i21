@@ -35,6 +35,6 @@
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY(intFutureMarketId)REFERENCES [dbo].[tblRKFutureMarket] (intFutureMarketId),
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY(intFutureMonthId)REFERENCES [dbo].[tblRKFuturesMonth] (intFutureMonthId),
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),	
-	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblICItem_intItemId] FOREIGN KEY([intCommodityId])REFERENCES [dbo].[tblICItem] ([intItemId]),	
+	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblICItem_intItemId] FOREIGN KEY([intItemId])REFERENCES [dbo].[tblICItem] ([intItemId]),	
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblEntity_intEntityId] FOREIGN KEY([intEntityId])REFERENCES [dbo].[tblEntity] ([intEntityId])
 )
