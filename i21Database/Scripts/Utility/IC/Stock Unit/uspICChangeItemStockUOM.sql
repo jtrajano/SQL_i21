@@ -44,22 +44,22 @@ END
 -- Get the original item uom records. 
 BEGIN 
 	DECLARE @OriginalItemUOM AS TABLE (
-		intItemUOMId AS INT
-		,intUnitMeasureId AS INT
-		,dblUnitQty AS NUMERIC(38, 20)
-		,ysnStockUnit AS BIT 
+		intItemUOMId INT
+		,intUnitMeasureId INT
+		,dblUnitQty NUMERIC(38, 20)
+		,ysnStockUnit BIT 
 	)
 
 	INSERT INTO @OriginalItemUOM (
 			intItemUOMId
 			,intUnitMeasureId
 			,dblUnitQty
-			,dblUnitQty
+			,ysnStockUnit
 	)
 	SELECT	intItemUOMId
 			,intUnitMeasureId
 			,dblUnitQty
-			,ysnStockUnit
+			,ISNULL(ysnStockUnit, 0) 
 	FROM dbo.tblICItemUOM
 	WHERE	intItemId = @intItemId
 END 
@@ -67,14 +67,16 @@ END
 -- Update the inventory stock
 BEGIN 
 	DECLARE @intItemUOMIdOriginalStockUnit AS INT 
+
 	SELECT	@intItemUOMIdOriginalStockUnit = intItemUOMId
 	FROM	dbo.tblICItemUOM
-	WHERE	ISNULL(ysnStockUnit, 0) = 1
+	WHERE	intItemId = @intItemId
+			AND ISNULL(ysnStockUnit, 0) = 1
 
 	DECLARE @dblNewStockUnit_UnitQty AS NUMERIC(38, 20)
 	SELECT	@dblNewStockUnit_UnitQty = dblUnitQty
 	FROM	@OriginalItemUOM
-	WHERE	intItemUOM = @intItemUOMAsNewStockUnit
+	WHERE	intItemUOMId = @intItemUOMAsNewStockUnit
 
 	-- Convert the stock unit from the Item Stock table to the new stock unit qty. 
 	UPDATE	ItemStock
@@ -123,6 +125,107 @@ BEGIN
 	WHERE	intItemId = @intItemId 
 END 
 
+-- Migrate all inventory transactions using the original stock unit to the new stock unit. 
+BEGIN 
+	-- Convert Qty, Cost, and Sales Price to the new stock unit. 
+	UPDATE	InvTrans
+	SET		dblQty = dbo.fnDivide(dblQty, @dblNewStockUnit_UnitQty) 
+			,dblCost = dbo.fnMultiply(dblCost, @dblNewStockUnit_UnitQty) 
+			,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, @dblNewStockUnit_UnitQty) 
+			,intItemUOMId = @intItemUOMAsNewStockUnit
+	FROM	dbo.tblICInventoryTransaction InvTrans 
+	WHERE	InvTrans.intItemId = @intItemId 
+			AND InvTrans.intItemUOMId = @intItemUOMIdOriginalStockUnit
+
+	UPDATE	InvLotTrans
+	SET		dblQty = dbo.fnDivide(dblQty, @dblNewStockUnit_UnitQty) 
+			,dblCost = dbo.fnMultiply(dblCost, @dblNewStockUnit_UnitQty) 
+			,intItemUOMId = @intItemUOMAsNewStockUnit
+	FROM	dbo.tblICInventoryLotTransaction InvLotTrans 
+	WHERE	InvLotTrans.intItemId = @intItemId 
+			AND InvLotTrans.intItemUOMId = @intItemUOMIdOriginalStockUnit
+
+	-- Migrate the Lot cost bucket from the original stock unit to the new stock unit.
+	BEGIN 
+		UPDATE	LotOut
+		SET		dblQty = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblCostAdjustQty = dbo.fnDivide(dblCostAdjustQty, @dblNewStockUnit_UnitQty) 
+		FROM	dbo.tblICInventoryLot InvLot INNER JOIN dbo.tblICInventoryLotOut LotOut
+					ON InvLot.intInventoryLotId = LotOut.intInventoryLotId
+		WHERE	InvLot.intItemId = @intItemId
+				AND InvLot.intItemUOMId = @intItemUOMIdOriginalStockUnit
+
+		UPDATE	InvLot
+		SET		dblStockIn = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblStockOut = dbo.fnDivide(dblStockOut, @dblNewStockUnit_UnitQty) 
+				,dblCost = dbo.fnMultiply(dblCost, @dblNewStockUnit_UnitQty) 
+				,intItemUOMId = @intItemUOMAsNewStockUnit
+		FROM	dbo.tblICInventoryLot InvLot
+		WHERE	InvLot.intItemId = @intItemId 
+				AND InvLot.intItemUOMId = @intItemUOMIdOriginalStockUnit
+	END 
+
+	-- Migrate the FIFO cost bucket from the original stock unit to the new stock unit.
+	BEGIN 
+		UPDATE	FIFOOut
+		SET		dblQty = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblCostAdjustQty = dbo.fnDivide(dblCostAdjustQty, @dblNewStockUnit_UnitQty) 
+		FROM	dbo.tblICInventoryFIFO InvFIFO INNER JOIN dbo.tblICInventoryFIFOOut FIFOOut
+					ON InvFIFO.intInventoryFIFOId = FIFOOut.intInventoryFIFOId
+		WHERE	InvFIFO.intItemId = @intItemId
+				AND InvFIFO.intItemUOMId = @intItemUOMIdOriginalStockUnit
+
+		UPDATE	InvFIFO
+		SET		dblStockIn = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblStockOut = dbo.fnDivide(dblStockOut, @dblNewStockUnit_UnitQty) 
+				,dblCost = dbo.fnMultiply(dblCost, @dblNewStockUnit_UnitQty) 
+				,intItemUOMId = @intItemUOMAsNewStockUnit
+		FROM	dbo.tblICInventoryFIFO InvFIFO
+		WHERE	InvFIFO.intItemId = @intItemId 
+				AND InvFIFO.intItemUOMId = @intItemUOMIdOriginalStockUnit
+	END
+
+	-- Migrate the LIFO cost bucket from the original stock unit to the new stock unit.
+	BEGIN 
+		UPDATE	LIFOOut
+		SET		dblQty = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblCostAdjustQty = dbo.fnDivide(dblCostAdjustQty, @dblNewStockUnit_UnitQty) 
+		FROM	dbo.tblICInventoryLIFO InvLIFO INNER JOIN dbo.tblICInventoryLIFOOut LIFOOut
+					ON InvLIFO.intInventoryLIFOId = LIFOOut.intInventoryLIFOId
+		WHERE	InvLIFO.intItemId = @intItemId
+				AND InvLIFO.intItemUOMId = @intItemUOMIdOriginalStockUnit
+	
+		UPDATE	InvLIFO
+		SET		dblStockIn = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblStockOut = dbo.fnDivide(dblStockOut, @dblNewStockUnit_UnitQty) 
+				,dblCost = dbo.fnMultiply(dblCost, @dblNewStockUnit_UnitQty) 
+				,intItemUOMId = @intItemUOMAsNewStockUnit
+		FROM	dbo.tblICInventoryLIFO InvLIFO
+		WHERE	InvLIFO.intItemId = @intItemId 
+				AND InvLIFO.intItemUOMId = @intItemUOMIdOriginalStockUnit
+	END 
+
+	-- Migrate the Actual Cost bucket from the original stock unit to the new stock unit.
+	BEGIN 
+		UPDATE	ActualCostOut
+		SET		dblQty = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblCostAdjustQty = dbo.fnDivide(dblCostAdjustQty, @dblNewStockUnit_UnitQty) 
+		FROM	dbo.tblICInventoryActualCost InvActualCost INNER JOIN dbo.tblICInventoryActualCostOut ActualCostOut
+					ON InvActualCost.intInventoryActualCostId = ActualCostOut.intInventoryActualCostId
+		WHERE	InvActualCost.intItemId = @intItemId
+				AND InvActualCost.intItemUOMId = @intItemUOMIdOriginalStockUnit
+
+		UPDATE	InvActualCost
+		SET		dblStockIn = dbo.fnDivide(dblStockIn, @dblNewStockUnit_UnitQty) 
+				,dblStockOut = dbo.fnDivide(dblStockOut, @dblNewStockUnit_UnitQty) 
+				,dblCost = dbo.fnMultiply(dblCost, @dblNewStockUnit_UnitQty) 
+				,intItemUOMId = @intItemUOMAsNewStockUnit
+		FROM	dbo.tblICInventoryActualCost InvActualCost
+		WHERE	InvActualCost.intItemId = @intItemId 
+				AND InvActualCost.intItemUOMId = @intItemUOMIdOriginalStockUnit
+	END 
+END
+
 -- Recalculate the Unit Qty's 
 BEGIN 
 	UPDATE	ItemUOM
@@ -142,13 +245,12 @@ BEGIN
 	WHERE	ItemPricing.intItemId = @intItemId
 END 
 
--- Update the unit Qty of the inventory transactions. 
+-- Update the UOM Qty on all transactions to the new Unit Qty. 
 BEGIN 
 	UPDATE	InvTrans
 	SET		dblUOMQty = ItemUOM.dblUnitQty
 	FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItemUOM ItemUOM
-				ON InvTrans.intItemUOMId = ItemUOM.intItemUOMId
+				ON InvTrans.intItemId = ItemUOM.intItemId
+				AND InvTrans.intItemUOMId = ItemUOM.intItemUOMId
 	WHERE	InvTrans.intItemId = @intItemId 
-END
-
--- Update the cost buckets
+END 
