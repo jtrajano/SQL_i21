@@ -3493,6 +3493,7 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
     <Build Include="dbo\Views\vyuLGWeightLoss.sql" />
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
