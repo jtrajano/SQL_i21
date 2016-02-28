@@ -1342,7 +1342,8 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
 		convert(decimal(24,2),(round(isnull(dblAdjustedContractPrice,0),4)-round(isnull(dblMarketPrice,0),4))*round(isnull(dblResult1,0),4)) dblResult,
 		convert(decimal(24,2),((round(isnull(dblContractBasis,0),4)+round(isnull(dblCosts,0),4))-round(isnull(dblMarketBasis,0),4))*round(isnull(dblResultBasis1,0),4)) dblResultBasis,
 		convert(decimal(24,2),((round(isnull(dblFutures,0),4)- round(isnull(dblFuturePrice,0),4))*round(isnull(dblMarketFuturesResult1,0),4))) dblMarketFuturesResult,
-	 isnull(dblResultCash1,0) as dblResultCash   into #Temp   
+		case when strPricingType='Cash' THEN convert(decimal(24,2),(round(isnull(dblAdjustedContractPrice,0),4)-round(isnull(dblMarketPrice,0),4))*round(isnull(dblResult1,0),4))
+		else null end as dblResultCash   into #Temp   
  FROM(
       SELECT 
       convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblFuturePrice)) as dblFuturePrice
@@ -1367,7 +1368,6 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
             end)
             as dblFutures,             
             convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblCash)) as dblCash, 
-           	--convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblCosts)) 
 			dblCosts,
             convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblMarketBasis)) as dblMarketBasis, 
             convert(decimal(24,6),dblFuturesClosingPrice) dblFuturesClosingPrice,              
@@ -1385,36 +1385,46 @@ END
 
 ------------- Calculation of Results ----------------------
    UPDATE #Temp set dblResult=
-             CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice < dblMarketPrice) 
+             CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
                   THEN abs(dblResult)
                   WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
                   THEN -abs(dblResult)
-                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice > dblMarketPrice) 
+                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
                   THEN abs(dblResult)
                   WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
                   THEN -abs(dblResult)
                END ,
+		dblResultCash=
+             CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
+                  THEN abs(dblResultCash)
+                  WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
+                  THEN -abs(dblResultCash)
+                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
+                  THEN abs(dblResultCash)
+                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
+                  THEN -abs(dblResultCash)
+               END ,
                dblResultBasis=
-             CASE WHEN intContractTypeId = 1 and (isnull(dblContractBasis,0) < dblMarketBasis) 
+             CASE WHEN intContractTypeId = 1 and (isnull(dblContractBasis,0) <= dblMarketBasis) 
                   THEN abs(dblResultBasis)
                   WHEN intContractTypeId = 1 and (isnull(dblContractBasis,0) > dblMarketBasis) 
                   THEN -abs(dblResultBasis)
-                  WHEN intContractTypeId = 2  and (isnull(dblContractBasis,0) > dblMarketBasis) 
+                  WHEN intContractTypeId = 2  and (isnull(dblContractBasis,0) >= dblMarketBasis) 
                   THEN abs(dblResultBasis)
                   WHEN intContractTypeId = 2  and (isnull(dblContractBasis,0) < dblMarketBasis) 
                   THEN -abs(dblResultBasis)
                END ,
                dblMarketFuturesResult=
-             CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice < dblMarketPrice) 
+             CASE WHEN intContractTypeId = 1 and (isnull(dblFutures,0) <= isnull(dblFuturesClosingPrice,0)) 
                   THEN abs(dblMarketFuturesResult)
-                  WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
+                  WHEN intContractTypeId = 1 and (isnull(dblFutures,0) > isnull(dblFuturesClosingPrice,0)) 
                   THEN -abs(dblMarketFuturesResult)
-                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice > dblMarketPrice) 
+                  WHEN intContractTypeId = 2  and (isnull(dblFutures,0) >= isnull(dblFuturesClosingPrice,0)) 
                   THEN abs(dblMarketFuturesResult)
-                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
+                  WHEN intContractTypeId = 2  and (isnull(dblFutures,0) < isnull(dblFuturesClosingPrice,0)) 
                   THEN -abs(dblMarketFuturesResult)
                END 
 		
 --------------END ---------------
 SELECT DISTINCT * INTO #TempFinal from #Temp where dblOpenQty <> 0 
-SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,* from #TempFinal
+SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) AS intRowNum,* from #TempFinal 

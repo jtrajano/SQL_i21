@@ -16,3 +16,10 @@ BEGIN
 END
 
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE name = 'tblRKM2MInquiryTransaction' AND type ='U')
+	BEGIN
+		EXEC('update  tblRKM2MInquiryTransaction set intItemId = NULL where intItemId not in(select intItemId from tblICItem)')
+	END
+
+GO
