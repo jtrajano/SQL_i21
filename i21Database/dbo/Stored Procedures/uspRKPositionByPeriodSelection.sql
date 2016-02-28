@@ -52,8 +52,10 @@ DECLARE @MonthList as TABLE (
 
 	DECLARE @MaxDate Datetime 
 	DECLARE @intCurrencyId INT
+	DECLARE @strCurrencyName nvarchar(max)
 	SELECT  TOP 1 @MaxDate=CONVERT(DATETIME,'01 '+dtmMonth) from @MonthList order by intRowNumber desc
 	select @intCurrencyId=intCurrencyId from tblRKCompanyPreference
+	select top 1 @strCurrencyName=strCurrency from tblSMCurrency where intCurrencyID =@intCurrencyId
 
 	 DECLARE @List AS TABLE (  
      intRowNumber INT IDENTITY(1,1) PRIMARY KEY , 
@@ -148,7 +150,8 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRateType et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateTypeId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRateType et1 on cd1.intCurrencyExchangeRateId=et1.intCurrencyExchangeRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		FROM vyuCTContractDetailView cd
@@ -826,7 +829,8 @@ update @FinalList set intOrderByTwo=2 Where strSecondSubHeading ='Wt./Avg Future
 update @FinalList set intOrderByTwo=3 Where strSecondSubHeading ='Wt./Avg Basis'
 update @FinalList set intOrderByTwo=4 Where strSecondSubHeading ='Wt./Avg Cash'
 update @FinalList set intOrderByTwo=5 Where strSecondSubHeading ='Wt./Avg Freight'
---update @FinalList set intOrderByTwo=6 Where strSecondSubHeading not in('Purchase Quantity','Wt./Avg Futures','Wt./Avg Basis','Wt./Avg Cash','Wt./Avg Freight')
+update @FinalList set intOrderByTwo=6 Where strSecondSubHeading like '%' + @strCurrencyName + '%'
+--not in('Purchase Quantity','Wt./Avg Futures','Wt./Avg Basis','Wt./Avg Cash','Wt./Avg Freight')
 
 DELETE @List
 INSERT INTO @List(strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,intOrderByOne,intOrderByTwo,ExRate) 
@@ -846,6 +850,9 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT * FROM @List WHERE strSecondSubHeading not like '%Wt./Avg%' and  dblBalance IS NOT NULL 
+
+	SELECT * from @List WHERE strSecondSubHeading  not like '%Wt./Avg%'
+	and strSecondSubHeading not like '%' + @strCurrencyName + '%' and	dblBalance IS NOT NULL 	
 	ORDER BY intOrderByOne,intOrderByTwo,strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading
+
 END
