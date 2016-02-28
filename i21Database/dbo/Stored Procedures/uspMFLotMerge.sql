@@ -2,7 +2,8 @@
  @intLotId INT,     
  @intNewLotId INT,  
  @dblMergeQty NUMERIC(38,20),
- @intUserId INT
+ @intUserId INT,
+ @blnValidateLotReservation BIT = 0
 
 AS
 
@@ -58,9 +59,12 @@ BEGIN TRY
 	
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
 	
-	IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+	IF @blnValidateLotReservation = 1
 	BEGIN
-		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		BEGIN
+			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		END
 	END
 
 	IF @intItemStockUOMId = @intWeightUOMId

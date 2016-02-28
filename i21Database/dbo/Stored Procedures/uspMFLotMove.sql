@@ -3,6 +3,7 @@
 	,@intNewStorageLocationId INT
 	,@dblMoveQty NUMERIC(38, 20)
 	,@intUserId INT
+	,@blnValidateLotReservation BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -70,9 +71,12 @@ BEGIN TRY
 	
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
 
-	IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+	IF @blnValidateLotReservation = 1 
 	BEGIN
-		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+		BEGIN
+			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		END
 	END
 
 	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
