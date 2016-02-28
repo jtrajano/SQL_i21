@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKM2MInquirySummary] 
+﻿CREATE PROCEDURE uspRKM2MInquirySummary 
 		@intM2MBasisId int = null,
 		@intFutureSettlementPriceId int = null,
 		@intQuantityUOMId int = null,
@@ -19,8 +19,8 @@ WHERE intM2MBasisId = @intM2MBasisId
 
 DECLARE @tblRow TABLE (
 	RowNumber INT IDENTITY(1, 1)
-	,intCommodityId INT)
-
+	,intCommodityId INT
+	)
 DECLARE @tblFinalDetail TABLE (
 	RowNumber INT IDENTITY(1, 1)
 	,strSummary NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -88,8 +88,7 @@ SELECT intCommodityId
 FROM (
 	SELECT DISTINCT intCommodityId
 		,strCommodityCode
-	FROM @#tempSummary
-	
+	FROM @#tempSummary	
 	) t
 ORDER BY strCommodityCode
 
@@ -192,11 +191,19 @@ BEGIN
 			GROUP BY intCommodityId
 				,strCommodityCode
 			) t
-	
+
+	INSERT INTO @tblFinalDetail(strSummary,dblQty,dblTotal, dblFutures,dblBasis,dblCash)
+	SELECT 'Total',sum(isnull(dblQty,0)),sum(isnull(dblTotal,0)), sum(isnull(dblFutures,0)),sum(isnull(dblBasis,0)),sum(isnull(dblCash,0)) FROM @tblFinalDetail
+	WHERE intCommodityId = @intCommodityId1
+
 	SELECT @mRowNumber = MIN(RowNumber)
 	FROM @tblRow
 	WHERE RowNumber > @mRowNumber
 END
 
-SELECT *,0 as intConcurrencyId  
-FROM @tblFinalDetail
+	INSERT INTO @tblFinalDetail(strSummary,dblQty,dblTotal, dblFutures,dblBasis,dblCash)
+	SELECT 'Total Summary',sum(isnull(dblQty,0)),sum(isnull(dblTotal,0)), sum(isnull(dblFutures,0)),sum(isnull(dblBasis,0)),sum(isnull(dblCash,0)) FROM @tblFinalDetail where 
+	strSummary = 'Total'
+	
+SELECT RowNumber,strSummary,intCommodityId,strCommodityCode,strContractOrInventoryType,dblQty,dblTotal,convert(decimal,dblFutures) as dblFutures,dblBasis,dblCash,0 as intConcurrencyId  
+FROM @tblFinalDetail	
