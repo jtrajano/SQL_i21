@@ -67,3 +67,12 @@ Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnAc
 Select * From @tblPickedLots
 
 END
+
+ELSE
+BEGIN
+	EXEC [uspMFAutoBlendSheetQuality] 
+			@intLocationId=@intLocationId,
+			@intBlendRequirementId=@intBlendRequirementId,
+			@dblQtyToProduce=@dblQtyToProduce,
+			@strXml=@strXml
+END
