@@ -50,24 +50,29 @@ BEGIN
 			,NULL
 		);													
 					
-	--Item Special Pricing
+	--Item Promotional Pricing
 	SELECT TOP 1 
 		@Price			= @UOMQuantity *
-							(CASE
-								WHEN strDiscountBy = 'Amount'
-									THEN dblUnitAfterDiscount - ISNULL(dblDiscount, 0.00)
-								ELSE	
-									dblUnitAfterDiscount - (dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
+							(CASE WHEN strPromotionType = 'Terms Discount' THEN dblUnitAfterDiscount
+							ELSE
+								(CASE
+									WHEN strDiscountBy = 'Amount'
+										THEN dblUnitAfterDiscount - ISNULL(dblDiscount, 0.00)
+									ELSE	
+										dblUnitAfterDiscount - (dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
+								END)
 							END)
 		,@PriceBasis	= dblUnitAfterDiscount		
-		,@Deviation		= 
-							(CASE
-								WHEN strDiscountBy = 'Amount'
-									THEN ISNULL(dblDiscount, 0.00)
-								ELSE	
-									(dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
-							END)		
-		,@Pricing		= 'Inventory Special Pricing'		
+		,@Deviation		= (CASE WHEN strPromotionType = 'Terms Discount' THEN dblDiscount
+							ELSE
+								(CASE
+									WHEN strDiscountBy = 'Amount'
+										THEN ISNULL(dblDiscount, 0.00)
+									ELSE	
+										(dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
+								END)
+							END) 									
+		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing 
 	WHERE
@@ -76,7 +81,7 @@ BEGIN
 		AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmBeginDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 	ORDER BY
-		intItemSpecialPricingId 
+		dtmBeginDate DESC
 	
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
