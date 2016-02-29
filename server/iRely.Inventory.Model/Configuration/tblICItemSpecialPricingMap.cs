@@ -32,9 +32,10 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemSpecialPricings)
                 .HasForeignKey(p => p.intItemLocationId);
+            
             this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemSpecialPricings)
-                .HasForeignKey(p => p.intItemLocationId);
+                .HasForeignKey(p => p.intItemUnitMeasureId);
         }
     }
 }
