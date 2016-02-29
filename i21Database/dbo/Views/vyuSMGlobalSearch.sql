@@ -8,7 +8,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Vendor' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -21,7 +21,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Customer' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -34,7 +34,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Salesperson' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -47,7 +47,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'FuturesBroker' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -60,7 +60,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'ForwardingAgent' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -73,7 +73,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Terminal' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -86,7 +86,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'ShippingLine' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -99,7 +99,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Trucker' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -112,7 +112,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'ShipVia' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -125,7 +125,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Insurer' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -138,7 +138,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Employee' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -151,7 +151,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'Producer' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
@@ -164,7 +164,7 @@ FROM
 		'EM' + CONVERT(NVARCHAR,entity.[intEntityId]) as Id,
 		'EntityManagement.view.Entity' as strNamespace,
 		'User' as strDisplayTitle,			
-		'intItemId' as strValueField,
+		'intEntityId' as strValueField,
 		CONVERT(NVARCHAR(10),entity.[intEntityId]) as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
