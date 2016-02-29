@@ -872,7 +872,7 @@ BEGIN
 					,dtmDate = 'March 15, 2014'
 					,dblStockIn = 0
 					,dblStockOut = 30
-					,dblCost = 20.50
+					,dblCost = 20.91666700 -- Negative stock is sold using average cost. 
 					,intCreatedEntityId = @intEntityUserSecurityId
 					,intConcurrencyId = 2
 
@@ -1115,7 +1115,7 @@ BEGIN
 					,[dblQty] = 0 
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = 0
-					,[dblValue] = 30 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
+					,[dblValue] = 30 * 20.91666700000000000000 -- dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1256,7 +1256,7 @@ BEGIN
 					,dblQty = 45					
 		END
 	END 
-	
+
 	-- Act 
 	BEGIN 
 		EXEC dbo.uspICPostAverageCosting
