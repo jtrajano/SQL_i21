@@ -490,7 +490,7 @@ BEGIN
 				,dblQty = 0
 				,dblUOMQty = 1
 				,dblCost = 0
-				,dblValue = 341.00
+				,dblValue = 22 * 18 -- 341.00
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -521,7 +521,7 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-		-- No Auto Variance because the stock is zero. 
+
 		-- Purchase 3: 100 @ $18.00
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
@@ -539,6 +539,27 @@ BEGIN
 				,strTransactionId = 'PURCHASE-000004'
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @PurchaseType
+				,intLotId = NULL
+				,intCreatedEntityId = 1
+				,intConcurrencyId = 1
+
+		-- Auto Negative
+		UNION ALL 
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @Default_Location
+				,intItemUOMId = NULL 
+				,dtmDate = 'November 17, 2014'
+				,dblQty = 0
+				,dblUOMQty = 0
+				,dblCost = 0
+				,dblValue = -55.00
+				,dblSalesPrice = 0 
+				,intCurrencyId = @USD
+				,dblExchangeRate = 1
+				,intTransactionId = 1
+				,strTransactionId = 'PURCHASE-000001'
+				,strBatchId = 'BATCH-000001'
+				,intTransactionTypeId = @AUTO_NEGATIVE
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
