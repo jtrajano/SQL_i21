@@ -3495,6 +3495,7 @@
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
