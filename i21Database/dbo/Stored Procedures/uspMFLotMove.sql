@@ -39,6 +39,15 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
+	IF @dblMoveQty>@dblWeight
+	BEGIN
+		RAISERROR (
+				90015
+				,11
+				,1
+				)
+	END
+
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
