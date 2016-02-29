@@ -3498,6 +3498,7 @@
     <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutItemMovementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
