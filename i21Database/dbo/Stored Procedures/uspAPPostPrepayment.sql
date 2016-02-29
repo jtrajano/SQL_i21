@@ -30,6 +30,13 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 
+CREATE TABLE #tmpPrepayInvalidData (
+	[strError] [NVARCHAR](100),
+	[strTransactionType] [NVARCHAR](50),
+	[strTransactionId] [NVARCHAR](50),
+	[intTransactionId] INT
+);
+
 --SET BatchId
 IF(@batchId IS NULL)
 BEGIN
@@ -37,6 +44,10 @@ BEGIN
 END
 
 SET @batchIdUsed = @batchId
+
+INSERT INTO #tmpPrepayInvalidData 
+SELECT * FROM [fnAPValidatePrepay](@paymentIds, @post, @userId)
+
 
 IF ISNULL(@post,0) = 1
 BEGIN
