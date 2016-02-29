@@ -15,9 +15,10 @@ BEGIN
 	-- *BOY = BEGINNING OF FISCAL YEAR
 	-- *BOT = BEGINNING OF TIME
 	--  NOTE : EXPENSE AND REVENUE BEGINNING BALANCE IS COMPUTED VIA *BOY WHILE OTHER ARE COMPUTE VIA *BOT
+	--  COGS transferred to Expense / Sales to Revenue 02-29-2016 (See 1_AccountType.sql - Post Deployment script)
 	DECLARE @accountType NVARCHAR(30)
 	SELECT @accountType= B.strAccountType  FROM tblGLAccount A JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId WHERE
-	A.strAccountId = @strAccountId and B.strAccountType IN ('Expense','Revenue','Cost of Goods Sold')
+	A.strAccountId = @strAccountId and B.strAccountType IN ('Expense','Revenue')
 	IF @accountType IS NOT NULL
 			INSERT  @tbl
 			SELECT  
