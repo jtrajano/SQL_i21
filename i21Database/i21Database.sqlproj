@@ -3329,4 +3329,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\16_PaymentMethod.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountType.sql" />
+  </ItemGroup>
 </Project>

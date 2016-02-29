@@ -133,6 +133,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- General Ledger
 :r .\GL\DefaultData\1_AccountStructure.sql
+:r .\GL\DefaultData\1_AccountType.sql
 :r .\GL\DefaultData\2_AccountGroup.sql
 :r .\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql
 :r .\GL\DefaultData\3_AccountCategory.sql
