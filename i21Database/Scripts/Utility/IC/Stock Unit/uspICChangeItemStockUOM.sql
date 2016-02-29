@@ -1,9 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspICChangeItemStockUOM]
 	@intItemId INT,
 	@intItemUOMAsNewStockUnit INT = NULL,
-	@strUnitMeasureId AS NVARCHAR(50) = NULL 
-
+	@strUnitMeasureId AS NVARCHAR(50) = NULL,
+	@entitySecurityUserId AS INT = NULL 
 AS
+
+DECLARE @strOriginalStockUnit AS NVARCHAR(50)
+		,@strNewStockUnit AS NVARCHAR(50) 
 
 -- Do the validations
 BEGIN 
@@ -22,6 +25,7 @@ BEGIN
 		-- Try to get the UOM based by the string value. 
 		SELECT	TOP 1 
 				@intItemUOMAsNewStockUnit = ItemUOM.intItemUOMId
+				,@strNewStockUnit = UOM.strUnitMeasure
 		FROM	dbo.tblICItemUOM ItemUOM INNER JOIN dbo.tblICUnitMeasure UOM
 				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		WHERE	ItemUOM.intItemId = @intItemId
@@ -68,10 +72,12 @@ END
 BEGIN 
 	DECLARE @intItemUOMIdOriginalStockUnit AS INT 
 
-	SELECT	@intItemUOMIdOriginalStockUnit = intItemUOMId
-	FROM	dbo.tblICItemUOM
-	WHERE	intItemId = @intItemId
-			AND ISNULL(ysnStockUnit, 0) = 1
+	SELECT	@intItemUOMIdOriginalStockUnit = ItemUOM.intItemUOMId
+			,@strOriginalStockUnit = UOM.strUnitMeasure
+	FROM	dbo.tblICItemUOM ItemUOM INNER JOIN dbo.tblICUnitMeasure UOM
+				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	WHERE	ItemUOM.intItemId = @intItemId
+			AND ISNULL(ItemUOM.ysnStockUnit, 0) = 1
 
 	DECLARE @dblNewStockUnit_UnitQty AS NUMERIC(38, 20)
 	SELECT	@dblNewStockUnit_UnitQty = dblUnitQty
@@ -254,3 +260,15 @@ BEGIN
 				AND InvTrans.intItemUOMId = ItemUOM.intItemUOMId
 	WHERE	InvTrans.intItemId = @intItemId 
 END 
+
+-- Create an Audit Log
+BEGIN 
+	EXEC	dbo.uspSMAuditLog 
+			@keyValue = @intItemId						
+			,@screenName = 'Inventory.view.Item'		
+			,@entityId = @entitySecurityUserId
+			,@actionType = 'Processed'                  
+			,@changeDescription = 'Migrate to a new Stock Unit.'
+			,@fromValue = @strOriginalStockUnit
+			,@toValue = @strNewStockUnit
+END
