@@ -3210,6 +3210,7 @@
     <Build Include="dbo\Functions\fnMultiply.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
     <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
