@@ -261,6 +261,20 @@ BEGIN
 	WHERE	InvTrans.intItemId = @intItemId 
 END 
 
+-- Change to the new Stock Unit
+BEGIN 
+	UPDATE	ItemUOM
+	SET		ysnStockUnit = 0 
+	FROM	dbo.tblICItemUOM ItemUOM
+	WHERE	intItemId = @intItemId
+
+	UPDATE	ItemUOM
+	SET		ysnStockUnit = 1
+	FROM	dbo.tblICItemUOM ItemUOM
+	WHERE	intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMAsNewStockUnit 
+END 
+
 -- Create an Audit Log
 BEGIN 
 	EXEC	dbo.uspSMAuditLog 
