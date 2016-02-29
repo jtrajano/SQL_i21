@@ -14,11 +14,18 @@ AS
 			CASE	WHEN Y.strType = 'Vendor' THEN V.ysnPymtCtrlActive 
 					WHEN Y.strType = 'Customer' THEN U.ysnActive
 					ELSE CAST(1 AS BIT)
-			END	AS	ysnActive
+			END	AS	ysnActive,
+			CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia
 	FROM	tblEntity			E
 	JOIN	tblEntityLocation	L	ON	E.intEntityId			=	L.intEntityId AND L.ysnDefaultLocation = 1
 	JOIN	tblEntityType		Y	ON	Y.intEntityId			=	E.intEntityId
 	JOIN	tblEntityToContact	C	ON	C.intEntityId			=	E.intEntityId AND C.ysnDefaultContact = 1
 	JOIN	tblEntity			T	ON	T.intEntityId			=	C.intEntityContactId	LEFT 
 	JOIN	tblAPVendor			V	ON	V.intEntityVendorId		=	E.intEntityId			LEFT
-	JOIN	tblARCustomer		U	ON	U.intEntityCustomerId	=	E.intEntityId
+	JOIN	tblARCustomer		U	ON	U.intEntityCustomerId	=	E.intEntityId			LEFT
+	JOIN	(
+				SELECT	EY.intEntityId 
+				FROM	tblEntity		EY
+				JOIN	tblEntityType	ET	ON	ET.intEntityId	=	EY.intEntityId	AND	
+												ET.strType		=	'Ship Via'
+			)					S	ON	S.intEntityId			=	E.intEntityId

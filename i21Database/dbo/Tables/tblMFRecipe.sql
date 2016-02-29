@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblMFRecipe]
 (
 	[intRecipeId] INT NOT NULL  IDENTITY(1,1),
+	[strName] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
     [intItemUOMId] INT NOT NULL, 

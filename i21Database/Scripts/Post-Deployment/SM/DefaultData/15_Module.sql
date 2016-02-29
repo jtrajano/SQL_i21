@@ -279,12 +279,15 @@
 		   [strAppCode]						=		N'ef',
 		   [ysnSupported]					=		1,
 	       [intSort]						=		31
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Elevtronic Price (DTN)')
+
+	/* Rename Elevtronic Price (DTN) to Electronic Price (DTN) */
+	UPDATE tblSMModule	SET strModule = 'Electronic Price (DTN)' WHERE strApplicationName = 'Origin' AND strModule = 'Elevtronic Price (DTN)'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Origin' AND strModule = 'Electronic Price (DTN)')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
 	SELECT [intModuleId]					=		32,
 		   [strApplicationName]				=		N'Origin',		  
-		   [strModule]						=		N'Elevtronic Price (DTN)',
+		   [strModule]						=		N'Electronic Price (DTN)',
 		   [strAppCode]						=		N'ep',
 		   [ysnSupported]					=		1,
 	       [intSort]						=		32

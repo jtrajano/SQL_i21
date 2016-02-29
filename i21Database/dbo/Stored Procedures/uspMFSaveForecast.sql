@@ -11,56 +11,56 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@intForecastItemValueId INT
 		,@strReasonCode NVARCHAR(MAX)
-		,@intOldJAN INT
-		,@intNewJAN INT
-		,@intOldFEB INT
-		,@intNewFEB INT
-		,@intOldMAR INT
-		,@intNewMAR INT
-		,@intOldAPR INT
-		,@intNewAPR INT
-		,@intOldMAY INT
-		,@intNewMAY INT
-		,@intOldJUN INT
-		,@intNewJUN INT
-		,@intOldJUL INT
-		,@intNewJUL INT
-		,@intOldAUG INT
-		,@intNewAUG INT
-		,@intOldSEP INT
-		,@intNewSEP INT
-		,@intOldOCT INT
-		,@intNewOCT INT
-		,@intOldNOV INT
-		,@intNewNOV INT
-		,@intOldDEC INT
-		,@intNewDEC INT
+		,@dblOldJan INT
+		,@dblNewJan INT
+		,@dblOldFeb INT
+		,@dblNewFeb INT
+		,@dblOldMar INT
+		,@dblNewMar INT
+		,@dblOldApr INT
+		,@dblNewApr INT
+		,@dblOldMay INT
+		,@dblNewMay INT
+		,@dblOldJun INT
+		,@dblNewJun INT
+		,@dblOldJul INT
+		,@dblNewJul INT
+		,@dblOldAug INT
+		,@dblNewAug INT
+		,@dblOldSep INT
+		,@dblNewSep INT
+		,@dblOldOct INT
+		,@dblNewOct INT
+		,@dblOldNov INT
+		,@dblNewNov INT
+		,@dblOldDec INT
+		,@dblNewDec INT
 	DECLARE @ForecastItemValue TABLE (
 		intForecastItemValueId INT NOT NULL
-		,intOldJAN INT
-		,intNewJAN INT
-		,intOldFEB INT
-		,intNewFEB INT
-		,intOldMAR INT
-		,intNewMAR INT
-		,intOldAPR INT
-		,intNewAPR INT
-		,intOldMAY INT
-		,intNewMAY INT
-		,intOldJUN INT
-		,intNewJUN INT
-		,intOldJUL INT
-		,intNewJUL INT
-		,intOldAUG INT
-		,intNewAUG INT
-		,intOldSEP INT
-		,intNewSEP INT
-		,intOldOCT INT
-		,intNewOCT INT
-		,intOldNOV INT
-		,intNewNOV INT
-		,intOldDEC INT
-		,intNewDEC INT
+		,dblOldJan INT
+		,dblNewJan INT
+		,dblOldFeb INT
+		,dblNewFeb INT
+		,dblOldMar INT
+		,dblNewMar INT
+		,dblOldApr INT
+		,dblNewApr INT
+		,dblOldMay INT
+		,dblNewMay INT
+		,dblOldJun INT
+		,dblNewJun INT
+		,dblOldJul INT
+		,dblNewJul INT
+		,dblOldAug INT
+		,dblNewAug INT
+		,dblOldSep INT
+		,dblNewSep INT
+		,dblOldOct INT
+		,dblNewOct INT
+		,dblOldNov INT
+		,dblNewNov INT
+		,dblOldDec INT
+		,dblNewDec INT
 		)
 
 	SELECT @dtmCurrentDate = GETDATE()
@@ -77,11 +77,12 @@ BEGIN TRY
 			,intUserId INT
 			)
 
-	IF (
-			SELECT MAX(FV.intConcurrencyId)
+	IF Exists(
+			SELECT *
 			FROM dbo.tblMFForecastItemValue FV
-			JOIN OPENXML(@idoc, 'root/ForecastItemValues/ForecastItemValue', 2) WITH (intForecastItemValueId INT) x ON x.intForecastItemValueId = FV.intForecastItemValueId
-			) <> @intConcurrencyId
+			JOIN OPENXML(@idoc, 'root/ForecastItemValues/ForecastItemValue', 2) WITH (intForecastItemValueId INT,intConcurrencyId int) x ON x.intForecastItemValueId = FV.intForecastItemValueId
+			Where FV.intConcurrencyId<>x.intConcurrencyId
+			) 
 	BEGIN
 		RAISERROR (
 				51194
@@ -98,18 +99,18 @@ BEGIN TRY
 		BEGIN TRANSACTION
 
 	UPDATE dbo.tblMFForecastItemValue
-	SET dblJan = x.intJAN
-		,dblFeb = x.intFEB
-		,dblMar = x.intMAR
-		,dblApr = x.intAPR
-		,dblMay = x.intMAY
-		,dblJun = x.intJUN
-		,dblJul = x.intJUL
-		,dblAug = x.intAUG
-		,dblSep = x.intSEP
-		,dblOct = x.intOCT
-		,dblNov = x.intNOV
-		,dblDec = x.intDEC
+	SET dblJan = x.dblJan
+		,dblFeb = x.dblFeb
+		,dblMar = x.dblMar
+		,dblApr = x.dblApr
+		,dblMay = x.dblMay
+		,dblJun = x.dblJun
+		,dblJul = x.dblJul
+		,dblAug = x.dblAug
+		,dblSep = x.dblSep
+		,dblOct = x.dblOct
+		,dblNov = x.dblNov
+		,dblDec = x.dblDec
 		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
@@ -141,18 +142,18 @@ BEGIN TRY
 	INTO @ForecastItemValue
 	FROM OPENXML(@idoc, 'root/ForecastItemValues/ForecastItemValue', 2) WITH (
 			intForecastItemValueId INT
-			,intJAN INT
-			,intFEB INT
-			,intMAR INT
-			,intAPR INT
-			,intMAY INT
-			,intJUN INT
-			,intJUL INT
-			,intAUG INT
-			,intSEP INT
-			,intOCT INT
-			,intNOV INT
-			,intDEC INT
+			,dblJan INT
+			,dblFeb INT
+			,dblMar INT
+			,dblApr INT
+			,dblMay INT
+			,dblJun INT
+			,dblJul INT
+			,dblAug INT
+			,dblSep INT
+			,dblOct INT
+			,dblNov INT
+			,dblDec INT
 			) x
 	WHERE x.intForecastItemValueId = tblMFForecastItemValue.intForecastItemValueId
 
@@ -165,188 +166,188 @@ BEGIN TRY
 
 	WHILE @intForecastItemValueId IS NOT NULL
 	BEGIN
-		SELECT @intOldJAN = NULL
-			,@intNewJAN = NULL
-			,@intOldFEB = NULL
-			,@intNewFEB = NULL
-			,@intOldMAR = NULL
-			,@intNewMAR = NULL
-			,@intOldAPR = NULL
-			,@intNewAPR = NULL
-			,@intOldMAY = NULL
-			,@intNewMAY = NULL
-			,@intOldJUN = NULL
-			,@intNewJUN = NULL
-			,@intOldJUL = NULL
-			,@intNewJUL = NULL
-			,@intOldAUG = NULL
-			,@intNewAUG = NULL
-			,@intOldSEP = NULL
-			,@intNewSEP = NULL
-			,@intOldOCT = NULL
-			,@intNewOCT = NULL
-			,@intOldNOV = NULL
-			,@intNewNOV = NULL
-			,@intOldDEC = NULL
-			,@intNewDEC = NULL
+		SELECT @dblOldJan = NULL
+			,@dblNewJan = NULL
+			,@dblOldFeb = NULL
+			,@dblNewFeb = NULL
+			,@dblOldMar = NULL
+			,@dblNewMar = NULL
+			,@dblOldApr = NULL
+			,@dblNewApr = NULL
+			,@dblOldMay = NULL
+			,@dblNewMay = NULL
+			,@dblOldJun = NULL
+			,@dblNewJun = NULL
+			,@dblOldJul = NULL
+			,@dblNewJul = NULL
+			,@dblOldAug = NULL
+			,@dblNewAug = NULL
+			,@dblOldSep = NULL
+			,@dblNewSep = NULL
+			,@dblOldOct = NULL
+			,@dblNewOct = NULL
+			,@dblOldNov = NULL
+			,@dblNewNov = NULL
+			,@dblOldDec = NULL
+			,@dblNewDec = NULL
 
-		SELECT @intOldJAN = intOldJAN
-			,@intNewJAN = intNewJAN
-			,@intOldFEB = intOldFEB
-			,@intNewFEB = intNewFEB
-			,@intOldMAR = intOldMAR
-			,@intNewMAR = intNewMAR
-			,@intOldAPR = intOldAPR
-			,@intNewAPR = intNewAPR
-			,@intOldMAY = intOldMAY
-			,@intNewMAY = intNewMAY
-			,@intOldJUN = intOldJUN
-			,@intNewJUN = intNewJUN
-			,@intOldJUL = intOldJUL
-			,@intNewJUL = intNewJUL
-			,@intOldAUG = intOldAUG
-			,@intNewAUG = intNewAUG
-			,@intOldSEP = intOldSEP
-			,@intNewSEP = intNewSEP
-			,@intOldOCT = intOldOCT
-			,@intNewOCT = intNewOCT
-			,@intOldNOV = intOldNOV
-			,@intNewNOV = intNewNOV
-			,@intOldDEC = intOldDEC
-			,@intNewDEC = intNewDEC
+		SELECT @dblOldJan =dblOldJan
+			,@dblNewJan = dblNewJan
+			,@dblOldFeb = dblOldFeb
+			,@dblNewFeb = dblNewFeb
+			,@dblOldMar = dblOldMar
+			,@dblNewMar = dblNewMar
+			,@dblOldApr = dblOldApr
+			,@dblNewApr = dblNewApr
+			,@dblOldMay = dblOldMay
+			,@dblNewMay = dblNewMay
+			,@dblOldJun = dblOldJun
+			,@dblNewJun = dblNewJun
+			,@dblOldJul = dblOldJul
+			,@dblNewJul = dblNewJul
+			,@dblOldAug = dblOldAug
+			,@dblNewAug = dblNewAug
+			,@dblOldSep = dblOldSep
+			,@dblNewSep = dblNewSep
+			,@dblOldOct = dblOldOct
+			,@dblNewOct = dblNewOct
+			,@dblOldNov = dblOldNov
+			,@dblNewNov = dblNewNov
+			,@dblOldDec = dblOldDec
+			,@dblNewDec = dblNewDec
 		FROM @ForecastItemValue
 		WHERE intForecastItemValueId = @intForecastItemValueId
 
-		IF @intOldJAN <> @intNewJAN
+		IF @dblOldJan <> @dblNewJan
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldJAN
-				,@toValue = @intNewJAN
+				,@fromValue = @dblOldJan
+				,@toValue = @dblNewJan
 		END
 
-		IF @intOldFEB <> @intNewFEB
+		IF @dblOldFeb <> @dblNewFeb
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldFEB
-				,@toValue = @intNewFEB
+				,@fromValue = @dblOldFeb
+				,@toValue = @dblNewFeb
 		END
 
-		IF @intOldMAR <> @intNewMAR
+		IF @dblOldMar <> @dblNewMar
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldMAR
-				,@toValue = @intNewMAR
+				,@fromValue = @dblOldMar
+				,@toValue = @dblNewMar
 		END
 
-		IF @intOldAPR <> @intNewAPR
+		IF @dblOldApr <> @dblNewApr
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldAPR
-				,@toValue = @intNewAPR
+				,@fromValue = @dblOldApr
+				,@toValue = @dblNewApr
 		END
 
-		IF @intOldMAY <> @intNewMAY
+		IF @dblOldMay <> @dblNewMay
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldMAY
-				,@toValue = @intNewMAY
+				,@fromValue = @dblOldMay
+				,@toValue = @dblNewMay
 		END
 
-		IF @intOldJUN <> @intNewJUN
+		IF @dblOldJun <> @dblNewJun
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldJUN
-				,@toValue = @intNewJUN
+				,@fromValue = @dblOldJun
+				,@toValue = @dblNewJun
 		END
 
-		IF @intOldJUL <> @intNewJUL
+		IF @dblOldJul <> @dblNewJul
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldJUL
-				,@toValue = @intNewJUL
+				,@fromValue = @dblOldJul
+				,@toValue = @dblNewJul
 		END
 
-		IF @intOldAUG <> @intNewAUG
+		IF @dblOldAug <> @dblNewAug
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldAUG
-				,@toValue = @intNewAUG
+				,@fromValue = @dblOldAug
+				,@toValue = @dblNewAug
 		END
 
-		IF @intOldSEP <> @intNewSEP
+		IF @dblOldSep <> @dblNewSep
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldSEP
-				,@toValue = @intNewSEP
+				,@fromValue = @dblOldSep
+				,@toValue = @dblNewSep
 		END
 
-		IF @intOldOCT <> @intNewOCT
+		IF @dblOldOct <> @dblNewOct
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldOCT
-				,@toValue = @intNewOCT
+				,@fromValue = @dblOldOct
+				,@toValue = @dblNewOct
 		END
 
-		IF @intOldNOV <> @intNewNOV
+		IF @dblOldNov <> @dblNewNov
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldNOV
-				,@toValue = @intNewNOV
+				,@fromValue = @dblOldNov
+				,@toValue = @dblNewNov
 		END
 
-		IF @intOldDEC <> @intNewDEC
+		IF @dblOldDec <> @dblNewDec
 		BEGIN
 			EXEC uspSMAuditLog @keyValue = @intForecastItemValueId
 				,@screenName = 'Manufacuturing.view.Forecast'
 				,@entityId = @intUserId
 				,@actionType = 'Processed'
 				,@changeDescription = @strReasonCode
-				,@fromValue = @intOldDEC
-				,@toValue = @intNewDEC
+				,@fromValue = @dblOldDec
+				,@toValue = @dblNewDec
 		END
 
 		SELECT @intForecastItemValueId = Min(intForecastItemValueId)

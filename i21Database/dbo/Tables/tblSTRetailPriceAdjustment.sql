@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSTRetailPriceAdjustment]
 (
 	[intRetailPriceAdjustmentId] INT NOT NULL IDENTITY , 
-    [dtmEffectiveDate] DATETIME NOT NULL, 
+    [dtmEffectiveDate] DATETIME NULL, 
     [strDescription] NVARCHAR(120) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTRetailPriceAdjustment] PRIMARY KEY CLUSTERED ([intRetailPriceAdjustmentId] ASC), 

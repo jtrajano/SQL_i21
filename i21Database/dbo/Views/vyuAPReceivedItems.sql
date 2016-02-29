@@ -357,7 +357,7 @@ FROM
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
-		,[dblUnitCost]								=	CD.dblCashPrice
+		,[dblUnitCost]								=	ISNULL(CD.dblCashPrice,0)
 		,[dblTax]									=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -379,10 +379,13 @@ FROM
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
-	FROM vyuCTContractCostView		CC
-	JOIN vyuCTContractDetailView	CD	ON CC.intContractDetailId = CC.intContractDetailId
-	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = CC.intItemId and ItemLoc.intLocationId = CD.intCompanyLocationId
-	WHERE CD.intContractDetailId NOT IN (SELECT IsNull(intContractDetailId, 0) FROM tblAPBillDetail)
+	FROM		vyuCTContractCostView		CC
+	JOIN		vyuCTContractDetailView		CD	ON CD.intContractDetailId = CC.intContractDetailId
+	LEFT JOIN	tblICItemLocation		ItemLoc ON ItemLoc.intItemId = CC.intItemId and ItemLoc.intLocationId = CD.intCompanyLocationId
+	LEFT JOIN	tblICInventoryReceiptCharge RC	ON RC.intContractId = CC.intContractHeaderId AND RC.intChargeId = CC.intItemId
+	WHERE		CD.intContractDetailId NOT IN (SELECT IsNull(intContractDetailId, 0) FROM tblAPBillDetail) AND 
+				RC.intInventoryReceiptChargeId IS NULL
+
 ) Items
 
 

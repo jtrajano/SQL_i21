@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [uspMFLotMove] @intLotId INT
 	,@intNewSubLocationId INT
 	,@intNewStorageLocationId INT
-	,@dblMoveQty NUMERIC(16, 8)
+	,@dblMoveQty NUMERIC(38, 20)
 	,@intUserId INT
+	,@blnValidateLotReservation BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -19,6 +20,11 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
+		,@dblWeightPerQty NUMERIC(38, 20)
+		,@intWeightUOMId INT
+		,@intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -27,8 +33,16 @@ BEGIN TRY
 		,@strLotNumber = strLotNumber
 		,@intLotStatusId = intLotStatusId
 		,@intNewLocationId = intLocationId
+		,@dblWeightPerQty = dblWeightPerQty
+		,@intWeightUOMId = intWeightUOMId
+		,@dblWeight = dblWeight
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
 
 	SELECT @strNewLotNumber = @strLotNumber
 
@@ -54,10 +68,25 @@ BEGIN TRY
 				,1
 				)
 	END
+	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+
+	IF @blnValidateLotReservation = 1 
+	BEGIN
+		IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+		BEGIN
+			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		END
+	END
 
 	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
 	BEGIN
 		RAISERROR(90008,11,1)
+	END
+
+	IF @intItemStockUOMId = @intWeightUOMId
+	BEGIN
+		SELECT @dblMoveQty = dbo.fnDivide(@dblMoveQty, @dblWeightPerQty)
 	END
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
@@ -76,6 +105,10 @@ BEGIN TRY
 		,@intUserId
 		,@intInventoryAdjustmentId
 
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblWeightPerQty
+	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
+		
 	IF EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrderProducedLot
@@ -92,6 +125,24 @@ BEGIN TRY
 
 		UPDATE dbo.tblMFWorkOrderProducedLot
 		SET intLotId = @intNewLotId
+		WHERE intLotId = @intLotId
+	END
+
+	IF (
+			SELECT dblWeight
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+			) < 0.01
+	BEGIN
+		--EXEC dbo.uspMFLotAdjustQty
+		-- @intLotId =@intLotId,       
+		-- @dblNewLotQty =0,
+		-- @intUserId=@intUserId ,
+		-- @strReasonCode ='Residue qty clean up',
+		-- @strNotes ='Residue qty clean up'
+		UPDATE tblICLot
+		SET dblWeight = 0
+			,dblQty = 0
 		WHERE intLotId = @intLotId
 	END
 END TRY

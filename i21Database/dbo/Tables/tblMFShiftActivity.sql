@@ -17,7 +17,7 @@
 	dblTargetEfficiency NUMERIC(18, 6),
 	intLineUnitMeasureId INT,
 	intLineRateUnitMeasureId INT,
-	strComments NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strComments NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	dblTotalSKUProduced NUMERIC(18, 6),
 	intSKUUnitMeasureId INT,
 	dblTotalWeightofProducedQty NUMERIC(18, 6),

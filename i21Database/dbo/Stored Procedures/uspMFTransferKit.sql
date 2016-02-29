@@ -22,15 +22,15 @@ Declare @intMinParentLot int
 Declare @intMinChildLot int
 Declare @intWorkOrderId int
 Declare @intParentLotId int
-Declare @dblReqQty numeric(18,6)
-Declare @dblAvailableQty numeric(18,6)
+Declare @dblReqQty numeric(38,20)
+Declare @dblAvailableQty numeric(38,20)
 Declare @dtmCurrentDateTime DateTime=GETDATE()
 Declare @index int
 Declare @id int
 Declare @ysnBlendSheetRequired bit
 Declare @intBlendItemId int
-Declare @dblWeightPerUnit numeric(18,6)
-Declare @dblMoveQty numeric(18,6)
+Declare @dblWeightPerUnit numeric(38,20)
+Declare @dblMoveQty numeric(38,20)
 Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
  
@@ -62,10 +62,10 @@ Declare @tblParentLot table
 	intRowNo int Identity(1,1),
 	intWorkOrderId int,
 	intParentLotId int,
-	dblReqQty numeric(18,6),
+	dblReqQty numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(18,6)
+	dblWeightPerUnit numeric(38,20)
 )
 
 Declare @tblChildLot table
@@ -74,10 +74,10 @@ Declare @tblChildLot table
 	intStageLotId int,
 	strStageLotNumber nvarchar(50),
 	intItemId int,
-	dblAvailableQty numeric(18,6),
+	dblAvailableQty numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(18,6)
+	dblWeightPerUnit numeric(38,20)
 )
 
 --Get the Comma Separated Work Order Ids into a table
@@ -126,7 +126,7 @@ Begin
 	--Get the parent Lots for the workorder
 	Delete From @tblParentLot
 	Insert Into @tblParentLot(intWorkOrderId,intParentLotId,dblReqQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select DISTINCT wi.intWorkOrderId,wi.intParentLotId,wi.dblIssuedQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
+	Select DISTINCT wi.intWorkOrderId,wi.intParentLotId,wi.dblQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
 	From tblMFWorkOrderInputParentLot wi 
 	Join tblMFPickListDetail pld on wi.intParentLotId=pld.intParentLotId
 	Where wi.intWorkOrderId=@intWorkOrderId And pld.intPickListId=@intPickListId
@@ -137,7 +137,7 @@ Begin
 
 	While(@intMinParentLot is not null) --Loop Parent Lots
 	Begin
-	Select @intParentLotId=intParentLotId,@dblReqQty=CASE WHEN intItemUOMId=intItemIssuedUOMId THEN dblReqQty ELSE dblReqQty * dblWeightPerUnit  End,
+	Select @intParentLotId=intParentLotId,--@dblReqQty=CASE WHEN intItemUOMId=intItemIssuedUOMId THEN dblReqQty ELSE dblReqQty * dblWeightPerUnit  End,
 	@intItemUOMId=intItemUOMId,@intItemIssuedUOMId=intItemIssuedUOMId 
 	From @tblParentLot Where intRowNo=@intMinParentLot
 
@@ -171,7 +171,7 @@ Begin
 					Exec [uspMFLotMove] @intLotId=@intLotId,
 										@intNewSubLocationId=@intNewSubLocationId,
 										@intNewStorageLocationId=@intBlendStagingLocationId,
-										@dblMoveQty=@dblMoveQty,
+										@dblMoveQty=@dblReqQty,
 										@intUserId=@intUserId
 
 					Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
@@ -181,7 +181,7 @@ Begin
 			Else --Merge
 				Exec [uspMFLotMerge] @intLotId=@intLotId,
 							@intNewLotId=@intNewLotId,
-							@dblMergeQty=@dblMoveQty,
+							@dblMergeQty=@dblReqQty,
 							@intUserId=@intUserId
 
 			
@@ -203,7 +203,7 @@ Begin
 					Exec [uspMFLotMove] @intLotId=@intLotId,
 										@intNewSubLocationId=@intNewSubLocationId,
 										@intNewStorageLocationId=@intBlendStagingLocationId,
-										@dblMoveQty=@dblMoveQty,
+										@dblMoveQty=@dblAvailableQty,
 										@intUserId=@intUserId
 
 					Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
@@ -213,13 +213,13 @@ Begin
 			Else --Merge
 				Exec [uspMFLotMerge] @intLotId=@intLotId,
 							@intNewLotId=@intNewLotId,
-							@dblMergeQty=@dblMoveQty,
+							@dblMergeQty=@dblAvailableQty,
 							@intUserId=@intUserId
 
 			Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
 			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
 			Select @intWorkOrderId,@intNewLotId,@intItemId,@dblAvailableQty,intItemUOMId,
-			CASE WHEN intItemUOMId=intItemIssuedUOMId THEN @dblReqQty ELSE @dblMoveQty End,intItemIssuedUOMId,null,
+			CASE WHEN intItemUOMId=intItemIssuedUOMId THEN @dblAvailableQty ELSE @dblMoveQty End,intItemIssuedUOMId,null,
 			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
 			From @tblChildLot where intRowNo = @intMinChildLot
 

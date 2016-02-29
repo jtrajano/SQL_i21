@@ -4,6 +4,7 @@
 	select 
 --Entity
 	id				= a.intEntityId
+	,ent_no			= a.strEntityNo
 	,name			= a.strName
 	,website		= a.strWebsite
 	,type			= case when e.intEntityVendorId is not null then 'vendor,' else '' end + 
@@ -25,8 +26,9 @@
 	,loc_state			= d.strState
 	,loc_zipcode		= d.strZipCode
 	,loc_country		= d.strCountry
-	,loc_termsId		= d.intTermsId
+	,loc_termsId		= h.strTerm
 	,loc_pricelevel		= d.strPricingLevel
+	,loc_warehouse		= k.strLocationName
 	
 	--Customer
 	,cus_number			= f.strCustomerNumber
@@ -65,3 +67,5 @@
 		on f.intSalespersonId = i.intEntitySalespersonId
 	left join tblGLAccount j
 		on e.intGLAccountExpenseId = j.intAccountId
+	left join tblSMCompanyLocation k
+		on k.intCompanyLocationId = d.intWarehouseId

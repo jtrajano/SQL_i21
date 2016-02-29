@@ -4,8 +4,8 @@
 )
 RETURNS @returntable	TABLE
 (
-	dblUncleanWeight	INT,
-	dblGrossWeight		INT
+	dblUncleanWeight	NUMERIC(18,6),
+	dblCleanWeight		NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -18,7 +18,7 @@ BEGIN
 	INSERT	@returntable
 	(
 			dblUncleanWeight, 
-			dblGrossWeight
+			dblCleanWeight
 	)
 	SELECT	SUM(dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,UM.intUnitMeasureId, @intCleanCostUOMId, RI.dblNet)) dblUncleanWeight,  
 			SUM(dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,UM.intUnitMeasureId, @intCleanCostUOMId, ISNULL(IL.dblGrossWeight,0) - ISNULL(dblTareWeight,0))) dblCleanWeight  

@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheet]
     @intLocationId INT,                            
     @intBlendRequirementId INT,    
-    @dblQtyToProduce NUMERIC(18,6),                                  
+    @dblQtyToProduce NUMERIC(38,20),                                  
     @strXml NVARCHAR(MAX)=NULL  
 AS
 	SET QUOTED_IDENTIFIER OFF
@@ -28,19 +28,19 @@ Declare @tblPickedLots AS table
 	strLotNumber nvarchar(50),
 	strItemNo nvarchar(50),
 	strDescription nvarchar(200),
-	dblQuantity numeric(18,6),
+	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50),
-	dblIssuedQuantity numeric(18,6),
+	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
 	strIssuedUOM nvarchar(50),
 	intItemId int,
 	intRecipeItemId int,
-	dblUnitCost numeric(18,6),
-	dblDensity numeric(18,6),
-	dblRequiredQtyPerSheet numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
-	dblRiskScore numeric(18,6),
+	dblUnitCost numeric(38,20),
+	dblDensity numeric(38,20),
+	dblRequiredQtyPerSheet numeric(38,20),
+	dblWeightPerUnit numeric(38,20),
+	dblRiskScore numeric(38,20),
 	intStorageLocationId int,
 	strStorageLocationName nvarchar(50),
 	strLocationName nvarchar(50),
@@ -66,4 +66,13 @@ Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnAc
 
 Select * From @tblPickedLots
 
+END
+
+ELSE
+BEGIN
+	EXEC [uspMFAutoBlendSheetQuality] 
+			@intLocationId=@intLocationId,
+			@intBlendRequirementId=@intBlendRequirementId,
+			@dblQtyToProduce=@dblQtyToProduce,
+			@strXml=@strXml
 END

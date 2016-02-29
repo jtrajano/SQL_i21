@@ -2,7 +2,7 @@
  @intLotId INT,       
  @intSplitSubLocationId INT,  
  @intSplitStorageLocationId INT,  
- @dblSplitQty NUMERIC(16,8),  
+ @dblSplitQty NUMERIC(38,20),  
  @intUserId INT,
  @strSplitLotNumber NVARCHAR(100)=NULL OUTPUT,
  @strNewLotNumber NVARCHAR(100) = NULL,    
@@ -31,9 +31,14 @@ BEGIN TRY
 	DECLARE @intNewSubLocationId INT
 	DECLARE @intNewStorageLocationId INT	
 	DECLARE @intNewItemUOMId INT
-	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
+	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @strLotTracking NVARCHAR(50)
 			,@intCategoryId int
+	DECLARE @dblWeightPerQty NUMERIC(38, 20)
+	DECLARE @intWeightUOMId INT
+	DECLARE @intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
 	
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
@@ -43,14 +48,34 @@ BEGIN TRY
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
 		   @intLotStatusId = intLotStatusId,
-		   @intItemUOMId = intItemUOMId	   
+		   @intItemUOMId = intItemUOMId,	 
+		   @dblWeightPerQty = dblWeightPerQty,
+		   @intWeightUOMId = intWeightUOMId,
+		   @dblWeight = dblWeight
 	FROM tblICLot WHERE intLotId = @intLotId
+
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
 	
 	SELECT @dblAdjustByQuantity = - @dblSplitQty, 
 		   @intNewItemUOMId = @intItemUOMId, 
 		   @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
+	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	
+	IF (@dblWeight + @dblAdjustByQuantity) < @dblLotReservedQty
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
+
+	IF @intItemStockUOMId = @intWeightUOMId
+	BEGIN
+		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	END
 	
 	SELECT @strLotTracking = strLotTracking
 			,@intCategoryId=intCategoryId
@@ -104,9 +129,30 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblWeightPerQty
+	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
 	
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
+
+	IF (
+			SELECT dblWeight
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+			) < 0.01
+	BEGIN
+		--EXEC dbo.uspMFLotAdjustQty
+		-- @intLotId =@intLotId,       
+		-- @dblNewLotQty =0,
+		-- @intUserId=@intUserId ,
+		-- @strReasonCode ='Residue qty clean up',
+		-- @strNotes ='Residue qty clean up'
+		UPDATE tblICLot
+		SET dblWeight = 0
+			,dblQty = 0
+		WHERE intLotId = @intLotId
+	END
 													 
 END TRY  
   

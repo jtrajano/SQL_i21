@@ -96,10 +96,10 @@ BEGIN
 		DROP TABLE #tblMFCalendarDetail
 
 	IF OBJECT_ID('tempdb..#tblMFScheduleCalendarMachineDetail') IS NOT NULL
-		DROP TABLE #tblMFCalendarDetail
+		DROP TABLE #tblMFScheduleCalendarMachineDetail
 
 	IF OBJECT_ID('tempdb..#tblMFScheduleCalendarMachineCountDetail') IS NOT NULL
-		DROP TABLE #tblMFCalendarDetail
+		DROP TABLE #tblMFScheduleCalendarMachineCountDetail
 
 	CREATE TABLE #tblMFCalendarDetail (
 		intCalendarDetailId INT

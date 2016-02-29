@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [uspMFLotMerge] 
  @intLotId INT,     
  @intNewLotId INT,  
- @dblMergeQty NUMERIC(18,6),
- @intUserId INT
+ @dblMergeQty NUMERIC(38,20),
+ @intUserId INT,
+ @blnValidateLotReservation BIT = 0
 
 AS
 
@@ -22,7 +23,6 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	
 	DECLARE @intNewLocationId INT
 	DECLARE @intNewSubLocationId INT
 	DECLARE @intNewStorageLocationId INT	
@@ -32,8 +32,12 @@ BEGIN TRY
 	DECLARE @strNewLotNumber NVARCHAR(100)
 	DECLARE @intSourceLotWeightUOM INT
 	DECLARE @intDestinationLotWeightUOM INT
-	DECLARE @dblAdjustByQuantity NUMERIC(18,6)
-	
+	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
+	DECLARE @intWeightUOMId INT
+	DECLARE @intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
+
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
 		   @intSubLocationId = intSubLocationId,
@@ -42,9 +46,32 @@ BEGIN TRY
 		   @intLotStatusId = intLotStatusId,
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
-		   @intSourceLotWeightUOM = intWeightUOMId
+		   @intSourceLotWeightUOM = intWeightUOMId,
+		   @intWeightUOMId = intWeightUOMId,
+		   @dblWeight = dblWeight
 	FROM tblICLot WHERE intLotId = @intLotId
+
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
+
 	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	
+	IF @blnValidateLotReservation = 1
+	BEGIN
+		IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		BEGIN
+			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		END
+	END
+
+	IF @intItemStockUOMId = @intWeightUOMId
+	BEGIN
+		SELECT @dblMergeQty = dbo.fnDivide(@dblMergeQty, @dblLotWeightPerUnit)
+	END
+
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
 	
 	SELECT @intNewLocationId = intLocationId ,
@@ -106,6 +133,22 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblNewLotWeightPerUnit
+	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
+
+	IF (SELECT dblWeight
+		FROM dbo.tblICLot
+		WHERE intLotId = @intLotId)<0.01
+		BEGIN
+			--EXEC dbo.uspMFLotAdjustQty
+			-- @intLotId =@intLotId,       
+			-- @dblNewLotQty =0,
+			-- @intUserId=@intUserId ,
+			-- @strReasonCode ='Residue qty clean up',
+			-- @strNotes ='Residue qty clean up'
+			UPDATE tblICLot SET dblWeight=0,dblQty=0 WHERE intLotId = @intLotId
+		END
 
 
 END TRY  

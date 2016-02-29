@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPickWorkOrder] @intWorkOrderId INT
-	,@dblProduceQty NUMERIC(18, 6)
+	,@dblProduceQty NUMERIC(38, 20)
 	,@intProduceUOMKey INT = NULL
 	,@intUserId INT
 	,@intBatchId INT
 	,@PickPreference NVARCHAR(50) = ''
 	,@ysnExcessConsumptionAllowed BIT = 0
-	,@dblUnitQty NUMERIC(18, 6)
+	,@dblUnitQty NUMERIC(38, 20)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -22,7 +22,7 @@ BEGIN TRY
 		,@intLotRecordKey INT
 		,@dblReqQty NUMERIC(18, 6)
 		,@intLotId INT
-		,@dblQty NUMERIC(18, 6)
+		,@dblQty NUMERIC(38, 20)
 		,@intLocationId INT
 		,@intSequenceNo INT
 		,@ysnSubstituteItem BIT
@@ -34,8 +34,8 @@ BEGIN TRY
 		,@intDayOfYear INT
 		,@intConsumptionMethodId INT
 		,@intWeightUOMId INT
-		,@dblAdjustByQuantity NUMERIC(18, 6)
-		,@dblWeightPerQty NUMERIC(18, 6)
+		,@dblAdjustByQuantity NUMERIC(38, 20)
+		,@dblWeightPerQty NUMERIC(38, 20)
 		,@intInventoryAdjustmentId INT
 		,@intTransactionCount INT
 		,@intAttributeId INT
@@ -110,9 +110,9 @@ BEGIN TRY
 		,strLotNumber NVARCHAR(50)
 		,intLotId INT
 		,intItemId INT
-		,dblQty NUMERIC(18, 6)
-		,dblIssuedQuantity NUMERIC(18, 6)
-		,dblWeightPerUnit NUMERIC(18, 6)
+		,dblQty NUMERIC(38, 20)
+		,dblIssuedQuantity NUMERIC(38, 20)
+		,dblWeightPerUnit NUMERIC(38, 20)
 		,intItemUOMId INT
 		,intItemIssuedUOMId INT
 		,ysnSubstituteItem BIT

@@ -6,7 +6,7 @@ BEGIN
 IF OBJECT_ID('tempdb..#tempLotHistory') IS NOT NULL
 DROP TABLE  #tempLotHistory
 
- DECLARE @dblPrimaryQty NUMERIC(18,6)
+ DECLARE @dblPrimaryQty NUMERIC(38,20)
  SET @dblPrimaryQty=0     
 
 		SELECT ilt.dtmCreated AS dtmDateTime, 
@@ -17,8 +17,8 @@ DROP TABLE  #tempLotHistory
 			   clsl.strSubLocationName AS strSubLocation, 
 			   sl.strName AS strStorageLocation, 
 			   itt.strName AS strTransaction, 
-			   CONVERT(NUMERIC(18,6),CASE WHEN iu.intItemUOMId = ilt.intItemUOMId THEN ilt.dblQty ELSE ilt.dblQty/ilt.dblUOMQty END) AS dblTransactionQty,
-			   CONVERT(NUMERIC(18,6),0.0) AS dblQuantity,
+			   CONVERT(NUMERIC(38,20),CASE WHEN iu.intItemUOMId = ilt.intItemUOMId THEN ilt.dblQty ELSE ilt.dblQty/ilt.dblUOMQty END) AS dblTransactionQty,
+			   CONVERT(NUMERIC(38,20),0.0) AS dblQuantity,
 			   um.strUnitMeasure AS strUOM, 
 			   iad.strNewLotNumber AS strRelatedLotId, 
 			   '' AS strPreviousItem, 
@@ -66,8 +66,8 @@ DROP TABLE  #tempLotHistory
 					THEN 'Inventory Adjustment - Expiry Date Change'
 				ELSE ''
 				END AS strTransaction, 
-			   CONVERT(NUMERIC(18,6),ISNULL(CASE WHEN ium.intItemUOMId = iad.intItemUOMId THEN iad.dblWeight  ELSE iad.dblWeight/iad.dblWeightPerQty END,0)) AS dblTransactionQty,
-			   CONVERT(NUMERIC(18,6),0.0) AS dblQuantity,    
+			   CONVERT(NUMERIC(38,20),ISNULL(CASE WHEN ium.intItemUOMId = iad.intItemUOMId THEN iad.dblWeight  ELSE iad.dblWeight/iad.dblWeightPerQty END,0)) AS dblTransactionQty,
+			   CONVERT(NUMERIC(38,20),0.0) AS dblQuantity,    
 			   um.strUnitMeasure AS strUOM, 
 			   iad.strNewLotNumber AS strRelatedLotId, 
 			   i1.strItemNo AS strPreviousItem, 

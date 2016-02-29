@@ -6,9 +6,9 @@
 	,@intStorageLocationId INT
 	,@intSubLocationId INT
 	,@intLocationId INT
-	,@dblQuantity NUMERIC(18, 6)
+	,@dblQuantity NUMERIC(38, 20)
 	,@intItemUOMId INT
-	,@dblUnitCount NUMERIC(18, 6) = 0
+	,@dblUnitCount NUMERIC(38, 20) = 0
 	,@intItemUnitCountUOMId INT = NULL
 	,@ysnNegativeQtyAllowed BIT = 0
 	,@ysnSubLotAllowed BIT = 0
@@ -46,8 +46,8 @@ BEGIN TRY
 		,@strExistingItemNo NVARCHAR(50)
 		,@intLotId INT
 		,@CasesPerPallet INT
-		,@dblUpperToleranceQuantity NUMERIC(18, 6)
-		,@dblLowerToleranceQuantity NUMERIC(18, 6)
+		,@dblUpperToleranceQuantity NUMERIC(38, 20)
+		,@dblLowerToleranceQuantity NUMERIC(38, 20)
 		,@strLocationName nvarchar(50)
 		,@dtmCurrentDate datetime
 		,@dtmCurrentDateTime datetime

@@ -44,7 +44,8 @@ Begin Tran
 		--Move the Staged (Kitting Area) Lots back to Storage Location
 		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity)
 		Select PL.intPickListDetailId,PL.intStageLotId,PL.intStorageLocationId,
-		CASE WHEN PL.intItemUOMId = PL.intItemIssuedUOMId THEN PL.dblPickQuantity / L.dblWeightPerQty ELSE PL.dblPickQuantity END 
+		--CASE WHEN PL.intItemUOMId = PL.intItemIssuedUOMId THEN PL.dblPickQuantity / L.dblWeightPerQty ELSE PL.dblPickQuantity END 
+		PL.dblQuantity
 		From tblMFPickListDetail PL
 		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
 		Where intPickListId=@intPickListId AND PL.intLotId <> PL.intStageLotId
@@ -84,7 +85,8 @@ Begin Tran
 		--Move the Staged (Kitting Area) Lots back to Storage Location
 		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity)
 		Select PL.intPickListDetailId,PL.intStageLotId,PL.intStorageLocationId,
-		CASE WHEN PL.intItemUOMId = PL.intItemIssuedUOMId THEN PL.dblPickQuantity / L.dblWeightPerQty ELSE PL.dblPickQuantity END 
+		--CASE WHEN PL.intItemUOMId = PL.intItemIssuedUOMId THEN PL.dblPickQuantity / L.dblWeightPerQty ELSE PL.dblPickQuantity END 
+		PL.dblQuantity
 		From tblMFPickListDetail PL
 		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
 		Where intPickListId=@intPickListId
@@ -114,6 +116,8 @@ Begin Tran
 		Delete From tblMFPickList Where intPickListId=@intPickListId
 
 		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
+
+		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
 
 		--Restore the Reservation to Parent Lot
 	End

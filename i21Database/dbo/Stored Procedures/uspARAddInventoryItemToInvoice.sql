@@ -158,11 +158,12 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 BEGIN TRY
 	DECLARE @existingInvoiceDetail INT
 
-	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId AND strSalesOrderNumber = @ItemSalesOrderNumber
+	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId AND strSalesOrderNumber = @ItemSalesOrderNumber AND intInvoiceId = @InvoiceId
 	IF ISNULL(@existingInvoiceDetail, 0) > 0
 		BEGIN
 			UPDATE tblARInvoiceDetail 
-				SET dblQtyShipped = dblQtyShipped + ISNULL(@ItemQtyShipped ,0.000000)
+				SET dblQtyOrdered = dblQtyOrdered + ISNULL(@ItemQtyShipped ,0.000000),
+					dblQtyShipped = dblQtyShipped + ISNULL(@ItemQtyShipped ,0.000000)
 			WHERE intInvoiceDetailId = @existingInvoiceDetail
 		END
 	ELSE
@@ -225,7 +226,7 @@ BEGIN TRY
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
-				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
+				,[dblQtyOrdered]					= ISNULL(@ItemQtyShipped,@ZeroDecimal)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			

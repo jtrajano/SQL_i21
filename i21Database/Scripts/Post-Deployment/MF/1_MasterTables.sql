@@ -499,7 +499,23 @@ GO
 IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 4)
 BEGIN
     INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
-    VALUES(4,'Others')
+    VALUES(4,'Bag Off')
+END
+ELSE
+BEGIN
+	UPDATE tblMFAttributeType SET strAttributeTypeName='Bag Off' WHERE intAttributeTypeId = 4
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 5)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(5,'Process Production')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 6)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(6,'Others')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendDemandStatus WHERE intStatusId = 1)
@@ -1954,7 +1970,13 @@ BEGIN
 		)
 	SELECT 2
 		,'O'
-		,'bc-paleblue'
+		,'bc-skyblue'
+END
+ELSE
+BEGIN
+	UPDATE tblMFForecastItemType
+	SET strBackColorName = 'bc-skyblue'
+	WHERE intForecastItemTypeId = 2
 END
 GO
 
@@ -1971,7 +1993,12 @@ BEGIN
 		)
 	SELECT 3
 		,'S'
-		,'bc-paleyellow'
+		,'bc-yellow'
 END
-
+ELSE
+BEGIN
+	UPDATE tblMFForecastItemType
+	SET strBackColorName = 'bc-yellow'
+	WHERE intForecastItemTypeId = 3
+END
 GO

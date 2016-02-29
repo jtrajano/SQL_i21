@@ -9,6 +9,7 @@ SELECT
 	A.ysnPosted,
 	A.ysnPaid,
 	A.ysnReadyForPayment,
+	ysnRestricted = ISNULL((SELECT TOP 1 ysnRestricted FROM dbo.tblAPBillDetail H WHERE A.intBillId = H.intBillId),0),
 	A.dtmDate,
 	A.dtmBillDate,
 	A.dtmDueDate,

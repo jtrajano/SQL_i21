@@ -41,6 +41,7 @@ DECLARE @intDefaultStorageSchedule AS INT
 DECLARE @intCommodityId AS INT
 DECLARE @matchStorageType AS INT
 DECLARE @ysnIsStorage AS INT
+DECLARE @intContractHeaderId INT
 
 
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -69,7 +70,9 @@ BEGIN TRY
 
 	SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
 	WHERE US.[intEntityUserSecurityId] = @intUserId
-
+	
+	SELECT @intContractHeaderId=intContractHeaderId FROM vyuCTContractDetailView Where intContractDetailId=@intDPContractId
+	
 	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId FROM tblSCTicket TIC
 	WHERE TIC.intTicketId = @intTicketId
 
@@ -579,7 +582,7 @@ BEGIN TRY
 		   ,@intTicketId
 		   ,NULL
 		   ,NULL
-		   ,NULL
+		   ,@intContractHeaderId
 		   ,@dblNetUnits
 		   ,dbo.fnRemoveTimeOnDate(GETDATE())
 		   ,0
@@ -637,6 +640,11 @@ BEGIN TRY
            ,[strSourceType]= 'Storage'
 		FROM	dbo.[tblQMTicketDiscount] SD
 		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
+		
+		Update tblGRCustomerStorage 
+		SET  dblDiscountsDue=(SELECT SUM(dblDiscountDue)FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage')
+		WHERE intCustomerStorageId=@intCustomerStorageId
+
 	END
 	
 	BEGIN

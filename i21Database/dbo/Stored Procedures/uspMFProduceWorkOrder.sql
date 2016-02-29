@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFProduceWorkOrder] (
 	@intWorkOrderId INT
 	,@intItemId INT = NULL
-	,@dblProduceQty NUMERIC(18, 6)
+	,@dblProduceQty NUMERIC(38, 20)
 	,@intProduceUOMKey INT = NULL
 	,@strVesselNo NVARCHAR(50)
 	,@intUserId INT
@@ -9,9 +9,9 @@
 	,@strBatchId NVARCHAR(40) = NULL
 	,@strLotNumber NVARCHAR(50)
 	,@intContainerId INT
-	,@dblTareWeight NUMERIC(18, 6) = NULL
-	,@dblUnitQty NUMERIC(18, 6) = NULL
-	,@dblPhysicalCount NUMERIC(18, 6) = NULL
+	,@dblTareWeight NUMERIC(38, 20) = NULL
+	,@dblUnitQty NUMERIC(38, 20) = NULL
+	,@dblPhysicalCount NUMERIC(38, 20) = NULL
 	,@intPhysicalItemUOMId INT = NULL
 	,@intBatchId INT
 	,@intShiftId INT = NULL

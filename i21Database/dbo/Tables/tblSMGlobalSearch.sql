@@ -5,7 +5,7 @@
 	[strValueData] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDisplayField] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDisplayData] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strScreen] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strNamespace] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDisplayTitle] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strScreenIcon] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strSearchCommand] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

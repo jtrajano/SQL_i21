@@ -1,8 +1,10 @@
-﻿CREATE PROCEDURE [uspMFLotAdjustQty] @intLotId INT
-	,@dblNewLotQty NUMERIC(18, 6)
-	,@intUserId INT
-	,@strReasonCode NVARCHAR(1000)
-	,@strNotes NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE [uspMFLotAdjustQty]
+ @intLotId INT,       
+ @dblNewLotQty numeric(38,20),
+ @intUserId INT ,
+ @strReasonCode NVARCHAR(1000),
+ @strNotes NVARCHAR(MAX)=NULL
+
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -13,26 +15,49 @@ BEGIN TRY
 	DECLARE @strLotNumber NVARCHAR(50)
 	DECLARE @intSourceId INT
 	DECLARE @intSourceTransactionTypeId INT
-	DECLARE @dblLotQty NUMERIC(18, 6)
-	DECLARE @dblAdjustByQuantity NUMERIC(18, 6)
-	DECLARE @dblNewUnitCost NUMERIC(18, 6)
+	DECLARE @dblLotQty NUMERIC(38,20)
+	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
+	DECLARE @dblNewUnitCost NUMERIC(38,20)
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intItemUOMId INT
 	DECLARE @intShiftId INT
+	DECLARE @dblWeightPerQty NUMERIC(38, 20)
+	DECLARE @intWeightUOMId INT
+	DECLARE @intItemStockUOMId INT
+	DECLARE @dblWeight NUMERIC(38, 20)
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	
+	SELECT @intItemId = intItemId, 
+		   @intLocationId = intLocationId,
+		   @intSubLocationId = intSubLocationId,
+		   @intStorageLocationId = intStorageLocationId, 
+		   @strLotNumber = strLotNumber,
+		   @dblLotQty = dblQty,
+		   @dblWeight=dblWeight,
+		   @dblWeightPerQty = dblWeightPerQty,
+		   @intWeightUOMId = intWeightUOMId
+	FROM tblICLot WHERE intLotId = @intLotId
+	
+	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblWeight
 
-	SELECT @intItemId = intItemId
-		,@intLocationId = intLocationId
-		,@intSubLocationId = intSubLocationId
-		,@intStorageLocationId = intStorageLocationId
-		,@strLotNumber = strLotNumber
-		,@dblLotQty = dblQty
-		,@intItemUOMId = intItemUOMId
-	FROM tblICLot
-	WHERE intLotId = @intLotId
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
 
-	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotQty
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	
+	IF (@dblWeight + @dblAdjustByQuantity) < @dblLotReservedQty
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
+		
+	IF @intItemStockUOMId = @intWeightUOMId
+	BEGIN
+		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	END
 
 	SELECT @dtmDate = GETDATE()
 
@@ -131,6 +156,23 @@ BEGIN TRY
 			,@intShiftId
 		FROM dbo.tblMFWorkOrderProducedLot WP
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
+		WHERE intLotId = @intLotId
+	END
+	IF (
+			SELECT dblWeight
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+			) < 0.01
+	BEGIN
+		--EXEC dbo.uspMFLotAdjustQty
+		-- @intLotId =@intLotId,       
+		-- @dblNewLotQty =0,
+		-- @intUserId=@intUserId ,
+		-- @strReasonCode ='Residue qty clean up',
+		-- @strNotes ='Residue qty clean up'
+		UPDATE tblICLot
+		SET dblWeight = 0
+			,dblQty = 0
 		WHERE intLotId = @intLotId
 	END
 END TRY

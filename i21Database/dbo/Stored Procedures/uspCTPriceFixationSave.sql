@@ -40,7 +40,8 @@ BEGIN TRY
 			@ysnHedge					BIT,
 			@dblFutures					NUMERIC(18,6),
 			@intTotalLots				INT,
-			@intTotalPFDetailNoOfLots	INT
+			@intTotalPFDetailNoOfLots	INT,
+			@ysnUnlimitedQuantity		BIT
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -56,6 +57,8 @@ BEGIN TRY
 	SELECT	@intTotalPFDetailNoOfLots	=	SUM(intNoOfLots)
 	FROM	tblCTPriceFixationDetail
 	WHERE	intPriceFixationId		=	@intPriceFixationId
+
+	SELECT	@ysnUnlimitedQuantity	=	ysnUnlimitedQuantity FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
 	SELECT	@ysnPartialPricing = ysnPartialPricing FROM tblCTCompanyPreference
 
@@ -311,7 +314,8 @@ BEGIN TRY
 					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
 					CD.dblCashPrice			=	CD.dblBasis + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),	
 					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * (CD.dblBasis + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))),	
-					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
+					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
+					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId

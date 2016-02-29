@@ -2,9 +2,17 @@
 	AS
 
 SELECT 
+	ReceiptItem.intInventoryReceiptId,
 	ReceiptItem.intInventoryReceiptItemId,
 	ReceiptItem.intOrderId,
 	Receipt.strReceiptType,
+	Receipt.intSourceType,
+	strSourceType = (
+		CASE WHEN Receipt.intSourceType = 1 THEN 'Scale'
+			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
+			WHEN Receipt.intSourceType = 3 THEN 'Transport'
+			WHEN Receipt.intSourceType = 0 THEN 'None'
+		END),
 	strOrderNumber = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
@@ -162,6 +170,30 @@ SELECT
 		)
 	, ContractView.ysnLoad
 	, ContractView.dblAvailableQty
+	, dblFranchise =
+		(
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+				THEN (
+					CASE WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+						THEN LogisticsView.dblFranchise
+					ELSE 0.00
+					END
+				)
+			ELSE 0.00
+			END
+		)
+	, dblContainerWeightPerQty =
+		(
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+				THEN (
+					CASE WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+						THEN LogisticsView.dblContainerWeightPerQty
+					ELSE 0.00
+					END
+				)
+			ELSE 0.00
+			END
+		)
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId

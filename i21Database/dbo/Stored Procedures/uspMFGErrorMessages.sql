@@ -56,3 +56,20 @@ EXEC sp_addmessage 90009,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90010) EXEC sp_dropmessage 90010, 'us_english'	
 SET @strmessage = 'Source storage location and destination storage location cannot be same.'
 EXEC sp_addmessage 90010,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90011) EXEC sp_dropmessage 90011, 'us_english'	
+SET @strmessage = 'Dragging this order from the current location will result in contamination between two adjacent orders %s, %s in this line: %s'
+EXEC sp_addmessage 90011,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90012) EXEC sp_dropmessage 90012, 'us_english'	
+SET @strmessage = 'Dropping this order on the target location will result in contamination of either of the adjacent orders %s, %s of the line: %s'
+EXEC sp_addmessage 90012,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90013) EXEC sp_dropmessage 90013, 'us_english'	
+SET @strmessage = 'This product is not configured for processing on this line: %s'
+EXEC sp_addmessage 90013,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90014) EXEC sp_dropmessage 90014, 'us_english'	
+SET @strmessage = 'Frozen/Released/started wokorder cannot be moved.'
+EXEC sp_addmessage 90014,11,@strmessage,'us_english','False'
+

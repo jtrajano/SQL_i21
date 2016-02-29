@@ -18,7 +18,7 @@ Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 DECLARE @tblReservedQty TABLE (
 	intLotId INT
-	,dblReservedQty NUMERIC(18, 6)
+	,dblReservedQty NUMERIC(38,20)
 	)
 
 INSERT INTO @tblReservedQty
@@ -44,8 +44,8 @@ GROUP BY cl.intLotId
 
 DECLARE @tblMFStagedLot TABLE (
 	intLotId INT
-	,dblRequiredQty NUMERIC(18, 6)
-	,dblStagedQty NUMERIC(18, 6)
+	,dblRequiredQty NUMERIC(38,20)
+	,dblStagedQty NUMERIC(38,20)
 	)
 Declare @intBlendProductionStagingUnitId int
 
@@ -147,7 +147,7 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,i.dblRiskScore
 	,ISNULL(wcl.ysnStaged, 0) AS ysnStaged
 	,(ISNULL(l.dblWeight, 0) - ISNULL(rq.dblReservedQty, 0)) AS dblAvailableQty
-	,ISNULL(l.dblWeightPerQty, 0) AS dblWeightPerUnit
+	,CASE WHEN wcl.intItemUOMId=wcl.intItemIssuedUOMId THEN 1 ELSE ISNULL(l.dblWeightPerQty, 1) END AS dblWeightPerUnit
 	,wcl.intRecipeItemId
 	,l.intParentLotId
 	,pl.strParentLotNumber
@@ -204,7 +204,8 @@ SELECT wcl.intWorkOrderConsumedLotId
 						) AS DT
 					)
 			END
-		) dblStagedQty
+		) dblStagedQty,
+		ls.strSecondaryStatus AS strLotStatus
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICLot l ON wcl.intLotId = l.intLotId
@@ -217,4 +218,5 @@ JOIN tblICUnitMeasure iu2 ON iu1.intUnitMeasureId = iu2.intUnitMeasureId
 LEFT JOIN tblICStorageLocation sl ON l.intStorageLocationId = sl.intStorageLocationId
 LEFT JOIN tblICParentLot pl ON l.intParentLotId = pl.intParentLotId
 LEFT JOIN @tblReservedQty rq ON l.intLotId = rq.intLotId
+LEFT JOIN tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
 WHERE wcl.intWorkOrderId = @intWorkOrderId

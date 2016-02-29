@@ -76,6 +76,7 @@ BEGIN
 				,intLocationId = A.intLocationId
 				,A.intCustomerID
 				,intSitePriceLevel = CAST(NULL AS INT)
+				,strSiteDescription = ISNULL(A.strDescription,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID

@@ -38,8 +38,8 @@ BEGIN TRY
 	UPDATE dbo.tblMFWorkOrderProducedLot
 	SET intShiftActivityId = @intShiftActivityId
 	WHERE intLotId IN (
-			SELECT intLotId
-			FROM OPENXML(@idoc, 'root/AllocateLot', 2) WITH (intLotId INT)
+			SELECT x.intLotId
+			FROM OPENXML(@idoc, 'root/AllocateLot', 2) WITH (intLotId INT) x
 			)
 
 	COMMIT TRANSACTION

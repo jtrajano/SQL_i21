@@ -42,7 +42,20 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
-		
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 'Posting different Currency are not yet implemented.',
+				'Payable',
+			   A.strPaymentRecordNum,
+			   A.intPaymentId
+		FROM dbo.tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+		INNER JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+		CROSS APPLY
+		(
+			SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference
+		) BaseCurrency
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId
+
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
 			'Please setup user default location.',
@@ -63,7 +76,7 @@ BEGIN
 							)
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT TOP 1
+		SELECT
 			'Bank account is inactive.',
 			'Payable',
 			A.strPaymentRecordNum,
@@ -75,7 +88,7 @@ BEGIN
 		AND B.ysnActive = 0
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT TOP 1
+		SELECT
 			'Overpayment requires to have default AP account setup.',
 			'Payable',
 			A.strPaymentRecordNum,
@@ -260,6 +273,22 @@ BEGIN
 				ON B.intBillId = C.intBillId
 		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
 		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount - B.dblInterest)
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			A.strPaymentRecordNum + ' payment have vouchers with different pay to address.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  A.[intPaymentId] IN (13)
+		AND B.dblPayment != 0
+		GROUP BY A.strPaymentRecordNum, A.intPaymentId
+		HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
