@@ -216,6 +216,7 @@ namespace iRely.Inventory.Model
         public int? intWeightUOMId { get; set; }
         public int? intCostUOMId { get; set; }
         public int? intCurrencyId { get; set; }
+        public int? intCent { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
@@ -859,6 +860,7 @@ namespace iRely.Inventory.Model
         public decimal? dblCostUOMConvFactor { get; set; }
         public int? intCurrencyId { get; set; }
         public string strCurrency { get; set; }
+        public int? intCent { get; set; }
         public decimal? dblGrossMargin { get; set; }
         public int? intGradeId { get; set; }
         public decimal? dblBillQty { get; set; }

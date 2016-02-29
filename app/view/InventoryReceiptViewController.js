@@ -807,7 +807,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         defaultFilters: [
                             {
                                 column: 'ysnSubCurrency',
-                                value: false,
+                                value: true,
                                 conjunction: 'and'
                             }
                         ]
@@ -1565,6 +1565,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
+        else if (combo.itemId === 'cboItemSubCurrency') {
+            current.set('intCent', records[0].get('intCent'));
+        }
 
         this.calculateGrossWeight(current);
         win.viewModel.data.currentReceiptItem = current;
@@ -1694,15 +1697,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         currentRecord.set('dblTax', totalItemTax);
         var unitCost = currentRecord.get('dblUnitCost');
+        var cents = Ext.isNumeric(currentRecord.get('intCent')) ? currentRecord.get('intCent') : 1 ;
         var qty = currentRecord.get('dblOpenReceive');
+
         var costCF = currentRecord.get('dblCostUOMConvFactor');
+        costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
         var receiveQtyCF = currentRecord.get('dblItemUOMConvFactor');
+
         var lineTotal = 0;
 
         if (iRely.Functions.isEmpty(currentRecord.get('intWeightUOMId'))) {
             // formula is: {Receive UOM Unit Qty} x {Receive Qty} x ({Unit Cost} / {Cost UOM})
             // ex: {60 Gallons} x {100 Qty} x ({$1} / {Gallon})
-            lineTotal = totalItemTax + (qty * receiveQtyCF * (unitCost / costCF))
+            lineTotal = totalItemTax + (qty * receiveQtyCF * (unitCost / cents / costCF))
         }
         else {
             var netWgt = currentRecord.get('dblNet');
@@ -1710,7 +1718,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // formula is: {Weight Unit Qty} x {Net Qty} x ({Unit Cost} / {Cost UOM})
             // ex: {450 Gallons} x {1 per Gallon} x ({$1} / {Gallon})
-            lineTotal = totalItemTax + (netWgt * netWgtCF * (unitCost / costCF))
+            lineTotal = totalItemTax + (netWgt * netWgtCF * (unitCost / cents / costCF))
         }
         currentRecord.set('dblLineTotal', i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2));
     },
@@ -4233,7 +4241,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboChargeCurrency": {
                 select: this.onChargeSelect
-            }
+            },
+            "#cboItemSubCurrency": {
+                select: this.onReceiptItemSelect
+            },
         })
     }
 

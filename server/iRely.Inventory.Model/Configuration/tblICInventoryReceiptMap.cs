@@ -153,6 +153,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(38, 20);
             this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intCent).HasColumnName("intCent");
+
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptItem)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
@@ -219,6 +222,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblCostUOMConvFactor).HasColumnName("dblCostUOMConvFactor").HasPrecision(38, 20);
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            this.Property(t => t.intCent).HasColumnName("intCent");
             this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin").HasPrecision(38, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.dblBillQty).HasColumnName("dblBillQty").HasPrecision(18, 6);
