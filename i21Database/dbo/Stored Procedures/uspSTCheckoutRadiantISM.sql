@@ -11,10 +11,10 @@ BEGIN
 	, UOM.intItemUOMId
 	, I.strDescription
 	, IL.intVendorId
-	, Chk.SalesQuantity
-	, Chk.ActualSalesPrice
-	, Chk.SalesAmount
-	, 0
+	, ISNULL(Chk.SalesQuantity,0)
+	, ISNULL(Chk.ActualSalesPrice,0)
+	, ISNULL(Chk.SalesAmount,0)
+	, 1
 	from #tempCheckoutInsert Chk
 	JOIN dbo.tblICItemUOM UOM ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
 	JOIN dbo.tblICItem I ON I.intItemId = UOM.intItemId
@@ -36,7 +36,7 @@ BEGIN
 		  END 
 		, 'Regular'
 		, 0
-		FROM tblSTStore S
+		FROM tblSTStore S WHERE intStoreId = @intStoreId
 
 		SET @intMarkUpDownId = @@IDENTITY
 
@@ -54,7 +54,7 @@ BEGIN
 		, 0 [dblTotalCostAmount]
 		, 'On Sale' [strNote]
 		, 0 [dblActulaGrossProfit]
-		, 'N' [ysnSentToHost]
+		, 0 [ysnSentToHost]
 		, '' [strReason]
 		, 0
 		FROM #tempCheckoutInsert Chk
