@@ -3497,6 +3497,7 @@
     <Build Include="dbo\Functions\fnDivide.sql" />
     <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutItemMovementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
