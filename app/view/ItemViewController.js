@@ -2541,17 +2541,17 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
         else if (combo.column.itemId === 'colSpecialPricingDiscountBy') {
-            if (records[0].get('strDescription') === 'Percent') {
+            if (records.get('strDescription') === 'Percent') {
                 var discount = current.get('dblUnitAfterDiscount') * current.get('dblDiscount') / 100;
                 var discPrice = current.get('dblUnitAfterDiscount') - discount;
                 current.set('dblDiscountedPrice', discPrice);
             }
-            else if (records[0].get('strDescription') === 'Amount') {
+            else if (records.get('strDescription') === 'Amount') {
                 var discount = current.get('dblDiscount');
                 var discPrice = current.get('dblUnitAfterDiscount') - discount;
                 current.set('dblDiscountedPrice', discPrice);
             }
-            else if (records[0].get('strDescription') === 'Terms Rate') {
+            else if (records.get('strDescription') === 'Terms Rate') {
                 var discount = current.get('dblUnitAfterDiscount') * current.get('dblDiscount') / 100;
                 var discPrice = current.get('dblUnitAfterDiscount') - discount;
                 current.set('dblDiscountedPrice', discPrice);
