@@ -49,9 +49,10 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, dblCostUOMConvFactor = ISNULL(ItemCostUOM.dblUnitQty, 0)
 	, ReceiptItem.intCurrencyId
 	, Currency.strCurrency
+	, ReceiptItem.intCent
 	, dblGrossMargin = (
-		CASE WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
-			ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
+		CASE	WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
+				ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
 	)
 	, ReceiptItem.intGradeId
 	, ReceiptItem.dblBillQty

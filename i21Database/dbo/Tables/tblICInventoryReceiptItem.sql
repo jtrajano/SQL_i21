@@ -33,6 +33,7 @@ Type the overview for the table here.
 		[dblUnitCost] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblUnitRetail] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[intCurrencyId] INT NULL,
+		[intCent] INT NULL,
 		[dblLineTotal] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intGradeId] INT NULL,		
 		[dblGross] NUMERIC(38, 20) NULL DEFAULT ((0)),
