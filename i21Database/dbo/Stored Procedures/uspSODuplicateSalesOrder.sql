@@ -40,6 +40,7 @@ BEGIN
            ,[ysnProcessed]
 		   ,[ysnRecurring]
            ,[strComments]
+		   ,[strFooterComments]
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
@@ -91,6 +92,7 @@ BEGIN
            ,0 --Processed
 		   ,0 --Recurring
            ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
+		   ,[strFooterComments]s
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
