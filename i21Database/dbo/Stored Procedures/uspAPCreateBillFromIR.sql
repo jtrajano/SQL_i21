@@ -175,6 +175,7 @@ BEGIN
 		[dblNetWeight],
 		[intContractDetailId],
 		[intContractHeaderId],
+		[intUnitOfMeasureId],
 		[intCostUOMId],
 		[intWeightUOMId],
 		[intLineNo]
@@ -202,6 +203,7 @@ BEGIN
 		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
 											ELSE NULL END,
+		[intUnitOfMeasureId]		=	B.intUnitMeasureId,
 		[intCostUOMId]				=	B.intCostUOMId,
 		[intWeightUOMId]			=	B.intWeightUOMId,
 		[intLineNo]					=	ISNULL(B.intSort,0)
@@ -243,6 +245,7 @@ BEGIN
 		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
 		[intContractHeaderId]		=	A.intContractHeaderId,
+		[intUnitOfMeasureId]		=	NULL,
 		[intCostUOMId]				=	NULL,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1
