@@ -126,7 +126,7 @@ BEGIN
 		WITH	(HOLDLOCK) 
 		AS		InventoryTransfer 
 		USING (
-			SELECT	TOP 1
+			SELECT	TOP 1 
 					RawData.*
 			FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData
 						ON RawHeaderData.TransferType = RawData.strTransferType
@@ -232,7 +232,6 @@ BEGIN
 				,[intTaxCodeId]
 				,[dblFreightRate]
 				,[dblFreightAmount]
-				,[intOwnershipType]
 				,[intSort]
 				,[intConcurrencyId]		
 		)
@@ -256,7 +255,6 @@ BEGIN
 				,[intTaxCodeId]				= NULL 
 				,[dblFreightRate]			= NULL 
 				,[dblFreightAmount]			= NULL 
-				,[intOwnershipType]			= RawData.intOwnershipType
 				,[intSort]					= NULL 
 				,[intConcurrencyId]			= 1
 		FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData

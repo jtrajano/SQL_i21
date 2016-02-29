@@ -5,14 +5,14 @@ CREATE FUNCTION [dbo].[fnCalculateCostPerLot] (
 	,@intLotUOMId AS INT
 	,@dblCostPerItemUOMId AS NUMERIC(38,20)
 )
-RETURNS FLOAT
+RETURNS NUMERIC(38,20)
 AS
 BEGIN 
-	DECLARE @CostPerWeightUOM AS FLOAT
+	DECLARE @CostPerWeightUOM AS NUMERIC(38,20)
 
-	DECLARE @ItemUOMUnitQty AS FLOAT
-			,@WeightUOMUnitQty AS FLOAT
-			,@LotUOMUnitQty AS FLOAT
+	DECLARE @ItemUOMUnitQty AS NUMERIC(38,20)
+			,@WeightUOMUnitQty AS NUMERIC(38,20)
+			,@LotUOMUnitQty AS NUMERIC(38,20)
 
 	-- If lot UOM is null, then assume it is the Item UOM. 
 	IF ISNULL(@intLotUOMId, 0) = 0 
@@ -40,10 +40,12 @@ BEGIN
 	-- A = Cost / (	(Item UOM Unit Qty) / (Weight UOM Unit Qty) )
 	-- B = A / (Weight UOM Unit Qty) * (Lot UOM Unit Qty)
 	RETURN (
-		(
-			@dblCostPerItemUOMId / (@ItemUOMUnitQty / @WeightUOMUnitQty)
-		)
-		/ @WeightUOMUnitQty
-		* @LotUOMUnitQty
+		dbo.fnMultiply (
+			dbo.fnDivide (
+				dbo.fnDivide (@dblCostPerItemUOMId, dbo.fnDivide(@ItemUOMUnitQty, @WeightUOMUnitQty)) 
+				,@WeightUOMUnitQty
+			)
+			,@LotUOMUnitQty
+		) 
 	)
 END

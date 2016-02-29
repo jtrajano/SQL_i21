@@ -87,6 +87,8 @@ DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(38,20)
 
+DECLARE @TransactionType_InventoryReceipt AS INT = 4
+
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
@@ -96,8 +98,11 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblQty, 0)
 
-		SELECT @dblCost = AverageCost
-		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId, @intItemUOMId)
+		-- Get the average cost when reducing stock. 
+		-- Except if doing vendor stock returns using Inventory Receipt. 
+		SELECT	@dblCost = AverageCost
+		FROM	dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId, @intItemUOMId)
+		WHERE	@intTransactionTypeId <> @TransactionType_InventoryReceipt
 
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId

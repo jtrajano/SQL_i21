@@ -20,9 +20,13 @@ BEGIN
 	WHERE	intItemId = @intItemId
 			AND intItemLocationId = @intItemLocationId
 
-	RETURN dbo.fnConvertFloatToNumeric(
-		CASE	WHEN @dblTotalQty <> 0 THEN CAST(@dblTotalInventoryValue AS FLOAT) / CAST(@dblTotalQty AS FLOAT) 
-				ELSE NULL 
+	RETURN (
+		CASE	WHEN @dblTotalQty <> 0 THEN 
+					dbo.fnDivide(@dblTotalInventoryValue, @dblTotalQty) 
+				ELSE 
+					NULL 
 		END 	
-	)	
+		
+	)
+
 END

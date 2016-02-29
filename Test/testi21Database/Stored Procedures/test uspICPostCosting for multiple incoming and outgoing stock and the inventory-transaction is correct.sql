@@ -490,7 +490,7 @@ BEGIN
 				,dblQty = 0
 				,dblUOMQty = 1
 				,dblCost = 0
-				,dblValue = 22 * 18 -- 341.00
+				,dblValue = 396.00
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -521,7 +521,7 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-
+		-- No auto negative because the stock is zero. 
 		-- Purchase 3: 100 @ $18.00
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
@@ -542,8 +542,6 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-
-		-- Auto Negative
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
@@ -552,7 +550,7 @@ BEGIN
 				,dblQty = 0
 				,dblUOMQty = 0
 				,dblCost = 0
-				,dblValue = -55.00
+				,dblValue = -55
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -568,6 +566,9 @@ BEGIN
 	-- Act
 	BEGIN 	
 		-- Call uspICPostCosting to post the costing and generate the g/l entries  
+		DECLARE @glDetail AS RecapTableType 
+
+		INSERT INTO @glDetail
 		EXEC dbo.uspICPostCosting
 			@ItemsToPost
 			,@strBatchId 
