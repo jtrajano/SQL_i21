@@ -45,3 +45,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90007) EXEC sp_dropmessa
 SET @strmessage = 'Default warehouse staging unit is not configured.'
 EXEC sp_addmessage 90007,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90015) EXEC sp_dropmessage 90015, 'us_english'	
+SET @strmessage = 'Move qty cannot be greater than available qty.'
+EXEC sp_addmessage 90015,11,@strmessage,'us_english','False'
