@@ -3496,6 +3496,8 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
+    <Build Include="dbo\Functions\fnDivide.sql" />
+    <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutItemMovementReport.sql" />
   </ItemGroup>
   <ItemGroup>

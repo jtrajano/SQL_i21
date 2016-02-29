@@ -25,12 +25,12 @@ DECLARE @intId AS INT
 		,@intItemLocationId AS INT 
 		,@intItemUOMId AS INT 
 		,@dtmDate AS DATETIME
-		,@dblQty AS NUMERIC(18, 6) 
-		,@dblUOMQty AS NUMERIC(18, 6)
-		,@dblCost AS NUMERIC(18, 6)
-		,@dblSalesPrice AS NUMERIC(18, 6)
+		,@dblQty AS NUMERIC(38, 20) 
+		,@dblUOMQty AS NUMERIC(38, 20)
+		,@dblCost AS NUMERIC(38, 20)
+		,@dblSalesPrice AS NUMERIC(38, 20)
 		,@intCurrencyId AS INT 
-		,@dblExchangeRate AS DECIMAL (38, 20) 
+		,@dblExchangeRate AS NUMERIC (38, 20) 
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
@@ -282,8 +282,8 @@ BEGIN
 	--------------------------------------------------
 	BEGIN 
 		-- Get the current average cost and stock qty 
-		DECLARE @CurrentStockQty AS NUMERIC(18,6) = NULL 
-		DECLARE @CurrentStockAveCost AS NUMERIC(18,6) = NULL 
+		DECLARE @CurrentStockQty AS NUMERIC(38, 20) = NULL 
+		DECLARE @CurrentStockAveCost AS NUMERIC(38, 20) = NULL 
 
 		SELECT	@CurrentStockAveCost = dblAverageCost
 		FROM	dbo.tblICItemPricing ItemPricing
