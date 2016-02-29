@@ -12,6 +12,7 @@
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -84,6 +85,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
+			,@ItemPricing					= @ItemPricing
 			,@RefreshPrice					= @RefreshPrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
 			,@ItemFrequency					= @ItemFrequency

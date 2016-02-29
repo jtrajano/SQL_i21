@@ -7,6 +7,7 @@
 	,@Quantity			NUMERIC(18,6)
 	,@Price				NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing			NVARCHAR(250)	= NULL OUTPUT	
+	,@Deviation			NUMERIC(18,6)	= NULL OUTPUT
 	,@VendorId			INT				= NULL
 	,@SupplyPointId		INT				= NULL
 	,@LastCost			NUMERIC(18,6)	= NULL
@@ -18,6 +19,7 @@ AS
 	SELECT
 		 @Price		= dblPrice
 		,@Pricing	= strPricing
+		,@Deviation	= dblDeviation 
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
