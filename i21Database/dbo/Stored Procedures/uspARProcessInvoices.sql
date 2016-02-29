@@ -171,6 +171,7 @@ DECLARE  @Id									INT
 		,@ItemQtyShipped						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemPrice								NUMERIC(18, 6)
+		,@ItemPricing							NVARCHAR(250)
 		,@RefreshPrice							BIT
 		,@ItemMaintenanceType					NVARCHAR(25)
 		,@ItemFrequency							NVARCHAR(25)
@@ -285,6 +286,7 @@ BEGIN
 		,@ItemQtyShipped				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyShipped] ELSE NULL END)
 		,@ItemDiscount					= (CASE WHEN @GroupingOption = 0 THEN [dblDiscount] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
+		,@ItemPricing					= (CASE WHEN @GroupingOption = 0 THEN [strPricing] ELSE NULL END)
 		,@RefreshPrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnRefreshPrice] ELSE 0 END)
 		,@ItemMaintenanceType			= (CASE WHEN @GroupingOption = 0 THEN [strMaintenanceType] ELSE NULL END)
 		,@ItemFrequency					= (CASE WHEN @GroupingOption = 0 THEN [strFrequency] ELSE NULL END)
@@ -546,6 +548,7 @@ BEGIN
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
+					,@ItemPricing					= [strPricing]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -602,6 +605,7 @@ BEGIN
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
 						,@ItemPrice						= @ItemPrice
+						,@ItemPricing					= @ItemPricing
 						,@RefreshPrice					= @RefreshPrice
 						,@ItemMaintenanceType			= @ItemMaintenanceType
 						,@ItemFrequency					= @ItemFrequency
@@ -1042,6 +1046,7 @@ BEGIN TRY
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
+						,@ItemPricing					= [strPricing] 
 						,@RefreshPrice					= [ysnRefreshPrice]
 						,@ItemMaintenanceType			= [strMaintenanceType]
 						,@ItemFrequency					= [strFrequency]
@@ -1096,6 +1101,7 @@ BEGIN TRY
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
+							,@ItemPricing					= @ItemPricing
 							,@RefreshPrice					= @RefreshPrice
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
@@ -1248,6 +1254,7 @@ BEGIN TRY
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
+					,@ItemPricing					= [strPricing] 
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -1341,6 +1348,7 @@ BEGIN TRY
 						,[dblQtyShipped]						= @ItemQtyShipped
 						,[dblDiscount]							= @ItemDiscount
 						,[dblPrice]								= @ItemPrice							
+						,[strPricing]							= @ItemPricing							
 						,[strMaintenanceType]					= @ItemMaintenanceType
 						,[strFrequency]							= @ItemFrequency					
 						,[dtmMaintenanceDate]					= @ItemMaintenanceDate			

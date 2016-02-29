@@ -78,7 +78,7 @@ BEGIN
 	WHERE
 		intItemId = @ItemId 
 		AND intItemLocationId = @ItemLocationId 
-		AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
+		AND intItemUnitMeasureId = @ItemUOMId
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmBeginDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 	ORDER BY
 		dtmBeginDate DESC

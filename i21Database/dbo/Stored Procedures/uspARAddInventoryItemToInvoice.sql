@@ -11,6 +11,7 @@
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -115,10 +116,10 @@ IF ISNULL(@RaiseError,0) = 0
 	
 IF (ISNULL(@RefreshPrice,0) = 1)
 	BEGIN
-		DECLARE @Pricing			NVARCHAR(250)				
-				,@ContractNumber	INT
+		DECLARE  @ContractNumber	INT
 				,@ContractSeq		INT
 				,@InvoiceType		NVARCHAR(200)
+
 		BEGIN TRY
 		SELECT TOP 1 @InvoiceType = strType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 		EXEC dbo.[uspARGetItemPrice]  
@@ -129,7 +130,7 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			,@TransactionDate			= @InvoiceDate
 			,@Quantity					= @ItemQtyShipped
 			,@Price						= @ItemPrice OUTPUT
-			,@Pricing					= @Pricing OUTPUT
+			,@Pricing					= @ItemPricing OUTPUT
 			,@ContractHeaderId			= @ItemContractHeaderId OUTPUT
 			,@ContractDetailId			= @ItemContractDetailId OUTPUT
 			,@ContractNumber			= @ContractNumber OUTPUT
@@ -178,6 +179,7 @@ BEGIN TRY
 				,[dblQtyShipped]
 				,[dblDiscount]
 				,[dblPrice]
+				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
 				,[intAccountId]
@@ -230,6 +232,7 @@ BEGIN TRY
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
+				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
 				,[intAccountId]						= Acct.[intAccountId] 
