@@ -39,6 +39,7 @@
     [int1099Category] INT NOT NULL DEFAULT 0 , 
 	[ysn1099Printed] BIT NULL DEFAULT 0 ,
 	[ysnRestricted] BIT NOT NULL DEFAULT 0 ,
+	[ysnSubCurrency] BIT NOT NULL DEFAULT 0 ,
     [intLineNo] INT NOT NULL DEFAULT 1,
     [intTaxGroupId] INT NULL, 
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],

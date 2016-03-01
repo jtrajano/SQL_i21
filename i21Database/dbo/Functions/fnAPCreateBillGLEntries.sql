@@ -58,7 +58,8 @@ BEGIN
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
 		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 THEN A.dblAmountDue / Rate.dblRate 
+												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 AND Rate.ysnSubCurrency = 0 THEN A.dblAmountDue / Rate.dblRate 
+												  WHEN A.intTransactionType IN (1) AND Rate.ysnSubCurrency > 0 THEN A.dblAmountDue 
 											 ELSE A.dblAmountDue END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
@@ -97,7 +98,7 @@ BEGIN
 				ON A.intEntityVendorId = C.intEntityVendorId
 			CROSS APPLY
 			(
-				SELECT TOP 1 dblRate FROM dbo.tblAPBillDetail A WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+				SELECT TOP 1 dblRate,ysnSubCurrency FROM dbo.tblAPBillDetail A WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 			) Rate
 			--CROSS APPLY
 			--(
@@ -155,7 +156,8 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 THEN B.dblTotal / B.dblRate 
+												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate 
+												  WHEN A.intTransactionType IN (1) AND B.ysnSubCurrency > 0 THEN B.dblTotal
 												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 														ELSE 
 															(CASE WHEN B.dblOldCost != 0 THEN CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) --COST ADJUSTMENT
@@ -215,7 +217,8 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2))
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / B.dblRate
+												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / B.dblRate
+												  WHEN A.intTransactionType IN (1) AND B.ysnSubCurrency > 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2))
 											 ELSE 0 END), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -268,7 +271,8 @@ BEGIN
 		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.intAccountId
 												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
 		[dblDebit]						=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
-												 WHEN B.dblRate > 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / dblRate
+												 WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / dblRate
+												 WHEN B.ysnSubCurrency > 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal 
 												ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
 														ELSE D.dblAmount
 													END)
