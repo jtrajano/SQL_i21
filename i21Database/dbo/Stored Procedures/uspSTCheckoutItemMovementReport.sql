@@ -13,24 +13,24 @@ JOIN dbo.tblSTCheckoutHeader CH ON CH.intCheckoutId = CIM.intCheckoutId
 WHERE CH.dtmCheckoutDate BETWEEN @BeginDate AND @EndDate
 GROUP BY CIM.intItemUPCId, CIM.intVendorId
 
-SELECT * FROM @tblItemMovement
+--SELECT * FROM @tblItemMovement
 
-SELECT t1.*, ((t1.[Gross Margin $]/t1.[Total Sales])*100) [Gross Margin %] FROM
+SELECT t1.*, ((t1.[dblGrossMarginDollar]/t1.[dblTotalSales])*100) [dblGrossMarginPercent] FROM
 (
 SELECT t.*
-, (t.[Current Price]*t.[Qty Sold]) [Total Sales] 
-, ((t.[Current Price]*t.[Qty Sold]) - (t.[Item Cost]*t.[Qty Sold])) [Gross Margin $]
+, (t.[dblCurrentPrice]*t.[dblQtySold]) [dblTotalSales] 
+, ((t.[dblCurrentPrice]*t.[dblQtySold]) - (t.[dblItemCost]*t.[dblQtySold])) [dblGrossMarginDollar]
 FROM
 (
-SELECT DISTINCT CASE WHEN UOM.strUpcCode is not null then UOM.strUpcCode else UOM.strLongUPCCode end [UPC Number]
-, I.strDescription [Description]
-, V.strVendorId [Vendor]
-, ISNULL(CIM.dblItemStandardCost, 0) [Item Cost]
+SELECT DISTINCT CASE WHEN UOM.strUpcCode is not null then UOM.strUpcCode else UOM.strLongUPCCode end [strUPCNumber]
+, I.strDescription [strDescription]
+, V.strVendorId [strVendor]
+, ISNULL(CIM.dblItemStandardCost, 0) [dblItemCost]
 , CASE WHEN (SP.dtmBeginDate < CH.dtmCheckoutDate AND SP.dtmEndDate > CH.dtmCheckoutDate) 
 		THEN SP.dblUnit 
 		ELSE Pr.dblSalePrice 
-	END [Current Price]
-, IM.dblQty [Qty Sold]
+	END [dblCurrentPrice]
+, IM.dblQty [dblQtySold]
 FROM @tblItemMovement IM
 JOIN dbo.tblSTCheckoutItemMovements CIM ON CIM.intItemUPCId = IM.intItemUOMId AND CIM.intVendorId = IM.intVendorId
 JOIN dbo.tblSTCheckoutHeader CH ON CH.intCheckoutId = CIM.intCheckoutId
