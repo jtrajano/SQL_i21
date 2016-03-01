@@ -18,6 +18,7 @@ SELECT
 	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN B.dblTotal * -1 ELSE B.dblTotal END AS dblTotal,
 	B.dblTax,
 	B.dblRate,
+	B.ysnSubCurrency,
 	B.strMiscDescription,
 	C.strDescription AS strItemDescription,
 	H.strAccountId,
