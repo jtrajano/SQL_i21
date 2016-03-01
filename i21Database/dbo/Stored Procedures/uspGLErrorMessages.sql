@@ -55,5 +55,5 @@ SET @strmessage = 'Unable to find an open fiscal year period for %s module to ma
 EXEC sp_addmessage 60009,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 60010) EXEC sp_dropmessage 60010, 'us_english'	
-SET @strmessage = 'Unable to recalculate summary. General Ledger Detail has out of balance transactions'
+SET @strmessage = 'Unable to recalculate summary. General Ledger Detail has out of balance transactions.'
 EXEC sp_addmessage 60010,11,@strmessage,'us_english','False'
