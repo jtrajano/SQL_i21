@@ -360,9 +360,9 @@ BEGIN TRY
 			SELECT @intCalendarDetailId = intCalendarDetailId
 				,@intCalendarId = intCalendarId
 				,@dtmCalendarDate = dtmCalendarDate
-				,@dtmPlannedStartDate = dtmShiftStartTime
 				,@dtmShiftStartTime = dtmShiftStartTime
 				,@dtmShiftEndTime = dtmShiftEndTime
+				,@dtmPlannedEndDate = dtmShiftEndTime
 				,@intDuration = intDuration * intNoOfMachine
 				,@intRemainingDuration = intDuration
 				,@intShiftId = intShiftId
