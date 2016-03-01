@@ -58,6 +58,7 @@ DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@intOldLotWeightUOMId INT
 		,@intOldLotWeightUnitMeasureId INT
 		,@intNewLotWeightUOMId INT
+		,@intNewItemLocationId INT
 
 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +153,7 @@ SELECT @intOldUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUO
 SELECT @intOldLotWeightUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intOldLotWeightUOMId
 SELECT @intNewUnitMeasureId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldUnitMeasureId
 SELECT @intNewLotWeightUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldLotWeightUnitMeasureId
+SELECT @intNewItemLocationId = intItemLocationId FROM tblICItemLocation WHERE intItemId = @intNewItemId
 
 IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldUnitMeasureId)
 BEGIN
@@ -167,7 +169,8 @@ END
 UPDATE tblICLot
 SET intItemId = @intNewItemId, 
 	intItemUOMId = @intNewUnitMeasureId,
-	intWeightUOMId = @intNewLotWeightUOMId
+	intWeightUOMId = @intNewLotWeightUOMId,
+	intItemLocationId = @intNewItemLocationId
 WHERE intLotId = @intLotId
 	AND intLocationId = @intLocationId
 	AND intSubLocationId = @intSubLocationId
