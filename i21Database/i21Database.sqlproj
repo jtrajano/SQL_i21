@@ -3497,6 +3497,7 @@
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
