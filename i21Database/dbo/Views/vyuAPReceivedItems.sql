@@ -396,13 +396,14 @@ FROM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
 	FROM		vyuCTContractCostView		CC
-	JOIN		vyuCTContractDetailView		CD	ON CD.intContractDetailId = CC.intContractDetailId
-	LEFT JOIN	tblICItemLocation		ItemLoc ON ItemLoc.intItemId = CC.intItemId and ItemLoc.intLocationId = CD.intCompanyLocationId
-	LEFT JOIN	tblICInventoryReceiptCharge RC	ON RC.intContractId = CC.intContractHeaderId AND RC.intChargeId = CC.intItemId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intUnitMeasureId
-	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-	WHERE		CD.intContractDetailId NOT IN (SELECT IsNull(intContractDetailId, 0) FROM tblAPBillDetail) AND 
-				RC.intInventoryReceiptChargeId IS NULL
+	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
+													ItemLoc.intLocationId	=	CD.intCompanyLocationId
+	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
+													RC.intChargeId			=	CC.intItemId
+	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intUnitMeasureId
+	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
+	WHERE		RC.intInventoryReceiptChargeId IS NULL
 
 ) Items
 
