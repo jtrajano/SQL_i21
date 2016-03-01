@@ -126,7 +126,7 @@ FROM
 			tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 		WHERE
 			ISNULL(ID.[intSalesOrderDetailId], 0) <> 0
-			AND ID.intSalesOrderDetailId NOT IN (SELECT intLineNo FROM tblICInventoryShipmentItem)
+			AND ID.intSalesOrderDetailId NOT IN (SELECT intLineNo FROM tblICInventoryShipmentItem WHERE ISNULL(intLineNo, 0) > 0)
 		GROUP BY
 			ID.[intSalesOrderDetailId]
 	) SHP
