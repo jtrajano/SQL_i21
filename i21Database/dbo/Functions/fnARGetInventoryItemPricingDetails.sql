@@ -8,11 +8,13 @@
 	,@Quantity				NUMERIC(18,6)
 	,@VendorId				INT
 	,@PricingLevelId		INT
+	,@TermId				INT
 )
 RETURNS @returntable TABLE
 (
 	 dblPrice			NUMERIC(18,6)
 	,strPricing			NVARCHAR(250)
+	,dblTermDiscount	NUMERIC(18,6)
 	,dblPriceBasis		NUMERIC(18,6)
 	,dblDeviation		NUMERIC(18,6)
 	,dblUOMQuantity		NUMERIC(18,6)
@@ -21,9 +23,12 @@ AS
 BEGIN
 
 	DECLARE  @Price			NUMERIC(18,6)
+			,@TermDiscount	NUMERIC(18,6)
 			,@Pricing		NVARCHAR(250)
 			,@PriceBasis	NUMERIC(18,6)
 			,@Deviation		NUMERIC(18,6)
+			,@DiscountBy	NVARCHAR(50)
+			,@PromotionType	NVARCHAR(50)
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())	
 	
@@ -72,6 +77,15 @@ BEGIN
 										(dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
 								END)
 							END) 									
+		,@DiscountBy	= strDiscountBy
+		,@PromotionType	= strPromotionType
+		,@TermDiscount	= @Quantity *
+								(CASE
+									WHEN strDiscountBy = 'Amount'
+										THEN ISNULL(dblDiscount, 0.00)
+									ELSE	
+										(@Price * (ISNULL(dblDiscount, 0.00)/100.00) )
+								END)
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing 
@@ -85,8 +99,63 @@ BEGIN
 	
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
-			INSERT @returntable(dblPrice, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-			SELECT @Price, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
+			IF @PromotionType = 'Terms Discount'
+				BEGIN
+					IF @DiscountBy = 'Terms Rate'
+						BEGIN
+							DECLARE @Type NVARCHAR(100)
+							DECLARE @DiscountDay INT, @DayMonthDue INT, @DueNextMonth INT
+							DECLARE @DiscountEP NUMERIC(18,6)
+							DECLARE @DiscountDate DATETIME
+							DECLARE @InvoiceDiscountTotal NUMERIC(18,6)
+
+
+							SELECT 
+								 @Type = strType 
+								,@DiscountDay = ISNULL(intDiscountDay, 0)
+								,@DiscountDate = ISNULL(dtmDiscountDate, @TransactionDate) 
+								,@DiscountEP = ISNULL(dblDiscountEP,0)
+							FROM
+								tblSMTerm
+							WHERE
+								intTermID = @TermId
+
+							IF (@Type = 'Standard')
+								BEGIN
+									IF (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @TransactionDate)
+										BEGIN
+											SET @TermDiscount = (@Quantity * (@Price * (@DiscountEP / 100)))
+										END
+								END	
+							ELSE IF (@Type = 'Date Driven')
+								BEGIN
+									DECLARE @TransactionMonth int, @TransactionDay int, @TransactionYear int
+									SELECT @TransactionMonth = DATEPART(MONTH,@TransactionDate), @TransactionDay = DATEPART(DAY,@TransactionDate) ,@TransactionYear = DATEPART(YEAR,@TransactionDate)
+		
+									DECLARE @TempDiscountDate datetime
+									Set @TempDiscountDate = CONVERT(datetime, (CAST(@TransactionMonth AS nvarchar(10)) + '/' + CAST(@DiscountDay AS nvarchar(10)) + '/' + CAST(@TransactionYear AS nvarchar(10))), 101)
+			
+									IF (@TempDiscountDate >= @TransactionDate)
+										BEGIN
+											SET @TermDiscount = (@Quantity * (@Price * (@DiscountEP / 100)))
+										END		
+								END	
+							ELSE
+								BEGIN
+									IF (@DiscountDate >= @TransactionDate)
+										BEGIN
+											SET @TermDiscount = (@Quantity * (@Price * (@DiscountEP / 100)))
+										END
+								END
+						END					
+				END
+			ELSE
+				BEGIN
+					SET @TermDiscount = 0.00
+				END
+
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
+			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
 			RETURN;
 		END
 	
@@ -120,8 +189,8 @@ BEGIN
 		
 				IF(ISNULL(@Price,0) <> 0)
 					BEGIN
-						INSERT @returntable(dblPrice, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-						SELECT @Price, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
+						INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
+						SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
 						RETURN;
 					END	
 			END	
@@ -152,8 +221,8 @@ BEGIN
 		
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
-			INSERT @returntable(dblPrice, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-			SELECT @Price, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
+			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
 			RETURN;
 		END		
 		
@@ -178,8 +247,8 @@ BEGIN
 
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
-			INSERT @returntable(dblPrice, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-			SELECT @Price, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
+			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
 			RETURN;
 		END
 			
