@@ -37,6 +37,7 @@
 	[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	[strMarks] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	[intCompanyLocationSubLocationId] INT, 
+	[strCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
