@@ -80,6 +80,14 @@ BEGIN TRY
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
+	IF(ISNULL(@strNewLotNumber,'') <> '')
+	BEGIN
+		IF EXISTS(SELECT 1 FROM tblICLot WHERE strLotNumber = @strNewLotNumber AND intItemId <> @intItemId)
+		BEGIN
+			RAISERROR('Supplied lot number already exists for a lot with a different item. Please provide a different lot number to continue.',11,1)
+		END
+	END
+
 	IF (@strNewLotNumber = '' OR @strNewLotNumber IS NULL) 
 	BEGIN 
 		IF (@strLotTracking = 'Yes - Serial Number')
