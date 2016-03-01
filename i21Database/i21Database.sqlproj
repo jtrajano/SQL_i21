@@ -3503,6 +3503,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceItemsTermTotalDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
