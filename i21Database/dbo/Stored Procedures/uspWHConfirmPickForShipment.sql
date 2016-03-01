@@ -48,7 +48,7 @@ BEGIN TRY
 			AND intItemId = @intLotItemId
 
 		INSERT INTO tblICInventoryShipmentItemLot(intInventoryShipmentItemId, intLotId, dblQuantityShipped, dblGrossWeight, dblTareWeight)
-		VALUES (@intShipmentItemId, @intLotId, @dblLotQty, 0, 0)
+		VALUES (@intShipmentItemId, @intLotId, @dblLotQty, @dblLotWeight, 0)
 	
 		DELETE FROM tblWHPickForShipment WHERE id = @intMinId
 												 
