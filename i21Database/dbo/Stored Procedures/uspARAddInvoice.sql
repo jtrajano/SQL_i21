@@ -11,12 +11,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal		DECIMAL(18,6)
-	  , @ARAccountId		INT
-	  , @EntityId			INT
-	  , @intFreightItemId	INT
-	  , @intLocationId		INT
-	  , @intItemUOMId		INT
+DECLARE @ZeroDecimal			DECIMAL(18,6)
+	  , @ARAccountId			INT
+	  , @EntityId				INT
+	  , @intFreightItemId		INT
+	  , @intSurchargeItemId		INT
+	  , @ysnItemizeSurcharge	BIT
+	  , @intLocationId			INT
+	  , @intFreightItemUOMId	INT
+	  , @intSurchargeItemUOMId	INT
 
 SET @ZeroDecimal = 0.000000
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
@@ -417,22 +420,44 @@ FROM
 	 	vyuARGetItemAccount Acct
 	 		ON IE.[intItemId] = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
-				
-SELECT @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
+
+--VALIDATE FREIGHT AND SURCHARGE ITEM				
+SELECT TOP 1
+	   @intFreightItemId	= intItemForFreightId
+     , @intSurchargeItemId	= intSurchargeItemId
+	 , @ysnItemizeSurcharge = ysnItemizeSurcharge
+FROM tblTRCompanyPreference
+
+SELECT TOP 1 @intLocationId = intLocationId FROM @InvoiceEntries 
 
 IF ISNULL(@intFreightItemId, 0) > 0
-	BEGIN
-		SELECT TOP 1 @intLocationId = intLocationId FROM @InvoiceEntries 
-		SELECT TOP 1 @intItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intLocationId = @intLocationId
+	BEGIN		
+		SELECT TOP 1 @intFreightItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intLocationId = @intLocationId
 
-		IF ISNULL(@intItemUOMId, 0) = 0
+		IF ISNULL(@intFreightItemUOMId, 0) = 0
 			BEGIN
-				SELECT TOP 1 @intItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+				SELECT TOP 1 @intFreightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
 			END
 
-		IF ISNULL(@intItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
+		IF ISNULL(@intFreightItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
 			BEGIN
 				RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+				RETURN 0
+			END
+	END
+
+IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
+	BEGIN
+		SELECT TOP 1 @intSurchargeItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intSurchargeItemId AND intLocationId = @intLocationId
+
+		IF ISNULL(@intSurchargeItemUOMId, 0) = 0
+			BEGIN
+				SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+			END
+
+		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblSurcharge, @ZeroDecimal) > @ZeroDecimal)
+			BEGIN
+				RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 				RETURN 0
 			END
 	END
@@ -461,13 +486,13 @@ SELECT
 	,@intFreightItemId										    --[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
 	,IE.strSourceId
-	,@intItemUOMId												--[intItemUOMId]
+	,@intFreightItemUOMId										--[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]
 	,dblPrice = CASE		
-					WHEN ISNULL(IE.dblSurcharge,0) != 0
+					WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0
 					   THEN	ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
-					WHEN ISNULL(IE.dblSurcharge,0) = 0
+					WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1
 					   THEN	 ISNULL(IE.[dblFreightRate],0) 
 			        END 
 	,0          												--[dblTotal]
@@ -500,6 +525,68 @@ JOIN @temp TE
 	 		ON @intFreightItemId = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
      WHERE ISNULL(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice !=1
+
+--Surcharge Item
+IF @ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0
+	BEGIN
+		INSERT INTO [tblARInvoiceDetail]
+			([intInvoiceId]
+			,[intItemId]
+			,[strItemDescription]
+			,[strDocumentNumber]
+			,[intItemUOMId]
+			,[dblQtyOrdered]
+			,[dblQtyShipped]
+			,[dblPrice]
+			,[dblTotal]
+			,[intAccountId]
+			,[intCOGSAccountId]
+			,[intSalesAccountId]
+			,[intInventoryAccountId]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[intTaxGroupId] 
+			,[intConcurrencyId])
+		SELECT
+			IV.[intInvoiceId]											--[intInvoiceId]
+			,@intSurchargeItemId										    --[intItemId]
+			,IC.[strDescription]										--strItemDescription] 
+			,IE.strSourceId
+			,@intSurchargeItemUOMId										--[intItemUOMId]
+			,1   														--[dblQtyOrdered]
+			,1  														--[dblQtyShipped]
+			,dblPrice = ISNULL(IE.dblQty, @ZeroDecimal) * (ISNULL(IE.[dblFreightRate], @ZeroDecimal) * (ISNULL(IE.dblSurcharge, @ZeroDecimal) / 100))
+			,0          												--[dblTotal]
+			,Acct.[intAccountId]										--[intAccountId]
+			,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
+			,Acct.[intSalesAccountId]									--[intSalesAccountId]
+			,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
+			,NULL														--[intContractHeaderId]
+			,NULL														--[intContractDetailId]
+			,NULL														--[intTaxGroupId]
+			,1															--[intConcurrencyId]
+		FROM @InvoiceEntries IE
+		JOIN @temp TE
+			 ON TE.Customer = IE.intEntityCustomerId 
+			   AND TE.Location = IE.intLocationId 
+			   AND TE.strSource = IE.strSourceId
+			   AND TE.dtmDate = IE.dtmDate
+			   AND TE.Currency = IE.intCurrencyId
+			   AND TE.Salesperson = IE.intSalesPersonId
+			   AND TE.Shipvia = IE.intShipViaId
+			   AND TE.Comments = IE.strComments
+			   AND TE.PurchaseOrder = IE.strPurchaseOrder	  
+			JOIN tblARInvoice IV
+				ON TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
+			INNER JOIN
+	 			tblICItem IC
+	 				ON @intFreightItemId = IC.[intItemId] 
+			 LEFT OUTER JOIN
+	 			vyuARGetItemAccount Acct
+	 				ON @intFreightItemId = Acct.[intItemId]
+	 					AND IE.[intLocationId] = Acct.[intLocationId]
+			 WHERE ISNULL(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice != 1
+	END
 	
 --Log Insert	
 DECLARE @Invoices AS TABLE(intInvoiceID INT)
