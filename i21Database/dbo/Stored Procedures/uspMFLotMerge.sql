@@ -65,10 +65,10 @@ BEGIN TRY
 		END
 	END
 
-	IF @intItemStockUOMId = @intWeightUOMId
-	BEGIN
+	--IF @intItemStockUOMId = @intWeightUOMId
+	--BEGIN
 		SELECT @dblMergeQty = dbo.fnDivide(@dblMergeQty, @dblLotWeightPerUnit)
-	END
+	--END
 
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
 	
