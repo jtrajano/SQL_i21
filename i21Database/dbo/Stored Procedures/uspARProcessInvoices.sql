@@ -170,6 +170,7 @@ DECLARE  @Id									INT
 		,@ItemQtyOrdered						NUMERIC(18, 6)
 		,@ItemQtyShipped						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
+		,@ItemTermDiscount						NUMERIC(18, 6)
 		,@ItemPrice								NUMERIC(18, 6)
 		,@ItemPricing							NVARCHAR(250)
 		,@RefreshPrice							BIT
@@ -1300,8 +1301,9 @@ BEGIN TRY
 								,@ContractNumber	INT
 								,@ContractSeq		INT
 								,@InvoiceType		NVARCHAR(200)
+
 						BEGIN TRY
-						SELECT TOP 1 @InvoiceType = strType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
+						SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 						EXEC dbo.[uspARGetItemPrice]  
 							 @ItemId					= @ItemId
 							,@CustomerId				= @EntityCustomerId
@@ -1309,12 +1311,13 @@ BEGIN TRY
 							,@ItemUOMId					= @ItemUOMId
 							,@TransactionDate			= @Date
 							,@Quantity					= @ItemQtyShipped
-							,@Price						= @ItemPrice OUTPUT
-							,@Pricing					= @Pricing OUTPUT
-							,@ContractHeaderId			= @ItemContractHeaderId OUTPUT
-							,@ContractDetailId			= @ItemContractDetailId OUTPUT
-							,@ContractNumber			= @ContractNumber OUTPUT
-							,@ContractSeq				= @ContractSeq OUTPUT
+							,@Price						= @ItemPrice			OUTPUT
+							,@Pricing					= @Pricing				OUTPUT
+							,@ContractHeaderId			= @ItemContractHeaderId	OUTPUT
+							,@ContractDetailId			= @ItemContractDetailId	OUTPUT
+							,@ContractNumber			= @ContractNumber		OUTPUT
+							,@ContractSeq				= @ContractSeq			OUTPUT
+							,@TermDiscount				= @ItemTermDiscount		OUTPUT
 							--,@AvailableQuantity			= NULL OUTPUT
 							--,@UnlimitedQuantity			= 0    OUTPUT
 							--,@OriginalQuantity			= NULL
@@ -1327,6 +1330,7 @@ BEGIN TRY
 							--,@PricingLevelId			= NULL
 							--,@AllowQtyToExceedContract	= 0
 							,@InvoiceType				= @InvoiceType
+							,@TermId					= @TermId
 						END TRY
 						BEGIN CATCH
 							SET @ErrorMessage = ERROR_MESSAGE();
@@ -1347,6 +1351,7 @@ BEGIN TRY
 						,[dblQtyOrdered]						= @ItemQtyOrdered
 						,[dblQtyShipped]						= @ItemQtyShipped
 						,[dblDiscount]							= @ItemDiscount
+						,[dblItemTermDiscount]					= @ItemTermDiscount
 						,[dblPrice]								= @ItemPrice							
 						,[strPricing]							= @ItemPricing							
 						,[strMaintenanceType]					= @ItemMaintenanceType

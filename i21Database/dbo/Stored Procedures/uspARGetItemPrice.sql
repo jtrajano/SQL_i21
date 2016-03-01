@@ -14,6 +14,7 @@
 	,@AvailableQuantity			NUMERIC(18,6)   = NULL OUTPUT
 	,@UnlimitedQuantity			BIT             = 0    OUTPUT
 	,@Deviation					NUMERIC(18,6)	= NULL OUTPUT
+	,@TermDiscount				NUMERIC(18,6)	= NULL OUTPUT
 	,@OriginalQuantity			NUMERIC(18,6)	= NULL
 	,@CustomerPricingOnly		BIT				= 0
 	,@VendorId					INT				= NULL
@@ -24,6 +25,7 @@
 	,@PricingLevelId			INT				= NULL
 	,@AllowQtyToExceedContract	BIT				= 0
 	,@InvoiceType				NVARCHAR(200)	= NULL
+	,@TermId					INT				= NULL
 AS	
 	
 	SELECT
@@ -35,7 +37,8 @@ AS
 		,@ContractSeq		= intContractSeq
 		,@AvailableQuantity = dblAvailableQty
 		,@UnlimitedQuantity = ysnUnlimitedQty
-		,@Deviation			= dblDeviation 
+		,@Deviation			= dblDeviation
+		,@TermDiscount		= dblTermDiscount  
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
@@ -60,6 +63,7 @@ AS
 			,@PricingLevelId
 			,@AllowQtyToExceedContract
 			,@InvoiceType
+			,@TermId
 		)
 
 RETURN 0

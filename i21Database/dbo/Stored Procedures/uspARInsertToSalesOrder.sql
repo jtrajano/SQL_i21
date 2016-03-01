@@ -126,7 +126,7 @@ BEGIN
 	SELECT 	
 		 [intSalesOrderDetailId]
 		,ISNULL([dblDiscount], @ZeroDecimal)
-		,ISNULL([dblDiscountAmount], @ZeroDecimal)
+		,ISNULL([dblItemTermDiscount], @ZeroDecimal)
 		,ISNULL([dblPrice], @ZeroDecimal)
 		,ISNULL([dblQtyOrdered], @ZeroDecimal)
 	FROM
@@ -139,20 +139,13 @@ BEGIN
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderDetails)
 	BEGIN
 		DECLARE @SalesOrderDetailId		INT,
-				@NewSalesOrderDetailId	INT,
-				@Discount				NUMERIC(18,6),
-				@DiscountAmount			NUMERIC(18,6),
+				@NewSalesOrderDetailId	INT,				
 				@QtyOrdered				NUMERIC(18,6),
 				@Price					NUMERIC(18,6)
 
-		SELECT TOP 1 @SalesOrderDetailId = [intSalesOrderDetailId],
-					 @Discount			 = [dblDiscount],
-		             @DiscountAmount	 = [dblDiscountAmount] 
+		SELECT TOP 1 @SalesOrderDetailId = [intSalesOrderDetailId]
 		FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
 		
-		IF @Discount > @ZeroDecimal AND @DiscountAmount = @ZeroDecimal
-			SET @DiscountAmount = ROUND(ISNULL((@QtyOrdered * @Price) * (@Discount/100) ,@ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-
 		INSERT INTO tblSOSalesOrderDetail
 			([intSalesOrderId]
 			,[intItemId]
@@ -162,7 +155,7 @@ BEGIN
 			,[dblQtyAllocated]
 			,[dblQtyShipped]
 			,[dblDiscount]
-			,[dblDiscountAmount]
+			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
 			,[dblTotalTax]
@@ -191,7 +184,7 @@ BEGIN
 			,[dblQtyAllocated]
 			,[dblQtyShipped]
 			,[dblDiscount]
-			,@DiscountAmount
+			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
 			,[dblTotalTax]

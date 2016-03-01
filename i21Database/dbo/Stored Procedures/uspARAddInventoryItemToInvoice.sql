@@ -59,10 +59,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@EntityCustomerId INT
-		,@CompanyLocationId INT
-		,@InvoiceDate DATETIME
+DECLARE @ZeroDecimal		NUMERIC(18, 6)
+		,@EntityCustomerId	INT
+		,@CompanyLocationId	INT
+		,@InvoiceDate		DATETIME
+		,@TermDiscount		NUMERIC(18, 6)
 
 SET @ZeroDecimal = 0.000000
 
@@ -119,9 +120,10 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 		DECLARE  @ContractNumber	INT
 				,@ContractSeq		INT
 				,@InvoiceType		NVARCHAR(200)
+				,@TermId			INT
 
 		BEGIN TRY
-		SELECT TOP 1 @InvoiceType = strType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
+		SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 		EXEC dbo.[uspARGetItemPrice]  
 			 @ItemId					= @ItemId
 			,@CustomerId				= @EntityCustomerId
@@ -129,12 +131,13 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			,@ItemUOMId					= @ItemUOMId
 			,@TransactionDate			= @InvoiceDate
 			,@Quantity					= @ItemQtyShipped
-			,@Price						= @ItemPrice OUTPUT
-			,@Pricing					= @ItemPricing OUTPUT
-			,@ContractHeaderId			= @ItemContractHeaderId OUTPUT
-			,@ContractDetailId			= @ItemContractDetailId OUTPUT
-			,@ContractNumber			= @ContractNumber OUTPUT
-			,@ContractSeq				= @ContractSeq OUTPUT
+			,@Price						= @ItemPrice			OUTPUT
+			,@Pricing					= @ItemPricing			OUTPUT
+			,@ContractHeaderId			= @ItemContractHeaderId	OUTPUT
+			,@ContractDetailId			= @ItemContractDetailId	OUTPUT
+			,@ContractNumber			= @ContractNumber		OUTPUT
+			,@ContractSeq				= @ContractSeq			OUTPUT
+			,@TermDiscount				= @TermDiscount			OUTPUT
 			--,@AvailableQuantity			= NULL OUTPUT
 			--,@UnlimitedQuantity			= 0    OUTPUT
 			--,@OriginalQuantity			= NULL
@@ -147,6 +150,7 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			--,@PricingLevelId			= NULL
 			--,@AllowQtyToExceedContract	= 0
 			,@InvoiceType				= @InvoiceType
+			,@TermId					= @TermId
 		END TRY
 		BEGIN CATCH
 			SET @ErrorMessage = ERROR_MESSAGE();
@@ -178,6 +182,7 @@ BEGIN TRY
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
 				,[dblDiscount]
+				,[dblItemTermDiscount]
 				,[dblPrice]
 				,[strPricing]
 				,[dblTotalTax]
@@ -231,6 +236,7 @@ BEGIN TRY
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyShipped,@ZeroDecimal)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
+				,[dblItemTermDiscount]				= ISNULL(@TermDiscount, @ZeroDecimal)
 				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal

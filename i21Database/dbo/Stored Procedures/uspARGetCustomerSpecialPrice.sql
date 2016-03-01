@@ -8,12 +8,14 @@
 	,@Price				NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing			NVARCHAR(250)	= NULL OUTPUT	
 	,@Deviation			NUMERIC(18,6)	= NULL OUTPUT
+	,@TermDiscount		NUMERIC(18,6)	= NULL OUTPUT
 	,@VendorId			INT				= NULL
 	,@SupplyPointId		INT				= NULL
 	,@LastCost			NUMERIC(18,6)	= NULL
 	,@ShipToLocationId  INT				= NULL
 	,@VendorLocationId  INT				= NULL
 	,@InvoiceType		NVARCHAR(200)	= NULL
+	,@TermId			INT				= NULL
 AS		
 	
 	SELECT
@@ -44,6 +46,7 @@ AS
 			,NULL
 			,NULL
 			,@InvoiceType
+			,@TermId
 		)
 
 RETURN 0
