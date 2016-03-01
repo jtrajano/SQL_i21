@@ -53,6 +53,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strBOL = NULL
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
+		, ysnSubCurrency = 0 
 	FROM vyuPODetails POView
 	WHERE ysnCompleted = 0
 
@@ -108,6 +109,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strBOL = NULL
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
+		, ysnSubCurrency
 	FROM vyuCTContractDetailView ContractView
 	WHERE ysnAllowedToShow = 1
 		AND strContractType = 'Purchase'
@@ -164,6 +166,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strBOL = LogisticsView.strBLNumber
 		, dblFranchise = LogisticsView.dblFranchise
 		, dblContainerWeightPerQty = LogisticsView.dblContainerWeightPerQty
+		, ysnSubCurrency
 	FROM vyuLGShipmentContainerReceiptContracts LogisticsView
 	WHERE LogisticsView.dblBalanceToReceive > 0
 		AND LogisticsView.ysnDirectShipment = 0
@@ -220,6 +223,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strBOL = NULL
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
+		, ysnSubCurrency = 0 
 	FROM vyuICGetInventoryTransferDetail TransferView
 	WHERE TransferView.ysnPosted = 1)
 tblAddOrders

@@ -21,6 +21,7 @@ Type the overview for the table here.
 		[strReceiptNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dtmReceiptDate] [datetime] NOT NULL DEFAULT (getdate()),
 		[intCurrencyId] [int] NULL,
+		[intSubCurrencyCents] [int] NULL,
 		[intBlanketRelease] [int] NULL,
 		[strVendorRefNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 		[strBillOfLading] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
