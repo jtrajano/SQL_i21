@@ -55,6 +55,9 @@ DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@strParentLotNumber NVARCHAR(100) = NULL
 		,@dtmExpiryDate DATETIME
 		,@intLotStatusId INT
+		,@intOldLotWeightUOMId INT
+		,@intOldLotWeightUnitMeasureId INT
+		,@intNewLotWeightUOMId INT
 
 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -144,9 +147,11 @@ WHERE	intEntityUserSecurityId = @intUserId
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Update Lot Item UOM
 ------------------------------------------------------------------------------------------------------------------------------------
-SELECT @intOldLotItemUOMId = intItemUOMId, @dtmExpiryDate = dtmExpiryDate, @intLotStatusId = intLotStatusId FROM tblICLot WHERE intLotId = @intLotId
+SELECT @intOldLotItemUOMId = intItemUOMId, @dtmExpiryDate = dtmExpiryDate, @intLotStatusId = intLotStatusId, @intOldLotWeightUOMId = intWeightUOMId FROM tblICLot WHERE intLotId = @intLotId
 SELECT @intOldUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intOldLotItemUOMId
+SELECT @intOldLotWeightUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intOldLotWeightUOMId
 SELECT @intNewUnitMeasureId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldUnitMeasureId
+SELECT @intNewLotWeightUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldLotWeightUnitMeasureId
 
 IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intUnitMeasureId = @intOldUnitMeasureId)
 BEGIN
@@ -161,7 +166,8 @@ END
 
 UPDATE tblICLot
 SET intItemId = @intNewItemId, 
-	intItemUOMId = @intNewUnitMeasureId
+	intItemUOMId = @intNewUnitMeasureId,
+	intWeightUOMId = @intNewLotWeightUOMId
 WHERE intLotId = @intLotId
 	AND intLocationId = @intLocationId
 	AND intSubLocationId = @intSubLocationId
