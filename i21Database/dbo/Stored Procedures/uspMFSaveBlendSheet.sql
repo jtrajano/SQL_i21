@@ -113,6 +113,8 @@ INSERT INTO @tblLot(
 
 Update @tblLot Set intStorageLocationId=null where intStorageLocationId=0
 
+Update @tblBlendSheet Set dblQtyToProduce=(Select SUM(ISNULL(dblQty,0)) From @tblLot)
+
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
 
 If @ysnEnableParentLot=0
