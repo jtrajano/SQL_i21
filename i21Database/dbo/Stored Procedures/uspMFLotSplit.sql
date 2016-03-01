@@ -71,10 +71,10 @@ BEGIN TRY
 		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 	END
 
-	IF @intItemStockUOMId = @intWeightUOMId
-	BEGIN
+	--IF @intItemStockUOMId = @intWeightUOMId
+	--BEGIN
 		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
-	END
+	--END
 	
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem

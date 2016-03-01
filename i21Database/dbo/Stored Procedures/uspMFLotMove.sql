@@ -88,10 +88,10 @@ BEGIN TRY
 		END
 	END
 
-	IF @intItemStockUOMId = @intWeightUOMId
-	BEGIN
+	--IF @intItemStockUOMId = @intWeightUOMId
+	--BEGIN
 		SELECT @dblMoveQty = dbo.fnDivide(@dblMoveQty, @dblWeightPerQty)
-	END
+	--END
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 		,@dtmDate
