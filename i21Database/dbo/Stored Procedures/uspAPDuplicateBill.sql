@@ -42,8 +42,7 @@ UPDATE A
 	,strReference = A.strReference + ' Duplicate of ' + A.strBillId
 	,intEntityId = @userId
 	,ysnApproved = 0
-	,ysnForApproval = CASE WHEN A.ysnForApprovalSubmitted = 1 OR dtmApprovalDate IS NOT NULL THEN 1 ELSE 0 END
-	,A.ysnForApprovalSubmitted = 0
+	,ysnForApprovalSubmitted = 0
 	,dtmApprovalDate = NULL
 FROM #tmpDuplicateBill A
 
