@@ -391,6 +391,13 @@ BEGIN
 
 							END
 
+							/ 
+							CASE	WHEN DetailItem.ysnSubCurrency = 1 THEN 
+										CASE WHEN ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Header.intSubCurrencyCents, 1) ELSE 1 END 
+									ELSE 
+										1
+							END 								
+
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
 				,dblExchangeRate = 1  
@@ -722,6 +729,12 @@ BEGIN
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 											END 
 
+							END 
+							/ 
+							CASE	WHEN DetailItem.ysnSubCurrency = 1 THEN 
+										CASE WHEN ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Header.intSubCurrencyCents, 1) ELSE 1 END 
+									ELSE 
+										1
 							END 
 
 				,dblSalesPrice = 0  
