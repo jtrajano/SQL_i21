@@ -200,12 +200,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         freightTerm: {
             type: 'FreightTermsBuffered'
         },
-        itemCurrency: {
-            type: 'currencybuffered'
-        },
-        chargeCurrency: {
-            type: 'currencybuffered'
-        },
+        //itemCurrency: {
+        //    type: 'currencybuffered'
+        //},
+        //chargeCurrency: {
+        //    type: 'currencybuffered'
+        //},
 
         contract: {
             type: 'ctcontractheaderviewbuffered'

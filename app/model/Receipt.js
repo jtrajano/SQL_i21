@@ -23,6 +23,7 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'strReceiptNumber', type: 'string' },
         { name: 'dtmReceiptDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intCurrencyId', type: 'int', allowNull: true },
+        { name: 'intSubCurrencyCents', type: 'int', allowNull: true },
         { name: 'intBlanketRelease', type: 'int' },
         { name: 'strVendorRefNo', type: 'string' },
         { name: 'strBillOfLading', type: 'string' },

@@ -28,6 +28,7 @@ namespace iRely.Inventory.Model
         public string strReceiptNumber { get; set; }
         public DateTime? dtmReceiptDate { get; set; }
         public int? intCurrencyId { get; set; }
+        public int? intSubCurrencyCents { get; set; }
         public int? intBlanketRelease { get; set; }
         public string strVendorRefNo { get; set; }
         public string strBillOfLading { get; set; }
@@ -153,6 +154,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmReceiptDate { get; set; }
         public int? intCurrencyId { get; set; }
         public string strCurrency { get; set; }
+        public int? intSubCurrencyCents { get; set; }
         public int? intBlanketRelease { get; set; }
         public string strVendorRefNo { get; set; }
         public string strBillOfLading { get; set; }
@@ -215,7 +217,6 @@ namespace iRely.Inventory.Model
         public int? intUnitMeasureId { get; set; }
         public int? intWeightUOMId { get; set; }
         public int? intCostUOMId { get; set; }
-        public int? intCurrencyId { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
@@ -227,6 +228,7 @@ namespace iRely.Inventory.Model
         public bool? ysnExported { get; set; }
         public DateTime? dtmExportedDate { get; set; }
         public int? intSort { get; set; }
+        public bool? ysnSubCurrency { get; set; }
 
         private string _orderNumber;
         [NotMapped]
@@ -749,25 +751,6 @@ namespace iRely.Inventory.Model
                 _discountSchedule = value;
             }
         }
-        private string _currency;
-        [NotMapped]
-        public string strCurrency
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_currency))
-                    if (vyuICGetInventoryReceiptItem != null)
-                        return vyuICGetInventoryReceiptItem.strCurrency;
-                    else
-                        return null;
-                else
-                    return _currency;
-            }
-            set
-            {
-                _currency = value;
-            }
-        }
         private decimal _franchise;
         [NotMapped]
         public decimal dblFranchise
@@ -857,8 +840,6 @@ namespace iRely.Inventory.Model
         public decimal? dblWeightUOMConvFactor { get; set; }
         public string strCostUOM { get; set; }
         public decimal? dblCostUOMConvFactor { get; set; }
-        public int? intCurrencyId { get; set; }
-        public string strCurrency { get; set; }
         public decimal? dblGrossMargin { get; set; }
         public int? intGradeId { get; set; }
         public decimal? dblBillQty { get; set; }
@@ -873,6 +854,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmExportedDate { get; set; }
         public decimal? dblFranchise { get; set; }
         public decimal? dblContainerWeightPerQty { get; set; }
+        public bool? ysnSubCurrency { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
@@ -888,7 +870,6 @@ namespace iRely.Inventory.Model
         public decimal? dblRate { get; set; }
         public decimal? dblExchangeRate { get; set; }
         public int? intCostUOMId { get; set; }
-        public int? intCurrencyId { get; set; }
         public decimal? dblAmount { get; set; }
         public string strAllocateCostBy { get; set; }
         public bool? ysnAccrue { get; set; }
@@ -898,6 +879,7 @@ namespace iRely.Inventory.Model
         public decimal? dblAmountPaid { get; set; }
         public decimal? dblAmountPriced { get; set; }
         public int? intSort { get; set; }
+        public bool? ysnSubCurrency { get; set; }
 
         private string _contractNo;
         [NotMapped]
@@ -1051,25 +1033,6 @@ namespace iRely.Inventory.Model
                 _vendorName = value;
             }
         }
-        private string _currency;
-        [NotMapped]
-        public string strCurrency
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_currency))
-                    if (vyuICGetInventoryReceiptCharge != null)
-                        return vyuICGetInventoryReceiptCharge.strCurrency;
-                    else
-                        return null;
-                else
-                    return _currency;
-            }
-            set
-            {
-                _currency = value;
-            }
-        }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
@@ -1089,8 +1052,6 @@ namespace iRely.Inventory.Model
         public decimal? dblExchangeRate { get; set; }
         public string strCostUOM { get; set; }
         public string strUnitType { get; set; }
-        public int? intCurrencyId { get; set; }
-        public string strCurrency { get; set; }
         public int? intOnCostTypeId { get; set; }
         public string strOnCostType { get; set; }
         public decimal? dblAmount { get; set; }
@@ -1100,6 +1061,7 @@ namespace iRely.Inventory.Model
         public string strVendorId { get; set; }
         public string strVendorName { get; set; }
         public bool? ysnPrice { get; set; }
+        public bool? ysnSubCurrency { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }
@@ -1513,6 +1475,7 @@ namespace iRely.Inventory.Model
         public string strBOL { get; set; }
         public decimal? dblFranchise { get; set; }
         public decimal? dblContainerWeightPerQty { get; set; }
+        public bool? ysnSubCurrency { get; set; }
     }
 
     public class vyuICGetInventoryReceiptVoucher
