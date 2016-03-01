@@ -39,6 +39,15 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
+	IF @dblMoveQty>@dblWeight
+	BEGIN
+		RAISERROR (
+				90015
+				,11
+				,1
+				)
+	END
+
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
@@ -84,10 +93,11 @@ BEGIN TRY
 		RAISERROR(90008,11,1)
 	END
 
-	IF @intItemStockUOMId = @intWeightUOMId
-	BEGIN
+	
+	--IF @intItemStockUOMId = @intWeightUOMId
+	--BEGIN
 		SELECT @dblMoveQty = dbo.fnDivide(@dblMoveQty, @dblWeightPerQty)
-	END
+	--END
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 		,@dtmDate

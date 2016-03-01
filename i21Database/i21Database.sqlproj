@@ -3492,10 +3492,14 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateBillGLEntriesRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
+	<Build Include="dbo\Views\vyuEME2C2Role.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
     <Build Include="dbo\Functions\fnDivide.sql" />
     <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutItemMovementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

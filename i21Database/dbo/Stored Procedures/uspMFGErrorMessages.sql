@@ -73,3 +73,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90014) EXEC sp_dropmessa
 SET @strmessage = 'Frozen/Released/started wokorder cannot be moved.'
 EXEC sp_addmessage 90014,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90015) EXEC sp_dropmessage 90015, 'us_english'	
+SET @strmessage = 'Move qty cannot be greater than available qty.'
+EXEC sp_addmessage 90015,11,@strmessage,'us_english','False'

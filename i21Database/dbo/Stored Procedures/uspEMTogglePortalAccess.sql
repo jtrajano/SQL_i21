@@ -2,7 +2,8 @@
 	@intEntityId			int,
 	@intEntityContactId		int,
 	@ysnEnablePortalAccess	bit,
-	@message				nvarchar(200) output
+	@message				nvarchar(200) output,
+	@intUserRoleId			int output
 AS
 BEGIN
 	if @ysnEnablePortalAccess = 0 
@@ -29,12 +30,13 @@ BEGIN
 			 where intEntityId = @intEntityId and b.ysnAdmin = 1
 		declare @userName nvarchar(200)
 		select @userName = strEmail from tblEntity where intEntityId = @intEntityContactId
-
+				
 		if(@roleId is null or @roleId < 0)
 		begin
 			set @message =  'User role is not yet created'
 			return 0
 		end
+		set @intUserRoleId = @roleId
 
 		if(@userName is null or @userName = '')
 		begin
