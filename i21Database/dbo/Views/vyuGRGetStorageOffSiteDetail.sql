@@ -25,7 +25,8 @@ SELECT DISTINCT
 	,a.strCustomerReference  
  	,a.dtmLastStorageAccrueDate  
  	,c1.strScheduleId,
- 	isnull(ysnExternal,0) as ysnExternal 	  
+ 	isnull(ysnExternal,0) as ysnExternal,
+	ri.intItemId  	  
 FROM tblICInventoryReceipt r
 JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 JOIN tblSCTicket sc on sc.intTicketId = ri.intSourceId
