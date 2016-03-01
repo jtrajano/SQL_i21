@@ -235,14 +235,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboCurrency: {
                 value: '{current.intCurrencyId}',
                 store: '{currency}',
-                readOnly: '{current.ysnPosted}',
-                defaultFilters: [
-                    {
-                        column: 'ysnSubCurrency',
-                        value: false,
-                        conjunction: 'and'
-                    }
-                ]
+                readOnly: '{current.ysnPosted}'
             },
             txtReceiptNumber: {
                 value: '{current.strReceiptNumber}'
@@ -489,23 +482,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'intLoadReceive'
                 },
                 colItemSubCurrency: {
-                    dataIndex: 'strCurrency',
+                    dataIndex: 'ysnSubCurrency',
                     editor: {
-                        store: '{itemCurrency}',
-                        origValueField: 'intCurrencyID',
-                        origUpdateField: 'intCurrencyId',
-                        defaultFilters: [
-                            {
-                                column: 'ysnSubCurrency',
-                                value: true,
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intMainCurrencyId',
-                                value: '{current.intCurrencyId}',
-                                conjunction: 'and'
-                            }
-                        ]
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
                 colUOM: {
@@ -798,19 +777,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{costMethod}'
                     }
                 },
-                colChargeCurrency: {
-                    dataIndex: 'strCurrency',
+                colChargeSubCurrency: {
+                    dataIndex: 'ysnSubCurrency',
                     editor: {
-                        store: '{chargeCurrency}',
-                        origValueField: 'intCurrencyID',
-                        origUpdateField: 'intCurrencyId',
-                        defaultFilters: [
-                            {
-                                column: 'ysnSubCurrency',
-                                value: true,
-                                conjunction: 'and'
-                            }
-                        ]
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
                 colRate: 'dblRate',
@@ -976,8 +946,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     key: 'tblICInventoryReceiptCharges',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCharges,
-                        deleteButton: grdCharges.down('#btnRemoveCharge'),
-                        createRecord: me.createChargeRecord
+                        deleteButton: grdCharges.down('#btnRemoveCharge')
+                        //createRecord: me.createChargeRecord
                     })
                 },
                 {
@@ -1170,14 +1140,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         action(record);
     },
 
-    createChargeRecord: function (config, action) {
-        var win = config.grid.up('window');
-        var cboCurrency = win.down('#cboCurrency');
-        var record = Ext.create('Inventory.model.ReceiptCharge');
-        record.set('strCurrency', cboCurrency.getRawValue());
-        record.set('intCurrencyId', cboCurrency.getValue());
-        action(record);
-    },
+    //createChargeRecord: function (config, action) {
+    //    var win = config.grid.up('window');
+    //    var cboCurrency = win.down('#cboCurrency');
+    //    var record = Ext.create('Inventory.model.ReceiptCharge');
+    //    record.set('strCurrency', cboCurrency.getRawValue());
+    //    record.set('intCurrencyId', cboCurrency.getValue());
+    //    action(record);
+    //},
 
     validateRecord: function (config, action) {
         this.validateRecord(config, function (result) {
@@ -4244,7 +4214,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboItemSubCurrency": {
                 select: this.onReceiptItemSelect
-            },
+            }
         })
     }
 
