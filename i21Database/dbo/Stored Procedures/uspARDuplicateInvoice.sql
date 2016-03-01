@@ -251,7 +251,6 @@ BEGIN
 								,[dblQtyOrdered]
 								,[dblQtyShipped]
 								,[dblDiscount]
-								,[dblDiscountAmount]
 								,[dblPrice]
 								,[dblTotalTax]
 								,[dblTotal]
@@ -290,7 +289,6 @@ BEGIN
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblDiscount]	  * @dblSplitPercent
-								,[dblDiscountAmount] * @dblSplitPercent
 								,[dblPrice]      * @dblSplitPercent
 								,[dblTotalTax]   * @dblSplitPercent
 								,[dblTotal]      * @dblSplitPercent
