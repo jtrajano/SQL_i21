@@ -71,6 +71,7 @@ BEGIN TRY
 		,strContainerNumber = x.strContainerNumber
 		,strMarks = x.strMarks
 		,intCompanyLocationSubLocationId = x.intCompanyLocationSubLocationId
+		,strCountry = x.strCountry
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -108,6 +109,7 @@ BEGIN TRY
 			,strContainerNumber NVARCHAR(100)
 			,strMarks NVARCHAR(100)
 			,intCompanyLocationSubLocationId INT
+			,strCountry NVARCHAR(100)
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)

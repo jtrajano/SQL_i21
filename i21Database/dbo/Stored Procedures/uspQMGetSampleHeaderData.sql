@@ -14,7 +14,10 @@ BEGIN
 		,@intProductValueId AS intProductValueId
 		,I.intItemId
 		,I.strDescription
+		,I.intOriginId AS intCountryId
+		,CA.strDescription AS strCountry
 	FROM tblICItem I
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	WHERE I.strStatus = 'Active'
 		AND I.intItemId = @intProductValueId
 END
@@ -28,8 +31,9 @@ BEGIN
 		,C.strItemDescription AS strDescription
 		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
-		,C.intCountryId
 		,C.intEntityId
+		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 	FROM vyuCTContractDetailView C
 	WHERE C.intContractDetailId = @intProductValueId
 END
@@ -47,8 +51,9 @@ BEGIN
 		,C.intItemId
 		,C.strItemDescription AS strDescription
 		,C.intUnitMeasureId AS intRepresentingUOMId
-		,C.intCountryId
 		,C.intEntityId
+		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 	FROM vyuLGShipmentContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	WHERE S.intShipmentBLContainerContractId = @intProductValueId
@@ -65,8 +70,9 @@ BEGIN
 		,C.intItemId
 		,C.strItemDescription AS strDescription
 		,C.intUnitMeasureId AS intRepresentingUOMId
-		,C.intCountryId
 		,C.intEntityId
+		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 	FROM vyuLGShipmentContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	WHERE S.intShipmentContractQtyId = @intProductValueId
@@ -87,10 +93,13 @@ BEGIN
 				END
 			) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
+		,I.intOriginId AS intCountryId
+		,CA.strDescription AS strCountry
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.ysnStockUnit = 1
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	WHERE L.intLotId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 11 -- Parent Lot  
@@ -117,7 +126,10 @@ BEGIN
 		,I.strDescription
 		,@dblRepresentingQty AS dblRepresentingQty
 		,@intRepresentingUOMId AS intRepresentingUOMId
+		,I.intOriginId AS intCountryId
+		,CA.strDescription AS strCountry
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	WHERE PL.intParentLotId = @intProductValueId
 END

@@ -126,6 +126,7 @@ BEGIN TRY
 		,strContainerNumber
 		,strMarks
 		,intCompanyLocationSubLocationId
+		,strCountry
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -167,6 +168,7 @@ BEGIN TRY
 		,strContainerNumber
 		,strMarks
 		,intCompanyLocationSubLocationId
+		,strCountry
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -206,6 +208,7 @@ BEGIN TRY
 			,strContainerNumber NVARCHAR(100)
 			,strMarks NVARCHAR(100)
 			,intCompanyLocationSubLocationId INT
+			,strCountry NVARCHAR(100)
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
