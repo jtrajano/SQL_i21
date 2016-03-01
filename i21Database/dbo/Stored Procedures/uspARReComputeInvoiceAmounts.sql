@@ -31,7 +31,6 @@ SET
 	 [dblQtyOrdered]	 = ISNULL([dblQtyOrdered], @ZeroDecimal)
 	,[dblQtyShipped]	 = ISNULL([dblQtyShipped], @ZeroDecimal)
 	,[dblDiscount]		 = ISNULL([dblDiscount], @ZeroDecimal)
-	,[dblDiscountAmount] = ROUND(ISNULL((([dblQtyShipped] * [dblPrice]) * ([dblDiscount]/100)), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,[dblPrice]			 = ISNULL([dblPrice], @ZeroDecimal)
 	,[dblTotalTax]		 = ISNULL([dblTotalTax], @ZeroDecimal)
 	,[dblTotal]			 = ISNULL([dblTotal], @ZeroDecimal)
