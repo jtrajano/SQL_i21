@@ -62,7 +62,7 @@ AS
 												CS.strContractStatus,			ISNULL(SU.dblStockUOMCF,0)		AS	dblStockUOMCF,	
 			IX.strIndex,						VR.strVendorId,					
 			SP.intSupplyPointId,												SP.intEntityVendorId			AS	intTerminalId,
-			SP.intRackPriceSupplyPointId,		IM.intOriginId,					IG.strCountry					AS	strItemOrigin,
+			SP.intRackPriceSupplyPointId,		IM.intOriginId,					CA.strDescription				AS	strItemOrigin,
 			RV.dblReservedQuantity,				IM.intLifeTime,					IC.intCountryId					AS	intItemContractOriginId,
 			IM.strLifeTimeType,													CG.strCountry					AS	strItemContractOrigin,
 			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0) AS dblUnReservedQuantity,
@@ -139,7 +139,7 @@ AS
 	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId				AND	
 													SM.ysnStockUnit				=	1							LEFT
 	JOIN	tblICUnitMeasure				U4	ON	U4.intUnitMeasureId			=	SM.intUnitMeasureId			LEFT
-	JOIN	tblSMCountry					IG	ON	IG.intCountryID				=	IM.intOriginId				LEFT
+	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId				LEFT
 	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
 	JOIN	tblSMCountry					CG	ON	CG.intCountryID				=	IC.intCountryId				LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
