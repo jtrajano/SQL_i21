@@ -3541,6 +3541,8 @@
     <Build Include="dbo\Views\vyuRKGetFutureMonthAndYears.sql" />
     <Build Include="dbo\Views\vyuRKGetCommodityUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionImport.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePrepay.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentAmountDue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

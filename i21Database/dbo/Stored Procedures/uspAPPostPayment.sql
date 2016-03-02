@@ -64,6 +64,7 @@ DECLARE @paymentIds NVARCHAR(MAX) = @param
 DECLARE @validPaymentIds NVARCHAR(MAX)
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @count INT = 0;
+DECLARE @prepayIds AS Id
 
 SET @recapId = '1'
 
@@ -127,6 +128,17 @@ SELECT @paymentIds = COALESCE(@paymentIds + ',', '') +  CONVERT(VARCHAR(12),intP
 FROM #tmpPayablePostData
 ORDER BY intPaymentId
 
+--GET ALL PREPAY
+INSERT INTO @prepayIds
+SELECT 
+	A.intPaymentId
+FROM #tmpPayablePostData A
+INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
+WHERE B.ysnPrepay = 1
+
+DELETE A
+FROM #tmpPayablePostData A WHERE A.intPaymentId IN (SELECT intPaymentId FROM @prepayIds)
+
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -136,6 +148,8 @@ BEGIN
 	--VALIDATIONS
 	INSERT INTO #tmpPayableInvalidData 
 	SELECT * FROM [fnAPValidatePostPayment](@paymentIds, @post, @userId)
+	UNION ALL
+	SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
 
 	DECLARE @totalInvalid INT
 	SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
