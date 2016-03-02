@@ -1271,6 +1271,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intVendorEntityId', records[0].get('intEntityVendorId'));
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
 
+            var cents =  records[0].get('intCent');
+            cents = cents && Ext.isNumeric(cents) && cents != 0 ? cents : 1;
+            current.set('intSubCurrencyCents', cents);
+
             current.set('intShipFromId', null);
             current.set('intShipViaId', null);
 
