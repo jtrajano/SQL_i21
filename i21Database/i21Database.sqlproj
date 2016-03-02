@@ -3506,6 +3506,7 @@
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
     <Build Include="dbo\Views\vyuCTContractChart.sql" />
+    <Build Include="dbo\uspPRCreatePaycheckPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
