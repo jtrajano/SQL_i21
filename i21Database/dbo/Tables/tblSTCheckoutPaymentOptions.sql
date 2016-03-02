@@ -8,6 +8,7 @@
     [intAccountId] INT NULL, 
     [dblAmount] DECIMAL(18, 6) NULL, 
     [dblRegisterAmount] DECIMAL(18, 6) NULL, 
+    [intRegisterCount] INT NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutPaymentOptions_intPaymentOptionsId] PRIMARY KEY ([intPaymentOptionsPrimId]), 
     CONSTRAINT [FK_tblSTCheckoutPaymentOptions_tblSTPaymentOption] FOREIGN KEY ([intPaymentOptionId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 

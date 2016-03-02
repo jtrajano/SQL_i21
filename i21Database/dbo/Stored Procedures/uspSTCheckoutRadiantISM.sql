@@ -14,11 +14,13 @@ BEGIN
 	, ISNULL(Chk.SalesQuantity,0)
 	, ISNULL(Chk.ActualSalesPrice,0)
 	, ISNULL(Chk.SalesAmount,0)
+	, P.dblStandardCost
 	, 1
 	from #tempCheckoutInsert Chk
 	JOIN dbo.tblICItemUOM UOM ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
 	JOIN dbo.tblICItem I ON I.intItemId = UOM.intItemId
 	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
+	JOIN dbo.tblICItemPricing P ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
 	JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
 	WHERE S.intStoreId = @intStoreId

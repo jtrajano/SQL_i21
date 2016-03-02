@@ -34,6 +34,10 @@
 	[dtmTestingEndDate] DATETIME CONSTRAINT [DF_tblQMSample_dtmTestingEndDate] DEFAULT GetDate(), 
 	[dtmSamplingEndDate] DATETIME CONSTRAINT [DF_tblQMSample_dtmSamplingEndDate] DEFAULT GetDate(), 
 	[strSamplingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	[strMarks] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	[intCompanyLocationSubLocationId] INT, 
+	[strCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
@@ -57,5 +61,6 @@
 	CONSTRAINT [FK_tblQMSample_tblICUnitMeasure_intSampleUOMId] FOREIGN KEY ([intSampleUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [FK_tblQMSample_tblICUnitMeasure_intRepresentingUOMId] FOREIGN KEY ([intRepresentingUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [FK_tblQMSample_tblICLotStatus] FOREIGN KEY ([intLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]), 
-	CONSTRAINT [FK_tblQMSample_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
+	CONSTRAINT [FK_tblQMSample_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]), 
+	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
 )

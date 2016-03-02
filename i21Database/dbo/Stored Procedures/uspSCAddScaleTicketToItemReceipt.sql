@@ -147,10 +147,11 @@ SELECT
 		,intLotId					= NULL --No LOTS from scale
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
-		,ysnIsStorage				= CASE 
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN 0 -- own
-                                        WHEN LI.intTransactionDetailId IS NULL THEN 1 -- storage
-									  END
+		--,ysnIsStorage				= CASE 
+		--								WHEN LI.intTransactionDetailId IS NOT NULL THEN 0 -- own
+  --                                      WHEN LI.intTransactionDetailId IS NULL THEN 1 -- storage
+		--							  END
+		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
 		,dblGross					= SC.dblGrossWeight
 		,dblNet						= SC.dblGrossWeight - SC.dblTareWeight

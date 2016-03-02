@@ -123,6 +123,10 @@ BEGIN TRY
 		,dtmTestingEndDate
 		,dtmSamplingEndDate
 		,strSamplingMethod
+		,strContainerNumber
+		,strMarks
+		,intCompanyLocationSubLocationId
+		,strCountry
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -161,6 +165,10 @@ BEGIN TRY
 		,dtmTestingEndDate
 		,dtmSamplingEndDate
 		,strSamplingMethod
+		,strContainerNumber
+		,strMarks
+		,intCompanyLocationSubLocationId
+		,strCountry
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -197,6 +205,10 @@ BEGIN TRY
 			,dtmTestingEndDate DATETIME
 			,dtmSamplingEndDate DATETIME
 			,strSamplingMethod NVARCHAR(50)
+			,strContainerNumber NVARCHAR(100)
+			,strMarks NVARCHAR(100)
+			,intCompanyLocationSubLocationId INT
+			,strCountry NVARCHAR(100)
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

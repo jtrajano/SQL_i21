@@ -9,6 +9,7 @@
     [strManagersPassword] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [dtmShiftDateForImport] DATETIME NULL, 
     [dtmShiftClosedDate] DATETIME NULL, 
+    [strCheckoutCloseDate] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblProcessXMLVersion] DECIMAL(18, 6) NULL, 
     [strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strRegister] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
