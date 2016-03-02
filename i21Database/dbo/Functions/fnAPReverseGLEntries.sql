@@ -44,11 +44,11 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @tmpTransacions TABLE (
-		[intTransactionId] [int] PRIMARY KEY,
-		UNIQUE (intTransactionId)
-	);
-	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
+	--DECLARE @tmpTransacions TABLE (
+	--	[intTransactionId] [int] PRIMARY KEY,
+	--	UNIQUE (intTransactionId)
+	--);
+	--INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
 	INSERT INTO @returntable(
 		[strTransactionId]
@@ -116,7 +116,7 @@ BEGIN
 		,[dblForeignRate]  
 		,[intEntityId] = @intUserId
 	FROM	tblGLDetail 
-	WHERE	intTransactionId IN (SELECT intId FROM @tmpTransacions)
+	WHERE	intTransactionId IN (SELECT intId FROM @transactionIds)
 	AND strTransactionForm = @transactionType
 	AND ysnIsUnposted = 0
 	ORDER BY intGLDetailId

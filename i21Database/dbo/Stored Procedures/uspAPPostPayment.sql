@@ -152,7 +152,7 @@ BEGIN
 
 	--VALIDATIONS
 	INSERT INTO #tmpPayableInvalidData 
-	SELECT * FROM [fnAPValidatePostPayment](@paymentIds, @post, @userId)
+	SELECT * FROM [fnAPValidatePostPayment](@payments, @post, @userId)
 	UNION ALL
 	SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
 
@@ -227,227 +227,66 @@ BEGIN
 	--UPDATE tblAPPaymentDetail
 	EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
 
-	IF(ISNULL(@post,0) = 0)
+	EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
+
+	--Update posted status
+	UPDATE tblAPPayment
+		SET		ysnPosted = @post
+	WHERE	intPaymentId IN (SELECT intId FROM @payments)
+
+	IF EXISTS(SELECT 1 FROM @prepayIds)
 	BEGIN
-		
-		--Unposting Process
-		--UPDATE tblAPPaymentDetail
-		--SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
-		--											THEN (B.dblDiscount + B.dblPayment - B.dblInterest) 
-		--										ELSE (B.dblAmountDue + B.dblPayment) END)
-		--FROM tblAPPayment A
-		--	LEFT JOIN tblAPPaymentDetail B
-		--		ON A.intPaymentId = B.intPaymentId
-		--	LEFT JOIN tblAPBill C
-		--		ON B.intBillId = C.intBillId
-		--WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		UPDATE A
+			SET A.ysnPosted = @post
+		FROM tblAPBill A
+		INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+		WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
+	END
 
-		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
-		UPDATE tblAPBill
-			SET tblAPBill.dblAmountDue = B.dblAmountDue,
-				tblAPBill.ysnPaid = 0,
-				tblAPBill.dblPayment = (C.dblPayment - B.dblPayment),
-				tblAPBill.dtmDatePaid = NULL,
-				tblAPBill.dblWithheld = 0
-		FROM tblAPPayment A
-					INNER JOIN tblAPPaymentDetail B 
-							ON A.intPaymentId = B.intPaymentId
-					INNER JOIN tblAPBill C
-							ON B.intBillId = C.intBillId
-					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+	EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @payments, @post = @post, @userId = @userId, @batchId = @batchIdUsed
 
+	--Insert Successfully posted transactions.
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	SELECT 
+		CASE WHEN @post = 1 THEN @PostSuccessfulMsg ELSE @UnpostSuccessfulMsg END,
+		'Payable',
+		A.strPaymentRecordNum,
+		@batchId,
+		A.intPaymentId
+	FROM tblAPPayment A
+	WHERE intPaymentId IN (SELECT intId FROM @payments)
+
+	IF @post = 0
+	BEGIN
+		--UPDATE ysnIsUnposted of tblGLDetail
 		UPDATE tblGLDetail
 			SET tblGLDetail.ysnIsUnposted = 1
 		FROM tblAPPayment A
 			INNER JOIN tblGLDetail B
 				ON A.intPaymentId = B.intTransactionId
 		WHERE B.[strTransactionId] IN (SELECT strPaymentRecordNum FROM tblAPPayment 
-							WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData))
+							WHERE intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds))
 
-		-- Creating the temp table:
-		DECLARE @isSuccessful BIT
-		CREATE TABLE #tmpCMBankTransaction (
-         --[intTransactionId] INT PRIMARY KEY,
-         [strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
-         UNIQUE (strTransactionId))
-
-		INSERT INTO #tmpCMBankTransaction
-		 SELECT strPaymentRecordNum FROM tblAPPayment A
-		 INNER JOIN #tmpPayablePostData B ON A.intPaymentId = B.intPaymentId
-
-		-- Calling the stored procedure
-		EXEC dbo.uspCMBankTransactionReversal @userId, DEFAULT, @isSuccessful OUTPUT
-
-		IF @isSuccessful = 0
-		BEGIN
-			RAISERROR('Failed to reverse bank transaction.', 16, 1);
-		END
-
-		--update payment record based on record from tblCMBankTransaction
+		--UPDATE strPaymentInfo
 		UPDATE tblAPPayment
 			SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
 		FROM tblAPPayment A 
 			INNER JOIN tblCMBankTransaction B
 				ON A.strPaymentRecordNum = B.strTransactionId
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		--update payment record
-		UPDATE tblAPPayment
-			SET ysnPosted= 0
-		FROM tblAPPayment A 
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		--Insert Successfully unposted transactions.
-		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT 
-			@UnpostSuccessfulMsg,
-			'Payable',
-			A.strPaymentRecordNum,
-			@batchId,
-			A.intPaymentId
-		FROM tblAPPayment A
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		--remove overpayment
-		DELETE A
-		FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
-		WHERE B.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND A.intTransactionType = 8
-
+		WHERE intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
 	END
-	ELSE
+
+	--OVERPAYMENT
+	IF @post = 1
 	BEGIN
-
-		-- Update the posted flag in the transaction table
-		UPDATE tblAPPayment
-		SET		ysnPosted = 1
-				--,intConcurrencyId += 1 
-		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		--UPDATE B
-		--	SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-		--							THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END,
-		--	B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-		--						THEN B.dblDiscount ELSE 0 END,
-		--	B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-		--						THEN B.dblInterest ELSE 0 END
-		--FROM tblAPPayment A
-		--	LEFT JOIN tblAPPaymentDetail B
-		--		ON A.intPaymentId = B.intPaymentId
-		--WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-
-		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
-		UPDATE tblAPBill
-			SET tblAPBill.dblAmountDue = B.dblAmountDue,
-				tblAPBill.ysnPaid = (CASE WHEN (B.dblAmountDue) = 0 THEN 1 ELSE 0 END),
-				tblAPBill.dtmDatePaid = (CASE WHEN (B.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE NULL END),
-				tblAPBill.dblWithheld = B.dblWithheld,
-				tblAPBill.dblDiscount = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount ELSE 0 END),
-				tblAPBill.dblInterest = (CASE WHEN B.dblAmountDue = 0 THEN B.dblInterest ELSE 0 END),
-				tblAPBill.dblPayment = (C.dblPayment + B.dblPayment)
-		FROM tblAPPayment A
-					INNER JOIN tblAPPaymentDetail B 
-							ON A.intPaymentId = B.intPaymentId
-					INNER JOIN tblAPBill C
-							ON B.intBillId = C.intBillId
-					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		----Update Bill Amount Due associated on the other payment record
-		--UPDATE tblAPPaymentDetail
-		--SET dblAmountDue = C.dblAmountDue
-		--FROM tblAPPaymentDetail A
-		--	INNER JOIN tblAPPayment B
-		--		ON A.intPaymentId = B.intPaymentId
-		--		AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		--		AND B.ysnPosted = 0
-		--	INNER JOIN tblAPBill C
-		--		ON A.intBillId = C.intBillId
-
-		--Insert to bank transaction
-		INSERT INTO tblCMBankTransaction(
-			[strTransactionId],
-			[intBankTransactionTypeId],
-			[intBankAccountId],
-			[intCurrencyId],
-			[dblExchangeRate],
-			[dtmDate],
-			[strPayee],
-			[intPayeeId],
-			[strAddress],
-			[strZipCode],
-			[strCity],
-			[strState],
-			[strCountry],
-			[dblAmount],
-			[strAmountInWords],
-			[strMemo],
-			[strReferenceNo],
-			[ysnCheckToBePrinted],
-			[ysnCheckVoid],
-			[ysnPosted],
-			[strLink],
-			[ysnClr],
-			[dtmDateReconciled],
-			[intEntityId],
-			[intCreatedUserId],
-			[dtmCreated],
-			[intLastModifiedUserId],
-			[dtmLastModified],
-			[intConcurrencyId]
-		)
-		SELECT
-			[strTransactionId] = A.strPaymentRecordNum,
-			[intBankTransactionTypeID] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'echeck' THEN 20 
-											WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'ach' THEN 22 
-											ELSE (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment') END,
-			[intBankAccountID] = A.intBankAccountId,
-			[intCurrencyID] = A.intCurrencyId,
-			[dblExchangeRate] = 0,
-			[dtmDate] = A.dtmDatePaid,
-			[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityVendorId),
-			[intPayeeId] = B.intEntityVendorId,
-			[strAddress] = '',
-			[strZipCode] = '',
-			[strCity] = '',
-			[strState] = '',
-			[strCountry] = '',
-			[dblAmount] = A.dblAmountPaid + A.dblWithheld,
-			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
-			[strMemo] = A.strNotes,
-			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,
-			[ysnCheckToBePrinted] = 1,
-			[ysnCheckVoid] = 0,
-			[ysnPosted] = 1,
-			[strLink] = @batchId,
-			[ysnClr] = 0,
-			[dtmDateReconciled] = NULL,
-			[intEntityId] = A.intEntityId,
-			[intCreatedUserID] = @userId,
-			[dtmCreated] = GETDATE(),
-			[intLastModifiedUserID] = NULL,
-			[dtmLastModified] = GETDATE(),
-			[intConcurrencyId] = 1
-			FROM tblAPPayment A
-				INNER JOIN tblAPVendor B
-					ON A.intEntityVendorId = B.intEntityVendorId
-				--LEFT JOIN tblSMPaymentMethod C ON A.intPaymentMethodId = C.intPaymentMethodID
-			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-			--AND C.strPaymentMethod = 'Check'
-
-		--Insert Successfully posted transactions.
-		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT 
-			@PostSuccessfulMsg,
-			'Payable',
-			A.strPaymentRecordNum,
-			@batchId,
-			A.intPaymentId
-		FROM tblAPPayment A
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
 		--Create overpayment
-		SELECT intPaymentId INTO #tmpPayableIds FROM #tmpPayablePostData
+		SELECT 
+			intId 
+		INTO #tmpPayableIds 
+		FROM @payments A 
+			INNER JOIN tblAPPayment B ON A.intId = B.intPaymentId 
+		WHERE B.dblUnapplied > 0 --process only the records that has overpayment
+
 		DECLARE @payId INT;
 		SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
 		WHILE (@payId IS NOT NULL)
@@ -458,10 +297,17 @@ BEGIN
 			SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
 		END
 	END
+	ELSE
+	BEGIN
+		--remove overpayment
+		DELETE A
+		FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
+		WHERE B.intPaymentId IN (SELECT intId FROM @payments)
+		AND A.intTransactionType = 8
+	END
 
 	--UPDATE 1099 Information
 	EXEC [uspAPUpdateBill1099] @param
-
 END
 ELSE
 	BEGIN

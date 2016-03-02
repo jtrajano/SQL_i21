@@ -14,10 +14,10 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @tmpPayments TABLE(
-		[intPaymentId] [int]
-	);
-	INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
+	--DECLARE @tmpPayments TABLE(
+	--	[intPaymentId] [int]
+	--);
+	--INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
 	IF @post = 1
 	BEGIN
@@ -30,7 +30,7 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A 
 		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		GROUP BY A.strPaymentRecordNum, A.intPaymentId
 		HAVING COUNT(B.intPaymentDetailId) > 1 
 
@@ -42,7 +42,7 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.ysnPrepay = 0
 	END
 	ELSE
@@ -58,7 +58,7 @@ BEGIN
 		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPAppliedPrepaidAndDebit C ON B.intBillId = C.intBillId
 		INNER JOIN tblAPBill D ON C.intBillId = C.intBillId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 	END
 
 	RETURN;

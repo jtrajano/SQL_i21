@@ -3544,6 +3544,7 @@
     <Build Include="dbo\Functions\fnAPValidatePrepay.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentAmountDue.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
