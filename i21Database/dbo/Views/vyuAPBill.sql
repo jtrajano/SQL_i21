@@ -6,6 +6,7 @@ SELECT
 	A.strBillId,
 	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
 	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
+	A.intSubCurrencyCents,
 	A.ysnPosted,
 	A.ysnPaid,
 	A.ysnReadyForPayment,
