@@ -579,7 +579,7 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
--- Check if the transaction is already posted
+-- Check if the transaction is already unposted
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
@@ -657,6 +657,20 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+-- Check if transaction has associated Payables
+IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
+BEGIN 
+	IF EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblAPBillDetail
+		WHERE	intPaycheckHeaderId = @intPaycheckId 
+	)
+	BEGIN
+		-- Cannot Unpost Paycheck with associated Payables.
+		RAISERROR('Cannot Unpost Paycheck with associated Payables.', 11, 1)
+		GOTO Post_Rollback
+	END
+END 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -913,6 +927,9 @@ IF (@isSuccessful <> 0)
 						/* Update Paycheck Direct Deposit Distribution */
 						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
 							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
+
+						/* Create Paycheck Payables */
+						EXEC uspPRCreatePaycheckPayable @intPaycheckId, @intUserId
 
 					END
 			END
