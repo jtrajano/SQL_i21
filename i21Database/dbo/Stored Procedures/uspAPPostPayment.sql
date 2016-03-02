@@ -65,6 +65,7 @@ DECLARE @validPaymentIds NVARCHAR(MAX)
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @count INT = 0;
 DECLARE @prepayIds AS Id
+DECLARE @payments AS Id
 
 SET @recapId = '1'
 
@@ -139,6 +140,10 @@ WHERE B.ysnPrepay = 1
 DELETE A
 FROM #tmpPayablePostData A WHERE A.intPaymentId IN (SELECT intPaymentId FROM @prepayIds)
 
+--GET ALL PAYMENTS
+INSERT INTO @payments
+SELECT intPaymentId FROM #tmpPayablePostData
+
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -192,19 +197,23 @@ DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
 --CREATE TEMP GL ENTRIES
-SELECT @validPaymentIds = COALESCE(@validPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intPaymentId)
-FROM #tmpPayablePostData
-ORDER BY intPaymentId
+--SELECT @validPaymentIds = COALESCE(@validPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intPaymentId)
+--FROM #tmpPayablePostData
+--ORDER BY intPaymentId
 
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@validPaymentIds, @userId, @batchId)
+	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@payments, @userId, @batchId)
+	UNION ALL
+	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@prepayIds, @userId, @batchId)
 END
 ELSE
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@validPaymentIds, 'Payable', DEFAULT, @userId, @batchId)
+	SELECT * FROM dbo.fnAPReverseGLEntries(@payments, 'Payable', DEFAULT, @userId, @batchId)
+	UNION ALL
+	SELECT * FROM dbo.fnAPReverseGLEntries(@prepayIds, 'Payable', DEFAULT, @userId, @batchId)
 END
 
 --=====================================================================================================================================
@@ -215,20 +224,23 @@ BEGIN
 
 	EXEC uspGLBookEntries @GLEntries, @post
 
+	--UPDATE tblAPPaymentDetail
+	EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
+
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 		
 		--Unposting Process
-		UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
-													THEN (B.dblDiscount + B.dblPayment - B.dblInterest) 
-												ELSE (B.dblAmountDue + B.dblPayment) END)
-		FROM tblAPPayment A
-			LEFT JOIN tblAPPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId
-			LEFT JOIN tblAPBill C
-				ON B.intBillId = C.intBillId
-		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--UPDATE tblAPPaymentDetail
+		--SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
+		--											THEN (B.dblDiscount + B.dblPayment - B.dblInterest) 
+		--										ELSE (B.dblAmountDue + B.dblPayment) END)
+		--FROM tblAPPayment A
+		--	LEFT JOIN tblAPPaymentDetail B
+		--		ON A.intPaymentId = B.intPaymentId
+		--	LEFT JOIN tblAPBill C
+		--		ON B.intBillId = C.intBillId
+		--WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 		UPDATE tblAPBill
@@ -312,17 +324,17 @@ BEGIN
 				--,intConcurrencyId += 1 
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
-		UPDATE B
-			SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-									THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END,
-			B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-								THEN B.dblDiscount ELSE 0 END,
-			B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-								THEN B.dblInterest ELSE 0 END
-		FROM tblAPPayment A
-			LEFT JOIN tblAPPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId
-		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--UPDATE B
+		--	SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+		--							THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END,
+		--	B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+		--						THEN B.dblDiscount ELSE 0 END,
+		--	B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+		--						THEN B.dblInterest ELSE 0 END
+		--FROM tblAPPayment A
+		--	LEFT JOIN tblAPPaymentDetail B
+		--		ON A.intPaymentId = B.intPaymentId
+		--WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
@@ -341,16 +353,16 @@ BEGIN
 							ON B.intBillId = C.intBillId
 					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
-		--Update Bill Amount Due associated on the other payment record
-		UPDATE tblAPPaymentDetail
-		SET dblAmountDue = C.dblAmountDue
-		FROM tblAPPaymentDetail A
-			INNER JOIN tblAPPayment B
-				ON A.intPaymentId = B.intPaymentId
-				AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-				AND B.ysnPosted = 0
-			INNER JOIN tblAPBill C
-				ON A.intBillId = C.intBillId
+		----Update Bill Amount Due associated on the other payment record
+		--UPDATE tblAPPaymentDetail
+		--SET dblAmountDue = C.dblAmountDue
+		--FROM tblAPPaymentDetail A
+		--	INNER JOIN tblAPPayment B
+		--		ON A.intPaymentId = B.intPaymentId
+		--		AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--		AND B.ysnPosted = 0
+		--	INNER JOIN tblAPBill C
+		--		ON A.intBillId = C.intBillId
 
 		--Insert to bank transaction
 		INSERT INTO tblCMBankTransaction(

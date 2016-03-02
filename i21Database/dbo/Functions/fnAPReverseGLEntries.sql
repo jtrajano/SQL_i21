@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPReverseGLEntries]
 (
-		@transactionIds		NVARCHAR(MAX)
+		@transactionIds		Id READONLY
 		,@transactionType	NVARCHAR(50)
 		,@dtmDateReverse	DATETIME = NULL 
 		,@intUserId			INT
@@ -116,7 +116,7 @@ BEGIN
 		,[dblForeignRate]  
 		,[intEntityId] = @intUserId
 	FROM	tblGLDetail 
-	WHERE	intTransactionId IN (SELECT intTransactionId FROM @tmpTransacions)
+	WHERE	intTransactionId IN (SELECT intId FROM @tmpTransacions)
 	AND strTransactionForm = @transactionType
 	AND ysnIsUnposted = 0
 	ORDER BY intGLDetailId

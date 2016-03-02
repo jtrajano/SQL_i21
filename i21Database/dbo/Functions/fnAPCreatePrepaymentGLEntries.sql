@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPCreatePrepaymentGLEntries]
 (
-	@prepaymentId		INT
+	@prepaymentIds		Id READONLY
 	,@intUserId			INT
 	,@batchId			NVARCHAR(50)
 )
@@ -80,7 +80,7 @@ BEGIN
 		FROM	[dbo].tblAPPayment A 
 		INNER JOIN tblAPVendor C
 			ON A.intEntityVendorId = C.intEntityVendorId
-		WHERE	A.intPaymentId IN (@prepaymentId)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @prepaymentIds)
 		---- DEBIT SIDE
 		UNION ALL 
 		SELECT	
@@ -118,7 +118,7 @@ BEGIN
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
-		WHERE	A.intPaymentId IN (@prepaymentId)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @prepaymentIds)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,

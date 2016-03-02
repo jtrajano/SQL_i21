@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPCreatePaymentGLEntries]
 (
-	@transactionIds		NVARCHAR(MAX)
+	@paymentIds			Id READONLY
 	,@intUserId			INT
 	,@batchId			NVARCHAR(50)
 )
@@ -58,26 +58,27 @@ BEGIN
 		WHERE intCompanyLocationId = @userLocation
 	END
 
-	DECLARE @tmpTransacions TABLE (
-		[intTransactionId] [int] PRIMARY KEY,
-		UNIQUE (intTransactionId)
-	);
-	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
+	--DECLARE @tmpTransacions TABLE (
+	--	[intTransactionId] [int] PRIMARY KEY,
+	--	UNIQUE (intTransactionId)
+	--);
+	
+	--INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
 	IF(EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPVendor B ON A.intEntityVendorId = B.intEntityVendorId
-					WHERE A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.ysnWithholding = 1))
+					WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND B.ysnWithholding = 1))
 	BEGIN
 		SET @applyWithHold = 1;
 	END
 
 	IF(EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-				WHERE A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.dblDiscount <> 0))
+				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND B.dblDiscount <> 0))
 	BEGIN
 		SET @applyDiscount = 1;
 	END
 
 	IF(EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-				WHERE A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions) AND B.dblInterest <> 0))
+				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND B.dblInterest <> 0))
 	BEGIN
 		SET @applyInterest = 1;
 	END
@@ -119,7 +120,7 @@ BEGIN
 	FROM	[dbo].tblAPPayment A 
 	INNER JOIN tblAPVendor C
 		ON A.intEntityVendorId = C.intEntityVendorId
-	WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	--Withheld
 	IF (@applyWithHold = 1 AND @WithholdAccount IS NOT NULL AND @WithholdAccount > 0)
@@ -161,7 +162,7 @@ BEGIN
 					ON A.intAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
 					ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
-		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	END
 
 	--Discount
@@ -205,7 +206,7 @@ BEGIN
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor C
 					ON A.intEntityVendorId = C.intEntityVendorId
-		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
 		AND B.dblDiscount <> 0 AND B.dblPayment > 0
 		GROUP BY A.[strPaymentRecordNum],
@@ -253,7 +254,7 @@ BEGIN
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
-	WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
 	GROUP BY A.[strPaymentRecordNum],
 	A.intPaymentId,
@@ -307,7 +308,7 @@ BEGIN
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor C
 					ON A.intEntityVendorId = C.intEntityVendorId
-		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
 		AND B.dblInterest <> 0 AND B.dblPayment > 0
 		GROUP BY A.[strPaymentRecordNum],
@@ -319,13 +320,13 @@ BEGIN
 	END
 
 	--OVERPAYMENT
-	IF(EXISTS(SELECT 1 FROM tblAPPayment WHERE dblUnapplied > 0 AND intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)))
+	IF(EXISTS(SELECT 1 FROM tblAPPayment WHERE dblUnapplied > 0 AND intPaymentId IN (SELECT intId FROM @paymentIds)))
 	BEGIN
 		INSERT INTO @returntable
 		SELECT
 			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 			[strBatchId]				=	@batchId,
-			[intAccountId]				=	(SELECT TOP 1 intAccountId FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)), --use the first AP account only
+			[intAccountId]				=	(SELECT TOP 1 intAccountId FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)), --use the first AP account only
 			[dblDebit]					=	A.dblUnapplied,
 			[dblCredit]					=	0,
 			[dblDebitUnit]				=	0,
@@ -357,7 +358,7 @@ BEGIN
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor B
 					ON A.intEntityVendorId = B.intEntityVendorId
-		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND A.dblUnapplied > 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
