@@ -3919,7 +3919,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             intOwnershipType: 1,
                             strOwnershipType: 'Own',
                             dblFranchise: order.get('dblFranchise'),
-                            dblContainerWeightPerQty: order.get('dblContainerWeightPerQty')
+                            dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
+                            ysnSubCurrency: order.get('ysnSubCurrency')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
                         currentVM.tblICInventoryReceiptItems().add(newRecord);
@@ -3971,7 +3972,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             strCurrency: otherCharge.strCurrency,
                                                             strCostUOM: otherCharge.strUOM,
                                                             strVendorId: otherCharge.strVendorName,
-                                                            strContractNumber: order.get('strOrderNumber')
+                                                            strContractNumber: order.get('strOrderNumber'),
+                                                            ysnSubCurrency: order.get('ysnSubCurrency')
                                                         });
                                                         currentVM.tblICInventoryReceiptCharges().add(newCost);
                                                     }
