@@ -194,10 +194,20 @@ BEGIN
 END 
 
 -- Update the Surcharge amounts
+-- Also, the sub-currency amounts must be converted back the currency amounts.
 BEGIN 
 	UPDATE	Charge
-	SET		dblAmount = ISNULL(CalculatedCharges.dblAmount, 0)
-	FROM	dbo.tblICInventoryReceiptCharge Charge 	INNER JOIN dbo.tblICItem Item 
+	SET		dblAmount = ROUND(	
+							ISNULL(CalculatedCharges.dblAmount, 0)
+							/ CASE	WHEN Charge.ysnSubCurrency = 1 THEN 
+										CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
+									ELSE 
+										1
+							END 
+						, 2)		
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge 	
+				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = Charge.intChargeId		
 			LEFT JOIN (
 					SELECT	dblAmount = SUM(dblCalculatedAmount)
