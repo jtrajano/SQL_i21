@@ -2,7 +2,7 @@
  This stored procedure is used as data source in the Voucher Check Middle AP Sub Report Overflow 
 */  
 CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleSubReportAPPaymentOverflow]
- @xmlParam NVARCHAR(MAX) = NULL  
+  @intTransactionIdFrom INT = 0  
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -52,52 +52,52 @@ DECLARE @BANK_DEPOSIT INT = 1
 --</xmlparam>'  
   
 -- Sanitize the @xmlParam   
-IF LTRIM(RTRIM(@xmlParam)) = ''   
- SET @xmlParam = NULL   
+--IF LTRIM(RTRIM(@xmlParam)) = ''   
+-- SET @xmlParam = NULL   
   
--- Declare the variables.  
-DECLARE @intTransactionIdFrom AS INT    
+---- Declare the variables.  
+--DECLARE @intTransactionIdFrom AS INT    
   
-  -- Declare the variables for the XML parameter  
-  ,@xmlDocumentId AS INT  
+--  -- Declare the variables for the XML parameter  
+--  ,@xmlDocumentId AS INT  
     
--- Create a table variable to hold the XML data.     
-DECLARE @temp_xml_table TABLE (  
- [fieldname] NVARCHAR(50)  
- ,condition NVARCHAR(20)        
- ,[from] NVARCHAR(50)  
- ,[to] NVARCHAR(50)  
- ,[join] NVARCHAR(10)  
- ,[begingroup] NVARCHAR(50)  
- ,[endgroup] NVARCHAR(50)  
- ,[datatype] NVARCHAR(50)  
-)  
+---- Create a table variable to hold the XML data.     
+--DECLARE @temp_xml_table TABLE (  
+-- [fieldname] NVARCHAR(50)  
+-- ,condition NVARCHAR(20)        
+-- ,[from] NVARCHAR(50)  
+-- ,[to] NVARCHAR(50)  
+-- ,[join] NVARCHAR(10)  
+-- ,[begingroup] NVARCHAR(50)  
+-- ,[endgroup] NVARCHAR(50)  
+-- ,[datatype] NVARCHAR(50)  
+--)  
   
--- Prepare the XML   
-EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
+---- Prepare the XML   
+--EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
--- Insert the XML to the xml table.     
-INSERT INTO @temp_xml_table  
-SELECT *  
-FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
-WITH (  
- [fieldname] nvarchar(50)  
- , condition nvarchar(20)  
- , [from] nvarchar(50)  
- , [to] nvarchar(50)  
- , [join] nvarchar(10)  
- , [begingroup] nvarchar(50)  
- , [endgroup] nvarchar(50)  
- , [datatype] nvarchar(50)  
-)  
+---- Insert the XML to the xml table.     
+--INSERT INTO @temp_xml_table  
+--SELECT *  
+--FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
+--WITH (  
+-- [fieldname] nvarchar(50)  
+-- , condition nvarchar(20)  
+-- , [from] nvarchar(50)  
+-- , [to] nvarchar(50)  
+-- , [join] nvarchar(10)  
+-- , [begingroup] nvarchar(50)  
+-- , [endgroup] nvarchar(50)  
+-- , [datatype] nvarchar(50)  
+--)  
   
--- Gather the variables values from the xml table.   
-SELECT @intTransactionIdFrom = [from]  
-FROM @temp_xml_table   
-WHERE [fieldname] = 'intTransactionId'  
+---- Gather the variables values from the xml table.   
+--SELECT @intTransactionIdFrom = [from]  
+--FROM @temp_xml_table   
+--WHERE [fieldname] = 'intTransactionId'  
   
 -- Sanitize the parameters  
-SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN NULL ELSE @intTransactionIdFrom END  
+--SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN NULL ELSE @intTransactionIdFrom END  
 
 -- Report Query:  
 SELECT 
@@ -141,7 +141,7 @@ SELECT
 				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
 			INNER JOIN [dbo].[tblAPBill] BILL
 				ON PYMTDetail.intBillId = BILL.intBillId	
-	WHERE	F.intTransactionId = @intTransactionIdFrom
+	WHERE	F.intTransactionId =ISNULL(@intTransactionIdFrom, F.intTransactionId)
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
 ) Data
 WHERE [row_number] > 10
