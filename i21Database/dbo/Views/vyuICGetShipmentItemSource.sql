@@ -113,22 +113,26 @@ SELECT
 			END
 		),
 	dblCost = ItemPricing.dblLastCost
-FROM tblICInventoryShipmentItem ShipmentItem
-	LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-	LEFT JOIN vyuICGetItemPricing ItemPricing ON ItemPricing.intUnitMeasureId = ShipmentItem.intItemUOMId AND ItemPricing.intLocationId = Shipment.intShipFromLocationId
-	LEFT JOIN vyuSOSalesOrderDetail SODetail
-		ON SODetail.intSalesOrderId = ShipmentItem.intOrderId AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
-		AND Shipment.intOrderType = 2
-	LEFT JOIN vyuCTContractDetailView ContractView
-		ON ContractView.intContractDetailId = ShipmentItem.intLineNo
-		AND Shipment.intOrderType = 1
-		AND Shipment.intSourceType = 0
-	LEFT JOIN vyuTRTransportReceipt TransportView
-		ON TransportView.intTransportReceiptId = ShipmentItem.intSourceId
-		AND Shipment.intSourceType = 3
-	LEFT JOIN tblSCTicket ScaleView
-		ON ScaleView.intTicketId = ShipmentItem.intSourceId
-		AND Shipment.intSourceType = 1
-	LEFT JOIN tblLGShipment LogisticView
-		ON LogisticView.intShipmentId = ShipmentItem.intSourceId
-		AND Shipment.intSourceType = 2
+FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
+			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+		LEFT JOIN vyuICGetItemPricing ItemPricing 
+			ON ItemPricing.intUnitMeasureId = ShipmentItem.intItemUOMId 
+			AND ItemPricing.intItemId = ShipmentItem.intItemId
+			AND ItemPricing.intLocationId = Shipment.intShipFromLocationId			
+		LEFT JOIN vyuSOSalesOrderDetail SODetail
+			ON SODetail.intSalesOrderId = ShipmentItem.intOrderId 
+			AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
+			AND Shipment.intOrderType = 2
+		LEFT JOIN vyuCTContractDetailView ContractView
+			ON ContractView.intContractDetailId = ShipmentItem.intLineNo
+			AND Shipment.intOrderType = 1
+			AND Shipment.intSourceType IN (0, 1) 
+		LEFT JOIN vyuTRTransportReceipt TransportView
+			ON TransportView.intTransportReceiptId = ShipmentItem.intSourceId
+			AND Shipment.intSourceType = 3
+		LEFT JOIN tblSCTicket ScaleView
+			ON ScaleView.intTicketId = ShipmentItem.intSourceId
+			AND Shipment.intSourceType = 1
+		LEFT JOIN tblLGShipment LogisticView
+			ON LogisticView.intShipmentId = ShipmentItem.intSourceId
+			AND Shipment.intSourceType = 2
