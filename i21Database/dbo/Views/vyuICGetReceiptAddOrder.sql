@@ -73,7 +73,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, intSourceType = 0
 		, intSourceId = NULL
 		, strSourceNumber = NULL
-		, intItemId
+		, ContractView.intItemId
 		, strItemNo
 		, strItemDescription
 		, dblQtyToReceive = dblDetailQuantity - (dblDetailQuantity - dblBalance)
@@ -89,18 +89,21 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strSubLocationName
 		, intStorageLocationId
 		, strStorageLocationName
-		, intOrderUOMId = intItemUOMId
+		, intOrderUOMId = ContractView.intItemUOMId
 		, strOrderUOM = strItemUOM
 		, dblOrderUOMConvFactor = dblItemUOMCF
-		, intItemUOMId = intItemUOMId
+		, intItemUOMId = ContractView.intItemUOMId
 		, strUnitMeasure = strItemUOM
-		, strUnitType = NULL
-		, intWeightUOMId = NULL
-		, strWeightUOM = NULL
+		, strUnitType = NULL		
+		-- Gross/Net UOM
+		, intWeightUOMId = NetWeightUOM.intItemUOMId
+		, strWeightUOM = UOM.strUnitMeasure
+		-- Conversion factors
 		, dblItemUOMConvFactor = dblItemUOMCF
-		, dblWeightUOMConvFactor = 0
-		, intCostUOMId = intItemUOMId
-		, strCostUOM = strItemUOM
+		, dblWeightUOMConvFactor = NetWeightUOM.dblUnitQty
+		-- Cost UOM
+		, intCostUOMId = intPriceItemUOMId
+		, strCostUOM = strPriceUOM
 		, dblCostUOMConvFactor = dblItemUOMCF
 		, intLifeTime
 		, strLifeTimeType
@@ -110,7 +113,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
 		, ysnSubCurrency
-	FROM vyuCTContractDetailView ContractView
+	FROM vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM NetWeightUOM
+			ON ContractView.intNetWeightUOMId = NetWeightUOM.intItemUOMId
+		LEFT JOIN dbo.tblICUnitMeasure UOM
+			ON UOM.intUnitMeasureId = NetWeightUOM.intUnitMeasureId
 	WHERE ysnAllowedToShow = 1
 		AND strContractType = 'Purchase'
 
