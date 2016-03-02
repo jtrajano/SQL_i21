@@ -3507,6 +3507,8 @@
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
     <Build Include="dbo\Views\vyuCTContractChart.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckPayable.sql" />
+    <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
