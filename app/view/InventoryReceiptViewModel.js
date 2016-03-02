@@ -39,7 +39,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         weightLoss: 0
     },
 
-
     stores: {
         receiptTypes: {
             autoLoad: true,
@@ -705,11 +704,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         getWeightLossText: function (get) {
-            if (get('weightLoss') !== 0) {
-                return 'Weight Gain/Loss: ' + Ext.util.Format.number(get('weightLoss'), '0,000.00');
+            var weight = get('weightLoss');
+            if (Ext.isNumeric(weight) && weight !== 0) {
+                return 'Wgt or Vol Gain/Loss: ' + Ext.util.Format.number(weight, '0,000.00');
             }
             else {
-                return 'Weight Gain/Loss: 0.00';
+                return 'Wgt or Vol Gain/Loss: 0.00';
             }
         }
     }

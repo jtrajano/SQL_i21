@@ -782,13 +782,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         xtype: 'label',
                                                                                         itemId: 'lblGrossWgt',
                                                                                         width: 150,
-                                                                                        text: 'Gross Wgt'
+                                                                                        text: 'Gross'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'label',
                                                                                         itemId: 'lblNetWgt',
                                                                                         width: 150,
-                                                                                        text: 'Net Wgt'
+                                                                                        text: 'Net'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'label',

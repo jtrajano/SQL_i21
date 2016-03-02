@@ -339,7 +339,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             lblWeightLossMsg: {
-                hidden: false,
                 text: '{getWeightLossText}'
             },
             grdInventoryReceipt: {
@@ -524,7 +523,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colUnitCost: {
-                    dataIndex: 'dblUnitCost',
                     dataIndex: 'dblUnitCost',
                     editor: {
                         readOnly: '{readOnlyUnitCost}'
@@ -1763,8 +1761,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         lblSubTotal.setText('SubTotal: ' + Ext.util.Format.number(totalAmount, '0,000.00'));
         lblTax.setText('Tax: ' + Ext.util.Format.number(totalTax, '0,000.00'));
-        lblGrossWgt.setText('Gross Wgt: ' + Ext.util.Format.number(totalGross, '0,000.00'));
-        lblNetWgt.setText('Net Wgt: ' + Ext.util.Format.number(totalNet, '0,000.00'));
+        lblGrossWgt.setText('Gross: ' + Ext.util.Format.number(totalGross, '0,000.00'));
+        lblNetWgt.setText('Net: ' + Ext.util.Format.number(totalNet, '0,000.00'));
         lblTotal.setText('Total: ' + Ext.util.Format.number(grandTotal, '0,000.00'));
     },
 
