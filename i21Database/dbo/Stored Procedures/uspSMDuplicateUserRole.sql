@@ -81,4 +81,10 @@ BEGIN
 	FROM [tblSMUserRoleCompanyLocationPermission]
 	WHERE [intUserRoleId] = @intUserRoleId
 
+	IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityToRole WHERE intEntityRoleId = @intUserRoleId)
+	BEGIN
+		INSERT INTO tblEMEntityToRole([intEntityId], [intEntityRoleId])
+		SELECT [intEntityId], @newUserRoleId FROM tblEMEntityToRole WHERE intEntityRoleId = @intUserRoleId
+	END
+
 END
