@@ -1,123 +1,77 @@
 ﻿CREATE VIEW dbo.vyuARInvoiceCompact
 AS
 SELECT     
-	I.intInvoiceId, 
-	I.strInvoiceNumber,
-	CE.strName						AS strCustomerName, 
-	C.strCustomerNumber, 
-	C.[intEntityCustomerId], 
-	I.strTransactionType, 
-	ISNULL(I.strType, 'Standard')	AS strType,
-	I.strPONumber, 
-	T.strTerm,
-	I.strBOLNumber,
-	I.intTermId, 
-	I.intAccountId,
-	I.dtmDate,
-	I.dtmDueDate, 
-	(CASE WHEN I.ysnPosted = 0 THEN NULL ELSE I.dtmPostDate END) AS dtmPostDate,
-	I.dtmShipDate,
-	I.ysnPosted, 
-	I.ysnPaid, 
-	I.ysnProcessed, 
-	I.ysnForgiven,
-	I.ysnCalculated,
-	I.dblInvoiceTotal, 
-	ISNULL(I.dblDiscount,0)			AS dblDiscount, 
-	ISNULL(I.dblDiscountAvailable,0)	AS dblDiscountAvailable, 
-	ISNULL(I.dblInterest,0)			AS dblInterest, 
-	ISNULL(I.dblAmountDue,0)		AS dblAmountDue, 
-	ISNULL(I.dblPayment, 0)			AS dblPayment,
-	ISNULL(I.dblInvoiceSubtotal, 0)	AS dblInvoiceSubtotal,
-	ISNULL(I.dblShipping, 0)		AS dblShipping,
-	ISNULL(I.dblTax, 0)				AS dblTax,
-	I.intPaymentMethodId, 
-	I.intCompanyLocationId, 
-	I.strComments,
-	I.intCurrencyId,
-	L.strLocationName,
-	P.strPaymentMethod,
-	0.000000						AS dblPaymentAmount,
-	SV.strShipVia,
-	SE.strName						AS strSalesPerson,
-	E.strEmail						AS strCustomerEmail,
-	CUR.strCurrency,		
-	ELB.strLocationName				AS strBillToLocationName,
-	ELB.strAddress					AS strBillToAddress,
-	ELB.strCity						AS strBillToCity,
-	ELB.strState					AS strBillToState,
-	ELB.strZipCode					AS strBillToZipCode,
-	ELB.strCountry					AS strBillToCountry,
-	ELS.strLocationName				AS strShipToLocationName,
-	ELS.strAddress					AS strShipToAddress,
-	ELS.strCity						AS strShipToCity,
-	ELS.strState					AS strShipToState,
-	ELS.strZipCode					AS strShipToZipCode,
-	ELS.strCountry					AS strShipToCountry,
-	I.intEntityId					AS intEntredById,
-	EB.strName						AS strEnteredBy,
-	CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END AS ysnHasEmailSetup
-	,GL.dtmDate AS dtmBatchDate
-	,GL.strBatchId
-	,GL.strName strUserEntered
+	 intInvoiceId					= ARI.intInvoiceId
+	,strInvoiceNumber				= ARI.strInvoiceNumber
+	,strCustomerName				= CE.strName
+	,strCustomerNumber				= ARC.strCustomerNumber
+	,intEntityCustomerId			= ARC.intEntityCustomerId
+	,strTransactionType				= ARI.strTransactionType
+	,strType						= ISNULL(ARI.strType, 'Standard')	
+	,dtmDate						= ARI.dtmDate
+	,dtmDueDate						= ARI.dtmDueDate
+	,dtmPostDate					= ARI.dtmPostDate
+	,dtmShipDate					= ARI.dtmShipDate
+	,ysnPosted						= ARI.ysnPosted
+	,ysnPaid						= ARI.ysnPaid
+	,ysnProcessed					= ARI.ysnProcessed
+	,ysnForgiven					= ARI.ysnForgiven
+	,ysnCalculated					= ARI.ysnCalculated
+	,dblInvoiceTotal				= ISNULL(ARI.dblInvoiceTotal, 0)
+	,dblDiscount					= ISNULL(ARI.dblDiscount, 0)
+	,dblDiscountAvailable			= ISNULL(ARI.dblDiscountAvailable, 0)
+	,dblInterest					= ISNULL(ARI.dblInterest, 0)
+	,dblAmountDue					= ISNULL(ARI.dblAmountDue, 0)
+	,dblPayment						= ISNULL(ARI.dblPayment, 0)
+	,dblInvoiceSubtotal				= ISNULL(ARI.dblInvoiceSubtotal, 0)
+	,dblShipping					= ISNULL(ARI.dblShipping, 0)
+	,dblTax							= ISNULL(ARI.dblTax, 0)
+	,dblPaymentAmount				= 0.000000
+	,intAccountId					= ARI.intAccountId
+	,strAccountId					= GLA.strAccountId
+	,intCompanyLocationId			= ARI.intCompanyLocationId	
+	,strLocationName				= SML.strLocationName
+	,intPaymentMethodId				= ARI.intPaymentMethodId
+	,strPaymentMethod				= SMP.strPaymentMethod	
+	,strCustomerEmail				= E.strEmail
+	,intCurrencyId					= ARI.intCurrencyId
+	,strCurrency					= SMC.strCurrency
+	,intTermId						= ARI.intTermId
+	,strTerm						= SMT.strTerm
+	,strTermType					= SMT.strType 
+	,intTermDiscountDay				= SMT.intDiscountDay 
+	,dtmTermDiscountDate			= SMT.dtmDiscountDate
+	,dblTermDiscountEP				= SMT.dblDiscountEP
+	,intTermBalanceDue				= SMT.intBalanceDue
+	,dtmTermDueDate					= SMT.dtmDueDate
+	,dblTermAPR						= SMT.dblAPR	
+	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = ARI.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + ARI.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	,dblItemTermDiscountTotal		= (SELECT SUM(ISNULL(dblItemTermDiscount,0)) FROM tblARInvoiceDetail ARID WHERE ARID.intInvoiceId = ARI.intInvoiceId)
 FROM         
-	dbo.tblARInvoice AS I 
+	dbo.tblARInvoice AS ARI 
 INNER JOIN
-	dbo.tblARCustomer AS C 
-		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
+	dbo.tblARCustomer AS ARC 
+		ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	dbo.tblEntityToContact AS EC ON C.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
+	dbo.tblEntityToContact AS EC ON ARC.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
 LEFT OUTER JOIN
 	dbo.tblEntity AS E ON EC.intEntityContactId = E.intEntityId
-LEFT OUTER JOIN
-	dbo.tblEntityLocation AS ELB ON C.intBillToId = ELB.intEntityLocationId
-LEFT OUTER JOIN
-	dbo.tblEntityLocation AS ELS ON C.intShipToId = ELS.intEntityLocationId		
 INNER JOIN
 	dbo.tblEntity AS CE 
-		ON C.[intEntityCustomerId] = CE.intEntityId 
+		ON ARC.[intEntityCustomerId] = CE.intEntityId 
 LEFT OUTER JOIN
-	dbo.tblSMTerm AS T 
-		ON I.intTermId = T.intTermID 
+	dbo.tblSMTerm AS SMT 
+		ON ARI.intTermId = SMT.intTermID 
 LEFT OUTER JOIN
-	dbo.tblSMCompanyLocation AS L 
-		ON I.intCompanyLocationId  = L.intCompanyLocationId 
+	dbo.tblSMCompanyLocation AS SML 
+		ON ARI.intCompanyLocationId  = SML.intCompanyLocationId 
 LEFT OUTER JOIN
-	dbo.tblSMPaymentMethod AS P 
-		ON I.intPaymentMethodId = P.intPaymentMethodID
+	dbo.tblSMPaymentMethod AS SMP 
+		ON ARI.intPaymentMethodId = SMP.intPaymentMethodID
 LEFT OUTER JOIN
-	dbo.tblSMShipVia AS SV 
-		ON I.intShipViaId = SV.[intEntityShipViaId]
+	dbo.tblSMCurrency SMC
+		ON ARI.intCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN
-	dbo.tblEntity AS SE 
-		ON I.[intEntitySalespersonId] = SE.intEntityId 
-LEFT OUTER JOIN
-	dbo.tblSMCurrency CUR
-		ON I.intCurrencyId = CUR.intCurrencyID
-LEFT OUTER JOIN
-	dbo.tblEntity AS EB 
-		ON I.[intEntityId] = EB.intEntityId
-LEFT OUTER JOIN
-	(
-	SELECT --TOP 1
-		 G.intTransactionId
-		,G.strTransactionId
-		,G.intAccountId
-		,G.strTransactionType
-		,G.dtmDate
-		,G.strBatchId
-		,E.intEntityId
-		,E.strName
-	FROM
-		tblGLDetail G
-	LEFT OUTER JOIN
-		tblEntity E
-			ON G.intEntityId = E.intEntityId
-	WHERE
-			G.strTransactionType IN ('Invoice')
-		AND G.ysnIsUnposted = 0
-		AND G.strCode = 'AR'
-	) GL
-		ON I.intInvoiceId = GL.intTransactionId
-		AND I.intAccountId = GL.intAccountId
-		AND I.strInvoiceNumber = GL.strTransactionId					 
+	dbo.tblGLAccount GLA
+		ON ARI.intAccountId = GLA.intAccountId 
+				 
