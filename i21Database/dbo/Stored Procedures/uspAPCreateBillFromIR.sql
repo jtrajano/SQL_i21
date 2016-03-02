@@ -189,7 +189,7 @@ BEGIN
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
 		[dblTax]					=	B.dblTax,
-		[dblRate]					=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,0) ELSE ISNULL(G.dblRate,0) END,
+		[dblRate]					=	ISNULL(G.dblRate,0),
 		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
