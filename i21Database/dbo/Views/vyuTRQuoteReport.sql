@@ -26,7 +26,7 @@ SELECT TOP 100 PERCENT
 									FROM vyuARCustomerContacts CC 
 									WHERE CC.intCustomerEntityId = QH.intEntityCustomerId 
 										AND ISNULL(CC.strEmail, '') <> '' 
-										AND CC.strEmailDistributionOption LIKE '%' + 'Quotes' + '%') > 0 THEN CONVERT(BIT, 1) 
+										AND CC.strEmailDistributionOption LIKE '%' + 'Transport Quote' + '%') > 0 THEN CONVERT(BIT, 1) 
 							ELSE CONVERT(BIT, 0) END
 	, QH.intQuoteHeaderId
 	, QH.strQuoteComments
