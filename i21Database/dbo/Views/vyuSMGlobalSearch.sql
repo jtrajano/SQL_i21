@@ -296,17 +296,17 @@ FROM
 	union
 	select 
 		'SM' + CONVERT(NVARCHAR, mm.[intMenuID]) as Id,
-		IIF(CHARINDEX('searchCommand', strCommand, 0) > 0, 
-		SUBSTRING(strCommand,0, CHARINDEX('?searchCommand=', strCommand, 0)),
-		strCommand) as strNamespace,
+		CASE WHEN (CHARINDEX('searchCommand', strCommand, 0) > 0) THEN 
+		SUBSTRING(strCommand,0, CHARINDEX('?searchCommand=', strCommand, 0)) ELSE
+		strCommand END as strNamespace,
 		'Master Menu' as strDisplayTitle,			
 		'' as strValueField,
 		strCommand as strValueData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strMenuName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strMenuName],'')) as strTag,		
-		IIF(CHARINDEX('searchCommand', strCommand, 0) > 0, 
-		REPLACE(SUBSTRING(strCommand, CHARINDEX('searchCommand=', strCommand, 0), LEN(strCommand)) COLLATE Latin1_General_BIN,'searchCommand=',''),
-		'') as strSearchCommand
+		CASE WHEN (CHARINDEX('searchCommand', strCommand, 0) > 0) THEN 
+		REPLACE(SUBSTRING(strCommand, CHARINDEX('searchCommand=', strCommand, 0), LEN(strCommand)) COLLATE Latin1_General_BIN,'searchCommand=','') ELSE
+		'' END as strSearchCommand
 	from [dbo].[tblSMMasterMenu] as mm where strType = 'Screen'
 
 		
