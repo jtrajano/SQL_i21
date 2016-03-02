@@ -325,6 +325,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRemoveCharge: {
                 hidden: '{current.ysnPosted}'
             },
+            btnCalculateCharges: {
+                hidden: '{current.ysnPosted}'
+            },
             btnshowOtherCharges: {
                 hidden: '{current.ysnPosted}'
             },
@@ -4174,6 +4177,42 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     },
 
+    onCalculateChargeClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        var doPost = function () {
+            if (current) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
+                    method: 'post',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        if (!jsonData.success) {
+                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        }
+                        else {
+                            context.configuration.paging.store.load();
+                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    }
+                });
+            }
+        };
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function () {
+                doPost();
+            }
+        });
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -4316,7 +4355,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboItemSubCurrency": {
                 select: this.onReceiptItemSelect
-            }
+            },
+            "#btnCalculateCharges": {
+                click: this.onCalculateChargeClick
+            },
         })
     }
 
