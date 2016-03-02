@@ -3511,6 +3511,7 @@
     <Build Include="dbo\Views\vyuRKGetMarketBrokerList.sql" />
     <Build Include="dbo\Views\vyuHDSalesRepSummary.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceItemsTermTotalDiscount.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceCompact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
