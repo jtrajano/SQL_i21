@@ -24,6 +24,7 @@
 			,proj.intCustomerContactId
 			,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = cus.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
 			,proj.dtmCreated
+			,proj.intCustomerId
         from
             tblHDProject proj
             left outer join tblARCustomer cus on cus.[intEntityCustomerId] = proj.intCustomerId
