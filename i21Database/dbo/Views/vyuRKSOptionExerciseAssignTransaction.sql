@@ -1,5 +1,4 @@
-﻿
-CREATE View vyuRKSOptionExerciseAssignTransaction
+﻿CREATE View vyuRKSOptionExerciseAssignTransaction
 AS
 SELECT m.intOptionsPnSExercisedAssignedId,
 	   strTranNo,
@@ -13,7 +12,7 @@ SELECT m.intOptionsPnSExercisedAssignedId,
 	   t.dblStrike,
        t.strOptionType,
        t.dblPrice AS dblPremiumRate,
-       t.dblPrice*dblContractSize*intLots AS dblPremiumTotal,
+       (t.dblPrice*dblContractSize*intLots)/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblPremiumTotal,
 	   e.strName,
 	   b.strAccountNumber,
 	   strCommodityCode,
@@ -23,6 +22,7 @@ SELECT m.intOptionsPnSExercisedAssignedId,
 FROM tblRKOptionsPnSExercisedAssigned m
 Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
 Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
+JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId  
 JOIN tblRKOptionsMonth om on om.intOptionMonthId=t.intOptionMonthId
 Join tblEntity e on e.intEntityId=t.intEntityId
 Join tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId

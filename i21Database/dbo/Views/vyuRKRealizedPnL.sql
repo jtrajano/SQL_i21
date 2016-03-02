@@ -1,8 +1,9 @@
 ﻿CREATE VIEW vyuRKRealizedPnL  
 AS  
-SELECT *,(dblGrossPL-dblFutCommission1) AS dblNetPL,-dblFutCommission1 as dblFutCommission FROM(  
+
+SELECT *,(dblGrossPL1-dblFutCommission1) / case when ysnSubCurrency = 'true' then intCent else 1 end AS dblNetPL,-dblFutCommission1/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblFutCommission FROM(  
 SELECT   
-((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize) as dblGrossPL,* FROM  
+((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize) as dblGrossPL1,((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL,* FROM  
 (  
 SELECT psh.intMatchFuturesPSHeaderId,  
     psd.intMatchFuturesPSDetailId,  
@@ -25,7 +26,8 @@ SELECT psh.intMatchFuturesPSHeaderId,
     e.strName,  
     acc.strAccountNumber,  
     icc.strCommodityCode,  
-    sl.strLocationName,ot.intFutureMonthId,ot.intCommodityId,ot.intFutureMarketId                
+    sl.strLocationName,ot.intFutureMonthId,ot.intCommodityId,ot.intFutureMarketId,
+	c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency                    
  FROM tblRKMatchFuturesPSHeader psh  
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId   
  JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId  
@@ -35,6 +37,7 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=ot.intLocationId  
  JOIN tblEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
+ JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId  
  JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=psh.intFutureMarketId AND psh.intBrokerageAccountId=bc.intBrokerageAccountId   
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId AND ot.intInstrumentTypeId =1
