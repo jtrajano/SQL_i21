@@ -41,7 +41,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	UPDATE dbo.tblSTCheckoutDepartmetTotals
+	UPDATE dbo.tblSTCheckoutDepartmetTotals  
 	SET intTotalSalesCount = ISNULL(Chk.SalesQuantity,0),
 	dblTotalSalesAmount = (CASE WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' 
 		THEN ISNULL(Chk.SalesAmount,0) + ISNULL(Chk.DiscountAmount,0) + ISNULL(Chk.PromotionAmount,0) + ISNULL(Chk.RefundAmount,0)   
@@ -54,7 +54,7 @@ BEGIN
 	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
 	JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
-	WHERE intCheckoutId = @intCheckoutId
+	WHERE intCheckoutId = @intCheckoutId AND tblSTCheckoutDepartmetTotals.intCategoryId = Cat.intCategoryId
 END
 
 UPDATE dbo.tblSTCheckoutDepartmetTotals SET dblRegisterSalesAmount = dblTotalSalesAmount Where intCheckoutId = @intCheckoutId

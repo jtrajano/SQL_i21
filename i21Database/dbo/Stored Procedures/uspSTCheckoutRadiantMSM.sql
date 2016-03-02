@@ -12,7 +12,7 @@ BEGIN
 	FROM #tempCheckoutInsert chk
 	JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
 	JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
-	WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId
+	WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId AND tblSTCheckoutPaymentOptions.intPaymentOptionId = PO.intPaymentOptionId
 	
 	Update dbo.tblSTCheckoutPaymentOptions
 	SET dblRegisterAmount = chk.MiscellaneousSummaryAmount
