@@ -325,6 +325,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRemoveCharge: {
                 hidden: '{current.ysnPosted}'
             },
+            btnCalculateCharges: {
+                hidden: '{current.ysnPosted}'
+            },
             btnshowOtherCharges: {
                 hidden: '{current.ysnPosted}'
             },
@@ -521,6 +524,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colUnitCost: {
+                    dataIndex: 'dblUnitCost',
                     dataIndex: 'dblUnitCost',
                     editor: {
                         readOnly: '{readOnlyUnitCost}'
@@ -784,17 +788,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colRate: 'dblRate',
-                colExchangeRate: 'dblExchangeRate',
-                colCostUOM: {
+                colChargeUOM: {
                     dataIndex: 'strCostUOM',
                     editor: {
-                        store: '{costUOM}',
+                        store: '{chargeUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intCostUOMId',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
                                 value: '{grdCharges.selection.intChargeId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
                                 conjunction: 'and'
                             }
                         ]
@@ -1262,6 +1270,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strVendorName', records[0].get('strName'));
             current.set('intVendorEntityId', records[0].get('intEntityVendorId'));
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
+
+            var cents =  records[0].get('intCent');
+            cents = cents && Ext.isNumeric(cents) && cents != 0 ? cents : 1;
+            current.set('intSubCurrencyCents', cents);
 
             current.set('intShipFromId', null);
             current.set('intShipViaId', null);
@@ -3723,9 +3735,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
-        else if (combo.itemId === 'cboChargeCurrency') {
-            current.set('dblExchangeRate', record.get('dblDailyRate'));
-        }
     },
 
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
@@ -3914,7 +3923,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             intOwnershipType: 1,
                             strOwnershipType: 'Own',
                             dblFranchise: order.get('dblFranchise'),
-                            dblContainerWeightPerQty: order.get('dblContainerWeightPerQty')
+                            dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
+                            ysnSubCurrency: order.get('ysnSubCurrency')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
                         currentVM.tblICInventoryReceiptItems().add(newRecord);
@@ -3955,7 +3965,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             ysnInventoryCost: false,
                                                             strCostMethod: otherCharge.strCostMethod,
                                                             dblRate: otherCharge.dblRate,
-                                                            dblExchangeRate: otherCharge.dblFx,
                                                             intCostUOMId: otherCharge.intItemUOMId,
                                                             intEntityVendorId: otherCharge.intVendorId,
                                                             dblAmount: 0,
@@ -3967,7 +3976,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             strCurrency: otherCharge.strCurrency,
                                                             strCostUOM: otherCharge.strUOM,
                                                             strVendorId: otherCharge.strVendorName,
-                                                            strContractNumber: order.get('strOrderNumber')
+                                                            strContractNumber: order.get('strOrderNumber'),
+                                                            ysnSubCurrency: order.get('ysnSubCurrency')
                                                         });
                                                         currentVM.tblICInventoryReceiptCharges().add(newCost);
                                                     }
@@ -4173,6 +4183,51 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     },
 
+    onCalculateChargeClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        var doPost = function () {
+            if (current) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
+                    method: 'post',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        if (!jsonData.success) {
+                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        }
+                        else {
+                            context.configuration.paging.store.load();
+                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    }
+                });
+            }
+        };
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function () {
+                doPost();
+            }
+        });
+    },
+
+    onPostedTransactionBeforeCheckChange: function (obj, rowIndex, checked, eOpts) {
+        var grid = obj.up('grid');
+        var win = obj.up('window');
+        var current = win.viewModel.data.current;
+        if (current && current.get('ysnPosted') === true){
+                return false;
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -4315,6 +4370,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboItemSubCurrency": {
                 select: this.onReceiptItemSelect
+            },
+            "#btnCalculateCharges": {
+                click: this.onCalculateChargeClick
+            },
+            "#colItemSubCurrency": {
+                beforecheckchange: this.onPostedTransactionBeforeCheckChange
+            },
+            "#colChargeSubCurrency": {
+                beforecheckchange: this.onPostedTransactionBeforeCheckChange
+            },
+            "#colLoadContract": {
+                beforecheckchange: this.onPostedTransactionBeforeCheckChange
             }
         })
     }

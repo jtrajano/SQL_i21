@@ -1938,16 +1938,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colExchangeRate',
-                                                        text: 'Exchange Rate',
-                                                        flex: 1,
-                                                        format: '0,000.000000',
-                                                        editor: {
-                                                            xtype: 'numericfield'
-                                                        }
-                                                    },
-                                                    {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCostUOM',
                                                         text: 'UOM',

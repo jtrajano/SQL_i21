@@ -2406,7 +2406,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
-                                                                itemId: 'colCostUOM',
+                                                                itemId: 'colChargeUOM',
                                                                 text: 'UOM',
                                                                 flex: 1,
                                                                 editor: {
@@ -2438,19 +2438,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             flex: 1
                                                                         }
                                                                     ],
-                                                                    itemId: 'cboCostUOM',
+                                                                    itemId: 'cboChargeUOM',
                                                                     displayField: 'strUnitMeasure',
                                                                     valueField: 'strUnitMeasure'
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'numbercolumn',
-                                                                itemId: 'colExchangeRate',
-                                                                text: 'Exchange Rate',
-                                                                flex: 1,
-                                                                format: '0,000.000000',
-                                                                editor: {
-                                                                    xtype: 'numericfield'
                                                                 }
                                                             },
                                                             {

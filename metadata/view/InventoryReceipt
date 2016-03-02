@@ -1566,7 +1566,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter14",
+                                                                            "name": "filter122",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         },
@@ -3462,7 +3462,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter15",
+                                                                            "name": "filter123",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4780,7 +4780,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter16",
+                                                            "name": "filter124",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5062,7 +5062,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
-                                                        "itemId": "colCostUOM",
+                                                        "itemId": "colChargeUOM",
                                                         "text": "UOM"
                                                     },
                                                     "name": "MyColumn45",
@@ -5107,7 +5107,7 @@
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strUnitMeasure",
-                                                                "itemId": "cboCostUOM",
+                                                                "itemId": "cboChargeUOM",
                                                                 "valueField": "strUnitMeasure"
                                                             },
                                                             "name": "MyComboBox82",
@@ -5122,37 +5122,6 @@
                                                                     "type": "string"
                                                                 }
                                                             ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "format": "0,000.000000",
-                                                        "itemId": "colExchangeRate",
-                                                        "text": "Exchange Rate"
-                                                    },
-                                                    "name": "MyNumberColumn24",
-                                                    "designerId": "4d890153-7a6f-44d3-a137-4b404cbf4f43",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Number",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "designer|createAlias": "numericfield"
-                                                            },
-                                                            "name": "MyNumberField60",
-                                                            "designerId": "45042bcf-17e9-4278-ab79-54378bb60de6"
                                                         }
                                                     ]
                                                 },
@@ -5753,7 +5722,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter125",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6222,7 +6191,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter126",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6752,7 +6721,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging15",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
