@@ -2,6 +2,7 @@
 	AS
 		select
 			intId = ROW_NUMBER() over (order by strProjectType)
+			,intCustomerId
 			,strProjectType
 			,strCustomerName
 			,dblTotalNetOpportunityAmount = sum(dblNetOpportunityAmmount)
