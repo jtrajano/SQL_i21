@@ -167,6 +167,8 @@ BEGIN
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[dblTax],
+		[dblRate],
+		[ysnSubCurrency],
 		[intTaxGroupId],
 		[intAccountId],
 		[dblTotal],
@@ -190,6 +192,8 @@ BEGIN
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
 		[dblTax]					=	B.dblTax,
+		[dblRate]					=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,0) ELSE ISNULL(G.dblRate,0) END,
+		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
@@ -218,6 +222,10 @@ BEGIN
 		ON E.intEntityId = A.intEntityVendorId 
 				AND E.intContractHeaderId = B.intOrderId 
 				AND E1.intContractDetailId = B.intLineNo
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
+	LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A.intCurrencyId
 	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
@@ -237,6 +245,8 @@ BEGIN
 		[dblQtyOrdered]				=	1,
 		[dblQtyReceived]			=	1,
 		[dblTax]					=	0,
+		[dblRate]					=	ISNULL(G.dblRate,0),
+		[ysnSubCurrency]			=	0,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
@@ -252,6 +262,9 @@ BEGIN
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = B.intCurrencyId) 
+											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = B.intCurrencyId)
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
