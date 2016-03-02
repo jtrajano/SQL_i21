@@ -868,7 +868,6 @@ namespace iRely.Inventory.Model
         public bool? ysnInventoryCost { get; set; }
         public string strCostMethod { get; set; }
         public decimal? dblRate { get; set; }
-        public decimal? dblExchangeRate { get; set; }
         public int? intCostUOMId { get; set; }
         public decimal? dblAmount { get; set; }
         public string strAllocateCostBy { get; set; }
@@ -1049,7 +1048,6 @@ namespace iRely.Inventory.Model
         public bool? ysnInventoryCost { get; set; }
         public string strCostMethod { get; set; }
         public decimal? dblRate { get; set; }
-        public decimal? dblExchangeRate { get; set; }
         public string strCostUOM { get; set; }
         public string strUnitType { get; set; }
         public int? intOnCostTypeId { get; set; }

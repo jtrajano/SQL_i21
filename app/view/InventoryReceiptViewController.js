@@ -522,6 +522,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colUnitCost: {
                     dataIndex: 'dblUnitCost',
+                    dataIndex: 'dblUnitCost',
                     editor: {
                         readOnly: '{readOnlyUnitCost}'
                     }
@@ -784,17 +785,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colRate: 'dblRate',
-                colExchangeRate: 'dblExchangeRate',
-                colCostUOM: {
+                colChargeUOM: {
                     dataIndex: 'strCostUOM',
                     editor: {
-                        store: '{costUOM}',
+                        store: '{chargeUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intCostUOMId',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
                                 value: '{grdCharges.selection.intChargeId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
                                 conjunction: 'and'
                             }
                         ]
@@ -3723,9 +3728,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
-        else if (combo.itemId === 'cboChargeCurrency') {
-            current.set('dblExchangeRate', record.get('dblDailyRate'));
-        }
     },
 
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
@@ -3955,7 +3957,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             ysnInventoryCost: false,
                                                             strCostMethod: otherCharge.strCostMethod,
                                                             dblRate: otherCharge.dblRate,
-                                                            dblExchangeRate: otherCharge.dblFx,
                                                             intCostUOMId: otherCharge.intItemUOMId,
                                                             intEntityVendorId: otherCharge.intVendorId,
                                                             dblAmount: 0,
