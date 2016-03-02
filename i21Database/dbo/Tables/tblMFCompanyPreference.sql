@@ -17,5 +17,6 @@
 	ysnCheckCrossContamination bit NULL, 
 	dtmWorkOrderCreateDate DATETIME,
 	strSchedulingCutOffTime NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strScheduleType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )
