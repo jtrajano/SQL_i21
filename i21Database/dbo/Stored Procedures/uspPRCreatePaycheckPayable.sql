@@ -104,7 +104,7 @@ BEGIN
 		,[intCurrencyId]			
 	)
 	SELECT * FROM #tmpBillData
-	SET @intbillId = SCOPE_IDENTITY()
+	SET @intBillId = SCOPE_IDENTITY()
 
 	/* Update Voucher Invoice Number */
 	UPDATE tblAPBill SET 
