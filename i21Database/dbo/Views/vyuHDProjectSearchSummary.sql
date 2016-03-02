@@ -9,5 +9,6 @@
 		from
 			vyuHDProjectSearch
 		group by
-			strProjectType
+			intCustomerId
+			,strProjectType
 			,strCustomerName
