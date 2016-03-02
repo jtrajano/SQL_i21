@@ -4219,6 +4219,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    onPostedTransactionBeforeCheckChange: function (obj, rowIndex, checked, eOpts) {
+        var grid = obj.up('grid');
+        var win = obj.up('window');
+        var current = win.viewModel.data.current;
+        if (current && current.get('ysnPosted') === true){
+                return false;
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -4365,6 +4374,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnCalculateCharges": {
                 click: this.onCalculateChargeClick
             },
+            "#colItemSubCurrency": {
+                beforecheckchange: this.onPostedTransactionBeforeCheckChange
+            },
+            "#colChargeSubCurrency": {
+                beforecheckchange: this.onPostedTransactionBeforeCheckChange
+            },
+            "#colLoadContract": {
+                beforecheckchange: this.onPostedTransactionBeforeCheckChange
+            }
         })
     }
 
