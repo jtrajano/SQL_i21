@@ -152,11 +152,11 @@ BEGIN
 		,[intTaxGroupId]		=	NULL
 		,[intPaycheckHeaderId]	= @intPaycheck				
 	FROM 
-		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intExpenseAccountId, strItem = TT.strTax, dblTotal = PT.dblTotal 
+		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intAccountId, strItem = TT.strTax, dblTotal = PT.dblTotal 
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
 			WHERE PT.dblTotal > 0 AND PT.intPaycheckId = @intPaycheck AND TT.intVendorId = @intVendorEntityId
 		 UNION ALL
-		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intExpenseAccountId, strItem = TD.strDeduction, dblTotal = PD.dblTotal 
+		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intAccountId, strItem = TD.strDeduction, dblTotal = PD.dblTotal 
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
 			WHERE PD.dblTotal > 0 AND PD.intPaycheckId = @intPaycheck AND TD.intVendorId = @intVendorEntityId
 		) A
