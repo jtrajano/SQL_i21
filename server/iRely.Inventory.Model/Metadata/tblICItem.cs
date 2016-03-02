@@ -271,6 +271,9 @@ namespace iRely.Inventory.Model
         public decimal? dblAmount { get; set; }
         public int? intCostUOMId { get; set; }
         public string strCostUOM { get; set; }
+        public int? intOriginId { get; set; }
+        public string strOriginName { get; set; }
+
     }
 
     public class vyuICGetItemCommodity

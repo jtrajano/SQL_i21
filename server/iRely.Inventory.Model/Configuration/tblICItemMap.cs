@@ -269,6 +269,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
             this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
             this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
+            this.Property(t => t.intOriginId).HasColumnName("intOriginId");
+            this.Property(t => t.strOriginName).HasColumnName("strOriginName");
         }
     }
 
