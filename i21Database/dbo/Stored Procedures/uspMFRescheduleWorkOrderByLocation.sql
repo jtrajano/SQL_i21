@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspMFRescheduleWorkOrderByLocation (@strXML NVARCHAR(MAX)
+﻿CREATE PROCEDURE dbo.uspMFRescheduleWorkOrderByLocation (@strXML NVARCHAR(MAX),@ysnScheduleByManufacturingCell int=0
 	)
 AS
 BEGIN TRY
@@ -12,6 +12,9 @@ BEGIN TRY
 		,@dtmToDate DATETIME
 		,@intUserId INT
 		,@intManufacturingCellId int
+		,@intScheduleId int
+		,@ysnStandard bit
+		,@intConcurrencyId int
 
 	DECLARE @tblMFSequence TABLE (
 		intWorkOrderId INT
@@ -27,12 +30,18 @@ BEGIN TRY
 		,@dtmFromDate = dtmFromDate
 		,@dtmToDate = dtmToDate
 		,@intManufacturingCellId=intManufacturingCellId
+		,@intScheduleId=intScheduleId
+		,@ysnStandard=ysnStandard
+		,@intConcurrencyId=intConcurrencyId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intUserId INT
 			,intLocationId INT
 			,dtmFromDate DATETIME
 			,dtmToDate DATETIME
 			,intManufacturingCellId INT
+			,intScheduleId int
+			,ysnStandard bit
+			,intConcurrencyId int
 			)
 
 	INSERT INTO @tblMFWorkOrder (
@@ -131,11 +140,18 @@ BEGIN TRY
 	FROM @tblMFWorkOrder W
 	JOIN @tblMFSequence S ON S.intWorkOrderId = W.intWorkOrderId
 
+	DECLARE @v1 XML = (SELECT * FROM @tblMFSequence FOR XML AUTO)
+	DECLARE @v XML = (SELECT * FROM @tblMFWorkOrder FOR XML AUTO)
+
 	EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFWorkOrder
 		,@dtmFromDate = @dtmFromDate
 		,@dtmToDate = @dtmToDate
 		,@intUserId = @intUserId
 		,@intChartManufacturingCellId=@intManufacturingCellId
+		,@ysnScheduleByManufacturingCell=@ysnScheduleByManufacturingCell
+		,@intScheduleId=@intScheduleId
+		,@ysnStandard = @ysnStandard
+		,@intConcurrencyId = @intConcurrencyId
 END TRY
 
 BEGIN CATCH

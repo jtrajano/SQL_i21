@@ -2,6 +2,15 @@
 AS
 BEGIN TRY
 	SET NOCOUNT ON
+	DECLARE @strScheduleType nvarchar(50)
+	SELECT @strScheduleType = strScheduleType
+	FROM dbo.tblMFCompanyPreference
+
+	IF @strScheduleType='Backward Schedule'
+	BEGIN
+		EXEC dbo.uspMFRescheduleWorkOrderByLocation @strXML=@strXML,@ysnScheduleByManufacturingCell=1
+		RETURN
+	END
 
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
@@ -345,9 +354,7 @@ BEGIN TRY
 
 		RETURN
 	END
-
-
-
+	
 	INSERT INTO @tblMFScheduleWorkOrderCalendarDetail (
 		intCalendarDetailId
 		,intCalendarId
