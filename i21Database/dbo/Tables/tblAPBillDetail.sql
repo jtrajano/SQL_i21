@@ -10,6 +10,7 @@
 	[intItemId]    INT             NULL,
 	[intInventoryReceiptItemId]    INT             NULL,
 	[intInventoryReceiptChargeId]    INT             NULL,
+	[intPaycheckHeaderId]    INT             NULL,
 	[intPurchaseDetailId]    INT             NULL,
 	[intContractHeaderId]    INT             NULL,
 	[intContractDetailId]    INT             NULL,
