@@ -130,7 +130,8 @@ BEGIN
 		,[int1099Form]					
 		,[int1099Category]				
 		,[intLineNo]						
-		,[intTaxGroupId]					
+		,[intTaxGroupId]
+		,[intPaycheckHeaderId]				
 	)
 	SELECT
 		[intBillId]				=	@intBillId
@@ -148,7 +149,8 @@ BEGIN
 											ELSE 0 END)
 		,[int1099Category]		=	ISNULL(D.int1099CategoryId, 0)
 		,[intLineNo]			=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-		,[intTaxGroupId]		=	NULL					
+		,[intTaxGroupId]		=	NULL
+		,[intPaycheckHeaderId]	= @intPaycheck				
 	FROM 
 		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intExpenseAccountId, strItem = TT.strTax, dblTotal = PT.dblTotal 
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
