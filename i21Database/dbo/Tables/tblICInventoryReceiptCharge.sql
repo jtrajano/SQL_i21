@@ -7,7 +7,6 @@
     [ysnInventoryCost] BIT NULL DEFAULT ((0)), 
     [strCostMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Per Unit'), 
     [dblRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[dblExchangeRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
     [intCostUOMId] INT NULL, 
 	[ysnSubCurrency] BIT NULL DEFAULT ((0)),
     [dblAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
