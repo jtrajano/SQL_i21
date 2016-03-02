@@ -61,8 +61,7 @@ BEGIN TRY
 		,@dtmExpectedDate DATETIME
 		,@dtmLatestDate DATETIME
 		,@dtmEarliestDate DATETIME
-
-	SELECT @intAllottedNoOfMachine = 0
+		,@dtmTargetDate DATETIME
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -129,7 +128,9 @@ BEGIN TRY
 
 	WHILE @intManufacturingCellId IS NOT NULL
 	BEGIN
+
 		SELECT @intPreviousWorkOrderId = 0
+		SELECT @intAllottedNoOfMachine = 0
 
 		SELECT @intCalendarId = intCalendarId
 		FROM tblMFScheduleCalendar
@@ -360,9 +361,9 @@ BEGIN TRY
 			SELECT @intCalendarDetailId = intCalendarDetailId
 				,@intCalendarId = intCalendarId
 				,@dtmCalendarDate = dtmCalendarDate
-				,@dtmPlannedStartDate = dtmShiftStartTime
 				,@dtmShiftStartTime = dtmShiftStartTime
 				,@dtmShiftEndTime = dtmShiftEndTime
+				,@dtmPlannedEndDate = dtmShiftEndTime
 				,@intDuration = intDuration * intNoOfMachine
 				,@intRemainingDuration = intDuration
 				,@intShiftId = intShiftId
@@ -394,7 +395,10 @@ BEGIN TRY
 					,@intSetupDuration = NULL
 					,@intMaxChangeoverTime = NULL
 					,@dblStdLineEfficiency = NULL
-
+					,@dtmEarliestDate=NULL
+					,@dtmLatestDate=NULL
+					,@dtmTargetDate=NULL
+					
 				SELECT @intWorkOrderId = intWorkOrderId
 					,@intNoOfUnit = intNoOfUnit
 					,@intPackTypeId = intPackTypeId
@@ -405,6 +409,7 @@ BEGIN TRY
 					,@intSetupDuration = intSetupDuration
 					,@dtmEarliestDate = dtmEarliestDate
 					,@dtmLatestDate = dtmLatestDate
+					,@dtmTargetDate = dtmTargetDate
 				FROM @tblMFScheduleWorkOrder
 				WHERE intRecordId = @intRecordId
 

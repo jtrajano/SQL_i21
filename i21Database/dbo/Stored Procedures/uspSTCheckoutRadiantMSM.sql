@@ -3,6 +3,36 @@
 AS
 BEGIN
 
+	DECLARE @intStoreId int
+	SELECT @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
+
+	Update dbo.tblSTCheckoutPaymentOptions
+	SET dblRegisterAmount = chk.MiscellaneousSummaryAmount
+	, intRegisterCount = chk.MiscellaneousSummaryCount
+	FROM #tempCheckoutInsert chk
+	JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
+	JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
+	WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId
+	
+	Update dbo.tblSTCheckoutPaymentOptions
+	SET dblRegisterAmount = chk.MiscellaneousSummaryAmount
+	, intRegisterCount = chk.MiscellaneousSummaryCount
+	FROM #tempCheckoutInsert chk
+	--JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
+	--JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
+	WHERE intCheckoutId = @intCheckoutId AND chk.MiscellaneousSummaryCode = 4 AND chk.MiscellaneousSummarySubCode IN (5,6)
+	AND intPaymentOptionId IN (SELECT intLotteryWinnersMopId FROM dbo.tblSTRegister Where intStoreId = @intStoreId)
+	
+	Update dbo.tblSTCheckoutPaymentOptions
+	SET dblRegisterAmount = chk.MiscellaneousSummaryAmount
+	, intRegisterCount = chk.MiscellaneousSummaryCount
+	FROM #tempCheckoutInsert chk
+	--JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
+	--JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
+	WHERE intCheckoutId = @intCheckoutId AND chk.MiscellaneousSummaryCode = 19 AND chk.MiscellaneousSummarySubCodeModifier = 1550
+	AND intPaymentOptionId IN (SELECT intPaymentOptionId FROM dbo.tblSTPaymentOption Where intRegisterMop = MiscellaneousSummarySubCodeModifier )
+
+	
 	IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
 	BEGIN
 		DECLARE @tbl TABLE (intCnt int, intAccountId int, strAccountId nvarchar(100))
