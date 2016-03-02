@@ -10,7 +10,6 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.ysnInventoryCost
 	, ReceiptCharge.strCostMethod
 	, ReceiptCharge.dblRate
-	, ReceiptCharge.dblExchangeRate
 	, strCostUOM = UOM.strUnitMeasure
 	, strUnitType = UOM.strUnitType
 	, ReceiptCharge.ysnSubCurrency
