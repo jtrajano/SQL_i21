@@ -1,65 +1,51 @@
 ﻿CREATE VIEW dbo.vyuARInvoiceSearch
 AS
 SELECT     
-	I.intInvoiceId, 
-	I.strInvoiceNumber,
-	CE.strName						AS strCustomerName, 
-	C.strCustomerNumber, 
-	C.[intEntityCustomerId], 
-	I.strTransactionType, 
-	ISNULL(I.strType, 'Standard')	AS strType,
-	I.strPONumber, 
-	T.strTerm,
-	I.strBOLNumber,
-	I.intTermId, 
-	I.intAccountId,
-	I.dtmDate,
-	I.dtmDueDate, 
-	(CASE WHEN I.ysnPosted = 0 THEN NULL ELSE I.dtmPostDate END) AS dtmPostDate,
-	I.dtmShipDate,
-	I.ysnPosted, 
-	I.ysnPaid, 
-	I.ysnProcessed, 
-	I.ysnForgiven,
-	I.ysnCalculated,
-	I.dblInvoiceTotal, 
-	ISNULL(I.dblDiscount,0)			AS dblDiscount, 
-	ISNULL(I.dblDiscountAvailable,0)	AS dblDiscountAvailable, 
-	ISNULL(I.dblInterest,0)			AS dblInterest, 
-	ISNULL(I.dblAmountDue,0)		AS dblAmountDue, 
-	ISNULL(I.dblPayment, 0)			AS dblPayment,
-	ISNULL(I.dblInvoiceSubtotal, 0)	AS dblInvoiceSubtotal,
-	ISNULL(I.dblShipping, 0)		AS dblShipping,
-	ISNULL(I.dblTax, 0)				AS dblTax,
-	I.intPaymentMethodId, 
-	I.intCompanyLocationId, 
-	I.strComments,
-	I.intCurrencyId,
-	L.strLocationName,
-	P.strPaymentMethod,
-	0.000000						AS dblPaymentAmount,
-	SV.strShipVia,
-	SE.strName						AS strSalesPerson,
-	E.strEmail						AS strCustomerEmail,
-	CUR.strCurrency,		
-	ELB.strLocationName				AS strBillToLocationName,
-	ELB.strAddress					AS strBillToAddress,
-	ELB.strCity						AS strBillToCity,
-	ELB.strState					AS strBillToState,
-	ELB.strZipCode					AS strBillToZipCode,
-	ELB.strCountry					AS strBillToCountry,
-	ELS.strLocationName				AS strShipToLocationName,
-	ELS.strAddress					AS strShipToAddress,
-	ELS.strCity						AS strShipToCity,
-	ELS.strState					AS strShipToState,
-	ELS.strZipCode					AS strShipToZipCode,
-	ELS.strCountry					AS strShipToCountry,
-	I.intEntityId					AS intEntredById,
-	EB.strName						AS strEnteredBy,
-	CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END AS ysnHasEmailSetup
-	,GL.dtmDate AS dtmBatchDate
-	,GL.strBatchId
-	,GL.strName strUserEntered
+	 intInvoiceId					= I.intInvoiceId
+	,strInvoiceNumber				= I.strInvoiceNumber
+	,strCustomerName				= CE.strName
+	,strCustomerNumber				= C.strCustomerNumber
+	,intEntityCustomerId			= C.intEntityCustomerId
+	,strTransactionType				= I.strTransactionType
+	,strType						= ISNULL(I.strType, 'Standard')
+	,strPONumber					= I.strPONumber
+	,strTerm						= T.strTerm
+	,strBOLNumber					= I.strBOLNumber
+	,intTermId						= I.intTermId
+	,intAccountId					= I.intAccountId
+	,dtmDate						= I.dtmDate
+	,dtmDueDate						= I.dtmDueDate
+	,dtmPostDate					= I.dtmPostDate
+	,dtmShipDate					= I.dtmShipDate
+	,ysnPosted						= I.ysnPosted
+	,ysnPaid						= I.ysnPaid
+	,ysnProcessed					= I.ysnProcessed
+	,ysnForgiven					= I.ysnForgiven
+	,ysnCalculated					= I.ysnCalculated
+	,dblInvoiceTotal				= ISNULL(I.dblInvoiceTotal, 0)
+	,dblDiscount					= ISNULL(I.dblDiscount,0)
+	,dblDiscountAvailable			= ISNULL(I.dblDiscountAvailable,0)
+	,dblInterest					= ISNULL(I.dblInterest,0)
+	,dblAmountDue					= ISNULL(I.dblAmountDue,0)
+	,dblPayment						= ISNULL(I.dblPayment, 0)
+	,dblInvoiceSubtotal				= ISNULL(I.dblInvoiceSubtotal, 0)
+	,dblShipping					= ISNULL(I.dblShipping, 0)
+	,dblTax							= ISNULL(I.dblTax, 0)
+	,intPaymentMethodId				= I.intPaymentMethodId
+	,intCompanyLocationId			= I.intCompanyLocationId
+	,strComments					= I.strComments
+	,intCurrencyId					= I.intCurrencyId
+	,strLocationName				= L.strLocationName
+	,strPaymentMethod				= P.strPaymentMethod
+	,strShipVia						= SV.strShipVia
+	,strSalesPerson					= SE.strName
+	,strCustomerEmail				= E.strEmail
+	,strCurrency					= CUR.strCurrency
+	,intEntredById					= I.intEntityId
+	,strEnteredBy					= EB.strName
+	,dtmBatchDate					= GL.dtmDate
+	,strBatchId						= GL.strBatchId
+	,strUserEntered					= GL.strName
 FROM         
 	dbo.tblARInvoice AS I 
 INNER JOIN
@@ -68,11 +54,7 @@ INNER JOIN
 LEFT OUTER JOIN
 	dbo.tblEntityToContact AS EC ON C.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
 LEFT OUTER JOIN
-	dbo.tblEntity AS E ON EC.intEntityContactId = E.intEntityId
-LEFT OUTER JOIN
-	dbo.tblEntityLocation AS ELB ON C.intBillToId = ELB.intEntityLocationId
-LEFT OUTER JOIN
-	dbo.tblEntityLocation AS ELS ON C.intShipToId = ELS.intEntityLocationId		
+	dbo.tblEntity AS E ON EC.intEntityContactId = E.intEntityId	
 INNER JOIN
 	dbo.tblEntity AS CE 
 		ON C.[intEntityCustomerId] = CE.intEntityId 
