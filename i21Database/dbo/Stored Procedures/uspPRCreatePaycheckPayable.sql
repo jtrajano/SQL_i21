@@ -130,8 +130,7 @@ BEGIN
 		,[int1099Form]					
 		,[int1099Category]				
 		,[intLineNo]						
-		,[intTaxGroupId]
-		,[intPaycheckHeaderId]				
+		,[intTaxGroupId]					
 	)
 	SELECT
 		[intBillId]				=	@intBillId
@@ -149,14 +148,13 @@ BEGIN
 											ELSE 0 END)
 		,[int1099Category]		=	ISNULL(D.int1099CategoryId, 0)
 		,[intLineNo]			=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-		,[intTaxGroupId]		=	NULL
-		,[intPaycheckHeaderId]	= @intPaycheck				
+		,[intTaxGroupId]		=	NULL					
 	FROM 
-		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intAccountId, strItem = TT.strTax, dblTotal = PT.dblTotal 
+		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intExpenseAccountId, strItem = TT.strTax, dblTotal = PT.dblTotal 
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
 			WHERE PT.dblTotal > 0 AND PT.intPaycheckId = @intPaycheck AND TT.intVendorId = @intVendorEntityId
 		 UNION ALL
-		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intAccountId, strItem = TD.strDeduction, dblTotal = PD.dblTotal 
+		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intExpenseAccountId, strItem = TD.strDeduction, dblTotal = PD.dblTotal 
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
 			WHERE PD.dblTotal > 0 AND PD.intPaycheckId = @intPaycheck AND TD.intVendorId = @intVendorEntityId
 		) A
