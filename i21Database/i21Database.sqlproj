@@ -3510,6 +3510,7 @@
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Views\vyuARInvoiceCompact.sql" />
+    <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
