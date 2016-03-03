@@ -156,14 +156,26 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate 
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency > 0 THEN B.dblTotal / B.dblRate
-												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
-														ELSE 
-															(CASE WHEN B.dblOldCost != 0 THEN CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) --COST ADJUSTMENT
-																ELSE B.dblTotal END)
-															+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
-														END) --IC Tax
+												  --WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate 
+												  --WHEN A.intTransactionType IN (1) AND B.ysnSubCurrency > 0 THEN B.dblTotal + CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
+												ELSE 
+													CASE WHEN B.dblRate > 0 THEN 
+															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															ELSE 
+																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
+																	  ELSE B.dblTotal END)
+																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
+															END) / B.dblRate 
+													ELSE 
+															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															ELSE 
+																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
+																	  ELSE B.dblTotal END)
+																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
+															END)
+													END
 												END), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,

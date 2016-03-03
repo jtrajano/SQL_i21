@@ -118,7 +118,9 @@ BEGIN
 		[dblDiscount],
 		[dblWithheld],
 		[intStoreLocationId],
-		[intPayToAddressId]
+		[intPayToAddressId],
+		[intSubCurrencyCents]
+		
 	)
 	OUTPUT inserted.intBillId, @receiptId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId)
 	SELECT
@@ -145,7 +147,8 @@ BEGIN
 		[dblDiscount]			=	0,
 		[dblWithheld]			=	0,
 		[intStoreLocationId]	=	A.intLocationId,
-		[intPayToAddressId]		=	A.intShipFromId
+		[intPayToAddressId]		=	A.intShipFromId,
+		[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,0)
 	FROM tblICInventoryReceipt A
 	OUTER APPLY 
 	(
@@ -197,7 +200,7 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)),
+		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) / A.intSubCurrencyCents ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) END,
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
