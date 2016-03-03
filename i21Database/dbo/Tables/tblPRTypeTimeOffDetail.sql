@@ -6,7 +6,7 @@
 	[strDescription]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[dblRate]          NUMERIC (18, 6)  DEFAULT ((0)) NULL,
     [dblPerPeriod]     NUMERIC (18, 6) DEFAULT ((0)) NULL,
-    [strPeriod]        NVARCHAR (30) COLLATE Latin1_General_CI_AS  DEFAULT ((0)) NULL,
+    [strPeriod]        NVARCHAR (30) COLLATE Latin1_General_CI_AS   NULL,
     [dblMaxEarned]     NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [dblMaxCarryover]  NUMERIC (18, 6)  DEFAULT ((0)) NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)),
