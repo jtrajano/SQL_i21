@@ -3,6 +3,7 @@
 	,@intNewStorageLocationId INT
 	,@dblMoveQty NUMERIC(38, 20)
 	,@intUserId INT
+	,@blnValidateLotReservation BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -22,16 +23,22 @@ BEGIN TRY
 		,@dblWeightPerQty NUMERIC(38, 20)
 		,@intWeightUOMId INT
 		,@intItemStockUOMId INT
+	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblWeight NUMERIC(38,20)
+	DECLARE @dblLotQty NUMERIC(38,20)
+	DECLARE @dblLotAvailableQty NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@strLotNumber = strLotNumber
+		,@dblLotQty = dblQty
 		,@intLotStatusId = intLotStatusId
 		,@intNewLocationId = intLocationId
 		,@dblWeightPerQty = dblWeightPerQty
 		,@intWeightUOMId = intWeightUOMId
+		,@dblWeight = dblWeight
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -39,6 +46,21 @@ BEGIN TRY
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
+
+	SELECT @dblLotAvailableQty = (CASE 
+	WHEN ISNULL(@dblWeight, 0) = 0
+		THEN ISNULL(@dblLotQty, 0)
+	ELSE ISNULL(@dblWeight, 0)
+	END)
+
+	IF @dblMoveQty>@dblLotAvailableQty
+	BEGIN
+		RAISERROR (
+				90015
+				,11
+				,1
+				)
+	END
 
 	SELECT @strNewLotNumber = @strLotNumber
 
@@ -64,6 +86,16 @@ BEGIN TRY
 				,1
 				)
 	END
+	
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+
+	IF @blnValidateLotReservation = 1 
+	BEGIN
+		IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+		BEGIN
+			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		END
+	END
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 		,@dtmDate
@@ -80,6 +112,10 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId
+	
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblWeightPerQty
+	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 	IF EXISTS (
 			SELECT *
@@ -100,11 +136,7 @@ BEGIN TRY
 		WHERE intLotId = @intLotId
 	END
 
-	IF (
-			SELECT dblWeight
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId
-			) < 0.01
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
 	BEGIN
 		UPDATE tblICLot
 		SET dblWeight = 0
