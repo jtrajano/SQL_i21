@@ -213,6 +213,14 @@ Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId
 Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
 AND r.intWorkOrderId = @intWorkOrderId
 
+--Sub Items
+Delete tpl From @tblPickListDetail tpl 
+Join tblMFWorkOrderRecipeSubstituteItem rs on tpl.intItemId=rs.intSubstituteItemId
+Join tblMFWorkOrderRecipeItem ri on rs.intItemId=ri.intItemId 
+Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+AND r.intWorkOrderId = @intWorkOrderId
+
 Begin Tran
 
 If @intPickListId=0

@@ -64,6 +64,13 @@ Join tblMFRecipeItem ri on tpl.intItemId=ri.intItemId
 Join tblMFRecipe r on ri.intRecipeId=r.intRecipeId 
 Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
 
+--Sub Items
+Delete tpl From @tblPickedLots tpl
+Join tblMFRecipeSubstituteItem rs on tpl.intItemId=rs.intSubstituteItemId 
+Join tblMFRecipeItem ri on ri.intItemId=rs.intItemId 
+Join tblMFRecipe r on ri.intRecipeId=r.intRecipeId 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+
 --Delete shortage of item records
 Delete From @tblPickedLots Where ISNULL(intLotId,0)=0
 
