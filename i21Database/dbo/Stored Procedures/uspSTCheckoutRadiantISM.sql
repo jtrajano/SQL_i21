@@ -7,7 +7,7 @@ BEGIN
 	Select @intStoreId = intStoreId, @intShiftNo = intShiftNo from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
 
 	INSERT INTO dbo.tblSTCheckoutItemMovements
-	SELECT @intCheckoutId 
+	SELECT DISTINCT @intCheckoutId 
 	, UOM.intItemUOMId
 	, I.strDescription
 	, IL.intVendorId

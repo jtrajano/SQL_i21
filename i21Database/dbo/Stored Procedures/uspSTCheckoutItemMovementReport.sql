@@ -27,8 +27,8 @@ SELECT DISTINCT CASE WHEN UOM.strUpcCode is not null then UOM.strUpcCode else UO
 , V.strVendorId [strVendor]
 , ISNULL(CIM.dblItemStandardCost, 0) [dblItemCost]
 , CASE WHEN (SP.dtmBeginDate < CH.dtmCheckoutDate AND SP.dtmEndDate > CH.dtmCheckoutDate) 
-		THEN SP.dblUnit 
-		ELSE Pr.dblSalePrice 
+		THEN ISNULL(SP.dblUnit,0) 
+		ELSE ISNULL(Pr.dblSalePrice,0) 
 	END [dblCurrentPrice]
 , IM.dblQty [dblQtySold]
 FROM @tblItemMovement IM
@@ -38,7 +38,7 @@ JOIN dbo.tblICItemUOM UOM ON UOM.intItemUOMId = CIM.intItemUPCId
 JOIN dbo.tblICItem I ON I.intItemId = UOM.intItemId
 JOIN dbo.tblAPVendor V ON V.intEntityVendorId = CIM.intVendorId
 JOIN dbo.tblICItemSpecialPricing SP ON I.intItemId = SP.intItemId 
-JOIN dbo.tblICItemPricing Pr ON Pr.intItemId = I.intItemId 
+LEFT JOIN dbo.tblICItemPricing Pr ON Pr.intItemId = I.intItemId 
 ) t
 )t1
 
