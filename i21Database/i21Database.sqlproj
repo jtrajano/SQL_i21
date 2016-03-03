@@ -3504,6 +3504,8 @@
     <Build Include="dbo\Views\vyuCTContractChart.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspSMResolveContactRoleMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
