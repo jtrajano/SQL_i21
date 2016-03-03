@@ -3511,6 +3511,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Views\vyuARInvoiceCompact.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMResolveContactRoleMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
