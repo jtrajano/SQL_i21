@@ -592,6 +592,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Approval 
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'i21.view.ApprovalList' WHERE strMenuName = 'Approval List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calendar' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Calendar', N'System Manager', @CommonInfoParentMenuId, N'Calendar', N'Maintenance', N'Screen', N'#calendar', N'small-menu-maintenance', 0, 0, 0, 1, 20, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = '#calendar' WHERE strMenuName = 'Calendar' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
 /* Start Delete */
 --DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
@@ -3972,7 +3978,7 @@ ELSE
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------- ALL CONTACT MENUS MUST BE DELETED IN uspSMFixUserRoleMenus ---------------------------------------------
+------------------------------------------- ALL CONTACT MENUS ONLY MUST BE DELETED IN uspSMFixUserRoleMenus ----------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 /* System Manager */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @SystemManagerParentMenuId)
@@ -4190,6 +4196,18 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Prospects and
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ProspectsAndCustomersMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@ProspectsAndCustomersMenuId)
+END
+
+/* CONTRACT MANAGEMENT */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ContractManagementParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@ContractManagementParentMenuId)
+
+DECLARE @ContractsMenuId INT
+SELECT  @ContractsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ContractsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@ContractsMenuId)
 END
 
 GO

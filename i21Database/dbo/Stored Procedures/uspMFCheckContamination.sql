@@ -194,7 +194,7 @@ BEGIN
 	SELECT W.intWorkOrderId
 		,Row_Number() OVER (
 			PARTITION BY W.intManufacturingCellId ORDER BY W.intManufacturingCellId
-				,WS.intSequenceNo
+				,WS.intSequenceNo Desc
 				,CASE 
 					WHEN WS.intStatusId = 3
 						THEN W1.intExecutionOrder

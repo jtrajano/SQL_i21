@@ -22,7 +22,8 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
         @total as int,
 		@defaultCurrency int,
 		@intSurchargeItemId as int,
-		@intFreightItemId as int;
+		@intFreightItemId as int,
+		@FreightCostAllocationMethod AS INT
 
 SELECT	TOP 1 @defaultCurrency = CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
@@ -168,6 +169,8 @@ END
 
    SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
    SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+   -- Get Freight Cost Allocation Method from Company Preferences
+   SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod FROM tblTRCompanyPreference
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -199,11 +202,11 @@ END
 			,[intShipFromId]					= min(RE.intShipFromId)
 			,[intCurrencyId]  					= min(RE.intCurrencyId)
 			,[intChargeId]						= @intFreightItemId
-			,[ysnInventoryCost]					= CASE	WHEN min(TLR.strTransaction) = Null THEN 1
- 										                                                       
-												    	WHEN min(TLR.strTransaction) != Null THEN 0
-														                                   
-												END
+			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
+														ELSE (CASE WHEN (TLR.strTransaction) = NULL THEN CAST(1 AS BIT)
+																WHEN (TLR.strTransaction) != NULL THEN CAST(0 AS BIT)
+																END)
+														END)
 			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= min(RE.dblFreightRate)
 			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
@@ -215,10 +218,11 @@ END
 															min(RE.intShipViaId)
 												END
 			,[dblAmount]						= 0
-			,[strAllocateCostBy]				=  CASE	WHEN min(TLR.strTransaction) = Null THEN 'Unit'
-												    	WHEN min(TLR.strTransaction) != Null THEN Null
-														                                   
-											    	END
+			,[strAllocateCostBy]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Unit'
+														ELSE (CASE WHEN (TLR.strTransaction) = NULL THEN 'Unit'
+																WHEN (TLR.strTransaction) != NULL THEN NULL
+																END)
+														END)
 			,[intContractHeaderId]				= min(RE.intContractHeaderId)
 			,[intContractDetailId]				= min(RE.intContractDetailId)
 			,[ysnAccrue]						= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
@@ -249,9 +253,11 @@ END
 			,[intShipFromId]					= min(RE.intShipFromId)
 			,[intCurrencyId]  					= min(RE.intCurrencyId)
 			,[intChargeId]						= @intSurchargeItemId
-			,[ysnInventoryCost]					= CASE WHEN min(LTE.strTransaction) = Null THEN 1
-												    	WHEN min(LTE.strTransaction) != Null THEN 0
-												END
+			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
+														ELSE (CASE WHEN (LTE.strTransaction) = NULL THEN CAST(1 AS BIT)
+																WHEN (LTE.strTransaction) != NULL THEN CAST(0 AS BIT)
+																END)
+														END)
 			,[strCostMethod]					= 'Percentage'
 			,[dblRate]							= min(RE.dblSurcharge)
 			,[intCostUOMId]						= (SELECT TOP 1 UOM.intItemUOMId FROM tblICItemUOM UOM WHERE UOM.intItemId =  @intSurchargeItemId)
@@ -263,10 +269,11 @@ END
 															min(RE.intShipViaId)
 												END
 			,[dblAmount]						= 0
-			,[strAllocateCostBy]				= CASE	WHEN min(LTE.strTransaction) = Null THEN 'Unit'
-												    	WHEN min(LTE.strTransaction) != Null THEN Null
-														                                   
-											    	END
+			,[strAllocateCostBy]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Unit'
+														ELSE (CASE WHEN (LTE.strTransaction) = NULL THEN 'Unit'
+																WHEN (LTE.strTransaction) != NULL THEN NULL
+																END)
+														END)
 			,[intContractHeaderId]				= min(RE.intContractHeaderId)
 			,[intContractDetailId]				= min(RE.intContractDetailId)
 			,[ysnAccrue]						= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
