@@ -3506,6 +3506,8 @@
     <Build Include="dbo\Stored Procedures\uspSMResolveContactRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
+    <Build Include="dbo\Tables\tblPRForm941.sql" />
     <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
     <Build Include="dbo\Views\vyuRKGetMarketBrokerList.sql" />
     <Build Include="dbo\User Defined Types\ScheduleConstraintTable.sql" />
