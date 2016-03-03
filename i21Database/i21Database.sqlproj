@@ -3499,6 +3499,8 @@
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
