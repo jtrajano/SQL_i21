@@ -30,7 +30,7 @@ SELECT TOP 1 @tranType = intTransactionType FROM #tmpDuplicateBill
 
 SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 END
 
-IF (EXISTS(SELECT 1 FROM tblEntityToContact A INNER JOIN tblEntityType B ON A.intEntityContactId = B.intEntityId WHERE intEntityContactId = @userId AND strType = 'Vendor'))
+IF (EXISTS(SELECT 1 FROM tblEntityToContact A INNER JOIN tblEntityType B ON A.intEntityId = B.intEntityId WHERE intEntityContactId = @userId AND strType = 'Vendor'))
 BEGIN
 	SET @isVendorContact = 1;
 END
