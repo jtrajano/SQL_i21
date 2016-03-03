@@ -176,8 +176,13 @@ BEGIN
 	END
 
 	DECLARE @totalRecords INT
-	SELECT @totalRecords = COUNT(*) FROM #tmpPayablePostData
-
+	SELECT @totalRecords = COUNT(*) 
+	FROM 
+	(
+		SELECT intId FROM @payments
+		UNION ALL 
+		SELECT intId FROM @prepayIds
+	) PaymentRecords
 	IF(@totalRecords = 0)  
 	BEGIN
 		SET @success = 0
@@ -288,7 +293,7 @@ BEGIN
 		WHERE B.dblUnapplied > 0 --process only the records that has overpayment
 
 		DECLARE @payId INT;
-		SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
+		SELECT TOP 1 @payId = intId FROM #tmpPayableIds
 		WHILE (@payId IS NOT NULL)
 		BEGIN
 			EXEC uspAPCreateOverpayment @payId, @userId;
