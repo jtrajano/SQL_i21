@@ -19,7 +19,7 @@
 	[intCountyTaxCodeId]        INT            NULL,
 	[intTaxGroupId]			INT				NULL,
 	[intTaxClassId]			INT				NULL,
-	[ysnActive]				BIT			 NULL,
+	[ysnActive]				BIT			 NULL DEFAULT(1),
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
