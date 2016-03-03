@@ -137,7 +137,7 @@ Begin
 
 	While(@intMinParentLot is not null) --Loop Parent Lots
 	Begin
-	Select @intParentLotId=intParentLotId,--@dblReqQty=CASE WHEN intItemUOMId=intItemIssuedUOMId THEN dblReqQty ELSE dblReqQty * dblWeightPerUnit  End,
+	Select @intParentLotId=intParentLotId,@dblReqQty=dblReqQty,--@dblReqQty=CASE WHEN intItemUOMId=intItemIssuedUOMId THEN dblReqQty ELSE dblReqQty * dblWeightPerUnit  End,
 	@intItemUOMId=intItemUOMId,@intItemIssuedUOMId=intItemIssuedUOMId 
 	From @tblParentLot Where intRowNo=@intMinParentLot
 

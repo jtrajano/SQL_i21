@@ -44,6 +44,7 @@ Declare @intWorkOrderStatusId INT
 Declare @intKitStatusId INT=NULL
 Declare @dblBulkReqQuantity numeric(38,20)
 Declare @dblPlannedQuantity numeric(38,20)
+Declare @ysnAllInputItemsMandatory bit
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -72,7 +73,11 @@ Declare @tblItem table
 (
 	intRowNo int Identity(1,1),
 	intItemId int,
-	dblReqQty numeric(38,20)
+	dblReqQty numeric(38,20),
+	ysnIsSubstitute BIT
+	,intConsumptionMethodId INT
+	,intConsumptionStoragelocationId INT
+	,intParentItemId int
 )
 
 Declare @tblLot table
@@ -150,6 +155,45 @@ INSERT INTO @tblLot(
 	ysnParentLot bit
 	)
 
+--Available Qty Check
+Declare @tblLotSummary AS table
+(
+	intRowNo int IDENTITY,
+	intLotId INT,
+	intItemId int,
+	dblQty NUMERIC(38,20)	
+)
+Declare @dblInputAvlQty NUMERIC(38,20)
+Declare @dblInputReqQty NUMERIC(38,20)
+Declare @intInputLotId int
+Declare @intInputItemId int
+Declare @strInputLotNumber nvarchar(50)
+
+INSERT INTO @tblLotSummary(intLotId,intItemId,dblQty)
+Select intLotId,intItemId,SUM(dblQty) From @tblLot GROUP BY intLotId,intItemId
+
+Declare @intMinLot INT
+Select @intMinLot=Min(intRowNo) From @tblLotSummary
+While(@intMinLot is not null)
+Begin
+	Select @intInputLotId=intLotId,@dblInputReqQty=dblQty,@intInputItemId=intItemId From @tblLotSummary Where intRowNo=@intMinLot
+	Select @dblInputAvlQty=dblWeight - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=@intInputLotId) 
+	From tblICLot Where intLotId=@intInputLotId
+
+	if @dblInputReqQty > @dblInputAvlQty
+	Begin
+		Select @strInputLotNumber=strLotNumber From tblICLot Where intLotId=@intInputLotId
+		Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+
+		Set @ErrMsg='Quantity of ' + CONVERT(varchar,@dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(nvarchar,@strInputItemNo) +
+		+ ' cannot be added to blend sheet because the lot has available qty of ' + CONVERT(varchar,@dblInputAvlQty) + '.'
+		RaisError(@ErrMsg,16,1)
+	End
+
+	Select @intMinLot=Min(intRowNo) From @tblLotSummary Where intRowNo>@intMinLot
+End
+--End Available Qty Check
+
 Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
 
 Update @tblLot Set intStorageLocationId=null where intStorageLocationId=0
@@ -210,6 +254,91 @@ Select @ysnCalculateNoSheetUsingBinSize=CASE When UPPER(pa.strAttributeValue) = 
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 and at.strAttributeName='Calculate No Of Blend Sheet Using Blend Bin Size'
+
+Select @ysnAllInputItemsMandatory=CASE When UPPER(pa.strAttributeValue) = 'TRUE' then 1 Else 0 End 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and UPPER(at.strAttributeName)=UPPER('All input items mandatory for consumption')
+
+--Missing Item Check / Required Qty Check
+if @ysnAllInputItemsMandatory=1
+Begin
+	Insert into @tblItem(intItemId,dblReqQty,ysnIsSubstitute,intConsumptionMethodId,intConsumptionStoragelocationId,intParentItemId)
+	Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblPlannedQuantity/r.dblQuantity)) AS RequiredQty,0 AS ysnIsSubstitute,ri.intConsumptionMethodId,ri.intStorageLocationId,0
+	From tblMFRecipeItem ri 
+	Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
+	where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
+	UNION
+	Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblPlannedQuantity/r.dblQuantity)) AS RequiredQty,1 AS ysnIsSubstitute,0,0,rs.intItemId
+	From tblMFRecipeSubstituteItem rs 
+	Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
+	where rs.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
+
+	Declare @intMinMissingItem INT
+	Declare @intConsumptionMethodId int
+	Declare @dblInputItemBSQty numeric(38,20)
+	Declare @dblBulkItemAvlQty numeric(38,20)
+
+	Select @intMinMissingItem=Min(intRowNo) From @tblItem
+	While(@intMinMissingItem is not null)
+	Begin
+		Select @intInputItemId=intItemId,@dblInputReqQty=dblReqQty,@intConsumptionMethodId=intConsumptionMethodId 
+		From @tblItem Where intRowNo=@intMinLot AND ysnIsSubstitute=0
+
+		If @intConsumptionMethodId=1
+		Begin
+			Select @dblInputItemBSQty=ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblLot Where intItemId=@intInputItemId
+
+			--Include Sub Items
+			Set @dblInputItemBSQty=@dblInputItemBSQty + (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblLot 
+			Where intItemId in (Select intItemId From @tblItem Where intParentItemId = @intInputItemId))
+
+			if @dblInputItemBSQty < @dblInputReqQty
+			Begin
+				Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+
+				Set @ErrMsg='Selected quantity of ' + CONVERT(varchar,@dblInputItemBSQty) + ' of item ' + CONVERT(nvarchar,@strInputItemNo) +
+				+ ' is less than the required quantity of ' + CONVERT(varchar,@dblInputReqQty) + '.'
+				RaisError(@ErrMsg,16,1)
+			End
+		End
+		
+		--Bulk
+		If @intConsumptionMethodId in (2,3)
+		Begin
+			Select @dblBulkItemAvlQty=ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
+			Where l.intItemId=@intInputItemId AND l.intLocationId = @intLocationId
+				AND ls.strPrimaryStatus IN (
+					'Active'
+					,'Quarantine'
+					)
+				AND l.dtmExpiryDate >= GETDATE()
+				AND l.dblWeight >0
+
+				--Iclude Sub Items
+				Set @dblBulkItemAvlQty = @dblBulkItemAvlQty + (Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
+				Where l.intItemId in (Select intItemId From @tblItem Where intParentItemId = @intInputItemId)
+				AND l.intLocationId = @intLocationId
+				AND ls.strPrimaryStatus IN (
+					'Active'
+					,'Quarantine'
+					)
+				AND l.dtmExpiryDate >= GETDATE()
+				AND l.dblWeight >0)
+
+			if @dblBulkItemAvlQty < @dblInputReqQty
+			Begin
+				Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+
+				Set @ErrMsg='Required quantity of ' + CONVERT(varchar,@dblInputReqQty) + ' of bulk item ' + CONVERT(nvarchar,@strInputItemNo) +
+				+ ' is not avaliable.'
+				RaisError(@ErrMsg,16,1)
+			End
+		End
+
+		Select @intMinMissingItem=Min(intRowNo) From @tblItem Where intRowNo>@intMinMissingItem AND ysnIsSubstitute=0
+	End
+End
 
 If @ysnCalculateNoSheetUsingBinSize=0
 	Begin
@@ -377,7 +506,7 @@ Begin
 End
 
 --Update Bulk Item(By Location or FIFO) Standard Required Qty Calculated Using Planned Qty
-If @ysnCalculateNoSheetUsingBinSize=0
+--If @ysnCalculateNoSheetUsingBinSize=0
 Begin
 	SELECT 
 		@dblBulkReqQuantity = ISNULL(SUM((ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity))),0)
