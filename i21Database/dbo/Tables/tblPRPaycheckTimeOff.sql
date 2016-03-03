@@ -12,6 +12,7 @@
     [dblMaxCarryover] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblHoursAccrued] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblHoursUsed] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblHoursYTD] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((1))
     
 )
@@ -133,3 +134,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckTimeOff',
     @level2type = N'COLUMN',
     @level2name = N'dblHoursUsed'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Hours YTD',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = N'dblHoursYTD'
