@@ -57,7 +57,7 @@ SELECT
 	B.ysnOneBillPerPayment,
 	B.strFLOId,
 	E.intCent,
-	E.ysnSubCurrency 
+	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0)
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B
