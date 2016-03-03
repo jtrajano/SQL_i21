@@ -3513,6 +3513,8 @@
     <Build Include="dbo\Stored Procedures\uspSMResolveContactRoleMenus.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
     <Build Include="dbo\Tables\tblPRForm941.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
