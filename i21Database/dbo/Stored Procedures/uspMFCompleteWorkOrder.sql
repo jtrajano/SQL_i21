@@ -442,6 +442,7 @@ BEGIN TRY
 				,@intBatchId = @intBatchId
 				,@intUserId = @intUserId
 				,@dblUnitQty=@dblUnitQty
+				,@ysnProducedQtyByWeight=1
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
@@ -459,6 +460,7 @@ BEGIN TRY
 				,@intBatchId = @intBatchId
 				,@intUserId = @intUserId
 				,@dblUnitQty=@dblUnitQty
+				,@ysnProducedQtyByWeight=0
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblPhysicalCount

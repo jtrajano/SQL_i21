@@ -6,6 +6,7 @@
 	,@PickPreference NVARCHAR(50) = ''
 	,@ysnExcessConsumptionAllowed BIT = 0
 	,@dblUnitQty NUMERIC(38, 20)
+	,@ysnProducedQtyByWeight bit=1
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -178,7 +179,7 @@ BEGIN TRY
 		)
 	SELECT ri.intItemId
 		,CASE 
-			WHEN C.strCategoryCode = @strPackagingCategory
+			WHEN C.strCategoryCode = @strPackagingCategory AND @ysnProducedQtyByWeight=1 AND P.dblMaxWeightPerPack>0
 				THEN (
 						--CASE 
 						--	WHEN @dblUnitQty > P.dblWeight
@@ -223,7 +224,7 @@ BEGIN TRY
 		UNION
 		SELECT ri.intItemId
 		,(CASE 
-			WHEN C.strCategoryCode = @strPackagingCategory
+			WHEN C.strCategoryCode = @strPackagingCategory AND @ysnProducedQtyByWeight=1 AND P.dblMaxWeightPerPack>0
 				THEN (
 						--CASE 
 						--	WHEN @dblUnitQty > P.dblWeight
