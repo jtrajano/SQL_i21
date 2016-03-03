@@ -263,8 +263,8 @@ BEGIN TRY
 				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 				,1 AS ysnIsSubstitute
 				,0
-				,1
-				,0
+				,ri.intConsumptionMethodId
+				,ri.intStorageLocationId
 				,ri.intItemId
 			FROM tblMFWorkOrderRecipeSubstituteItem rs
 			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
@@ -370,7 +370,7 @@ BEGIN TRY
 			intConsumptionMethodId int,
 			intConsumptionStoragelocationId int,
 			intParentItemId int
-			)
+			) ORDER BY ysnIsSubstitute
 		IF @idoc <> 0 EXEC sp_xml_removedocument @idoc
 	End
 
@@ -1258,7 +1258,10 @@ BEGIN TRY
 				Begin
 					--if main item qty not there then remaining qty pick from substitute if exists
 					If Exists(Select 1 From @tblInputItem Where intParentItemId=@intRawItemId And ysnIsSubstitute=1)
-						Update @tblInputItem Set dblRequiredQty=@dblRemainingRequiredQty Where intParentItemId=@intRawItemId And ysnIsSubstitute=1
+						Begin
+							Update @tblInputItem Set dblRequiredQty=@dblRemainingRequiredQty Where intParentItemId=@intRawItemId And ysnIsSubstitute=1
+							Delete From @tblInputItem Where intItemId=@intRawItemId And ysnIsSubstitute=0 --Remove the main Item
+						End
 					Else --substitute does not exists then show 0 for main item
 						If ISNULL(@intPartialQuantityStorageLocationId, 0) > 0
 							INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
@@ -1284,6 +1287,7 @@ BEGIN TRY
 				--IF @intIssuedUOMTypeId = 2
 				  --AND 
 				  if @intConsumptionMethodId in (2,4) --By FIFO and By Locationn
+				  AND Exists (Select 1 From @tblInputItem Where intItemId=@intRawItemId)
 			BEGIN
 				SELECT @dblRemainingRequiredQty=@dblOriginalRequiredQty - ISNULL(SUM(ISNULL(dblQuantity,0)),0) From #tblBlendSheetLot Where intItemId=@intRawItemId
 				IF @dblRemainingRequiredQty > 0

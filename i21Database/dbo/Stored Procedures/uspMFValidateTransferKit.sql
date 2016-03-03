@@ -82,7 +82,7 @@ Declare @tblParentLot table
 	Begin
 		Select @intParentLotId=intParentLotId,@dblReqQty=dblReqQty From @tblParentLot Where intRowNo=@intMinParentLot
 
-		Select @dblAvailableQty=SUM(l.dblWeight)
+		Select @dblAvailableQty=ISNULL(SUM(l.dblWeight),0)
 		From tblICLot l Join tblMFPickListDetail pld on l.intLotId=pld.intStageLotId 
 		Where pld.intPickListId=@intPickListId And l.intParentLotId=@intParentLotId And l.dblQty > 0 
 		AND l.intStorageLocationId=@intKitStagingLocationId
