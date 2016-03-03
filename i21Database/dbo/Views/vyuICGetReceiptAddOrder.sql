@@ -39,10 +39,13 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, intItemUOMId = intUnitOfMeasureId
 		, strUnitMeasure = strUOM
 		, strUnitType = strType
+		-- Gross/Net 
 		, intWeightUOMId = NULL
 		, strWeightUOM = NULL
+		-- Conversion factor
 		, dblItemUOMConvFactor = dblItemUOMCF
-		, dblWeightUOMConvFactor = 0
+		, dblWeightUOMConvFactor = 00
+		-- Cost UOM
 		, intCostUOMId = intUnitOfMeasureId
 		, strCostUOM = strUOM
 		, dblCostUOMConvFactor = dblItemUOMCF
@@ -158,13 +161,16 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, intItemUOMId = intItemUOMId
 		, strUnitMeasure = strUnitMeasure
 		, strUnitType = NULL
-		, intWeightUOMId = intWeightItemUOMId  -- intWeightUOMId
+		-- Gross/Net UOM
+		, intWeightUOMId = intWeightItemUOMId  
 		, strWeightUOM = strWeightUOM
+		-- Conversion factor
 		, dblItemUOMConvFactor = dblItemUOMCF
 		, dblWeightUOMConvFactor = dblItemUOMCF
-		, intCostUOMId = intItemUOMId
-		, strCostUOM = strUnitMeasure
-		, dblCostUOMConvFactor = dblItemUOMCF
+		-- Cost UOM
+		, intCostUOMId = intCostUOMId
+		, strCostUOM = strCostUOM
+		, dblCostUOMConvFactor = dblCostUOMCF
 		, intLifeTime
 		, strLifeTimeType
 		, ysnLoad = 0
@@ -215,10 +221,13 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, intItemUOMId = intItemUOMId
 		, strUnitMeasure = strUnitMeasure
 		, strUnitType = NULL
+		-- Gross/Net UOM
 		, intWeightUOMId = intWeightUOMId
 		, strWeightUOM = strWeightUOM
+		-- Conversion factor
 		, dblItemUOMConvFactor = dblItemUOMCF
 		, dblWeightUOMConvFactor = dblWeightUOMCF
+		-- Cost UOM 
 		, intCostUOMId = intItemUOMId
 		, strCostUOM = strUnitMeasure
 		, dblCostUOMConvFactor = dblItemUOMCF
