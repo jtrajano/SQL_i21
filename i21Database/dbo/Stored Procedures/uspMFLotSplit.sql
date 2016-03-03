@@ -38,7 +38,9 @@ BEGIN TRY
 	DECLARE @intItemStockUOMId INT
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
-	
+	DECLARE @dblLotQty NUMERIC(38,20)
+	DECLARE @dblLotAvailableQty NUMERIC(38,20)
+
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
 	SELECT @intItemId = intItemId, 
@@ -46,6 +48,7 @@ BEGIN TRY
 		   @intSubLocationId = intSubLocationId,
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
+		   @dblLotQty = dblQty,
 		   @intLotStatusId = intLotStatusId,
 		   @intItemUOMId = intItemUOMId,	 
 		   @dblWeightPerQty = dblWeightPerQty,
@@ -57,7 +60,13 @@ BEGIN TRY
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
-	
+		
+	SELECT @dblLotAvailableQty = (CASE 
+		WHEN ISNULL(@dblWeight, 0) = 0
+			THEN ISNULL(@dblLotQty, 0)
+		ELSE ISNULL(@dblWeight, 0)
+		END)
+
 	SELECT @dblAdjustByQuantity = - @dblSplitQty, 
 		   @intNewItemUOMId = @intItemUOMId, 
 		   @dtmDate = GETDATE(), 
@@ -66,15 +75,15 @@ BEGIN TRY
 	
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
 	
-	IF (@dblWeight + @dblAdjustByQuantity) < @dblLotReservedQty
+	IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
 	BEGIN
 		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 	END
 
-	--IF @intItemStockUOMId = @intWeightUOMId
-	--BEGIN
+	IF @dblWeightPerQty > 0 
+	BEGIN
 		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
-	--END
+	END
 	
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
@@ -127,11 +136,7 @@ BEGIN TRY
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
 
-	IF (
-			SELECT dblWeight
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId
-			) < 0.01
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
 	BEGIN
 		--EXEC dbo.uspMFLotAdjustQty
 		-- @intLotId =@intLotId,       

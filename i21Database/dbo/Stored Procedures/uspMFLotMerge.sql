@@ -65,10 +65,10 @@ BEGIN TRY
 		END
 	END
 
-	--IF @intItemStockUOMId = @intWeightUOMId
-	--BEGIN
+	IF @dblLotWeightPerUnit > 0 
+	BEGIN
 		SELECT @dblMergeQty = dbo.fnDivide(@dblMergeQty, @dblLotWeightPerUnit)
-	--END
+	END
 
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
 	
@@ -124,18 +124,16 @@ BEGIN TRY
 	SET dblWeightPerQty = @dblNewLotWeightPerUnit
 	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
-	IF (SELECT dblWeight
-		FROM dbo.tblICLot
-		WHERE intLotId = @intLotId)<0.01
-		BEGIN
-			--EXEC dbo.uspMFLotAdjustQty
-			-- @intLotId =@intLotId,       
-			-- @dblNewLotQty =0,
-			-- @intUserId=@intUserId ,
-			-- @strReasonCode ='Residue qty clean up',
-			-- @strNotes ='Residue qty clean up'
-			UPDATE tblICLot SET dblWeight=0,dblQty=0 WHERE intLotId = @intLotId
-		END
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
+	BEGIN
+		--EXEC dbo.uspMFLotAdjustQty
+		-- @intLotId =@intLotId,       
+		-- @dblNewLotQty =0,
+		-- @intUserId=@intUserId ,
+		-- @strReasonCode ='Residue qty clean up',
+		-- @strNotes ='Residue qty clean up'
+		UPDATE tblICLot SET dblWeight=0,dblQty=0 WHERE intLotId = @intLotId
+	END
 
 
 END TRY  
