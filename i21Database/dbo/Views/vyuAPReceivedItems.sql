@@ -396,8 +396,8 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[dblUnitCost]								=	ISNULL(CD.dblCashPrice,0)
 		,[dblTax]									=	0
-		,[dblRate]									=	0
-		,[ysnSubCurrency]							=	0
+		,[dblRate]									=	CC.dblRate
+		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strName]									=	CC.strVendorName
@@ -427,6 +427,7 @@ FROM
 													RC.intChargeId			=	CC.intItemId
 	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intUnitMeasureId
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
+	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
 
 ) Items
