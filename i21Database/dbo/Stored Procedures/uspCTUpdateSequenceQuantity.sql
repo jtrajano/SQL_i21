@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdateSequenceQuantity]
 	@intContractDetailId	INT, 
-	@dblQuantityToUpdate	NUMERIC(12,4),
+	@dblQuantityToUpdate	NUMERIC(18,6),
 	@intUserId				INT,
 	@intExternalId			INT,
 	@strScreenName			NVARCHAR(50)
@@ -9,12 +9,12 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg						NVARCHAR(MAX),
-			@dblQuantity				NUMERIC(12,4),
-			@dblScheduleQty				NUMERIC(12,4),
-			@dblBalance					NUMERIC(12,4),
-			@dblBalanceToUpdate			NUMERIC(12,4),
-			@dblAvailable				NUMERIC(12,4),
-			@dblNewQuantity				NUMERIC(12,4),
+			@dblQuantity				NUMERIC(18,6),
+			@dblScheduleQty				NUMERIC(18,6),
+			@dblBalance					NUMERIC(18,6),
+			@dblBalanceToUpdate			NUMERIC(18,6),
+			@dblAvailable				NUMERIC(18,6),
+			@dblNewQuantity				NUMERIC(18,6),
 			@intCommodityUnitMeasureId	INT,
 			@intItemUOMId				INT,
 			@IntFromUnitMeasureId		INT,
