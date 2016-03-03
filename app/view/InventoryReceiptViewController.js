@@ -1616,9 +1616,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var totalItemTax = 0.00,
             qtyOrdered = currentReceiptItem.get('dblOpenReceive'),
-            itemPrice = currentReceiptItem.get('dblUnitCost');
+            unitCost = currentReceiptItem.get('dblUnitCost');
 
         if (reset !== false) reset = true;
+
+        // Adjust the item price by the sub currency
+        {
+            var isSubCurrency = currentReceiptItem.get('ysnSubCurrency');
+            var costCentsFactor = currentReceipt.get('intSubCurrencyCents');
+
+            // sanitize the value for the sub currency.
+            costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
+
+            // check if there is a need to compute for the sub currency.
+            if (!isSubCurrency) {
+                costCentsFactor = 1;
+            }
+
+            unitCost = unitCost / costCentsFactor;
+        }
 
         currentReceiptItem.tblICInventoryReceiptItemTaxes().removeAll();
 
@@ -1626,7 +1642,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var taxableAmount,
                 taxAmount;
 
-            taxableAmount = me.getTaxableAmount(qtyOrdered, itemPrice, itemDetailTax, itemTaxes);
+            taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
             if (itemDetailTax.strCalculationMethod === 'Percentage') {
                 taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
             } else {
@@ -1666,22 +1682,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
             currentReceiptItem.tblICInventoryReceiptItemTaxes().add(newItemTax);
         });
-
-        // Adjust the tax by the sub currency
-        {
-            var isSubCurrency = currentReceiptItem.get('ysnSubCurrency');
-            var costCentsFactor = currentReceipt.get('intSubCurrencyCents');
-
-            // sanitize the value for the sub currency.
-            costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
-
-            // check if there is a need to compute for the sub currency.
-            if (!isSubCurrency) {
-                costCentsFactor = 1;
-            }
-
-            totalItemTax = totalItemTax / costCentsFactor;
-        }
 
         currentReceiptItem.set('dblTax', totalItemTax);
         currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
