@@ -25,12 +25,15 @@ BEGIN TRY
 		,@intItemStockUOMId INT
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
+	DECLARE @dblLotQty NUMERIC(38,20)
+	DECLARE @dblLotAvailableQty NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@strLotNumber = strLotNumber
+		,@dblLotQty = dblQty
 		,@intLotStatusId = intLotStatusId
 		,@intNewLocationId = intLocationId
 		,@dblWeightPerQty = dblWeightPerQty
@@ -39,7 +42,18 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	IF @dblMoveQty>@dblWeight
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM dbo.tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
+
+	SELECT @dblLotAvailableQty = (CASE 
+	WHEN ISNULL(@dblWeight, 0) = 0
+		THEN ISNULL(@dblLotQty, 0)
+	ELSE ISNULL(@dblWeight, 0)
+	END)
+
+	IF @dblMoveQty>@dblLotAvailableQty
 	BEGIN
 		RAISERROR (
 				90015
@@ -47,11 +61,6 @@ BEGIN TRY
 				,1
 				)
 	END
-
-	SELECT @intItemStockUOMId = intItemUOMId
-	FROM dbo.tblICItemUOM
-	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
 
 	SELECT @strNewLotNumber = @strLotNumber
 
@@ -88,10 +97,10 @@ BEGIN TRY
 		END
 	END
 
-	--IF @intItemStockUOMId = @intWeightUOMId
-	--BEGIN
+	IF @dblWeightPerQty > 0 
+	BEGIN
 		SELECT @dblMoveQty = dbo.fnDivide(@dblMoveQty, @dblWeightPerQty)
-	--END
+	END
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 		,@dtmDate
@@ -132,11 +141,7 @@ BEGIN TRY
 		WHERE intLotId = @intLotId
 	END
 
-	IF (
-			SELECT dblWeight
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId
-			) < 0.01
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
 	BEGIN
 		--EXEC dbo.uspMFLotAdjustQty
 		-- @intLotId =@intLotId,       
