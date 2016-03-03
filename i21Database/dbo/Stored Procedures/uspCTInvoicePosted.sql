@@ -16,10 +16,10 @@ BEGIN TRY
 				@intFromItemUOMId				INT,
 				@intToItemUOMId					INT,
 				@intUniqueId					INT,
-				@dblQty							NUMERIC(12,4),
-				@dblConvertedQty				NUMERIC(12,4),
+				@dblQty							NUMERIC(18,6),
+				@dblConvertedQty				NUMERIC(18,6),
 				@ErrMsg							NVARCHAR(MAX),
-				@dblSchQuantityToUpdate			NUMERIC(12,4)
+				@dblSchQuantityToUpdate			NUMERIC(18,6)
 
 	--SELECT @strReceiptType = strReceiptType FROM @ItemsFromInvoice
 
@@ -32,7 +32,7 @@ BEGIN TRY
 		intInvoiceDetailId			INT,
 		intContractDetailId			INT,
 		intItemUOMId				INT,
-		dblQty						NUMERIC(12,4)	
+		dblQty						NUMERIC(18,6)	
 	)
 
 	INSERT INTO @tblToProcess(
