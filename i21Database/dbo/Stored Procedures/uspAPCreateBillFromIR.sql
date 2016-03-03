@@ -117,7 +117,10 @@ BEGIN
 		[intTransactionType],
 		[dblDiscount],
 		[dblWithheld],
-		[intStoreLocationId]
+		[intStoreLocationId],
+		[intPayToAddressId],
+		[intSubCurrencyCents]
+		
 	)
 	OUTPUT inserted.intBillId, @receiptId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId)
 	SELECT
@@ -143,7 +146,9 @@ BEGIN
 		[intTransactionType]	=	1,
 		[dblDiscount]			=	0,
 		[dblWithheld]			=	0,
-		[intStoreLocationId]	=	A.intLocationId
+		[intStoreLocationId]	=	A.intLocationId,
+		[intPayToAddressId]		=	A.intShipFromId,
+		[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,0)
 	FROM tblICInventoryReceipt A
 	OUTER APPLY 
 	(
@@ -175,6 +180,7 @@ BEGIN
 		[dblNetWeight],
 		[intContractDetailId],
 		[intContractHeaderId],
+		[intUnitOfMeasureId],
 		[intCostUOMId],
 		[intWeightUOMId],
 		[intLineNo]
@@ -194,7 +200,7 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)),
+		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) / A.intSubCurrencyCents ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) END,
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
@@ -204,6 +210,7 @@ BEGIN
 		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
 											ELSE NULL END,
+		[intUnitOfMeasureId]		=	B.intUnitMeasureId,
 		[intCostUOMId]				=	B.intCostUOMId,
 		[intWeightUOMId]			=	B.intWeightUOMId,
 		[intLineNo]					=	ISNULL(B.intSort,0)
@@ -251,6 +258,7 @@ BEGIN
 		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
 		[intContractHeaderId]		=	A.intContractHeaderId,
+		[intUnitOfMeasureId]		=	NULL,
 		[intCostUOMId]				=	NULL,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1
