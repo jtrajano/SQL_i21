@@ -3211,6 +3211,8 @@
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
     <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
