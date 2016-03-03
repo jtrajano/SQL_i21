@@ -30,8 +30,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
-        'Logistics.store.BufferedShipmentReceiptContracts',
-        'AccountsPayable.common.extensions.GridExtension'
+        'Logistics.store.BufferedShipmentReceiptContracts'
+        //'AccountsPayable.common.extensions.GridExtension' -- Removed as per Erick and Lex.
     ],
 
     data: {
