@@ -28,6 +28,7 @@ BEGIN TRY
 	DECLARE @intItemStockUOMId INT
 	DECLARE @dblWeight NUMERIC(38, 20)
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
+	DECLARE @dblLotAvailableQty NUMERIC(38,20)
 	
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -40,7 +41,13 @@ BEGIN TRY
 		   @intWeightUOMId = intWeightUOMId
 	FROM tblICLot WHERE intLotId = @intLotId
 	
-	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblWeight
+	SELECT @dblLotAvailableQty = (CASE 
+		WHEN ISNULL(@dblWeight, 0) = 0
+			THEN ISNULL(@dblLotQty, 0)
+		ELSE ISNULL(@dblWeight, 0)
+		END)
+
+	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotAvailableQty
 
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
@@ -49,15 +56,16 @@ BEGIN TRY
 
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
 	
-	IF (@dblWeight + @dblAdjustByQuantity) < @dblLotReservedQty
+	IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
 	BEGIN
 		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 	END
 		
 	--IF @intItemStockUOMId = @intWeightUOMId
-	--BEGIN
+	IF @dblWeightPerQty > 0 
+	BEGIN
 		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
-	--END
+	END
 	
 	SELECT @dtmDate = GETDATE()
 
@@ -158,11 +166,8 @@ BEGIN TRY
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
 		WHERE intLotId = @intLotId
 	END
-	IF (
-			SELECT dblWeight
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId
-			) < 0.01
+
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
 	BEGIN
 		--EXEC dbo.uspMFLotAdjustQty
 		-- @intLotId =@intLotId,       
