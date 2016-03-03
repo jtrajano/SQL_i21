@@ -30,15 +30,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
-        'Logistics.store.BufferedShipmentReceiptContracts',
-        'AccountsPayable.common.extensions.GridExtension'
+        'Logistics.store.BufferedShipmentReceiptContracts'
+        //'AccountsPayable.common.extensions.GridExtension' -- Removed as per Erick and Lex.
     ],
 
     data: {
         forceSelection: false,
         weightLoss: 0
     },
-
 
     stores: {
         receiptTypes: {
@@ -200,12 +199,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         freightTerm: {
             type: 'FreightTermsBuffered'
         },
-        itemCurrency: {
-            type: 'currencybuffered'
-        },
-        chargeCurrency: {
-            type: 'currencybuffered'
-        },
+        //itemCurrency: {
+        //    type: 'currencybuffered'
+        //},
+        //chargeCurrency: {
+        //    type: 'currencybuffered'
+        //},
 
         contract: {
             type: 'ctcontractheaderviewbuffered'
@@ -233,6 +232,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             ]
         },
         costUOM: {
+            type: 'icbuffereditempricingview'
+        },
+        chargeUOM: {
             type: 'icbuffereditempricingview'
         },
         vendor: {
@@ -702,11 +704,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         getWeightLossText: function (get) {
-            if (get('weightLoss') !== 0) {
-                return 'Weight Gain/Loss: ' + Ext.util.Format.number(get('weightLoss'), '0,000.00');
+            var weight = get('weightLoss');
+            if (Ext.isNumeric(weight) && weight !== 0) {
+                return 'Wgt or Vol Gain/Loss: ' + Ext.util.Format.number(weight, '0,000.00');
             }
             else {
-                return 'Weight Gain/Loss: 0.00';
+                return 'Wgt or Vol Gain/Loss: 0.00';
             }
         }
     }

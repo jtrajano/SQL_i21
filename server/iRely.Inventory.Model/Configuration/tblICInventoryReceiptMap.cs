@@ -21,6 +21,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
             this.Property(t => t.dtmReceiptDate).HasColumnName("dtmReceiptDate");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.intSubCurrencyCents).HasColumnName("intSubCurrencyCents");
             this.Property(t => t.intBlanketRelease).HasColumnName("intBlanketRelease");
             this.Property(t => t.strVendorRefNo).HasColumnName("strVendorRefNo");
             this.Property(t => t.strBillOfLading).HasColumnName("strBillOfLading");
@@ -84,6 +85,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmReceiptDate).HasColumnName("dtmReceiptDate");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            this.Property(t => t.intSubCurrencyCents).HasColumnName("intSubCurrencyCents");
             this.Property(t => t.intBlanketRelease).HasColumnName("intBlanketRelease");
             this.Property(t => t.strVendorRefNo).HasColumnName("strVendorRefNo");
             this.Property(t => t.strBillOfLading).HasColumnName("strBillOfLading");
@@ -153,6 +155,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(38, 20);
             this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptItem)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
@@ -217,8 +220,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblWeightUOMConvFactor).HasColumnName("dblWeightUOMConvFactor").HasPrecision(38, 20);
             this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
             this.Property(t => t.dblCostUOMConvFactor).HasColumnName("dblCostUOMConvFactor").HasPrecision(38, 20);
-            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
-            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
             this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin").HasPrecision(38, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.dblBillQty).HasColumnName("dblBillQty").HasPrecision(18, 6);
@@ -233,6 +234,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmExportedDate).HasColumnName("dtmExportedDate");
             this.Property(t => t.dblFranchise).HasColumnName("dblFranchise").HasPrecision(19, 6);
             this.Property(t => t.dblContainerWeightPerQty).HasColumnName("dblContainerWeightPerQty").HasPrecision(19, 6);
+            this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
         }
     }
 
@@ -259,6 +261,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptCharge)
                 .WithRequired(p => p.tblICInventoryReceiptCharge);
@@ -292,6 +295,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strAllocateCostBy).HasColumnName("strAllocateCostBy");
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
+            this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
         }
     }
 
@@ -552,6 +556,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strBOL).HasColumnName("strBOL");
             this.Property(t => t.dblFranchise).HasColumnName("dblFranchise").HasPrecision(19, 6);
             this.Property(t => t.dblContainerWeightPerQty).HasColumnName("dblContainerWeightPerQty").HasPrecision(19, 6);
+            this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
         }
     }
 
