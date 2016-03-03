@@ -21,6 +21,8 @@ Declare @ysnBlendSheetRequired bit
 Declare @intBlendRequirementId int
 DECLARE @intKitStagingLocationId INT
 DECLARE @intBlendStagingLocationId INT
+Declare @ysnIsSubstitute bit
+Declare @intParentItemId int
 Declare @intMinItemCount int,
 		@intRecipeItemId int,
 		@intRawItemId int,
@@ -175,7 +177,8 @@ Declare @tblRemainingPickedItems AS table
 	intRowNo int IDENTITY,
 	intItemId int,
 	dblRemainingQuantity numeric(38,20),
-	intConsumptionMethodId int
+	intConsumptionMethodId int,
+	ysnIsSubstitute bit
 )
 
 DECLARE @tblInputItem TABLE (
@@ -257,9 +260,22 @@ Begin
 				AND ri.intRecipeItemTypeId = 1
 				AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
+			UNION
+			SELECT 
+				rs.intSubstituteItemId
+				,(rs.dblQuantity * (@dblQuantity / r.dblQuantity)) AS dblRequiredQty
+				,1
+				,ri.intConsumptionMethodId
+			FROM tblMFWorkOrderRecipeSubstituteItem rs 
+			JOIN tblMFWorkOrderRecipeItem ri ON rs.intRecipeItemId=ri.intRecipeItemId
+			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
+			WHERE r.intRecipeId = @intRecipeId
+				AND ri.intRecipeItemTypeId = 1
+				AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+
 			--Bulk Items
-			Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId)
-			Select ti.intItemId,ti.dblRequiredQty AS dblRemainingQuantity,ti.intConsumptionMethodId 
+			Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute)
+			Select ti.intItemId,ti.dblRequiredQty AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute 
 			From @tblInputItem ti 
 			WHERE ti.intConsumptionMethodId in (2,3)
 
@@ -271,23 +287,34 @@ Begin
 				Set @strXml = '<root>'
 				While(@intMinItemCount is not null)
 				Begin
-					Select @intRawItemId=intItemId,@dblRequiredQty=dblRemainingQuantity
+					Select @intRawItemId=intItemId,@dblRequiredQty=dblRemainingQuantity,@ysnIsSubstitute=ysnIsSubstitute
 					From @tblRemainingPickedItems Where intRowNo=@intMinItemCount
 
-					Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
-					From tblMFWorkOrderRecipe r Join tblMFWorkOrderRecipeItem ri on r.intWorkOrderId=ri.intWorkOrderId 
-					Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1 
-					AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+					If @ysnIsSubstitute=0
+						Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId,
+						@intParentItemId=0 
+						From tblMFWorkOrderRecipe r Join tblMFWorkOrderRecipeItem ri on r.intWorkOrderId=ri.intWorkOrderId 
+						Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1 
+						AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+
+					If @ysnIsSubstitute=1
+						Select @intRecipeItemId=rs.intRecipeSubstituteItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId,
+						@intParentItemId=rs.intItemId 
+						From tblMFWorkOrderRecipe r Join tblMFWorkOrderRecipeItem ri on r.intWorkOrderId=ri.intWorkOrderId 
+						Join tblMFWorkOrderRecipeSubstituteItem rs on ri.intRecipeItemId=rs.intRecipeItemId
+						Where r.intRecipeId=@intRecipeId And rs.intSubstituteItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1 
+						AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
 					Set @strXml = @strXml + '<item>'
 					Set @strXml = @strXml + '<intRecipeId>' + CONVERT(varchar,@intRecipeId) + '</intRecipeId>'
 					Set @strXml = @strXml + '<intRecipeItemId>' + CONVERT(varchar,@intRecipeItemId) + '</intRecipeItemId>'
 					Set @strXml = @strXml + '<intItemId>' + CONVERT(varchar,@intRawItemId) + '</intItemId>'
 					Set @strXml = @strXml + '<dblRequiredQty>' + CONVERT(varchar,@dblRequiredQty) + '</dblRequiredQty>'
-					Set @strXml = @strXml + '<ysnIsSubstitute>' + CONVERT(varchar,0) + '</ysnIsSubstitute>'
+					Set @strXml = @strXml + '<ysnIsSubstitute>' + CONVERT(varchar,@ysnIsSubstitute) + '</ysnIsSubstitute>'
 					Set @strXml = @strXml + '<ysnMinorIngredient>' + CONVERT(varchar,0) + '</ysnMinorIngredient>'
 					Set @strXml = @strXml + '<intConsumptionMethodId>' + CONVERT(varchar,@intConsumptionMethodId) + '</intConsumptionMethodId>'
 					Set @strXml = @strXml + '<intConsumptionStoragelocationId>' + CONVERT(varchar,ISNULL(@intConsumptionStoragelocationId,0)) + '</intConsumptionStoragelocationId>'
+					Set @strXml = @strXml + '<intParentItemId>' + CONVERT(varchar,@intParentItemId) + '</intParentItemId>'
 					Set @strXml = @strXml + '</item>'
 
 					Select @intMinItemCount=Min(intRowNo) from @tblRemainingPickedItems Where intRowNo > @intMinItemCount

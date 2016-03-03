@@ -142,7 +142,7 @@ Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickL
 		rs.intSubstituteItemId AS intItemId
 		,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 		,1
-		,0
+		,ri.intConsumptionMethodId
 		,ri.intItemId
 	FROM tblMFWorkOrderRecipeSubstituteItem rs
 	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
@@ -200,9 +200,18 @@ Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickL
 
 			--WO created from Blend Management Screen if Lots are there input lot table when kitting enabled
 			If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
-				Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
-				From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
-				Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+				Begin
+					if @ysnIsSubstitute=0
+						Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
+						From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
+						Where r.intRecipeId=@intRecipeId And ri.intItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+
+					if @ysnIsSubstitute=1
+						Select @intRecipeItemId=rs.intRecipeSubstituteItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
+						From tblMFRecipe r Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId 
+						Join tblMFRecipeSubstituteItem rs on ri.intItemId=rs.intItemId
+						Where r.intRecipeId=@intRecipeId And rs.intSubstituteItemId=@intRawItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+				End
 			Else
 				Select @intRecipeItemId=ri.intRecipeItemId,@intConsumptionMethodId=ri.intConsumptionMethodId,@intConsumptionStoragelocationId=ri.intStorageLocationId 
 				From tblMFWorkOrderRecipe r Join tblMFWorkOrderRecipeItem ri on r.intWorkOrderId=ri.intWorkOrderId 
