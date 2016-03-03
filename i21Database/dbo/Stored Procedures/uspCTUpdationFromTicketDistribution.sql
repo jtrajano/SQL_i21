@@ -2,7 +2,7 @@ CREATE PROCEDURE uspCTUpdationFromTicketDistribution
 
 	@intTicketId			INT,
 	@intEntityId			INT,
-	@dblNetUnits			NUMERIC(10,3),
+	@dblNetUnits			NUMERIC(18,6),
 	@intContractDetailId	INT,
 	@intUserId				INT,
 	@ysnDP					BIT
@@ -12,14 +12,14 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@dblBalance				NUMERIC(12,4),			
-			@dblAvailable			NUMERIC(12,4),	
+			@dblBalance				NUMERIC(18,6),			
+			@dblAvailable			NUMERIC(18,6),	
 			@intItemId				INT,
-			@dblNewBalance			NUMERIC(12,4),
+			@dblNewBalance			NUMERIC(18,6),
 			@strInOutFlag			NVARCHAR(4),
-			@dblQuantity			NUMERIC(12,4),
+			@dblQuantity			NUMERIC(18,6),
 			@strAdjustmentNo		NVARCHAR(50),
-			@dblCost				NUMERIC(9,4),
+			@dblCost				NUMERIC(18,6),
 			@ApplyScaleToBasis		BIT,
 			@intContractHeaderId	INT,
 			@ysnAllowedToShow		BIT,
@@ -28,15 +28,15 @@ BEGIN TRY
 	DECLARE @Processed TABLE
 	(
 			intContractDetailId INT,
-			dblUnitsDistributed NUMERIC(12,4),
-			dblUnitsRemaining	NUMERIC(12,4),
-			dblOldQuantity		NUMERIC(12,4),
-			dblOldBalance		NUMERIC(12,4),			
-			dblAdjAmount		NUMERIC(12,4),			
-			dblNewBalance		NUMERIC(12,4),				
-			dblNewQuantity		NUMERIC(12,4),	
+			dblUnitsDistributed NUMERIC(18,6),
+			dblUnitsRemaining	NUMERIC(18,6),
+			dblOldQuantity		NUMERIC(18,6),
+			dblOldBalance		NUMERIC(18,6),			
+			dblAdjAmount		NUMERIC(18,6),			
+			dblNewBalance		NUMERIC(18,6),				
+			dblNewQuantity		NUMERIC(18,6),	
 			strAdjustmentNo		NVARCHAR(50),
-			dblCost				NUMERIC(9,4)
+			dblCost				NUMERIC(18,6)
 	)			
 	
 	IF NOT EXISTS(SELECT * FROM tblSCTicket WHERE intTicketId = @intTicketId)

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdateSequenceBalance]
 	@intContractDetailId			INT,
-	@dblQuantityToUpdate			NUMERIC(12,4),
+	@dblQuantityToUpdate			NUMERIC(18,6),
 	@intUserId						INT,
 	@intExternalId					INT,
 	@strScreenName					NVARCHAR(50)
