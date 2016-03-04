@@ -165,7 +165,7 @@ BEGIN
 									  THEN 2
 									  END
 			,intStorageLocationId	= SC.intStorageLocationId
-			,intDiscountSchedule	= SC.intDiscountSchedule
+			,intDiscountSchedule	= SC.intDiscountId
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
