@@ -130,8 +130,10 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) 
 				ON G1.intEntityId = D1.intEntityVendorId AND B.intItemId = G2.intItemId AND B.intContractDetailId = G2.intContractDetailId
-		WHERE NOT EXISTS(
+		WHERE EXISTS(
 			SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = tblReceived.intInventoryReceiptItemId AND H.intPurchaseDetailId = B.intPurchaseDetailId
+			GROUP BY H.intInventoryReceiptItemId, H.intPurchaseDetailId
+			HAVING SUM(H.dblQtyReceived) < tblReceived.dblOpenReceive
 		)
 	UNION ALL
 	--Miscellaneous items
@@ -192,8 +194,10 @@ FROM
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 	AND B.dblQtyOrdered != B.dblQtyReceived
-	AND NOT EXISTS(
+	AND EXISTS(
 		SELECT 1 FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
+		GROUP BY G.intPurchaseDetailId
+		HAVING SUM(G.dblQtyReceived) < B.dblQtyReceived
 	)
 	UNION ALL
 	--DIRECT TYPE
@@ -268,8 +272,10 @@ FROM
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
-	AND NOT EXISTS(
+	AND EXISTS(
 		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
+		GROUP BY H.intInventoryReceiptItemId
+		HAVING SUM(H.dblQtyReceived) < B.dblOpenReceive
 	)
 	UNION ALL
 
@@ -321,12 +327,12 @@ FROM
 		,[strgrossNetUOM]							=	NULL
 		,[dblUnitQty]								=	0   
 	FROM [vyuAPChargesForBilling] A
-	WHERE NOT EXISTS(
+	WHERE EXISTS(
 		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+		GROUP BY H.intInventoryReceiptChargeId
+		HAVING SUM(H.dblQtyReceived) < A.dblOpenReceive
 	)
-
 	UNION ALL
-
 	SELECT
 		[intEntityVendorId]							=	A.intVendorEntityId
 		,[dtmDate]									=	A.dtmInventorizedDate
@@ -378,9 +384,7 @@ FROM
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
-
 	UNION ALL
-
 	SELECT
 		[intEntityVendorId]							=	CC.intVendorId
 		,[dtmDate]									=	CD.dtmStartDate
@@ -437,6 +441,5 @@ FROM
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
-
 ) Items
 GO
