@@ -55,6 +55,7 @@ DECLARE @intItemId AS INT
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS DECIMAL (38, 20) 
 		,@strTransactionForm AS NVARCHAR(255)
+		,@intCostingMethod AS INT
 
 -- Get the list of items to unpost
 BEGIN 
@@ -70,6 +71,7 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			,intInventoryTransactionId
+			,intCostingMethod
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
@@ -81,6 +83,7 @@ BEGIN
 			,ItemTrans.intSubLocationId
 			,ItemTrans.intStorageLocationId
 			,ItemTrans.intInventoryTransactionId
+			,ItemTrans.intCostingMethod
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
@@ -355,6 +358,7 @@ BEGIN
 					,dblUOMQty 
 					,dblCost
 					,intLotId 
+					,intCostingMethod
 			FROM	@ItemsToUnpost
 
 			OPEN loopItemsToUnpost;	
@@ -369,7 +373,8 @@ BEGIN
 				,@dblQty 
 				,@dblUOMQty 
 				,@dblCost
-				,@intLotId;
+				,@intLotId
+				,@intCostingMethod;
 
 			-----------------------------------------------------------------------------------------------------------------------------
 			-- Start of the loop
@@ -378,14 +383,16 @@ BEGIN
 			BEGIN 
 
 				-- Recalculate the average cost from the inventory transaction table. 
+				-- Except on Actual Costing. Do not compute the average cost when doing actual costing.
 				UPDATE	ItemPricing
 				SET		dblAverageCost = ISNULL(
 							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
 							, dblAverageCost
 						) 
-				FROM	dbo.tblICItemPricing AS ItemPricing 
+				FROM	dbo.tblICItemPricing ItemPricing	
 				WHERE	ItemPricing.intItemId = @intItemId
-						AND ItemPricing.intItemLocationId = @intItemLocationId			
+						AND ItemPricing.intItemLocationId = @intItemLocationId
+						AND @intCostingMethod <> @ACTUALCOST
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				EXEC [dbo].[uspICPostStockQuantity]
@@ -407,7 +414,8 @@ BEGIN
 					,@dblQty 
 					,@dblUOMQty 
 					,@dblCost
-					,@intLotId;
+					,@intLotId
+					,@intCostingMethod;
 			END;
 
 			-----------------------------------------------------------------------------------------------------------------------------

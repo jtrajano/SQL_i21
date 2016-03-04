@@ -69,6 +69,7 @@ END
                 ,[intStatusId]
                 ,[intShipViaId]
                 ,[intFreightUOMId]
+				,[strActualCostId]
                 -- Detail
                 ,[intItemId]
                 ,[intLotId]
@@ -99,8 +100,9 @@ END
 											            IU.intUnitMeasureId											
 											            FROM dbo.tblICItemUOM IU 
 											            WHERE	IU.intItemId = min(TR.intItemId) and IU.ysnStockUnit = 1)
+				,[strActualCostId]			= min(TL.strTransaction) 
                 -- Detail
-                ,[intItemId]                =min( TR.intItemId)
+                ,[intItemId]                = min(TR.intItemId)
                 ,[intLotId]                 = NULL
                 ,[intItemUOMId]             = (SELECT	TOP 1 
 											            IU.intItemUOMId											

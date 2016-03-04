@@ -340,7 +340,7 @@ BEGIN
 		-- If matched, update the average cost, last cost, and standard cost
 		WHEN MATCHED THEN 
 			UPDATE 
-			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
+			SET		dblAverageCost = CASE WHEN @strActualCostId IS NULL THEN dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost) ELSE ItemPricing.dblAverageCost END 
 					,dblLastCost = CASE WHEN StockToUpdate.Qty > 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblLastCost END 
 					,dblStandardCost = 
 									CASE WHEN StockToUpdate.Qty > 0 THEN 
@@ -362,7 +362,7 @@ BEGIN
 			VALUES (
 				StockToUpdate.intItemId
 				,StockToUpdate.intItemLocationId
-				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost)
+				,CASE WHEN @strActualCostId IS NULL THEN dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost) ELSE 0 END 
 				,StockToUpdate.Cost
 				,StockToUpdate.Cost
 				,1
