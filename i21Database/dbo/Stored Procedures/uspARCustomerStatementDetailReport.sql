@@ -164,7 +164,7 @@ END
 
 SET @query = 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber
-	 , I.strTransactionType
+	 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
 	 , I.intEntityCustomerId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'') THEN NULL ELSE I.dtmDueDate END
 	 , I.dtmPostDate
@@ -177,7 +177,7 @@ SET @query = 'SELECT * FROM
 						ELSE 0
 					END
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
-	 , IC.strDescription
+	 , strDescription = CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE IC.strDescription END
 	 , IC.strItemNo
 	 , ID.dblQtyOrdered
 	 , ID.dblQtyShipped
@@ -198,8 +198,8 @@ FROM tblARInvoice I
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
 	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 WHERE I.ysnPosted = 1
-  AND I.ysnPaid = 0
-  AND I.ysnForgiven = 0
+  AND I.ysnPaid = 0  
+  AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
   '+ @innerQuery +'
 ) MainQuery'
 
