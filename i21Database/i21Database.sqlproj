@@ -3505,8 +3505,7 @@
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspSMResolveContactRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
-    <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />    <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
     <Build Include="dbo\Tables\tblPRForm941.sql" />
     <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
     <Build Include="dbo\Views\vyuRKGetMarketBrokerList.sql" />
@@ -3523,6 +3522,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
