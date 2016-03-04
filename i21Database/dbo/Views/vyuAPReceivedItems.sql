@@ -32,6 +32,7 @@ FROM
 		,[dblTax]					=	tblReceived.dblTax
 		,[dblRate]					=	tblReceived.dblRate
 		,[ysnSubCurrency]			=	tblReceived.ysnSubCurrency
+		,[intSubCurrencyCents]		=   tblReceived.intSubCurrencyCents
 		,[intAccountId]				=	tblReceived.intAccountId
 		,[strAccountId]				=	tblReceived.strAccountId
 		,[strName]					=	D2.strName
@@ -73,6 +74,7 @@ FROM
 				,B1.dblTax
 				,ISNULL(G.dblRate,0) AS dblRate
 				,CASE WHEN B1.ysnSubCurrency > 0 THEN 1 ELSE 0 END AS ysnSubCurrency
+				,ISNULL(A1.intSubCurrencyCents, 0) AS intSubCurrencyCents
 				,B1.intUnitMeasureId
 				,UOM.strUnitMeasure AS strUOM
 				,B1.intWeightUOMId
@@ -119,6 +121,7 @@ FROM
 				,ItemCostUOM.dblUnitQty
 				,B1.ysnSubCurrency
 				,G.dblRate
+				,A1.intSubCurrencyCents
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -156,6 +159,7 @@ FROM
 	,[dblTax]					=	B.dblTax
 	,[dblRate]					=	0
 	,[ysnSubCurrency]			=	0
+	,[intSubCurrencyCents]		=	0
 	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
 	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
 	,[strName]					=	D2.strName
@@ -217,6 +221,7 @@ FROM
 	,[dblTax]					=	B.dblTax
 	,[dblRate]					=	ISNULL(G1.dblRate,0)
 	,[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END
+	,[intSubCurrencyCents]		=	ISNULL(A.intSubCurrencyCents, 0)
 	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
 	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing'))
 	,[strName]					=	D2.strName
@@ -293,6 +298,7 @@ FROM
 		,[dblTax]									=	A.dblTax
 		,[dblRate]									=	0
 		,[ysnSubCurrency]							=	0
+		,[intSubCurrencyCents]						=	0
 		,[intAccountId]								=	A.intAccountId
 		,[strAccountId]								=	A.strAccountId
 		,[strName]									=	A.strName
@@ -345,6 +351,7 @@ FROM
 		,[dblTax]									=	0
 		,[dblRate]									=	0
 		,[ysnSubCurrency]							=	0
+		,[intSubCurrencyCents]						=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strName]									=	A.strVendor
@@ -398,6 +405,7 @@ FROM
 		,[dblTax]									=	0
 		,[dblRate]									=	CC.dblRate
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
+		,[intSubCurrencyCents]						=	0
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strName]									=	CC.strVendorName
