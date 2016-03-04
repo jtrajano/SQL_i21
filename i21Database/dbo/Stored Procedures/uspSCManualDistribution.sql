@@ -59,8 +59,79 @@ OPEN intListCursor;
 			-- example).
 			IF @ysnIsStorage = 0
 				BEGIN
-					IF	ISNULL(@intLoopContractId,0) != 0
+					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
+						EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+						IF @strDistributionOption = 'LOD'
+							BEGIN 
+								SELECT @intLoadId = intLoadId, @strInOutFlag = strInOutFlag FROM tblSCTicket WHERE intTicketId = @intTicketId;
+							END
+
+							BEGIN
+								IF @strInOutFlag = 'I'
+									SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadView LGL WHERE LGL.intLoadId = @intLoadId
+								ELSE
+									SELECT @intLoadContractId = LGL.intSContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadView LGL WHERE LGL.intLoadId = @intLoadId
+							END
+							IF @intLoadContractId IS NOT NULL
+							BEGIN
+								SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
+								EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
+							END
+							BEGIN
+								INSERT INTO [dbo].[tblSCTicketCost]
+										([intTicketId]
+										,[intConcurrencyId]
+										,[intItemId]
+										,[intEntityVendorId]
+										,[strCostMethod]
+										,[dblRate]
+										,[intItemUOMId]
+										,[ysnAccrue]
+										,[ysnMTM]
+										,[ysnPrice])
+							SELECT	@intTicketId,
+									1, 
+									LD.intItemId,
+									LD.intVendorId,
+									LD.strCostMethod,
+									LD.dblRate,
+									LD.intItemUOMId,
+									LD.ysnAccrue,
+									LD.ysnMTM,
+									LD.ysnPrice
+							FROM	tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
+							END
+							IF @strDistributionOption = 'CNT'
+								BEGIN
+									INSERT INTO [dbo].[tblSCTicketCost]
+											   ([intTicketId]
+											   ,[intConcurrencyId]
+											   ,[intItemId]
+											   ,[intEntityVendorId]
+											   ,[strCostMethod]
+											   ,[dblRate]
+											   ,[intItemUOMId]
+											   ,[ysnAccrue]
+											   ,[ysnMTM]
+											   ,[ysnPrice])
+									SELECT	@intTicketId,
+											1, 
+											CC.intItemId,
+											CC.intVendorId,
+											CC.strCostMethod,
+											CC.dblRate,
+											CC.intItemUOMId,
+											CC.ysnAccrue,
+											CC.ysnMTM,
+											CC.ysnPrice
+									FROM	tblCTContractCost CC WHERE CC.intContractDetailId = @intLoopContractId
+								END
+							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+							BEGIN
+								IF	ISNULL(@intLoopContractId,0) != 0
+								EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+							END
 						INSERT INTO @ItemsForItemReceipt (
 								intItemId
 								,intItemLocationId
@@ -101,48 +172,49 @@ OPEN intListCursor;
 								,ysnIsStorage
 							FROM @LineItem
 							where intItemId = @intItemId
-
-						EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
-
-						BEGIN 
-							SELECT @intLoadId = intLoadId, @strInOutFlag = strInOutFlag FROM tblSCTicket WHERE intTicketId = @intTicketId;
-						END
-
+					END
+					ELSE
 						BEGIN
-							IF @strInOutFlag = 'I'
-								SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadView LGL WHERE LGL.intLoadId = @intLoadId
-							ELSE
-								SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadView LGL WHERE LGL.intLoadId = @intLoadId
-						END
-						IF @intLoadContractId IS NOT NULL
-						BEGIN
-							SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
-							EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
-						END
-						BEGIN
-							INSERT INTO [dbo].[tblSCTicketCost]
-										([intTicketId]
-										,[intConcurrencyId]
-										,[intItemId]
-										,[intEntityVendorId]
-										,[strCostMethod]
-										,[dblRate]
-										,[intItemUOMId]
-										,[ysnAccrue]
-										,[ysnMTM]
-										,[ysnPrice])
-							SELECT	@intTicketId,
-									1, 
-									LD.intItemId,
-									LD.intVendorId,
-									LD.strCostMethod,
-									LD.dblRate,
-									LD.intItemUOMId,
-									LD.ysnAccrue,
-									LD.ysnMTM,
-									LD.ysnPrice
-							FROM	tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
-						END
+						INSERT INTO @ItemsForItemReceipt (
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,dtmDate
+								,dblQty
+								,dblUOMQty
+								,dblCost
+								,dblSalesPrice
+								,intCurrencyId
+								,dblExchangeRate
+								,intTransactionId
+								,intTransactionDetailId
+								,strTransactionId
+								,intTransactionTypeId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+								,ysnIsStorage 
+							)SELECT 
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,dtmDate
+								,dblQty
+								,dblUOMQty
+								,dblCost
+								,dblSalesPrice
+								,intCurrencyId
+								,dblExchangeRate
+								,intTransactionId
+								,intTransactionDetailId
+								,strTransactionId
+								,intTransactionTypeId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId
+								,ysnIsStorage
+							FROM @LineItem
+							where intItemId = @intItemId
 					END
 				END
 			IF @ysnIsStorage = 1
