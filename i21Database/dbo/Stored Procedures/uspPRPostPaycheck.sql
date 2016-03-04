@@ -928,9 +928,6 @@ IF (@isSuccessful <> 0)
 						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
 							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
 
-						/* Create Paycheck Payables */
-						EXEC uspPRCreatePaycheckPayable @intPaycheckId, @intUserId
-
 					END
 			END
 		ELSE
@@ -984,6 +981,7 @@ IF (@isSuccessful <> 0)
 			DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
 		END
 
+		EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 	END
 ELSE
 	BEGIN

@@ -3515,6 +3515,7 @@
     <Build Include="dbo\Tables\tblPRForm941.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
