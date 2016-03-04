@@ -3,7 +3,8 @@
 */
 CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
 (
-	[intItemId] INT NOT NULL								-- The item. 
+	[intId]	INT NOT NULL									-- record counter
+	,[intItemId] INT NOT NULL								-- The item. 
 	,[intItemLocationId] INT NULL							-- The location where the item is stored.
 	,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
@@ -22,7 +23,7 @@ CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
 	,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
 	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
 	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
-	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
+	,[strDistributionOption] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- distribution type of scale ticket. 
     ,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
 	,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
 )

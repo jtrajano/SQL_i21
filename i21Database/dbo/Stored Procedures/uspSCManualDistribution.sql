@@ -38,18 +38,18 @@ DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @strInOutFlag AS NVARCHAR(100)
 
 BEGIN TRY
-DECLARE @intItemId INT;
+DECLARE @intId INT;
 DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(12,4);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intItemId, strActualCostId
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption
 FROM @LineItem;
 
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intItemId, @strDistributionOption;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -61,12 +61,10 @@ OPEN intListCursor;
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
-						EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 						IF @strDistributionOption = 'LOD'
 							BEGIN 
 								SELECT @intLoadId = intLoadId, @strInOutFlag = strInOutFlag FROM tblSCTicket WHERE intTicketId = @intTicketId;
 							END
-
 							BEGIN
 								IF @strInOutFlag = 'I'
 									SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadView LGL WHERE LGL.intLoadId = @intLoadId
@@ -171,7 +169,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 							FROM @LineItem
-							where intItemId = @intItemId
+							where intId = @intId
 					END
 					ELSE
 						BEGIN
@@ -214,8 +212,9 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 							FROM @LineItem
-							where intItemId = @intItemId
+							where intId = @intId
 					END
+					EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 				END
 			IF @ysnIsStorage = 1
 			BEGIN
@@ -241,9 +240,9 @@ OPEN intListCursor;
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL
 			END		   
-	-- Attempt to fetch next row from cursor
-	FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intItemId, @strDistributionOption;
-END;
+			-- Attempt to fetch next row from cursor
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption;
+		END;
 
 CLOSE intListCursor;
 DEALLOCATE intListCursor;
