@@ -12,7 +12,7 @@ BEGIN
 		SELECT @intCheckoutId 
 		, UOM.intItemUOMId [intPumpCardCouponId]
 		, I.strDescription
-		, (CAST(ISNULL(Chk.FuelGradeSalesAmount,0) as numeric(18,6))/ CAST(ISNULL(Chk.FuelGradeSalesVolume,1) as numeric(18,6))) [dblPrice]
+		, (ISNULL(CAST(Chk.FuelGradeSalesAmount as numeric(18,6)),0)/ ISNULL(CAST(Chk.FuelGradeSalesVolume as numeric(18,6)),1)) [dblPrice]
 		, ISNULL(Chk.FuelGradeSalesVolume, 0) [dblQuantity]
 		, ISNULL(Chk.FuelGradeSalesAmount,0) [dblAmount]
 		, 0
@@ -30,7 +30,7 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE dbo.tblSTCheckoutPumpTotals
-		SET [dblPrice] = (CAST(ISNULL(Chk.FuelGradeSalesAmount,0) as numeric(18,6))/ CAST(ISNULL(Chk.FuelGradeSalesVolume,1) as numeric(18,6)))
+		SET [dblPrice] = (ISNULL(CAST(Chk.FuelGradeSalesAmount as numeric(18,6)),0)/ ISNULL(CAST(Chk.FuelGradeSalesVolume as numeric(18,6)),1))
 		, [dblQuantity] = ISNULL(Chk.FuelGradeSalesVolume, 0)
 		, [dblAmount] = ISNULL(Chk.FuelGradeSalesAmount,0)
 		from #tempCheckoutInsert Chk
