@@ -79,8 +79,8 @@ BEGIN
 				  THEN UPDATE SET PAT.dblVolume = CASE WHEN B.ysnPosted = 1 THEN (PAT.dblVolume + B.dblVolume) 
 													   ELSE (PAT.dblVolume - B.dblVolume) END
 			 WHEN NOT MATCHED BY TARGET
-				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
-					   VALUES (B.intEntityVendorId, B.intPatronageCategoryId, @intFiscalYear, GETDATE(),  B.dblVolume, 1);
+				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intRefundTypeDetailId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
+					   VALUES (B.intEntityVendorId, B.intPatronageCategoryId, (SELECT tblPATRefundRateDetail.intRefundTypeDetailId FROM tblPATRefundRateDetail WHERE tblPATRefundRateDetail.intPatronageCategoryId = B.intPatronageCategoryId), @intFiscalYear, GETDATE(),  B.dblVolume, 1);
 
 			DROP TABLE #tempItem
 		END
