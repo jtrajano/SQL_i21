@@ -114,7 +114,7 @@ DROP TABLE  #tempLotHistory
 	ORDER BY 1
 
 	UPDATE #tempLotHistory
-	SET @dblPrimaryQty=dblQuantity = CASE WHEN (@dblPrimaryQty + dblTransactionQtyNEW) < 0.01 THEN 0 ELSE @dblPrimaryQty + dblTransactionQtyNEW END
+	SET @dblPrimaryQty=dblQuantity = CASE WHEN (@dblPrimaryQty + dblTransactionQty) < 0.01 THEN 0 ELSE @dblPrimaryQty + dblTransactionQty END
 
 	SELECT * FROM #tempLotHistory
 END
