@@ -18,7 +18,7 @@ BEGIN
 	SET @calculatedValue = 
 		dbo.fnDivide(
 			dbo.fnMultiply(@UnsoldQty, @CostDifference)
-			,@CostDifference
+			,@RunningQty
 		)
 		+ @CurrentAverageCost 
 
