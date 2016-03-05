@@ -63,12 +63,13 @@ BEGIN TRY
 		,@dtmLatestDate DATETIME
 		,@dtmEarliestDate DATETIME
 		,@dtmTargetDate DATETIME
+		,@strSchedulingCutOffTime nvarchar(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
-	SELECT @ysnConsiderSumOfChangeoverTime = ysnConsiderSumOfChangeoverTime
+	SELECT @ysnConsiderSumOfChangeoverTime = ysnConsiderSumOfChangeoverTime,@strSchedulingCutOffTime=strSchedulingCutOffTime
 	FROM dbo.tblMFCompanyPreference
 
 	DECLARE @tblMFScheduleWorkOrderCalendarDetail TABLE (
@@ -233,10 +234,11 @@ BEGIN TRY
 			,0 AS ysnPicked
 			,W.intDemandRatio
 			,W.dtmEarliestDate
-			,W.dtmLatestDate
+			,IsNULL(W.dtmLatestDate,W1.dtmLatestDate)
 			,W.dtmTargetDate
 			,W.intScheduleId
 		FROM @tblMFWorkOrder W
+		JOIN dbo.tblMFWorkOrder W1 on W1.intWorkOrderId=W.intWorkOrderId
 		LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 			AND MC.intPackTypeId = W.intPackTypeId
 		LEFT JOIN tblMFPackType P ON P.intPackTypeId = W.intPackTypeId
@@ -398,7 +400,6 @@ BEGIN TRY
 					,@intMaxChangeoverTime = NULL
 					,@dblStdLineEfficiency = NULL
 					,@dtmEarliestDate = NULL
-					,@dtmLatestDate = NULL
 					,@dtmTargetDate = NULL
 
 				SELECT @intWorkOrderId = intWorkOrderId
@@ -410,7 +411,7 @@ BEGIN TRY
 					,@dtmEarliestStartDate = dtmEarliestStartDate
 					,@intSetupDuration = intSetupDuration
 					,@dtmEarliestDate = dtmEarliestDate
-					,@dtmLatestDate = dtmLatestDate
+					,@dtmLatestDate = CASE WHEN dtmLatestDate<=Isnull(@dtmLatestDate,dtmLatestDate) THEN CONVERT(CHAR, dtmLatestDate, 101) + ' ' + @strSchedulingCutOffTime ELSE @dtmLatestDate END 
 					,@dtmTargetDate = dtmTargetDate
 				FROM @tblMFScheduleWorkOrder
 				WHERE intRecordId = @intRecordId
