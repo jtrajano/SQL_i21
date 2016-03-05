@@ -37,10 +37,10 @@ BEGIN TRY
 
 	SELECT @intTransactionId=@intBatchId
 
-	SELECT @strTransactionId = strLotNumber
+	SELECT @strTransactionId = strWorkOrderNo 
 		,@intItemId=intItemId
-	FROM tblICLot
-	WHERE intLotId = @intLotId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF EXISTS (
 			SELECT *
