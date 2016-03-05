@@ -301,27 +301,27 @@ BEGIN
 	)
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = 1
-			,dblAverageCost = 2 -- 2.15
+			,dblAverageCost = 0.00 -- 2.15
 			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @StickyGrains
 			,intItemLocationId = 2
-			,dblAverageCost = 2 -- 2.15
+			,dblAverageCost = 0.00 -- 2.15
 			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @PremiumGrains
 			,intItemLocationId = 3
-			,dblAverageCost = 2 -- 2.15
+			,dblAverageCost = 0.00 -- 2.15
 			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @ColdGrains
 			,intItemLocationId = 4
-			,dblAverageCost = 2 -- 2.15
+			,dblAverageCost = 0.00 -- 2.15
 			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @HotGrains
 			,intItemLocationId = 5
-			,dblAverageCost = 2 -- 2.15
+			,dblAverageCost = 0.00 -- 2.15
 			,dblUnitOnHand = -75
 	-- END Setup the expected Item Stock
 

@@ -579,16 +579,17 @@ DEALLOCATE loopActualCostOut;
 -----------------------------------------------------------------------------------------------------------------------------
 -- 6. Update the average cost 
 -----------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	EXEC dbo.uspICRecalcAveCostOnCostAdjustment
-		@intItemId
-		,@intItemLocationId
-		,@StockQtyToRevalue
-		,@CostBucketUOMQty
-		,@dblNewCost
-		,@CostBucketCost
-	;
-END 
+-- Do not recalculate the average cost on Actual Costing. 
+--BEGIN 
+--	EXEC dbo.uspICRecalcAveCostOnCostAdjustment
+--		@intItemId
+--		,@intItemLocationId
+--		,@StockQtyToRevalue
+--		,@CostBucketUOMQty
+--		,@dblNewCost
+--		,@CostBucketCost
+--	;
+--END 
 
 -- Immediate exit
 Post_Exit: 

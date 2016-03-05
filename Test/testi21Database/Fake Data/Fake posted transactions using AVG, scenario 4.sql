@@ -47,6 +47,12 @@ BEGIN
 	EXEC testi21Database.[Fake inventory items]
 	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 
+	DECLARE @AVERAGE_COST AS INT = 1
+			,@FIFO AS INT = 2
+			,@LIFO AS INT = 3
+			,@LOT_COST AS INT = 4
+			,@ACTUAL_COST AS INT = 5
+
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
 			,@StickyGrains AS INT = 2
@@ -327,6 +333,7 @@ BEGIN
 				,strBatchId
 				,dblExchangeRate
 				,strTransactionForm
+				,intCostingMethod
 		)
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -346,6 +353,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1		
 				,strTransactionForm = 'Inventory Shipment'
+				,intCostingMethod = @ACTUAL_COST
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -365,6 +373,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
 				,strTransactionForm = 'Inventory Shipment'
+				,intCostingMethod = @ACTUAL_COST
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -384,6 +393,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
 				,strTransactionForm = 'Inventory Shipment'
+				,intCostingMethod = @ACTUAL_COST
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -403,6 +413,7 @@ BEGIN
 				,strBatchId = @strBatchId			
 				,dblExchangeRate = 1
 				,strTransactionForm = 'Inventory Shipment'
+				,intCostingMethod = @ACTUAL_COST
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -422,6 +433,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
 				,strTransactionForm = 'Inventory Shipment'
+				,intCostingMethod = @ACTUAL_COST
 
 		----------------------------------------------------------------
 		-- Fake data for tblGLDetail & GL Summary 
@@ -706,13 +718,13 @@ BEGIN
 		----------------------------------------------------------------
 		-- Fake data for tblICItemPricing
 		----------------------------------------------------------------
-		UPDATE	tblICItemPricing
-		SET		dblAverageCost = 2.15
-		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemStock.intItemId = ItemLocation.intItemId
-					AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
-		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
+		--UPDATE	tblICItemPricing
+		--SET		dblAverageCost = 2.15
+		--FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
+		--			ON ItemStock.intItemId = ItemLocation.intItemId
+		--			AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
+		--WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+		--		AND ItemLocation.intLocationId = @Default_Location
 
 
 		----------------------------------------------------------------
@@ -846,6 +858,7 @@ BEGIN
 				,dblExchangeRate
 				,intCurrencyId
 				,strTransactionForm
+				,intCostingMethod
 			)
 			----------------------------------------------------
 			SELECT	dtmDate = @dtmDate
@@ -866,6 +879,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -886,6 +900,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -906,6 +921,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -926,6 +942,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -946,6 +963,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -966,6 +984,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -986,6 +1005,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1006,6 +1026,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1026,6 +1047,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1046,6 +1068,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1066,6 +1089,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1086,6 +1110,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1106,6 +1131,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1126,6 +1152,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1146,6 +1173,7 @@ BEGIN
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
 					,strTransactionForm = 'Inventory Receipt'
+					,intCostingMethod = @ACTUAL_COST
 		END 
 
 		----------------------------------------------------------------

@@ -706,13 +706,13 @@ BEGIN
 		----------------------------------------------------------------
 		-- Fake data for tblICItemPricing 
 		----------------------------------------------------------------
-		UPDATE	tblICItemPricing
-		SET		dblAverageCost = 2.15
-		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemStock.intItemId = ItemLocation.intItemId
-					AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
-		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
+		--UPDATE	tblICItemPricing
+		--SET		dblAverageCost = 2.15
+		--FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
+		--			ON ItemStock.intItemId = ItemLocation.intItemId
+		--			AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
+		--WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+		--		AND ItemLocation.intLocationId = @Default_Location
 
 		----------------------------------------------------------------
 		-- Fake data for tblICInventoryFIFO
