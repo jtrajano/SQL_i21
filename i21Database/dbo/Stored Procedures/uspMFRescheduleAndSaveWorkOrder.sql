@@ -5,9 +5,9 @@
 	,@intUserId INT
 	,@intChartManufacturingCellId INT = 0
 	,@ysnScheduleByManufacturingCell INT = 0
-	,@intScheduleId int
-	,@ysnStandard bit
-	,@intConcurrencyId int
+	,@intScheduleId int=NULL
+	,@ysnStandard bit=1
+	,@intConcurrencyId int=1
 	)
 AS
 BEGIN TRY
@@ -1331,8 +1331,8 @@ BEGIN TRY
 			,IU.intUnitMeasureId
 			,W.intStatusId
 			,SL.intScheduleWorkOrderId
-			,SL.intExecutionOrder
-			,SL.ysnFrozen
+			,IsNULL(SL.intExecutionOrder,0) AS intExecutionOrder
+			,IsNULL(SL.ysnFrozen,0) AS ysnFrozen
 			,I.intPackTypeId
 			,ISNULL(SL.intConcurrencyId, 0) AS intConcurrencyId
 			,CONVERT(BIT, 0) AS ysnEOModified
@@ -1351,7 +1351,12 @@ BEGIN TRY
 				WHERE S.intLocationId = @intLocationId
 					AND S.ysnStandard = 1
 				)
-		ORDER BY SL.intExecutionOrder
+		ORDER BY W.intManufacturingCellId,SL.intExecutionOrder
+
+		IF @intChartManufacturingCellId=-1
+		BEGIN
+			SELECT @intChartManufacturingCellId=0
+		END
 
 		EXEC dbo.uspMFGetScheduleDetail @intManufacturingCellId = @intChartManufacturingCellId
 			,@dtmPlannedStartDate = @dtmFromDate
