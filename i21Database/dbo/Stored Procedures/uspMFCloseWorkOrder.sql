@@ -10,7 +10,7 @@ BEGIN TRY
 		,@intTransactionId INT
 		,@strTransactionId NVARCHAR(50)
 		,@dblQuantity NUMERIC(38, 20)
-		,@RecordKey INT
+		,@intRecordId INT
 		,@dtmCurrentDate DATETIME
 		,@strLotNumber nvarchar(50)
 		,@intAttributeId int
@@ -23,6 +23,8 @@ BEGIN TRY
 		,@dtmPlannedDate DATETIME
 		,@intTransactionCount INT
 		,@strInstantConsumption nvarchar(50)
+		,@strWorkOrderNo nvarchar(50)
+		,@intBatchId int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -50,6 +52,7 @@ BEGIN TRY
 
 	SELECT @intManufacturingProcessId=intManufacturingProcessId
 		,@intLocationId=intLocationId
+		,@strWorkOrderNo=strWorkOrderNo 
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -114,28 +117,29 @@ BEGIN TRY
 		EXEC dbo.uspMFPostWorkOrder @strXML=@strXML
 	END
 
-	DECLARE @Lot TABLE (
-		RecordKey INT identity(1, 1)
-		,intLotId INT
-		,strLotNumber nvarchar(50)
+	DECLARE @tblMFLot TABLE (
+		intRecordId INT identity(1, 1)
+		,intBatchId INT
 		)
 
-	INSERT INTO @Lot (intLotId,strLotNumber)
-	SELECT PL.intLotId,L.strLotNumber
+	INSERT INTO @tblMFLot (intBatchId)
+	SELECT PL.intBatchId
 	FROM dbo.tblMFWorkOrderProducedLot PL
 	JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 	WHERE intWorkOrderId = @intWorkOrderId
-		AND L.intLotStatusId = 3
+		AND L.intLotStatusId = 2
 		AND ysnProductionReversed = 0
 
-	SELECT @RecordKey = MIN(RecordKey)
-	FROM @Lot
+	SELECT @intRecordId = MIN(intRecordId)
+	FROM @tblMFLot
 
-	WHILE @RecordKey IS NOT NULL AND @strAttributeValue='True'
+	WHILE @intRecordId IS NOT NULL AND @strAttributeValue='True'
 	BEGIN
-		SELECT @intLotId = intLotId,@strLotNumber=strLotNumber
-		FROM @Lot
-		WHERE RecordKey = @RecordKey
+		SELECT @intBatchId=NULL
+
+		SELECT @intBatchId = intBatchId
+		FROM @tblMFLot
+		WHERE intRecordId = @intRecordId
 
 		DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 
@@ -177,8 +181,8 @@ BEGIN TRY
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			)
-		EXEC dbo.uspICUnpostCosting @intLotId
-			,@strLotNumber
+		EXEC dbo.uspICUnpostCosting @intBatchId
+			,@strWorkOrderNo
 			,@strBatchId
 			,@intUserId
 			,0
@@ -190,21 +194,21 @@ BEGIN TRY
 		SET ysnProductionReversed = 1
 			,dtmLastModified = @dtmCurrentDate
 			,intLastModifiedUserId = @intUserId
-		WHERE intLotId = @intLotId
+		WHERE intBatchId = @intBatchId
 			AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblQuantity = dblQuantity
 		FROM tblMFWorkOrderProducedLot
-		WHERE intLotId = @intLotId
+		WHERE intBatchId = @intBatchId
 			AND intWorkOrderId = @intWorkOrderId
 
 		UPDATE tblMFWorkOrder
 		SET dblProducedQuantity = dblProducedQuantity - @dblQuantity
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @RecordKey = MIN(RecordKey)
-		FROM @Lot
-		WHERE RecordKey > @RecordKey
+		SELECT @intRecordId = MIN(intRecordId)
+		FROM @tblMFLot
+		WHERE intRecordId > @intRecordId
 	END
 
 	SELECT @intExecutionOrder = intExecutionOrder
