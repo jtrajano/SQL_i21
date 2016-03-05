@@ -25,7 +25,7 @@ BEGIN
 		,IU.intUnitMeasureId
 		,CASE WHEN W.intStatusId=1 THEN 3 ELSE W.intStatusId END AS intStatusId
 		,SL.intScheduleWorkOrderId
-		,CONVERT(INT, ROW_NUMBER() OVER (
+		,CONVERT(INT, ROW_NUMBER() OVER (Partition by W.intManufacturingCellId 
 				ORDER BY CASE 
 						WHEN W.intStatusId IN (
 								1
@@ -71,7 +71,7 @@ BEGIN
 				AND S.ysnStandard = 1
 				AND intLocationId = @intLocationId
 			)
-	ORDER BY CASE 
+	ORDER BY W.intManufacturingCellId,CASE 
 			WHEN W.intStatusId IN (
 					1
 					,3
