@@ -183,7 +183,10 @@ End
 End
 
 If @ysnBlendSheetRequired = 0
+Begin
 Delete From @tblPickListDetail Where intLotId=0
+Delete From @tblPickListDetail Where dblPickQuantity<=0
+End
 
 If ISNULL(@strPickListNo,'') = ''
 	Begin

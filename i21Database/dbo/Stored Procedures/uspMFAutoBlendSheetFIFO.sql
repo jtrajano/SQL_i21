@@ -222,7 +222,7 @@ BEGIN TRY
 		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
 	)
 
-	Select TOP 1 @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where intBlendRequirementId=@intBlendRequirementId
+	Select TOP 1 @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where intBlendRequirementId=@intBlendRequirementId AND ISNULL(intSalesOrderLineItemId,0)>0
 
 	--Get Recipe Input Items
 	--@strXml (if it has value)- Used For Picking Specific Recipe Items with qty full or remaining qty
