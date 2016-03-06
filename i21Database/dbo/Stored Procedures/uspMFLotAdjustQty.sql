@@ -167,6 +167,13 @@ BEGIN TRY
 		WHERE intLotId = @intLotId
 	END
 
+	
+	UPDATE tblICLot
+	SET dblWeight = dblQty
+	WHERE dblQty <> dblWeight
+		AND intItemUOMId = intWeightUOMId
+	and intLotId=@intLotId
+
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
 	BEGIN
 		--EXEC dbo.uspMFLotAdjustQty
