@@ -392,7 +392,7 @@ BEGIN
 				FROM	dbo.tblICItemPricing ItemPricing	
 				WHERE	ItemPricing.intItemId = @intItemId
 						AND ItemPricing.intItemLocationId = @intItemLocationId
-						AND @intCostingMethod <> @ACTUALCOST
+						AND ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				EXEC [dbo].[uspICPostStockQuantity]
@@ -461,7 +461,7 @@ BEGIN
 				,intStorageLocationId
 				,intInventoryTransactionId
 		FROM	@ItemsToUnpost
-		WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST				
+		WHERE	ISNULL(intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) = @AVERAGECOST
 				AND dblQty > 0 
 
 		SELECT	TOP 1 
