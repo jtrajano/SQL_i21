@@ -10,6 +10,7 @@ DECLARE @intInvalidItemId AS INT
 
 If @ysnReservationByParentLot=0
 Begin
+If (Select COUNT(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)>0
 	INSERT INTO @ItemsToReserve (
 			intItemId
 			,intItemLocationId
@@ -33,6 +34,33 @@ Begin
 			,strTransactionId = w.strWorkOrderNo
 			,intTransactionTypeId = @intInventoryTransactionType
 	FROM	tblMFWorkOrderConsumedLot wcl
+			JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
+			JOIN tblICLot l ON l.intLotId = wcl.intLotId
+	WHERE	wcl.intWorkOrderId = @intWorkOrderId
+Else
+	INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+	)
+	SELECT	intItemId = wcl.intItemId
+			,intItemLocationId = l.intItemLocationId
+			,intItemUOMId = wcl.intItemUOMId
+			,intLotId = wcl.intLotId
+			,intSubLocationId = l.intSubLocationId
+			,intStorageLocationId = l.intStorageLocationId
+			,dblQty = wcl.dblQuantity
+			,intTransactionId = wcl.intWorkOrderId
+			,strTransactionId = w.strWorkOrderNo
+			,intTransactionTypeId = @intInventoryTransactionType
+	FROM	tblMFWorkOrderInputLot wcl
 			JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
 			JOIN tblICLot l ON l.intLotId = wcl.intLotId
 	WHERE	wcl.intWorkOrderId = @intWorkOrderId
