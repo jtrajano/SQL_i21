@@ -15,6 +15,7 @@ BEGIN TRY
 		,@intScheduleId int
 		,@ysnStandard bit
 		,@intConcurrencyId int
+		,@tblMFScheduleConstraint AS ScheduleConstraintTable
 
 
 	DECLARE @tblMFSequence TABLE (
@@ -141,6 +142,31 @@ BEGIN TRY
 	FROM @tblMFWorkOrder W
 	JOIN @tblMFSequence S ON S.intWorkOrderId = W.intWorkOrderId
 
+	IF @ysnScheduleByManufacturingCell = 1
+	BEGIN
+		INSERT INTO @tblMFScheduleConstraint(intScheduleRuleId,intPriorityNo)
+		SELECT intScheduleRuleId,intPriorityNo
+		FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+				intScheduleRuleId INT
+				,intPriorityNo int
+				,ysnSelect bit
+				)
+		WHERE ysnSelect=1
+		ORDER BY intPriorityNo
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFScheduleConstraint (
+			intScheduleRuleId
+			,intPriorityNo
+			)
+		SELECT intScheduleRuleId
+			,intPriorityNo
+		FROM tblMFScheduleRule
+		WHERE ysnActive = 1
+		ORDER BY intPriorityNo
+	END
+
 	EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFWorkOrder
 		,@dtmFromDate = @dtmFromDate
 		,@dtmToDate = @dtmToDate
@@ -150,6 +176,7 @@ BEGIN TRY
 		,@intScheduleId=@intScheduleId
 		,@ysnStandard = @ysnStandard
 		,@intConcurrencyId = @intConcurrencyId
+		,@tblMFScheduleConstraint=@tblMFScheduleConstraint
 END TRY
 
 BEGIN CATCH
