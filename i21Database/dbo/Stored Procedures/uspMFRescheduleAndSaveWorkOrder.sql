@@ -1464,7 +1464,9 @@ BEGIN TRY
 			,@intScheduleId AS intScheduleId
 			,W.strWorkOrderNo
 			,IsNULL(SL.dblQuantity, W.dblQuantity) AS dblQuantity
+			,SL.dtmEarliestDate 
 			,Isnull(SL.dtmExpectedDate, W.dtmExpectedDate) AS dtmExpectedDate
+			,SL.dtmLatestDate 
 			,IsNULL(SL.dblQuantity, W.dblQuantity) - W.dblProducedQuantity AS dblBalanceQuantity
 			,W.dblProducedQuantity
 			,W.strComment AS strWorkOrderComments
