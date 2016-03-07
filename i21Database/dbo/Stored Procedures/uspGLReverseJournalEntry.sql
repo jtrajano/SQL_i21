@@ -37,6 +37,7 @@ INSERT INTO [tblGLJournal]
            ,[dtmDate]
            ,[strReverseLink]
            ,[intCurrencyId]
+		   ,[intExchangeRateDetailId]
            ,[dblExchangeRate]
            ,[strDescription]
            ,[ysnPosted]
@@ -56,6 +57,7 @@ INSERT INTO [tblGLJournal]
            ,GETDATE()
            ,[strReverseLink]
            ,[intCurrencyId]
+		   ,[intExchangeRateDetailId]
            ,[dblExchangeRate]
            ,'Reversing transaction for ' + strJournalId
            ,0
