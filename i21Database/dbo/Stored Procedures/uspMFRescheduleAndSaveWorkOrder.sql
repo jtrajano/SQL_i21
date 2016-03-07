@@ -5,7 +5,7 @@
 	,@intUserId INT
 	,@intChartManufacturingCellId INT = 0
 	,@ysnScheduleByManufacturingCell INT = 0
-	,@intScheduleId int=NULL
+	,@intScheduleId int=0
 	,@ysnStandard bit=1
 	,@intConcurrencyId int=1
 	)
@@ -1415,6 +1415,10 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+
+		If @intScheduleId is NULL 
+		Select @intScheduleId=0
+
 		IF @intScheduleId > 0
 		BEGIN
 			SELECT S.intScheduleId
