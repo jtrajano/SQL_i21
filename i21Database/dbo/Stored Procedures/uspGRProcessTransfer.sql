@@ -15,6 +15,7 @@ BEGIN TRY
 	DECLARE @ItemStorageType INT
 	DECLARE @ItemStorageSchedule INT	
 	DECLARE @ItemBalance DECIMAL(24,10)
+	DECLARE @ItemContractBalance DECIMAL(24,10)
 	DECLARE @TicketNo Nvarchar(20)
 	DECLARE @TransferTicketNumber Nvarchar(20)
 	DECLARE @intBillBeforeTransfer INT
@@ -37,6 +38,8 @@ BEGIN TRY
 	DECLARE @ItemCustomerName NVARCHAR(200)
 	DECLARE @ItemStorageTypeDescription NVARCHAR(50)
 	DECLARE @ItemStorageScheduleId NVARCHAR(50)
+	DECLARE @ItemContractHeaderId INT
+	DECLARE @ItemContractDetailId INT
 	DECLARE @ActionLocationName NVARCHAR(100)
 	DECLARE @ActionStorageTypeDescription NVARCHAR(50)
 	DECLARE @ActionCustomerName NVARCHAR(200)
@@ -51,6 +54,8 @@ BEGIN TRY
 	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)	
 	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
+	DECLARE @ActionContractHeaderId INT
+	DECLARE @ActionontractDetailId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -63,6 +68,7 @@ BEGIN TRY
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
 		,dblOpenBalance DECIMAL(24,10)
+		,intContractHeaderId INT
 	)
 		
 	DECLARE @Action AS TABLE 
@@ -74,6 +80,7 @@ BEGIN TRY
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
 		,intCompanyLocationId INT
+		,intContractHeaderId INT
 	)
 
 	SELECT @UserKey = intCreatedUserId		
@@ -113,6 +120,7 @@ BEGIN TRY
 		,intStorageTypeId
 		,intStorageScheduleId
 		,dblOpenBalance
+		,intContractHeaderId
 	)
 	SELECT intCustomerStorageId
 		,intEntityId
@@ -120,6 +128,7 @@ BEGIN TRY
 		,intStorageTypeId
 		,intStorageScheduleId
 		,dblOpenBalance
+		,intContractHeaderId
 	FROM OPENXML(@idoc, 'root/ItemsToTransfer', 2) WITH 
 	(
 			intCustomerStorageId INT
@@ -128,6 +137,7 @@ BEGIN TRY
 			,intStorageTypeId INT
 			,intStorageScheduleId INT
 			,dblOpenBalance DECIMAL(24,10)
+			,intContractHeaderId INT
 	)
 
 	INSERT INTO @Action 
@@ -138,6 +148,7 @@ BEGIN TRY
 		,intStorageTypeId
 		,intStorageScheduleId
 		,intCompanyLocationId
+		,intContractHeaderId
 	)
 	SELECT intEntityId
 		,dblPercent
@@ -145,14 +156,16 @@ BEGIN TRY
 		,intStorageTypeId
 		,intStorageScheduleId
 		,intCompanyLocationId
+		,intContractHeaderId
 	FROM OPENXML(@idoc, 'root/ActionTransfer', 2) WITH 
 	(
-			intEntityId INT
+			 intEntityId INT
 			,dblPercent DECIMAL(24,10)
 			,dblOpenBalance DECIMAL(24,10)
 			,intStorageTypeId INT
 			,intStorageScheduleId INT
 			,intCompanyLocationId INT
+			,intContractHeaderId INT
 	)
   
   
@@ -170,8 +183,10 @@ BEGIN TRY
 	SET @TicketNo=NULL
 	SET @intItemId=NULL
 	SET @intItemLocationId=NULL
-	SET @intActionLocationId=NULL
-	
+	SET @intActionLocationId=NULL	
+	SET @ItemContractHeaderId=NULL
+	SET @ItemContractDetailId=NULL
+	SET @ItemContractBalance=NULL  
 
 	
 	WHILE @ItemsToMoveKey > 0
@@ -180,6 +195,7 @@ BEGIN TRY
 			,@ItemStorageType = intStorageTypeId
 			,@ItemStorageSchedule=intStorageScheduleId
 			,@ItemBalance = dblOpenBalance
+			,@ItemContractHeaderId=intContractHeaderId
 		FROM @ItemsToMove
 		WHERE intItemsToMoveKey = @ItemsToMoveKey
 		
@@ -192,8 +208,6 @@ BEGIN TRY
 		SELECT @ItemStorageScheduleId=strScheduleId FROM tblGRStorageScheduleRule Where intStorageScheduleRuleId=@ItemStorageSchedule
 
 		SELECT @ActionKey = MIN(intActionKey) FROM @Action
-		
-		
 		 
 		SET @ActionCustomer = NULL
 		SET @Percent = NULL
@@ -203,7 +217,9 @@ BEGIN TRY
 		SET @ActionStorageTypeDescription = NULL
 		SET @ActionCustomerName = NULL
 		SET @NewCustomerStorageId=NULL
-		
+		SET @ActionContractHeaderId=NULL
+		SET @ActionontractDetailId=NULL
+
 		IF @CurrentItemOpenBalance <> @ItemBalance
 		BEGIN		 
 		 SELECT @TicketNo=strStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
@@ -233,6 +249,20 @@ BEGIN TRY
 
 		END
 		
+		IF ISNULL(@ItemContractHeaderId,0)>0
+		BEGIN
+		SELECT @ItemContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ItemContractHeaderId
+		SET @ItemContractBalance = -@ItemBalance
+
+			EXEC uspCTUpdateSequenceQuantity 
+				  @intContractDetailId=@ItemContractDetailId
+				 ,@dblQuantityToUpdate=@ItemContractBalance
+				 ,@intUserId=@UserKey
+				 ,@intExternalId=@intCustomerStorageId
+				 ,@strScreenName='Transfer Storage'
+
+		END
+
 		WHILE @ActionKey > 0
 		BEGIN
 		
@@ -242,9 +272,10 @@ BEGIN TRY
 				,@ActionOpenBalance = dblOpenBalance
 				,@ActionStorageTypeId = intStorageTypeId
 				,@ActionStorageScheduleId = intStorageScheduleId
+				,@ActionContractHeaderId=intContractHeaderId
 			FROM @Action
 			WHERE intActionKey = @ActionKey
-
+			
 			SELECT @ActionStorageTypeDescription = strStorageTypeDescription
 			FROM tblGRStorageType
 			WHERE intStorageScheduleTypeId = @ActionStorageTypeId
@@ -289,7 +320,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -405,7 +436,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL 
@@ -457,7 +488,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -572,7 +603,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -623,7 +654,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -738,7 +769,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -790,7 +821,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -905,7 +936,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -957,7 +988,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -1072,7 +1103,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -1123,7 +1154,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -1238,7 +1269,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -1292,7 +1323,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ItemContractHeaderId,0)>0 THEN @ItemContractHeaderId ELSE NULL END
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -1407,7 +1438,7 @@ BEGIN TRY
 					,@intCustomerStorageId
 					,NULL
 					,NULL
-					,NULL
+					,CASE WHEN ISNULL(@ActionContractHeaderId,0)>0 THEN @ActionContractHeaderId ELSE NULL END
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
@@ -1422,6 +1453,18 @@ BEGIN TRY
 					)				
 			END
 			
+			IF ISNULL(@ActionContractHeaderId,0)>0
+			BEGIN
+			SELECT @ActionontractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ActionContractHeaderId
+
+				EXEC uspCTUpdateSequenceQuantity 
+					  @intContractDetailId=@ActionontractDetailId
+					 ,@dblQuantityToUpdate=@ActionOpenBalance
+					 ,@intUserId=@UserKey
+					 ,@intExternalId=@intCustomerStorageId
+					 ,@strScreenName='Transfer Storage'			
+			END
+
 			SELECT @ActionKey = MIN(intActionKey)
 			FROM @Action
 			WHERE intActionKey > @ActionKey
@@ -1431,9 +1474,7 @@ BEGIN TRY
 		FROM @ItemsToMove
 		WHERE intItemsToMoveKey > @ItemsToMoveKey	
 		
-	END
-	
-	
+	END	
 
 	EXEC sp_xml_removedocument @idoc
 	
@@ -1444,5 +1485,3 @@ BEGIN CATCH
 	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
-
-
