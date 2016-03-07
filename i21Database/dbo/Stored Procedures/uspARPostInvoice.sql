@@ -88,7 +88,7 @@ SELECT	@INVENTORY_INVOICE_TYPE = intTransactionTypeId
 FROM	tblICInventoryTransactionType 
 WHERE	strName = @SCREEN_NAME
 
-DECLARE @ZeroDecimal decimal(18,6)
+DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000	
 
 -- Ensure @post and @recap is not NULL  
@@ -1435,7 +1435,7 @@ IF @post = 1
 				AND D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND A.strType <> 'Debit Memo'
 				
 			UNION ALL 
@@ -1502,7 +1502,7 @@ IF @post = 1
 				AND D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND A.strType <> 'Debit Memo'	
 				
 			UNION ALL 
@@ -1570,7 +1570,7 @@ IF @post = 1
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND A.strType <> 'Debit Memo'
 				
 			UNION ALL 
@@ -1638,7 +1638,7 @@ IF @post = 1
 				AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND A.strType <> 'Debit Memo'
 		END TRY
 		BEGIN CATCH
@@ -1677,33 +1677,32 @@ IF @post = 1
 				,strActualCostId
 			) 
 			SELECT 
-				Detail.intItemId  
-				,IST.intItemLocationId
-				,Detail.intItemUOMId  
-				,Header.dtmShipDate
-				,(Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
-				,ItemUOM.dblUnitQty
+				 intItemId					= Detail.intItemId  
+				,intItemLocationId			= IST.intItemLocationId
+				,intItemUOMId				= Detail.intItemUOMId  
+				,dtmDate					= Header.dtmShipDate
+				,dblQty						= (Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost =	ISNULL(dbo.fnMultiply (				
-								CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-											dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
-										ELSE 
-											IST.dblLastCost  
-								END 
-								,ItemUOM.dblUnitQty
-							),@ZeroDecimal)
-				,Detail.dblPrice 
-				,Header.intCurrencyId
-				,1.00
-				,Header.intInvoiceId
-				,Detail.intInvoiceDetailId
-				,Header.strInvoiceNumber 
-				,@INVENTORY_SHIPMENT_TYPE
-				,NULL 
-				,IST.intSubLocationId
-				,IST.intStorageLocationId
-				,strActualCostId = Header.strActualCostId
+				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
+																					dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
+																				ELSE 
+																					IST.dblLastCost  
+																		END 
+																		,ItemUOM.dblUnitQty
+																	),@ZeroDecimal)
+				,dblSalesPrice				= Detail.dblPrice 
+				,intCurrencyId				= Header.intCurrencyId
+				,dblExchangeRate			= 1.00
+				,intTransactionId			= Header.intInvoiceId
+				,intTransactionDetailId		= Detail.intInvoiceDetailId
+				,strTransactionId			= Header.strInvoiceNumber 
+				,intTransactionTypeId		= @INVENTORY_SHIPMENT_TYPE
+				,intLotId					= NULL 
+				,intSubLocationId			= IST.intSubLocationId
+				,intStorageLocationId		= IST.intStorageLocationId
+				,strActualCostId			= Header.strActualCostId
 			FROM 
 				tblARInvoiceDetail Detail
 			INNER JOIN
@@ -1726,8 +1725,67 @@ IF @post = 1
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND Header.strType <> 'Debit Memo'
+
+
+			UNION ALL
+
+			SELECT
+				 intItemId					= ARIC.[intComponentItemId]
+				,intItemLocationId			= IST.intItemLocationId
+				,intItemUOMId				= ARIC.[intItemUnitMeasureId] 
+				,dtmDate					= ARI.[dtmShipDate]
+				,dblQty						= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARI.[strTransactionType] = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,dblUOMQty					= ICIUOM.[dblUnitQty]
+				-- If item is using average costing, it must use the average cost. 
+				-- Otherwise, it must use the last cost value of the item. 
+				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
+																					dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId) 
+																				ELSE 
+																					IST.dblLastCost  
+																		END 
+																		,ICIUOM.dblUnitQty
+																),@ZeroDecimal)
+				,dblSalesPrice				= ARID.[dblPrice]
+				,intCurrencyId				= ARI.[intCurrencyId]
+				,dblExchangeRate			= 1.00
+				,intTransactionId			= ARI.[intInvoiceId]
+				,intTransactionDetailId		= ARID.[intInvoiceDetailId]
+				,strTransactionId			= ARI.[strInvoiceNumber]
+				,intTransactionTypeId		= @INVENTORY_SHIPMENT_TYPE
+				,intLotId					= NULL 
+				,intSubLocationId			= IST.intSubLocationId
+				,intStorageLocationId		= IST.intStorageLocationId
+				,strActualCostId			= ARI.[strActualCostId]
+			FROM
+				vyuARGetItemComponents ARIC
+			INNER JOIN
+				tblARInvoiceDetail ARID
+					ON ARIC.[intItemId] = ARID.[intItemId]
+			INNER JOIN
+				tblARInvoice ARI
+					ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]
+			INNER JOIN
+				@PostInvoiceData P
+					ON ARI.[intInvoiceId] = P.[intInvoiceId]		
+			INNER JOIN
+				tblICItem ICI
+					ON ARIC.[intComponentItemId] = ICI.[intItemId]
+			LEFT OUTER JOIN
+				tblICItemUOM ICIUOM
+					ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
+			LEFT OUTER JOIN
+				vyuICGetItemStock IST
+					ON ARIC.[intComponentItemId] = IST.intItemId 
+					AND ARI.[intCompanyLocationId] = IST.intLocationId 			 
+			WHERE
+				ARID.[dblTotal] <> 0
+				AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
+				AND ISNULL(ARID.[intItemId],0) <> 0
+				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
+				AND ARI.[strType] <> 'Debit Memo'	
 
 			
 		END TRY
