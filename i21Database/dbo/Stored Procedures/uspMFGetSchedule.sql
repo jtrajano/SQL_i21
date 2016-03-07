@@ -298,7 +298,9 @@ SELECT C.intManufacturingCellId
 	,Isnull(S.intScheduleId, 0) intScheduleId
 	,W.strWorkOrderNo
 	,W.dblQuantity
+	,ISNULL(W.dtmEarliestDate,W.dtmExpectedDate) AS dtmEarliestDate 
 	,W.dtmExpectedDate
+	,ISNULL(W.dtmLatestDate,W.dtmExpectedDate) AS dtmLatestDate
 	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
 	,W.dblProducedQuantity
 	,W.strComment AS strWorkOrderComments

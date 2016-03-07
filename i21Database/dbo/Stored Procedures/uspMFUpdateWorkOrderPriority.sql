@@ -43,6 +43,8 @@ BEGIN TRY
 		,intConcurrencyId INT
 		,intSequenceId int
 		,intDemandRatio int
+		,dtmEarliestDate DateTime
+		,dtmLatestDate DateTime
 		)
 
 	DECLARE @tblMFScheduleConstraint TABLE (
@@ -107,6 +109,8 @@ BEGIN TRY
 		,intConcurrencyId
 		,intSequenceId
 		,intDemandRatio
+		,dtmEarliestDate
+		,dtmLatestDate
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -138,6 +142,8 @@ BEGIN TRY
 		,@intConcurrencyId
 		,x.intSequenceNo
 		,x.intDemandRatio
+		,x.dtmEarliestDate
+		,x.dtmLatestDate
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -168,6 +174,8 @@ BEGIN TRY
 			,intSequenceNo int
 			,ysnEOModified bit
 			,intDemandRatio int
+			,dtmEarliestDate int
+			,dtmLatestDate int
 			) x Where x.intStatusId<>1
 	ORDER BY x.intExecutionOrder
 	
@@ -201,6 +209,8 @@ BEGIN TRY
 		,intConcurrencyId
 		,intSequenceId
 		,intDemandRatio
+		,dtmEarliestDate
+		,dtmLatestDate
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -231,6 +241,8 @@ BEGIN TRY
 		,@intConcurrencyId
 		,x.intSequenceNo
 		,x.intDemandRatio
+		,x.dtmEarliestDate
+		,x.dtmLatestDate
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -260,6 +272,8 @@ BEGIN TRY
 			,ysnFrozen BIT
 			,intSequenceNo int
 			,intDemandRatio int
+			,dtmEarliestDate int
+			,dtmLatestDate int
 			) x Where x.intStatusId=1
 	ORDER BY x.intExecutionOrder
 	
@@ -270,7 +284,9 @@ BEGIN TRY
 		,@intScheduleId AS intScheduleId
 		,W.strWorkOrderNo
 		,SL.dblQuantity
+		,SL.dtmEarliestDate
 		,SL.dtmExpectedDate
+		,SL.dtmLatestDate
 		,SL.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
 		,W.dblProducedQuantity
 		,W.strComment AS strWorkOrderComments
