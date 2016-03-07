@@ -9,6 +9,7 @@
 	,@ysnStandard bit=1
 	,@intConcurrencyId int=1
 	,@tblMFScheduleConstraint ScheduleConstraintTable READONLY
+	,@intCalendarId int=0
 	)
 AS
 BEGIN TRY
@@ -19,7 +20,6 @@ BEGIN TRY
 		,@intManufacturingCellId INT
 		,@intWorkOrderId INT
 		,@intCalendarDetailId INT
-		,@intCalendarId INT
 		,@dtmCalendarDate DATETIME
 		,@dtmPlannedStartDate DATETIME
 		,@dtmShiftStartTime DATETIME
@@ -120,10 +120,13 @@ BEGIN TRY
 
 		SELECT @intAllottedNoOfMachine = 0
 
-		SELECT @intCalendarId = intCalendarId
-		FROM tblMFScheduleCalendar
-		WHERE intManufacturingCellId = @intManufacturingCellId
-			AND ysnStandard = 1
+		If @ysnScheduleByManufacturingCell=0
+		BEGIN
+			SELECT @intCalendarId = intCalendarId
+			FROM tblMFScheduleCalendar
+			WHERE intManufacturingCellId = @intManufacturingCellId
+				AND ysnStandard = 1
+		END
 
 		IF EXISTS (
 				SELECT *
@@ -332,6 +335,8 @@ BEGIN TRY
 			AND C.intCalendarId = @intCalendarId
 			--AND CD.dtmShiftEndTime > @dtmCurrentDateTime
 			AND CD.intNoOfMachine > 0
+
+		--DECLARE @v XML = (SELECT * FROM @tblMFScheduleWorkOrderCalendarDetail FOR XML AUTO)
 
 		SELECT @intCalendarDetailId = MAX(intCalendarDetailId)
 		FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -1195,11 +1200,11 @@ BEGIN TRY
 			FROM @tblMFScheduleWorkOrder x
 			WHERE x.intStatusId <> 1
 
-			DECLARE @v XML = (
-					SELECT *
-					FROM @tblMFScheduleWorkOrder
-					FOR XML AUTO
-					)
+			--DECLARE @v XML = (
+			--		SELECT *
+			--		FROM @tblMFScheduleWorkOrder
+			--		FOR XML AUTO
+			--		)
 
 			IF @ysnStandard = 1
 			BEGIN

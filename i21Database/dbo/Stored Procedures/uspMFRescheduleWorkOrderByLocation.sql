@@ -16,6 +16,7 @@ BEGIN TRY
 		,@ysnStandard bit
 		,@intConcurrencyId int
 		,@tblMFScheduleConstraint AS ScheduleConstraintTable
+		,@intCalendarId int
 
 	DECLARE @tblMFSequence TABLE (
 		intWorkOrderId INT
@@ -33,6 +34,7 @@ BEGIN TRY
 		,@intManufacturingCellId=intManufacturingCellId
 		,@intScheduleId=intScheduleId
 		,@ysnStandard=ysnStandard
+		,@intCalendarId=intCalendarId
 		,@intConcurrencyId=intConcurrencyId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intUserId INT
@@ -43,6 +45,7 @@ BEGIN TRY
 			,intScheduleId int
 			,ysnStandard bit
 			,intConcurrencyId int
+			,intCalendarId int
 			)
 
 	INSERT INTO @tblMFWorkOrder (
@@ -176,6 +179,7 @@ BEGIN TRY
 		,@ysnStandard = @ysnStandard
 		,@intConcurrencyId = @intConcurrencyId
 		,@tblMFScheduleConstraint=@tblMFScheduleConstraint
+		,@intCalendarId=@intCalendarId
 END TRY
 
 BEGIN CATCH
