@@ -1136,7 +1136,7 @@ BEGIN TRY
 				,x.intWorkOrderId
 				,x.intStatusId
 				,x.intDuration
-				,ROW_NUMBER() OVER (
+				,ROW_NUMBER() OVER (PARTITION BY intManufacturingCellId
 					ORDER BY x.intExecutionOrder
 					) AS intExecutionOrder
 				,x.intChangeoverDuration
