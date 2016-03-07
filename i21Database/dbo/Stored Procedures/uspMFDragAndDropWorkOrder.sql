@@ -211,7 +211,7 @@ BEGIN TRY
 		,x.dblBalance
 		,x.dtmExpectedDate
 		,x.intStatusId
-		,Row_number() OVER (
+		,Row_number() OVER (Partition By intManufacturingCellId
 			ORDER BY intManufacturingCellId
 				,x.intExecutionOrder
 				,x.ysnEOModified DESC
@@ -279,6 +279,8 @@ BEGIN TRY
 	--			,1
 	--			)
 	--END
+	DECLARE @v XML = (SELECT * FROM @tblMFScheduleWorkOrder FOR XML AUTO)
+
 	EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFScheduleWorkOrder
 		,@dtmFromDate = @dtmFromDate
 		,@dtmToDate = @dtmToDate

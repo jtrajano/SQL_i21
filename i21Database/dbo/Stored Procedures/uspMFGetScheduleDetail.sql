@@ -105,8 +105,8 @@ SELECT MC.intManufacturingCellId
 	,W.dblQuantity - ISNULL(W.dblProducedQuantity, 0) AS dblBalanceQuantity
 	,W.strComment AS strWorkOrderComment
 	,W.dtmExpectedDate
-	,W.dtmEarliestDate
-	,W.dtmLatestDate
+	,ISNULL(W.dtmEarliestDate,W.dtmExpectedDate) As dtmEarliestDate
+	,ISNULL(W.dtmLatestDate,W.dtmExpectedDate) As dtmLatestDate
 	,I.intItemId
 	,I.strItemNo
 	,I.strDescription
