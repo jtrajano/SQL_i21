@@ -104,6 +104,14 @@ BEGIN
 		FROM	tblGRCustomerStorage	HR	
 		WHERE	HR.intCustomerStorageId	=	@intExternalId
 	END
+	ELSE IF @strScreenName = 'Transfer Storage'
+	BEGIN
+		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
+				@strNumber				=	HR.strStorageTicketNumber,
+				@strHeaderIdColumn		=	'intCustomerStorageId'
+		FROM	tblGRCustomerStorage	HR	
+		WHERE	HR.intCustomerStorageId	=	@intExternalId
+	END
 	ELSE IF @strScreenName = 'Inventory Shipment'
 	BEGIN
 		SELECT	@intExternalHeaderId			=	HR.intInventoryShipmentId,
