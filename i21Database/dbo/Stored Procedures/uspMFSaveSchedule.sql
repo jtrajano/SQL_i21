@@ -201,6 +201,8 @@ BEGIN TRY
 			,intPlannedShiftId =x.intPlannedShiftId
 			,dtmPlannedDate =x.dtmPlannedStartDate
 			,intExecutionOrder =x.intExecutionOrder 
+			,dtmEarliestDate=x.dtmEarliestDate
+			,dtmLatestDate=x.dtmLatestDate
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 				intWorkOrderId INT
 				,intStatusId int
@@ -208,7 +210,10 @@ BEGIN TRY
 				,intManufacturingCellId int
 				,intPlannedShiftId int
 				,dtmPlannedStartDate datetime
-				,intExecutionOrder int) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
+				,intExecutionOrder int
+				,dtmEarliestDate datetime
+				,dtmLatestDate datetime
+				) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
 	END
 	
 	INSERT INTO dbo.tblMFScheduleWorkOrderDetail (
