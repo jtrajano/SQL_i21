@@ -15,6 +15,9 @@ Declare @intNewSubLocationId int
 Declare @strPickListNo nvarchar(50)
 DECLARE @intMinWO int
 DECLARE @intWorkOrderId int
+DECLARE @ysnEnableParentLot BIT = 0
+
+SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference
 
 Select @intKitStatusId=intKitStatusId,@strPickListNo=strPickListNo from tblMFPickList Where intPickListId = @intPickListId
 
@@ -83,7 +86,7 @@ Begin Tran
 		Begin
 			Select @intWorkOrderId=intWorkOrderId from tblMFWorkOrder Where intWorkOrderId=@intMinWO
 
-			EXEC uspMFCreateLotReservation @intWorkOrderId,0
+			EXEC uspMFCreateLotReservation @intWorkOrderId,@ysnEnableParentLot
 
 			Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder where intPickListId=@intPickListId And intWorkOrderId>@intWorkOrderId
 		End
@@ -136,7 +139,7 @@ Begin Tran
 		Begin
 			Select @intWorkOrderId=intWorkOrderId from tblMFWorkOrder Where intWorkOrderId=@intMinWO
 
-			EXEC uspMFCreateLotReservation @intWorkOrderId,0
+			EXEC uspMFCreateLotReservation @intWorkOrderId,@ysnEnableParentLot
 
 			Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder where intPickListId=@intPickListId And intWorkOrderId>@intWorkOrderId
 		End
@@ -145,7 +148,6 @@ Begin Tran
 
 		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
 
-		--Restore the Reservation to Parent Lot
 	End
 Commit Tran
 
