@@ -10,7 +10,8 @@
 		strEntityContactName	=	d.strName,
 		intEntityRoleId			=	a.intEntityRoleId, 
 		strRoleName				=	b.strName,
-		ysnAdmin				=	b.ysnAdmin
+		ysnAdmin				=	b.ysnAdmin,
+		strPassword				=	e.strPassword
 	from tblEntityToContact a
 		join tblSMUserRole b
 			on a.intEntityRoleId = b.intUserRoleID
@@ -18,3 +19,5 @@
 			on a.intEntityId = c.intEntityId
 		join tblEntity d
 			on a.intEntityContactId = d.intEntityId
+		left join tblEntityCredential e
+			on a.intEntityContactId = e.intEntityId
