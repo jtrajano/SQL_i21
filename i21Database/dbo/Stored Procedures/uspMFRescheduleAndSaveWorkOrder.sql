@@ -8,6 +8,7 @@
 	,@intScheduleId int=0
 	,@ysnStandard bit=1
 	,@intConcurrencyId int=1
+	,@tblMFScheduleConstraint ScheduleConstraintTable READONLY
 	)
 AS
 BEGIN TRY
@@ -108,21 +109,6 @@ BEGIN TRY
 		,dtmChangeoverEndDate DATETIME
 		,intDuration INT
 		)
-	DECLARE @tblMFScheduleConstraint TABLE (
-		intScheduleConstraintId INT identity(1, 1)
-		,intScheduleRuleId INT
-		,intPriorityNo INT
-		)
-
-	INSERT INTO @tblMFScheduleConstraint (
-		intScheduleRuleId
-		,intPriorityNo
-		)
-	SELECT intScheduleRuleId
-		,intPriorityNo
-	FROM tblMFScheduleRule
-	WHERE ysnActive = 1
-	ORDER BY intPriorityNo
 
 	SELECT @intManufacturingCellId = MIN(intManufacturingCellId)
 		,@intLocationId = MIN(intLocationId)
@@ -1348,8 +1334,8 @@ BEGIN TRY
 			DELETE
 			FROM @tblMFScheduleConstraintDetail
 
-			DELETE
-			FROM @tblMFScheduleConstraint
+			--DELETE
+			--FROM @tblMFScheduleConstraint
 		END
 
 		SELECT @intManufacturingCellId = MIN(intManufacturingCellId)
