@@ -3516,6 +3516,7 @@
     <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
+    <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
