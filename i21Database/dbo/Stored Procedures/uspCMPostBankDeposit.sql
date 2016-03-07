@@ -50,7 +50,8 @@ DECLARE
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
-	,@RecapTable AS RecapTableType 
+	,@RecapTable AS RecapTableType
+	,@GLEntries AS  RecapTableType
 	
 	-- CREATE THE TEMPORARY TABLE 
 	CREATE TABLE #tmpGLDetail (
@@ -403,8 +404,66 @@ END
 --=====================================================================================================================================
 -- 	Book the G/L ENTRIES to tblGLDetail (The G/L Ledger detail table)
 ---------------------------------------------------------------------------------------------------------------------------------------
-EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
-IF @isSuccessful = 0 GOTO Post_Rollback
+--EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
+--IF @isSuccessful = 0 GOTO Post_Rollback
+INSERT INTO @GLEntries(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	
+			) 
+SELECT
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	 
+FROM #tmpGLDetail
+
+EXEC uspGLBookEntries @GLEntries, @ysnPost
+		
+IF @@ERROR <> 0	GOTO Post_Rollback
 
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP

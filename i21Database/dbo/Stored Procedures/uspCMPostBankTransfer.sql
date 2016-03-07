@@ -79,6 +79,7 @@ DECLARE
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
+	,@GLEntries AS RecapTableType
 	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
 	
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -482,8 +483,66 @@ END
 --=====================================================================================================================================
 -- 	Book the G/L ENTRIES to tblGLDetail (The General Ledger Detail table)
 ---------------------------------------------------------------------------------------------------------------------------------------
-EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
-IF @isSuccessful = 0 GOTO Post_Rollback
+--EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
+--IF @isSuccessful = 0 GOTO Post_Rollback
+INSERT INTO @GLEntries(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	
+			) 
+SELECT
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	 
+FROM #tmpGLDetail
+
+EXEC uspGLBookEntries @GLEntries, @ysnPost
+		
+IF @@ERROR <> 0	GOTO Post_Rollback
 
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP
