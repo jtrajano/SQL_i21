@@ -11,9 +11,9 @@ BEGIN
 	, UOM.intItemUOMId
 	, I.strDescription
 	, IL.intVendorId
-	, ISNULL(Chk.SalesQuantity,0)
-	, ISNULL(Chk.ActualSalesPrice,0)
-	, ISNULL(Chk.SalesAmount,0)
+	, ISNULL(CAST(Chk.SalesQuantity as int),0)
+	, ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
+	, ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
 	, P.dblStandardCost
 	, 1
 	from #tempCheckoutInsert Chk
@@ -48,9 +48,9 @@ BEGIN
 		, I.intCategoryId
 		, '' [strMarkUpOrDown]
 		, ISNULL(Chk.DiscountAmount, '') [strRetailShrinkRS]
-		, Chk.SalesQuantity [intQty]
-		, CASE WHEN (SP.dtmBeginDate < GETDATE() AND SP.dtmEndDate > GETDATE()) THEN (ISNULL(Chk.ActualSalesPrice, 0) - (ISNULL(SP.dblUnit ,0) / ISNULL(UOM.dblUnitQty, 1)) )
-				ELSE (ISNULL(Chk.ActualSalesPrice, 0) - (ISNULL(Pr.dblSalePrice ,0) / ISNULL(UOM.dblUnitQty, 1)) )
+		, CAST(Chk.SalesQuantity as int) [intQty]
+		, CASE WHEN (SP.dtmBeginDate < GETDATE() AND SP.dtmEndDate > GETDATE()) THEN (ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)), 0) - (ISNULL(SP.dblUnit ,0) / ISNULL(UOM.dblUnitQty, 1)) )
+				ELSE (ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)), 0) - (ISNULL(Pr.dblSalePrice ,0) / ISNULL(UOM.dblUnitQty, 1)) )
 			END [dblRetailPerUnit]
 		, 0 [dblTotalRetailAmount]
 		, 0 [dblTotalCostAmount]

@@ -12,9 +12,9 @@ BEGIN
 		SELECT @intCheckoutId 
 		, UOM.intItemUOMId [intPumpCardCouponId]
 		, I.strDescription
-		, (ISNULL(CAST(Chk.FuelGradeSalesAmount as numeric(18,6)),0)/ ISNULL(CAST(Chk.FuelGradeSalesVolume as numeric(18,6)),1)) [dblPrice]
-		, ISNULL(Chk.FuelGradeSalesVolume, 0) [dblQuantity]
-		, ISNULL(Chk.FuelGradeSalesAmount,0) [dblAmount]
+		, (ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0)/ ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) [dblPrice]
+		, ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0) [dblQuantity]
+		, ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) [dblAmount]
 		, 0
 		from #tempCheckoutInsert Chk
 		JOIN dbo.tblICItemLocation IL ON Chk.FuelGradeID COLLATE Latin1_General_CI_AS = CASE WHEN ISNULL(IL.strPassportFuelId1, '') <> '' THEN IL.strPassportFuelId1
@@ -30,9 +30,9 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE dbo.tblSTCheckoutPumpTotals
-		SET [dblPrice] = (ISNULL(CAST(Chk.FuelGradeSalesAmount as numeric(18,6)),0)/ ISNULL(CAST(Chk.FuelGradeSalesVolume as numeric(18,6)),1))
-		, [dblQuantity] = ISNULL(Chk.FuelGradeSalesVolume, 0)
-		, [dblAmount] = ISNULL(Chk.FuelGradeSalesAmount,0)
+		SET [dblPrice] = (ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0)/ ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1))
+		, [dblQuantity] = ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0)
+		, [dblAmount] = ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0)
 		from #tempCheckoutInsert Chk
 		JOIN dbo.tblICItemLocation IL ON RIGHT(Chk.FuelGradeID, 3) COLLATE Latin1_General_CI_AS = CASE WHEN ISNULL(IL.strPassportFuelId1, '') <> '' THEN IL.strPassportFuelId1
 																							WHEN ISNULL(IL.strPassportFuelId2, '') <> '' THEN IL.strPassportFuelId2
