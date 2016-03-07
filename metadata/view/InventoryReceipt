@@ -3165,6 +3165,24 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
+                                                                                "iconCls": "small-insert",
+                                                                                "itemId": "btnReplicateBalanceLots",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Replicate Balance Lots"
+                                                                            },
+                                                                            "name": "MyButton24",
+                                                                            "designerId": "40a93255-54d9-493b-95d0-621b8f47e419"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
                                                                                 "iconCls": "small-remove",
                                                                                 "itemId": "btnRemoveLot",
                                                                                 "layout|flex": null,
