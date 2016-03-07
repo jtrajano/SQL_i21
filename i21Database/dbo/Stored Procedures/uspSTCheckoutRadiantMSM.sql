@@ -7,16 +7,16 @@ BEGIN
     SELECT @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
 
     Update dbo.tblSTCheckoutPaymentOptions
-    SET dblRegisterAmount = chk.MiscellaneousSummaryAmount
-    , intRegisterCount = ISNULL( CAST(chk.MiscellaneousSummaryCount as int) ,0)
+    SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
+    , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
     FROM #tempCheckoutInsert chk
     JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
     JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
     WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId AND tblSTCheckoutPaymentOptions.intPaymentOptionId = PO.intPaymentOptionId
        
     Update dbo.tblSTCheckoutPaymentOptions
-    SET dblRegisterAmount = chk.MiscellaneousSummaryAmount
-    , intRegisterCount = ISNULL( CAST(chk.MiscellaneousSummaryCount as int) ,0)
+    SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
+    , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
     FROM #tempCheckoutInsert chk
     --JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
     --JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
@@ -24,8 +24,8 @@ BEGIN
     AND intPaymentOptionId IN (SELECT intLotteryWinnersMopId FROM dbo.tblSTRegister Where intStoreId = @intStoreId)
        
     Update dbo.tblSTCheckoutPaymentOptions
-    SET dblRegisterAmount = chk.MiscellaneousSummaryAmount
-    , intRegisterCount = ISNULL( CAST(chk.MiscellaneousSummaryCount as int) ,0)
+    SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
+    , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
     FROM #tempCheckoutInsert chk
     --JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
     --JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
