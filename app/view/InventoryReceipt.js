@@ -1595,6 +1595,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
+                                                                                        itemId: 'btnReplicateBalanceLots',
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Replicate Balance Lots'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
                                                                                         itemId: 'btnRemoveLot',
                                                                                         iconCls: 'small-remove',
                                                                                         text: 'Remove'
