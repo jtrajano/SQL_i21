@@ -3617,6 +3617,7 @@
     <None Include="Scripts\Post-Deployment\EM\023_RenameEntityContactEmailDistribution.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\16_FixInvoicePostDate.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
