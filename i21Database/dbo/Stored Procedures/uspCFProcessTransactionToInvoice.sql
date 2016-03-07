@@ -234,7 +234,7 @@ ON cfTrans.intContractId = ctContracts.intContractDetailId
 WHERE cfTrans.intTransactionId = @TransactionId
 
 
-SELECT * FROM @EntriesForInvoice
+--SELECT * FROM @EntriesForInvoice
 
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
@@ -320,5 +320,4 @@ BEGIN
 	UPDATE tblCFTransaction 
 	SET ysnPosted = @Post 
 	WHERE intTransactionId = @TransactionId 
-	AND intInvoiceId = @UpdatedIvoices
 END
