@@ -60,10 +60,11 @@ BEGIN
 			ELSE dtmShiftEndTime
 			END
 	FROM dbo.tblMFShift
-	WHERE Convert(TIME, @dtmStartTime) BETWEEN Convert(TIME, dtmShiftStartTime)
+	WHERE (Convert(TIME, @dtmStartTime) BETWEEN Convert(TIME, dtmShiftStartTime)
 			AND Convert(TIME, dtmShiftEndTime)
 		OR Convert(TIME, @dtmEndTime) BETWEEN Convert(TIME, dtmShiftStartTime)
-			AND Convert(TIME, dtmShiftEndTime)
+			AND Convert(TIME, dtmShiftEndTime))
+		--AND intLocationId = @intLocationId
 
 	WHILE @dtmEndDate > @dtmStartDate
 	BEGIN
@@ -78,8 +79,8 @@ BEGIN
 		SELECT @intScheduledMaintenanceId
 			,@dtmStartDate
 			,intShiftId
-			,dtmStartTime
-			,dtmEndTime
+			,@dtmStartDate+dtmStartTime
+			,@dtmStartDate+dtmEndTime
 			,DateDiff(Minute, dtmStartTime, dtmEndTime)
 		FROM @tblMFShift
 
