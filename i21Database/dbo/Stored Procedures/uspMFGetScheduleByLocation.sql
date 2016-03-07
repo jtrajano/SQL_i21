@@ -52,7 +52,7 @@ BEGIN
 						END
 				)) AS intExecutionOrder
 		,ISNULL(SL.ysnFrozen, 0) AS ysnFrozen
-		,I.intPackTypeId
+		,ISNULL(I.intPackTypeId,0) As intPackTypeId
 		,ISNULL(SL.intConcurrencyId, 0) AS intConcurrencyId
 		,CONVERT(BIT, 0) AS ysnEOModified
 	FROM dbo.tblMFWorkOrder W

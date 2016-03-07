@@ -141,9 +141,6 @@ BEGIN TRY
 	FROM @tblMFWorkOrder W
 	JOIN @tblMFSequence S ON S.intWorkOrderId = W.intWorkOrderId
 
-	DECLARE @v1 XML = (SELECT * FROM @tblMFSequence FOR XML AUTO)
-	DECLARE @v XML = (SELECT * FROM @tblMFWorkOrder FOR XML AUTO)
-
 	EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFWorkOrder
 		,@dtmFromDate = @dtmFromDate
 		,@dtmToDate = @dtmToDate
