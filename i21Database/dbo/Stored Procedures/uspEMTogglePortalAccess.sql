@@ -36,6 +36,12 @@ BEGIN
 			set @message =  'User role is not yet created'
 			return 0
 		end
+
+		if exists( select top 1 1 from tblEntityToContact where intEntityRoleId = @roleId and intEntityContactId = @intEntityContactId and ysnPortalAccess = 1)
+		begin
+			return 0;
+		end
+
 		set @intUserRoleId = @roleId
 
 		if(@userName is null or @userName = '')
