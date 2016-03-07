@@ -4788,4 +4788,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[dblRate]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c99bf8f8-821d-44ea-926e-d5a6133efde7" ChangeDateTime="03/07/2016 02:22:59">
+    <Property Name="ElementName" Value="[dbo].[FK_tblPATCustomerVolume_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPATCustomerVolume]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblPATCustomerVolume_tblPATRefundRateDetail]" />
+  </Operation>
 </Operations>
