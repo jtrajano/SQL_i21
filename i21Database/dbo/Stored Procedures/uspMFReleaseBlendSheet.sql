@@ -283,10 +283,20 @@ Begin
 	While(@intMinMissingItem is not null)
 	Begin
 		Select @intInputItemId=intItemId,@dblInputReqQty=dblReqQty,@intConsumptionMethodId=intConsumptionMethodId 
-		From @tblItem Where intRowNo=@intMinLot AND ysnIsSubstitute=0
+		From @tblItem Where intRowNo=@intMinMissingItem AND ysnIsSubstitute=0
 
 		If @intConsumptionMethodId=1
 		Begin
+			If Not Exists (Select 1 From @tblLot Where intItemId=@intInputItemId) 
+			AND 
+			Not Exists (Select 1 From @tblLot Where intItemId=(Select intItemId From @tblItem Where intParentItemId=@intInputItemId))
+			Begin
+				Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+
+				Set @ErrMsg='There is no lot selected for item ' + CONVERT(nvarchar,@strInputItemNo) + '.'
+				RaisError(@ErrMsg,16,1)
+			End
+
 			Select @dblInputItemBSQty=ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblLot Where intItemId=@intInputItemId
 
 			--Include Sub Items

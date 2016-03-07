@@ -180,7 +180,10 @@ End
 End
 
 If @ysnBlendSheetRequired = 0
+Begin
 Delete From @tblPickListDetail Where intLotId=0
+Delete From @tblPickListDetail Where dblPickQuantity<=0
+End
 
 If ISNULL(@strPickListNo,'') = ''
 	Begin
@@ -242,7 +245,7 @@ Begin
 	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,
 	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId
 	From tblMFPickListDetail pld Join @tblPickListDetail tpld on pld.intPickListDetailId=tpld.intPickListDetailId 
-	Where pld.intPickListId=@intPickListId
+	Where pld.intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId
 
 	--insert new picked lots
 	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,

@@ -13,6 +13,8 @@ Declare @intStorageLocationId int
 Declare @dblPickQuantity numeric(18,6)
 Declare @intNewSubLocationId int
 Declare @strPickListNo nvarchar(50)
+DECLARE @intMinWO int
+DECLARE @intWorkOrderId int
 
 Select @intKitStatusId=intKitStatusId,@strPickListNo=strPickListNo from tblMFPickList Where intPickListId = @intPickListId
 
@@ -74,9 +76,21 @@ Begin Tran
 
 		Delete From tblMFPickList Where intPickListId=@intPickListId
 
-		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
+		--Restore the reservation for blend sheet
+		Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder Where intPickListId=@intPickListId
+
+		While(@intMinWO is not null)
+		Begin
+			Select @intWorkOrderId=intWorkOrderId from tblMFWorkOrder Where intWorkOrderId=@intMinWO
+
+			EXEC uspMFCreateLotReservation @intWorkOrderId,0
+
+			Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder where intPickListId=@intPickListId And intWorkOrderId>@intWorkOrderId
+		End
 
 		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
+
+		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
 	End
 
 	If @intKitStatusId = 12
@@ -115,9 +129,21 @@ Begin Tran
 
 		Delete From tblMFPickList Where intPickListId=@intPickListId
 
-		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
+		--Restore the reservation for blend sheet
+		Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder Where intPickListId=@intPickListId
+
+		While(@intMinWO is not null)
+		Begin
+			Select @intWorkOrderId=intWorkOrderId from tblMFWorkOrder Where intWorkOrderId=@intMinWO
+
+			EXEC uspMFCreateLotReservation @intWorkOrderId,0
+
+			Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder where intPickListId=@intPickListId And intWorkOrderId>@intWorkOrderId
+		End
 
 		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
+
+		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
 
 		--Restore the Reservation to Parent Lot
 	End

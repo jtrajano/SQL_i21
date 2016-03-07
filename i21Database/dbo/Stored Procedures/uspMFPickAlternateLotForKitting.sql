@@ -33,7 +33,13 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
-	
+
+	IF ISNULL(@dblAlternateLotQty,0) <=0
+	BEGIN
+		SET @strErrMsg= 'QTY NOT AVAILABLE FOR LOT ' + @strAlternateLotNo +' ON LOCATION ' + @strLotSourceLocation +'.'
+		RAISERROR(@strErrMsg,16,1)
+	END	
+
 	IF ISNULL(@intAlternateLotId,0) = 0
 	BEGIN
 		RAISERROR('ALTERNATE LOT DOES NOT EXISTS IN THE SCANNED LOCATION',16,1)
