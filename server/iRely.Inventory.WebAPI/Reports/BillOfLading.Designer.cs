@@ -38,6 +38,7 @@
             this.xrLabel24 = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabel26 = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabel32 = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel13 = new DevExpress.XtraReports.UI.XRLabel();
             this.TopMargin = new DevExpress.XtraReports.UI.TopMarginBand();
             this.BottomMargin = new DevExpress.XtraReports.UI.BottomMarginBand();
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource();
@@ -73,6 +74,7 @@
             this.PageInfo = new DevExpress.XtraReports.UI.XRControlStyle();
             this.DataField = new DevExpress.XtraReports.UI.XRControlStyle();
             this.GroupHeader1 = new DevExpress.XtraReports.UI.GroupHeaderBand();
+            this.xrLabel9 = new DevExpress.XtraReports.UI.XRLabel();
             this.xrPanel7 = new DevExpress.XtraReports.UI.XRPanel();
             this.xrPanel2 = new DevExpress.XtraReports.UI.XRPanel();
             this.xrPanel1 = new DevExpress.XtraReports.UI.XRPanel();
@@ -83,8 +85,6 @@
             this.GroupFooter1 = new DevExpress.XtraReports.UI.GroupFooterBand();
             this.GroupFooter2 = new DevExpress.XtraReports.UI.GroupFooterBand();
             this.xrSubreport1 = new DevExpress.XtraReports.UI.XRSubreport();
-            this.xrLabel9 = new DevExpress.XtraReports.UI.XRLabel();
-            this.xrLabel13 = new DevExpress.XtraReports.UI.XRLabel();
             ((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
             // 
             // Detail
@@ -163,6 +163,18 @@
             this.xrLabel32.SizeF = new System.Drawing.SizeF(114.0981F, 17F);
             this.xrLabel32.StyleName = "DataField";
             this.xrLabel32.StylePriority.UseFont = false;
+            // 
+            // xrLabel13
+            // 
+            this.xrLabel13.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
+            new DevExpress.XtraReports.UI.XRBinding("Text", null, "CustomSqlQuery.dblNetWeight", "{0:n2}")});
+            this.xrLabel13.Font = new System.Drawing.Font("Times New Roman", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel13.LocationFloat = new DevExpress.Utils.PointFloat(553.6387F, 2.00002F);
+            this.xrLabel13.Name = "xrLabel13";
+            this.xrLabel13.Padding = new DevExpress.XtraPrinting.PaddingInfo(1, 1, 0, 0, 100F);
+            this.xrLabel13.SizeF = new System.Drawing.SizeF(96.36127F, 17F);
+            this.xrLabel13.StyleName = "DataField";
+            this.xrLabel13.StylePriority.UseFont = false;
             // 
             // TopMargin
             // 
@@ -310,7 +322,7 @@
             this.xrLabel8.LocationFloat = new DevExpress.Utils.PointFloat(0F, 237.5F);
             this.xrLabel8.Name = "xrLabel8";
             this.xrLabel8.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 1, 0, 0, 100F);
-            this.xrLabel8.SizeF = new System.Drawing.SizeF(111.9145F, 17.00003F);
+            this.xrLabel8.SizeF = new System.Drawing.SizeF(112.5F, 17F);
             this.xrLabel8.StyleName = "FieldCaption";
             this.xrLabel8.StylePriority.UseBackColor = false;
             this.xrLabel8.StylePriority.UseBorders = false;
@@ -608,6 +620,24 @@
             this.GroupHeader1.HeightF = 282.1581F;
             this.GroupHeader1.Name = "GroupHeader1";
             // 
+            // xrLabel9
+            // 
+            this.xrLabel9.BackColor = System.Drawing.Color.LightGray;
+            this.xrLabel9.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
+            | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel9.Font = new System.Drawing.Font("Times New Roman", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.xrLabel9.LocationFloat = new DevExpress.Utils.PointFloat(550F, 237.5F);
+            this.xrLabel9.Name = "xrLabel9";
+            this.xrLabel9.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 1, 0, 0, 100F);
+            this.xrLabel9.SizeF = new System.Drawing.SizeF(100F, 17F);
+            this.xrLabel9.StyleName = "FieldCaption";
+            this.xrLabel9.StylePriority.UseBackColor = false;
+            this.xrLabel9.StylePriority.UseBorders = false;
+            this.xrLabel9.StylePriority.UseFont = false;
+            this.xrLabel9.StylePriority.UsePadding = false;
+            this.xrLabel9.Text = "Net Wgt";
+            // 
             // xrPanel7
             // 
             this.xrPanel7.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
@@ -714,36 +744,6 @@
             this.xrSubreport1.ParameterBindings.Add(new DevExpress.XtraReports.UI.ParameterBinding("intWarehouseInstructionHeaderId", null, "CustomSqlQuery.intWarehouseInstructionHeaderId"));
             this.xrSubreport1.ReportSource = new iRely.Inventory.WebApi.Reports.WorkingInstruction();
             this.xrSubreport1.SizeF = new System.Drawing.SizeF(650F, 23.69444F);
-            // 
-            // xrLabel9
-            // 
-            this.xrLabel9.BackColor = System.Drawing.Color.LightGray;
-            this.xrLabel9.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
-            | DevExpress.XtraPrinting.BorderSide.Right) 
-            | DevExpress.XtraPrinting.BorderSide.Bottom)));
-            this.xrLabel9.Font = new System.Drawing.Font("Times New Roman", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.xrLabel9.LocationFloat = new DevExpress.Utils.PointFloat(550F, 237.5F);
-            this.xrLabel9.Name = "xrLabel9";
-            this.xrLabel9.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 1, 0, 0, 100F);
-            this.xrLabel9.SizeF = new System.Drawing.SizeF(100F, 17F);
-            this.xrLabel9.StyleName = "FieldCaption";
-            this.xrLabel9.StylePriority.UseBackColor = false;
-            this.xrLabel9.StylePriority.UseBorders = false;
-            this.xrLabel9.StylePriority.UseFont = false;
-            this.xrLabel9.StylePriority.UsePadding = false;
-            this.xrLabel9.Text = "Net Wgt";
-            // 
-            // xrLabel13
-            // 
-            this.xrLabel13.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "CustomSqlQuery.dblNetWeight", "{0:n2}")});
-            this.xrLabel13.Font = new System.Drawing.Font("Times New Roman", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.xrLabel13.LocationFloat = new DevExpress.Utils.PointFloat(553.6387F, 2.00002F);
-            this.xrLabel13.Name = "xrLabel13";
-            this.xrLabel13.Padding = new DevExpress.XtraPrinting.PaddingInfo(1, 1, 0, 0, 100F);
-            this.xrLabel13.SizeF = new System.Drawing.SizeF(96.36127F, 17F);
-            this.xrLabel13.StyleName = "DataField";
-            this.xrLabel13.StylePriority.UseFont = false;
             // 
             // BillOfLading
             // 
