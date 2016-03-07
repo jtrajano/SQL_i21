@@ -108,9 +108,10 @@ END
 											            IU.intItemUOMId											
 											            FROM dbo.tblICItemUOM IU 
 											            WHERE	IU.intItemId = min(TR.intItemId) and IU.ysnStockUnit = 1)
-                ,[dblQuantityToTransfer]    = CASE	WHEN min(SP.strGrossOrNet) = 'Gross' THEN min(TR.dblGross)
-													WHEN min(SP.strGrossOrNet) = 'Net' THEN min(TR.dblNet)
-											  END
+				,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
+             --   ,[dblQuantityToTransfer]    = CASE	WHEN min(SP.strGrossOrNet) = 'Gross' THEN min(TR.dblGross)
+													--WHEN min(SP.strGrossOrNet) = 'Net' THEN min(TR.dblNet)
+											  --END
                 ,[strNewLotId]              = NULL
                 ,[intFromSubLocationId]     = NULL
                 ,[intToSubLocationId]       = NULL
