@@ -3,7 +3,8 @@
 	@intEntityContactId		int,
 	@ysnEnablePortalAccess	bit,
 	@message				nvarchar(200) output,
-	@intUserRoleId			int output
+	@intUserRoleId			int output,
+	@strPassword			nvarchar(100) = ''
 AS
 BEGIN
 	if @ysnEnablePortalAccess = 0 
@@ -60,8 +61,11 @@ BEGIN
 
 		if not exists(select top 1 1 from tblEntityCredential where intEntityId = @intEntityContactId)
 		begin
+			if(@strPassword = '')
+				set @strPassword = '1234'
+
 			insert into tblEntityCredential(intEntityId,strUserName,strPassword)
-			select @intEntityContactId, @userName, '1234'
+			select @intEntityContactId, @userName, @strPassword
 		end
 		
 

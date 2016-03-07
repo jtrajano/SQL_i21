@@ -27,7 +27,8 @@ SELECT
 	F.Trucker ,
 	D.strContactType,
 	D.strEmailDistributionOption,
-	B.imgPhoto	
+	B.imgPhoto,
+	papit = g.strPassword
 FROM dbo.tblEntity AS B 			
 	INNER JOIN dbo.tblEntityToContact AS C 
 			ON B.[intEntityId] = C.[intEntityId] 
@@ -37,4 +38,6 @@ FROM dbo.tblEntity AS B
 			ON C.intEntityLocationId = E.intEntityLocationId
 	JOIN vyuEMSearch F
 		ON F.intEntityId = B.intEntityId
+	LEFT JOIN tblEntityCredential g
+		on g.intEntityId = D.intEntityId
 
