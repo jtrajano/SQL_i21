@@ -166,9 +166,8 @@ DECLARE  @Id									INT
 		,@Inventory								BIT
 		,@ItemDocumentNumber					NVARCHAR(100)
 		,@ItemDescription						NVARCHAR(250)
-		,@OrderUOMId							INT
-		,@ItemQtyOrdered						NUMERIC(18, 6)
 		,@ItemUOMId								INT
+		,@ItemQtyOrdered						NUMERIC(18, 6)
 		,@ItemQtyShipped						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemPrice								NUMERIC(18, 6)
@@ -281,9 +280,8 @@ BEGIN
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
 		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL([strDocumentNumber],[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
-		,@OrderUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
-		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
 		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
+		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
 		,@ItemQtyShipped				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyShipped] ELSE NULL END)
 		,@ItemDiscount					= (CASE WHEN @GroupingOption = 0 THEN [dblDiscount] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
@@ -431,9 +429,8 @@ BEGIN
 			,@ItemIsInventory				= @Inventory
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
-			,@OrderUOMId					= @OrderUOMId
-			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemUOMId						= @ItemUOMId
+			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
@@ -544,9 +541,8 @@ BEGIN
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
-					,@OrderUOMId					= [intOrderUOMId]					
-					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemUOMId						= [intItemUOMId]
+					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
@@ -601,9 +597,8 @@ BEGIN
 						,@RaiseError					= @RaiseError
 						,@ItemDocumentNumber			= @ItemDocumentNumber
 						,@ItemDescription				= @ItemDescription
-						,@OrderUOMId					= @OrderUOMId
-						,@ItemQtyOrdered				= @ItemQtyShipped
 						,@ItemUOMId						= @ItemUOMId
+						,@ItemQtyOrdered				= @ItemQtyShipped
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
 						,@ItemPrice						= @ItemPrice
@@ -1042,9 +1037,8 @@ BEGIN TRY
 						,@Inventory						= [ysnInventory]
 						,@ItemDocumentNumber			= [strDocumentNumber]
 						,@ItemDescription				= [strItemDescription]
-						,@OrderUOMId					= [intOrderUOMId]
-						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemUOMId						= [intItemUOMId]
+						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
@@ -1097,9 +1091,8 @@ BEGIN TRY
 							,@RaiseError					= @RaiseError
 							,@ItemDocumentNumber			= @ItemDocumentNumber
 							,@ItemDescription				= @ItemDescription
-							,@OrderUOMId					= @OrderUOMId
-							,@ItemQtyOrdered				= @ItemQtyShipped
 							,@ItemUOMId						= @ItemUOMId
+							,@ItemQtyOrdered				= @ItemQtyShipped
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
@@ -1250,9 +1243,8 @@ BEGIN TRY
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
-					,@OrderUOMId					= [intOrderUOMId]
-					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemUOMId						= [intItemUOMId]
+					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
@@ -1344,9 +1336,8 @@ BEGIN TRY
 						 [intItemId]							= @ItemId
 						,[strDocumentNumber]					= @ItemDocumentNumber
 						,[strItemDescription]					= @ItemDescription
-						,[intOrderUOMId]						= @OrderUOMId
-						,[dblQtyOrdered]						= @ItemQtyOrdered
 						,[intItemUOMId]							= @ItemUOMId
+						,[dblQtyOrdered]						= @ItemQtyOrdered
 						,[dblQtyShipped]						= @ItemQtyShipped
 						,[dblDiscount]							= @ItemDiscount
 						,[dblPrice]								= @ItemPrice							

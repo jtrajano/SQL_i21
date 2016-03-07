@@ -14,7 +14,7 @@ BEGIN
 	SET @result =	CASE	WHEN ISNULL(@dblWeight, 0) = 0 THEN 
 								0 
 							ELSE 
-								dbo.fnDivide(@dblItemOverallValue, @dblWeight)
+								dbo.fnDivide(@dblItemOverallValue, @dblWeight) 
 					END 
 	RETURN ISNULL(@result, 0);
 END

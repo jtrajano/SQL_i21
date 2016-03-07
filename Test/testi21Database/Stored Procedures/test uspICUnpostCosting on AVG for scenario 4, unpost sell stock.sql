@@ -363,27 +363,27 @@ BEGIN
 	)
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = 1
-			,dblAverageCost = 2.15
+			,dblAverageCost = 2.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @StickyGrains
 			,intItemLocationId = 2
-			,dblAverageCost = 2.15
+			,dblAverageCost = 2.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @PremiumGrains
 			,intItemLocationId = 3
-			,dblAverageCost = 2.15
+			,dblAverageCost = 2.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @ColdGrains
 			,intItemLocationId = 4
-			,dblAverageCost = 2.15
+			,dblAverageCost = 2.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @HotGrains
 			,intItemLocationId = 5
-			,dblAverageCost = 2.15
+			,dblAverageCost = 2.00
 			,dblUnitOnHand = 100
 			
 	-- Setup the expected FIFO data

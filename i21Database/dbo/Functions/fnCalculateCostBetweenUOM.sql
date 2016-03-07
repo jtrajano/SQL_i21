@@ -27,8 +27,8 @@ AS
 BEGIN 
 	DECLARE	@result AS NUMERIC(38,20) 
 
-	DECLARE @dblUnitQtyFrom AS NUMERIC(18,12)
-			,@dblUnitQtyTo AS NUMERIC(18,12)
+	DECLARE @dblUnitQtyFrom AS NUMERIC(38,20)
+			,@dblUnitQtyTo AS NUMERIC(38,20)
 
 	SELECT	@dblUnitQtyFrom = ItemUOM.dblUnitQty
 	FROM	dbo.tblICItemUOM ItemUOM 
@@ -55,10 +55,7 @@ BEGIN
 					@dblCost
 				ELSE 
 					CASE	WHEN @dblUnitQtyFrom <> 0 THEN 
-								dbo.fnMultiply(
-									dbo.fnDivide(@dblCost, @dblUnitQtyFrom) 
-									,@dblUnitQtyTo
-								)
+								dbo.fnMultiply(dbo.fnDivide(@dblCost, @dblUnitQtyFrom), @dblUnitQtyTo) 
 							ELSE 
 								NULL 
 					END

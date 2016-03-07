@@ -9,46 +9,18 @@ AS
 BEGIN 
 	DECLARE @quotient AS NUMERIC(38, 20)
 	DECLARE @rawResult AS NVARCHAR(200) 
+	DECLARE @valueSign AS INT
 
 	-- Avoid 'divide by zero' error. Return NULL value. 
 	IF ISNULL(@divisor, 0) = 0 
 		RETURN NULL;
 
-	-- Divide it and get the raw result as a string. 
-	-- Avoid the arithmetic overflow by ensuring the numbers are truncated at the 19th digit from the left. 
+	-- Divide it and process the raw result as a string. 
+	-- Avoid the arithmetic overflow by ensuring the numbers are truncated at the 17th digit from the left. 
 	BEGIN 
 		DECLARE @NoDecimalDividend AS NUMERIC(19, 0) 
 		DECLARE @NoDecimalDivisor AS NUMERIC(19, 0) 
 
-		SET @NoDecimalDividend = 
-				LEFT(
-					CAST(
-						@dividend * 
-						POWER(CAST(10 AS NUMERIC(18,10)), 
-							LEN(REPLACE(REPLACE(RTRIM(LTRIM(REPLACE('@' + PARSENAME(@dividend, 1), '0', ' '))), ' ', '0'), '@', ''))
-						) 
-						AS NVARCHAR(100)
-					)
-					,19
-				)
-		SET @NoDecimalDivisor = 
-				LEFT(
-					CAST(
-						@divisor * 
-						POWER(CAST(10 AS NUMERIC(18,10)), 
-							LEN(REPLACE(REPLACE(RTRIM(LTRIM(REPLACE('@' + PARSENAME(@divisor, 1), '0', ' '))), ' ', '0'), '@', '')) 
-						)	
-						AS NVARCHAR(100)
-					)
-					,19
-				)
-
-		SET @rawResult = @NoDecimalDividend / @NoDecimalDivisor
-	END 
-
-	-- Determine where to place the decimal point. 
-	BEGIN 
-		DECLARE @currentDecimalPosition AS INT = CHARINDEX('.', @rawResult) 
 		DECLARE @dividendDecimalPlaces AS INT = (
 							LEN(REPLACE(REPLACE(RTRIM(LTRIM(REPLACE('@' + PARSENAME(@dividend, 1), '0', ' '))), ' ', '0'), '@', '')) 
 						)					
@@ -56,21 +28,52 @@ BEGIN
 							LEN(REPLACE(REPLACE(RTRIM(LTRIM(REPLACE('@' + PARSENAME(@divisor, 1), '0', ' '))), ' ', '0'), '@', '')) 	
 						)
 
-		DECLARE @moveDecimalPlaces AS INT = @divisorDecimalPlaces - @dividendDecimalPlaces - (CASE WHEN @divisorDecimalPlaces >= 18 THEN @divisorDecimalPlaces - 17 ELSE 0 END)
+		SET @NoDecimalDividend = 
+				LEFT(
+					CAST(
+						@dividend * 
+						POWER(CAST(10 AS NUMERIC(18,10)), @dividendDecimalPlaces) 
+						AS NVARCHAR(100)
+					)
+					,17
+				)
+		SET @NoDecimalDivisor = 
+				LEFT(
+					CAST(
+						@divisor * 
+						POWER(CAST(10 AS NUMERIC(18,10)), @divisorDecimalPlaces)	
+						AS NVARCHAR(100)
+					)
+					,17
+				)
 
-		SELECT	@rawResult = REPLICATE('0', @dividendDecimalPlaces - @currentDecimalPosition + 1) + @rawResult
-				,@currentDecimalPosition = @currentDecimalPosition + (@dividendDecimalPlaces - @currentDecimalPosition) + 1
-		WHERE  @dividendDecimalPlaces >= @currentDecimalPosition
+		SET @rawResult = @NoDecimalDividend / @NoDecimalDivisor
+		SET @rawResult = REPLACE(LTRIM(REPLACE(REPLACE(REPLACE(@rawResult, '-', ''), '.', ''), '0', ' ')), ' ', 0)		
+	END 
 
+	-- Pad zeroes to the left 
+	BEGIN 
+		DECLARE @actualDivide AS NUMERIC(38,20) = CAST(@dividend AS NUMERIC(18, 6)) / CAST(@divisor AS NUMERIC(18, 6)) 
+		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@actualDivide, '.', ''), '-', '')) - 1) + @rawResult
+	END 
+
+	-- Determine where to place the decimal point. 
+	BEGIN 
 		SET @rawResult = 
 			STUFF(
-				REPLACE(@rawResult, '.', '') 
-				,@currentDecimalPosition + @moveDecimalPlaces
+				@rawResult
+				,CHARINDEX('.', @actualDivide) + CASE WHEN SIGN(@actualDivide) = -1 THEN -1 ELSE 0 END 
 				,0
-				,'.'
+				,'.' 
 			)
+	END
+
+	-- Determine if there is a need to append a negative sign. 
+	BEGIN 
+		SET @rawResult = CASE WHEN SIGN(@actualDivide) = -1 THEN '-' ELSE '' END + @rawResult
 	END 
-	SET @quotient = CAST(@rawResult AS NUMERIC(38, 20)) 
-		
+
+	-- Finalize the return value by converting the string to numeric. 
+	SET @quotient = ISNULL(CAST(LEFT(@rawResult, 38) AS NUMERIC(38, 20)), 0)
 	RETURN @quotient
 END

@@ -1,6 +1,4 @@
-﻿
--- Obsolete. This function is too buggy to maintain. 
--- This function returns the weight per uom 
+﻿-- This function returns the weight per uom 
 CREATE FUNCTION [dbo].[fnConvertFloatToNumeric] (
 	@input AS FLOAT
 )
@@ -23,7 +21,7 @@ BEGIN
 				DECIMAL(38,20),
 				(
 					CONVERT(
-						DECIMAL(38,20), 
+						DECIMAL(21,20), 
 						LEFT(CONVERT(VARCHAR(50), @input, 2), 17)
 					) 
 					* POWER (

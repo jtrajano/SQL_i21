@@ -1643,7 +1643,7 @@ IF @post = 1
 		--Update onhand
 		BEGIN TRY	
 			-- Get the items to post  
-			DECLARE @ItemsForPost AS ItemCostingTableType  
+			DECLARE @ItemsForPost AS ItemCostingTableType 
 			INSERT INTO @ItemsForPost (  
 				intItemId  
 				,intItemLocationId 
@@ -1708,7 +1708,7 @@ IF @post = 1
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				AND Header.strType <> 'Debit Memo'
 
-			
+
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
@@ -2043,7 +2043,6 @@ IF @recap = 1
 --------------------------------------------------------------------------------------------  
 IF @recap = 0
 	BEGIN
-	 
 		BEGIN TRY 
 			IF @post = 0
 				BEGIN

@@ -206,6 +206,10 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblSOSalesOrder';
 	EXEC tSQLt.FakeTable 'dbo.tblSOSalesOrderDetail', @Identity = 1;
 
+	EXEC tSQLt.FakeTable 'dbo.tblARInvoice', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblARInvoiceDetail', @Identity = 1;
+
+
 	-- Sales Order Ids 
 	DECLARE @STR_SO_10001 AS NVARCHAR(50) = 'SO-10001'
 

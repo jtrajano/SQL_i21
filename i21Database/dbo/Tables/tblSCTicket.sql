@@ -56,6 +56,7 @@
     [ysnTicketPrinted] BIT NULL, 
     [ysnPlantTicketPrinted] BIT NULL, 
     [ysnGradingTagPrinted] BIT NULL, 
+    [intHaulerId] INT NULL, 
     [intFreightCarrierId] INT NULL, 
     [dblFreightRate] DECIMAL(9, 5) NULL, 
     [dblFreightAdjustment] DECIMAL(7, 2) NULL, 
@@ -605,6 +606,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'ysnGradingTagPrinted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Freight Carrier Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intHaulerId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Freight Carrier Id',

@@ -17,22 +17,19 @@ BEGIN
 	SET @calculatedValue = 
 			CASE	WHEN @intLotItemUOMId = @intCostingItemUOMId THEN 
 						-- @dblCostingQty is in Lot UOM. 
-						ISNULL(@dblLotQty, 0)
+						ISNULL(@dblLotQty, 0) 
 						+ ISNULL(@dblCostingQty, 0)
 					ELSE 
 						-- @dblCostingQty is in Weight. Since it is a weight, need to convert it into Qty. 						
 						CASE	WHEN ISNULL(@dblLotWeightPerQty, 0) = 0 THEN 
 									@dblLotQty
 								ELSE 
-									dbo.fnDivide (
-										(
-											ISNULL(@dblLotWeight, 0)
-											+ ISNULL(@dblCostingQty, 0) 
-										)
+									dbo.fnDivide(
+										ISNULL(@dblLotWeight, 0) + ISNULL(@dblCostingQty, 0) 
 										,@dblLotWeightPerQty 
-									)
+									) 
 						END 
 			END
 
-	RETURN @calculatedValue
+	RETURN @calculatedValue; 
 END

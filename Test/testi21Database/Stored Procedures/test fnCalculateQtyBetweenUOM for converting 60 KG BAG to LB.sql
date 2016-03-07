@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnCalculateQtyBetweenUOM for converting 60 KG BAG to LB]
+﻿ CREATE PROCEDURE testi21Database.[test fnCalculateQtyBetweenUOM for converting 60 KG BAG to LB]
 AS 
 BEGIN
 	-- Call the fake data
@@ -12,7 +12,7 @@ BEGIN
 	DECLARE @dblQty AS NUMERIC(18,6) = 1
 
 	DECLARE @result AS NUMERIC(38,20)
-	DECLARE @expected AS NUMERIC(38,20) = 132.27746521102660000000 -- @dblQty * 60.00 / 0.4535920 = 132.2774652110266
+	DECLARE @expected AS NUMERIC(38,20) = 132.27746521102660000000
 
 	-- Act
 	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@60KG_BAG, @LBS, @dblQty)

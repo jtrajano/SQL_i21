@@ -12,11 +12,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal		DECIMAL(18,6)
-		,@DateOnly			DATETIME
-		,@Currency			INT
-		,@ARAccountId		INT
-		,@ShipmentNumber	NVARCHAR(100)
+DECLARE @ZeroDecimal decimal(18,6)
+		,@DateOnly DATETIME
+		,@Currency int
+		,@ARAccountId int
 
 SET @ZeroDecimal = 0.000000
 	
@@ -24,8 +23,6 @@ SELECT @DateOnly = CAST(GETDATE() as date)
 
 SET @Currency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
-
-SELECT @ShipmentNumber = [strShipmentNumber] FROM tblICInventoryShipment WHERE [intInventoryShipmentId] = @ShipmentId
 
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
@@ -162,146 +159,165 @@ WHERE
 DECLARE @NewId as int
 SET @NewId = SCOPE_IDENTITY()
 							
+
 		
 INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
-	,[strDocumentNumber]
 	,[intItemId]
 	,[strItemDescription]
-	,[dblQtyOrdered]
-	,[intOrderUOMId]
-	,[dblQtyShipped]
 	,[intItemUOMId]
+	,[dblQtyOrdered]
+	,[dblQtyShipped]
 	,[dblDiscount]
-	,[dblDiscountAmount]
 	,[dblPrice]
-	,[strPricing]
 	,[dblTotalTax]
 	,[dblTotal]
 	,[intAccountId]
 	,[intCOGSAccountId]
 	,[intSalesAccountId]
 	,[intInventoryAccountId]
-	,[intServiceChargeAccountId]
-	,[strMaintenanceType]
-	,[strFrequency]
-	,[dtmMaintenanceDate]
-	,[dblMaintenanceAmount]
-	,[dblLicenseAmount]
-	,[intTaxGroupId]
-	,[intSCInvoiceId]
-	,[intSCBudgetId]
-	,[strSCInvoiceNumber]
-	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
-	,[strShipmentNumber]
 	,[intSalesOrderDetailId]
-	,[strSalesOrderNumber]
-	,[intContractHeaderId]
-	,[intContractDetailId]
-	,[intShipmentId]
-	,[intShipmentPurchaseSalesContractId]
-	,[intShipmentItemUOMId]
-	,[dblShipmentQtyShipped]
-	,[dblShipmentGrossWt]
-	,[dblShipmentTareWt]
-	,[dblShipmentNetWt]
-	,[intTicketId]
-	,[intTicketHoursWorkedId]
-	,[intOriginalInvoiceDetailId]
-	,[intEntitySalespersonId]
 	,[intSiteId]
-	,[strBillingBy]
 	,[dblPercentFull]
 	,[dblNewMeterReading]
-	,[dblPreviousMeterReading]
-	,[dblConversionFactor]
 	,[intPerformerId]
-	,[ysnLeaseBilling]
-	,[ysnVirtualMeterReading]
+	,[intContractHeaderId]
+    ,[intContractDetailId]
+    ,[intTicketId]
+	,[intTaxGroupId]
 	,[intConcurrencyId])
+           
 SELECT 
-	 [intInvoiceId]							= @NewId
-	,[strDocumentNumber]					= ARSI.[strTransactionNumber] 
-	,[intItemId]							= ARSI.[intItemId] 
-	,[strItemDescription]					= ARSI.[strItemDescription] 
-	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
-	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-	,[dblQtyShipped]						= ARSI.[dblShipmentQuantity] 
-	,[intItemUOMId]							= ARSI.[intShipmentItemUOMId] 
-	,[dblDiscount]							= ARSI.[dblDiscount]
-	,[dblDiscountAmount]					= @ZeroDecimal 
-	,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
-	,[strPricing]							= 'Inventory Shipment'
-	,[dblTotalTax]							= ARSI.[dblTotalTax] 
-	,[dblTotal]								= ARSI.[dblTotal] 
-	,[intAccountId]							= ARSI.[intAccountId] 
-	,[intCOGSAccountId]						= ARSI.[intCOGSAccountId]
-	,[intSalesAccountId]					= ARSI.[intSalesAccountId]
-	,[intInventoryAccountId]				= ARSI.[intInventoryAccountId]
-	,[intServiceChargeAccountId]			= NULL
-	,[strMaintenanceType]					= ''
-	,[strFrequency]							= ''
-	,[dtmMaintenanceDate]					= NULL
-	,[dblMaintenanceAmount]					= @ZeroDecimal 
-	,[dblLicenseAmount]						= @ZeroDecimal
-	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
-	,[intSCInvoiceId]						= NULL
-	,[intSCBudgetId]						= NULL
-	,[strSCInvoiceNumber]					= ''
-	,[strSCBudgetDescription]				= ''
-	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId] 
-	,[strShipmentNumber]					= ARSI.[strTransactionNumber] 
-	,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 
-	,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
-	,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
-	,[intContractDetailId]					= ARSI.[intContractDetailId] 
-	,[intShipmentId]						= ARSI.[intShipmentId] 	
-	,[intShipmentPurchaseSalesContractId]	= NULL
-	,[intShipmentItemUOMId]					= ARSI.[intShipmentItemUOMId] 
-	,[dblShipmentQtyShipped]				= ARSI.[dblShipmentQuantity] 
-	,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
-	,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
-	,[dblShipmentNetWt]						= ARSI.[dblNetWt] 
-	,[intTicketId]							= ARSI.[intTicketId] 
-	,[intTicketHoursWorkedId]				= NULL
-	,[intOriginalInvoiceDetailId]			= NULL
-	,[intEntitySalespersonId]				= NULL
-	,[intSiteId]							= NULL
-	,[strBillingBy]							= ''
-	,[dblPercentFull]						= @ZeroDecimal 
-	,[dblNewMeterReading]					= @ZeroDecimal 
-	,[dblPreviousMeterReading]				= @ZeroDecimal 
-	,[dblConversionFactor]					= @ZeroDecimal 
-	,[intPerformerId]						= NULL
-	,[ysnLeaseBilling]						= 0
-	,[ysnVirtualMeterReading]				= 0	
-	,[intConcurrencyId]						= 1
+	 @NewId									--[intInvoiceId]
+	,SD.[intItemId]							--[intItemId]
+	,SOD.[strItemDescription]				--[strItemDescription] 
+	,SD.[intItemUOMId]						--[intItemUOMId]
+	,SD.[dblQuantity]						--[dblQtyOrdered]
+	,SD.[dblQuantity]						--[dblQtyShipped]
+	,SOD.[dblDiscount]						--[dblDiscount] 
+	,SD.[dblUnitPrice]						--[dblPrice]
+	,SOD.[dblTotalTax]						--[dblTotalTax]
+	,SOD.[dblTotal]							--[dblTotal]
+	,SOD.[intAccountId]						--[intAccountId]
+	,SOD.[intCOGSAccountId]					--[intCOGSAccountId]
+	,SOD.[intSalesAccountId]				--[intSalesAccountId]
+	,SOD.[intInventoryAccountId]			--[intInventoryAccountId]
+	,SD.[intInventoryShipmentItemId]		--[intInventoryShipmentItemId]
+	,SOD.[intSalesOrderDetailId]			--[intSalesOrderDetailId]
+	,NULL									--[intSiteId]
+	,@ZeroDecimal							--[dblPercentFull]
+	,@ZeroDecimal							--[dblMeterReading]
+	,NULL									--[intServicePerformerId]
+	,SOD.[intContractHeaderId]				--[intContractHeaderId]
+    ,SOD.[intContractDetailId]				--[intContractDetailId]
+    ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,SOD.[intTaxGroupId]					--[intTaxGroupId]
+	,1		
 FROM
-	vyuARShippedItems ARSI
+	[tblICInventoryShipmentItem] SD
+INNER JOIN
+	[tblICInventoryShipment] HD
+		ON SD.[intInventoryShipmentId] = HD.[intInventoryShipmentId]
+		AND HD.[intOrderType] = 2 --Sales Order
+LEFT OUTER JOIN
+	[tblSOSalesOrderDetail] SOD
+		ON SD.[intLineNo] = SOD.[intSalesOrderDetailId]
 WHERE
-	ARSI.[strTransactionType] = 'Inventory Shipment'
-	AND ARSI.[strTransactionNumber] = @ShipmentNumber
+	SD.[intInventoryShipmentId] = @ShipmentId
 	
+	
+UNION ALL
+
+SELECT 
+	 @NewId									--[intInvoiceId]
+	,SD.[intItemId]							--[intItemId]
+	,COD.[strItemDescription]				--[strItemDescription] 
+	,SD.[intItemUOMId]						--[intItemUOMId]
+	,SD.[dblQuantity]						--[dblQtyOrdered]
+	,SD.[dblQuantity]						--[dblQtyShipped]
+	,@ZeroDecimal							--[dblDiscount] 
+	,ISNULL(COD.[dblCashPrice], SD.[dblUnitPrice])						--[dblPrice]
+	,@ZeroDecimal							--[dblTotalTax]
+	,SD.[dblQuantity] * SD.[dblUnitPrice]	--[dblTotal]
+	,ACCT.[intAccountId]					--[intAccountId]
+	,ACCT.[intCOGSAccountId]				--[intCOGSAccountId]
+	,ACCT.[intSalesAccountId]				--[intSalesAccountId]
+	,ACCT.[intInventoryAccountId]			--[intInventoryAccountId]
+	,SD.[intInventoryShipmentItemId]		--[intInventoryShipmentItemId]
+	,NULL									--[intSalesOrderDetailId]
+	,NULL									--[intSiteId]
+	,@ZeroDecimal							--[dblPercentFull]
+	,@ZeroDecimal							--[dblMeterReading]
+	,NULL									--[intServicePerformerId]
+	,COD.[intContractHeaderId]				--[intContractHeaderId]
+    ,COD.[intContractDetailId]				--[intContractDetailId]
+    ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,NULL									--[intTaxGroupId]
+	,1		
+FROM
+	[tblICInventoryShipmentItem] SD
+INNER JOIN
+	[tblICInventoryShipment] HD
+		ON SD.[intInventoryShipmentId] = HD.[intInventoryShipmentId]
+		AND HD.[intOrderType] = 1 --Sales Contract		
+LEFT OUTER JOIN
+	[vyuCTContractDetailView] COD
+		ON SD.[intOrderId] = COD.[intContractHeaderId]
+		AND SD.[intLineNo] = COD.[intContractDetailId] 
+LEFT OUTER JOIN
+	[vyuARGetItemAccount] ACCT
+		ON SD.intItemId = ACCT.[intItemId]
+		AND HD.[intShipFromLocationId] = ACCT.[intLocationId] 
+WHERE
+	SD.[intInventoryShipmentId] = @ShipmentId
+
+UNION ALL	
+	
+SELECT 
+	 @NewId									--[intInvoiceId]
+	,SD.[intItemId]							--[intItemId]
+	,I.[strDescription]						--[strItemDescription]  
+	,SD.[intItemUOMId]						--[intItemUOMId]
+	,SD.[dblQuantity]						--[dblQtyOrdered]
+	,SD.[dblQuantity]						--[dblQtyShipped]
+	,@ZeroDecimal							--[dblDiscount] 
+	,SD.[dblUnitPrice]						--[dblPrice]
+	,@ZeroDecimal							--[dblTotalTax]
+	,SD.[dblQuantity] * SD.[dblUnitPrice]	--[dblTotal]
+	,ACCT.[intAccountId]					--[intAccountId]
+	,ACCT.[intCOGSAccountId]				--[intCOGSAccountId]
+	,ACCT.[intSalesAccountId]				--[intSalesAccountId]
+	,ACCT.[intInventoryAccountId]			--[intInventoryAccountId]
+	,SD.[intInventoryShipmentItemId]		--[intInventoryShipmentItemId]
+	,NULL									--[intSalesOrderDetailId]
+	,NULL									--[intSiteId]
+	,@ZeroDecimal							--[dblPercentFull]
+	,@ZeroDecimal							--[dblMeterReading]
+	,NULL									--[intServicePerformerId]
+	,NULL									--[intContractHeaderId]
+    ,NULL									--[intContractDetailId]
+    ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,NULL									--[intTaxGroupId]
+	,1		
+FROM
+	[tblICInventoryShipmentItem] SD
+INNER JOIN
+	[tblICInventoryShipment] HD
+		ON SD.[intInventoryShipmentId] = HD.[intInventoryShipmentId]
+		AND HD.[intOrderType] IN (3,4) --Transfer Order & Direct
+INNER JOIN
+	[tblICItem]	I
+		ON SD.[intItemId] = I.[intItemId] 
+LEFT OUTER JOIN
+	[vyuARGetItemAccount] ACCT
+		ON SD.intItemId = ACCT.[intItemId]
+		AND HD.[intShipFromLocationId] = ACCT.[intLocationId] 
+WHERE
+	SD.[intInventoryShipmentId] = @ShipmentId
+
 		
 EXEC [dbo].[uspARReComputeInvoiceTaxes] @NewId
-
-
-IF ISNULL(@NewId, 0) <> 0
-	BEGIN
-		DECLARE @InvoiceNumber NVARCHAR(250)
-				,@SourceScreen NVARCHAR(250)
-		SELECT @InvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewId
-		SET	@SourceScreen = 'Inventory Shipment to Invoice'
-		EXEC dbo.uspSMAuditLog 
-			 @keyValue			= @NewId						-- Primary Key Value of the Invoice. 
-			,@screenName		= 'AccountsReceivable.view.Invoice'	-- Screen Namespace
-			,@entityId			= @UserId							-- Entity Id.
-			,@actionType		= 'Processed'						-- Action Type
-			,@changeDescription	= @SourceScreen						-- Description
-			,@fromValue			= @ShipmentNumber					-- Previous Value
-			,@toValue			= @InvoiceNumber					-- New Value	
-	END	
 
 SET @NewInvoiceId = @NewId 
 

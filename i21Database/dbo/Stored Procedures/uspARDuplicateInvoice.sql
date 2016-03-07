@@ -208,9 +208,8 @@ BEGIN
 					,@NewInvoiceDetailId			INT
 					,@ErrorMessage					NVARCHAR(MAX)
 					,@ItemId						INT
-					,@OrderUOMId					INT
-					,@ItemQtyOrdered				NUMERIC(18,6)
 					,@ItemUOMId						INT
+					,@ItemQtyOrdered				NUMERIC(18,6)
 					,@ItemQtyShipped				NUMERIC(18,6)
 					,@ItemPrice						NUMERIC(18,6)					
 					,@ItemDescription				NVARCHAR(500)
@@ -246,9 +245,8 @@ BEGIN
 								([intInvoiceId]
 								,[intItemId]
 								,[strItemDescription]
-								,[intOrderUOMId]
-								,[dblQtyOrdered]
 								,[intItemUOMId]
+								,[dblQtyOrdered]
 								,[dblQtyShipped]
 								,[dblDiscount]
 								,[dblPrice]
@@ -285,9 +283,8 @@ BEGIN
 								 @NewInvoiceId
 								,[intItemId] 
 								,[strItemDescription]
-								,[intOrderUOMId]
-								,[dblQtyShipped] * @dblSplitPercent
 								,[intItemUOMId]
+								,[dblQtyShipped] * @dblSplitPercent
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblDiscount]	  * @dblSplitPercent
 								,[dblPrice]      * @dblSplitPercent
@@ -367,9 +364,8 @@ BEGIN
 				BEGIN
 					SELECT
 						 @ItemId						= [intItemId]			
-						,@OrderUOMId					= [intOrderUOMId]
-						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemUOMId						= [intItemUOMId]
+						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDescription				= [strItemDescription]
 						,@ItemPrice						= [dblPrice]						
@@ -407,9 +403,8 @@ BEGIN
 						,@ItemId						= @ItemId
 						,@NewInvoiceDetailId			= @NewInvoiceDetailId	OUTPUT 
 						,@ErrorMessage					= @ErrorMessage	OUTPUT
-						,@OrderUOMId					= @OrderUOMId
-						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemUOMId						= @ItemUOMId
+						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemPrice						= @ItemPrice
 						,@ItemDescription				= @ItemDescription

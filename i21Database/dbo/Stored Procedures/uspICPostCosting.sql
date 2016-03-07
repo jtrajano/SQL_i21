@@ -266,28 +266,144 @@ BEGIN
 	-- ACTUAL COST 
 	IF (@strActualCostId IS NOT NULL)
 	BEGIN 
-		EXEC dbo.uspICPostActualCost
-			@strActualCostId 
-			,@intItemId 
-			,@intItemLocationId 
-			,@intItemUOMId 
-			,@intSubLocationId 
-			,@intStorageLocationId 
-			,@dtmDate 
-			,@dblQty 
-			,@dblUOMQty 
-			,@dblCost 
-			,@dblSalesPrice 
-			,@intCurrencyId 
-			,@dblExchangeRate 
-			,@intTransactionId 
-			,@intTransactionDetailId 
-			,@strTransactionId 
-			,@strBatchId 
-			,@intTransactionTypeId 
-			,@strTransactionForm 
-			,@intEntityUserSecurityId 
-			;
+		-- Check if there is enough stock to reduce an actual stock.
+		-- If it is not enought then use the default costing method of the item-location. 
+		IF (ISNULL(@dblQty, 0) < 0) AND NOT EXISTS (
+			SELECT TOP 1 1 
+			FROM dbo.tblICInventoryActualCost
+			WHERE	strActualCostId = @strActualCostId
+					AND intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+					AND intItemUOMId = @intItemUOMId
+					AND (dblStockIn - dblStockOut) > 0 
+					AND dbo.fnDateGreaterThanEquals(@dtmDate, dtmDate) = 1
+		)
+		BEGIN 
+			DECLARE @intCostingMethod AS INT
+			SELECT @intCostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) 
+
+			IF @intCostingMethod = @AVERAGECOST
+			BEGIN 
+				EXEC dbo.uspICPostAverageCosting
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId
+			END 
+
+			ELSE IF @intCostingMethod = @FIFO
+			BEGIN 
+				EXEC dbo.uspICPostFIFO
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId;
+			END 
+
+			ELSE IF @intCostingMethod = @LIFO
+			BEGIN
+				EXEC dbo.uspICPostLIFO
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId;
+			END 
+
+			ELSE IF @intCostingMethod = @LOTCOST
+			BEGIN 
+				EXEC dbo.uspICPostLot
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@intLotId
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId;
+			END 
+		END 
+		ELSE 
+		BEGIN 
+			EXEC dbo.uspICPostActualCost
+				@strActualCostId 
+				,@intItemId 
+				,@intItemLocationId 
+				,@intItemUOMId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dtmDate 
+				,@dblQty 
+				,@dblUOMQty 
+				,@dblCost 
+				,@dblSalesPrice 
+				,@intCurrencyId 
+				,@dblExchangeRate 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@strTransactionForm 
+				,@intEntityUserSecurityId 
+				;
+		END 
 	END
 
 	--------------------------------------
@@ -340,7 +456,7 @@ BEGIN
 		-- If matched, update the average cost, last cost, and standard cost
 		WHEN MATCHED THEN 
 			UPDATE 
-			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
+			SET		dblAverageCost = CASE WHEN @strActualCostId IS NULL THEN dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost) ELSE ItemPricing.dblAverageCost END 
 					,dblLastCost = CASE WHEN StockToUpdate.Qty > 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblLastCost END 
 					,dblStandardCost = 
 									CASE WHEN StockToUpdate.Qty > 0 THEN 
@@ -362,7 +478,7 @@ BEGIN
 			VALUES (
 				StockToUpdate.intItemId
 				,StockToUpdate.intItemLocationId
-				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost)
+				,CASE WHEN @strActualCostId IS NULL THEN dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost) ELSE 0 END 
 				,StockToUpdate.Cost
 				,StockToUpdate.Cost
 				,1

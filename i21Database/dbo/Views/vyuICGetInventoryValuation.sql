@@ -14,7 +14,7 @@ SELECT	intInventoryValuationKeyId  = [Transaction].intInventoryTransactionId
 		,SubLocation.strSubLocationName
 		,[Transaction].intStorageLocationId
 		,strStorageLocationName = StorageLocation.strName
-		,[Transaction].dtmDate
+		,dtmDate = dbo.fnRemoveTimeOnDate([Transaction].dtmDate)
 		,strTransactionType = TransactionType.strName
 		,[Transaction].strTransactionForm
 		,[Transaction].strTransactionId

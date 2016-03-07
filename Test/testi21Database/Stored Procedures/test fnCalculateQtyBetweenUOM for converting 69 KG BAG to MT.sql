@@ -8,11 +8,6 @@ BEGIN
 			,@69KG_BAG AS INT = 2
 			,@KG AS INT = 3
 
-	DECLARE @METRIC_TON_UnitQty AS NUMERIC(38,20) = 1						-- Metric ton is the stock unit. 
-			,@69KG_BAG_UnitQty AS NUMERIC(38,20) = 0.069			-- One 69KG BAG is 0.069 mt
-			,@KG_UnitQty AS NUMERIC(38,20) = 0.001					-- one KG is 0.001 mt
-			,@LB_UnitQty AS NUMERIC(38,20) = 0.00045359237			-- one LB is 0.00045359237 mt
-
 	-- Arrange
 	DECLARE @dblQty AS NUMERIC(18,6) = 1
 

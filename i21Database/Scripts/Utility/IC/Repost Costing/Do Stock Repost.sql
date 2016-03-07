@@ -160,6 +160,8 @@ BEGIN
 									'Cost of Goods'
 								WHEN @strTransactionForm = 'Inventory Shipment' AND @strTransactionId NOT LIKE 'SI%' THEN 
 									'Inventory In-Transit'
+								WHEN @strTransactionForm = 'Invoice' AND @strTransactionId LIKE 'SI%' THEN 
+									'Cost of Goods'
 								WHEN @strTransactionForm = 'Inventory Transfer' THEN 
 									CASE WHEN EXISTS (SELECT 1 FROM dbo.tblICInventoryTransfer WHERE strTransferNo = @strTransactionId AND strTransferType = 'Location to Location') THEN 
 											NULL
@@ -308,27 +310,28 @@ BEGIN
 						,intStorageLocationId
 						,strActualCostId
 				)
-				SELECT 	intItemId  
-						,intItemLocationId 
-						,intItemUOMId  
-						,dtmDate  
-						,dblQty  
-						,dblUOMQty  
-						,dblCost  = (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId and intItemLocationId = #tmpICInventoryTransaction.intItemLocationId) * dblUOMQty  
-						,dblSalesPrice  
-						,intCurrencyId  
-						,dblExchangeRate  
-						,intTransactionId  
-						,intTransactionDetailId  
-						,strTransactionId  
-						,intTransactionTypeId  
-						,intLotId 
-						,intSubLocationId
-						,intStorageLocationId
-						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction 
-				WHERE	strBatchId = @strBatchId
-						AND dblQty < 0 
+				SELECT 	RebuildTran.intItemId  
+						,RebuildTran.intItemLocationId 
+						,RebuildTran.intItemUOMId  
+						,RebuildTran.dtmDate  
+						,RebuildTran.dblQty  
+						,RebuildTran.dblUOMQty  
+						,dblCost  = (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildTran.intItemId and intItemLocationId = RebuildTran.intItemLocationId) * dblUOMQty  
+						,RebuildTran.dblSalesPrice  
+						,RebuildTran.intCurrencyId  
+						,RebuildTran.dblExchangeRate  
+						,RebuildTran.intTransactionId  
+						,RebuildTran.intTransactionDetailId  
+						,RebuildTran.strTransactionId  
+						,RebuildTran.intTransactionTypeId  
+						,RebuildTran.intLotId 
+						,RebuildTran.intSubLocationId
+						,RebuildTran.intStorageLocationId
+						,invTransfer.strActualCostId
+				FROM	#tmpICInventoryTransaction RebuildTran LEFT JOIN dbo.tblICInventoryTransfer invTransfer
+							ON RebuildTran.strTransactionId = invTransfer.strTransferNo
+				WHERE	RebuildTran.strBatchId = @strBatchId
+						AND RebuildTran.dblQty < 0 
 					
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -376,7 +379,7 @@ BEGIN
 						,Detail.intLotId 
 						,Detail.intFromSubLocationId
 						,Detail.intFromStorageLocationId
-						,strActualCostId = NULL 
+						,strActualCostId = Header.strActualCostId
 				FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 							ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 						INNER JOIN dbo.tblICInventoryTransaction TransferSource
@@ -631,3 +634,24 @@ FROM	tblGLFiscalYearPeriod FYPeriod INNER JOIN tblGLFiscalYearPeriodOriginal FYP
 DROP TABLE tblGLFiscalYearPeriodOriginal
 
 GO
+
+------------------------------------------------------------------------------------------------------------------------------------
+-- Update the GL Summary 
+------------------------------------------------------------------------------------------------------------------------------------
+
+DELETE [dbo].[tblGLSummary]
+
+INSERT INTO tblGLSummary
+SELECT
+		intAccountId
+		,dtmDate
+		,SUM(ISNULL(dblDebit,0)) as dblDebit
+		,SUM(ISNULL(dblCredit,0)) as dblCredit
+		,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
+		,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
+		,strCode
+		,0 as intConcurrencyId
+FROM
+	tblGLDetail
+WHERE ysnIsUnposted = 0	
+GROUP BY intAccountId, dtmDate, strCode

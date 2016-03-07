@@ -1,5 +1,4 @@
-﻿
--- This function calculates the average cost of an item. 
+﻿-- This function calculates the average cost of an item. 
 CREATE FUNCTION [dbo].[fnCalculateAverageCost]
 (
 	@Qty AS NUMERIC(38, 20)
@@ -12,7 +11,7 @@ AS
 BEGIN
 	-- If qty is negative or zero (as to reduce stock), return the same average cost. 
 	IF ISNULL(@Qty, 0) <= 0
-		RETURN @StockAverageCost; 
+		RETURN @StockAverageCost;
 
 	-- If qty is positive (as to increase stock) but stock qty was zero or negative, return cost as the new average cost. 
 	IF ISNULL(@Qty, 0) > 0 AND ISNULL(@StockOnHandQty, 0) <= 0
@@ -24,7 +23,7 @@ BEGIN
 
 	-- If overall stock qty will be positive, return a new average cost based on the calculations below
 	RETURN dbo.fnDivide (
-			dbo.fnMultiply(ISNULL(@Qty, 0), ISNULL(@Cost, 0)) + dbo.fnMultiply(ISNULL(@StockOnHandQty, 0), ISNULL(@StockAverageCost, 0)) 
+			dbo.fnMultiply(@Qty, @Cost) + dbo.fnMultiply(@StockOnHandQty, @StockAverageCost)
 			,ISNULL(@Qty, 0) + ISNULL(@StockOnHandQty, 0)
-		);
+	); 
 END

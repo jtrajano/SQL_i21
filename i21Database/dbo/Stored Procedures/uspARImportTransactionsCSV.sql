@@ -290,9 +290,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intItemId]
 							,[ysnInventory]
 							,[strItemDescription]
-							,[intOrderUOMId]
-							,[dblQtyOrdered]
 							,[intItemUOMId]
+							,[dblQtyOrdered]
 							,[dblQtyShipped]
 							,[dblDiscount]
 							,[dblPrice]
@@ -367,9 +366,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 															CASE WHEN (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @ItemId) = 'Inventory' THEN 1 ELSE 0 END
 														  ELSE 0 END
 							,[strItemDescription]		= @ItemDescription
-							,[intOrderUOMId]			= NULL
-							,[dblQtyOrdered]			= @ItemQtyShipped
 							,[intItemUOMId]				= NULL
+							,[dblQtyOrdered]			= @ItemQtyShipped
 							,[dblQtyShipped]			= @ItemQtyShipped
 							,[dblDiscount]				= @DiscountPercentage
 							,[dblPrice]					= @ItemPrice

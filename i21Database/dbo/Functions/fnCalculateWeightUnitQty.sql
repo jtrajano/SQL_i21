@@ -7,7 +7,7 @@ RETURNS NUMERIC(38, 20)
 AS
 BEGIN 
 	DECLARE @result AS NUMERIC(38, 20)
-			,@calculatedValue AS FLOAT
+			,@calculatedValue AS NUMERIC(38, 20)
 
 	-- The formula is Total Weight / Qty
 	-- If Qty is zero or null, return zero. 
@@ -15,8 +15,8 @@ BEGIN
 			CASE		WHEN ISNULL(@dblQty, 0) = 0 THEN 
 						0.0
 					ELSE
-						dbo.fnDivide(ISNULL(@dblTotalWeight, 0), ISNULL(@dblQty, 0)) 
+						dbo.fnDivide(@dblTotalWeight, @dblQty) 
 			END
 
-	RETURN @calculatedValue; 
+	RETURN @calculatedValue
 END

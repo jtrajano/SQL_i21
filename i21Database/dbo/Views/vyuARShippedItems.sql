@@ -27,8 +27,6 @@ SELECT
 	,[strItemDescription]				= SOD.[strItemDescription]
 	,[intItemUOMId]						= SOD.[intItemUOMId]
 	,[strUnitMeasure]					= U.[strUnitMeasure]
-	,[intOrderUOMId]					= SOD.[intItemUOMId]
-	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
 	,[intShipmentItemUOMId]				= SOD.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
 	,[dblQtyShipped]					= SOD.[dblQtyShipped]	
@@ -142,8 +140,6 @@ SELECT
 	,[strItemDescription]				= SOD.[strItemDescription]
 	,[intItemUOMId]						= SOD.[intItemUOMId]
 	,[strUnitMeasure]					= U.[strUnitMeasure]
-	,[intOrderUOMId]					= SOD.[intItemUOMId]
-	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
 	,[intShipmentItemUOMId]				= SOD.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
 	,[dblQtyShipped]					= SOD.[dblQtyShipped]
@@ -250,10 +246,8 @@ SELECT
 	,[intItemId]						= SOD.[intItemId]	
 	,[strItemNo]						= I.[strItemNo] 
 	,[strItemDescription]				= SOD.[strItemDescription]
-	,[intItemUOMId]						= SHP.[intItemUOMId]
+	,[intItemUOMId]						= SOD.[intItemUOMId]
 	,[strUnitMeasure]					= U.[strUnitMeasure]
-	,[intOrderUOMId]					= SOD.[intItemUOMId]
-	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
 	,[intShipmentItemUOMId]				= SHP.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= SHP.[strUnitMeasure]
 	,[dblQtyShipped]					= SOD.[dblQtyShipped]	
@@ -428,12 +422,10 @@ SELECT
 	,[strItemDescription]				= ICI.[strDescription] 
 	,[intItemUOMId]						= ICISI.[intItemUOMId]
 	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
-	,[intOrderUOMId]					= ISNULL(CTCD.[intItemUOMId],NULL)
-	,[strOrderUnitMeasure]				= ISNULL(ICUM2.[strUnitMeasure],'')
 	,[intShipmentItemUOMId]				= ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId])
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
 	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
-	,[dblQtyOrdered]					= CASE WHEN CTCD.[intContractDetailId] IS NOT NULL THEN CTCD.dblDetailQuantity ELSE 0 END 
+	,[dblQtyOrdered]					= 0 
 	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
 	,[dblShipmentQtyShippedTotal]		= ICISI.[dblQuantity]
 	,[dblQtyRemaining]					= ICISI.[dblQuantity]
@@ -526,10 +518,7 @@ LEFT JOIN
 		ON ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]) = ICIU1.[intItemUOMId] 
 LEFT JOIN
 	tblICUnitMeasure ICUM1
-		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]
-LEFT JOIN
-	tblICUnitMeasure ICUM2
-		ON CTCD.[intUnitMeasureId] = ICUM2.[intUnitMeasureId]					
+		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]				
 INNER JOIN
 	tblEntity EME
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
@@ -576,8 +565,6 @@ SELECT
 	,[strItemDescription]				= ''
 	,[intItemUOMId]						= NULL
 	,[strUnitMeasure]					= ''
-	,[intOrderUOMId]					= NULL
-	,[strOrderUnitMeasure]				= ''
 	,[intShipmentItemUOMId]				= NULL
 	,[strShipmentUnitMeasure]			= ''
 	,[dblQtyShipped]					= 0.00

@@ -11,12 +11,9 @@ BEGIN
 	-- formula is cost  / unit qty
 	-- If unit qty is zero, return cost. 
 	SET @result =	CASE	WHEN ISNULL(@dblUnitQty, 0) = 0 THEN 
-								@dblCost 
+								@dblCost
 							ELSE	
-								dbo.fnDivide (
-									@dblCost
-									,@dblUnitQty
-								)
+								dbo.fnDivide(@dblCost, @dblUnitQty) 
 					END 
 
 	RETURN ISNULL(@result, 0);
