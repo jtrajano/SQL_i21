@@ -174,8 +174,8 @@ BEGIN TRY
 			,intSequenceNo int
 			,ysnEOModified bit
 			,intDemandRatio int
-			,dtmEarliestDate int
-			,dtmLatestDate int
+			,dtmEarliestDate DATETIME
+			,dtmLatestDate DATETIME
 			) x Where x.intStatusId<>1
 	ORDER BY x.intExecutionOrder
 	
@@ -272,8 +272,8 @@ BEGIN TRY
 			,ysnFrozen BIT
 			,intSequenceNo int
 			,intDemandRatio int
-			,dtmEarliestDate int
-			,dtmLatestDate int
+			,dtmEarliestDate DATETIME
+			,dtmLatestDate DATETIME
 			) x Where x.intStatusId=1
 	ORDER BY x.intExecutionOrder
 	
