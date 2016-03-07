@@ -1701,8 +1701,8 @@ IF @post = 1
 				,Header.strInvoiceNumber 
 				,@INVENTORY_SHIPMENT_TYPE
 				,NULL 
-				,NULL
-				,NULL
+				,IST.intSubLocationId
+				,IST.intStorageLocationId
 				,strActualCostId = Header.strActualCostId
 			FROM 
 				tblARInvoiceDetail Detail
