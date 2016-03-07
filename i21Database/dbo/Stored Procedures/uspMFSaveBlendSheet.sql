@@ -167,6 +167,8 @@ BEGIN TRY
 	SET intStorageLocationId = NULL
 	WHERE intStorageLocationId = 0
 
+	Update @tblBlendSheet Set dblQtyToProduce=(Select SUM(ISNULL(dblQty,0)) From @tblLot)
+
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblMFCompanyPreference
 
