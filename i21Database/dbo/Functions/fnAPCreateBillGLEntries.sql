@@ -57,10 +57,9 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
-												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 AND Rate.ysnSubCurrency = 0 THEN A.dblAmountDue / Rate.dblRate 
-												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 AND Rate.ysnSubCurrency > 0  THEN A.dblAmountDue / Rate.dblRate
-											 ELSE A.dblAmountDue END),
+		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 THEN A.dblAmountDue / Rate.dblRate 
+											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -155,7 +154,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
+		[dblDebit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
 												  --WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate 
 												  --WHEN A.intTransactionType IN (1) AND B.ysnSubCurrency > 0 THEN B.dblTotal + CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
 												ELSE 
@@ -176,7 +175,7 @@ BEGIN
 																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
 															END)
 													END
-												END), --Bill Detail
+												END) AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
