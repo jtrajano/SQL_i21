@@ -3522,12 +3522,12 @@
     <Build Include="dbo\Tables\tblTFTaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblTFTaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponentConfiguration.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFields.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_Transactions.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponentConfiguration.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFields.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transactions.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
   </ItemGroup>
   <ItemGroup>
