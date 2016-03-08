@@ -24,7 +24,7 @@ BEGIN
 				AS 
 				SELECT DISTINCT
 					strLocationName = vwloc_loc_no
-					,intCompanyLocationId = A.A4GLIdentity
+					,intLocationId = A.A4GLIdentity
 					,intConcurrencyId = 0
 				FROM vwlocmst A
 				INNER JOIN tblTMSite B
@@ -41,7 +41,7 @@ BEGIN
 
 			SELECT DISTINCT
 				A.strLocationName
-				,A.intCompanyLocationId
+				,intLocationId = A.intCompanyLocationId
 				,intConcurrencyId = 0
 			FROM tblSMCompanyLocation A
 			INNER JOIN tblTMSite B

@@ -51,7 +51,8 @@ BEGIN
 						agloc_loc_no	COLLATE Latin1_General_CI_AS as vwloc_loc_no,
 						agloc_name		COLLATE Latin1_General_CI_AS as vwloc_name,
 						agloc_addr		COLLATE Latin1_General_CI_AS as vwloc_addr,
-						CAST(A4GLIdentity AS INT) as A4GLIdentity	
+						CAST(A4GLIdentity AS INT) as A4GLIdentity,	
+						intConcurrencyId = 0
 					FROM aglocmst
 				
 				')
@@ -66,7 +67,8 @@ BEGIN
 						ptloc_loc_no	COLLATE Latin1_General_CI_AS as vwloc_loc_no,
 						ptloc_name		COLLATE Latin1_General_CI_AS as vwloc_name,
 						ptloc_addr		COLLATE Latin1_General_CI_AS as vwloc_addr,
-						CAST(A4GLIdentity AS INT) as A4GLIdentity	
+						CAST(A4GLIdentity AS INT) as A4GLIdentity,	
+						intConcurrencyId = 0	
 					FROM ptlocmst
 				
 				')
@@ -81,7 +83,8 @@ BEGIN
 				vwloc_loc_no = strLocationName
 				,vwloc_name = strLocationName
 				,vwloc_addr	= strAddress
-				,CAST(intCompanyLocationId AS INT) as A4GLIdentity	
+				,CAST(intCompanyLocationId AS INT) as A4GLIdentity,	
+				intConcurrencyId
 			FROM tblSMCompanyLocation
 			
 		')

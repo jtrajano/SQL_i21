@@ -5,7 +5,7 @@ AS
 
 SELECT DISTINCT
 	A.strLocationName
-	,A.intCompanyLocationId
+	,intLocationId = A.intCompanyLocationId
 	,intConcurrencyId = 0
 FROM tblSMCompanyLocation A
 INNER JOIN tblTMSite B
