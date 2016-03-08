@@ -1395,5 +1395,27 @@ BEGIN
         ,''
 END
 GO
-
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 67
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 67
+        ,'Schedule Type'
+        ,5
+        ,3
+        ,0
+        ,'Select ''Forward Schedule'' as ValueMember,''Forward Schedule'' as DisplayMember UNION Select ''Backward Schedule'' as ValueMember,''Backward Schedule'' as DisplayMember'
+END
+GO
 
