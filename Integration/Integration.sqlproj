@@ -313,5 +313,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateLocationUsedBySiteView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDriverUsedBySiteView.sql" />
     <None Include="dbo\Views\vyuTMOriginItemUsedBySite.sql" />
+    <None Include="Scripts\TM\PopulateLocationIdInDeviceTable.sql" />
   </ItemGroup>
 </Project>
