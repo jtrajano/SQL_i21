@@ -547,7 +547,6 @@ BEGIN TRY
 							AND @dtmPlannedEndDate BETWEEN dtmStartTime
 								AND dtmEndTime
 
-
 						IF @intShiftBreakTypeDuration IS NOT NULL
 							SELECT @dtmPlannedStartDate = DATEADD(MINUTE, - @intShiftBreakTypeDuration, @dtmPlannedStartDate)
 
@@ -659,7 +658,7 @@ BEGIN TRY
 									,intDuration
 									)
 								VALUES (
-									@intWorkOrderId
+									@intPreviousWorkOrderId
 									,@intScheduleRuleId
 									,@dtmPlannedStartDate
 									,@dtmPlannedEndDate
