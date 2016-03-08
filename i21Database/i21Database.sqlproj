@@ -3196,7 +3196,6 @@
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Tables\tblEntityGroup.sql" />
     <Build Include="dbo\Tables\tblEntityGroupDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfMISC.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfTransmitter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUnpostCostAdjustmentGL.sql" />
