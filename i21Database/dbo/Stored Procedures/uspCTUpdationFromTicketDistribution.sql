@@ -23,6 +23,7 @@ BEGIN TRY
 			@ApplyScaleToBasis		BIT,
 			@intContractHeaderId	INT,
 			@ysnAllowedToShow		BIT,
+			@ysnUnlimitedQuantity	BIT,
 			@strContractStatus		NVARCHAR(MAX)
 
 	DECLARE @Processed TABLE
@@ -119,14 +120,17 @@ BEGIN TRY
 		SELECT	@dblBalance		=	NULL,
 				@dblQuantity	=	NULL,
 				@dblCost		=	NULL,
-				@dblAvailable	=	NULL
+				@dblAvailable	=	NULL,
+				@ysnUnlimitedQuantity = NULL
 
-		SELECT	@dblBalance		=	dblBalance,
-				@dblQuantity	=	dblQuantity,
-				@dblCost		=	ISNULL(dblBasis,0)+ISNULL(dblFutures,0),
-				@dblAvailable	=	ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0)
-		FROM	tblCTContractDetail 
-		WHERE	intContractDetailId = @intContractDetailId
+		SELECT	@dblBalance		=	CD.dblBalance,
+				@dblQuantity	=	CD.dblQuantity,
+				@dblCost		=	ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0),
+				@dblAvailable	=	ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0),
+				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity
+		FROM	tblCTContractDetail CD
+		JOIN	tblCTContractHeader CH	ON CH.intContractHeaderId = CD.intContractHeaderId 
+		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		IF @ysnDP = 1
 		BEGIN
@@ -170,7 +174,7 @@ BEGIN TRY
 			GOTO CONTINUEISH
 		END
 
-		IF	@dblNetUnits <= @dblAvailable
+		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblAvailable,@dblNetUnits,@dblAvailable - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
 
