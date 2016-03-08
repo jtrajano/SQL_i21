@@ -3529,6 +3529,8 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transactions.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
