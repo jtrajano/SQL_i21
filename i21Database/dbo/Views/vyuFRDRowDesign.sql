@@ -9,7 +9,7 @@ intRowDetailId
 ,B.strDescription as strHeaderDescription
 ,intRefNo
 ,'R' + CAST(intRefNo as NVARCHAR(10)) as strRefNo
-,B.strDescription
+,A.strDescription
 ,strRowType
 ,strBalanceSide
 ,strSource
