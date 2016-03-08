@@ -15,6 +15,8 @@ BEGIN TRY
 		,@dtmCurrentDate datetime=GetDate()
 		,@strItemNo nVarchar(50)
 		,@strItemStatus nVarchar(50)
+		,@intKitStatusId INT
+		,@ysnKittingEnabled bit
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -29,7 +31,7 @@ BEGIN TRY
 			,intLocationId int
 			)
 
-	Select @intStatusId=intStatusId,@strWONo=strWorkOrderNo
+	Select @intStatusId=intStatusId,@strWONo=strWorkOrderNo,@intKitStatusId=ISNULL(intKitStatusId,0),@ysnKittingEnabled=ISNULL(ysnKittingEnabled,0)
 		From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
 	Select @strItemNo=strItemNo,@strItemStatus=strStatus From tblICItem Where intItemId=@intItemId
@@ -43,6 +45,12 @@ BEGIN TRY
 	if (@strItemStatus) <> 'Active'
 	Begin
 		Set @strErrMsg='The blend item ' + @strItemNo + ' is not active, cannot start the blend sheet.'
+		RaisError(@strErrMsg,16,1)
+	End
+
+	if @ysnKittingEnabled=1 AND @intKitStatusId <> 8
+	Begin
+		Set @strErrMsg='The blend sheet ' + @strWONo + ' requires kitting, cannot start the blend sheet.'
 		RaisError(@strErrMsg,16,1)
 	End
 
