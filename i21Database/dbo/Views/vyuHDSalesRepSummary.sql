@@ -8,9 +8,9 @@
 			,Tasks = count(Tasks)
 			,Meetings = count(Meetings)
 			,Quotes = count(QuoteType)
-			,DollarValueOfQuotes = 15000.00--sum(QuoteAmountDue)
+			,DollarValueOfQuotes = sum(QuoteAmountDue)
 			,Orders = count(OrderTransactionType)
-			,DollarValueOfOrders = 10000.00--sum(OrderAmountDue)
+			,DollarValueOfOrders = sum(OrderAmountDue)
 		From
 		(
 		select
