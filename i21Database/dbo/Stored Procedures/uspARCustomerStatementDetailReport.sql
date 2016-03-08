@@ -62,7 +62,8 @@ DECLARE @temp_aging_table TABLE(
 	,[dblAmountPaid]			NUMERIC(18,6)
 	,[dblCredits]				NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME	
+	,[dtmAsOfDate]				DATETIME
+	,[strSalespersonName]		NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -143,7 +144,7 @@ ELSE
 	END
 
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateWithCurrentReport] @dtmDateFrom, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 

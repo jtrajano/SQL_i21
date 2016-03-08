@@ -6,7 +6,7 @@ SELECT A.strInvoiceNumber
 	 , A.strBOLNumber
 	 , A.intEntityCustomerId     
 	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
-	 , dblTotalAR			= SUM(B.dblTotalDue)
+	 , dblTotalAR			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= SUM(B.dbl0Days)
 	 , dbl10Days			= SUM(B.dbl10Days)

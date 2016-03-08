@@ -21,7 +21,7 @@ SELECT A.strInvoiceNumber
 	 , A.intEntityCustomerId
 	 , A.strCustomerNumber
 	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
-	 , dblTotalAR			= B.dblTotalDue
+	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= B.dbl0Days
 	 , dbl10Days			= B.dbl10Days
