@@ -607,8 +607,8 @@ BEGIN TRY
 							JOIN dbo.tblMFScheduleGroupDetail(NOLOCK) TG ON FD.intToScheduleGroupId = TG.intScheduleGroupId
 							JOIN dbo.tblMFScheduleChangeoverFactor(NOLOCK) F ON F.intChangeoverFactorId = FD.intChangeoverFactorId
 							WHERE F.intManufacturingCellId = @intManufacturingCellId
-								AND FG.strGroupValue = @strPreviousColumnValue
-								AND TG.strGroupValue = @strColumnValue
+								AND FG.strGroupValue = @strColumnValue 
+								AND TG.strGroupValue = @strPreviousColumnValue
 
 							IF @intChangeoverTime IS NOT NULL
 							BEGIN
