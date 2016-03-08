@@ -659,7 +659,7 @@ BEGIN TRY
 									,intDuration
 									)
 								VALUES (
-									@intWorkOrderId
+									@intPreviousWorkOrderId
 									,@intScheduleRuleId
 									,@dtmPlannedStartDate
 									,@dtmPlannedEndDate
