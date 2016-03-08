@@ -822,7 +822,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colAllocateCostBy: {
                     dataIndex: 'strAllocateCostBy',
                     editor: {
-                        readOnly: '{checkInventoryCost}',
+                        readOnly: '{checkInventoryCostAndPrice}',
                         store: '{allocateBy}'
                     }
                 },
@@ -2668,7 +2668,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     intCostUOMId: cost.intItemUOMId,
                                     intEntityVendorId: cost.intVendorId,
                                     dblAmount: 0,
-                                    strAllocateCostBy: '',
+                                    strAllocateCostBy: 'Unit',
                                     ysnAccrue: cost.ysnAccrue,
                                     ysnPrice: cost.ysnPrice,
 
@@ -3968,7 +3968,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             intCostUOMId: otherCharge.intItemUOMId,
                                                             intEntityVendorId: otherCharge.intVendorId,
                                                             dblAmount: 0,
-                                                            strAllocateCostBy: '',
+                                                            strAllocateCostBy: 'Unit',
                                                             ysnAccrue: otherCharge.ysnAccrue,
                                                             ysnPrice: otherCharge.ysnPrice,
                                                             strItemNo: otherCharge.strItemNo,
