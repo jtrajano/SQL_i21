@@ -2100,7 +2100,7 @@ IF @post = 1
 				,intLotId					= NULL 
 				,intSubLocationId			= IST.intSubLocationId
 				,intStorageLocationId		= IST.intStorageLocationId
-				,strActualCostId			= Header.strActualCostId
+				,strActualCostId			= CASE WHEN (ISNULL(Header.intDistributionHeaderId,0) <> 0 OR ISNULL(Header.intLoadDistributionHeaderId,0) <> 0) THEN Header.strActualCostId ELSE NULL END
 			FROM 
 				tblARInvoiceDetail Detail
 			INNER JOIN
@@ -2155,7 +2155,7 @@ IF @post = 1
 				,intLotId					= NULL 
 				,intSubLocationId			= IST.intSubLocationId
 				,intStorageLocationId		= IST.intStorageLocationId
-				,strActualCostId			= ARI.[strActualCostId]
+				,strActualCostId			= CASE WHEN (ISNULL(ARI.intDistributionHeaderId,0) <> 0 OR ISNULL(ARI.intLoadDistributionHeaderId,0) <> 0) THEN ARI.strActualCostId ELSE NULL END
 			FROM
 				vyuARGetItemComponents ARIC
 			INNER JOIN
