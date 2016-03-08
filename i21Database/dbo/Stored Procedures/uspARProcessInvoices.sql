@@ -1082,6 +1082,7 @@ BEGIN TRY
 						,@ItemPerformerId				= [intPerformerId]
 						,@ItemLeaseBilling				= [ysnLeaseBilling]
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
+						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1290,6 +1291,7 @@ BEGIN TRY
 					,@ItemPerformerId				= [intPerformerId]
 					,@ItemLeaseBilling				= [ysnLeaseBilling]
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
+					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 				FROM
 					@InvoiceEntries
 				WHERE
