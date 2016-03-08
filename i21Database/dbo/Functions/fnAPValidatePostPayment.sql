@@ -288,6 +288,20 @@ BEGIN
 			ON B.intBillId = C.intBillId
 		WHERE C.intEntityVendorId <> A.intEntityVendorId
 		AND A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+
+		--DO NOT ALLOW TO POST DEBIT MEMOS AND PAYMENTS IF AMOUNT PAID IS NOT EQUAL TO ZERO
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Payment ' + A.strPaymentRecordNum + ' has incorrect payment method.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A
+		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
+		WHERE A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		AND LOWER(B.strPaymentMethod) = 'debit memos and payments'
+		AND A.dblAmountPaid != 0
+
 	END
 	ELSE
 	BEGIN
