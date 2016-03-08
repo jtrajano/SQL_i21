@@ -496,8 +496,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return true;
             }
         },
-        checkInventoryCost: function (get) {
-            if (get('grdCharges.selection.ysnInventoryCost')) {
+        checkInventoryCostAndPrice: function (get) {
+            if (
+                get('grdCharges.selection.ysnInventoryCost') ||
+                get('grdCharges.selection.ysnPrice')
+            ) {
                 return false;
             }
             else
