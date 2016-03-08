@@ -3520,6 +3520,7 @@
     <Build Include="dbo\Views\vyuRKGetMarketBrokerList.sql" />
     <Build Include="dbo\User Defined Types\ScheduleConstraintTable.sql" />
     <Build Include="dbo\Views\vyuHDSalesRepSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
