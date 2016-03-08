@@ -21,17 +21,22 @@ BEGIN TRY
 	DECLARE @CurrentItemOpenBalance DECIMAL(24, 10)
 	DECLARE @intCustomerStorageId INT
 	DECLARE @dblStorageUnits DECIMAL(24, 10)
+	DECLARE @dblNegativeStorageUnits DECIMAL(24, 10)
 	DECLARE @dblOpenBalance DECIMAL(24, 10)
 	DECLARE @strStorageTicketNumber NVARCHAR(50)
 	DECLARE @intCompanyLocationId INT
 	DECLARE @intStorageTypeId INT
 	DECLARE @intStorageScheduleId INT
+	DECLARE @ContractHeaderId INT
+	DECLARE @ContractDetailId INT
+	DECLARE @dblDPStorageUnits DECIMAL(24, 10)
 	
 	--Contract Varibales
 	DECLARE @SettleContractKey INT
 	DECLARE @intContractDetailId INT
 	DECLARE @intContractHeaderId INT
 	DECLARE @dblContractUnits DECIMAL(24, 10)
+	DECLARE @dblNegativeContractUnits DECIMAL(24, 10)
 	DECLARE @strContractNumber NVARCHAR(50)
 	DECLARE @ContractEntityId INT
 	DECLARE @dblAvailableQty DECIMAL(24, 10)
@@ -69,6 +74,7 @@ BEGIN TRY
 		,intCompanyLocationId INT
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
+		,intContractHeaderId INT	
 	)
 
 	CREATE TABLE #SettleStorageCopy 
@@ -81,6 +87,7 @@ BEGIN TRY
 		,intCompanyLocationId INT
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
+		,intContractHeaderId INT		
 	)
 
 	DECLARE @SettleContract AS TABLE 
@@ -129,6 +136,7 @@ BEGIN TRY
 			,intCompanyLocationId
 			,intStorageTypeId
 			,intStorageScheduleId
+			,intContractHeaderId
 		)
 	SELECT intCustomerStorageId
 		,dblUnits
@@ -137,6 +145,7 @@ BEGIN TRY
 		,intCompanyLocationId
 		,intStorageTypeId
 		,intStorageScheduleId
+		,intContractHeaderId INT
 	FROM OPENXML(@idoc, 'root/SettleStorage', 2) WITH 
 	(
 			intCustomerStorageId INT
@@ -146,6 +155,7 @@ BEGIN TRY
 			,intCompanyLocationId INT
 			,intStorageTypeId INT
 			,intStorageScheduleId INT
+			,intContractHeaderId INT
 	)
 	
 	INSERT INTO @SettleContract 
@@ -186,10 +196,7 @@ BEGIN TRY
 			,dblSpotPrice DECIMAL(24, 10)
 			,dblSpotBasis DECIMAL(24, 10)
 			,dblSpotCashPrice DECIMAL(24, 10)
-	)	
-
-	
-	
+	)		
 		
 	SELECT @SettleStorageKey = MIN(intSettleStorageKey)	FROM #SettleStorage	WHERE dblStorageUnits > 0
 	
@@ -201,7 +208,9 @@ BEGIN TRY
 	SET @intStorageTypeId = NULL
 	SET @intStorageScheduleId = NULL
 	SET @CurrentItemOpenBalance = NULL
-	
+	SET @dblDPStorageUnits=NULL
+	SET @ContractHeaderId = NULL
+	SET @ContractDetailId = NULL
 		--SELECT @CurrentItemOpenBalance = dblOpenBalance
 		--FROM tblGRCustomerStorage
 		--WHERE intCustomerStorageId = @intCustomerStorageId
@@ -229,9 +238,24 @@ BEGIN TRY
 			,@strStorageTicketNumber = strStorageTicketNumber
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intStorageTypeId = intStorageTypeId
-			,@intStorageScheduleId = intStorageScheduleId		
+			,@intStorageScheduleId = intStorageScheduleId
+			,@ContractHeaderId=intContractHeaderId		
 		FROM #SettleStorage
-		WHERE intSettleStorageKey = @SettleStorageKey	
+		WHERE intSettleStorageKey = @SettleStorageKey
+		
+		IF ISNULL(@ContractHeaderId,0)>0
+		BEGIN
+			SELECT @ContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ContractHeaderId
+			SET @dblDPStorageUnits= - @dblStorageUnits
+
+			 EXEC uspCTUpdateSequenceQuantity 
+			 @intContractDetailId=@ContractDetailId
+			,@dblQuantityToUpdate=@dblDPStorageUnits
+			,@intUserId=@UserKey
+			,@intExternalId=@intCustomerStorageId
+			,@strScreenName='Settle Storage'
+
+		END	
 		
 		IF EXISTS (SELECT 1 FROM @SettleContract WHERE dblContractUnits > 0 )
 		BEGIN
@@ -245,6 +269,7 @@ BEGIN TRY
 			SET @strContractType = NULL
 			SET @dblCashPrice = NULL
 			SET @intContractHeaderId = NULL
+			SET @dblNegativeContractUnits=NULL
 			
 			
 
@@ -264,15 +289,15 @@ BEGIN TRY
 
 				IF @dblStorageUnits <= @dblContractUnits
 				BEGIN
-					
+					SET @dblNegativeStorageUnits= - @dblStorageUnits					
 
 					UPDATE @SettleContract SET dblContractUnits = dblContractUnits - @dblStorageUnits WHERE intSettleContractKey = @SettleContractKey
 															
 					UPDATE #SettleStorage SET dblStorageUnits = 0 WHERE intSettleStorageKey = @SettleStorageKey
 					
-					EXEC uspCTUpdateScheduleQuantity 
+					EXEC uspCTUpdateSequenceQuantity 
 						 @intContractDetailId=@intContractDetailId
-						,@dblQuantityToUpdate=@dblStorageUnits
+						,@dblQuantityToUpdate=@dblNegativeStorageUnits
 						,@intUserId=@UserKey
 						,@intExternalId=@intCustomerStorageId
 						,@strScreenName='Settle Storage'
@@ -313,15 +338,15 @@ BEGIN TRY
 				ELSE
 				BEGIN
 
-					
+					SET @dblNegativeStorageUnits= - @dblContractUnits
 						
 					UPDATE @SettleContract SET dblContractUnits = dblContractUnits - @dblContractUnits WHERE intSettleContractKey = @SettleContractKey
 
 					UPDATE #SettleStorage SET dblStorageUnits = 0 WHERE intSettleStorageKey = @SettleStorageKey
 
-					EXEC uspCTUpdateScheduleQuantity 
+					EXEC uspCTUpdateSequenceQuantity 
 						 @intContractDetailId=@intContractDetailId
-						,@dblQuantityToUpdate=@dblContractUnits
+						,@dblQuantityToUpdate=@dblNegativeStorageUnits
 						,@intUserId=@UserKey
 						,@intExternalId=@intCustomerStorageId
 						,@strScreenName='Settle Storage'
@@ -368,6 +393,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					)
 					SELECT 
 						 intSettleStorageKey
@@ -378,6 +404,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					FROM #SettleStorage WHERE intSettleStorageKey > @SettleStorageKey
 
 					DELETE FROM #SettleStorage WHERE intSettleStorageKey > @SettleStorageKey
@@ -393,6 +420,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 						)
 					SELECT @SettleStorageKey + 1
 						,@intCustomerStorageId
@@ -402,6 +430,7 @@ BEGIN TRY
 						,@intCompanyLocationId
 						,@intStorageTypeId
 						,@intStorageScheduleId
+						,@intContractHeaderId
 
 					SET IDENTITY_INSERT [dbo].[#SettleStorage] OFF
 
@@ -414,6 +443,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					)
 					SELECT intCustomerStorageId
 						,dblStorageUnits
@@ -422,6 +452,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					FROM #SettleStorageCopy
 
 					DELETE FROM #SettleStorageCopy
@@ -435,8 +466,78 @@ BEGIN TRY
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey) FROM [#SettleStorage] WHERE intSettleStorageKey > @SettleStorageKey AND dblStorageUnits > 0
 			
 		END
-		ELSE
-		
+		ELSE IF @dblSpotUnits >0
+		BEGIN
+			 
+			 IF @dblStorageUnits<=@dblSpotUnits
+			 BEGIN
+			 Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblStorageUnits Where intCustomerStorageId=@intCustomerStorageId
+
+					--CREATE History For Storage Ticket
+					INSERT INTO [dbo].[tblGRStorageHistory] 
+					(
+					 [intConcurrencyId]
+					,[intCustomerStorageId]	
+					,[intInvoiceId]
+					,[intContractHeaderId]
+					,[dblUnits]
+					,[dtmHistoryDate]					
+					,[strType]
+					,[strUserName]					
+					,[intEntityId]
+					,[strSettleTicket]					
+					)
+				VALUES 
+				   (
+					1
+					,@intCustomerStorageId
+					,NULL
+					,NULL
+					,@dblStorageUnits				
+					,GETDATE()					
+					,'Settlement'
+					,@UserName				
+					,NULL
+					,@TicketNo
+					)
+				SET @dblSpotUnits=@dblSpotUnits-@dblStorageUnits
+			 END
+			 ELSE
+			 BEGIN
+			   Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblSpotUnits Where intCustomerStorageId=@intCustomerStorageId
+
+					--CREATE History For Storage Ticket
+					INSERT INTO [dbo].[tblGRStorageHistory] 
+					(
+					 [intConcurrencyId]
+					,[intCustomerStorageId]	
+					,[intInvoiceId]
+					,[intContractHeaderId]
+					,[dblUnits]
+					,[dtmHistoryDate]					
+					,[strType]
+					,[strUserName]					
+					,[intEntityId]
+					,[strSettleTicket]					
+					)
+				VALUES 
+				   (
+					1
+					,@intCustomerStorageId
+					,NULL
+					,NULL
+					,@dblSpotUnits				
+					,GETDATE()					
+					,'Settlement'
+					,@UserName				
+					,NULL
+					,@TicketNo
+					)
+				SET @dblSpotUnits=0
+			 END
+
+		END
+		ELSE				
 			BREAK;
 	END
 		
