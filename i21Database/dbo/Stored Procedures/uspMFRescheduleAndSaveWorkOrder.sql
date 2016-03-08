@@ -1020,7 +1020,7 @@ BEGIN TRY
 			FROM @tblMFScheduleWorkOrder S
 			WHERE intNoOfUnit > 0
 				AND S.intStatusId <> 1
-			ORDER BY intExecutionOrder DESC
+			ORDER BY intExecutionOrder ASC
 
 			SELECT @strWorkOrderNo = strWorkOrderNo
 			FROM tblMFWorkOrder
