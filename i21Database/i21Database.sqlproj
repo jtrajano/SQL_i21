@@ -3531,6 +3531,7 @@
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
