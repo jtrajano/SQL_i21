@@ -3,8 +3,20 @@ AS
 BEGIN TRY
 	SET NOCOUNT ON
 	DECLARE @strScheduleType nvarchar(50)
-	SELECT @strScheduleType = strScheduleType
-	FROM dbo.tblMFCompanyPreference
+			,@intAttributeId int
+			,@strAttributeValue nvarchar(50)
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Schedule Type'
+	
+	Select @strScheduleType=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intAttributeId
+
+	If @strScheduleType is NULL or @strScheduleType=''
+	Begin
+		SELECT @strScheduleType = strScheduleType
+		FROM dbo.tblMFCompanyPreference
+	End
 
 	IF @strScheduleType='Backward Schedule'
 	BEGIN
