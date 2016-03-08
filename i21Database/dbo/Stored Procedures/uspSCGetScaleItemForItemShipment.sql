@@ -82,7 +82,42 @@ BEGIN TRY
 				WHERE	LI.intTicketId = @intTicketId
 			END
 		END
-		Else
+		ELSE IF @strDistributionOption = 'SPT'
+		BEGIN
+			BEGIN 
+				SELECT	intItemId = ScaleTicket.intItemId
+						,intLocationId = ItemLocation.intItemLocationId 
+						,intItemUOMId = ItemUOM.intItemUOMId
+						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+						,dblQty = @dblNetUnits 
+						,dblUOMQty = ItemUOM.dblUnitQty
+						,dblCost = @dblCost
+						,dblSalesPrice = 0
+						,intCurrencyId = ScaleTicket.intCurrencyId
+						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+						,intTransactionId = ScaleTicket.intTicketId
+						,strTransactionId = ScaleTicket.strTicketNumber
+						,intTransactionTypeId = @intDirectType 
+						,intTransactionDetailId = NULL
+						,intLotId = NULL 
+						,intSubLocationId = ScaleTicket.intSubLocationId
+						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,ysnIsStorage = 0
+				FROM	dbo.tblSCTicket ScaleTicket
+						INNER JOIN dbo.tblICItemUOM ItemUOM
+							ON ScaleTicket.intItemId = ItemUOM.intItemId
+							AND @intTicketItemUOMId = ItemUOM.intItemUOMId
+						INNER JOIN dbo.tblICItemLocation ItemLocation
+							ON ScaleTicket.intItemId = ItemLocation.intItemId
+							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
+						AND TicketCommodityUOM.ysnStockUnit = 1
+				WHERE	ScaleTicket.intTicketId = @intTicketId
+			
+			END
+		END
+		ELSE
 		BEGIN
 			BEGIN 
 				SELECT	intItemId = ScaleTicket.intItemId
