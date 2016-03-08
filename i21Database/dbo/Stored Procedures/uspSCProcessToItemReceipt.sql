@@ -331,12 +331,12 @@ BEGIN TRY
 					dblUnitsRemaining,
 					dblCost)
 					EXEC dbo.uspCTUpdationFromTicketDistribution 
-						@intTicketId
+					@intTicketId
 					,@intEntityId
 					,@dblNetUnits
 					,@intContractId
 					,@intUserId
-					,0
+					,@ysnDPStorage
 
 					DECLARE @intDPContractId INT;
 					DECLARE @dblDPContractUnits NUMERIC(12,4);
