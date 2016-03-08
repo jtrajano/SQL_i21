@@ -3488,9 +3488,6 @@
     <Build Include="dbo\Views\vyuSCTicketView.sql" />
     <Build Include="dbo\Functions\fnMultiply.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillGLEntriesRecords.sql" />
-    <Build Include="dbo\Functions\fnAPGetImportedBillsNotEqualToDetailTotal.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPFixVoucher.sql" />
-    <Build Include="dbo\Views\vyuAPBillPaymentActual.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
     <Build Include="dbo\Views\vyuEME2C2Role.sql" />
@@ -3504,17 +3501,11 @@
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
     <Build Include="dbo\Views\vyuCTContractChart.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckPayable.sql" />
-    <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Views\vyuARInvoiceCompact.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspSMResolveContactRoleMenus.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPRForm941.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
     <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
     <Build Include="dbo\Views\vyuRKGetMarketBrokerList.sql" />
     <Build Include="dbo\User Defined Types\ScheduleConstraintTable.sql" />
