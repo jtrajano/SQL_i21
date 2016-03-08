@@ -32,9 +32,9 @@ BEGIN
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblARCustomer C ON C.intEntityCustomerId = W.intCustomerId
-	JOIN dbo.tblEntity E ON E.intEntityId = C.intEntityCustomerId
-	JOIN dbo.tblEntityType ET ON ET.intEntityId = E.intEntityId
+	LEFT JOIN dbo.tblARCustomer C ON C.intEntityCustomerId = W.intCustomerId
+	LEFT JOIN dbo.tblEntity E ON E.intEntityId = C.intEntityCustomerId
+	LEFT JOIN dbo.tblEntityType ET ON ET.intEntityId = E.intEntityId
 		AND ET.strType = 'Customer'
 	WHERE SW.dtmPlannedStartDate >= @dtmStartDate
 		AND SW.dtmPlannedEndDate <= @dtmEndDate
