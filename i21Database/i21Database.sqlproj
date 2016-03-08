@@ -3520,6 +3520,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transactions.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
