@@ -3523,6 +3523,7 @@
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
+    <Build Include="dbo\Views\vyuEMUserSecurityEntityToRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
