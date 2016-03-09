@@ -398,7 +398,7 @@ BEGIN TRY
 					,@intPackTypeId = intPackTypeId
 					,@dblBalance = dblBalance
 					,@dblConversionFactor = dblConversionFactor
-					,@intNoOfSelectedMachine = @intNoOfMachine
+					,@intNoOfSelectedMachine = intNoOfSelectedMachine
 					,@dtmEarliestStartDate = dtmEarliestStartDate
 					,@intSetupDuration = intSetupDuration
 					,@dtmEarliestDate = dtmEarliestDate
@@ -406,10 +406,15 @@ BEGIN TRY
 					,@dtmTargetDate = dtmTargetDate
 				FROM @tblMFScheduleWorkOrder
 				WHERE intRecordId = @intRecordId
+				
+				IF @intNoOfSelectedMachine IS NULL or @intNoOfSelectedMachine=0
+				BEGIN
+					Select @intNoOfSelectedMachine = @intNoOfMachine
 
-				UPDATE @tblMFScheduleWorkOrder
-				SET intNoOfSelectedMachine = @intNoOfMachine
-				WHERE intRecordId = @intRecordId
+					UPDATE @tblMFScheduleWorkOrder
+					SET intNoOfSelectedMachine = @intNoOfMachine
+					WHERE intRecordId = @intRecordId
+				END
 
 				SELECT @dblStdLineEfficiency = dblLineEfficiencyRate
 				FROM dbo.tblMFManufacturingCellPackType
@@ -698,7 +703,7 @@ BEGIN TRY
 							UPDATE @tblMFScheduleConstraintDetail
 							SET dtmChangeoverStartDate = NULL
 								,dtmChangeoverEndDate = NULL
-							WHERE intWorkOrderId = @intWorkOrderId
+							WHERE intWorkOrderId = @intPreviousWorkOrderId
 						END
 						ELSE
 						BEGIN
@@ -739,7 +744,7 @@ BEGIN TRY
 							UPDATE @tblMFScheduleConstraintDetail
 							SET dtmChangeoverStartDate = @dtmPlannedStartDate
 								,dtmChangeoverEndDate = @dtmPlannedEndDate
-							WHERE intWorkOrderId = @intWorkOrderId
+							WHERE intWorkOrderId = @intPreviousWorkOrderId
 								AND intDuration = @intMaxChangeoverTime
 						END
 
@@ -751,7 +756,7 @@ BEGIN TRY
 					IF EXISTS (
 							SELECT *
 							FROM @tblMFScheduleConstraintDetail
-							WHERE intWorkOrderId = @intWorkOrderId
+							WHERE intWorkOrderId = @intPreviousWorkOrderId
 							)
 					BEGIN
 						SELECT @intChangeoverDuration = (
@@ -764,13 +769,13 @@ BEGIN TRY
 							,@dtmChangeoverStartDate = MIN(dtmChangeoverStartDate)
 							,@dtmChangeoverEndDate = MAX(dtmChangeoverEndDate)
 						FROM @tblMFScheduleConstraintDetail
-						WHERE intWorkOrderId = @intWorkOrderId
+						WHERE intWorkOrderId = @intPreviousWorkOrderId
 
 						UPDATE @tblMFScheduleWorkOrder
 						SET dtmChangeoverStartDate = @dtmChangeoverStartDate
 							,dtmChangeoverEndDate = @dtmChangeoverEndDate
 							,intChangeoverDuration = @intChangeoverDuration
-						WHERE intWorkOrderId = @intWorkOrderId
+						WHERE intWorkOrderId = @intPreviousWorkOrderId
 					END
 				END
 

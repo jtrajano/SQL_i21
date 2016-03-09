@@ -74,6 +74,11 @@ BEGIN TRY
 		,intUnitMeasureId
 		,intScheduleId
 		,ysnFrozen
+		,intNoOfSelectedMachine
+		,intSetupDuration
+			,strComments
+		,strNote
+		,strAdditionalComments
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -99,6 +104,11 @@ BEGIN TRY
 		,x.intUnitMeasureId
 		,x.intScheduleId
 		,x.ysnFrozen
+		,x.intNoOfSelectedMachine
+		,x.intSetupDuration
+		,x.strComments
+		,x.strNote
+		,x.strAdditionalComments
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -118,6 +128,10 @@ BEGIN TRY
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,intSetupDuration INT
+			,intNoOfSelectedMachine int
+			,strComments NVARCHAR(MAX)
+			,strNote NVARCHAR(MAX)
+			,strAdditionalComments NVARCHAR(MAX)
 			) x
 	LEFT JOIN dbo.tblICItemFactory F1 ON F1.intFactoryId = @intLocationId
 		AND F1.intItemId = x.intItemId
