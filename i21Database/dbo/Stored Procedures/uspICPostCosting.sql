@@ -617,6 +617,7 @@ BEGIN
 					,[dtmCreated]
 					,[intCreatedEntityId]
 					,[intConcurrencyId]
+					,[intCostingMethod]
 			)			
 		SELECT	
 				[intItemId]								= @intItemId
@@ -628,7 +629,7 @@ BEGIN
 				,[dblQty]								= 0
 				,[dblUOMQty]							= 0
 				,[dblCost]								= 0
-				,[dblValue]								= (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 				,[dblSalesPrice]						= 0
 				,[intCurrencyId]						= @intCurrencyId
 				,[dblExchangeRate]						= @dblExchangeRate
@@ -643,14 +644,15 @@ BEGIN
 				,[strRelatedTransactionId]				= NULL 
 				,[strTransactionForm]					= @strTransactionForm
 				,[dtmCreated]							= GETDATE()
-				,[intCreatedEntityId]						= @intEntityUserSecurityId
+				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
+				,[intCostingMethod]						= @AVERAGECOST
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
+				AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
 
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative

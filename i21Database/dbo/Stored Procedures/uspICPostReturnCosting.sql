@@ -513,7 +513,7 @@ BEGIN
 				,[dblQty]								= 0
 				,[dblUOMQty]							= 0
 				,[dblCost]								= 0
-				,[dblValue]								= (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 				,[dblSalesPrice]						= 0
 				,[intCurrencyId]						= @intCurrencyId
 				,[dblExchangeRate]						= @dblExchangeRate
@@ -535,7 +535,7 @@ BEGIN
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
+				AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
 
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative

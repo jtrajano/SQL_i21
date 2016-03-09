@@ -236,7 +236,7 @@ BEGIN
 			IF @QtyOffset IS NOT NULL
 			BEGIN 				
 				-- Add Write-Off Sold				
-				SELECT @dblValue = @QtyOffset * ISNULL(@CostUsed, 0) --dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
+				SELECT @dblValue = dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0)) --dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
@@ -266,7 +266,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
 				-- Add Revalue sold
-				SET @dblValue =  @QtyOffset * @dblCost * -1
+				SET @dblValue = dbo.fnMultiply(dbo.fnMultiply(@QtyOffset, @dblCost), -1)
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
@@ -327,11 +327,14 @@ BEGIN
 					AND @NewFifoId IS NOT NULL  	
 
 		SET @dblValue = 0
-		SELECT	@dblValue = (((@dblQty * @dblUOMQty) + Stock.dblUnitOnHand) * (@dblCost / @dblUOMQty)) 
+		SELECT	@dblValue = dbo.fnMultiply(
+								(dbo.fnMultiply(@dblQty, @dblUOMQty) + Stock.dblUnitOnHand) 								
+								,dbo.fnDivide(@dblCost, @dblUOMQty)
+							) 
 							- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId)
 		FROM	[dbo].[tblICItemStock] Stock
-		WHERE	(@dblQty * @dblUOMQty) + Stock.dblUnitOnHand < 0 
-				AND (@dblQty * @dblUOMQty) > 0 
+		WHERE	dbo.fnMultiply(@dblQty, @dblUOMQty) + Stock.dblUnitOnHand < 0 
+				AND dbo.fnMultiply(@dblQty, @dblUOMQty) > 0 
 				AND Stock.intItemId = @intItemId
 				AND Stock.intItemLocationId = @intItemLocationId				
 
