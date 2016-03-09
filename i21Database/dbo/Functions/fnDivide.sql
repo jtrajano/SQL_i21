@@ -15,6 +15,12 @@ BEGIN
 	IF ISNULL(@divisor, 0) = 0 
 		RETURN NULL;
 
+	IF @dividend IS NULL 
+		RETURN NULL;
+
+	IF @divisor IS NULL
+		RETURN NULL; 
+
 	-- Divide it and process the raw result as a string. 
 	-- Avoid the arithmetic overflow by ensuring the numbers are truncated at the 17th digit from the left. 
 	BEGIN 
