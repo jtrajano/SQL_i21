@@ -24,15 +24,29 @@ BEGIN
 	SET @strZipCode = CASE WHEN @strZipCode = '' THEN NULL ELSE @strZipCode END
 	SET @strCountry = CASE WHEN @strCountry = '' THEN NULL ELSE @strCountry END
 
-	SET @fullAddress = ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
+	IF @strBillToName IS NULL
+		BEGIN
+			SET @fullAddress = ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
+					 + ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
+					 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
+					 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
+					 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')
+					 + ISNULL(RTRIM(@strCity), '')
+					 + ISNULL(', ' + RTRIM(@strState), '')
+					 + ISNULL(', ' + RTRIM(@strZipCode), '')
+					 + ISNULL(', ' + RTRIM(@strCountry), '')
+		END
+	ELSE
+		BEGIN
+			SET @fullAddress = ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
-				 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strCity), '')
 				 + ISNULL(', ' + RTRIM(@strState), '')
 				 + ISNULL(', ' + RTRIM(@strZipCode), '')
 				 + ISNULL(', ' + RTRIM(@strCountry), '')
+		END	
 
 	RETURN @fullAddress	
 END
