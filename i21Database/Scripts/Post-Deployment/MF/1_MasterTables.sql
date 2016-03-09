@@ -1435,7 +1435,7 @@ GO
 	BEGIN
 	
 		UPDATE tblWHCompanyPreference
-		SET intCompanyLocationId = @intCompanyLocationId, intAllowablePickDayRange = 30, ysnAllowMoveAssignedTask = 1, ysnScanForkliftOnLogin = 0, strHandheldType = 'Small', strWarehouseType = 'Lite', intContainerMinimumLength = 3, intLocationMinLength = 3, ysnNegativeQtyAllowed = 0, ysnPartialMoveAllowed = 0, ysnGTINCaseCodeMandatory = 1, ysnEnableMoveAndMergeSplit = 1, ysnTicketLabelToPrinter = 1, intNoOfCopiesToPrintforPalletSlip = 3, strWebServiceServerURL = '', strWMSStatus = 'Release,Hold', dblPalletWeight = 50.000000, intNumberOfDecimalPlaces = 4, ysnCreateLoadTasks = 0, intMaximumPalletsOnForklift = 3
+		SET intAllowablePickDayRange = 30, ysnAllowMoveAssignedTask = 1, ysnScanForkliftOnLogin = 0, strHandheldType = 'Small', strWarehouseType = 'Lite', intContainerMinimumLength = 3, intLocationMinLength = 3, ysnNegativeQtyAllowed = 0, ysnPartialMoveAllowed = 0, ysnGTINCaseCodeMandatory = 1, ysnEnableMoveAndMergeSplit = 1, ysnTicketLabelToPrinter = 1, intNoOfCopiesToPrintforPalletSlip = 3, strWebServiceServerURL = '', strWMSStatus = 'Release,Hold', dblPalletWeight = 50.000000, intNumberOfDecimalPlaces = 4, ysnCreateLoadTasks = 0, intMaximumPalletsOnForklift = 3
 	END
 	ELSE
 	BEGIN
