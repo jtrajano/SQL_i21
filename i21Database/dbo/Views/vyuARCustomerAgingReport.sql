@@ -12,7 +12,7 @@ SELECT A.strCustomerName
 	 , dbl60Days			= SUM(B.dbl60Days)
 	 , dbl90Days			= SUM(B.dbl90Days)
 	 , dbl91Days			= SUM(B.dbl91Days)
-	 , dblTotalDue			= SUM(B.dblTotalDue)
+	 , dblTotalDue			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
 	 , dblAmountPaid		= SUM(A.dblAmountPaid)
 	 , dblInvoiceTotal		= SUM(A.dblInvoiceTotal)
 	 , dblCredits			= SUM(B.dblAvailableCredit)
