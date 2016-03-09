@@ -241,6 +241,7 @@ BEGIN TRY
 		,intSetupDuration
 		,ysnPicked
 		,intDemandRatio
+		,intNoOfFlushes
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -273,6 +274,7 @@ BEGIN TRY
 		,x.intSetupDuration
 		,0 AS ysnPicked
 		,x.intDemandRatio
+		,x.intNoOfFlushes
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -297,6 +299,7 @@ BEGIN TRY
 			,strWIPItemNo NVARCHAR(50)
 			,intSetupDuration INT
 			,intDemandRatio int
+			,intNoOfFlushes int
 			) x
 	LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
 		AND MC.intPackTypeId = x.intPackTypeId
@@ -1131,8 +1134,9 @@ BEGIN TRY
 			SELECT TOP 1 strItemNo
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+			JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = @strBlendAttributeValue
+				AND C.strCategoryCode = @strBlendAttributeValue
 			) AS strWIPItemNo
 		,I.intItemId
 		,I.strItemNo
@@ -1173,6 +1177,7 @@ BEGIN TRY
 		,W.dtmLastProducedDate
 		,CONVERT(bit,0) AS ysnEOModified
 		,SL.intDemandRatio
+		,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes 
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		AND W.intManufacturingCellId = @intManufacturingCellId
@@ -1276,6 +1281,7 @@ BEGIN TRY
 		,0 AS intLeadTime
 		,'' AS strCustomer
 		,Ltrim(W.intWorkOrderId) AS strRowId
+		,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 	FROM dbo.tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -1330,6 +1336,7 @@ BEGIN TRY
 		,SC.intDuration AS intLeadTime
 		,NULL AS strCustomer
 		,Ltrim(W.intWorkOrderId)+Ltrim(SR.intScheduleRuleId)
+		,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 	FROM dbo.tblMFWorkOrder W
 	JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	JOIN @tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId

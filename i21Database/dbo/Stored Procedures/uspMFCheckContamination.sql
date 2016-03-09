@@ -57,6 +57,7 @@ BEGIN
 		intWorkOrderId INT
 		,intExecutionOrder INT
 		,dtmTargetDate DATETIME
+		,intNoOfFlushes int
 		)
 
 	LOOP1:
@@ -202,12 +203,14 @@ BEGIN
 					END
 			)
 		,Isnull(W1.dtmTargetDate, W.dtmTargetDate)
+		,ISNULL(W.intNoOfFlushes,0) AS intNoOfFlushes
 	FROM @tblMFWorkOrder W
 	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	LEFT JOIN @tblMFCCWorkOrder W1 ON W1.intWorkOrderId = W.intWorkOrderId
 
 	SELECT S.intWorkOrderId
 		,S.intExecutionOrder
-		,dtmTargetDate
+		,S.dtmTargetDate
+		,S.intNoOfFlushes
 	FROM @tblMFSequence S
 END
