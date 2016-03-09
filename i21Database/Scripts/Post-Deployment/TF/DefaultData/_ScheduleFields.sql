@@ -109,7 +109,7 @@ INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponen
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1120, 17, N'strSupplierName', N'Supplier Name', N'', N'No', 0, 1972, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1121, 17, N'pxrpt_cus_name', N'Customer Name', N'', N'No', 0, 7, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1122, 17, N'pxrpt_itm_desc', N'Description', N'', N'No', 0, 32, 0)
-GO
+
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1123, 17, N'dtmDate', N'Date', N'', N'No', 0, 1977, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1124, 17, N'pxrpt_sls_trans_gals', N'Total', N'', N'No', 0, 45, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1125, 18, N'strProductCode', N'Product Code', N'', N'No', 0, 25, 0)
@@ -210,7 +210,7 @@ INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponen
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1220, 33, N'pxrpt_sls_trans_gals', N'Total', N'', N'No', 0, 45, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1221, 34, N'strProductCode', N'Product Code', N'', N'No', 0, 25, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1222, 34, N'strSupplierName', N'Supplier Name', N'', N'No', 0, 1972, 0)
-GO
+
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1223, 34, N'pxrpt_cus_name', N'Customer Name', N'', N'No', 0, 7, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1224, 34, N'pxrpt_itm_desc', N'Description', N'', N'No', 0, 32, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1225, 34, N'dtmDate', N'Date', N'', N'No', 0, 1977, 0)
@@ -311,7 +311,7 @@ INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponen
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1320, 50, N'pxrpt_itm_desc', N'Description', N'', N'No', 0, 32, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1321, 50, N'dtmDate', N'Date', N'', N'No', 0, 1977, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1322, 50, N'pxrpt_sls_trans_gals', N'Total', N'', N'No', 0, 45, 0)
-GO
+
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1323, 51, N'strProductCode', N'Product Code', N'', N'No', 0, 25, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1324, 51, N'strSupplierName', N'Supplier Name', N'', N'No', 0, 1972, 0)
 INSERT [dbo].[tblTFScheduleFields] ([intScheduleColumnId], [intReportingComponentDetailId], [strColumn], [strCaption], [strFormat], [strFooter], [intWidth], [intScheduleFieldTemplateId], [intConcurrencyId]) VALUES (1325, 51, N'pxrpt_cus_name', N'Customer Name', N'', N'No', 0, 7, 0)
