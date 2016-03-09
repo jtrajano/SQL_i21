@@ -19,7 +19,8 @@ BEGIN TRY
 	DECLARE @intSourceTransactionTypeId INT
 	DECLARE @intLotStatusId INT
 	DECLARE @intItemUOMId INT
-		
+	DECLARE @dblLotWeightPerUnit NUMERIC(38,20) 
+			
 	DECLARE @intTransactionCount INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 
@@ -31,14 +32,21 @@ BEGIN TRY
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
 		   @intLotStatusId = intLotStatusId,
+		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intItemUOMId = intItemUOMId	   
 	FROM tblICLot WHERE intLotId = @intLotId
 	
-	SELECT @dblAdjustByQuantity = - @dblLotQty, 
-		   @dtmDate = GETDATE(), 
+	SELECT @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
+	IF @dblLotWeightPerUnit > 0 
+	BEGIN
+		SELECT @dblLotQty = dbo.fnDivide(@dblLotQty, @dblLotWeightPerUnit)
+	END
+
+	SELECT @dblAdjustByQuantity = - @dblLotQty
+
 	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
 													   ,@dtmDate = @dtmDate
 													   ,@intLocationId = @intLocationId
