@@ -9,7 +9,16 @@ BEGIN TRY
 		,@intConcurrencyId int
 		,@intManufacturingCellId int
 		,@intLocationId int
-		
+		,@intBlendAttributeId int
+		,@strBlendAttributeValue nvarchar(50)
+
+
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	
+	Select @strBlendAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intBlendAttributeId
+
 	SELECT @dtmCurrentDate = GetDate()	
 	
 	DECLARE @tblMFScheduleWorkOrder TABLE (
@@ -297,7 +306,7 @@ BEGIN TRY
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = 'Assembly/Blend'
+				AND WI.strType = @strBlendAttributeValue
 			) AS strWIPItemNo
 		,I.intItemId
 		,I.strItemNo

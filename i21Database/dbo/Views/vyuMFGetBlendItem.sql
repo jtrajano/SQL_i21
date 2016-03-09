@@ -3,4 +3,4 @@ AS
 SELECT strItemNo as strWIPItemNo
 	,strDescription
 FROM dbo.tblICItem
-WHERE strType = 'Assembly/Blend'
+WHERE strType = 'Blend'
