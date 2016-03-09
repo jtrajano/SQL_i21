@@ -380,7 +380,7 @@ BEGIN TRY
 						,ysnIsStorage 
 						)
 						EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
-						EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
+						--EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
 
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
