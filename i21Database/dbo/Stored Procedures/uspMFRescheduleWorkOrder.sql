@@ -5,12 +5,20 @@ BEGIN TRY
 	DECLARE @strScheduleType nvarchar(50)
 			,@intAttributeId int
 			,@strAttributeValue nvarchar(50)
+			,@intBlendAttributeId int
+			,@strBlendAttributeValue nvarchar(50)
 
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Schedule Type'
 	
 	Select @strScheduleType=strAttributeValue
 	From tblMFManufacturingProcessAttribute
 	Where intAttributeId=@intAttributeId
+
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	
+	Select @strBlendAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intBlendAttributeId
 
 	If @strScheduleType is NULL or @strScheduleType=''
 	Begin
@@ -1124,7 +1132,7 @@ BEGIN TRY
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = 'Assembly/Blend'
+				AND WI.strType = @strBlendAttributeValue
 			) AS strWIPItemNo
 		,I.intItemId
 		,I.strItemNo
