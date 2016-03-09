@@ -134,6 +134,7 @@ SELECT MC.intManufacturingCellId
 	,0 AS intLeadTime
 	,'' AS strCustomer
 	,Ltrim(W.intWorkOrderId) AS strRowId
+	,IsNULL(SL.intNoOfFlushes,0) intNoOfFlushes
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -209,5 +210,6 @@ SELECT SC.intManufacturingCellId
 	,SC.intDuration AS intLeadTime
 	,NULL AS strCustomer
 	,strRowId
+	,0 AS intNoOfFlushes
 FROM @tblMFScheduleConstraintDetail SC
 ORDER BY intManufacturingCellId,intExecutionOrder

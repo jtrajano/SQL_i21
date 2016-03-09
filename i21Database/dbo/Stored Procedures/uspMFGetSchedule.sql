@@ -320,8 +320,9 @@ SELECT C.intManufacturingCellId
 		SELECT TOP 1 strItemNo
 		FROM dbo.tblMFRecipeItem RI
 		JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+		JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 		WHERE RI.intRecipeId = R.intRecipeId
-			AND WI.strType = @strBlendAttributeValue
+			AND C.strCategoryCode = @strBlendAttributeValue
 		) AS strWIPItemNo
 	,I.intItemId
 	,I.strItemNo
@@ -393,6 +394,7 @@ SELECT C.intManufacturingCellId
 	,W.ysnIngredientAvailable
 	,CONVERT(BIT, 0) AS ysnEOModified
 	,WD.intDemandRatio
+	,IsNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
 	AND W.intStatusId <> 13
