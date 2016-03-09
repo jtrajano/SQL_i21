@@ -1726,9 +1726,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // Compute the line total with respect to the Gross UOM.
         if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
-            // formula is: {Receive UOM Unit Qty} x {Receive Qty} x ({Unit Cost} / {Cost UOM})
-            // ex: {60 Gallons} x {100 Qty} x ({$1} / {Gallon})
-            lineTotal = tax + (qty * qtyCF * (unitCost / costCentsFactor / costCF));
+            // formula is: {Receive UOM Unit Qty} x {Receive Qty} x ({Unit Cost} x {Cost UOM})
+            // ex: {Tax} + {60 Gallons} x {1 Unit Qty per Gallon} x ({$1} x {1 Unit Qty per Gallon})
+            lineTotal = tax + (qty * qtyCF * (unitCost / costCentsFactor * costCF));
         }
 
         // Compute the line total with respect to the Cost UOM.
@@ -1736,9 +1736,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var netWgt = currentReceiptItem.get('dblNet');
             var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
 
-            // formula is: {Weight Unit Qty} x {Net Qty} x ({Unit Cost} / {Cost UOM})
-            // ex: {450 Gallons} x {1 per Gallon} x ({$1} / {Gallon})
-            lineTotal = tax + (netWgt * netWgtCF * (unitCost / costCentsFactor / costCF));
+            // formula is: {Weight Unit Qty} x {Net Qty} x ({Unit Cost} x {Cost UOM})
+            // ex: {450 Net Gallons} x {1 per Gallon} x ({$1} x {Gallon})
+            lineTotal = tax + (netWgt * netWgtCF * (unitCost / costCentsFactor * costCF));
         }
 
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
