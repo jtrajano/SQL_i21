@@ -4185,6 +4185,8 @@ BEGIN TRY
 			,NULL
 			)
 	END
+	
+	SET @dblStorageDuePerUnit=ISNULL(@dblStorageDuePerUnit,0)
 
 	SELECT @dblStorageDueTotalPerUnit = dblStorageDue - dblStoragePaid
 		,@dblStorageBilledPerUnit = dblStoragePaid - @dblOldStoragePaid
