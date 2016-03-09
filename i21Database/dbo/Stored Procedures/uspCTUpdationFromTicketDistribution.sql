@@ -123,7 +123,8 @@ BEGIN TRY
 				@dblAvailable	=	NULL,
 				@ysnUnlimitedQuantity = NULL
 
-		SELECT	@dblBalance		=	CD.dblBalance,
+		SELECT	@intContractHeaderId = CD.intContractHeaderId,
+				@dblBalance		=	CD.dblBalance,
 				@dblQuantity	=	CD.dblQuantity,
 				@dblCost		=	ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0),
 				@dblAvailable	=	ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0),
