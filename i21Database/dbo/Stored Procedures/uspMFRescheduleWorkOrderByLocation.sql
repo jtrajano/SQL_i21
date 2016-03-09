@@ -22,6 +22,7 @@ BEGIN TRY
 		intWorkOrderId INT
 		,intExecutionOrder INT
 		,dtmTargetDate DATETIME
+		,intNoOfFlushes int
 		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -65,7 +66,6 @@ BEGIN TRY
 		,intSecondPreferenceCellId
 		,intThirdPreferenceCellId
 		,intTargetPreferenceCellId
-		,intNoOfFlushes
 		,ysnPicked
 		,intLocationId
 		,intPackTypeId
@@ -75,9 +75,10 @@ BEGIN TRY
 		,ysnFrozen
 		,intNoOfSelectedMachine
 		,intSetupDuration
-			,strComments
+		,strComments
 		,strNote
 		,strAdditionalComments
+		,intNoOfFlushes
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -94,7 +95,6 @@ BEGIN TRY
 		,MC1.intManufacturingCellId AS intFirstPreferenceCellId
 		,MC2.intManufacturingCellId AS intSecondPreferenceCellId
 		,MC3.intManufacturingCellId AS intThirdPreferenceCellId
-		,1
 		,0
 		,0
 		,@intLocationId
@@ -108,6 +108,7 @@ BEGIN TRY
 		,x.strComments
 		,x.strNote
 		,x.strAdditionalComments
+		,x.intNoOfFlushes
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -131,6 +132,7 @@ BEGIN TRY
 			,strComments NVARCHAR(MAX)
 			,strNote NVARCHAR(MAX)
 			,strAdditionalComments NVARCHAR(MAX)
+			,intNoOfFlushes int
 			) x
 	LEFT JOIN dbo.tblICItemFactory F1 ON F1.intFactoryId = @intLocationId
 		AND F1.intItemId = x.intItemId
@@ -155,6 +157,7 @@ BEGIN TRY
 	UPDATE W
 	SET W.intExecutionOrder = S.intExecutionOrder
 		,W.dtmTargetDate = S.dtmTargetDate
+		,W.intNoOfFlushes=S.intNoOfFlushes
 	FROM @tblMFWorkOrder W
 	JOIN @tblMFSequence S ON S.intWorkOrderId = W.intWorkOrderId
 

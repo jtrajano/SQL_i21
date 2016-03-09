@@ -55,6 +55,7 @@ BEGIN
 		,ISNULL(I.intPackTypeId,0) As intPackTypeId
 		,ISNULL(SL.intConcurrencyId, 0) AS intConcurrencyId
 		,CONVERT(BIT, 0) AS ysnEOModified
+		,IsNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 	FROM dbo.tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		AND W.intStatusId <> 13

@@ -54,135 +54,6 @@ BEGIN TRY
 			,dtmToDate datetime
 			)
 
-	DECLARE @intItemId1 INT
-		,@intItemId2 INT
-
-	SELECT @intItemId1 = intItemId
-	FROM @tblMFScheduleWorkOrder
-	WHERE intExecutionOrder = @intDraggedExecutionOrder - 1
-
-	SELECT @intItemId2 = intItemId
-	FROM @tblMFScheduleWorkOrder
-	WHERE intExecutionOrder = @intDraggedExecutionOrder + 1
-
-	IF (
-			SELECT ISNULL(MAX(ICD2.intNoOfFlushes), 0)
-			FROM dbo.tblMFRecipe R
-			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-				AND R.intLocationId = @intLocationId
-				AND R.ysnActive = 1
-				AND R.intItemId = @intItemId2
-			JOIN dbo.tblMFItemContamination IC1 ON IC1.intItemId = @intItemId1
-			JOIN dbo.tblMFItemContamination IC2 ON IC2.intItemId = RI.intItemId
-			JOIN dbo.tblMFItemContaminationDetail ICD2 ON ICD2.intItemContaminationId = IC2.intItemContaminationId
-				AND ICD2.intItemGroupId = IC1.intItemGroupId
-			WHERE (
-					(
-						RI.ysnYearValidationRequired = 1
-						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN RI.dtmValidFrom
-							AND RI.dtmValidTo
-						)
-					OR (
-						RI.ysnYearValidationRequired = 0
-						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, RI.dtmValidFrom)
-							AND DATEPART(dy, RI.dtmValidTo)
-						)
-					)
-			) > 0
-	BEGIN
-		RAISERROR (
-				90011
-				,14
-				,1
-				)
-	END
-
-	SELECT @intItemId1 = NULL
-
-	SELECT @intItemId2 = NULL
-
-	SELECT @intItemId1 = intItemId
-	FROM @tblMFScheduleWorkOrder
-	WHERE intExecutionOrder = @intDroppedBeforeExecutionOrder - 1
-
-	SELECT @intItemId2 = @intDraggedItemId
-
-	IF (
-			SELECT ISNULL(MAX(ICD2.intNoOfFlushes), 0)
-			FROM dbo.tblMFRecipe R
-			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-				AND R.intLocationId = @intLocationId
-				AND R.ysnActive = 1
-				AND R.intItemId = @intItemId2
-			JOIN dbo.tblMFItemContamination IC1 ON IC1.intItemId = @intItemId1
-			JOIN dbo.tblMFItemContamination IC2 ON IC2.intItemId = RI.intItemId
-			JOIN dbo.tblMFItemContaminationDetail ICD2 ON ICD2.intItemContaminationId = IC2.intItemContaminationId
-				AND ICD2.intItemGroupId = IC1.intItemGroupId
-			WHERE (
-					(
-						RI.ysnYearValidationRequired = 1
-						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN RI.dtmValidFrom
-							AND RI.dtmValidTo
-						)
-					OR (
-						RI.ysnYearValidationRequired = 0
-						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, RI.dtmValidFrom)
-							AND DATEPART(dy, RI.dtmValidTo)
-						)
-					)
-			) > 0
-	BEGIN
-		RAISERROR (
-				90012
-				,14
-				,1
-				)
-	END
-
-	SELECT @intItemId1 = NULL
-
-	SELECT @intItemId2 = NULL
-
-	SELECT @intItemId1 = @intDraggedItemId
-
-	SELECT @intItemId2 = intItemId
-	FROM @tblMFScheduleWorkOrder
-	WHERE intExecutionOrder = @intDroppedBeforeExecutionOrder
-
-	IF (
-			SELECT ISNULL(MAX(ICD2.intNoOfFlushes), 0)
-			FROM dbo.tblMFRecipe R
-			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-				AND R.intLocationId = @intLocationId
-				AND R.ysnActive = 1
-				AND R.intItemId = @intItemId2
-			JOIN dbo.tblMFItemContamination IC1 ON IC1.intItemId = @intItemId1
-			JOIN dbo.tblMFItemContamination IC2 ON IC2.intItemId = RI.intItemId
-			JOIN dbo.tblMFItemContaminationDetail ICD2 ON ICD2.intItemContaminationId = IC2.intItemContaminationId
-				AND ICD2.intItemGroupId = IC1.intItemGroupId
-			WHERE (
-					(
-						RI.ysnYearValidationRequired = 1
-						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN RI.dtmValidFrom
-							AND RI.dtmValidTo
-						)
-					OR (
-						RI.ysnYearValidationRequired = 0
-						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, RI.dtmValidFrom)
-							AND DATEPART(dy, RI.dtmValidTo)
-						)
-					)
-			) > 0
-	BEGIN
-		RAISERROR (
-				90012
-				,14
-				,1
-				)
-	END
-
-	
-
 	INSERT INTO @tblMFScheduleWorkOrder (
 		intManufacturingCellId
 		,intWorkOrderId
@@ -202,6 +73,7 @@ BEGIN TRY
 		,intScheduleId
 		,intLocationId 
 		)
+	
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
 		,x.intItemId
@@ -244,6 +116,163 @@ BEGIN TRY
 	WHERE x.intStatusId <> 1
 	ORDER BY x.intExecutionOrder
 	
+
+	DECLARE @intItemId1 INT
+		,@intItemId2 INT
+		,@strWorkOrderNo1 nvarchar(50)
+		,@strWorkOrderNo2 nvarchar(50)
+		,@intWorkOrderId1 int
+		,@intWorkOrderId2 int
+		,@strCellName nvarchar(50)
+
+	SELECT @intItemId1 = intItemId, @intWorkOrderId1=intWorkOrderId
+	FROM @tblMFScheduleWorkOrder
+	WHERE intExecutionOrder = @intDraggedExecutionOrder - 1
+
+	SELECT @intItemId2 = intItemId, @intWorkOrderId2=intWorkOrderId
+	FROM @tblMFScheduleWorkOrder
+	WHERE intExecutionOrder = @intDraggedExecutionOrder + 1
+
+	IF (
+			SELECT ISNULL(MAX(ICD2.intNoOfFlushes), 0)
+			FROM dbo.tblMFRecipe R
+			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND R.intLocationId = @intLocationId
+				AND R.ysnActive = 1
+				AND R.intItemId = @intItemId2
+			JOIN dbo.tblMFItemContamination IC1 ON IC1.intItemId = @intItemId1
+			JOIN dbo.tblMFItemContamination IC2 ON IC2.intItemId = RI.intItemId
+			JOIN dbo.tblMFItemContaminationDetail ICD2 ON ICD2.intItemContaminationId = IC2.intItemContaminationId
+				AND ICD2.intItemGroupId = IC1.intItemGroupId
+			WHERE (
+					(
+						RI.ysnYearValidationRequired = 1
+						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN RI.dtmValidFrom
+							AND RI.dtmValidTo
+						)
+					OR (
+						RI.ysnYearValidationRequired = 0
+						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, RI.dtmValidFrom)
+							AND DATEPART(dy, RI.dtmValidTo)
+						)
+					)
+			) > 0
+	BEGIN
+		Select @strWorkOrderNo1=strWorkOrderNo from dbo.tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId1
+		Select @strWorkOrderNo2=strWorkOrderNo from dbo.tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId2
+
+		SELECT @strCellName =strCellName
+		FROM tblMFManufacturingCell Where intManufacturingCellId =@intDraggedManufacturingCellId
+
+		RAISERROR (
+				90011
+				,14
+				,1
+				,@strWorkOrderNo1
+				,@strWorkOrderNo2
+				,@strCellName
+				)
+	END
+
+	SELECT @intItemId1 = NULL
+
+	SELECT @intItemId2 = NULL
+
+	SELECT @intItemId1 = intItemId,@intWorkOrderId1=intWorkOrderId
+	FROM @tblMFScheduleWorkOrder
+	WHERE intExecutionOrder = @intDroppedBeforeExecutionOrder - 1
+
+	SELECT @intItemId2 = @intDraggedItemId
+
+	IF (
+			SELECT ISNULL(MAX(ICD2.intNoOfFlushes), 0)
+			FROM dbo.tblMFRecipe R
+			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND R.intLocationId = @intLocationId
+				AND R.ysnActive = 1
+				AND R.intItemId = @intItemId2
+			JOIN dbo.tblMFItemContamination IC1 ON IC1.intItemId = @intItemId1
+			JOIN dbo.tblMFItemContamination IC2 ON IC2.intItemId = RI.intItemId
+			JOIN dbo.tblMFItemContaminationDetail ICD2 ON ICD2.intItemContaminationId = IC2.intItemContaminationId
+				AND ICD2.intItemGroupId = IC1.intItemGroupId
+			WHERE (
+					(
+						RI.ysnYearValidationRequired = 1
+						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN RI.dtmValidFrom
+							AND RI.dtmValidTo
+						)
+					OR (
+						RI.ysnYearValidationRequired = 0
+						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, RI.dtmValidFrom)
+							AND DATEPART(dy, RI.dtmValidTo)
+						)
+					)
+			) > 0
+	BEGIN
+		Select @strWorkOrderNo1=strWorkOrderNo from dbo.tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId1
+		Select @strWorkOrderNo2=strWorkOrderNo from dbo.tblMFWorkOrder Where intWorkOrderId=@intDraggedWorkOrder
+
+		SELECT @strCellName =strCellName
+		FROM tblMFManufacturingCell Where intManufacturingCellId =@intDroppedManufacturingCell
+
+		RAISERROR (
+				90012
+				,14
+				,1
+				,@strWorkOrderNo1
+				,@strWorkOrderNo2
+				,@strCellName
+				)
+	END
+
+	SELECT @intItemId1 = NULL
+
+	SELECT @intItemId2 = NULL
+
+	SELECT @intItemId1 = @intDraggedItemId
+
+	SELECT @intItemId2 = intItemId,@intWorkOrderId2=intWorkOrderId
+	FROM @tblMFScheduleWorkOrder
+	WHERE intExecutionOrder = @intDroppedBeforeExecutionOrder
+
+	IF (
+			SELECT ISNULL(MAX(ICD2.intNoOfFlushes), 0)
+			FROM dbo.tblMFRecipe R
+			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND R.intLocationId = @intLocationId
+				AND R.ysnActive = 1
+				AND R.intItemId = @intItemId2
+			JOIN dbo.tblMFItemContamination IC1 ON IC1.intItemId = @intItemId1
+			JOIN dbo.tblMFItemContamination IC2 ON IC2.intItemId = RI.intItemId
+			JOIN dbo.tblMFItemContaminationDetail ICD2 ON ICD2.intItemContaminationId = IC2.intItemContaminationId
+				AND ICD2.intItemGroupId = IC1.intItemGroupId
+			WHERE (
+					(
+						RI.ysnYearValidationRequired = 1
+						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN RI.dtmValidFrom
+							AND RI.dtmValidTo
+						)
+					OR (
+						RI.ysnYearValidationRequired = 0
+						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, RI.dtmValidFrom)
+							AND DATEPART(dy, RI.dtmValidTo)
+						)
+					)
+			) > 0
+	BEGIN
+		Select @strWorkOrderNo1=strWorkOrderNo from dbo.tblMFWorkOrder Where intWorkOrderId=@intDraggedWorkOrder
+		Select @strWorkOrderNo2=strWorkOrderNo from dbo.tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId1
+
+		SELECT @strCellName =strCellName
+		FROM tblMFManufacturingCell Where intManufacturingCellId =@intDroppedManufacturingCell
+
+		RAISERROR (
+				90012
+				,14
+				,1
+				)
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM @tblMFScheduleWorkOrder
@@ -279,7 +308,7 @@ BEGIN TRY
 	--			,1
 	--			)
 	--END
-	DECLARE @v XML = (SELECT * FROM @tblMFScheduleWorkOrder FOR XML AUTO)
+	--DECLARE @v XML = (SELECT * FROM @tblMFScheduleWorkOrder FOR XML AUTO)
 
 	EXEC dbo.uspMFRescheduleAndSaveWorkOrder @tblMFWorkOrder = @tblMFScheduleWorkOrder
 		,@dtmFromDate = @dtmFromDate

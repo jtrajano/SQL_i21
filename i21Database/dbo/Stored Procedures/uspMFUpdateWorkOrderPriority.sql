@@ -54,6 +54,7 @@ BEGIN TRY
 		,intDemandRatio int
 		,dtmEarliestDate DateTime
 		,dtmLatestDate DateTime
+		,intNoOfFlushes int
 		)
 
 	DECLARE @tblMFScheduleConstraint TABLE (
@@ -120,6 +121,7 @@ BEGIN TRY
 		,intDemandRatio
 		,dtmEarliestDate
 		,dtmLatestDate
+		,intNoOfFlushes
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -153,6 +155,7 @@ BEGIN TRY
 		,x.intDemandRatio
 		,x.dtmEarliestDate
 		,x.dtmLatestDate
+		,x.intNoOfFlushes
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -185,6 +188,7 @@ BEGIN TRY
 			,intDemandRatio int
 			,dtmEarliestDate DATETIME
 			,dtmLatestDate DATETIME
+			,intNoOfFlushes int
 			) x Where x.intStatusId<>1
 	ORDER BY x.intExecutionOrder
 	
@@ -220,6 +224,7 @@ BEGIN TRY
 		,intDemandRatio
 		,dtmEarliestDate
 		,dtmLatestDate
+		,intNoOfFlushes
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -252,6 +257,7 @@ BEGIN TRY
 		,x.intDemandRatio
 		,x.dtmEarliestDate
 		,x.dtmLatestDate
+		,x.intNoOfFlushes
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -283,6 +289,7 @@ BEGIN TRY
 			,intDemandRatio int
 			,dtmEarliestDate DATETIME
 			,dtmLatestDate DATETIME
+			,intNoOfFlushes int
 			) x Where x.intStatusId=1
 	ORDER BY x.intExecutionOrder
 	
@@ -305,8 +312,9 @@ BEGIN TRY
 			SELECT TOP 1 strItemNo
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+			JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = @strBlendAttributeValue
+				AND C.strCategoryCode = @strBlendAttributeValue
 			) AS strWIPItemNo
 		,I.intItemId
 		,I.strItemNo
@@ -347,6 +355,7 @@ BEGIN TRY
 		,W.dtmLastProducedDate
 		,CONVERT(bit,0) AS ysnEOModified
 		,SL.intDemandRatio
+		,IsNULL(SL.intNoOfFlushes,0) As intNoOfFlushes
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
