@@ -253,9 +253,11 @@ BEGIN
 												THEN 'Extended Remote'
 											END)
 
-			END
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
+
+			END
+			
 	END
 	SELECT TOP 1 
 		 @intCardId = C.intCardId

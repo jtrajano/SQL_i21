@@ -11,6 +11,16 @@ DECLARE @dtmCurrentDate DATETIME
 	,@ysnDisplayNewOrderByExpectedDate BIT
 	,@intLocationId int
 	,@ysnCheckCrossContamination bit
+	,@intBlendAttributeId INT
+	,@strBlendAttributeValue NVARCHAR(50)
+
+SELECT @intBlendAttributeId = intAttributeId
+FROM tblMFAttribute
+WHERE strAttributeName = 'Blend Category'
+
+SELECT @strBlendAttributeValue = strAttributeValue
+FROM tblMFManufacturingProcessAttribute
+WHERE intAttributeId = @intBlendAttributeId
 
 DECLARE @tblWorkOrderDemandRatio TABLE (
 	intWorkOrderId INT
@@ -190,7 +200,7 @@ BEGIN
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = 'Assembly/Blend'
+				AND WI.strType = @strBlendAttributeValue
 			) AS strWIPItemNo
 		,Row_number() OVER (
 			ORDER BY WS.intSequenceNo DESC
@@ -310,8 +320,9 @@ SELECT C.intManufacturingCellId
 		SELECT TOP 1 strItemNo
 		FROM dbo.tblMFRecipeItem RI
 		JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+		JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 		WHERE RI.intRecipeId = R.intRecipeId
-			AND WI.strType = 'Assembly/Blend'
+			AND C.strCategoryCode = @strBlendAttributeValue
 		) AS strWIPItemNo
 	,I.intItemId
 	,I.strItemNo
@@ -383,6 +394,7 @@ SELECT C.intManufacturingCellId
 	,W.ysnIngredientAvailable
 	,CONVERT(BIT, 0) AS ysnEOModified
 	,WD.intDemandRatio
+	,IsNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
 	AND W.intStatusId <> 13

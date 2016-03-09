@@ -105,7 +105,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblItemUOMConvFactor = dblItemUOMCF
 		, dblWeightUOMConvFactor = NetWeightUOM.dblUnitQty
 		-- Cost UOM
-		, intCostUOMId = intPriceItemUOMId
+		, intCostUOMId = dbo.fnGetMatchingItemUOMId(intCommodityId, intPriceItemUOMId) -- intPriceItemUOMId
 		, strCostUOM = strPriceUOM
 		, dblCostUOMConvFactor = dblItemUOMCF
 		, intLifeTime
@@ -168,7 +168,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblItemUOMConvFactor = dblItemUOMCF
 		, dblWeightUOMConvFactor = dblItemUOMCF
 		-- Cost UOM
-		, intCostUOMId = intCostUOMId
+		, intCostUOMId = dbo.fnGetMatchingItemUOMId(intItemId, intCostUOMId) -- intCostUOMId
 		, strCostUOM = strCostUOM
 		, dblCostUOMConvFactor = dblCostUOMCF
 		, intLifeTime
@@ -228,7 +228,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblItemUOMConvFactor = dblItemUOMCF
 		, dblWeightUOMConvFactor = dblWeightUOMCF
 		-- Cost UOM 
-		, intCostUOMId = intItemUOMId
+		, intCostUOMId = dbo.fnGetMatchingItemUOMId(intItemId, intItemUOMId) -- intItemUOMId
 		, strCostUOM = strUnitMeasure
 		, dblCostUOMConvFactor = dblItemUOMCF
 		, intLifeTime

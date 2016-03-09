@@ -920,7 +920,7 @@ IF (@isSuccessful <> 0)
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed + A.dblHours
 							FROM tblPRPaycheckEarning A
-							WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
+							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
 								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 								AND A.intPaycheckId = @intPaycheckId
 
@@ -944,7 +944,7 @@ IF (@isSuccessful <> 0)
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed - A.dblHours
 							FROM tblPRPaycheckEarning A
-							WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
+							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
 								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 								AND A.intPaycheckId = @intPaycheckId
 

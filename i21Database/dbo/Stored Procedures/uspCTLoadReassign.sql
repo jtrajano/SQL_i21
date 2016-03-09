@@ -101,7 +101,7 @@ BEGIN
 			strInternalTradeNo,
 			FO.strBuySell strTradeType,
 			UM.strUnitMeasure strPriceUOM,
-
+			PD.intPriceFixationDetailId,
 			--Dummy--
 			CAST(ROW_NUMBER() OVER (ORDER BY SY.intContractDetailId ASC) AS INT) * -1 AS intReassignFutureId,
 			0 AS intReassignId,
@@ -112,6 +112,7 @@ BEGIN
 	JOIN	tblRKFutOptTransaction				FO	ON	FO.intFutOptTransactionId	=	SY.intFutOptTransactionId
 	JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FO.intFutureMarketId	
 	JOIN	tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FO.intFutureMonthId			
-	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId			=	MA.intUnitMeasureId
+	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId			=	MA.intUnitMeasureId		LEFT
+	JOIN	tblCTPriceFixationDetail			PD	ON	PD.intFutOptTransactionId	=	SY.intFutOptTransactionId
 	WHERE	SY.intContractDetailId	=	@intDonorId
 END

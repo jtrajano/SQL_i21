@@ -19,6 +19,7 @@
 	,dtmEarliestStartDate DATETIME
 	,dtmTargetDate DATETIME
 	,ysnFrozen bit
+	,intNoOfFlushes int
 	,intConcurrencyId INT
 	,dtmCreated DATETIME NOT NULL
 	,intCreatedUserId INT NOT NULL

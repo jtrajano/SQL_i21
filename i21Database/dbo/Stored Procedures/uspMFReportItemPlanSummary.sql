@@ -4,6 +4,15 @@ BEGIN
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@xmlDocumentId INT
+		,@intBlendAttributeId int
+		,@strBlendAttributeValue nvarchar(50)
+
+
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	
+	Select @strBlendAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intBlendAttributeId
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -123,7 +132,7 @@ BEGIN
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 		--AND II.intCategoryId = @intCategoryId
-		AND II.strType = 'Assembly/Blend'
+		AND II.strType = @strBlendAttributeValue
 	WHERE S.ysnStandard = 1
 		AND CD.dtmCalendarDate <= @dtmCurrentDate
 	GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
@@ -322,7 +331,7 @@ BEGIN
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 		--AND II.intCategoryId = @intCategoryId
-		AND II.strType = 'Assembly/Blend'
+		AND II.strType = @strBlendAttributeValue
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	
 	UNION
@@ -335,7 +344,7 @@ BEGIN
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		--AND intCategoryId = @intCategoryId
-		AND I.strType = 'Assembly/Blend'
+		AND I.strType = @strBlendAttributeValue
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	WHERE L.dblWeight > 0
 

@@ -29,7 +29,7 @@ SELECT A.strInvoiceNumber
 	 , dbl60Days			= B.dbl60Days
 	 , dbl90Days			= B.dbl90Days
 	 , dbl91Days			= B.dbl91Days
-	 , dblTotalDue			= B.dblTotalDue
+	 , dblTotalDue			= B.dblTotalDue - B.dblAvailableCredit
 	 , dblAmountPaid		= A.dblAmountPaid
 	 , dblInvoiceTotal		= A.dblInvoiceTotal
 	 , dblCredits			= B.dblAvailableCredit

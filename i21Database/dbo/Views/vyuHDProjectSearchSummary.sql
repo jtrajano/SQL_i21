@@ -8,6 +8,8 @@
 			,dblTotalNetOpportunityAmount = (case when sum(dblNetOpportunityAmmount) is null then 0 else sum(dblNetOpportunityAmmount) end)
 		from
 			vyuHDProjectSearch
+		where
+			strProjectStatus <> 'Closed'
 		group by
 			intCustomerId
 			,strProjectType

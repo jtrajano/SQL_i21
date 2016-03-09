@@ -32,12 +32,13 @@ BEGIN
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN dbo.tblARCustomer C ON C.intEntityCustomerId = W.intCustomerId
-	JOIN dbo.tblEntity E ON E.intEntityId = C.intEntityCustomerId
-	JOIN dbo.tblEntityType ET ON ET.intEntityId = E.intEntityId
+	LEFT JOIN dbo.tblARCustomer C ON C.intEntityCustomerId = W.intCustomerId
+	LEFT JOIN dbo.tblEntity E ON E.intEntityId = C.intEntityCustomerId
+	LEFT JOIN dbo.tblEntityType ET ON ET.intEntityId = E.intEntityId
 		AND ET.strType = 'Customer'
-	WHERE SW.dtmPlannedStartDate >= @dtmStartDate
-		AND SW.dtmPlannedEndDate <= @dtmEndDate
+	WHERE ((SW.dtmPlannedStartDate >= @dtmStartDate
+		AND SW.dtmPlannedEndDate <= @dtmEndDate)
+		OR (@dtmStartDate BETWEEN SW.dtmPlannedStartDate AND SW.dtmPlannedEndDate OR @dtmEndDate BETWEEN SW.dtmPlannedStartDate AND SW.dtmPlannedEndDate))
 		AND W.intManufacturingCellId IN (
 			SELECT Item
 			FROM dbo.fnSplitString(@strManufacturingCellId, ',')
@@ -60,7 +61,7 @@ BEGIN
 		,SW.dtmPlannedEndDate
 	ORDER BY W.strSalesOrderNo
 
-	SELECT 
+	SELECT Distinct
 		I.intItemId 
 		,I.strItemNo
 		,I.strShortName
@@ -81,10 +82,11 @@ BEGIN
 	JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = RI.intItemUOMId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	WHERE SW.dtmPlannedStartDate >= @dtmStartDate
-		AND SW.dtmPlannedEndDate <= @dtmEndDate
+	WHERE(( SW.dtmPlannedStartDate >= @dtmStartDate
+		AND SW.dtmPlannedEndDate <= @dtmEndDate)
+		OR (@dtmStartDate BETWEEN SW.dtmPlannedStartDate AND SW.dtmPlannedEndDate OR @dtmEndDate BETWEEN SW.dtmPlannedStartDate AND SW.dtmPlannedEndDate))
 		AND W.intManufacturingCellId IN (
 			SELECT Item
 			FROM dbo.fnSplitString(@strManufacturingCellId, ',')

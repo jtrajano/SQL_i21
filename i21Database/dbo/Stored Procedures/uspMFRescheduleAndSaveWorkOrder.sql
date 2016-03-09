@@ -65,6 +65,15 @@ BEGIN TRY
 		,@dtmEarliestDate DATETIME
 		,@dtmTargetDate DATETIME
 		,@strSchedulingCutOffTime nvarchar(50)
+					,@intBlendAttributeId int
+			,@strBlendAttributeValue nvarchar(50)
+
+
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	
+	Select @strBlendAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intBlendAttributeId
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -192,6 +201,7 @@ BEGIN TRY
 			,dtmLatestDate
 			,dtmTargetDate
 			,intScheduleId
+			,intNoOfFlushes
 			)
 		SELECT W.intManufacturingCellId
 			,W.intWorkOrderId
@@ -226,6 +236,7 @@ BEGIN TRY
 			,IsNULL(W.dtmLatestDate,W1.dtmLatestDate)
 			,W.dtmTargetDate
 			,W.intScheduleId
+			,W.intNoOfFlushes
 		FROM @tblMFWorkOrder W
 		JOIN dbo.tblMFWorkOrder W1 on W1.intWorkOrderId=W.intWorkOrderId
 		LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = W.intManufacturingCellId
@@ -398,7 +409,7 @@ BEGIN TRY
 					,@intPackTypeId = intPackTypeId
 					,@dblBalance = dblBalance
 					,@dblConversionFactor = dblConversionFactor
-					,@intNoOfSelectedMachine = @intNoOfMachine
+					,@intNoOfSelectedMachine = intNoOfSelectedMachine
 					,@dtmEarliestStartDate = dtmEarliestStartDate
 					,@intSetupDuration = intSetupDuration
 					,@dtmEarliestDate = dtmEarliestDate
@@ -406,10 +417,15 @@ BEGIN TRY
 					,@dtmTargetDate = dtmTargetDate
 				FROM @tblMFScheduleWorkOrder
 				WHERE intRecordId = @intRecordId
+				
+				IF @intNoOfSelectedMachine IS NULL or @intNoOfSelectedMachine=0
+				BEGIN
+					Select @intNoOfSelectedMachine = @intNoOfMachine
 
-				UPDATE @tblMFScheduleWorkOrder
-				SET intNoOfSelectedMachine = @intNoOfMachine
-				WHERE intRecordId = @intRecordId
+					UPDATE @tblMFScheduleWorkOrder
+					SET intNoOfSelectedMachine = @intNoOfMachine
+					WHERE intRecordId = @intRecordId
+				END
 
 				SELECT @dblStdLineEfficiency = dblLineEfficiencyRate
 				FROM dbo.tblMFManufacturingCellPackType
@@ -659,7 +675,7 @@ BEGIN TRY
 									,intDuration
 									)
 								VALUES (
-									@intWorkOrderId
+									@intPreviousWorkOrderId
 									,@intScheduleRuleId
 									,@dtmPlannedStartDate
 									,@dtmPlannedEndDate
@@ -699,7 +715,7 @@ BEGIN TRY
 							UPDATE @tblMFScheduleConstraintDetail
 							SET dtmChangeoverStartDate = NULL
 								,dtmChangeoverEndDate = NULL
-							WHERE intWorkOrderId = @intWorkOrderId
+							WHERE intWorkOrderId = @intPreviousWorkOrderId
 						END
 						ELSE
 						BEGIN
@@ -740,7 +756,7 @@ BEGIN TRY
 							UPDATE @tblMFScheduleConstraintDetail
 							SET dtmChangeoverStartDate = @dtmPlannedStartDate
 								,dtmChangeoverEndDate = @dtmPlannedEndDate
-							WHERE intWorkOrderId = @intWorkOrderId
+							WHERE intWorkOrderId = @intPreviousWorkOrderId
 								AND intDuration = @intMaxChangeoverTime
 						END
 
@@ -752,7 +768,7 @@ BEGIN TRY
 					IF EXISTS (
 							SELECT *
 							FROM @tblMFScheduleConstraintDetail
-							WHERE intWorkOrderId = @intWorkOrderId
+							WHERE intWorkOrderId = @intPreviousWorkOrderId
 							)
 					BEGIN
 						SELECT @intChangeoverDuration = (
@@ -765,13 +781,13 @@ BEGIN TRY
 							,@dtmChangeoverStartDate = MIN(dtmChangeoverStartDate)
 							,@dtmChangeoverEndDate = MAX(dtmChangeoverEndDate)
 						FROM @tblMFScheduleConstraintDetail
-						WHERE intWorkOrderId = @intWorkOrderId
+						WHERE intWorkOrderId = @intPreviousWorkOrderId
 
 						UPDATE @tblMFScheduleWorkOrder
 						SET dtmChangeoverStartDate = @dtmChangeoverStartDate
 							,dtmChangeoverEndDate = @dtmChangeoverEndDate
 							,intChangeoverDuration = @intChangeoverDuration
-						WHERE intWorkOrderId = @intWorkOrderId
+						WHERE intWorkOrderId = @intPreviousWorkOrderId
 					END
 				END
 
@@ -1020,7 +1036,7 @@ BEGIN TRY
 			FROM @tblMFScheduleWorkOrder S
 			WHERE intNoOfUnit > 0
 				AND S.intStatusId <> 1
-			ORDER BY intExecutionOrder DESC
+			ORDER BY intExecutionOrder ASC
 
 			SELECT @strWorkOrderNo = strWorkOrderNo
 			FROM tblMFWorkOrder
@@ -1376,6 +1392,7 @@ BEGIN TRY
 			,I.intPackTypeId
 			,ISNULL(SL.intConcurrencyId, 0) AS intConcurrencyId
 			,CONVERT(BIT, 0) AS ysnEOModified
+			,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 		FROM tblMFWorkOrder W
 		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 			AND W.intStatusId <> 13
@@ -1471,8 +1488,9 @@ BEGIN TRY
 				SELECT TOP 1 strItemNo
 				FROM dbo.tblMFRecipeItem RI
 				JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+				JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 				WHERE RI.intRecipeId = R.intRecipeId
-					AND WI.strType = 'Assembly/Blend'
+					AND C.strCategoryCode = @strBlendAttributeValue
 				) AS strWIPItemNo
 			,I.intItemId
 			,I.strItemNo
@@ -1513,6 +1531,7 @@ BEGIN TRY
 			,W.dtmLastProducedDate
 			,CONVERT(BIT, 0) AS ysnEOModified
 			,SL.intDemandRatio
+			,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 		FROM tblMFWorkOrder W
 		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 			AND W.intManufacturingCellId = @intChartManufacturingCellId
@@ -1564,6 +1583,7 @@ BEGIN TRY
 			,intDuration
 			,@intConcurrencyId AS intConcurrencyId
 		FROM @tblMFScheduleConstraintDetail
+		Where dtmChangeoverStartDate IS NOT NULL or dtmChangeoverEndDate IS NOT NULL
 
 		IF @ysnConsiderSumOfChangeoverTime = 0
 		BEGIN
@@ -1616,6 +1636,7 @@ BEGIN TRY
 			,0 AS intLeadTime
 			,'' AS strCustomer
 			,Ltrim(W.intWorkOrderId) AS strRowId
+			,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 		FROM dbo.tblMFWorkOrder W
 		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -1677,6 +1698,7 @@ BEGIN TRY
 			,SC.intDuration AS intLeadTime
 			,NULL AS strCustomer
 			,Ltrim(W.intWorkOrderId) + Ltrim(SR.intScheduleRuleId)
+			,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 		FROM dbo.tblMFWorkOrder W
 		JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 		JOIN @tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId

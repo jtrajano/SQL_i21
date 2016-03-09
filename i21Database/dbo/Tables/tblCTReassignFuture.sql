@@ -14,6 +14,7 @@
     strInternalTradeNo		NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
     strTradeType			NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
     strPriceUOM				NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
+	intPriceFixationDetailId INT,
     intConcurrencyId		INT NOT NULL,
     
     PRIMARY KEY CLUSTERED (intReassignFutureId ASC),

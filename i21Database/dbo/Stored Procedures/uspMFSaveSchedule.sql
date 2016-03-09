@@ -136,6 +136,7 @@ BEGIN TRY
 		,strAdditionalComments
 		,dtmEarliestStartDate
 		,ysnFrozen
+		,intNoOfFlushes
 		,intConcurrencyId
 		,dtmCreated
 		,intCreatedUserId
@@ -160,6 +161,7 @@ BEGIN TRY
 		,x.strAdditionalComments
 		,x.dtmEarliestStartDate
 		,x.ysnFrozen
+		,x.intNoOfFlushes
 		,1
 		,@dtmCurrentDate
 		,@intUserId
@@ -184,6 +186,7 @@ BEGIN TRY
 			,strAdditionalComments NVARCHAR(MAX)
 			,dtmEarliestStartDate DATETIME
 			,ysnFrozen BIT
+			,intNoOfFlushes INT
 			,intConcurrencyId INT
 			,dtmCreated DATETIME
 			,intCreatedUserId INT
