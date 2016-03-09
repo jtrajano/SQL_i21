@@ -299,8 +299,8 @@ BEGIN
 		FROM tblAPPayment A
 		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
 		WHERE A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
-		AND LOWER(B.strPaymentMethod) = 'debit memos and payments'
-		AND A.dblAmountPaid != 0
+		AND A.dblAmountPaid = 0
+		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
 
 	END
 	ELSE
