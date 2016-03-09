@@ -980,7 +980,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     key: 'tblICInventoryReceiptCharges',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCharges,
-                        deleteButton: grdCharges.down('#btnRemoveCharge')
+                        deleteButton: grdCharges.down('#btnRemoveCharge'),
+                        createRecord: me.onChargeCreateRecord
                     })
                 },
                 {
@@ -1167,6 +1168,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var tare = config.dummy.get('dblTareWeight');
         var netTotal = total - tare;
         record.set('dblNetWeight', netTotal);
+
+        action(record);
+    },
+
+    onChargeCreateRecord: function (config, action) {
+        var win = config.grid.up('window');
+        //var current = win.viewModel.data.current;
+        //var currentCharge = win.viewModel.data.currentReceiptCharge;
+        var record = Ext.create('Inventory.model.ReceiptCharge');
+        record.set('strAllocateCostBy', 'Unit');
 
         action(record);
     },
