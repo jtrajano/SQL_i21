@@ -1719,24 +1719,34 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             costCentsFactor = 1;
         }
 
-        // Sanitize the cost conversion factor.
-        costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
-        // Compute the line total with respect to the Gross UOM.
+        // Compute the line total with respect to the Item UOM
         if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
-            // formula is: {Receive UOM Unit Qty} x {Receive Qty} x ({Unit Cost} x {Cost UOM})
-            // ex: {Tax} + {60 Gallons} x {1 Unit Qty per Gallon} x ({$1} x {1 Unit Qty per Gallon})
-            lineTotal = tax + (qty * qtyCF * (unitCost / costCentsFactor * costCF));
+            // Sanitize the cost conversion factor.
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+            // Formula is:
+            // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+            // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
+            // {Line Total} = Tax + ( {Qty in Item UOM} x {New Cost} )
+            lineTotal = tax + (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
         }
 
-        // Compute the line total with respect to the Cost UOM.
+        // Compute the line total with respect to the Gross UOM..
         else {
             var netWgt = currentReceiptItem.get('dblNet');
             var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
 
-            // formula is: {Weight Unit Qty} x {Net Qty} x ({Unit Cost} x {Cost UOM})
-            // ex: {450 Net Gallons} x {1 per Gallon} x ({$1} x {Gallon})
-            lineTotal = tax + (netWgt * netWgtCF * (unitCost / costCentsFactor * costCF));
+            // Sanitize the cost conversion factor.
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+            // Formula is:
+            // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+            // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
+            // {Line Total} = Tax + ( {Net Qty in Gross/Net UOM} x {New Cost} )
+            lineTotal = tax + (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
         }
 
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
