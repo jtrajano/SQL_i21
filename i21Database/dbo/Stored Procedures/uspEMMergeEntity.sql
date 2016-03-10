@@ -52,7 +52,7 @@ BEGIN
 		if exists(select top 1 1 from tblEntityType where intEntityId = @PrimaryKey and strType = @CurMergeType)
 			goto GoHere
 
-		if @CurMergeType = 'Customer'
+		if @CurMergeType = 'Customer' or @CurMergeType = 'Prospect'
 		begin
 			set @CurTableName = 'tblARCustomer'
 			set @CurTableKey = 'intEntityCustomerId'
