@@ -200,7 +200,12 @@ BEGIN
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) / A.intSubCurrencyCents ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) END,
+		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 
+											 THEN (CASE WHEN B.dblNet > 0 
+														THEN CAST(B.dblUnitCost AS DECIMAL(18,2)) / A.intSubCurrencyCents  * B.dblNet * ItemCostUOM.dblUnitQty --Calculate Sub-Cur Base Gross/Net UOM
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) / A.intSubCurrencyCents  --Calculate Sub-Cur 
+														END) 
+											 ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) END,
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
@@ -229,6 +234,7 @@ BEGIN
 											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A.intCurrencyId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
@@ -351,4 +357,3 @@ BEGIN
 END
 
 SELECT * FROM #tmpReceiptBillIds
-
