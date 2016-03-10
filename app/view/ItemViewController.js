@@ -1427,6 +1427,7 @@ Ext.define('Inventory.view.ItemViewController', {
         record.set('strType', 'Inventory');
         record.set('strLotTracking', 'No');
         record.set('strInventoryTracking', 'Item Level');
+        record.set('ysnListBundleSeparately', true);
         action(record);
     },
 
