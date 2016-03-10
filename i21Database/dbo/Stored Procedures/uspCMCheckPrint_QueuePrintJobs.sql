@@ -76,6 +76,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
@@ -93,6 +94,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 SELECT	intBankAccountId	= F.intBankAccountId
 		,intTransactionId	= F.intTransactionId
 		,strTransactionId	= F.strTransactionId
+		,intBankTransactionTypeId = F.intBankTransactionTypeId
 		,strBatchId			= F.strLink
 		,strCheckNo			= ISNULL(F.strReferenceNo,'')
 		,dtmPrintJobCreated	= GETDATE()
@@ -199,6 +201,7 @@ INSERT INTO tblCMCheckPrintJobSpool(
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
@@ -211,6 +214,7 @@ SELECT
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
