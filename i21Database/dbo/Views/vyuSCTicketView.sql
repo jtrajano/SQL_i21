@@ -114,7 +114,7 @@
 	left join dbo.tblEntity tblEntity
        on (tblEntity.intEntityId = tblSCTicket.intEntityId)
 	left join dbo.tblEntitySplit tblEntitySplit
-       on (tblEntitySplit.intEntityId = tblSCTicket.intEntityId)
+       on (tblEntitySplit.intSplitId = tblSCTicket.intSplitId)
 	left join dbo.tblSCScaleSetup tblSCScaleSetup
        on (tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId)
 	left join dbo.tblSMCompanyLocation tblSMCompanyLocation
