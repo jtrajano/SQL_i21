@@ -96,6 +96,8 @@ BEGIN
 			)
 	GROUP BY W1.intWorkOrderId
 
+	--DECLARE @v XML = (SELECT * FROM @tblMFCheckCC FOR XML AUTO)
+
 	UPDATE W
 	SET W.intNoOfFlushes = C.intNoOfFlushes
 	FROM @tblMFCCWorkOrder W
@@ -203,10 +205,12 @@ BEGIN
 					END
 			)
 		,Isnull(W1.dtmTargetDate, W.dtmTargetDate)
-		,ISNULL(W.intNoOfFlushes,0) AS intNoOfFlushes
+		,ISNULL(W1.intNoOfFlushes,0) AS intNoOfFlushes
 	FROM @tblMFWorkOrder W
 	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	LEFT JOIN @tblMFCCWorkOrder W1 ON W1.intWorkOrderId = W.intWorkOrderId
+
+	--DECLARE @v1 XML = (SELECT * FROM @tblMFSequence FOR XML AUTO)
 
 	SELECT S.intWorkOrderId
 		,S.intExecutionOrder

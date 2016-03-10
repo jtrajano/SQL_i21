@@ -80,15 +80,16 @@ BEGIN TRY
 		,strNote
 		,strAdditionalComments
 		,intNoOfFlushes
+		,strWIPItemNo
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
 		,x.intItemId
 		,x.dblQuantity
 		,x.dblBalance
-		,x.dtmEarliestDate
+		,ISNULL(x.dtmEarliestDate,W.dtmEarliestDate)
 		,x.dtmExpectedDate
-		,x.dtmLatestDate
+		,ISNULL(x.dtmLatestDate,W.dtmLatestDate)
 		,x.dtmExpectedDate
 		,2
 		,x.intStatusId
@@ -110,6 +111,7 @@ BEGIN TRY
 		,x.strNote
 		,x.strAdditionalComments
 		,x.intNoOfFlushes
+		,x.strWIPItemNo
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -134,7 +136,9 @@ BEGIN TRY
 			,strNote NVARCHAR(MAX)
 			,strAdditionalComments NVARCHAR(MAX)
 			,intNoOfFlushes int
+			,strWIPItemNo nvarchar(50)
 			) x
+	JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
 	LEFT JOIN dbo.tblICItemFactory F1 ON F1.intFactoryId = @intLocationId
 		AND F1.intItemId = x.intItemId
 	LEFT JOIN dbo.tblICItemFactoryManufacturingCell MC1 ON MC1.intItemFactoryId = F1.intItemFactoryId
