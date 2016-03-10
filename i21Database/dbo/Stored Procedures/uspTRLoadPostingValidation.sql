@@ -232,7 +232,7 @@ select @ReceiptCount = count(intReceiptId) from @ReceiptTable
 
 if (@ReceiptCount = 0)
 BEGIN
-    RAISERROR('Receipt Entries Not Present', 16, 1);
+    RAISERROR('Receipt entries not present', 16, 1);
 END
 
 set @incReceiptval = 1 
@@ -255,7 +255,7 @@ BEGIN
       BEGIN
 	     if @ysnPostOrUnPost = 1 and (@strBOL is NULL or LTRIM(RTRIM(@strBOL)) = '')
 		    BEGIN
-			   RAISERROR('Bill Of Lading is Required', 16, 1);
+			   RAISERROR('Bill of Lading is required', 16, 1);
 			END
          if (@intTerminal is null  )
          BEGIN
@@ -282,7 +282,7 @@ BEGIN
 	     select @GrossorNet = strGrossOrNet from dbo.tblTRSupplyPoint where intSupplyPointId = @intSupplyPoint
 	     if (@GrossorNet is null)
          BEGIN
-             RAISERROR('Gross or Net is not Setup for Supply Point', 16, 1);
+             RAISERROR('Gross or Net is not setup for Supply Point', 16, 1);
          END
 	     if(@GrossorNet = 'Gross')
 	        BEGIN
@@ -354,7 +354,7 @@ BEGIN
       if (@dblReveivedQuantity != @dblDistributedQuantity)
 		BEGIN
 		    select top 1 @strDescription = strDescription from vyuICGetItemStock IC where IC.intItemId = @intItem 
-		    SET @strresult = @strDescription + ' Received Quantity ' + ltrim(@dblReveivedQuantity)  + ' Doesnot match Distributed Quantity ' + ltrim(@dblDistributedQuantity)
+		    SET @strresult = @strDescription + ' received quantity ' + ltrim(@dblReveivedQuantity)  + ' does not match distributed quantity ' + ltrim(@dblDistributedQuantity)
 		    RAISERROR(@strresult, 16, 1);
 		 END
 
@@ -383,35 +383,35 @@ BEGIN
 
 	if (@strDestination is NULL)
 	BEGIN
-       RAISERROR('Destination is Invalid', 16, 1);
+       RAISERROR('Destination is invalid', 16, 1);
     END
 	if (@strDestination = 'Customer')
 	BEGIN
 	   if(@intEntityCustomerId is NULL)
 	   BEGIN
-          RAISERROR('Customer is Invalid', 16, 1); 
+          RAISERROR('Customer is invalid', 16, 1); 
        END
 	   if(@intEntitySalespersonId is NULL)
 	   BEGIN
-          RAISERROR('Salesperson is Invalid', 16, 1); 
+          RAISERROR('Salesperson is invalid', 16, 1); 
        END
 	   if(@intShipToLocationId is NULL)
 	   BEGIN
-          RAISERROR('Ship To is Invalid', 16, 1); 
+          RAISERROR('Ship To is invalid', 16, 1); 
        END
 	   
     END
 	if(@intCompanyLocationId is NULL)
 	BEGIN
-       RAISERROR('Location is Invalid', 16, 1); 
+       RAISERROR('Location is invalid', 16, 1); 
     END
 	if(isdate(@dtmInvoiceDateTime) = 0)
 	BEGIN
-       RAISERROR('Invoice Date is Invalid', 16, 1); 
+       RAISERROR('Invoice Date is invalid', 16, 1); 
     END
 	if(@intDistributionItemId is NULL)
 	BEGIN
-       RAISERROR('Distribution Item is Invalid', 16, 1); 
+       RAISERROR('Distribution Item is invalid', 16, 1); 
     END
 	select @intStockUOMId = intStockUOMId, @strItem = strItemNo from vyuICGetItemStock where intItemId = @intDistributionItemId and intLocationId = @intCompanyLocationId
 	if (@intStockUOMId is null)
