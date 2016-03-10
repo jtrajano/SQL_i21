@@ -440,6 +440,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
+            this.Property(t => t.ysnListBundleSeparately).HasColumnName("vyuICGetItemStock"); 
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)
