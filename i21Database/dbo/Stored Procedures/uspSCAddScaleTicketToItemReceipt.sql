@@ -32,7 +32,9 @@ DECLARE @dblTicketFees AS DECIMAL(7, 2)
 DECLARE @intFeeItemId AS INT
 DECLARE @checkContract AS INT
 DECLARE @intLoadContractId AS INT,
-		@intLoadId AS INT;
+		@intLoadId AS INT,
+		@intLoadCostId AS INT,
+		@intHaulerId AS INT;
 
 BEGIN 
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId
@@ -188,78 +190,677 @@ BEGIN
 	RAISERROR(80004, 11, 1);
 	RETURN;
 END
+SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTIicket.intHaulerId FROM tblSCScaleSetup SCSetup
+LEFT JOIN tblSCTicket SCTIicket
+ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
+WHERE intTicketId = @intTicketId
+
 IF	ISNULL(@intLoadId,0) != 0 
 	BEGIN
-		SELECT @intLoadContractId = LGLD.intPContractDetailId FROM tblLGLoad LGL
+		SELECT @intLoadContractId = LGLD.intPContractDetailId, @intLoadCostId = LGCOST.intLoadCostId FROM tblLGLoad LGL
 		INNER JOIN tblLGLoadDetail LGLD
 		ON LGL.intLoadId = LGLD.intLoadId
 		INNER JOIN tblLGLoadCost LGCOST
 		ON LGCOST.intLoadId = LGCOST.intLoadId  
 		WHERE LGL.intLoadId = @intLoadId
+
+		IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) != 0
+			BEGIN
+				INSERT INTO @OtherCharges
+				(
+						[intEntityVendorId] 
+						,[strBillOfLadding] 
+						,[strReceiptType] 
+						,[intLocationId] 
+						,[intShipViaId] 
+						,[intShipFromId] 
+						,[intCurrencyId]  	
+						,[intChargeId] 
+						,[ysnInventoryCost] 
+						,[strCostMethod] 
+						,[dblRate] 
+						,[intCostUOMId] 
+						,[intOtherChargeEntityVendorId] 
+						,[dblAmount] 
+						,[strAllocateCostBy] 
+						,[intContractHeaderId]
+						,[intContractDetailId] 
+						,[ysnAccrue]
+				) 
+				SELECT	[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= @intFreightItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= 'Per Unit'
+						,[dblRate]							= RE.dblFreightRate
+						,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+						,[intOtherChargeEntityVendorId]		= @intHaulerId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= RE.intContractHeaderId
+						,[intContractDetailId]				= RE.intContractDetailId
+						,[ysnAccrue]						= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+																		1
+																	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+																		0
+																	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+																		1
+															  END
+						FROM	@ReceiptStagingTable RE
+						WHERE	RE.dblFreightRate != 0 
+				IF ISNULL(@intLoadCostId,0) != 0
+					BEGIN
+						INSERT INTO @OtherCharges
+						(
+								[intEntityVendorId] 
+								,[strBillOfLadding] 
+								,[strReceiptType] 
+								,[intLocationId] 
+								,[intShipViaId] 
+								,[intShipFromId] 
+								,[intCurrencyId]  	
+								,[intChargeId] 
+								,[ysnInventoryCost] 
+								,[strCostMethod] 
+								,[dblRate] 
+								,[intCostUOMId] 
+								,[intOtherChargeEntityVendorId] 
+								,[dblAmount] 
+								,[strAllocateCostBy] 
+								,[intContractHeaderId]
+								,[intContractDetailId] 
+								,[ysnAccrue]
+						)
+						SELECT	
+						[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= LoadCost.intItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= LoadCost.strCostMethod
+						,[dblRate]							= LoadCost.dblRate
+						,[intCostUOMId]						= LoadCost.intItemUOMId
+						,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
+						,[intContractDetailId]				= @intLoadContractId
+						,[ysnAccrue]						= LoadCost.ysnAccrue
+						FROM @ReceiptStagingTable RE
+						LEFT JOIN tblLGLoadDetail LoadDetail
+							ON (RE.intContractDetailId = LoadDetail.intPContractDetailId AND RE.intContractDetailId = @intLoadContractId)
+						LEFT JOIN tblLGLoadCost LoadCost
+							ON LoadCost.intLoadId = LoadDetail.intLoadId
+						WHERE LoadCost.intItemId != @intFreightItemId
+						AND LoadCost.dblRate != 0;
+					END
+				ELSE
+					BEGIN
+						INSERT INTO @OtherCharges
+						(
+								[intEntityVendorId] 
+								,[strBillOfLadding] 
+								,[strReceiptType] 
+								,[intLocationId] 
+								,[intShipViaId] 
+								,[intShipFromId] 
+								,[intCurrencyId]  	
+								,[intChargeId] 
+								,[ysnInventoryCost] 
+								,[strCostMethod] 
+								,[dblRate] 
+								,[intCostUOMId] 
+								,[intOtherChargeEntityVendorId] 
+								,[dblAmount] 
+								,[strAllocateCostBy] 
+								,[intContractHeaderId]
+								,[intContractDetailId] 
+								,[ysnAccrue]
+						)
+						SELECT	
+						[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= ContractCost.intItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= ContractCost.strCostMethod
+						,[dblRate]							= ContractCost.dblRate
+						,[intCostUOMId]						= ContractCost.intItemUOMId
+						,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+						,[intContractDetailId]				= ContractCost.intContractDetailId
+						,[ysnAccrue]						= ContractCost.ysnAccrue
+						FROM tblCTContractCost ContractCost
+						LEFT JOIN @ReceiptStagingTable RE
+						ON RE.intContractDetailId = ContractCost.intContractDetailId
+						WHERE ContractCost.intItemId != @intFreightItemId
+						AND RE.intContractDetailId = @intLoadContractId
+						AND ContractCost.intItemId != @intFreightItemId
+						AND ContractCost.dblRate != 0;
+					END
+			END
+		ELSE IF ISNULL(@intFreightItemId,0) != 0
+			BEGIN
+				IF ISNULL(@intLoadCostId,0) != 0
+					BEGIN
+						INSERT INTO @OtherCharges
+						(
+								[intEntityVendorId] 
+								,[strBillOfLadding] 
+								,[strReceiptType] 
+								,[intLocationId] 
+								,[intShipViaId] 
+								,[intShipFromId] 
+								,[intCurrencyId]  	
+								,[intChargeId] 
+								,[ysnInventoryCost] 
+								,[strCostMethod] 
+								,[dblRate] 
+								,[intCostUOMId] 
+								,[intOtherChargeEntityVendorId] 
+								,[dblAmount] 
+								,[strAllocateCostBy] 
+								,[intContractHeaderId]
+								,[intContractDetailId] 
+								,[ysnAccrue]
+						)
+						SELECT	
+						[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= LoadCost.intItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= LoadCost.strCostMethod
+						,[dblRate]							= LoadCost.dblRate
+						,[intCostUOMId]						= LoadCost.intItemUOMId
+						,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
+						,[intContractDetailId]				= @intLoadContractId
+						,[ysnAccrue]						= LoadCost.ysnAccrue
+						FROM tblLGLoadDetail LoadDetail
+						LEFT JOIN @ReceiptStagingTable RE
+							ON RE.intContractDetailId = LoadDetail.intPContractDetailId
+						LEFT JOIN tblLGLoadCost LoadCost
+							ON LoadCost.intLoadId = LoadDetail.intLoadId
+						WHERE LoadCost.intItemId = @intFreightItemId
+						AND LoadDetail.intPContractDetailId = @intLoadContractId
+						AND LoadCost.dblRate != 0;
+
+						INSERT INTO @OtherCharges
+						(
+								[intEntityVendorId] 
+								,[strBillOfLadding] 
+								,[strReceiptType] 
+								,[intLocationId] 
+								,[intShipViaId] 
+								,[intShipFromId] 
+								,[intCurrencyId]  	
+								,[intChargeId] 
+								,[ysnInventoryCost] 
+								,[strCostMethod] 
+								,[dblRate] 
+								,[intCostUOMId] 
+								,[intOtherChargeEntityVendorId] 
+								,[dblAmount] 
+								,[strAllocateCostBy] 
+								,[intContractHeaderId]
+								,[intContractDetailId] 
+								,[ysnAccrue]
+						)
+						SELECT	
+						[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= LoadCost.intItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= LoadCost.strCostMethod
+						,[dblRate]							= LoadCost.dblRate
+						,[intCostUOMId]						= LoadCost.intItemUOMId
+						,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
+						,[intContractDetailId]				= @intLoadContractId
+						,[ysnAccrue]						= LoadCost.ysnAccrue
+						FROM tblLGLoadDetail LoadDetail
+						LEFT JOIN @ReceiptStagingTable RE
+							ON RE.intContractDetailId = LoadDetail.intPContractDetailId
+						LEFT JOIN tblLGLoadCost LoadCost
+							ON LoadCost.intLoadId = LoadDetail.intLoadId
+						WHERE LoadCost.intItemId != @intFreightItemId
+						AND LoadDetail.intPContractDetailId = @intLoadContractId
+						AND LoadCost.dblRate != 0;
+					END
+				ELSE
+					BEGIN
+						INSERT INTO @OtherCharges
+						(
+							[intEntityVendorId] 
+							,[strBillOfLadding] 
+							,[strReceiptType] 
+							,[intLocationId] 
+							,[intShipViaId] 
+							,[intShipFromId] 
+							,[intCurrencyId]  	
+							,[intChargeId] 
+							,[ysnInventoryCost] 
+							,[strCostMethod] 
+							,[dblRate] 
+							,[intCostUOMId] 
+							,[intOtherChargeEntityVendorId] 
+							,[dblAmount] 
+							,[strAllocateCostBy] 
+							,[intContractHeaderId]
+							,[intContractDetailId] 
+							,[ysnAccrue]
+						)
+						SELECT	
+						[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= ContractCost.intItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= ContractCost.strCostMethod
+						,[dblRate]							= ContractCost.dblRate
+						,[intCostUOMId]						= ContractCost.intItemUOMId
+						,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+						,[intContractDetailId]				= ContractCost.intContractDetailId
+						,[ysnAccrue]						= ContractCost.ysnAccrue
+						FROM tblCTContractCost ContractCost
+						LEFT JOIN @ReceiptStagingTable RE
+						ON RE.intContractDetailId = ContractCost.intContractDetailId
+						WHERE ContractCost.intItemId = @intFreightItemId
+						AND RE.intContractDetailId = @intLoadContractId
+						AND ContractCost.dblRate != 0;
+
+						INSERT INTO @OtherCharges
+						(
+								[intEntityVendorId] 
+								,[strBillOfLadding] 
+								,[strReceiptType] 
+								,[intLocationId] 
+								,[intShipViaId] 
+								,[intShipFromId] 
+								,[intCurrencyId]  	
+								,[intChargeId] 
+								,[ysnInventoryCost] 
+								,[strCostMethod] 
+								,[dblRate] 
+								,[intCostUOMId] 
+								,[intOtherChargeEntityVendorId] 
+								,[dblAmount] 
+								,[strAllocateCostBy] 
+								,[intContractHeaderId]
+								,[intContractDetailId] 
+								,[ysnAccrue]
+						)
+						SELECT	
+						[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= ContractCost.intItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= ContractCost.strCostMethod
+						,[dblRate]							= ContractCost.dblRate
+						,[intCostUOMId]						= ContractCost.intItemUOMId
+						,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+						,[intContractDetailId]				= ContractCost.intContractDetailId
+						,[ysnAccrue]						= ContractCost.ysnAccrue
+						FROM tblCTContractCost ContractCost
+						LEFT JOIN @ReceiptStagingTable RE
+						ON RE.intContractDetailId = ContractCost.intContractDetailId
+						WHERE ContractCost.intItemId != @intFreightItemId
+						AND RE.intContractDetailId = @intLoadContractId
+						AND ContractCost.dblRate != 0;
+					END
+			END
+		ELSE
+		BEGIN
+			IF ISNULL(@intLoadCostId,0) != 0
+				BEGIN
+					INSERT INTO @OtherCharges
+					(
+							[intEntityVendorId] 
+							,[strBillOfLadding] 
+							,[strReceiptType] 
+							,[intLocationId] 
+							,[intShipViaId] 
+							,[intShipFromId] 
+							,[intCurrencyId]  	
+							,[intChargeId] 
+							,[ysnInventoryCost] 
+							,[strCostMethod] 
+							,[dblRate] 
+							,[intCostUOMId] 
+							,[intOtherChargeEntityVendorId] 
+							,[dblAmount] 
+							,[strAllocateCostBy] 
+							,[intContractHeaderId]
+							,[intContractDetailId] 
+							,[ysnAccrue]
+					)
+					SELECT	
+					[intEntityVendorId]					= RE.intEntityVendorId
+					,[strBillOfLadding]					= RE.strBillOfLadding
+					,[strReceiptType]					= RE.strReceiptType
+					,[intLocationId]					= RE.intLocationId
+					,[intShipViaId]						= RE.intShipViaId
+					,[intShipFromId]					= RE.intShipFromId
+					,[intCurrencyId]  					= RE.intCurrencyId
+					,[intChargeId]						= LoadCost.intItemId
+					,[ysnInventoryCost]					= 0
+					,[strCostMethod]					= LoadCost.strCostMethod
+					,[dblRate]							= LoadCost.dblRate
+					,[intCostUOMId]						= LoadCost.intItemUOMId
+					,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
+					,[dblAmount]						= 0
+					,[strAllocateCostBy]				=  NULL
+					,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
+					,[intContractDetailId]				= @intLoadContractId
+					,[ysnAccrue]						= LoadCost.ysnAccrue
+					FROM tblLGLoadDetail LoadDetail
+					LEFT JOIN @ReceiptStagingTable RE
+						ON RE.intContractDetailId = LoadDetail.intPContractDetailId
+					LEFT JOIN tblLGLoadCost LoadCost
+						ON LoadCost.intLoadId = LoadDetail.intLoadId
+					WHERE LoadCost.intItemId = @intFreightItemId
+					AND LoadDetail.intPContractDetailId = @intLoadContractId
+					AND LoadCost.dblRate != 0;
+
+					INSERT INTO @OtherCharges
+					(
+							[intEntityVendorId] 
+							,[strBillOfLadding] 
+							,[strReceiptType] 
+							,[intLocationId] 
+							,[intShipViaId] 
+							,[intShipFromId] 
+							,[intCurrencyId]  	
+							,[intChargeId] 
+							,[ysnInventoryCost] 
+							,[strCostMethod] 
+							,[dblRate] 
+							,[intCostUOMId] 
+							,[intOtherChargeEntityVendorId] 
+							,[dblAmount] 
+							,[strAllocateCostBy] 
+							,[intContractHeaderId]
+							,[intContractDetailId] 
+							,[ysnAccrue]
+					)
+					SELECT	
+					[intEntityVendorId]					= RE.intEntityVendorId
+					,[strBillOfLadding]					= RE.strBillOfLadding
+					,[strReceiptType]					= RE.strReceiptType
+					,[intLocationId]					= RE.intLocationId
+					,[intShipViaId]						= RE.intShipViaId
+					,[intShipFromId]					= RE.intShipFromId
+					,[intCurrencyId]  					= RE.intCurrencyId
+					,[intChargeId]						= LoadCost.intItemId
+					,[ysnInventoryCost]					= 0
+					,[strCostMethod]					= LoadCost.strCostMethod
+					,[dblRate]							= LoadCost.dblRate
+					,[intCostUOMId]						= LoadCost.intItemUOMId
+					,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
+					,[dblAmount]						= 0
+					,[strAllocateCostBy]				=  NULL
+					,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
+					,[intContractDetailId]				= @intLoadContractId
+					,[ysnAccrue]						= LoadCost.ysnAccrue
+					FROM tblLGLoadDetail LoadDetail
+					LEFT JOIN @ReceiptStagingTable RE
+						ON RE.intContractDetailId = LoadDetail.intPContractDetailId
+					LEFT JOIN tblLGLoadCost LoadCost
+						ON LoadCost.intLoadId = LoadDetail.intLoadId
+					WHERE LoadCost.intItemId != @intFreightItemId
+					AND LoadDetail.intPContractDetailId = @intLoadContractId
+					AND LoadCost.dblRate != 0;
+				END
+			ELSE
+				BEGIN
+					INSERT INTO @OtherCharges
+					(
+						[intEntityVendorId] 
+						,[strBillOfLadding] 
+						,[strReceiptType] 
+						,[intLocationId] 
+						,[intShipViaId] 
+						,[intShipFromId] 
+						,[intCurrencyId]  	
+						,[intChargeId] 
+						,[ysnInventoryCost] 
+						,[strCostMethod] 
+						,[dblRate] 
+						,[intCostUOMId] 
+						,[intOtherChargeEntityVendorId] 
+						,[dblAmount] 
+						,[strAllocateCostBy] 
+						,[intContractHeaderId]
+						,[intContractDetailId] 
+						,[ysnAccrue]
+					)
+					SELECT	
+					[intEntityVendorId]					= RE.intEntityVendorId
+					,[strBillOfLadding]					= RE.strBillOfLadding
+					,[strReceiptType]					= RE.strReceiptType
+					,[intLocationId]					= RE.intLocationId
+					,[intShipViaId]						= RE.intShipViaId
+					,[intShipFromId]					= RE.intShipFromId
+					,[intCurrencyId]  					= RE.intCurrencyId
+					,[intChargeId]						= ContractCost.intItemId
+					,[ysnInventoryCost]					= 0
+					,[strCostMethod]					= ContractCost.strCostMethod
+					,[dblRate]							= ContractCost.dblRate
+					,[intCostUOMId]						= ContractCost.intItemUOMId
+					,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
+					,[dblAmount]						= 0
+					,[strAllocateCostBy]				=  NULL
+					,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+					,[intContractDetailId]				= ContractCost.intContractDetailId
+					,[ysnAccrue]						= ContractCost.ysnAccrue
+					FROM tblCTContractCost ContractCost
+					LEFT JOIN @ReceiptStagingTable RE
+					ON RE.intContractDetailId = ContractCost.intContractDetailId
+					WHERE ContractCost.intItemId = @intFreightItemId
+					AND RE.intContractDetailId = @intLoadContractId
+					AND ContractCost.dblRate != 0;
+
+					INSERT INTO @OtherCharges
+					(
+							[intEntityVendorId] 
+							,[strBillOfLadding] 
+							,[strReceiptType] 
+							,[intLocationId] 
+							,[intShipViaId] 
+							,[intShipFromId] 
+							,[intCurrencyId]  	
+							,[intChargeId] 
+							,[ysnInventoryCost] 
+							,[strCostMethod] 
+							,[dblRate] 
+							,[intCostUOMId] 
+							,[intOtherChargeEntityVendorId] 
+							,[dblAmount] 
+							,[strAllocateCostBy] 
+							,[intContractHeaderId]
+							,[intContractDetailId] 
+							,[ysnAccrue]
+					)
+					SELECT	
+					[intEntityVendorId]					= RE.intEntityVendorId
+					,[strBillOfLadding]					= RE.strBillOfLadding
+					,[strReceiptType]					= RE.strReceiptType
+					,[intLocationId]					= RE.intLocationId
+					,[intShipViaId]						= RE.intShipViaId
+					,[intShipFromId]					= RE.intShipFromId
+					,[intCurrencyId]  					= RE.intCurrencyId
+					,[intChargeId]						= ContractCost.intItemId
+					,[ysnInventoryCost]					= 0
+					,[strCostMethod]					= ContractCost.strCostMethod
+					,[dblRate]							= ContractCost.dblRate
+					,[intCostUOMId]						= ContractCost.intItemUOMId
+					,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
+					,[dblAmount]						= 0
+					,[strAllocateCostBy]				=  NULL
+					,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+					,[intContractDetailId]				= ContractCost.intContractDetailId
+					,[ysnAccrue]						= ContractCost.ysnAccrue
+					FROM tblCTContractCost ContractCost
+					LEFT JOIN @ReceiptStagingTable RE
+					ON RE.intContractDetailId = ContractCost.intContractDetailId
+					WHERE ContractCost.intItemId != @intFreightItemId
+					AND RE.intContractDetailId = @intLoadContractId
+					AND ContractCost.dblRate != 0;
+				END
+		END
 	END
 ELSE
 	BEGIN
-		SELECT @intFreightItemId = SCSetup.intFreightItemId FROM tblSCScaleSetup SCSetup
-		LEFT JOIN tblSCTicket SCTIicket
-		ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
-		WHERE intTicketId = @intTicketId
-
-		IF ISNULL(@intFreightItemId,0) != 0
-		BEGIN
-		INSERT INTO @OtherCharges
-		(
-				[intEntityVendorId] 
-				,[strBillOfLadding] 
-				,[strReceiptType] 
-				,[intLocationId] 
-				,[intShipViaId] 
-				,[intShipFromId] 
-				,[intCurrencyId]  	
-				,[intChargeId] 
-				,[ysnInventoryCost] 
-				,[strCostMethod] 
-				,[dblRate] 
-				,[intCostUOMId] 
-				,[intOtherChargeEntityVendorId] 
-				,[dblAmount] 
-				,[strAllocateCostBy] 
-				,[intContractHeaderId]
-				,[intContractDetailId] 
-				,[ysnAccrue]
-		) 
-		SELECT	[intEntityVendorId]					= RE.intEntityVendorId
+		IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) != 0
+			BEGIN
+				INSERT INTO @OtherCharges
+				(
+						[intEntityVendorId] 
+						,[strBillOfLadding] 
+						,[strReceiptType] 
+						,[intLocationId] 
+						,[intShipViaId] 
+						,[intShipFromId] 
+						,[intCurrencyId]  	
+						,[intChargeId] 
+						,[ysnInventoryCost] 
+						,[strCostMethod] 
+						,[dblRate] 
+						,[intCostUOMId] 
+						,[intOtherChargeEntityVendorId] 
+						,[dblAmount] 
+						,[strAllocateCostBy] 
+						,[intContractHeaderId]
+						,[intContractDetailId] 
+						,[ysnAccrue]
+				) 
+				SELECT	[intEntityVendorId]					= RE.intEntityVendorId
+						,[strBillOfLadding]					= RE.strBillOfLadding
+						,[strReceiptType]					= RE.strReceiptType
+						,[intLocationId]					= RE.intLocationId
+						,[intShipViaId]						= RE.intShipViaId
+						,[intShipFromId]					= RE.intShipFromId
+						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intChargeId]						= @intFreightItemId
+						,[ysnInventoryCost]					= 0
+						,[strCostMethod]					= 'Per Unit'
+						,[dblRate]							= RE.dblFreightRate
+						,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+						,[intOtherChargeEntityVendorId]		= @intHaulerId
+						,[dblAmount]						= 0
+						,[strAllocateCostBy]				=  NULL
+						,[intContractHeaderId]				= RE.intContractHeaderId
+						,[intContractDetailId]				= RE.intContractDetailId
+						,[ysnAccrue]						= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+																		1
+																	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+																		0
+																	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+																		1
+															END
+						FROM	@ReceiptStagingTable RE
+						WHERE	RE.dblFreightRate != 0 
+			END
+		ELSE IF ISNULL(@intFreightItemId,0) != 0
+			BEGIN
+				INSERT INTO @OtherCharges
+				(
+						[intEntityVendorId] 
+						,[strBillOfLadding] 
+						,[strReceiptType] 
+						,[intLocationId] 
+						,[intShipViaId] 
+						,[intShipFromId] 
+						,[intCurrencyId]  	
+						,[intChargeId] 
+						,[ysnInventoryCost] 
+						,[strCostMethod] 
+						,[dblRate] 
+						,[intCostUOMId] 
+						,[intOtherChargeEntityVendorId] 
+						,[dblAmount] 
+						,[strAllocateCostBy] 
+						,[intContractHeaderId]
+						,[intContractDetailId] 
+						,[ysnAccrue]
+				)
+				SELECT	
+				[intEntityVendorId]					= RE.intEntityVendorId
 				,[strBillOfLadding]					= RE.strBillOfLadding
 				,[strReceiptType]					= RE.strReceiptType
 				,[intLocationId]					= RE.intLocationId
 				,[intShipViaId]						= RE.intShipViaId
 				,[intShipFromId]					= RE.intShipFromId
 				,[intCurrencyId]  					= RE.intCurrencyId
-				,[intChargeId]						= @intFreightItemId
+				,[intChargeId]						= ContractCost.intItemId
 				,[ysnInventoryCost]					= 0
-				,[strCostMethod]					= 'Per Unit'
-				,[dblRate]							= RE.dblFreightRate
-				,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
-				,[intOtherChargeEntityVendorId]		= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
-																RE.intEntityVendorId
-															WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
-																NULL
-															WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
-																RE.intShipViaId
-													END
+				,[strCostMethod]					= ContractCost.strCostMethod
+				,[dblRate]							= ContractCost.dblRate
+				,[intCostUOMId]						= ContractCost.intItemUOMId
+				,[intOtherChargeEntityVendorId]		= CASE 
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+															RE.intEntityVendorId
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+															NULL
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+															RE.intShipViaId
+													  END
 				,[dblAmount]						= 0
 				,[strAllocateCostBy]				=  NULL
-				,[intContractHeaderId]				= RE.intContractHeaderId
-				,[intContractDetailId]				= RE.intContractDetailId
-				,[ysnAccrue]						= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
-																1
-															WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
-																0
-															WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
-																1
-													END
-				FROM	@ReceiptStagingTable RE 
-				WHERE	RE.dblFreightRate != 0 
-		END
+				,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+				,[intContractDetailId]				= ContractCost.intContractDetailId
+				,[ysnAccrue]						= ContractCost.ysnAccrue
+				FROM tblCTContractCost ContractCost
+				LEFT JOIN @ReceiptStagingTable RE
+				ON RE.intContractDetailId = ContractCost.intContractDetailId
+				WHERE ContractCost.intItemId = @intFreightItemId
+				AND RE.intContractDetailId IS NOT NULL
+				AND ContractCost.dblRate != 0;
+			END
 		INSERT INTO @OtherCharges
 		(
 				[intEntityVendorId] 
@@ -282,7 +883,7 @@ ELSE
 				,[ysnAccrue]
 		)
 		SELECT	
-		[intEntityVendorId]					= ContractCost.intVendorId
+		[intEntityVendorId]					= RE.intEntityVendorId
 		,[strBillOfLadding]					= RE.strBillOfLadding
 		,[strReceiptType]					= RE.strReceiptType
 		,[intLocationId]					= RE.intLocationId
