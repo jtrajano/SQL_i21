@@ -77,7 +77,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation NewSubLocation ON NewSubLocation.intCo
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = AdjDetail.intStorageLocationId
 LEFT JOIN tblICStorageLocation NewStorageLocation ON NewStorageLocation.intStorageLocationId = AdjDetail.intNewStorageLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = AdjDetail.intItemId
-LEFT JOIN tblICItem NewItem ON NewItem.intItemId = AdjDetail.intItemId
+LEFT JOIN tblICItem NewItem ON NewItem.intItemId = AdjDetail.intNewItemId
 LEFT JOIN tblICLot Lot ON Lot.intLotId = AdjDetail.intLotId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
 LEFT JOIN vyuICGetItemUOM NewItemUOM ON NewItemUOM.intItemUOMId = AdjDetail.intNewItemUOMId

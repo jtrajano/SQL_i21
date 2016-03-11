@@ -11,6 +11,12 @@ BEGIN
 	DECLARE @rawResult AS NVARCHAR(200)
 	DECLARE @decimalSize INT
 
+	IF @factor1 IS NULL 
+		RETURN NULL;
+
+	IF @factor2 IS NULL
+		RETURN NULL; 
+
 	-- Raw result is in string. 
 	BEGIN 
 		DECLARE @NoDecimalFactor1 AS NUMERIC(19, 0) 
