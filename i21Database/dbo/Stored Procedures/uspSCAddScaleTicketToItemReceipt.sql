@@ -303,7 +303,9 @@ ELSE
 		FROM tblCTContractCost ContractCost
 		LEFT JOIN @ReceiptStagingTable RE
 		ON RE.intContractDetailId = ContractCost.intContractDetailId
-		WHERE ContractCost.intItemId != @intFreightItemId;
+		WHERE ContractCost.intItemId != @intFreightItemId
+		AND RE.intContractDetailId IS NOT NULL
+		AND ContractCost.dblRate != 0;
 	END
 
 --SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
