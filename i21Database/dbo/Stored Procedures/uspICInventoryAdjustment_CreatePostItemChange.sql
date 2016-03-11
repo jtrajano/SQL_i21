@@ -7,7 +7,7 @@
 	,@intStorageLocationId AS INT	
 	,@strLotNumber AS NVARCHAR(50)		
 	-- Parameters for the new values: 
-	,@dblAdjustByQuantity AS NUMERIC(18,6)
+	,@dblAdjustByQuantity AS NUMERIC(38, 20)
 	,@intNewItemId AS INT
 	,@intNewSubLocationId AS INT	
 	,@intNewStorageLocationId AS INT	
@@ -249,7 +249,7 @@ BEGIN
 			,dblNewQuantity				= Lot.dblQty + @dblAdjustByQuantity
 			,intWeightUOMId				= Lot.intWeightUOMId
 			,intNewWeightUOMId			= NULL 
-			,dblWeight					= Lot.dblWeightPerQty * @dblAdjustByQuantity * -1
+			,dblWeight					= dbo.fnMultiply(dbo.fnMultiply(Lot.dblWeightPerQty, @dblAdjustByQuantity), -1) 
 			,dblNewWeight				= NULL 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
 			,dblNewWeightPerQty			= NULL 
