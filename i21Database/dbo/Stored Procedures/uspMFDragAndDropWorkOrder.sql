@@ -113,7 +113,7 @@ BEGIN TRY
 			,ysnEOModified BIT
 			,intScheduleId int
 			) x
-	WHERE x.intStatusId <> 1
+	WHERE x.intStatusId <> 1 AND x.intManufacturingCellId in (@intDraggedManufacturingCellId,@intDroppedManufacturingCell)
 	ORDER BY x.intExecutionOrder
 	
 
