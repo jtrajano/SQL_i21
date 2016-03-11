@@ -99,6 +99,12 @@ BEGIN TRY
 		SET intLotId = @intNewLotId
 		WHERE intLotId = @intLotId
 	END
+	
+	UPDATE tblICLot
+	SET dblWeight = dblQty
+	WHERE dblQty <> dblWeight
+		AND intItemUOMId = intWeightUOMId
+	AND intLotId=@intLotId
 
 	IF (
 			SELECT dblWeight
