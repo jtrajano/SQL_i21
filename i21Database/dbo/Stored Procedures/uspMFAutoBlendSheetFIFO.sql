@@ -1157,6 +1157,7 @@ BEGIN TRY
 
 				IF @ysnEnableParentLot = 0
 					AND @dblPartialQuantity > 0
+					Begin
 					INSERT INTO #tblPartialQtyLot (
 						intLotId
 						,intItemId
@@ -1194,6 +1195,9 @@ BEGIN TRY
 							)
 						AND L.dtmExpiryDate >= GETDATE()
 					ORDER BY L.dtmDateCreated
+
+					Delete From #tblPartialQtyLot Where dblAvailableQty <= 0
+					End
 
 				SELECT @intMinPartialQtyLotRowNo = MIN(intRowNo)
 				FROM #tblPartialQtyLot
