@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnCalculateLotWeight for the basics]
+﻿alter PROCEDURE testi21Database.[test fnCalculateLotWeight for the basics]
 AS 
 BEGIN
 	-- Arrange
@@ -9,8 +9,8 @@ BEGIN
 			,@dblCostingQty AS NUMERIC(38, 20)
 			,@dblLotWeightPerQty AS NUMERIC(38,20)
 
-			,@Expected AS NUMERIC(18,6) 
-			,@result AS NUMERIC(18,6)
+			,@expected AS NUMERIC(18,6) = 0  
+			,@result AS NUMERIC(18,6) 
 	
 	-- Act
 	SELECT @result = dbo.fnCalculateLotWeight(
@@ -23,5 +23,5 @@ BEGIN
 	);
 
 	-- Assert 
-	EXEC tSQLt.AssertEquals @Expected, @result;
+	EXEC tSQLt.AssertEquals @expected, @result;
 END
