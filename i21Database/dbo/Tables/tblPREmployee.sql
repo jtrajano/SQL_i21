@@ -35,6 +35,7 @@
 	[intUserSecurityId] [int] NULL,
 	[intRank] [int] NULL,
 	[strTimeEntryPassword] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[dblRegularHours] NUMERIC (18, 6) DEFAULT ((0)) NULL,
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
@@ -405,3 +406,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'dtmOriginalDateHired'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Default Regular Hours',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'dblRegularHours'
