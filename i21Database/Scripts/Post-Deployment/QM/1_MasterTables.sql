@@ -572,3 +572,7 @@ UPDATE tblQMCompanyPreference
 SET ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
 WHERE ysnChangeLotStatusOnApproveforPreSanitizeLot IS NULL
 GO
+
+GO
+UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
+GO
