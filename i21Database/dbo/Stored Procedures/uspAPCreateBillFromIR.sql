@@ -148,7 +148,7 @@ BEGIN
 		[dblWithheld]			=	0,
 		[intStoreLocationId]	=	A.intLocationId,
 		[intPayToAddressId]		=	A.intShipFromId,
-		[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,0)
+		[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
 	FROM tblICInventoryReceipt A
 	OUTER APPLY 
 	(
@@ -202,8 +202,8 @@ BEGIN
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 
 											 THEN (CASE WHEN B.dblNet > 0 
-														THEN CAST(B.dblUnitCost AS DECIMAL(18,2)) / A.intSubCurrencyCents  * B.dblNet * ItemCostUOM.dblUnitQty --Calculate Sub-Cur Base Gross/Net UOM
-														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) / A.intSubCurrencyCents  --Calculate Sub-Cur 
+														THEN CAST(B.dblUnitCost AS DECIMAL(18,2)) / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemCostUOM.dblUnitQty --Calculate Sub-Cur Base Gross/Net UOM
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) / ISNULL(A.intSubCurrencyCents,1)  --Calculate Sub-Cur 
 														END) 
 											 ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) END,
 		[dblCost]					=	B.dblUnitCost,
