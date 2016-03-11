@@ -3792,6 +3792,13 @@ ELSE
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality Exception View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	DELETE tblSMMasterMenu WHERE strMenuName = 'Quality Exception View' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Property' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Report Property', N'Quality', @QualityParentMenuId, N'Report Property', N'Activity', N'Screen', N'Quality.view.ReportProperty', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.ReportProperty' WHERE strMenuName = 'Report Property' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
+
+
 /* WAREHOUSE */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse' AND strModuleName = 'Warehouse' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
