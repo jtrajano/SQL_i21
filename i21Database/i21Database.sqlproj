@@ -3521,6 +3521,7 @@
     <Build Include="dbo\User Defined Types\ScheduleConstraintTable.sql" />
     <Build Include="dbo\Views\vyuHDSalesRepSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

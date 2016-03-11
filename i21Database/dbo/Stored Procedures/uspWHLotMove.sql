@@ -100,11 +100,13 @@ BEGIN TRY
 		WHERE intLotId = @intLotId
 	END
 
-	IF (
-			SELECT dblWeight
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId
-			) < 0.01
+	UPDATE tblICLot
+	SET dblWeight = dblQty
+	WHERE dblQty <> dblWeight
+		AND intItemUOMId = intWeightUOMId
+	AND intLotId=@intLotId
+
+	IF (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01
 	BEGIN
 		UPDATE tblICLot
 		SET dblWeight = 0
