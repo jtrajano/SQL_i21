@@ -351,4 +351,64 @@ BEGIN
 
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,1
+
+	DECLARE @intRecordId INT
+	,@intLotId1 INT
+	DECLARE @tblMFLot TABLE (
+		intRecordId INT Identity(1, 1)
+		,intLotId INT
+		)
+
+	INSERT INTO @tblMFLot (intLotId)
+	SELECT intLotId
+	FROM dbo.tblMFWorkOrderConsumedLot
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @intRecordId = Min(intRecordId)
+	FROM @tblMFLot
+
+	WHILE @intRecordId IS NOT NULL
+	BEGIN
+		SELECT @intLotId1 = NULL
+
+		SELECT @intLotId1 = intLotId
+		FROM @tblMFLot
+		WHERE intRecordId = @intRecordId
+
+		IF (
+				(
+					SELECT dblWeight
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId1
+					) < 0.01
+				)
+			AND (
+				(
+					SELECT dblQty
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId1
+					) < 0.01
+				)
+		BEGIN
+			--EXEC dbo.uspMFLotAdjustQty
+			-- @intLotId =@intLotId,       
+			-- @dblNewLotQty =0,
+			-- @intUserId=@intUserId ,
+			-- @strReasonCode ='Residue qty clean up',
+			-- @strNotes ='Residue qty clean up'
+			UPDATE tblICLot
+			SET dblWeight = 0
+				,dblQty = 0
+			WHERE intLotId = @intLotId1
+		END
+			UPDATE tblICLot
+			SET dblWeight = dblQty
+			WHERE dblQty <> dblWeight
+				AND intItemUOMId = intWeightUOMId
+			and intLotId=@intLotId1
+
+		SELECT @intRecordId = Min(intRecordId)
+		FROM @tblMFLot
+		WHERE intRecordId > @intRecordId
+	END
 END
