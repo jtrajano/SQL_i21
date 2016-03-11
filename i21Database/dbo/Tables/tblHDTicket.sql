@@ -9,7 +9,7 @@
 	[intCustomerContactId] [int] NULL,
 	[intCustomerId] [int] NULL,
 	[intMilestoneId] [int] NULL,
-	[intTicketTypeId] [int] NOT NULL,
+	[intTicketTypeId] [int] NULL,
 	[intTicketStatusId] [int] NOT NULL,
 	[intLineOfBusinessId] [int] NULL,
 	[intTicketPriorityId] [int] NULL,
