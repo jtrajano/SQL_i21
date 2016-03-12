@@ -45,6 +45,7 @@ Declare @ysnRequireCustomerApproval bit
 Declare @strLotTracking nvarchar(50)
 Declare @intMinWO int
 Declare @intCategoryId int
+Declare @strItemNo nvarchar(50)
 
 Declare @tblWO As table
 (
@@ -80,6 +81,13 @@ Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId)
 Select @intManufacturingProcessId=r.intManufacturingProcessId,@intAttributeTypeId=mp.intAttributeTypeId 
 From tblMFRecipe r Join  tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 
 Where r.intItemId=@intItemId And r.intLocationId=@intLocationId And r.ysnActive=1
+
+If ISNULL(@intManufacturingProcessId,0)=0
+Begin
+	Select @strItemNo=strItemNo From tblICItem Where intItemId=@intItemId
+	Set @ErrMsg='No active recipe found for item ' + @strItemNo + '.'
+	RaisError(@ErrMsg,16,1)
+End
 
 Begin Tran
 
