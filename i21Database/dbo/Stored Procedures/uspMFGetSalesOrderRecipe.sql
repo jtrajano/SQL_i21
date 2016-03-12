@@ -65,7 +65,8 @@ From @tblItemFinal
 Select @dblRecipeQty=dblQuantity 
 From tblMFRecipe Where intRecipeId=(Select intRecipeId From @tblItemFinal)
 
-Select @dblAvailableQty = SUM(dblQty) From tblICLot Where intItemId=@intItemId And dblQty>0 And intLocationId=@intLocationId
+Select @dblAvailableQty = SUM(ISNULL(CASE WHEN intWeightUOMId IS NULL THEN dblQty ELSE dblWeight END,0)) 
+From tblICLot Where intItemId=@intItemId And dblQty>0 And intLocationId=@intLocationId
 
 Select TOP 1 @intWorkOrderId=ISNULL(intWorkOrderId,0),
 @dblWOQty=dblQuantity,@dtmDueDate=dtmExpectedDate,@intCellId=intManufacturingCellId 
@@ -97,7 +98,7 @@ Where r.intLocationId=@intLocationId And r.ysnActive=1 And ri.intRecipeId=@intRe
 
 Select @intItemId=intItemId From @tblItemFinal Where intRowNo=2
 
-Select @dblAvailableQty = SUM(dblWeight) 
+Select @dblAvailableQty = SUM(ISNULL(CASE WHEN intWeightUOMId IS NULL THEN dblQty ELSE dblWeight END,0)) 
 From tblICLot Where intItemId=@intItemId And dblQty>0 And intLocationId=@intLocationId
 
 Set @intWorkOrderId=0
