@@ -1154,7 +1154,10 @@ BEGIN TRY
 		,SL.dtmChangeoverEndDate
 		,SL.dtmPlannedStartDate
 		,SL.dtmPlannedEndDate
-		,SL.intExecutionOrder
+		,Convert(INT, CASE 
+			WHEN W.intStatusId = 1
+				THEN NULL
+			ELSE SL.intExecutionOrder End) AS intExecutionOrder
 		,SL.intChangeoverDuration
 		,SL.intSetupDuration
 		,SL.strComments
