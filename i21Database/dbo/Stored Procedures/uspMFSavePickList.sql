@@ -232,6 +232,12 @@ Begin
 	Where strWorkOrderNo in (Select strWorkOrderNo From @tblWorkOrder) And intKitStatusId <> 6)
 		RaisError('Blend Sheet(s) are already picked.',16,1)
 
+	If Exists (Select 1 From tblMFPickList Where strPickListNo=@strPickListNo)
+	Begin
+		Set @ErrMsg='Pick List No ' + @strPickListNo + ' already exist.'
+		RaisError(@ErrMsg,16,1)
+	End
+
 	Insert Into tblMFPickList(strPickListNo,strWorkOrderNo,intKitStatusId,intAssignedToId,intLocationId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
 	Select @strPickListNo,strWorkOrderNo,7,intAssignedToId,intLocationId,@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1 From @tblPickList
 
