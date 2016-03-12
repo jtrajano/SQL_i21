@@ -21,11 +21,13 @@
 	wc.dblIssuedQuantity dblConsumedIssuedQuantity,
 	um1.strUnitMeasure strConsumedIssuedUOM,
 	l1.strLotNumber strProducedLotNumber,
+	l1.intLotId intProducedLotId,
 	wp.dblQuantity dblProducedLotQuantity,
 	cl.strLocationName,
 	cl.intCompanyLocationId intLocationId,
 	l1.dtmDateCreated dtmLotProducedDate,
-	e1.strName as strUserName
+	e1.strName as strUserName,
+	w.intBlendRequirementId
 	from tblMFWorkOrder w
 	JOIN tblMFBlendRequirement br ON br.intBlendRequirementId=w.intBlendRequirementId
 	JOIN tblMFWorkOrderConsumedLot wc ON wc.intWorkOrderId=w.intWorkOrderId
