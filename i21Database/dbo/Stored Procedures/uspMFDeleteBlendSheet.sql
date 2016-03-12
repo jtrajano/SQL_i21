@@ -16,6 +16,8 @@ BEGIN TRY
 		,@dtmDueDate DateTime
 		,@intExecutionOrder int
 		,@intRowCount int
+		,@intPickListId int
+		,@strWorkOrderNos nvarchar(max)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -59,6 +61,8 @@ BEGIN TRY
 				@dtmDueDate=dtmDueDate,@intExecutionOrder=intExecutionOrder,
 				@intUserId=intUserId from @tblWO where intRowNo=@intRowCount
 
+		Select @intPickListId=ISNULL(intPickListId,0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
 		If @intStatusId in (2,9)
 		Begin			
 			Delete from tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
@@ -79,6 +83,20 @@ BEGIN TRY
 
 					Exec [uspMFDeleteLotReservation] @intWorkOrderId=@intWorkOrderId
 				End
+
+			If Not Exists (Select 1 From tblMFWorkOrder Where intPickListId=@intPickListId)
+				Begin
+					Delete From tblMFPickListDetail Where intPickListId=@intPickListId
+					Delete From tblMFPickList Where intPickListId=@intPickListId
+				End
+
+			If @intPickListId > 0
+			Begin
+				SELECT @strWorkOrderNos=coalesce(@strWorkOrderNos + ', ', '') + t.strWorkOrderNo
+				FROM (SELECT DISTINCT strWorkOrderNo From tblMFWorkOrder Where intPickListId=@intPickListId) t
+
+				Update tblMFPickList Set strWorkOrderNo=@strWorkOrderNos Where intPickListId=@intPickListId
+			End
 		End
 							
 		Select @intRowCount=Min(intRowNo) from @tblWO where intRowNo>@intRowCount	
