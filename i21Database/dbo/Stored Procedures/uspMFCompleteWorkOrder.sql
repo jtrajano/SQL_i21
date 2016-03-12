@@ -469,6 +469,8 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@intWorkOrderId = @intWorkOrderId
 
+		SELECT @strLotAlias=@strWorkOrderNo
+
 	END
 
 	IF @intProductionTypeId in (1,3) 
