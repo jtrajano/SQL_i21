@@ -3535,6 +3535,7 @@
     <Build Include="dbo\Views\vyuEMUserSecurityEntityToRole.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReassignSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetStartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
