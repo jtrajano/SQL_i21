@@ -36,7 +36,8 @@ DECLARE
 		
 		@idoc			INT,			@varXML			XML,			@strPrimaryColumn		NVARCHAR(50),		@strCondition			NVARCHAR(MAX),
 		@strGetXML		NVARCHAR(MAX),	@intUniqueId	INT,			@strSetColumn			NVARCHAR(MAX),		@strSQL					NVARCHAR(MAX),
-		@intChildRecId	INT,			@strChildTable	NVARCHAR(MAX),	@strForeignKeyColumn	NVARCHAR(MAX),		@ErrMsg					NVARCHAR(MAX)
+		@intChildRecId	INT,			@strChildTable	NVARCHAR(MAX),	@strForeignKeyColumn	NVARCHAR(MAX),		@ErrMsg					NVARCHAR(MAX),
+		@strColName		NVARCHAR(100),	@strColValue	NVARCHAR(MAX)
 		
 
 		
@@ -46,11 +47,15 @@ DECLARE
 
 	IF OBJECT_ID('tempdb..#ParentTableColUpdate') IS NOT NULL  	
 		DROP TABLE #ParentTableColUpdate	
-		
-	SELECT	strColName	= C.value('local-name(.)', 'varchar(50)'),
-			strColValue = C.value('(.)[1]', 'varchar(50)') 
+
+	SELECT	ROW_NUMBER() OVER (ORDER BY strColName ASC) intUniqueId,
+			*
 	INTO	#ParentTableColUpdate
-	FROM	@varXML.nodes('/root/toUpdate/*') AS T(C)
+	FROM(	
+			SELECT	strColName	= C.value('local-name(.)', 'varchar(50)'),
+					strColValue = C.value('(.)[1]', 'varchar(50)') 
+			FROM	@varXML.nodes('/root/toUpdate/*') AS T(C)
+		)t
 
 	IF OBJECT_ID('tempdb..#ChildTables') IS NOT NULL  	
 		DROP TABLE #ChildTables
@@ -95,6 +100,22 @@ DECLARE
 	FROM #ParentTableColUpdate CH
     
     EXEC	uspCTGetTableDataInXML		@strTblName,	@strCondition,	@strGetXML OUTPUT,	''
+
+	SELECT @varXML = @strGetXML
+	SELECT @intUniqueId= MIN(intUniqueId) FROM #ParentTableColUpdate
+	
+	WHILE	ISNULL(@intUniqueId,0) > 0
+	BEGIN
+			SELECT	@strColName = strColName,@strColValue = strColValue FROM #ParentTableColUpdate WHERE intUniqueId = @intUniqueId
+			
+			SELECT @strSQL = N'SET  @varXML.modify(''replace value of (/'+@strTblName+'s/'+@strTblName+'/'+@strColName+'/text())[1] with sql:variable("@strColValue")'')'
+			EXEC sp_executesql @strSQL,N'@varXML XML OUTPUT,@strColValue NVARCHAR(MAX)',@varXML = @varXML OUTPUT,@strColValue = @strColValue
+			
+			SELECT	@intUniqueId= MIN(intUniqueId) FROM #ParentTableColUpdate WHERE intUniqueId > @intUniqueId
+	END
+
+	SELECT @strGetXML = CAST(@varXML AS NVARCHAR(MAX))
+
 	EXEC	uspCTInsertINTOTableFromXML @strTblName,	@strGetXML,		@intNewRecId OUTPUT
 	
 	IF ISNULL(@strSetColumn,'') <> ''
@@ -103,6 +124,7 @@ DECLARE
 		EXEC sp_executesql @strSQL
 	END
 	
+	SELECT @intUniqueId = NULL
 	SELECT @intUniqueId= MIN(intUniqueId) FROM #ChildTables
 	
 	WHILE	ISNULL(@intUniqueId,0) > 0
