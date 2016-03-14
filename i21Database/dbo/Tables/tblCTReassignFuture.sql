@@ -16,6 +16,7 @@
     strPriceUOM				NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
 	intPriceFixationDetailId INT,
     intConcurrencyId		INT NOT NULL,
+	intAssignFuturesToContractSummaryId INT,
     
     PRIMARY KEY CLUSTERED (intReassignFutureId ASC),
     CONSTRAINT [FK_tblCTReassignFuture_tblCTReassign_intReassignId] FOREIGN KEY (intReassignId) REFERENCES tblCTReassign(intReassignId) ON DELETE CASCADE,

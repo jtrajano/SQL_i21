@@ -89,7 +89,8 @@ BEGIN
 
 	--Futures
 
-	SELECT	SY.intFutOptTransactionId,
+	SELECT	SY.intAssignFuturesToContractSummaryId,
+			SY.intFutOptTransactionId,
 			FO.intFutureMarketId,
 			FO.intFutureMonthId,
 			MA.intUnitMeasureId AS intPriceUOMId,
