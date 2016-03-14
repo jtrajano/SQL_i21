@@ -803,6 +803,7 @@ END CATCH
 				INNER JOIN 
 					tblARPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
+						AND ISNULL(A.ysnPosted,0) = 1
 				INNER JOIN 
 					tblARInvoice C
 						ON B.intInvoiceId = C.intInvoiceId
@@ -2061,6 +2062,27 @@ IF @recap = 0
 						tblARInvoice 
 					WHERE 
 						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+						
+					UPDATE
+						tblARPaymentDetail
+					SET
+						 dblInvoiceTotal = ISNULL(ARI.dblInvoiceTotal,0.00)
+						,dblAmountDue = (ISNULL(ARI.dblInvoiceTotal,0.00) + ISNULL(ARPD.dblInterest,0.00)) - (ISNULL(ARPD.dblPayment,0.00) + ISNULL(ARPD.dblDiscount,0.00))
+					FROM
+						tblARPaymentDetail ARPD
+					INNER JOIN
+						tblARPayment ARP
+							ON ARPD.intPaymentId = ARP.intPaymentId
+					INNER JOIN
+						tblARInvoice ARI
+							ON ARPD.intInvoiceId = ARI.intInvoiceId
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					WHERE
+						ISNULL(ARP.ysnPosted,0) = 0
+						
+							
 
 					UPDATE
 						tblGLDetail
@@ -2158,6 +2180,26 @@ IF @recap = 0
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+						
+						
+					UPDATE
+						tblARPaymentDetail
+					SET
+						 dblInvoiceTotal = ISNULL(ARI.dblInvoiceTotal,0.00)
+						,dblAmountDue = (ISNULL(ARI.dblInvoiceTotal,0.00) + ISNULL(ARPD.dblInterest,0.00)) - (ISNULL(ARPD.dblPayment,0.00) + ISNULL(ARPD.dblDiscount,0.00))
+					FROM
+						tblARPaymentDetail ARPD
+					INNER JOIN
+						tblARPayment ARP
+							ON ARPD.intPaymentId = ARP.intPaymentId
+					INNER JOIN
+						tblARInvoice ARI
+							ON ARPD.intInvoiceId = ARI.intInvoiceId
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					WHERE
+						ISNULL(ARP.ysnPosted,0) = 0
 
 					--Insert Successfully posted transactions.
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
