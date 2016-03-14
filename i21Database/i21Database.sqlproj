@@ -3525,6 +3525,7 @@
     <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
     <Build Include="dbo\Views\vyuEMUserSecurityEntityToRole.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
+    <Build Include="dbo\Tables\tblSMEventInvitees.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
