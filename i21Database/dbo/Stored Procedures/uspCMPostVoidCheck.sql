@@ -490,6 +490,7 @@ Post_Commit:
 	SET @message_id = 10000
 	SET @isSuccessful = 1
 	COMMIT TRANSACTION
+	GOTO Audit_Log
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
@@ -504,6 +505,21 @@ Recap_Rollback:
 	
 	EXEC dbo.uspCMPostRecap @RecapTable
 	GOTO Post_Exit
+
+Audi_Log:
+	DECLARE @strDescription AS NVARCHAR(100) 
+			,@actionType AS NVARCHAR(50)
+
+	SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+   
+	EXEC uspSMAuditLog 
+	   @keyValue = @intTransactionId       -- Primary Key Value of the Bank Deposit. 
+	   ,@screenName = 'CashManagement.view.MiscellaneousChecks'        -- Screen Namespace
+	   ,@entityId = @intUserId     -- Entity Id.
+	   ,@actionType = @actionType                             -- Action Type
+	   ,@changeDescription = @strDescription     -- Description
+	   ,@fromValue = ''          -- Previous Value
+	   ,@toValue = ''           -- New Value
 		
 -- Clean-up routines:
 -- Delete all temporary tables used during the post transaction. 
