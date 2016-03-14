@@ -120,7 +120,8 @@ BEGIN TRY
 		AND ri.intConsumptionMethodId = 1
 
 	UPDATE tblICStockReservation
-	SET intLotId = @intNewLotId
+	SET intLotId = @intNewLotId,
+		intStorageLocationId = @intKitStagingLocationId
 	WHERE intLotId = @intPickedLotId
 		AND strTransactionId = @strPickListNo
 
