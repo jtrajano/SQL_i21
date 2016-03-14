@@ -9,14 +9,18 @@ BEGIN TRY
 	DECLARE @intAlternateLotId INT
 	DECLARE @intStorageLocationId INT
 	DECLARE @intPickListId INT
+	DECLARE @intCompanyLocationId INT
 	DECLARE @dblAlternateLotQty NUMERIC(38, 20)
 	DECLARE @dblReservedLotQtyForPickList NUMERIC(38, 20)
 	DECLARE @dblAlternateLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblAlternateLotAvailableQty NUMERIC(38, 20)
 	DECLARE @intTransactionCount INT
+	DECLARE @strBlendProductionStagingLocation NVARCHAR(100)
+	DECLARE @strKitStagingArea NVARCHAR(100)
 	DECLARE @strErrMsg NVARCHAR(MAX)
 
-	SELECT @intPickListId = intPickListId
+	SELECT @intPickListId = intPickListId,
+		   @intCompanyLocationId = intLocationId
 	FROM tblMFPickList
 	WHERE strPickListNo = @strPickListNo
 
@@ -33,6 +37,24 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
+
+	SELECT @strBlendProductionStagingLocation = sl.strName
+	FROM tblSMCompanyLocation cl
+	JOIN tblICStorageLocation sl ON cl.intBlendProductionStagingUnitId = sl.intStorageLocationId
+	WHERE intCompanyLocationId = 1
+
+	SELECT @strKitStagingArea = sl.strName
+	FROM tblMFAttribute a
+	JOIN tblMFManufacturingProcessAttribute mpa ON mpa.intAttributeId = a.intAttributeId
+	JOIN tblICStorageLocation sl ON sl.intStorageLocationId = mpa.strAttributeValue
+	WHERE a.strAttributeName = 'Kit Staging Location'
+		AND intManufacturingProcessId = 1
+	
+	IF (UPPER(@strLotSourceLocation) = UPPER(@strBlendProductionStagingLocation)) Or (UPPER(@strLotSourceLocation) = UPPER(@strKitStagingArea)) 
+	BEGIN
+		SET @strErrMsg= 'NOT ALLOWED TO PICK ANY LOT FROM THE LOCATION ''' + UPPER(@strLotSourceLocation) +'''.'
+		RAISERROR(@strErrMsg,16,1)
+	END
 
 	IF ISNULL(@dblAlternateLotQty,0) <=0
 	BEGIN
