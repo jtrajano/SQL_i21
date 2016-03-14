@@ -251,15 +251,15 @@ SELECT
 	,[strItemNo]						= I.[strItemNo] 
 	,[strItemDescription]				= SOD.[strItemDescription]
 	,[intItemUOMId]						= SHP.[intItemUOMId]
-	,[strUnitMeasure]					= U.[strUnitMeasure]
+	,[strUnitMeasure]					= SHP.[strUnitMeasure]
 	,[intOrderUOMId]					= SOD.[intItemUOMId]
 	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
 	,[intShipmentItemUOMId]				= SHP.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= SHP.[strUnitMeasure]
-	,[dblQtyShipped]					= SOD.[dblQtyShipped]	
+	,[dblQtyShipped]					= SHP.[dblQuantity]	
 	,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
 	,[dblShipmentQuantity]				= SHP.[dblQuantity]	
-	,[dblShipmentQtyShippedTotal]		= SOD.[dblQtyShipped]
+	,[dblShipmentQtyShippedTotal]		= SHP.[dblQuantity]
 	,[dblQtyRemaining]					= SOD.[dblQtyOrdered]
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
@@ -428,7 +428,7 @@ SELECT
 	,[strItemDescription]				= ICI.[strDescription] 
 	,[intItemUOMId]						= ICISI.[intItemUOMId]
 	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
-	,[intOrderUOMId]					= ISNULL(CTCD.[intItemUOMId],NULL)
+	,[intOrderUOMId]					= CTCD.[intItemUOMId]
 	,[strOrderUnitMeasure]				= ISNULL(ICUM2.[strUnitMeasure],'')
 	,[intShipmentItemUOMId]				= ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId])
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
