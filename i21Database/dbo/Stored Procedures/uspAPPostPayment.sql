@@ -287,6 +287,7 @@ BEGIN
 		WHERE B.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND A.intTransactionType = 8
 
+		GOTO Audit_Log_Invoke;
 		IF @@ERROR <> 0 OR @isSuccessful = 0 GOTO Post_Rollback;
 
 	END
@@ -437,6 +438,7 @@ BEGIN
 	END
 
 	--UPDATE 1099 Information
+	GOTO Audit_Log_Invoke;
 	EXEC [uspAPUpdateBill1099] @param
 
 END
@@ -509,7 +511,7 @@ ELSE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit;
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
-
+		GOTO Audit_Log_Invoke;
 		GOTO Post_Commit;
 	END
 
@@ -518,6 +520,22 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
+Audit_Log_Invoke:
+DECLARE @strDescription AS NVARCHAR(100) 
+  ,@actionType AS NVARCHAR(50)
+  ,@PaymentId AS NVARCHAR(50)
+
+SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
+SELECT @PaymentId = (SELECT intPaymentId FROM #tmpPayablePostData)
+EXEC dbo.uspSMAuditLog 
+   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
+  ,@keyValue = @PaymentId								-- Primary Key Value of the Voucher. 
+  ,@entityId = @userId									-- Entity Id.
+  ,@actionType = @actionType                        -- Action Type
+  ,@changeDescription = @strDescription				-- Description
+  ,@fromValue = ''									-- Previous Value
+  ,@toValue = ''									-- New Value
+
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1

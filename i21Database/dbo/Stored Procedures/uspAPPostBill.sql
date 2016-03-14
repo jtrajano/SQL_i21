@@ -361,6 +361,7 @@ BEGIN
 		FROM tblAPBill A
 		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
+		GOTO Audit_Log_Invoke
 	END
 	ELSE
 	BEGIN
@@ -439,6 +440,7 @@ BEGIN
 		FROM tblAPBill A
 		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
+		GOTO Audit_Log_Invoke
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
 	END
@@ -573,6 +575,22 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
+Audit_Log_Invoke:
+DECLARE @strDescription AS NVARCHAR(100) 
+  ,@actionType AS NVARCHAR(50)
+  ,@billId AS NVARCHAR(50)
+
+SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
+SELECT @billId = (SELECT intBillId FROM #tmpPostBillData)
+EXEC dbo.uspSMAuditLog 
+   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
+  ,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+  ,@entityId = @userId									-- Entity Id.
+  ,@actionType = @actionType                        -- Action Type
+  ,@changeDescription = @strDescription				-- Description
+  ,@fromValue = ''									-- Previous Value
+  ,@toValue = ''									-- New Value
+
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
