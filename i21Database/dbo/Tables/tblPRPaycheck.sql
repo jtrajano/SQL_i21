@@ -20,6 +20,7 @@
 	[ysnPrinted] [bit] NOT NULL,
 	[ysnVoid] [bit] NOT NULL,
 	[ysnDirectDeposit] [bit] NOT NULL DEFAULT ((0)),
+	[intBillId] INT NULL,
 	[intCreatedUserId] INT NULL,
 	[dtmCreated] [datetime] NOT NULL,
 	[intLastModifiedUserId] INT NULL,
@@ -27,7 +28,8 @@
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY],
  CONSTRAINT [FK_tblPRPaycheck_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]),
- CONSTRAINT [FK_tblPRPaycheck_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
+ CONSTRAINT [FK_tblPRPaycheck_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId]),
+ CONSTRAINT [FK_tblPRPaycheck_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
 ) ON [PRIMARY]
 GO
 /****** Object:  Default [DF__tblPRPayc__ysnGL__3D195C48]    Script Date: 08/14/2014 10:50:11 ******/
@@ -311,3 +313,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheck',
     @level2type = N'COLUMN',
     @level2name = N'dtmLastModified'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Bill Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheck',
+    @level2type = N'COLUMN',
+    @level2name = N'intBillId'
