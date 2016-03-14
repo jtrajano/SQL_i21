@@ -22,7 +22,7 @@ SELECT strRecordNumber
 							THEN ISNULL(A.dblQtyShipped, 0) 
 							ELSE ISNULL(A.dblQtyOrdered, 0)
 						END
-	 , dblMarginPercentage = CASE WHEN ISNULL(A.dblStandardCost, 0) > 0 THEN ((ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) / ISNULL(A.dblPrice, 0)) * 100 ELSE 100 END
+	 , dblMarginPercentage = CASE WHEN ISNULL(A.dblPrice, 0) > 0 THEN ((ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) / ISNULL(A.dblPrice, 0)) * 100 ELSE 0 END
 	 , ISNULL(A.dblPrice, 0)		  AS dblPrice 
 	 , ISNULL(A.dblTax, 0)			  AS dblTax
 	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
