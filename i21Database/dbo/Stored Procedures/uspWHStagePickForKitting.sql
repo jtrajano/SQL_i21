@@ -119,6 +119,11 @@ BEGIN TRY
 		AND ysnActive = 1
 		AND ri.intConsumptionMethodId = 1
 
+	UPDATE tblICStockReservation
+	SET intLotId = @intNewLotId
+	WHERE intLotId = @intPickedLotId
+		AND strTransactionId = @strPickListNo
+
 	IF NOT EXISTS(SELECT *
 				  FROM tblMFPickListDetail
 				  WHERE intPickListDetailId NOT IN (
@@ -132,11 +137,6 @@ BEGIN TRY
 						BEGIN
 							UPDATE tblMFPickList SET intKitStatusId = 12 WHERE intPickListId = @intPickListId
 							UPDATE tblMFWorkOrder SET intKitStatusId = 12 WHERE intPickListId = @intPickListId
-
-							UPDATE tblICStockReservation
-							SET intLotId = @intNewLotId
-							WHERE intLotId = @intPickedLotId
-								AND strTransactionId = @strPickListNo
 						END
 					END
 	
