@@ -3536,6 +3536,7 @@
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReassignSave.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetStartingNumber.sql" />
+    <Build Include="dbo\Tables\tblSMEventInvitees.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
