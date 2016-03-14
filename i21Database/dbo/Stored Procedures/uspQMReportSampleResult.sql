@@ -35,12 +35,9 @@ BEGIN TRY
 				,TR.strResult
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON TR.intPropertyId = P.intPropertyId
-				AND P.intPropertyId IN (
-					SELECT intPropertyId
-					FROM tblQMReportProperty
-					WHERE strReportName = 'Quality Label'
-					)
+			JOIN tblQMReportProperty RP ON RP.intPropertyId = P.intPropertyId AND RP.strReportName = 'Quality Label'
 			WHERE TR.intSampleId = @intSampleId
+			ORDER BY RP.intSequenceNo
 		END
 		ELSE
 		BEGIN
