@@ -8,15 +8,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intSampleId INT
+DECLARE @strSampleId NVARCHAR(MAX)
 
-SELECT TOP 1 @intSampleId = intSampleId
+SELECT @strSampleId = COALESCE(@strSampleId + '|^|', '') + CONVERT(NVARCHAR, intSampleId)
 FROM dbo.tblQMSample
 WHERE intProductTypeId = @intProductTypeId
 	AND intProductValueId = @intProductValueId
 ORDER BY intSampleId DESC
 
-IF @intSampleId IS NULL
-	SELECT 0 AS intSampleId
+IF @strSampleId IS NULL
+	SELECT '0' AS strSampleId
 ELSE
-	SELECT @intSampleId AS intSampleId
+	SELECT @strSampleId AS strSampleId
