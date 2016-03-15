@@ -228,8 +228,13 @@ BEGIN
 END
 ELSE
 BEGIN
+
+	DECLARE @Ids AS Id
+	INSERT INTO @Ids
+	SELECT intBillId FROM #tmpPostBillData
+
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@validBillIds, 'Bill', DEFAULT, @userId, @batchId)
+	SELECT * FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 END
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT

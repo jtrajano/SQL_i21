@@ -66,6 +66,8 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @count INT = 0;
 DECLARE @prepayIds AS Id
 DECLARE @payments AS Id
+DECLARE @lenOfSuccessPay INT, @lenOfSuccessPrePay INT;
+DECLARE @totalInvalid INT = 0;
 
 SET @recapId = '1'
 
@@ -137,12 +139,12 @@ FROM #tmpPayablePostData A
 INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
 WHERE B.ysnPrepay = 1
 
-DELETE A
-FROM #tmpPayablePostData A WHERE A.intPaymentId IN (SELECT intPaymentId FROM @prepayIds)
-
 --GET ALL PAYMENTS
 INSERT INTO @payments
-SELECT intPaymentId FROM #tmpPayablePostData
+SELECT A.intPaymentId 
+FROM #tmpPayablePostData A
+INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
+WHERE B.ysnPrepay != 1
 
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
@@ -156,7 +158,6 @@ BEGIN
 	UNION ALL
 	SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
 
-	DECLARE @totalInvalid INT
 	SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
 	IF(@totalInvalid > 0)
@@ -201,17 +202,12 @@ END
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
---CREATE TEMP GL ENTRIES
---SELECT @validPaymentIds = COALESCE(@validPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intPaymentId)
---FROM #tmpPayablePostData
---ORDER BY intPaymentId
-
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
 	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@payments, @userId, @batchId)
 	UNION ALL
-	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@prepayIds, @userId, @batchId)
+	SELECT * FROM dbo.[fnAPCreatePrepaymentGLEntries](@prepayIds, @userId, @batchId)
 END
 ELSE
 BEGIN
@@ -227,19 +223,57 @@ END
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
-	EXEC uspGLBookEntries @GLEntries, @post
+	--BATCH POST
+	EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 
-	--UPDATE tblAPPaymentDetail
-	EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
+	--Add to invalid payment count those invalid GL entries
+	SET @invalidCount = @totalInvalid + (SELECT COUNT(*) FROM tblGLPostResult B WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId)
 
-	EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
+	--DELETE THE FAILED POST ENTRIES
+	DELETE A
+	FROM @payments A
+	INNER JOIN tblGLPostResult B ON A.intId = B.intTransactionId
+	WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+
+	DELETE A
+	FROM @prepayIds A
+	INNER JOIN tblGLPostResult B ON A.intId = B.intTransactionId
+	WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+
+	--INSERT THE RESULT FOR SHOWING ON THE USER
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, intTransactionId, strBatchNumber)
+	SELECT 
+		A.strDescription
+		,A.strTransactionType
+		,A.strTransactionId
+		,A.intTransactionId
+		,@batchId
+	FROM tblGLPostResult A
+	WHERE A.strBatchId = @batchId
+
+	--MAKE SURE THAT ALL GL ENTRIES ARE VALID
+	SET @lenOfSuccessPay = (SELECT COUNT(*) FROM @payments)
+	SET @lenOfSuccessPrePay = (SELECT COUNT(*) FROM @prepayIds)
+
+	IF @lenOfSuccessPay = 0 AND @lenOfSuccessPrePay = 0
+	BEGIN
+		GOTO DONE;
+	END
+
+	IF @lenOfSuccessPay > 0
+	BEGIN
+		--UPDATE tblAPPaymentDetail
+		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
+		--UPDATE BILL RECORDS
+		EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
+	END
 
 	--Update posted status
 	UPDATE tblAPPayment
 		SET		ysnPosted = @post
-	WHERE	intPaymentId IN (SELECT intId FROM @payments)
+	WHERE	intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
 
-	IF EXISTS(SELECT 1 FROM @prepayIds)
+	IF @lenOfSuccessPrePay > 0
 	BEGIN
 		UPDATE A
 			SET A.ysnPosted = @post
@@ -248,7 +282,11 @@ BEGIN
 		WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
 	END
 
-	EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @payments, @post = @post, @userId = @userId, @batchId = @batchIdUsed
+	--CREATE BANK TRANSACTION
+	DECLARE @paymentForBankTransaction AS Id
+	INSERT INTO @paymentForBankTransaction
+	SELECT intPaymentId FROM #tmpPayablePostData
+	EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @paymentForBankTransaction, @post = @post, @userId = @userId, @batchId = @batchIdUsed
 
 	--Insert Successfully posted transactions.
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -259,7 +297,7 @@ BEGIN
 		@batchId,
 		A.intPaymentId
 	FROM tblAPPayment A
-	WHERE intPaymentId IN (SELECT intId FROM @payments)
+	WHERE intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
 
 	IF @post = 0
 	BEGIN
@@ -282,7 +320,7 @@ BEGIN
 	END
 
 	--OVERPAYMENT
-	IF @post = 1
+	IF @post = 1 AND @lenOfSuccessPay > 0
 	BEGIN
 		--Create overpayment
 		SELECT 
@@ -302,9 +340,9 @@ BEGIN
 			SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
 		END
 	END
-	ELSE
+	ELSE IF @post = 0
 	BEGIN
-		--remove overpayment
+		--remove overpayment when unposting
 		DELETE A
 		FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
 		WHERE B.intPaymentId IN (SELECT intId FROM @payments)
@@ -321,7 +359,7 @@ ELSE
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLPostRecap
-			WHERE intTransactionId IN (SELECT intPaymentId FROM #tmpPayablePostData);
+			WHERE intTransactionId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds);
 
 		INSERT INTO tblGLPostRecap(
 			 [strTransactionId]
@@ -386,19 +424,18 @@ ELSE
 IF(ISNULL(@recap,0) = 0)
 BEGIN
 ----DELETE PAYMENT DETAIL WITHOUT PAYMENT AMOUNT
-	IF(@post = 1)
+	IF @post = 1 AND @lenOfSuccessPay > 0
 	BEGIN		
 		DELETE FROM tblAPPaymentDetail
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		WHERE intPaymentId IN (SELECT intPaymentId FROM @payments)
 		AND dblPayment = 0
 	END
 END
 
-SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpPayablePostData) --only support recap per record
-
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
 
+DONE:
 IF @transCount = 0 COMMIT TRANSACTION
 SET @success = 1
 SET @successfulCount = @totalRecords
@@ -412,9 +449,7 @@ BEGIN CATCH
     SET @ErrorState    = ERROR_STATE()
     SET @ErrorLine     = ERROR_LINE()
     SET @ErrorProc     = ERROR_PROCEDURE()
-    SET @ErrorMessage  = 'Problem posting payment.' + CHAR(13) + 
-			'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
-			' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
+    SET @ErrorMessage  = 'Problem posting payment.' + CHAR(13) + @ErrorMessage
     -- Not all errors generate an error state, to set to 1 if it's zero
     IF @ErrorState  = 0
     SET @ErrorState = 1

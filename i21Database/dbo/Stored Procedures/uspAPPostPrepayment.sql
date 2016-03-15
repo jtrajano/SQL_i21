@@ -45,9 +45,8 @@ END
 
 SET @batchIdUsed = @batchId
 
-INSERT INTO #tmpPrepayInvalidData 
-SELECT * FROM [fnAPValidatePrepay](@paymentIds, @post, @userId)
-
+--INSERT INTO #tmpPrepayInvalidData 
+--SELECT * FROM [fnAPValidatePrepay](@paymentIds, @post, @userId)
 
 IF ISNULL(@post,0) = 1
 BEGIN

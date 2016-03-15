@@ -18,7 +18,7 @@ BEGIN
 	DECLARE @GLEntries AS RecapTableType 
 	DECLARE @batchId NVARCHAR(20)
 	DECLARE @createdPayments NVARCHAR(MAX)
-	DECLARE @transCount INT;
+	DECLARE @transCount INT = @@TRANCOUNT;
 
 	IF @transCount = 0 BEGIN TRANSACTION
 
@@ -190,9 +190,14 @@ BEGIN
 	SELECT @createdPayments = COALESCE(@createdPayments + ',', '') +  CONVERT(VARCHAR(12),intNewPaymentId)
 	FROM #tmpPayables WHERE intNewPaymentId IS NOT NULL
 	ORDER BY intNewPaymentId
+	
+	DECLARE @Ids AS Id
+	INSERT INTO @Ids
+	SELECT intPaymentId FROM #tmpPayables
+
 	INSERT INTO @GLEntries
 	--SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
-	SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
+	SELECT * FROM dbo.[fnAPReverseGLEntries](@Ids, 'Payable', @voidDate, @intUserId, @batchId)
 
 	--Reversed gl entries of void check should be posted
 	UPDATE A
