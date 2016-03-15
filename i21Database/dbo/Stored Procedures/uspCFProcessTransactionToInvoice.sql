@@ -188,7 +188,7 @@ SELECT
 	,[intPerformerId]						= NULL
 	,[ysnLeaseBilling]						= NULL
 	,[ysnVirtualMeterReading]				= NULL
-	,[ysnClearDetailTaxes]					= 0
+	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @TransactionId
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
@@ -259,7 +259,7 @@ BEGIN
 		,[strNotes]
 		,[intTempDetailIdForTaxes])
 	SELECT
-	[intDetailId]				= NULL
+	[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 	,[intTaxGroupId]			= NULL
 	,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 	,[intTaxClassId]			= cfTaxCode.intTaxClassId
