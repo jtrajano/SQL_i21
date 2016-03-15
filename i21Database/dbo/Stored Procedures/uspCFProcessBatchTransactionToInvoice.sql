@@ -235,7 +235,7 @@ END
 							ON iicItemLoc.intLocationId = icfSite.intARLocationId 
 							AND iicItemLoc.intItemId = icfItem.intARItemId)
 							AS cfSiteItem
-				ON (cfTrans.intSiteId = cfSiteItem.intSiteId OR cfTrans.intNetworkId = cfSiteItem.intNetworkId)
+				ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
 				AND cfSiteItem.intARItemId = cfTrans.intARItemId
 				AND cfSiteItem.intItemId = cfTrans.intProductId
 				INNER JOIN (SELECT * 
