@@ -10,7 +10,7 @@ intTransactionId
 ,strUserName = (SELECT strName from tblEntity where intEntityId = BT.intEntityId)
 ,intEntityId
 FROM tblCMBankTransaction BT
-WHERE ISNULL(ysnPosted,0) = 0
+WHERE ISNULL(ysnPosted,0) = 0 and  ISNULL(ysnCheckVoid,0) = 0
 UNION SELECT 
 intTransactionId,
 strTransactionId,
