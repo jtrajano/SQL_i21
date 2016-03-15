@@ -1529,12 +1529,16 @@ BEGIN CATCH
 END CATCH
 
 SET @batchIdUsed = ''
+
+DECLARE @TempInvoiceIdTable AS TABLE ([intInvoiceId] INT)
 		
 --Posting newly added Invoices
 DECLARE @IdsForPosting VARCHAR(MAX)
-BEGIN TRY	
-	SELECT --DISTINCT
-		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+BEGIN TRY
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		[intInvoiceID]
 	FROM
 		#EntriesForProcessing
 	WHERE
@@ -1543,6 +1547,11 @@ BEGIN TRY
 		AND ISNULL([intInvoiceID],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) <> 1	
+		
+	SELECT 
+		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable
 		
 	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
 		BEGIN		
@@ -1573,8 +1582,11 @@ BEGIN TRY
 	SET @batchIdUsed = ''	
 	SET @successfulCount = 0
 
-	SELECT --DISTINCT
-		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		[intInvoiceID]
 	FROM
 		#EntriesForProcessing
 	WHERE
@@ -1583,6 +1595,12 @@ BEGIN TRY
 		AND ISNULL([intInvoiceID],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) = 1	
+
+	SELECT --DISTINCT
+		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable
+		
 		
 	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
 		BEGIN	
@@ -1626,9 +1644,11 @@ END CATCH
 
 --Posting Updated Invoices
 DECLARE @IdsForPostingUpdated VARCHAR(MAX)
-BEGIN TRY	
-	SELECT --DISTINCT
-		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+BEGIN TRY
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		[intInvoiceID]
 	FROM
 		#EntriesForProcessing
 	WHERE
@@ -1636,7 +1656,13 @@ BEGIN TRY
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceID],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
-		AND ISNULL([ysnRecap],0) <> 1
+		AND ISNULL([ysnRecap],0) <> 1	
+
+	SELECT --DISTINCT
+		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable
+	
 		
 		
 	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
@@ -1668,8 +1694,11 @@ BEGIN TRY
 	SET @batchIdUsed = ''
 	SET @successfulCount = 0
 
-	SELECT --DISTINCT
-		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		[intInvoiceID]
 	FROM
 		#EntriesForProcessing
 	WHERE
@@ -1678,6 +1707,12 @@ BEGIN TRY
 		AND ISNULL([intInvoiceID],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) = 1
+
+	SELECT --DISTINCT
+		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable
+	
 		
 		
 	IF LEN(RTRIM(LTRIM(@IdsForPostingUpdated))) > 0
@@ -1721,9 +1756,11 @@ END CATCH
 
 --UnPosting Updated Invoices
 DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
-BEGIN TRY	
-	SELECT --DISTINCT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+BEGIN TRY
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		[intInvoiceID]
 	FROM
 		#EntriesForProcessing
 	WHERE
@@ -1733,7 +1770,12 @@ BEGIN TRY
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap],0) <> 1
-		
+			
+	SELECT --DISTINCT
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable
+			
 		
 	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
 		BEGIN			
@@ -1764,8 +1806,10 @@ BEGIN TRY
 	SET @batchIdUsed = ''
 	SET @successfulCount = 0
 
-	SELECT --DISTINCT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		[intInvoiceID]
 	FROM
 		#EntriesForProcessing
 	WHERE
@@ -1775,6 +1819,11 @@ BEGIN TRY
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap],0) = 1
+
+	SELECT --DISTINCT
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable	
 		
 		
 	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
@@ -1814,27 +1863,43 @@ END CATCH
 
 
 DECLARE @CreateIds VARCHAR(MAX)
-SELECT --DISTINCT
-	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+DELETE FROM @TempInvoiceIdTable
+INSERT INTO @TempInvoiceIdTable
+SELECT DISTINCT
+	[intInvoiceID]
 FROM
 	#EntriesForProcessing
 WHERE
 	ISNULL([ysnForInsert],0) = 1
 	AND ISNULL([ysnProcessed],0) = 1
 	AND ISNULL([intInvoiceID],0) <> 0
+
+SELECT --DISTINCT
+	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+FROM
+	@TempInvoiceIdTable
+
 	
 SET @CreatedIvoices = @CreateIds
 
 
 DECLARE @UpdatedIds VARCHAR(MAX)
-SELECT --DISTINCT
-	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+DELETE FROM @TempInvoiceIdTable
+INSERT INTO @TempInvoiceIdTable
+SELECT DISTINCT
+	[intInvoiceID]
 FROM
 	#EntriesForProcessing
 WHERE
 	ISNULL([ysnForUpdate],0) = 1
 	AND ISNULL([ysnProcessed],0) = 1
 	AND ISNULL([intInvoiceID],0) <> 0
+
+SELECT --DISTINCT
+	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+FROM
+	@TempInvoiceIdTable
+
 	
 SET @UpdatedIvoices = @UpdatedIds
 
