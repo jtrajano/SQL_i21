@@ -17,7 +17,7 @@ DROP TABLE  #tempLotHistory
 			   clsl.strSubLocationName AS strSubLocation, 
 			   sl.strName AS strStorageLocation, 
 			   itt.strName AS strTransaction, 
-			   CONVERT(NUMERIC(38,20),CASE WHEN iu.intItemUOMId = ilt.intItemUOMId THEN ilt.dblQty ELSE ilt.dblQty/ilt.dblUOMQty END) AS dblTransactionQty,
+			   CONVERT(NUMERIC(38,20),CASE WHEN iu.intItemUOMId = ilt.intItemUOMId THEN ilt.dblQty ELSE ilt.dblQty*ilt.dblUOMQty END) AS dblTransactionQty,
 			   CONVERT(NUMERIC(38,20),0.0) AS dblQuantity,
 			   um.strUnitMeasure AS strUOM, 
 			   iad.strNewLotNumber AS strRelatedLotId, 
@@ -66,7 +66,7 @@ DROP TABLE  #tempLotHistory
 					THEN 'Inventory Adjustment - Expiry Date Change'
 				ELSE ''
 				END AS strTransaction, 
-			   CONVERT(NUMERIC(38,20),ISNULL(CASE WHEN ium.intItemUOMId = iad.intItemUOMId THEN iad.dblWeight  ELSE iad.dblWeight/iad.dblWeightPerQty END,0)) AS dblTransactionQty,
+			   CONVERT(NUMERIC(38,20),ISNULL(CASE WHEN ium.intItemUOMId = iad.intItemUOMId THEN iad.dblWeight  ELSE iad.dblWeight*iad.dblWeightPerQty END,0)) AS dblTransactionQty,
 			   CONVERT(NUMERIC(38,20),0.0) AS dblQuantity,    
 			   um.strUnitMeasure AS strUOM, 
 			   iad.strNewLotNumber AS strRelatedLotId, 
