@@ -521,10 +521,11 @@ FROM (
 	FROM (
 		SELECT DISTINCT 'Delta options' AS Selection, 'Broker Account' AS PriceStatus, strFutureMonth, e.strName + '-' + strAccountNumber AS strAccountNumber, CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END AS dblNoOfContract, ft.strInternalTradeNo AS strTradeNo, ft.dtmTransactionDate AS TransactionDate, strBuySell AS TranType, e.strName AS CustVendor, CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END AS dblNoOfLot, CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END dblQuantity, um.intCommodityUnitMeasureId, (
 				SELECT TOP 1 dblDelta
-				FROM tblRKFuturesSettlementPrice sp
-				INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-				WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
-				ORDER BY dtmPriceDate DESC
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
 				) AS dblDelta
 		FROM tblRKFutOptTransaction ft
 		INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
