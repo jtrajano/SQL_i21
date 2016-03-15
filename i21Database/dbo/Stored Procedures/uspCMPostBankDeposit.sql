@@ -536,7 +536,7 @@ Post_Commit:
 	SET @message_id = 10000
 	SET @isSuccessful = 1
 	COMMIT TRANSACTION
-	GOTO Audi_Log
+	GOTO Audit_Log
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
