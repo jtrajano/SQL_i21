@@ -92,6 +92,18 @@ BEGIN TRY
 		RETURN
 	END
 
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblICInventoryTransaction
+			WHERE intTransactionId = @intTransactionId
+				AND strTransactionId = @strTransactionId
+			)
+	BEGIN
+		SELECT @strTransactionId = strLotNumber
+		FROM tblICLot
+		WHERE intLotId = @intLotId
+	END
+
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
