@@ -2,6 +2,7 @@
 (
 	intReassignAllocationId	INT IDENTITY (1, 1) NOT NULL,
     intReassignId			INT NOT NULL,
+	intAllocationDetailId	INT,
     intContractDetailId		INT,
     intAllocationUOMId		INT,
     intReassignUOMId		INT,

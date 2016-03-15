@@ -33,7 +33,15 @@ BEGIN TRY
 			@ErrMsg							NVARCHAR(MAX),
 			@intLotsHedged					INT,
 			@intReassignFutureId			INT,
-			@ysnIsHedged					BIT
+			@ysnIsHedged					BIT,
+			@intReassignAllocationId		INT,
+			@intAllocationDetailId			INT,
+			@intAllocationHeaderId			INT,
+			@dblReassignAllocation			NUMERIC(18,6),
+			@ysnFullyAllocation				INT,
+			@intContractTypeId				INT,
+			@dblConvertedReassign			NUMERIC(18,6),
+			@intUnitMeasureId				INT
 
 	DECLARE	@tblPricing TABLE
 	(
@@ -54,6 +62,18 @@ BEGIN TRY
 		ysnFullyPricingFutures		INT,
 		intFutOptTransactionId		INT,
 		intAssignFuturesToContractSummaryId INT
+	)
+
+	DECLARE	@tblAllocation TABLE
+	(
+		intReassignAllocationId		INT,
+		intAllocationDetailId		INT,
+		intAllocationHeaderId		INT,
+		dblReassign					NUMERIC(18,6),
+		ysnFullyAllocation			INT,
+		intContractTypeId			INT,
+		dblConvertedReassign		NUMERIC(18,6),
+		intUnitMeasureId			INT
 	)
 
 	SELECT	@intRecipientId			=	RE.intRecipientId,
@@ -95,6 +115,28 @@ BEGIN TRY
 														ISNULL(F2.dblAssignedLots,0) + 
 														ISNULL(F2.intHedgedLots,0)				=	RP.dblReassign
 	WHERE	RP.intReassignId = @intReassignId AND ISNULL(RP.dblReassign,0) > 0 AND RP.intPriceFixationDetailId IS NULL
+
+	INSERT	INTO  @tblAllocation
+	SELECT	RA.intReassignAllocationId,
+			RA.intAllocationDetailId,
+			AD.intAllocationHeaderId,
+			RA.dblReassign,
+			CASE	WHEN	CASE	WHEN	RN.intContractTypeId = 1 
+									THEN	AD.dblSAllocatedQty - RA.dblReassign
+									ELSE	AD.dblPAllocatedQty - RA.dblReassign
+							END	=	0 
+					THEN 1 
+					ELSE 0 
+			END,
+			RN.intContractTypeId,
+			dbo.fnCTConvertQtyToTargetItemUOM(RA.intReassignUOMId,CD.intItemUOMId,RA.dblReassign),
+			QU.intUnitMeasureId
+	FROM	tblCTReassignAllocation RA
+	JOIN	tblCTReassign			RN	ON	RN.intReassignId			=	RA.intReassignId
+	JOIN	tblLGAllocationDetail	AD	ON	RA.intAllocationDetailId	=	AD.intAllocationDetailId
+	JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	RN.intRecipientId
+	JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId				=	CD.intItemUOMId
+	WHERE	RA.intReassignId = @intReassignId AND ISNULL(RA.dblReassign,0) > 0
 
 	UPDATE	FD
 	SET		FD.intNoOfLots = FD.intNoOfLots - PR.dblReassign
@@ -344,6 +386,38 @@ BEGIN TRY
 			END
 
 			SELECT	@intReassignFutureId = MIN(intReassignFutureId) FROM @tblFutures WHERE intReassignFutureId > @intReassignFutureId
+		END
+
+		SELECT @intReassignAllocationId = MIN(intReassignAllocationId) FROM @tblAllocation
+
+		WHILE ISNULL(@intReassignAllocationId,0) > 0
+		BEGIN
+			SELECT	@intAllocationDetailId	=	NULL,
+					@intAllocationHeaderId	=	NULL,
+					@dblReassignAllocation	=	NULL,
+					@ysnFullyAllocation		=	NULL
+
+			SELECT	@intAllocationDetailId	=	intAllocationDetailId,
+					@intAllocationHeaderId	=	intAllocationHeaderId,
+					@dblReassignAllocation	=	dblReassign,
+					@ysnFullyAllocation		=	ysnFullyAllocation,
+					@intContractTypeId		=	intContractTypeId,
+					@dblConvertedReassign	=	dblConvertedReassign,
+					@intUnitMeasureId		=	intUnitMeasureId
+			FROM	@tblAllocation 
+			WHERE	intReassignAllocationId = @intReassignAllocationId
+
+			IF @ysnFullyAllocation	= 1
+			BEGIN
+				IF @intContractTypeId = 1
+					UPDATE	tblLGAllocationDetail 
+					SET		intPContractDetailId	=	@intRecipientId,
+							intPUnitMeasureId		=	@intUnitMeasureId,
+							dblPAllocatedQty		=	@dblConvertedReassign
+					WHERE	intAllocationDetailId	=	@intAllocationDetailId
+			END
+			
+			SELECT	@intReassignAllocationId = MIN(intReassignAllocationId) FROM @tblAllocation WHERE intReassignAllocationId > @intReassignAllocationId
 		END
 	END
 	--COMMIT TRAN
