@@ -3537,6 +3537,10 @@
     <Build Include="dbo\Stored Procedures\uspCTReassignSave.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetStartingNumber.sql" />
     <Build Include="dbo\Tables\tblSMEventInvitees.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionMonths.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureMonthAndYears.sql" />
+    <Build Include="dbo\Views\vyuRKGetCommodityUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

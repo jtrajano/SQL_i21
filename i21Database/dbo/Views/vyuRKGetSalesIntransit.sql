@@ -1,9 +1,8 @@
-﻿CREATE  VIEW [dbo].[vyuRKGetSalesIntransit]
+﻿CREATE VIEW [dbo].[vyuRKGetSalesIntransit]
 
 AS
-
-SELECT cd.intContractDetailId,intPricingTypeId,dblUnitReserved,ri.intInventoryReceiptId from tblICItem item
-JOIN tblICItemStock ics ON item.intItemId = ics.intItemId
-JOIN tblICInventoryReceiptItem ri on item.intItemId=ri.intItemId
-JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
-JOIN vyuCTContractDetailView cd on cd.intContractDetailId=ri.intLineNo AND strReceiptType = 'Purchase Contract' and intPricingTypeId in(1,2)
+SELECT DISTINCT cr.dblQty,ct.intContractDetailId  FROM tblICInventoryShipment pl
+Join tblICInventoryShipmentItem psi on pl.intInventoryShipmentId=psi.intInventoryShipmentId and pl.ysnPosted=1
+JOIN vyuLGDeliveryOpenPickLotDetails pld on pld.intPickLotHeaderId=psi.intLineNo
+JOIN tblCTContractDetail ct on ct.intContractHeaderId=pld.intPContractHeaderId and pld.intPContractDetailId=ct.intContractDetailId 
+JOIN tblICStockReservation cr on ct.intItemId=cr.intItemId and cr.intTransactionId=intPickLotDetailId

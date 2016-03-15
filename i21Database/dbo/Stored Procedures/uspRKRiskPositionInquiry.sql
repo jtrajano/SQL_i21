@@ -417,19 +417,25 @@ UNION
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,
 	 case when ft.strBuySell='Buy' then (ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS l WHERE l.intLFutOptTransactionId=ft.intFutOptTransactionId),0) )
 	  else -(ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId=ft.intFutOptTransactionId),0)) end *
-	     (SELECT top 1 dblDelta FROM tblRKFuturesSettlementPrice sp  
-     JOIN tblRKOptSettlementPriceMarketMap mm on sp.intFutureSettlementPriceId=mm.intFutureSettlementPriceId   
-     WHERE intFutureMarketId=ft.intFutureMarketId and mm.intOptionMonthId=ft.intOptionMonthId and   
-     mm.intTypeId = case when ft.strOptionType='Put' then 1 else 2 end Order By dtmPriceDate desc)
-	  
+	     isnull((
+						SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
+				),0)	  
 	   as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     	 case when ft.strBuySell='Buy' then (ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS l WHERE l.intLFutOptTransactionId=ft.intFutOptTransactionId),0) )
 	  else -(ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId=ft.intFutOptTransactionId),0)) end as dblNoOfLot,   
-     (SELECT top 1 dblDelta FROM tblRKFuturesSettlementPrice sp  
-     JOIN tblRKOptSettlementPriceMarketMap mm on sp.intFutureSettlementPriceId=mm.intFutureSettlementPriceId   
-     WHERE intFutureMarketId=ft.intFutureMarketId and mm.intOptionMonthId=ft.intOptionMonthId and   
-     mm.intTypeId = case when ft.strOptionType='Put' then 1 else 2 end Order By dtmPriceDate desc) as dblDelta
+     isnull((SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
+				),0) as dblDelta
 	FROM tblRKFutOptTransaction ft  
 	JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
 	JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
@@ -463,19 +469,26 @@ SELECT DISTINCT 'F&O' as Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' as 
      strFutureMonth,e.strName+'-'+strAccountNumber as strAccountNumber,
 	 case when ft.strBuySell='Buy' then (ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS l WHERE l.intLFutOptTransactionId=ft.intFutOptTransactionId),0) )
 	  else -(ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId=ft.intFutOptTransactionId),0)) end *
-	     (SELECT top 1 dblDelta FROM tblRKFuturesSettlementPrice sp  
-     JOIN tblRKOptSettlementPriceMarketMap mm on sp.intFutureSettlementPriceId=mm.intFutureSettlementPriceId   
-     WHERE intFutureMarketId=ft.intFutureMarketId and mm.intOptionMonthId=ft.intOptionMonthId and   
-     mm.intTypeId = case when ft.strOptionType='Put' then 1 else 2 end Order By dtmPriceDate desc)
+	     isnull((
+						SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
+				),0)
 	  
 	   as dblNoOfContract,  
     ft.strInternalTradeNo as strTradeNo, ft.dtmTransactionDate as TransactionDate,strBuySell as TranType, e.strName as CustVendor,  
     	 case when ft.strBuySell='Buy' then (ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS l WHERE l.intLFutOptTransactionId=ft.intFutOptTransactionId),0) )
 	  else -(ft.intNoOfContract-isnull((SELECT sum(intMatchQty)  FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId=ft.intFutOptTransactionId),0)) end as dblNoOfLot,   
-     (SELECT top 1 dblDelta FROM tblRKFuturesSettlementPrice sp  
-     JOIN tblRKOptSettlementPriceMarketMap mm on sp.intFutureSettlementPriceId=mm.intFutureSettlementPriceId   
-     WHERE intFutureMarketId=ft.intFutureMarketId and mm.intOptionMonthId=ft.intOptionMonthId and   
-     mm.intTypeId = case when ft.strOptionType='Put' then 1 else 2 end Order By dtmPriceDate desc) as dblDelta
+     isnull((SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
+				),0) as dblDelta
 	FROM tblRKFutOptTransaction ft  
 	JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
 	JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
@@ -533,14 +546,14 @@ FROM(
 	GROUP BY strFutureMonth,strTradeNo, TransactionDate,TranType,CustVendor
 	UNION
 	 SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,'Net market risk' as PriceStatus,strFutureMonth
-			 ,case when @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
+			 ,CASE WHEN @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity
 	FROM @List WHERE PriceStatus ='F&O' and Selection LIKE ('Total F&O%')
 	GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor
 	
 	UNION 
 	 SELECT  CASE WHEN @strRiskView='Processor' THEN 'Outright coverage' ELSE 'Net market risk' END AS Selection,'Net market risk' as PriceStatus,strFutureMonth
-			 ,case when @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
+			 ,CASE WHEN @strRiskView='Processor' then 'Market Coverage' else 'Market Risk' end as strAccountNumber,sum(dblNoOfContract) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity)  dblQuantity
 	FROM @List WHERE PriceStatus ='a. Delta %' and Selection = ('Total speciality delta fixed')
 	GROUP BY strFutureMonth,strAccountNumber,strTradeNo, TransactionDate,TranType,CustVendor
@@ -550,18 +563,18 @@ GROUP BY Selection,PriceStatus,strAccountNumber,strFutureMonth,strTradeNo, Trans
 INSERT INTO @List(Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity)  
 SELECT Selection,PriceStatus,strFutureMonth,strAccountNumber,(dblNoOfContract),strTradeNo,TransactionDate,TranType,CustVendor,(dblNoOfLot), (dblQuantity)
 FROM(
-	 SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
-			 ,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,(dblNoOfLot) dblNoOfContract,
+	 SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
+			 ,CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,(dblNoOfLot) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,(dblNoOfLot) dblNoOfLot, (dblQuantity)  dblQuantity 
 	FROM @List WHERE Selection='Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)' and strAccountNumber like '%Purchase%'
 	UNION
-	SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
-			 ,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,((dblNoOfLot)) dblNoOfContract,
+	SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
+			 ,CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,((dblNoOfLot)) dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,((dblNoOfLot)) dblNoOfLot,  ((dblQuantity))  dblQuantity 
 	FROM @List WHERE Selection='Physical position / Basis risk'  and PriceStatus = 'a. Unpriced - (Balance to be Priced)'  and strAccountNumber like '%Sale%'
 	UNION 
-	SELECT  case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
-			 ,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,dblNoOfContract dblNoOfContract,
+	SELECT  CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as Selection,case when @strRiskView='Processor' then 'Futures required' else 'Switch position' end as PriceStatus,strFutureMonth
+			 ,CASE WHEN @strRiskView='Processor' then 'Futures required' else 'Switch position' end as strAccountNumber,dblNoOfContract dblNoOfContract,
 			 strTradeNo, TransactionDate,TranType,CustVendor,(dblNoOfLot) dblNoOfLot, (dblQuantity)  dblQuantity 
 	FROM @List WHERE PriceStatus ='F&O' and Selection ='F&O'
 	)t 
