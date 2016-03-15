@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @strLotNumber NVARCHAR(100)
 	DECLARE @intNewLotId INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @intLotStorageLocationId INT
 
 	DECLARE @dblQtyToProduce NUMERIC(18,6)
 	DECLARE @intBlendItemId INT
@@ -73,18 +74,21 @@ BEGIN TRY
 	WHERE intStorageLocationId = @intKitStagingLocationId
 	
 	SELECT @strLotNumber = strLotNumber,
-		   @intItemId = intItemId
+		   @intItemId = intItemId,
+		   @intLotStorageLocationId = intStorageLocationId
 	FROM tblICLot 
 	WHERE intLotId = @intPickedLotId
 	
 	--SELECT @intPickedLotId intPickedLotId, @intSubLocationId intSubLocationId, @intStorageLocationId intStorageLocationId, @dblPickedQty dblPickedQty, @intUserId intUserId
 
-	
-	EXEC uspWHLotMove @intLotId = @intPickedLotId, 
-					  @intNewSubLocationId = @intSubLocationId,
-					  @intNewStorageLocationId = @intStorageLocationId, 
-					  @dblMoveQty = @dblPickedQty, 
-					  @intUserId = @intUserId
+	IF @intLotStorageLocationId <> @intStorageLocationId
+	BEGIN
+		EXEC uspWHLotMove @intLotId = @intPickedLotId, 
+						  @intNewSubLocationId = @intSubLocationId,
+						  @intNewStorageLocationId = @intStorageLocationId, 
+						  @dblMoveQty = @dblPickedQty, 
+						  @intUserId = @intUserId
+	END
 					  
 	SELECT TOP 1 @intNewLotId = intLotId
 	FROM tblICLot
@@ -115,6 +119,12 @@ BEGIN TRY
 		AND ysnActive = 1
 		AND ri.intConsumptionMethodId = 1
 
+	UPDATE tblICStockReservation
+	SET intLotId = @intNewLotId,
+		intStorageLocationId = @intKitStagingLocationId
+	WHERE intLotId = @intPickedLotId
+		AND strTransactionId = @strPickListNo
+
 	IF NOT EXISTS(SELECT *
 				  FROM tblMFPickListDetail
 				  WHERE intPickListDetailId NOT IN (
@@ -128,11 +138,6 @@ BEGIN TRY
 						BEGIN
 							UPDATE tblMFPickList SET intKitStatusId = 12 WHERE intPickListId = @intPickListId
 							UPDATE tblMFWorkOrder SET intKitStatusId = 12 WHERE intPickListId = @intPickListId
-
-							UPDATE tblICStockReservation
-							SET intLotId = @intNewLotId
-							WHERE intLotId = @intPickedLotId
-								AND strTransactionId = @strPickListNo
 						END
 					END
 	
