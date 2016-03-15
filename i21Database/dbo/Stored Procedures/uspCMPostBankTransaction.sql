@@ -536,7 +536,7 @@ Recap_Rollback:
 	EXEC dbo.uspCMPostRecap @RecapTable
 	GOTO Post_Exit
 
-Audi_Log:
+Audit_Log:
 	DECLARE @strDescription AS NVARCHAR(100) 
 			,@actionType AS NVARCHAR(50)
 
