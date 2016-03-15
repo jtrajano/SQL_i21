@@ -202,9 +202,9 @@ BEGIN
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 
 											 THEN (CASE WHEN B.dblNet > 0 
-														THEN CAST(B.dblUnitCost AS DECIMAL(18,2)) / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemCostUOM.dblUnitQty --Calculate Sub-Cur Base Gross/Net UOM
-														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) / ISNULL(A.intSubCurrencyCents,1)  --Calculate Sub-Cur 
-														END) 
+														THEN CAST(B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemCostUOM.dblUnitQty AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1) AS DECIMAL(18,2))  --Calculate Sub-Cur 
+												   END) 
 											 ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) END,
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
