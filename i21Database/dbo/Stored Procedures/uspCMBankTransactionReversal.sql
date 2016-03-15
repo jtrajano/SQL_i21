@@ -315,7 +315,7 @@ DECLARE @intPrintedTransaction AS INT
 SELECT @intPrintedTransaction = COUNT(F.intTransactionId) 
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH)
+WHERE	F.intBankTransactionTypeId IN (@ACH)
 		AND F.dtmCheckPrinted IS NOT NULL
 
 IF @intPrintedTransaction > 0
