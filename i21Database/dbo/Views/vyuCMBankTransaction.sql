@@ -15,6 +15,10 @@ ysnPrenoteSent = ISNULL((
 		SELECT TOP 1 ysnPrenoteSent FROM tblEntityEFTInformation EFTInfo 
 		WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 ),0),
+strAccountType = ISNULL((
+		SELECT TOP 1 strAccountType FROM tblEntityEFTInformation EFTInfo 
+		WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
+),''),
 strPayeeBankName = ISNULL((
 		SELECT TOP 1 strBankName FROM tblEntityEFTInformation EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
