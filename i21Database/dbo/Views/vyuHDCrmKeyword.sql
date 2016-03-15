@@ -48,11 +48,10 @@
 			intEntityId = tblEntity.intEntityId
 			,strKeyword = '{Phone}'
 			,strDescription = 'Sales Person Phone Number'
-			,strCurrentValue = (select top 1 e.strPhone from tblEntity e where e.intEntityId in (select ec.intEntityContactId from tblEntityToContact ec where ec.intEntityId = tblEntity.intEntityId))
-			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
+			,strCurrentValue = tblEntity.strPhone
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 tblEntityToContact.intEntityId from tblEntityToContact where tblEntityToContact.intEntityContactId = tblEntity.intEntityId))
 		from
 			tblEntity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblEntity.intEntityId
 
 		union all
 
@@ -60,11 +59,10 @@
 			intEntityId = tblEntity.intEntityId
 			,strKeyword = '{Mobile}'
 			,strDescription = 'Sales Person Mobile Number'
-			,strCurrentValue = (select top 1 e.strMobile from tblEntity e where e.intEntityId in (select ec.intEntityContactId from tblEntityToContact ec where ec.intEntityId = tblEntity.intEntityId))
-			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
+			,strCurrentValue = tblEntity.strMobile
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 tblEntityToContact.intEntityId from tblEntityToContact where tblEntityToContact.intEntityContactId = tblEntity.intEntityId))
 		from
 			tblEntity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblEntity.intEntityId
 
 		union all
 
@@ -72,9 +70,8 @@
 			intEntityId = tblEntity.intEntityId
 			,strKeyword = '{Email}'
 			,strDescription = 'Sales Person Email Address'
-			,strCurrentValue = (select top 1 e.strEmail from tblEntity e where e.intEntityId in (select ec.intEntityContactId from tblEntityToContact ec where ec.intEntityId = tblEntity.intEntityId))
-			,ysnActive = (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end)
+			,strCurrentValue = tblEntity.strEmail
+			,ysnActive = (select (case when tblARSalesperson.ysnActive is null then convert(bit, 0) else tblARSalesperson.ysnActive end) from tblARSalesperson where tblARSalesperson.intEntitySalespersonId = (select top 1 tblEntityToContact.intEntityId from tblEntityToContact where tblEntityToContact.intEntityContactId = tblEntity.intEntityId))
 		from
 			tblEntity
-			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblEntity.intEntityId
-			) as keyword
+		) as keyword
