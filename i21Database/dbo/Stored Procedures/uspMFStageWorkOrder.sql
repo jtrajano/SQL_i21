@@ -206,8 +206,8 @@ BEGIN TRY
 				)
 	END
 
-	IF @intConsumptionStorageLocationId IS NULL
-		OR @intConsumptionStorageLocationId = 0
+	IF @intConsumptionMethodId=2 AND (@intConsumptionStorageLocationId IS NULL
+		OR @intConsumptionStorageLocationId = 0)
 	BEGIN
 		RAISERROR (
 				51115
