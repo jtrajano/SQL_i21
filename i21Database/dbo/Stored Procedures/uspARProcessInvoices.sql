@@ -803,18 +803,28 @@ DECLARE	@successfulCount INT
 		,@batchIdUsed NVARCHAR(40)
 		,@recapId NVARCHAR(250)
 
+DECLARE @TempInvoiceIdTable AS TABLE ([intInvoiceId] INT)
+
 --UnPosting posted Invoices for update
 BEGIN TRY
 	DECLARE @IdsForUnPosting VARCHAR(MAX)
-	SELECT --DISTINCT
-		@IdsForUnPosting = COALESCE(@IdsForUnPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		[intInvoiceId]
 	FROM
 		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForUpdate],0) = 1
 		AND ISNULL([ysnProcessed],0) = 0
-		AND ISNULL([intInvoiceID],0) <> 0
-		AND [ysnPost] IS NOT NULL AND [ysnPost] = 0
+		AND ISNULL([intInvoiceId],0) <> 0
+		AND [ysnPost] IS NOT NULL AND [ysnPost] = 0	
+
+	SELECT
+		@IdsForUnPosting = COALESCE(@IdsForUnPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable
+	
 		
 	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
 		EXEC [dbo].[uspARPostInvoice]
@@ -1546,7 +1556,6 @@ END CATCH
 
 SET @batchIdUsed = ''
 
-DECLARE @TempInvoiceIdTable AS TABLE ([intInvoiceId] INT)
 		
 --Posting newly added Invoices
 DECLARE @IdsForPosting VARCHAR(MAX)
@@ -1554,18 +1563,18 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceID]
+		[intInvoiceId]
 	FROM
 		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForInsert],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([intInvoiceId],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) <> 1	
 		
 	SELECT 
-		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 		
@@ -1602,18 +1611,18 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceID]
+		[intInvoiceId]
 	FROM
 		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForInsert],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([intInvoiceId],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) = 1	
 
-	SELECT --DISTINCT
-		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	SELECT
+		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 		
@@ -1664,18 +1673,18 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceID]
+		[intInvoiceId]
 	FROM
 		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForUpdate],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([intInvoiceId],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) <> 1	
 
-	SELECT --DISTINCT
-		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	SELECT
+		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 	
@@ -1714,18 +1723,18 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceID]
+		[intInvoiceId]
 	FROM
 		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForUpdate],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([intInvoiceId],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) = 1
 
-	SELECT --DISTINCT
-		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	SELECT
+		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 	
@@ -1776,19 +1785,19 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceID]
+		[intInvoiceId]
 	FROM
 		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForUpdate],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([intInvoiceId],0) <> 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap],0) <> 1
 			
-	SELECT --DISTINCT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	SELECT
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 			
@@ -1825,19 +1834,19 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceID]
+		[intInvoiceId]
 	FROM
 		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForUpdate],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceID],0) <> 0
+		AND ISNULL([intInvoiceId],0) <> 0
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap],0) = 1
 
-	SELECT --DISTINCT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+	SELECT
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable	
 		
@@ -1882,16 +1891,16 @@ DECLARE @CreateIds VARCHAR(MAX)
 DELETE FROM @TempInvoiceIdTable
 INSERT INTO @TempInvoiceIdTable
 SELECT DISTINCT
-	[intInvoiceID]
+	[intInvoiceId]
 FROM
 	#EntriesForProcessing
 WHERE
 	ISNULL([ysnForInsert],0) = 1
 	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceID],0) <> 0
+	AND ISNULL([intInvoiceId],0) <> 0
 
-SELECT --DISTINCT
-	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+SELECT
+	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
@@ -1903,16 +1912,16 @@ DECLARE @UpdatedIds VARCHAR(MAX)
 DELETE FROM @TempInvoiceIdTable
 INSERT INTO @TempInvoiceIdTable
 SELECT DISTINCT
-	[intInvoiceID]
+	[intInvoiceId]
 FROM
 	#EntriesForProcessing
 WHERE
 	ISNULL([ysnForUpdate],0) = 1
 	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceID],0) <> 0
+	AND ISNULL([intInvoiceId],0) <> 0
 
-SELECT --DISTINCT
-	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceID] AS NVARCHAR(250))
+SELECT
+	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
