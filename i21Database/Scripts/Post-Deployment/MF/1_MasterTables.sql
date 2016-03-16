@@ -1218,7 +1218,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'BagOff Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 1
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1244,7 +1243,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'BagOff Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 2
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1271,7 +1269,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 1
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1297,7 +1294,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 2
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1324,7 +1320,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 3
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1350,7 +1345,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 4
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (

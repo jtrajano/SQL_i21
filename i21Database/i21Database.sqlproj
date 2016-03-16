@@ -3530,6 +3530,11 @@
     <Build Include="dbo\Views\vyuRKGetFutureMonthAndYears.sql" />
     <Build Include="dbo\Views\vyuRKGetCommodityUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionImport.sql" />
+    <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
+    <Build Include="dbo\Tables\tblWHUserPrinterMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

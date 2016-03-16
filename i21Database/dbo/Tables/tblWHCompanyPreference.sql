@@ -20,5 +20,6 @@
 	dblPalletWeight NUMERIC(18,6),
 	intNumberOfDecimalPlaces INT,
 	ysnCreateLoadTasks BIT,
-	intMaximumPalletsOnForklift INT
+	intMaximumPalletsOnForklift INT, 
+    strReportPrinterName NVARCHAR(512) NULL
 )
