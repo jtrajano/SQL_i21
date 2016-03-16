@@ -11,8 +11,17 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal	DECIMAL(18,6)
+DECLARE  @ZeroDecimal		DECIMAL(18,6)
+		,@SubCurrencyCents	INT
+
 SET @ZeroDecimal = 0.000000	
+						
+SELECT
+	@SubCurrencyCents		= ISNULL([intSubCurrencyCents], 1)
+FROM
+	tblARInvoice
+WHERE
+	[intInvoiceId] = @InvoiceId
 
 UPDATE
 	tblARInvoiceDetailTax
@@ -74,7 +83,7 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
+	[dblTotal]		= ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
 WHERE
 	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId
 	

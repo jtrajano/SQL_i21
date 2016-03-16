@@ -49,6 +49,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -122,6 +123,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
+			,@SubCurrency					= @SubCurrency
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -165,7 +167,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[intTaxGroupId]
 				,[intEntitySalespersonId]
 				,[intSalesOrderDetailId]
-				,[strSalesOrderNumber])
+				,[strSalesOrderNumber]
+				,[ysnSubCurrency])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -187,6 +190,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@EntitySalespersonId					
 				,@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber
+				,@SubCurrency
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -229,6 +233,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
+			,@SubCurrency					= @SubCurrency
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

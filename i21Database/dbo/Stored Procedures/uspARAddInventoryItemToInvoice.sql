@@ -48,6 +48,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -64,6 +65,7 @@ DECLARE @ZeroDecimal		NUMERIC(18, 6)
 		,@CompanyLocationId	INT
 		,@InvoiceDate		DATETIME
 		,@TermDiscount		NUMERIC(18, 6)
+		,@SubCurrencyCents	INT
 
 SET @ZeroDecimal = 0.000000
 
@@ -79,6 +81,7 @@ SELECT
 	 @EntityCustomerId	= [intEntityCustomerId]
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
+	,@SubCurrencyCents	= ISNULL([intSubCurrencyCents], 1)
 FROM
 	tblARInvoice
 WHERE
@@ -187,6 +190,7 @@ BEGIN TRY
 				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
+				,[ysnSubCurrency]
 				,[intAccountId]
 				,[intCOGSAccountId]
 				,[intSalesAccountId]
@@ -237,10 +241,11 @@ BEGIN TRY
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblItemTermDiscount]				= ISNULL(@TermDiscount, @ZeroDecimal)
-				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
+				,[dblPrice]							= (CASE WHEN (ISNULL(@SubCurrency,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @SubCurrency ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
+				,[ysnSubCurrency]					= @SubCurrency
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
 				,[intSalesAccountId]				= Acct.[intSalesAccountId]

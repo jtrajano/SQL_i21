@@ -23,6 +23,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
 	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
 	,[intCurrencyId]						INT												NOT NULL	-- Currency Id	
+	,[intSubCurrencyCents]					INT												NULL		-- Subcurrency Rate
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
 	,[intPeriodsToAccrue]					INT												NULL		-- Default(1) Period to Accrue	
 	,[dtmDate]								DATETIME										NOT NULL	-- Invoice Date
@@ -106,5 +107,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnVirtualMeterReading]				BIT												NULL
 	,[ysnClearDetailTaxes]					BIT												NULL		-- Indicate whether to clear tax details before inserting tax details from LineItemTaxDetailStagingTable
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id for linking line item detail taxes (LineItemTaxDetailStagingTable) which are also fro processing
+	,[ysnSubCurrency]						BIT												NULL		-- Indicates whether the line item price is on sub currency
 
 )

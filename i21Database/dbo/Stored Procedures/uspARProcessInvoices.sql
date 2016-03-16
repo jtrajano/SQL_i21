@@ -130,6 +130,7 @@ DECLARE  @Id									INT
 		,@EntityCustomerId						INT
 		,@CompanyLocationId						INT
 		,@CurrencyId							INT
+		,@SubCurrencyCents						INT
 		,@TermId								INT
 		,@Date									DATETIME
 		,@DueDate								DATETIME
@@ -208,7 +209,8 @@ DECLARE  @Id									INT
 		,@ItemLeaseBilling						BIT
 		,@ItemVirtualMeterReading				BIT
 		,@ClearDetailTaxes						BIT
-		,@TempDetailIdForTaxes					INT			
+		,@TempDetailIdForTaxes					INT
+		,@SubCurrency							BIT			
 		
 
 --INSERT
@@ -246,6 +248,7 @@ BEGIN
 		,@EntityCustomerId				= [intEntityCustomerId]
 		,@CompanyLocationId				= [intCompanyLocationId]
 		,@CurrencyId					= [intCurrencyId]
+		,@SubCurrencyCents				= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = [intCurrencyId]),1) ELSE 1 END)
 		,@TermId						= [intTermId]
 		,@Date							= [dtmDate]
 		,@DueDate						= [dtmDueDate]
@@ -322,6 +325,7 @@ BEGIN
 		,@ItemPerformerId				= (CASE WHEN @GroupingOption = 0 THEN [intPerformerId] ELSE NULL END)
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
+		,@SubCurrency					= (CASE WHEN @GroupingOption = 0 THEN [ysnSubCurrency] ELSE 0 END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -391,9 +395,10 @@ BEGIN
 
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
-			@EntityCustomerId				= @EntityCustomerId
+			 @EntityCustomerId				= @EntityCustomerId
 			,@CompanyLocationId				= @CompanyLocationId
 			,@CurrencyId					= @CurrencyId
+			,@SubCurrencyCents				= @SubCurrencyCents
 			,@TermId						= @TermId
 			,@EntityId						= @EntityId
 			,@InvoiceDate					= @Date
@@ -471,6 +476,7 @@ BEGIN
 			,@ItemPerformerId				= @ItemPerformerId
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
+			,@SubCurrency					= @SubCurrency
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -586,6 +592,7 @@ BEGIN
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 					,@ClearDetailTaxes				= [ysnClearDetailTaxes]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+					,@SubCurrency					= [ysnSubCurrency]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -641,6 +648,7 @@ BEGIN
 						,@ItemConversionFactor			= @ItemConversionFactor
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
+						,@SubCurrency					= @SubCurrency
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -855,6 +863,7 @@ BEGIN TRY
 			,@EntityCustomerId				= [intEntityCustomerId]
 			,@CompanyLocationId				= [intCompanyLocationId]
 			,@CurrencyId					= [intCurrencyId]
+			,@SubCurrencyCents				= [intSubCurrencyCents]
 			,@TermId						= [intTermId]
 			,@Date							= [dtmDate]
 			,@DueDate						= [dtmDueDate]
@@ -934,7 +943,8 @@ BEGIN TRY
 		SET 
 			 [intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
-			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])	
+			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])
+			,[intSubCurrencyCents]		= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, C.[intCurrencyId])),1) ELSE 1 END) 	
 			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
 			,[dtmDate]					= @Date
 			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
@@ -1083,6 +1093,7 @@ BEGIN TRY
 						,@ItemLeaseBilling				= [ysnLeaseBilling]
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+						,@SubCurrency					= [ysnSubCurrency]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1133,6 +1144,7 @@ BEGIN TRY
 							,@ItemConversionFactor			= @ItemConversionFactor
 							,@ItemPerformerId				= @ItemPerformerId
 							,@ItemLeaseBilling				= @ItemLeaseBilling
+							,@SubCurrency					= @SubCurrency
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -1292,6 +1304,7 @@ BEGIN TRY
 					,@ItemLeaseBilling				= [ysnLeaseBilling]
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+					,@SubCurrency					= [ysnSubCurrency]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1305,7 +1318,7 @@ BEGIN TRY
 								,@InvoiceType		NVARCHAR(200)
 
 						BEGIN TRY
-						SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
+						SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId, @SubCurrencyCents = intSubCurrencyCents FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 						EXEC dbo.[uspARGetItemPrice]  
 							 @ItemId					= @ItemId
 							,@CustomerId				= @EntityCustomerId
@@ -1354,7 +1367,7 @@ BEGIN TRY
 						,[dblQtyShipped]						= @ItemQtyShipped
 						,[dblDiscount]							= @ItemDiscount
 						,[dblItemTermDiscount]					= @ItemTermDiscount
-						,[dblPrice]								= @ItemPrice							
+						,[dblPrice]								= (CASE WHEN (ISNULL(@RefreshPrice,0) = 1 AND ISNULL(@SubCurrency,0) = 1) THEN @ItemPrice / ISNULL(@SubCurrencyCents,1) ELSE @ItemPrice END)
 						,[strPricing]							= @ItemPricing							
 						,[strMaintenanceType]					= @ItemMaintenanceType
 						,[strFrequency]							= @ItemFrequency					
@@ -1389,6 +1402,7 @@ BEGIN TRY
 						,[intPerformerId]						= @ItemPerformerId
 						,[ysnLeaseBilling]						= @ItemLeaseBilling
 						,[ysnVirtualMeterReading]				= @ItemVirtualMeterReading
+						,[ysnSubCurrency]						= @SubCurrency
 						,[intConcurrencyId]						= [intConcurrencyId] + 1
 					WHERE
 						[intInvoiceId] = @ExistingInvoiceId
@@ -1515,6 +1529,8 @@ BEGIN TRY
 			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
 		ELSE
 			EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId
+
+		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 0, @UserId = @UserId
 			
 		UPDATE #EntriesForProcessing SET [ysnRecomputed] = 1 WHERE [intInvoiceId] = @InvoiceId
 	END	

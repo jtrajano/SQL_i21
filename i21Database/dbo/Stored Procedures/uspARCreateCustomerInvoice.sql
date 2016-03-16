@@ -2,6 +2,7 @@
 	 @EntityCustomerId				INT
 	,@CompanyLocationId				INT
 	,@CurrencyId					INT				= NULL
+	,@SubCurrencyCents				INT				= NULL
 	,@TermId						INT				= NULL
 	,@EntityId						INT
 	,@InvoiceDate					DATETIME	
@@ -79,6 +80,7 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -170,6 +172,7 @@ BEGIN TRY
 		,[intCompanyLocationId]
 		,[intAccountId]
 		,[intCurrencyId]
+		,[intSubCurrencyCents]
 		,[intTermId]
 		,[dtmDate]
 		,[dtmDueDate]
@@ -227,6 +230,7 @@ BEGIN TRY
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))	
+		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))),1) ELSE 1 END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
 		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
@@ -409,6 +413,7 @@ BEGIN TRY
 		,@ItemPerformerId				= @ItemPerformerId
 		,@ItemLeaseBilling				= @ItemLeaseBilling
 		,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
+		,@SubCurrency					= @SubCurrency
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
