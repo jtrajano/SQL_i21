@@ -46,6 +46,7 @@ FROM
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
 		,[strScaleTicketNumber]		=	NULL
+		,[intShipmentId]			=	0            
 		,[intShipmentContractQtyId]	=	NULL
 		,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
 		,[strUOM]					=	tblReceived.strUOM
@@ -177,6 +178,7 @@ FROM
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
 	,[strScaleTicketNumber]		=	NULL
+	,[intShipmentId]			=	0    
 	,[intShipmentContractQtyId]	=	NULL
 	,[intUnitMeasureId]			=	B.intUnitOfMeasureId
 	,[strUOM]					=	UOM.strUnitMeasure
@@ -242,6 +244,7 @@ FROM
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	G.strTicketNumber
+	,[intShipmentId]			=	0
 	,[intShipmentContractQtyId]	=	NULL
   	,[intUnitMeasureId]			=	B.intUnitMeasureId
 	,[strUOM]					=	UOM.strUnitMeasure
@@ -322,6 +325,7 @@ FROM
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
+		,[intShipmentId]			=	0      
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	NULL
 		,[strCostUOM]								=	NULL
@@ -376,6 +380,7 @@ FROM
 		,[intContractDetailId]						=	A.intContractDetailId
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
+		,[intShipmentId]							=	A.intShipmentId      
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
 		,[intUnitMeasureId]							=	A.intItemUOMId
 		,[strUOM]									=	UOM.strUnitMeasure
@@ -429,6 +434,7 @@ FROM
 		,[intContractDetailId]						=	CD.intContractDetailId
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
+		,[intShipmentId]							=	0     
 		,[intShipmentContractQtyId]					=	NULL
 		,[intUnitMeasureId]							=	CC.intUnitMeasureId
 		,[strUOM]									=	UOM.strUnitMeasure
