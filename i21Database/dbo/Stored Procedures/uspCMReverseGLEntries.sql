@@ -96,6 +96,8 @@ SELECT	[strTransactionId]
 		,[intEntityId]
 FROM	tblGLDetail 
 WHERE	strBatchId = @strBatchId
+	AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
+	AND strCode = ISNULL(@strCode, strCode)
 ORDER BY intGLDetailId
 
 --=====================================================================================================================================
