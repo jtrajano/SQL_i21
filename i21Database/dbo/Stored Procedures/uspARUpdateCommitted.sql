@@ -78,7 +78,7 @@ BEGIN
 		AND Detail.intItemId = TD.intItemId		
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> TD.dblQtyShipped)
 		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
 		AND IST.strType <> 'Bundle'
 
 	UNION ALL
@@ -126,7 +126,7 @@ BEGIN
 		AND Header.strType <> 'Debit Memo'
 		AND Detail.intItemId <> TD.intItemId				
 		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
 		AND IST.strType <> 'Bundle'
 
 	UNION ALL
@@ -168,7 +168,7 @@ BEGIN
 		AND Header.strTransactionType = 'Invoice'
 		AND Header.strType <> 'Debit Memo'
 		AND ISNULL(TD.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(TD.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(TD.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(TD.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(TD.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(TD.intSalesOrderDetailId, 0) = 0)))
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 		AND IST.strType <> 'Bundle'
 		
@@ -211,7 +211,7 @@ BEGIN
 		AND Header.strTransactionType = 'Invoice'
 		AND Header.strType <> 'Debit Memo'
 		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
 		AND IST.strType <> 'Bundle'
 
@@ -269,7 +269,7 @@ BEGIN
 		AND ARID.intItemId = ARTD.intItemId		
 		AND (ARID.intItemUOMId <> ARTD.intItemUOMId OR ARID.dblQtyShipped <> ARTD.dblQtyShipped)
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0)))
 		AND ICI.strType = 'Bundle'
 
 	UNION ALL
@@ -324,7 +324,7 @@ BEGIN
 		AND ARI.strType <> 'Debit Memo'
 		AND ARID.intItemId <> ARTD.intItemId				
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0)))
 		AND ICI.strType = 'Bundle'
 
 	UNION ALL
@@ -373,7 +373,7 @@ BEGIN
 		AND ARI.strTransactionType = 'Invoice'
 		AND ARI.strType <> 'Debit Memo'
 		AND ISNULL(ARTD.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(ARTD.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(ARTD.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(ARTD.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0)))
 		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 		AND ICI.strType = 'Bundle'
 		
@@ -423,7 +423,7 @@ BEGIN
 		AND ARI.strTransactionType = 'Invoice'
 		AND ARI.strType <> 'Debit Memo'
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR ((@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0)))
 		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
 		AND ICI.strType = 'Bundle'
 		

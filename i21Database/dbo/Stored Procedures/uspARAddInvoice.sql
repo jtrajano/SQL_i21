@@ -619,7 +619,9 @@ BEGIN
 		AND I.intInvoiceId = @InvoiceId
 		
 	IF ISNULL(@intNewInvoiceId,0) <> 0	
-    BEGIN                                
+    BEGIN
+		EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @intUserId
+
         EXEC dbo.uspSMAuditLog 
 			 @keyValue			= @intNewInvoiceId                  -- Primary Key Value of the Invoice. 
 			,@screenName		= 'AccountsReceivable.view.Invoice' -- Screen Namespace
