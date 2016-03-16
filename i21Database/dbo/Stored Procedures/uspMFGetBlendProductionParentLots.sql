@@ -76,15 +76,17 @@ Begin
 		End
 	End
 
-	Insert into @tblItemQty(intItemId,dblQuantity,intItemUOMId,strUOM,dblIssuedQuantity,intItemIssuedUOMId,strIssuedUOM)
-	Select DISTINCT ri.intItemId,(ri.dblCalculatedQuantity * (@dblWOQty/r.dblQuantity)) dblQuantity,iu.intItemUOMId,u.strUnitMeasure,
-	(ri.dblCalculatedQuantity * (@dblWOQty/r.dblQuantity)) dblIssuedQuantity,iu.intItemUOMId AS intItemIssuedUOMId,u.strUnitMeasure
-	From tblMFWorkOrderRecipeItem ri 
-	Join tblMFWorkOrderRecipe r on r.intWorkOrderId=ri.intWorkOrderId AND r.intRecipeId=ri.intRecipeId 
-	Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
-	Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
-	where r.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1 and ri.intConsumptionMethodId in (2,3)
-
+	If (Select intStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) NOT IN (12,13)
+	Begin
+		Insert into @tblItemQty(intItemId,dblQuantity,intItemUOMId,strUOM,dblIssuedQuantity,intItemIssuedUOMId,strIssuedUOM)
+		Select DISTINCT ri.intItemId,(ri.dblCalculatedQuantity * (@dblWOQty/r.dblQuantity)) dblQuantity,iu.intItemUOMId,u.strUnitMeasure,
+		(ri.dblCalculatedQuantity * (@dblWOQty/r.dblQuantity)) dblIssuedQuantity,iu.intItemUOMId AS intItemIssuedUOMId,u.strUnitMeasure
+		From tblMFWorkOrderRecipeItem ri 
+		Join tblMFWorkOrderRecipe r on r.intWorkOrderId=ri.intWorkOrderId AND r.intRecipeId=ri.intRecipeId 
+		Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
+		where r.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1 and ri.intConsumptionMethodId in (2,3)
+	End
 
 	--When Work Order Created without Input Lots take the required qty from recipe
 	if (Select count(1) From @tblItemQty)=0

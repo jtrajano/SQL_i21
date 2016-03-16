@@ -54,12 +54,15 @@ BEGIN TRY
 			RaisError(@strErrMsg,16,1)
 		End
 
+If Exists(Select 1 From tblMFWorkOrderRecipeItem Where intWorkOrderId=@intWorkOrderId And intRecipeItemTypeId=1 And intConsumptionMethodId=1)
+Begin
 	If (Select count(1)	
 		FROM OPENXML(@idoc, 'root/lot', 2))=0  
 		Begin
 			Set @strErrMsg='Please add lots to Blend Sheet.'
 			RaisError(@strErrMsg,16,1)
 		End
+End
 
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Negative Quantity Allowed'
 

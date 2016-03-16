@@ -43,7 +43,8 @@ BEGIN
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
 			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)));
+			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)))
+			AND (ISNULL(TR.intInventoryTransferId, '') <> '')
 	
 	SELECT @total = COUNT(*) FROM #tmpAddInventoryTransferResult;
     IF (@total = 0)
