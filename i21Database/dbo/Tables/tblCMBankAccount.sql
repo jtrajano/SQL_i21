@@ -43,6 +43,8 @@
     [dtmCreated]                       DATETIME       NULL,
     [intLastModifiedUserId]            INT            NULL,
     [dtmLastModified]                  DATETIME       NULL,
+	[ysnDelete]						   BIT            NULL,
+	[dtmDateDeleted]				   DATETIME		  NULL,
     [strCbkNo]                         NVARCHAR (2)   COLLATE Latin1_General_CI_AS NOT NULL,
     [intConcurrencyId]                 INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBankAccount] PRIMARY KEY CLUSTERED ([intBankAccountId] ASC),
