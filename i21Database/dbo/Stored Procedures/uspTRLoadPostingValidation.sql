@@ -32,6 +32,7 @@ DECLARE @dtmLoadDateTime DATETIME,
 		@intStockUOMId int,
 		@err nvarchar(150),
 		@strItem nvarchar(50),
+		@strItemLocation nvarchar(50),
 		@intDriver int,
 		@ReceiptCount int,
 		@incReceiptval int,
@@ -413,10 +414,10 @@ BEGIN
 	BEGIN
        RAISERROR('Distribution Item is invalid', 16, 1); 
     END
-	select @intStockUOMId = intStockUOMId, @strItem = strItemNo from vyuICGetItemStock where intItemId = @intDistributionItemId and intLocationId = @intCompanyLocationId
+	select @intStockUOMId = intIssueUOMId, @strItem = strItemNo, @strItemLocation = strLocationName from vyuICGetItemStock where intItemId = @intDistributionItemId and intLocationId = @intCompanyLocationId
 	if (@intStockUOMId is null)
     BEGIN
-	    set @err = 'Stock UOM is not setup for item ' + @strItem 
+	    set @err = 'Default Issue UOM is not setup for item ' + @strItem + ' under location ' + @strItemLocation
         RAISERROR(@err , 16, 1);
     END 
 	if(@dblUnits = 0)
