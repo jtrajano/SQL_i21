@@ -252,6 +252,13 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'dblTotal,','0 as dblTotal,')
 	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
+	SELECT @cols1 = REPLACE (@cols1,'strCode,',''''' as strCode,')
+	SELECT @cols1 = REPLACE (@cols1,'strReferenceDetail,',''''' as strReferenceDetail,')
+	SELECT @cols1 = REPLACE (@cols1,'strDocument,',''''' as strDocument,')
+	SELECT @cols1 = REPLACE (@cols1,'strBatchId,',''''' as strBatchId,')
+	SELECT @cols1 = REPLACE (@cols1,'strReference,',''''' as strReference,')
+	SELECT @cols1 = REPLACE (@cols1,'strUOMCode,',''''' as strUOMCode,')
+	SELECT @cols1 = REPLACE (@cols1,'Location,',''''' as Location,')
 
 	IF @strAccountIdFrom = '' AND @strPrimaryCodeFrom = ''
 	BEGIN
