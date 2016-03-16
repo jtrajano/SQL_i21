@@ -351,6 +351,19 @@ BEGIN
 
 	--UPDATE 1099 Information
 	EXEC [uspAPUpdateBill1099] @param
+
+	DECLARE @strDescription AS NVARCHAR(100),@actionType AS NVARCHAR(50),@PaymentId AS NVARCHAR(50);
+	SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
+	SELECT @PaymentId = (SELECT intPaymentId FROM #tmpPayablePostData)
+	EXEC dbo.uspSMAuditLog 
+	   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
+	  ,@keyValue = @PaymentId								-- Primary Key Value of the Voucher. 
+	  ,@entityId = @userId									-- Entity Id.
+	  ,@actionType = @actionType                        -- Action Type
+	  ,@changeDescription = @strDescription				-- Description
+	  ,@fromValue = ''									-- Previous Value
+	  ,@toValue = ''
+
 END
 ELSE
 	BEGIN
