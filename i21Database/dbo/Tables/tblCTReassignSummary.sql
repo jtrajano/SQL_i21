@@ -11,7 +11,8 @@
     strContractSeq			NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
 	strAllocationUOM		NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
     intConcurrencyId		INT NOT NULL,
-     
+    intAllocationUnitMeasureId INT,
+
     PRIMARY KEY CLUSTERED (intReassignSummaryId ASC),
     CONSTRAINT [FK_tblCTReassignSummary_tblCTReassign_intReassignId] FOREIGN KEY (intReassignId) REFERENCES tblCTReassign(intReassignId) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCTReassignSummary_tblCTContractDetail_intContractDetailId] FOREIGN KEY (intContractDetailId) REFERENCES tblCTContractDetail(intContractDetailId),

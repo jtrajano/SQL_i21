@@ -40,8 +40,9 @@ BEGIN TRY
 			@dblReassignAllocation			NUMERIC(18,6),
 			@ysnFullyAllocation				INT,
 			@intContractTypeId				INT,
-			@dblConvertedReassign			NUMERIC(18,6),
-			@intUnitMeasureId				INT
+			@dblReassignRecipientUOM			NUMERIC(18,6),
+			@intUnitMeasureId				INT,
+			@intNewAllocationDetailId		INT
 
 	DECLARE	@tblPricing TABLE
 	(
@@ -72,8 +73,9 @@ BEGIN TRY
 		dblReassign					NUMERIC(18,6),
 		ysnFullyAllocation			INT,
 		intContractTypeId			INT,
-		dblConvertedReassign		NUMERIC(18,6),
-		intUnitMeasureId			INT
+		dblReassignRecipientUOM		NUMERIC(18,6),
+		intUnitMeasureId			INT,
+		dblReassignInDonorUOM		NUMERIC(18,6)
 	)
 
 	SELECT	@intRecipientId			=	RE.intRecipientId,
@@ -129,15 +131,20 @@ BEGIN TRY
 					ELSE 0 
 			END,
 			RN.intContractTypeId,
-			dbo.fnCTConvertQtyToTargetItemUOM(RA.intReassignUOMId,CD.intItemUOMId,RA.dblReassign),
-			QU.intUnitMeasureId
+			dbo.fnCTConvertQuantityToTargetItemUOM(DR.intItemId,AQ.intUnitMeasureId,RQ.intUnitMeasureId,RA.dblReassign),
+			RQ.intUnitMeasureId,
+			dbo.fnCTConvertQuantityToTargetItemUOM(DD.intItemId,AQ.intUnitMeasureId,DQ.intUnitMeasureId,RA.dblReassign)
 	FROM	tblCTReassignAllocation RA
 	JOIN	tblCTReassign			RN	ON	RN.intReassignId			=	RA.intReassignId
 	JOIN	tblLGAllocationDetail	AD	ON	RA.intAllocationDetailId	=	AD.intAllocationDetailId
-	JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	RN.intRecipientId
-	JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId				=	CD.intItemUOMId
+	JOIN	tblCTContractDetail		DR	ON	DR.intContractDetailId		=	RN.intRecipientId
+	JOIN	tblICItemUOM			RQ	ON	RQ.intItemUOMId				=	DR.intItemUOMId
+	JOIN	tblCTContractDetail		DD	ON	DD.intContractDetailId		=	RN.intDonorId
+	JOIN	tblICItemUOM			DQ	ON	DQ.intItemUOMId				=	DD.intItemUOMId
+	JOIN	tblICItemUOM			AQ	ON	AQ.intItemUOMId				=	RA.intReassignUOMId
 	WHERE	RA.intReassignId = @intReassignId AND ISNULL(RA.dblReassign,0) > 0
 
+	---------------------------------------Pircing------------------------------
 	UPDATE	FD
 	SET		FD.intNoOfLots = FD.intNoOfLots - PR.dblReassign
 	FROM	tblCTPriceFixationDetail	FD
@@ -318,108 +325,137 @@ BEGIN TRY
 		EXEC uspCTPriceFixationSave	@intNewPriceFixationId, 'Save', @intUserId
 
 		EXEC uspCTUpdateAdditionalCost @intRecipientHeaderId
-
-		SELECT @intReassignFutureId = MIN(intReassignFutureId) FROM @tblFutures
-
-		WHILE ISNULL(@intReassignFutureId,0) > 0
-		BEGIN
-			SELECT	@intAssignFuturesToContractSummaryId = NULL,
-					@ysnFullyPricingReassign = NULL
-
-			SELECT	@intAssignFuturesToContractSummaryId	=	intAssignFuturesToContractSummaryId,
-					@ysnFullyPricingReassign				=	ysnFullyPricingFutures,
-					@dblReassignFutures						=	dblReassign,
-					@intFutOptTransactionId					=	intFutOptTransactionId
-			FROM	@tblFutures 
-			WHERE	intReassignFutureId = @intReassignFutureId
-
-			IF @ysnFullyPricingReassign = 1
-			BEGIN
-				UPDATE tblRKAssignFuturesToContractSummary SET intContractHeaderId = @intRecipientHeaderId,intContractDetailId = @intRecipientId WHERE intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
-			END
-			ELSE
-			BEGIN
-				UPDATE	tblRKAssignFuturesToContractSummary 
-				SET		dblAssignedLots = dblAssignedLots - CASE WHEN ISNULL(dblAssignedLots,0) = 0 THEN  0 ElSE @dblReassignFutures END,
-						intHedgedLots = intHedgedLots - CASE WHEN ISNULL(intHedgedLots,0) = 0 THEN 0 ElSE @dblReassignFutures END,
-						@ysnIsHedged = CAST(CASE WHEN ISNULL(intHedgedLots,0) > ISNULL(dblAssignedLots,0) THEN 1 ELSE 0 END AS INT)
-				WHERE	intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
-
-				SELECT	@strCondition = 'intFutOptTransactionId = ' + LTRIM(@intFutOptTransactionId)
-				EXEC	uspCTGetTableDataInXML 'tblRKFutOptTransaction', @strCondition,@strXML OUTPUT
-				SELECT	@XML = @strXML
-				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intFutOptTransactionId)[1]')
-				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/strInternalTradeNo)[1]')
-				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intBookId)[1]')
-				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intSubBookId)[1]')
-				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmTransactionDate/text())[1] with sql:variable("@dtmCurrentDate")')
-				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmFilledDate/text())[1] with sql:variable("@dtmCurrentDate")')
-				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/intNoOfContract/text())[1] with sql:variable("@dblReassignFutures")')
-
-				IF ISNULL(@intRecipientBookId,0) > 0
-					SET		@XML.modify('insert <intBookId>{ xs:string(sql:variable("@intRecipientBookId")) }</intBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
-				IF ISNULL(@intRecipientSubBookId,0) > 0
-					SET		@XML.modify('insert <intSubBookId>{ xs:string(sql:variable("@intRecipientSubBookId")) }</intSubBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
-					
-				SELECT	@strXML = CAST(@XML AS NVARCHAR(MAX))
-					
-				SELECT @strXML = REPLACE(@strXML,'<tblRKFutOptTransactions>','')
-				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
-				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
-
-				EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT
-
-				SET @strXML = '<root><Transaction>';
-				SET @strXML = @strXML + '<intContractHeaderId>' + LTRIM(@intRecipientHeaderId) + '</intContractHeaderId>'
-				SET @strXML = @strXML + '<intContractDetailId>' + LTRIM(@intRecipientId) + '</intContractDetailId>'
-				SET @strXML = @strXML + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
-				SET @strXML = @strXML + '<intFutOptTransactionId>' + LTRIM(@intNewFutOptTransactionId) + '</intFutOptTransactionId>'
-				SET @strXML = @strXML + '<intHedgedLots>' + LTRIM(CAST(@dblReassignFutures AS INT) * @ysnIsHedged) + '</intHedgedLots>'
-				IF	@ysnIsHedged = 0
-					SET @strXML = @strXML + '<dblAssignedLots>'+LTRIM(@dblReassignFutures)+'</dblAssignedLots>'
-				ElSE
-					SET @strXML = @strXML + '<dblAssignedLots>0</dblAssignedLots>'
-				SET @strXML = @strXML + '<ysnIsHedged>'+LTRIM(@ysnIsHedged)+'</ysnIsHedged>'
-				SET @strXML = @strXML + '</Transaction></root>'
-
-				EXEC uspRKAssignFuturesToContractSummarySave @strXML
-			END
-
-			SELECT	@intReassignFutureId = MIN(intReassignFutureId) FROM @tblFutures WHERE intReassignFutureId > @intReassignFutureId
-		END
-
-		SELECT @intReassignAllocationId = MIN(intReassignAllocationId) FROM @tblAllocation
-
-		WHILE ISNULL(@intReassignAllocationId,0) > 0
-		BEGIN
-			SELECT	@intAllocationDetailId	=	NULL,
-					@intAllocationHeaderId	=	NULL,
-					@dblReassignAllocation	=	NULL,
-					@ysnFullyAllocation		=	NULL
-
-			SELECT	@intAllocationDetailId	=	intAllocationDetailId,
-					@intAllocationHeaderId	=	intAllocationHeaderId,
-					@dblReassignAllocation	=	dblReassign,
-					@ysnFullyAllocation		=	ysnFullyAllocation,
-					@intContractTypeId		=	intContractTypeId,
-					@dblConvertedReassign	=	dblConvertedReassign,
-					@intUnitMeasureId		=	intUnitMeasureId
-			FROM	@tblAllocation 
-			WHERE	intReassignAllocationId = @intReassignAllocationId
-
-			IF @ysnFullyAllocation	= 1
-			BEGIN
-				IF @intContractTypeId = 1
-					UPDATE	tblLGAllocationDetail 
-					SET		intPContractDetailId	=	@intRecipientId,
-							intPUnitMeasureId		=	@intUnitMeasureId,
-							dblPAllocatedQty		=	@dblConvertedReassign
-					WHERE	intAllocationDetailId	=	@intAllocationDetailId
-			END
-			
-			SELECT	@intReassignAllocationId = MIN(intReassignAllocationId) FROM @tblAllocation WHERE intReassignAllocationId > @intReassignAllocationId
-		END
 	END
+	
+	---------------------------------------End Pricing---------------------------
+
+	---------------------------------------Futures-------------------------------
+		
+	SELECT @intReassignFutureId = MIN(intReassignFutureId) FROM @tblFutures
+
+	WHILE ISNULL(@intReassignFutureId,0) > 0
+	BEGIN
+		SELECT	@intAssignFuturesToContractSummaryId = NULL,
+				@ysnFullyPricingReassign = NULL
+
+		SELECT	@intAssignFuturesToContractSummaryId	=	intAssignFuturesToContractSummaryId,
+				@ysnFullyPricingReassign				=	ysnFullyPricingFutures,
+				@dblReassignFutures						=	dblReassign,
+				@intFutOptTransactionId					=	intFutOptTransactionId
+		FROM	@tblFutures 
+		WHERE	intReassignFutureId = @intReassignFutureId
+
+		IF @ysnFullyPricingReassign = 1
+		BEGIN
+			UPDATE tblRKAssignFuturesToContractSummary SET intContractHeaderId = @intRecipientHeaderId,intContractDetailId = @intRecipientId WHERE intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
+		END
+		ELSE
+		BEGIN
+			UPDATE	tblRKAssignFuturesToContractSummary 
+			SET		dblAssignedLots = dblAssignedLots - CASE WHEN ISNULL(dblAssignedLots,0) = 0 THEN  0 ElSE @dblReassignFutures END,
+					intHedgedLots = intHedgedLots - CASE WHEN ISNULL(intHedgedLots,0) = 0 THEN 0 ElSE @dblReassignFutures END,
+					@ysnIsHedged = CAST(CASE WHEN ISNULL(intHedgedLots,0) > ISNULL(dblAssignedLots,0) THEN 1 ELSE 0 END AS INT)
+			WHERE	intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
+
+			SELECT	@strCondition = 'intFutOptTransactionId = ' + LTRIM(@intFutOptTransactionId)
+			EXEC	uspCTGetTableDataInXML 'tblRKFutOptTransaction', @strCondition,@strXML OUTPUT
+			SELECT	@XML = @strXML
+			SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intFutOptTransactionId)[1]')
+			SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/strInternalTradeNo)[1]')
+			SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intBookId)[1]')
+			SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intSubBookId)[1]')
+			SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmTransactionDate/text())[1] with sql:variable("@dtmCurrentDate")')
+			SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmFilledDate/text())[1] with sql:variable("@dtmCurrentDate")')
+			SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/intNoOfContract/text())[1] with sql:variable("@dblReassignFutures")')
+
+			IF ISNULL(@intRecipientBookId,0) > 0
+				SET		@XML.modify('insert <intBookId>{ xs:string(sql:variable("@intRecipientBookId")) }</intBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
+			IF ISNULL(@intRecipientSubBookId,0) > 0
+				SET		@XML.modify('insert <intSubBookId>{ xs:string(sql:variable("@intRecipientSubBookId")) }</intSubBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
+					
+			SELECT	@strXML = CAST(@XML AS NVARCHAR(MAX))
+					
+			SELECT @strXML = REPLACE(@strXML,'<tblRKFutOptTransactions>','')
+			SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
+			SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
+
+			EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT
+
+			SET @strXML = '<root><Transaction>';
+			SET @strXML = @strXML + '<intContractHeaderId>' + LTRIM(@intRecipientHeaderId) + '</intContractHeaderId>'
+			SET @strXML = @strXML + '<intContractDetailId>' + LTRIM(@intRecipientId) + '</intContractDetailId>'
+			SET @strXML = @strXML + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
+			SET @strXML = @strXML + '<intFutOptTransactionId>' + LTRIM(@intNewFutOptTransactionId) + '</intFutOptTransactionId>'
+			SET @strXML = @strXML + '<intHedgedLots>' + LTRIM(CAST(@dblReassignFutures AS INT) * @ysnIsHedged) + '</intHedgedLots>'
+			IF	@ysnIsHedged = 0
+				SET @strXML = @strXML + '<dblAssignedLots>'+LTRIM(@dblReassignFutures)+'</dblAssignedLots>'
+			ElSE
+				SET @strXML = @strXML + '<dblAssignedLots>0</dblAssignedLots>'
+			SET @strXML = @strXML + '<ysnIsHedged>'+LTRIM(@ysnIsHedged)+'</ysnIsHedged>'
+			SET @strXML = @strXML + '</Transaction></root>'
+
+			EXEC uspRKAssignFuturesToContractSummarySave @strXML
+		END
+
+		SELECT	@intReassignFutureId = MIN(intReassignFutureId) FROM @tblFutures WHERE intReassignFutureId > @intReassignFutureId
+	END
+	
+	---------------------------------------End Futures---------------------------
+
+	---------------------------------------Allocation----------------------------
+
+	UPDATE	AD 
+	SET		AD.intPContractDetailId	=	CASE WHEN AN.intContractTypeId = 1 THEN @intRecipientId ELSE AD.intPContractDetailId END,
+			AD.intPUnitMeasureId	=	CASE WHEN AN.intContractTypeId = 1 THEN AN.intUnitMeasureId ELSE AD.intPUnitMeasureId END,
+			AD.dblPAllocatedQty		=	CASE WHEN AN.intContractTypeId = 1 THEN AN.dblReassignRecipientUOM ELSE AD.dblPAllocatedQty END,
+
+			AD.intSContractDetailId	=	CASE WHEN AN.intContractTypeId = 2 THEN @intRecipientId ELSE AD.intSContractDetailId END,
+			AD.intSUnitMeasureId	=	CASE WHEN AN.intContractTypeId = 2 THEN AN.intUnitMeasureId ELSE AD.intSUnitMeasureId END,
+			AD.dblSAllocatedQty		=	CASE WHEN AN.intContractTypeId = 2 THEN AN.dblReassignRecipientUOM ELSE AD.dblSAllocatedQty END,
+
+			AD.dtmAllocatedDate		=	GETDATE()
+	FROM	tblLGAllocationDetail	AD
+	JOIN	@tblAllocation			AN	ON	AD.intAllocationDetailId = AN.intAllocationDetailId
+	WHERE	AN.ysnFullyAllocation	=	1
+
+	UPDATE	AD 
+	SET		AD.dblPAllocatedQty		=	AD.dblPAllocatedQty - CASE WHEN AN.intContractTypeId = 1 THEN AN.dblReassignInDonorUOM ELSE AN.dblReassign END,
+			AD.dblSAllocatedQty		=	AD.dblSAllocatedQty - CASE WHEN AN.intContractTypeId = 2 THEN AN.dblReassignInDonorUOM ELSE AN.dblReassign END
+
+	FROM	tblLGAllocationDetail	AD
+	JOIN	@tblAllocation			AN	ON	AD.intAllocationDetailId = AN.intAllocationDetailId
+	WHERE	AN.ysnFullyAllocation	=	0
+
+	INSERT INTO tblLGAllocationDetail
+	(
+		intConcurrencyId,
+		intAllocationHeaderId,
+		intPContractDetailId,
+		intSContractDetailId,
+		dblPAllocatedQty,
+		dblSAllocatedQty,
+		intPUnitMeasureId,
+		intSUnitMeasureId,
+		dtmAllocatedDate,
+		intUserSecurityId
+	)
+	SELECT	1,
+			AD.intAllocationHeaderId,
+			CASE WHEN AN.intContractTypeId = 1 THEN @intRecipientId ELSE AD.intPContractDetailId END,
+			CASE WHEN AN.intContractTypeId = 2 THEN @intRecipientId ELSE AD.intSContractDetailId END,
+			CASE WHEN AN.intContractTypeId = 1 THEN AN.dblReassignRecipientUOM ELSE AN.dblReassign END,
+			CASE WHEN AN.intContractTypeId = 2 THEN AN.dblReassignRecipientUOM ELSE AN.dblReassign END,
+			CASE WHEN AN.intContractTypeId = 1 THEN AN.intUnitMeasureId ELSE AD.intPUnitMeasureId END,
+			CASE WHEN AN.intContractTypeId = 2 THEN AN.intUnitMeasureId ELSE AD.intSUnitMeasureId END,
+			GEtDATE(),
+			@intUserId
+	FROM	tblLGAllocationDetail	AD
+	JOIN	@tblAllocation			AN	ON	AD.intAllocationDetailId = AN.intAllocationDetailId
+	WHERE	AN.ysnFullyAllocation	=	0
+
+	---------------------------------------End Allocation-------------------------
+
+	
 	--COMMIT TRAN
 END TRY
 BEGIN CATCH

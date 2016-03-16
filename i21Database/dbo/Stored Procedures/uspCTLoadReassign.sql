@@ -129,6 +129,7 @@ BEGIN
 			CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractSeq,
 			UM.strUnitMeasure		AS	strReassignUOM,
 			UM.strUnitMeasure		AS	strAllocationUOM,
+			AD.intSUnitMeasureId	AS	intReassignUnitMeasureId,
 			--Dummy--
 			CAST(ROW_NUMBER() OVER (ORDER BY AD.intAllocationDetailId ASC) AS INT) * -1 AS intReassignAllocationId,
 			0						AS	intReassignId,
@@ -161,6 +162,7 @@ BEGIN
 			CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractSeq,
 			UM.strUnitMeasure		AS	strReassignUOM,
 			UM.strUnitMeasure		AS	strAllocationUOM,
+			AD.intPUnitMeasureId	AS	intReassignUnitMeasureId,
 			--Dummy--
 			CAST(ROW_NUMBER() OVER (ORDER BY AD.intAllocationDetailId ASC) AS INT) * -1 AS intReassignAllocationId,
 			0						AS	intReassignId,
@@ -185,6 +187,7 @@ BEGIN
 
 	SELECT	CD.intContractDetailId,	
 			CD.intItemUOMId AS intAllocationUOMId,
+			QU.intUnitMeasureId AS intAllocationUnitMeasureId,
 			CASE WHEN CH.intContractTypeId = 1 THEN PA.dblAllocatedQty ELSE SA.dblAllocatedQty END AS dblAllocation,			
 			CAST(PF.intLotsFixed AS NUMERIC(18,6)) dblPricedLot,
 			CAST(SY.dblFuturesLot  AS NUMERIC(18,6)) AS dblFuturesLot,		
