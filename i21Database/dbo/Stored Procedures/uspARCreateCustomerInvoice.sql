@@ -101,6 +101,7 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 SET @ZeroDecimal = 0.000000	
 SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
 	SET @DeliverPickUp = ISNULL((SELECT TOP 1 strDeliverPickupDefault FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
@@ -232,10 +233,10 @@ BEGIN TRY
 		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))	
 		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))),1) ELSE 1 END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
-		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
-		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
-		,[dtmShipDate]					= @ShipDate
-		,[dtmPostDate]					= CASE WHEN @PostDate IS NULL THEN CAST(@InvoiceDate AS DATE) ELSE @PostDate END
+		,[dtmDate]						= ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
+		,[dtmShipDate]					= ISNULL(@ShipDate, DATEADD(month, 1, ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)))
+		,[dtmPostDate]					= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
 		,[dblShipping]					= @ZeroDecimal
 		,[dblTax]						= @ZeroDecimal
