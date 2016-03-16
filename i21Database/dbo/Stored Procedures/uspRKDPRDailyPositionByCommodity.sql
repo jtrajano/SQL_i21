@@ -32,7 +32,7 @@ SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
    isnull(OpenPurchasesQty,0) OpenPurchasesQty,
    isnull(OpenSalesQty,0) OpenSalesQty,
    isnull(OpenPurQty,0) OpenPurQty,
-      isnull(invQty,0) + isnull(dblGrainBalance,0)  AS InHouse     
+      isnull(invQty,0) + isnull(dblGrainBalance,0)+CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end   AS InHouse     
 FROM(  
 SELECT DISTINCT c.intCommodityId,              
   strCommodityCode,              

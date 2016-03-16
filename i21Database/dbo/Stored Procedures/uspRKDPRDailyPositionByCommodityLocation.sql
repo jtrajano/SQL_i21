@@ -23,23 +23,20 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    (isnull(dblCollatralPurchase,0)-isnull(dblCollatralSales,0))   + isnull(SlsBasisDeliveries,0)  AS CompanyTitled,
 
     isnull(invQty,0)-  isnull(ReserveQty,0)  + isnull(SlsBasisDeliveries,0)  
-   AS CompanyTitledNonDP,       
-   
-      
+   AS CompanyTitledNonDP,             
             (isnull(invQty,0)-isnull(ReserveQty,0)) +             
             (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))+              
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then isnull(OffSite,0) else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end +   
-   isnull(dblCollatralSales,0)  + isnull(SlsBasisDeliveries,0)  AS CashExposure,  
-   
+   isnull(dblCollatralSales,0)  + isnull(SlsBasisDeliveries,0)  AS CashExposure, 
    
    (((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1)) + isnull(DeltaOption,0)   DeltaOption,          
    isnull(ReceiptProductQty,0) ReceiptProductQty,
    isnull(OpenPurchasesQty,0) OpenPurchasesQty,
    isnull(OpenSalesQty,0) OpenSalesQty,
    isnull(OpenPurQty,0) OpenPurQty,
-   isnull(invQty,0) + isnull(dblGrainBalance ,0)
-   AS InHouse              
+   isnull(invQty,0) + isnull(dblGrainBalance ,0) +
+  CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end   AS InHouse             
                  
 FROM(  
 SELECT distinct c.intCommodityId, strLocationName, intLocationId,    
@@ -227,5 +224,3 @@ FROM #temp t
 	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 	WHERE t.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) 
 	ORDER BY strCommodityCode
-
-

@@ -112,6 +112,17 @@ INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,strLocationName,st
 				FROM vyuGRGetStorageDetail 
 				WHERE ysnCustomerStorage <> 1 AND
 				intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(0,0)=0 then intCompanyLocationId else 0 end
+				UNION
+				(select 1 AS intSeqId,@strDescription,'In-House' AS [strType],				
+				 CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
+				 ,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId
+				 FROM (
+				SELECT 
+				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal,strLocationName,strItemNo
+				FROM vyuGRGetStorageDetail ch
+				WHERE ch.intCommodityId  = @intCommodityId	AND ysnDPOwnedType = 1
+					AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
+				)t)
 
 INSERT INTO @Final (intSeqId,strCommodityCode,strType,dblTotal,intCommodityId ,strLocationName ,dtmDeliveryDate ,strTicket ,
 					strCustomerReference,strDPAReceiptNo ,dblDiscDue ,dblStorageDue , dtmLastStorageAccrueDate ,strScheduleId,intFromCommodityUnitMeasureId)
