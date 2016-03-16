@@ -276,8 +276,8 @@ BEGIN Try
 					intMachineId INT
 					,intShiftId INT
 					,dtmCalendarDate DATETIME
-					)
-			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND intMachineId=CMD.intMachineId))
+					)x
+			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND x.intMachineId=CMD.intMachineId))
 			BEGIN
 				SELECT @intMachineId=intMachineId 
 				FROM dbo.tblMFScheduleMachineDetail MD
@@ -288,8 +288,8 @@ BEGIN Try
 						intMachineId INT
 						,intShiftId INT
 						,dtmCalendarDate DATETIME
-						)
-				WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND intMachineId=CMD.intMachineId)
+						)x
+				WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND x.intMachineId=CMD.intMachineId)
 
 				SELECT @strName=strName
 				FROM dbo.tblMFMachine
@@ -312,8 +312,8 @@ BEGIN Try
 					intMachineId INT
 					,intShiftId INT
 					,dtmCalendarDate DATETIME
-					)
-			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND intMachineId=tblMFScheduleCalendarMachineDetail.intMachineId)
+					)x
+			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND x.intMachineId=tblMFScheduleCalendarMachineDetail.intMachineId)
 
 			INSERT INTO dbo.tblMFScheduleCalendarMachineDetail (
 				intCalendarDetailId
@@ -324,9 +324,9 @@ BEGIN Try
 					intMachineId INT
 					,intShiftId INT
 					,dtmCalendarDate DATETIME
-					)
+					)x
 			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId 
-			AND NOT EXISTS(SELECT *FROM tblMFScheduleCalendarMachineDetail MD WHERE MD.intCalendarDetailId=@intCalendarDetailId AND MD.intMachineId=intMachineId)
+			AND NOT EXISTS(SELECT *FROM tblMFScheduleCalendarMachineDetail MD WHERE MD.intCalendarDetailId=@intCalendarDetailId AND MD.intMachineId=x.intMachineId)
 		END
 
 		SELECT @intRecordId = MIN(intRecordId)
