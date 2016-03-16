@@ -85,7 +85,7 @@ FROM
 				,dblNet AS dblNetWeight
 				,CostUOM.strUnitMeasure AS costUOM
 				,WeightUOM.strUnitMeasure AS grossNetUOM
-				,ItemCostUOM.dblUnitQty
+				,ItemWeightUOM.dblUnitQty
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -122,6 +122,7 @@ FROM
 				,CostUOM.strUnitMeasure	
 				,WeightUOM.strUnitMeasure
 				,ItemCostUOM.dblUnitQty
+				,ItemWeightUOM.dblUnitQty
 				,B1.ysnSubCurrency
 				,G.dblRate
 				,A1.intSubCurrencyCents
@@ -253,7 +254,7 @@ FROM
 	,[dblNetWeight]				=	B.dblNet
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
-	,[dblUnitQty]				=	ItemCostUOM.dblUnitQty
+	,[dblUnitQty]				=	ItemWeightUOM.dblUnitQty
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId

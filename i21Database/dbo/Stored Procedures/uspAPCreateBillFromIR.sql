@@ -199,13 +199,16 @@ BEGIN
 		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
-		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 
+		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 --SubCur True
 											 THEN (CASE WHEN B.dblNet > 0 
 														THEN CAST(B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemCostUOM.dblUnitQty AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1) AS DECIMAL(18,2))  --Calculate Sub-Cur 
 												   END) 
-											 ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)) END,
+											 ELSE (CASE WHEN B.dblNet > 0 --SubCur False
+														THEN CAST(B.dblUnitCost * B.dblNet * ItemCostUOM.dblUnitQty  AS DECIMAL(18,2)) --Base Gross/Net UOM 
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2))  --Orig Calculation
+												   END)
+										END,
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
@@ -234,7 +237,7 @@ BEGIN
 											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A.intCurrencyId
-	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intWeightUOMId
 	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
