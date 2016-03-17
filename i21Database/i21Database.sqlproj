@@ -3522,7 +3522,7 @@
     <Build Include="dbo\Views\vyuHDSalesRepSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
-    <Build Include="dbo\Tables\tblWHUserPrinterMap.sql" />
+    <Build Include="dbo\Tables\tblMFUserPrinterMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
