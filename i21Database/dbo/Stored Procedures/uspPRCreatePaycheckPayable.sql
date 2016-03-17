@@ -166,16 +166,23 @@ BEGIN
 		INNER JOIN tblEntity C ON B.intEntityVendorId = C.intEntityId
 		LEFT JOIN tblAP1099Category D ON C.str1099Type = D.strCategory
 
+	/* Update Voucher Total */
+	IF EXISTS (SELECT TOP 1 1 FROM @intBillIds) 
+		EXEC uspAPUpdateVoucherTotal @intBillIds
+
+	/* Update Paycheck Taxes Bill Id */
+	UPDATE tblPRPaycheckTax SET intBillId = @intBillId 
+	FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId = @intVendorEntityId
+
+	/* Update Paycheck Deductions Bill Id */
+	UPDATE tblPRPaycheckDeduction SET intBillId = @intBillId 
+	FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
+	WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId = @intVendorEntityId
+
 	DELETE FROM #tmpVendors WHERE intVendorId = @intVendorEntityId
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillData')) DROP TABLE #tmpBillData
 END
-
-/* Update Voucher Total */
-IF EXISTS (SELECT TOP 1 1 FROM @intBillIds) 
-	EXEC uspAPUpdateVoucherTotal @intBillIds
-
-/* Update Paycheck Bill Id */
-UPDATE tblPRPaycheck SET intBillId = @intBillId WHERE intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks)
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVendors')) DROP TABLE #tmpVendors
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPaychecks')) DROP TABLE #tmpPaychecks
