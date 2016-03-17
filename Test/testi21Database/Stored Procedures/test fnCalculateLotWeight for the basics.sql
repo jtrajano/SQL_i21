@@ -1,4 +1,4 @@
-﻿alter PROCEDURE testi21Database.[test fnCalculateLotWeight for the basics]
+﻿CREATE PROCEDURE testi21Database.[test fnCalculateLotWeight for the basics]
 AS 
 BEGIN
 	-- Arrange
