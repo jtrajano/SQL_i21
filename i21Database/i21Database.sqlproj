@@ -3546,6 +3546,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
     <Build Include="dbo\Tables\tblWHUserPrinterMap.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateQuotePage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
