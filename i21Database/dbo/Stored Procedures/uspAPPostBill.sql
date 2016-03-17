@@ -445,9 +445,6 @@ BEGIN
 		FROM tblAPBill A
 		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
-		GOTO Audit_Log_Invoke
-		IF @@ERROR <> 0	GOTO Post_Rollback;
-
 	END
 
 	BEGIN TRY
@@ -493,6 +490,9 @@ BEGIN
 		RAISERROR(@integrationError, 16, 1);
 		GOTO Post_Rollback
 	END CATCH
+
+	GOTO Audit_Log_Invoke
+	IF @@ERROR <> 0	GOTO Post_Rollback;
 
 END
 ELSE
