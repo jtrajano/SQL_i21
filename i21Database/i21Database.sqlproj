@@ -3534,7 +3534,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
-    <Build Include="dbo\Tables\tblWHUserPrinterMap.sql" />
+    <Build Include="dbo\Tables\tblMFUserPrinterMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
