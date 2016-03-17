@@ -500,6 +500,68 @@ JOIN @temp TE
 	 		ON @intFreightItemId = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
      WHERE ISNULL(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice !=1
+
+--Surcharge Item
+IF @ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0
+	BEGIN
+		INSERT INTO [tblARInvoiceDetail]
+			([intInvoiceId]
+			,[intItemId]
+			,[strItemDescription]
+			,[strDocumentNumber]
+			,[intItemUOMId]
+			,[dblQtyOrdered]
+			,[dblQtyShipped]
+			,[dblPrice]
+			,[dblTotal]
+			,[intAccountId]
+			,[intCOGSAccountId]
+			,[intSalesAccountId]
+			,[intInventoryAccountId]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[intTaxGroupId] 
+			,[intConcurrencyId])
+		SELECT
+			IV.[intInvoiceId]											--[intInvoiceId]
+			,@intSurchargeItemId										    --[intItemId]
+			,IC.[strDescription]										--strItemDescription] 
+			,IE.strSourceId
+			,@intSurchargeItemUOMId										--[intItemUOMId]
+			,1   														--[dblQtyOrdered]
+			,1  														--[dblQtyShipped]
+			,dblPrice = ISNULL(IE.dblQty, @ZeroDecimal) * (ISNULL(IE.[dblFreightRate], @ZeroDecimal) * (ISNULL(IE.dblSurcharge, @ZeroDecimal) / 100))
+			,0          												--[dblTotal]
+			,Acct.[intAccountId]										--[intAccountId]
+			,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
+			,Acct.[intSalesAccountId]									--[intSalesAccountId]
+			,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
+			,NULL														--[intContractHeaderId]
+			,NULL														--[intContractDetailId]
+			,NULL														--[intTaxGroupId]
+			,1															--[intConcurrencyId]
+		FROM @InvoiceEntries IE
+		JOIN @temp TE
+			 ON TE.Customer = IE.intEntityCustomerId 
+			   AND TE.Location = IE.intLocationId 
+			   AND TE.strSource = IE.strSourceId
+			   AND TE.dtmDate = IE.dtmDate
+			   AND TE.Currency = IE.intCurrencyId
+			   AND TE.Salesperson = IE.intSalesPersonId
+			   AND TE.Shipvia = IE.intShipViaId
+			   AND ISNULL(TE.Comments, '')		= ISNULL(IE.strComments, '')
+			   AND ISNULL(TE.PurchaseOrder, '')	= ISNULL(IE.strPurchaseOrder, '')	  
+			JOIN tblARInvoice IV
+				ON TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
+			INNER JOIN
+	 			tblICItem IC
+	 				ON @intFreightItemId = IC.[intItemId] 
+			 LEFT OUTER JOIN
+	 			vyuARGetItemAccount Acct
+	 				ON @intFreightItemId = Acct.[intItemId]
+	 					AND IE.[intLocationId] = Acct.[intLocationId]
+			 WHERE ISNULL(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice != 1
+	END
 	
 --Log Insert	
 DECLARE @Invoices AS TABLE(intInvoiceID INT)
