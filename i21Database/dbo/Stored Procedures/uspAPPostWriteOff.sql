@@ -28,6 +28,10 @@ END
 
 SET @batchIdUsed = @batchId
 
+DECLARE @Ids Id
+INSERT INTO @Ids
+SELECT @prepaymentId
+
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
@@ -36,7 +40,7 @@ END
 ELSE
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(CAST(@prepaymentId AS NVARCHAR(10)), 'Payable', DEFAULT, @userId, @batchId)
+	SELECT * FROM dbo.fnAPReverseGLEntries(@Ids, 'Payable', DEFAULT, @userId, @batchId)
 END
 
 --=====================================================================================================================================
