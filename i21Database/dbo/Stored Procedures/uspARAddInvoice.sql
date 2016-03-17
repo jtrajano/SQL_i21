@@ -574,8 +574,8 @@ IF @ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0
 			   AND TE.Currency = IE.intCurrencyId
 			   AND TE.Salesperson = IE.intSalesPersonId
 			   AND TE.Shipvia = IE.intShipViaId
-			   AND TE.Comments = IE.strComments
-			   AND TE.PurchaseOrder = IE.strPurchaseOrder	  
+			   AND ISNULL(TE.Comments, '')		= ISNULL(IE.strComments, '')
+			   AND ISNULL(TE.PurchaseOrder, '')	= ISNULL(IE.strPurchaseOrder, '')	  
 			JOIN tblARInvoice IV
 				ON TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
 			INNER JOIN
