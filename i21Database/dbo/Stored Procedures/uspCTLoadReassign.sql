@@ -21,7 +21,11 @@ BEGIN
 			CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractSeq,
 			CASE WHEN CD.intContractDetailId = @intDonorId THEN 'Donor' ELSE 'Recipient' END AS strType,
 			CASE WHEN CH.intContractTypeId = 1 THEN PA.dblAllocatedQty ELSE SA.dblAllocatedQty END AS dblAllocatedQty,
-			
+			CAST(CASE WHEN ISNULL(BL.intCount,0) > 0 THEN 1 ELSE 0 END AS BIT) ysnVoucherExist,
+			CAST(CASE WHEN ISNULL(ID.intCount,0) > 0 THEN 1 ELSE 0 END AS BIT) ysnInvoiceExist,
+			CD.intItemUOMId intQtyUOMId,
+			QM.strUnitMeasure AS strQtyUOM,
+			QM.strUnitType,
 			--Dummy--
 			CAST(ROW_NUMBER() OVER (ORDER BY CD.intContractDetailId ASC) AS INT) * -1 AS intReassignDetailId,
 			0 AS intReassignId,
@@ -35,6 +39,8 @@ BEGIN
 	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId			LEFT
 	JOIN	tblICItemUOM		PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId		LEFT
 	JOIN	tblICUnitMeasure	PM	ON	PM.intUnitMeasureId		=	PU.intUnitMeasureId			LEFT
+	JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId				LEFT
+	JOIN	tblICUnitMeasure	QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId			LEFT
 	JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId	=	CD.intContractDetailId		LEFT
 	JOIN	(
 				SELECT		intPriceFixationId,SUM(dblQuantity) dblQuantity 
@@ -55,7 +61,20 @@ BEGIN
 				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty
 				FROM		tblLGAllocationDetail 
 				Group By	intSContractDetailId
-			)					SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId
+			)					SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId	LEFT
+	JOIN	(
+				SELECT	BD.intContractDetailId,COUNT(*) intCount
+				FROM	tblAPBillDetail	BD
+				JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
+				WHERE	BD.intBillId	=	BL.intBillId AND 
+						BL.intTransactionType <> 2
+				GROUP	BY BD.intContractDetailId
+			)					BL	ON	BL.intContractDetailId		=	CD.intContractDetailId	LEFT
+	JOIN	(
+				SELECT	AD.intContractDetailId,COUNT(*) intCount
+				FROM	tblARInvoiceDetail	AD
+				GROUP	BY AD.intContractDetailId
+			)					ID	ON	ID.intContractDetailId		=	CD.intContractDetailId
 	WHERE	CD.intContractDetailId	IN(@intDonorId,@intRecipientId)
 	
 	--Pricing
