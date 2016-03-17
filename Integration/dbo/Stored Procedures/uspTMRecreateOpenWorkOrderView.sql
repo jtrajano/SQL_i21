@@ -53,6 +53,7 @@ BEGIN
 				,intSiteID = A.intSiteID
 				,A.intCustomerID
 				,A.intConcurrencyId
+				,A.intLocationId
 			FROM tblTMSite A
 			INNER JOIN tblTMWorkOrder B
 				ON A.intSiteID = B.intSiteID
@@ -104,6 +105,7 @@ BEGIN
 				,intSiteID = A.intSiteID
 				,A.intCustomerID
 				,A.intConcurrencyId
+				,A.intLocationId
 			FROM tblTMSite A
 			INNER JOIN tblTMWorkOrder B
 				ON A.intSiteID = B.intSiteID
