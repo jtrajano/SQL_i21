@@ -35,12 +35,13 @@ BEGIN
 		WHERE	dbo.fnConvertOriginUserIdtoi21(apcbk_user_id) IS NULL
 
 		-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. 
-		UPDATE	tblGLAccount
-		SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts'')
-		from	tblGLAccount gl INNER JOIN (
-					SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
-				) Q
-					ON gl.intAccountId = Q.intGLAccountId
+		--UPDATE	tblGLAccount
+		--SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts'')
+		--from	tblGLAccount gl INNER JOIN (
+		--			SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
+		--		) Q
+		--			ON gl.intAccountId = Q.intGLAccountId
+
 		-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" category. 
 		UPDATE	tblGLAccountSegment
 		SET		intAccountCategoryId  = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''Cash Account'')
