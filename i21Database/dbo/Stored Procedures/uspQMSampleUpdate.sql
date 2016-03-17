@@ -307,6 +307,7 @@ BEGIN TRY
 		,strResult = x.strResult
 		,strComment = x.strComment
 		,intSequenceNo = x.intSequenceNo
+		,intControlPointId = x.intControlPointId
 		,intListItemId = x.intListItemId
 		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intLastModifiedUserId = x.intLastModifiedUserId
@@ -319,6 +320,7 @@ BEGIN TRY
 			,strResult NVARCHAR(20)
 			,strComment NVARCHAR(MAX)
 			,intSequenceNo INT
+			,intControlPointId INT
 			,intListItemId INT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
