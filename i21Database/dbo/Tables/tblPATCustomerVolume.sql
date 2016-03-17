@@ -3,7 +3,7 @@
 	[intCategoryVolumeId] INT NOT NULL IDENTITY, 
     [intCustomerPatronId] INT NULL, 
     [intPatronageCategoryId] INT NULL, 
-	[intRefundTypeDetailId] [int] NOT NULL,
+	[intRefundTypeDetailId] [int] NULL,
     [intFiscalYear] INT NULL, 
 	[dtmLastActivityDate] DATETIME NULL,
     [dblVolume] NUMERIC(18, 6) NULL, 

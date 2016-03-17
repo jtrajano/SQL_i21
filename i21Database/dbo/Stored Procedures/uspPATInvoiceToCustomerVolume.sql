@@ -77,7 +77,7 @@ BEGIN
 				  THEN DELETE
 			 WHEN MATCHED
 				  THEN UPDATE SET PAT.dblVolume = CASE WHEN B.ysnPosted = 1 THEN (PAT.dblVolume + B.dblVolume) 
-													   ELSE (PAT.dblVolume - B.dblVolume) END
+													   ELSE (PAT.dblVolume - B.dblVolume) END, intRefundTypeDetailId = (SELECT tblPATRefundRateDetail.intRefundTypeDetailId FROM tblPATRefundRateDetail WHERE tblPATRefundRateDetail.intPatronageCategoryId = B.intPatronageCategoryId)
 			 WHEN NOT MATCHED BY TARGET
 				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intRefundTypeDetailId,  intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
 					   VALUES (B.intEntityCustomerId, B.intPatronageCategoryId, (SELECT tblPATRefundRateDetail.intRefundTypeDetailId FROM tblPATRefundRateDetail WHERE tblPATRefundRateDetail.intPatronageCategoryId = B.intPatronageCategoryId), @intFiscalYear, GETDATE(),  B.dblVolume, 1);
