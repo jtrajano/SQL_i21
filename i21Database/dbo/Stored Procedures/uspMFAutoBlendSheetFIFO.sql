@@ -590,7 +590,7 @@ BEGIN TRY
 					,'Quarantine'
 					)
 				AND L.dtmExpiryDate >= GETDATE()
-				AND L.dblWeight > 0
+				AND L.dblWeight >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId
@@ -827,7 +827,7 @@ BEGIN TRY
 			--Apply Business Rules
 			SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
 								   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId 
-								   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > 0 ORDER BY ' + @strOrderByFinal
+								   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 ORDER BY ' + @strOrderByFinal
 
 			EXEC (@strSQL)
 
@@ -912,7 +912,7 @@ BEGIN TRY
 								,L.dblWeightPerQty
 							FROM tblICLot L
 							WHERE L.intLotId = @intParentLotId
-								AND L.dblWeight > 0
+								AND L.dblWeight >= .01
 						ELSE
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId
@@ -1022,7 +1022,7 @@ BEGIN TRY
 								,L.dblWeightPerQty
 							FROM tblICLot L
 							WHERE L.intLotId = @intParentLotId
-								AND L.dblWeight > 0
+								AND L.dblWeight >= .01
 						ELSE
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId
@@ -1147,7 +1147,7 @@ BEGIN TRY
 					JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 					WHERE L.intItemId = @intRawItemId
 						AND L.intStorageLocationId = @intPartialQuantityStorageLocationId
-						AND L.dblWeight > 0
+						AND L.dblWeight >= 0.01
 						AND LS.strPrimaryStatus IN (
 							'Active'
 							,'Quarantine'
@@ -1155,7 +1155,7 @@ BEGIN TRY
 						AND L.dtmExpiryDate >= GETDATE()
 					ORDER BY L.dtmDateCreated
 
-					Delete From #tblPartialQtyLot Where dblAvailableQty <= 0
+					Delete From #tblPartialQtyLot Where dblAvailableQty < .01
 					End
 
 				SELECT @intMinPartialQtyLotRowNo = MIN(intRowNo)
