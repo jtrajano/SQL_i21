@@ -322,12 +322,12 @@ Begin
 				Set @strXml = @strXml + '</root>'
 
 				Insert Into @tblPickedLots
-				Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml
+				Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
 			End
 		End
 	Else
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,@dblQuantity
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,@dblQuantity,'',1
 
 	--Remaining Lots to Pick
 	Insert Into @tblRemainingPickedLots
