@@ -28,16 +28,16 @@ WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 /* Get all Vendor Ids from Payable Taxes and Deductions */
 SELECT DISTINCT intVendorId INTO #tmpVendors FROM
 (SELECT intVendorId FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
-	WHERE PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId IS NOT NULL
+	WHERE PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId IS NOT NULL AND PT.intBillId IS NULL
  UNION ALL
  SELECT intVendorId FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL
+	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL AND PD.intBillId IS NULL
 ) PayableTaxesAndDeductions
 
 
 /* Validate Vendor Invoice No */
 DECLARE @strMsg NVARCHAR(200) = ''
-SELECT TOP 1 @strMsg = 'Invoice No. already exists for Vendor ' + tblEntity.strEntityNo + '!'
+SELECT TOP 1 @strMsg = 'Invoice No. already exists for Vendor ''' + tblEntity.strEntityNo + '''!'
 	FROM tblAPBill INNER JOIN tblEntity ON tblAPBill.intEntityVendorId = tblEntity.intEntityId
 WHERE strVendorOrderNumber = @strInvoiceNo AND intEntityVendorId IN (SELECT intVendorId FROM #tmpVendors)
 
@@ -169,12 +169,14 @@ BEGIN
 	FROM 
 		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intExpenseAccountId, strItem = TT.strTax, dblTotal = SUM(PT.dblTotal)
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
-			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId = @intVendorEntityId
+			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) 
+			  AND TT.intVendorId = @intVendorEntityId AND PT.intBillId IS NULL
 			GROUP BY TT.intVendorId, PT.intExpenseAccountId, TT.strTax
 		 UNION ALL
 		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intExpenseAccountId, strItem = TD.strDeduction, dblTotal = SUM(PD.dblTotal)
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId = @intVendorEntityId
+			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) 
+			  AND TD.intVendorId = @intVendorEntityId AND PD.intBillId IS NULL
 			GROUP BY TD.intVendorId, PD.intExpenseAccountId, TD.strDeduction
 		) A
 		INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
