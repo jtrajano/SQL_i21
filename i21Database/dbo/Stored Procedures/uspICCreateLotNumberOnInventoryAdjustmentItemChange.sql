@@ -123,7 +123,7 @@ BEGIN
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
 			,[dblWeight]				= SourceLot.dblWeight
-			,[intWeightUOMId]			= SourceLot.intWeightUOMId
+			,[intWeightUOMId]			= NewWeightUOM.intItemUOMId
 			,[intOriginId]				= SourceLot.intOriginId
 			,[strBOLNo]					= SourceLot.strBOLNo
 			,[strVessel]				= SourceLot.strVessel
@@ -154,6 +154,10 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM NewItemUOM
 				ON NewItemUOM.intItemId = Detail.intNewItemId
 				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceLot.intItemUOMId)
+
+			LEFT JOIN dbo.tblICItemUOM NewWeightUOM
+				ON NewWeightUOM.intItemId = Detail.intNewItemId
+				AND NewWeightUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceLot.intWeightUOMId)
 
 			--LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 			--	ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
