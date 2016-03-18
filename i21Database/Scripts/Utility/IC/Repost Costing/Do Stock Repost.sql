@@ -392,9 +392,9 @@ BEGIN
 						,Detail.intInventoryTransferDetailId
 						,Header.strTransferNo
 						,TransferSource.intTransactionTypeId  
-						,Detail.intLotId 
-						,Detail.intFromSubLocationId
-						,Detail.intFromStorageLocationId
+						,Detail.intNewLotId 
+						,Detail.intToSubLocationId
+						,Detail.intToStorageLocationId
 						,strActualCostId = NULL 
 				FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 							ON Header.intInventoryTransferId = Detail.intInventoryTransferId
