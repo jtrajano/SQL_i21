@@ -56,7 +56,8 @@ Declare @tblPickedLots AS table
 			@intLocationId=@intLocationId,
 			@intBlendRequirementId=@intBlendRequirementId,
 			@dblQtyToProduce=@dblQtyToProduce,
-			@strXml=@strXml
+			@strXml=@strXml,
+			@ysnFromPickList=0
 
 --Delete items if consumption method is not By Lot
 Delete tpl From @tblPickedLots tpl 

@@ -2,6 +2,7 @@
 	,@intBlendRequirementId INT
 	,@dblQtyToProduce NUMERIC(38,20)
 	,@strXml NVARCHAR(MAX) = NULL
+	,@ysnFromPickList bit = 0
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -60,8 +61,9 @@ BEGIN TRY
 		,@strOrderBy NVARCHAR(100) = ''
 		,@strOrderByFinal NVARCHAR(100) = ''
 
-	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
-	FROM tblMFCompanyPreference
+	If @ysnFromPickList=0
+		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+		FROM tblMFCompanyPreference
 
 	SELECT @strBlendItemNo = i.strItemNo
 		,@intBlendItemId = i.intItemId
@@ -221,6 +223,16 @@ BEGIN TRY
 		ysnParentLot bit,
 		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
 	)
+
+	Declare @tblLotStatus AS Table
+	(
+		strStatusName nvarchar(50) COLLATE Latin1_General_CI_AS
+	)
+
+	Insert Into @tblLotStatus(strStatusName) Values('Active')
+
+	If @ysnFromPickList=0
+		Insert Into @tblLotStatus(strStatusName) Values('Quarantine')
 
 	Select TOP 1 @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where intBlendRequirementId=@intBlendRequirementId AND ISNULL(intSalesOrderLineItemId,0)>0
 
@@ -586,8 +598,7 @@ BEGIN TRY
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
-					'Active'
-					,'Quarantine'
+					Select strStatusName From @tblLotStatus
 					)
 				AND L.dtmExpiryDate >= GETDATE()
 				AND L.dblWeight >= .01
@@ -1190,8 +1201,7 @@ BEGIN TRY
 						AND L.intStorageLocationId = @intPartialQuantityStorageLocationId
 						AND L.dblWeight >= 0.01
 						AND LS.strPrimaryStatus IN (
-							'Active'
-							,'Quarantine'
+							Select strStatusName From @tblLotStatus
 							)
 						AND L.dtmExpiryDate >= GETDATE()
 					ORDER BY L.dtmDateCreated
@@ -1491,6 +1501,8 @@ BEGIN TRY
 			,SL.strName AS strStorageLocationName
 			,CL.strLocationName
 			,@intLocationId AS intLocationId
+			,'' AS strSubLocationName
+			,PL.strParentLotAlias AS strLotAlias
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS
@@ -1542,6 +1554,8 @@ BEGIN TRY
 			,BS.intStorageLocationId
 			,CL.strLocationName
 			,@intLocationId AS intLocationId
+			,'' AS strSubLocationName
+			,PL.strParentLotAlias AS strLotAlias
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS

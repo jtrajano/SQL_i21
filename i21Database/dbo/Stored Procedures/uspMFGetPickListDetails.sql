@@ -390,7 +390,7 @@ Begin
 		Set @strXml = @strXml + '</root>'
 
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
 
 		--Remaining Lots to Pick
 		Insert Into @tblRemainingPickedLots
@@ -504,7 +504,7 @@ Begin
 		Set @strXml = @strXml + '</root>'
 
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
 
 		--Remaining Lots to Pick
 		Insert Into @tblRemainingPickedLots
