@@ -12,9 +12,11 @@ SET XACT_ABORT ON
 
 /* Localize Parameters */
 DECLARE @intUser INT
+		,@strInvoice NVARCHAR(100)
 		,@xmlPaychecks XML
 
 SELECT @xmlPaychecks = CAST('<A>'+ REPLACE(@intPaycheckIds, ',', '</A><A>')+ '</A>' AS XML) 
+	  ,@strInvoice = @strInvoiceNo
 	  ,@intUser = @intUserId
 
 --Parse the Paychecks Parameter to Temporary Table
@@ -29,8 +31,21 @@ SELECT DISTINCT intVendorId INTO #tmpVendors FROM
 	WHERE PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId IS NOT NULL
  UNION ALL
  SELECT intVendorId FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-	WHERE PD.intPaycheckId = (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL
+	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL
 ) PayableTaxesAndDeductions
+
+
+/* Validate Vendor Invoice No */
+DECLARE @strMsg NVARCHAR(200) = ''
+SELECT TOP 1 @strMsg = 'Invoice No. already exists for Vendor ' + tblEntity.strEntityNo + '!'
+	FROM tblAPBill INNER JOIN tblEntity ON tblAPBill.intEntityVendorId = tblEntity.intEntityId
+WHERE strVendorOrderNumber = @strInvoiceNo AND intEntityVendorId IN (SELECT intVendorId FROM #tmpVendors)
+
+IF (LEN(@strMsg) > 0)
+BEGIN
+	RAISERROR(@strMsg, 11, 1)
+	GOTO Process_Exit
+END
 
 DECLARE @intVendorEntityId INT
 DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory
@@ -172,17 +187,19 @@ BEGIN
 
 	/* Update Paycheck Taxes Bill Id */
 	UPDATE tblPRPaycheckTax SET intBillId = @intBillId 
-	FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
+	FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax ON TT.intTypeTaxId = tblPRPaycheckTax.intTypeTaxId
 	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId = @intVendorEntityId
 
 	/* Update Paycheck Deductions Bill Id */
 	UPDATE tblPRPaycheckDeduction SET intBillId = @intBillId 
-	FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-	WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId = @intVendorEntityId
+	FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction ON TD.intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId = @intVendorEntityId
 
 	DELETE FROM #tmpVendors WHERE intVendorId = @intVendorEntityId
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillData')) DROP TABLE #tmpBillData
 END
+
+Process_Exit:
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVendors')) DROP TABLE #tmpVendors
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPaychecks')) DROP TABLE #tmpPaychecks
