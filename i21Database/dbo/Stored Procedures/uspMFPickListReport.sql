@@ -234,7 +234,7 @@ Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickL
 		Set @strXml = @strXml + '</root>'
 
 		Insert Into @tblRemainingPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
 
 	End
 
