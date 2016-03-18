@@ -89,6 +89,20 @@ BEGIN
 			,@intStorageLocationId = @intStorageLocationId
 	END
 
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+				AND intWeightUOMId IS NULL
+			)
+	BEGIN
+		UPDATE dbo.tblICLot
+		SET dblWeight = dblQty
+			,intWeightUOMId = intItemUOMId
+			,dblWeightPerQty = 1
+		WHERE intLotId = @intLotId
+	END
+
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
