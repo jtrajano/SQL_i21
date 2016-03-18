@@ -4795,4 +4795,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblPATCustomerVolume_tblPATRefundRateDetail]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a996d3db-2409-4add-bd13-48ab09a0d622" ChangeDateTime="03/17/2016 18:52:12">
+    <Property Name="ElementName" Value="[dbo].[tblTRTransactionDetailLog].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRTransactionDetailLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionDetailLogId" />
+  </Operation>
 </Operations>
