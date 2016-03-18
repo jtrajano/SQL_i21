@@ -133,6 +133,7 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_SplitLot
 			, @ADJUSTMENT_TYPE_LotMerge
 			, @ADJUSTMENT_TYPE_LotMove
+			, @ADJUSTMENT_TYPE_ItemChange
 		)
 
 --------------------------------------------------------------------------------------------  
@@ -233,6 +234,10 @@ BEGIN
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentItemChange
 				@intTransactionId
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intEntityUserSecurityId
+				,@strAdjustmentDescription
 	END 
 
 	-----------------------------------
