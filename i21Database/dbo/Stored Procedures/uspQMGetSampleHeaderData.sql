@@ -45,6 +45,7 @@ BEGIN
 		,S.intShipmentContractQtyId
 		,S.intShipmentBLContainerId
 		,S.intShipmentBLContainerContractId
+		,S.strContainerNumber
 		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
