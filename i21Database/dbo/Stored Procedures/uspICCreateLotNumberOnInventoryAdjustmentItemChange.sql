@@ -171,6 +171,8 @@ BEGIN
 	EXEC @intErrorFoundOnCreateUpdateLotNumber = dbo.uspICCreateUpdateLotNumber 
 		@ItemsThatNeedLotId
 		,@intEntityUserSecurityId
+		,NULL
+		,1
 
 	IF @intErrorFoundOnCreateUpdateLotNumber <> 0
 		RETURN @intErrorFoundOnCreateUpdateLotNumber;
