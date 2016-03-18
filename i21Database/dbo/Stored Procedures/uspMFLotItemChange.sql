@@ -1,9 +1,7 @@
 ﻿CREATE PROCEDURE uspMFLotItemChange
  @intLotId INT,
- @dblLotQty NUMERIC(18,6),
  @intNewItemId INT,
- @intUserId INT,
- @intInventoryAdjustmentId int=NULL OUTPUT
+ @intUserId INT
 
 AS
 
@@ -20,7 +18,8 @@ BEGIN TRY
 	DECLARE @intLotStatusId INT
 	DECLARE @intItemUOMId INT
 	DECLARE @dblLotWeightPerUnit NUMERIC(38,20) 
-			
+	DECLARE @dblLotQty NUMERIC(38,20)
+	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @intTransactionCount INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 
@@ -33,18 +32,14 @@ BEGIN TRY
 		   @strLotNumber = strLotNumber,
 		   @intLotStatusId = intLotStatusId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
-		   @intItemUOMId = intItemUOMId	   
+		   @intItemUOMId = intItemUOMId,
+		   @dblLotQty = dblQty	   
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	IF @dblLotWeightPerUnit > 0 
-	BEGIN
-		SELECT @dblLotQty = dbo.fnDivide(@dblLotQty, @dblLotWeightPerUnit)
-	END
-
 	SELECT @dblAdjustByQuantity = - @dblLotQty
 
 	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
