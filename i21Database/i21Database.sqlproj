@@ -3554,6 +3554,7 @@
     <Build Include="dbo\Tables\tblTRTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
