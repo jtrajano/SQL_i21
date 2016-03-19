@@ -17,6 +17,7 @@ BEGIN TRY
 		,@ysnExcessConsumptionAllowed int
 		,@intManufacturingProcessId int
 		,@intLocationId int
+		,@strInstantConsumption nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -51,35 +52,44 @@ BEGIN TRY
 	Begin
 		Select @intManufacturingProcessId=intManufacturingProcessId, @intLocationId=intLocationId From dbo.tblMFWorkOrder Where intWorkOrderId =@intWorkOrderId 
 
-		Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Yield Adjustment Allowed'
-
-		Select @strYieldAdjustmentAllowed=strAttributeValue
+		Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Instant Consumption'
+	
+		Select @strInstantConsumption=strAttributeValue
 		From tblMFManufacturingProcessAttribute
 		Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 
-		Select @ysnExcessConsumptionAllowed=0
-		If @strYieldAdjustmentAllowed='True'
+		If @strInstantConsumption='False'
 		Begin
-			Select @ysnExcessConsumptionAllowed=1
+			Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Yield Adjustment Allowed'
+
+			Select @strYieldAdjustmentAllowed=strAttributeValue
+			From tblMFManufacturingProcessAttribute
+			Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+			Select @ysnExcessConsumptionAllowed=0
+			If @strYieldAdjustmentAllowed='True'
+			Begin
+				Select @ysnExcessConsumptionAllowed=1
+			End
+
+			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblProduceQty
+				,@intProduceUOMKey = @intItemUOMId
+				,@intBatchId = @intBatchId
+				,@intUserId = @intUserId
+				,@PickPreference='Substitute Item'
+				,@ysnExcessConsumptionAllowed=@ysnExcessConsumptionAllowed
+				,@dblUnitQty =NULL
+
+			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblProduceQty
+				,@intProduceUOMKey = @intItemUOMId
+				,@intUserId = @intUserId
+				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+				,@strRetBatchId = @strRetBatchId OUTPUT
+				,@ysnPostConsumption = 1
+				,@intBatchId = @intBatchId
 		End
-
-		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@dblProduceQty = @dblProduceQty
-			,@intProduceUOMKey = @intItemUOMId
-			,@intBatchId = @intBatchId
-			,@intUserId = @intUserId
-			,@PickPreference='Substitute Item'
-			,@ysnExcessConsumptionAllowed=@ysnExcessConsumptionAllowed
-			,@dblUnitQty =NULL
-
-		EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@dblProduceQty = @dblProduceQty
-			,@intProduceUOMKey = @intItemUOMId
-			,@intUserId = @intUserId
-			,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
-			,@strRetBatchId = @strRetBatchId OUTPUT
-			,@ysnPostConsumption = 1
-			,@intBatchId = @intBatchId
 	End
 
 	EXEC dbo.uspMFCalculateYield @intWorkOrderId = @intWorkOrderId

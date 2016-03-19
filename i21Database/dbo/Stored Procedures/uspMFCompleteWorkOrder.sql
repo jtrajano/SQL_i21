@@ -68,6 +68,7 @@ BEGIN TRY
 		,@ysnIgnoreTolerance bit
 		,@intCategoryId int
 		,@dtmBusinessDate datetime
+		,@strInstantConsumption nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -470,6 +471,22 @@ BEGIN TRY
 			,@intWorkOrderId = @intWorkOrderId
 
 	END
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Instant Consumption'
+	
+	Select @strInstantConsumption=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	If @strInstantConsumption='False' and @intProductionTypeId=3
+	Begin
+		Select @intProductionTypeId=2
+	End
+
+	If @strInstantConsumption='True' and @intProductionTypeId=2
+	Begin
+		Select @intProductionTypeId=3
+	End
 
 	IF @intProductionTypeId in (1,3) 
 	BEGIN
