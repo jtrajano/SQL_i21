@@ -3524,6 +3524,7 @@
     <Build Include="dbo\Stored Procedures\uspWHLotMove.sql" />
     <Build Include="dbo\Tables\tblMFUserPrinterMap.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeControlPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
