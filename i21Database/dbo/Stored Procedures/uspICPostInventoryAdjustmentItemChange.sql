@@ -239,7 +239,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -1 * SourceTransaction.dblQty
+			,dblQty					= dbo.fnMultiply(-1, SourceTransaction.dblQty) 
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= SourceTransaction.dblCost
 			,dblValue				= 0

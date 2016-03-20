@@ -21,11 +21,13 @@
 	[strVal5] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
 	[strVal6] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSet] [bit] NULL,
+	[intBillId] INT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL, 
     CONSTRAINT [PK_tblPRPaycheckTax] PRIMARY KEY ([intPaycheckTaxId]), 
 	CONSTRAINT [FK_tblPRPaycheckTax_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPRPaycheckTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId]),
+	CONSTRAINT [FK_tblPRPaycheckTax_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
 ) ON [PRIMARY]
 GO
 /****** Object:  Default [DF__tblPRPayc__dblAm__150B6AEE]    Script Date: 08/14/2014 10:50:11 ******/
@@ -263,3 +265,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckTax',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Voucher Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intBillId'

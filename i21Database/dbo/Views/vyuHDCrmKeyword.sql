@@ -6,7 +6,7 @@
 		,strKeyword
 		,strDescription
 		,strCurrentValue
-		,ysnActive
+		,ysnActive = (case when ysnActive is null then convert(bit,0) else ysnActive end)
 	from (
 		select
 			intEntityId = tblEntity.intEntityId

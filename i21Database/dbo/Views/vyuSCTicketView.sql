@@ -103,7 +103,14 @@
        tblSCListTicketTypes.strTicketType,
 	   tblSMCompanyLocation.strLocationName,
 	   tblSMCompanyLocationSubLocation.strSubLocationName,
-	   tblGRStorageType.strStorageTypeDescription,
+	   ISNULL(tblGRStorageType.strStorageTypeDescription, 
+	   CASE 
+			WHEN tblSCTicket.strDistributionOption = 'CNT' THEN 'Contract'
+			WHEN tblSCTicket.strDistributionOption = 'LOD' THEN 'Load'
+			WHEN tblSCTicket.strDistributionOption = 'SPT' THEN 'Spot Sale'
+			WHEN tblSCTicket.strDistributionOption = 'SPL' THEN 'Split'
+			WHEN tblSCTicket.strDistributionOption = 'HLD' THEN 'Hold'
+		END) AS strStorageTypeDescription,
 	   tblSCScaleSetup.strStationShortDescription,
 	   tblEntitySplit.strSplitNumber,
 	   tblSCTicketPool.strTicketPool,
@@ -133,4 +140,3 @@
        on (tblICStorageLocation.intStorageLocationId = tblSCTicket.intStorageLocationId)
 	left join dbo.tblGRStorageScheduleRule tblGRStorageScheduleRule
        on (tblGRStorageScheduleRule.intStorageScheduleRuleId = tblSCTicket.intStorageScheduleId)
-	   

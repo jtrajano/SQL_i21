@@ -190,7 +190,8 @@ BEGIN TRY
 						--	END
 						CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack)))
 						)
-			ELSE CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)))
+			WHEN C.strCategoryCode = @strPackagingCategory THEN CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)))
+			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
 			END AS RequiredQty
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
@@ -235,7 +236,8 @@ BEGIN TRY
 						--	END
 						CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack)))
 						)
-			ELSE CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)))
+			WHEN C.strCategoryCode = @strPackagingCategory THEN CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)))
+			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
 			END)-WC.dblQuantity/rs.dblSubstituteRatio AS  RequiredQty
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
@@ -273,7 +275,7 @@ BEGIN TRY
 				THEN (
 						CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack)))
 						)
-			ELSE CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)))
+			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
 			END)-WC.dblQuantity/rs.dblSubstituteRatio>0
 
 	IF @PickPreference = 'Substitute Item'
