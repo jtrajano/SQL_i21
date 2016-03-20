@@ -104,15 +104,19 @@ INSERT INTO @Final(intSeqId,strCommodityCode,strType,dblTotal,strLocationName,st
 				INNER JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
 				INNER JOIN tblSMCompanyLocation ic on ic.intCompanyLocationId = il.intLocationId
-				WHERE i.intCommodityId =@intCommodityId AND il.intLocationId= case when isnull(0,0)=0 then il.intLocationId else 0 end
+				WHERE i.intCommodityId =@intCommodityId AND il.intLocationId= case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 				UNION
 				SELECT 1 AS intSeqId,@strDescription,'In-House' AS [strType],
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(Balance,0))
 				,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId
 				FROM vyuGRGetStorageDetail 
 				WHERE ysnCustomerStorage <> 1 AND
-				intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(0,0)=0 then intCompanyLocationId else 0 end
+				intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
+				
+				
 				UNION
+
+
 				(select 1 AS intSeqId,@strDescription,'In-House' AS [strType],				
 				 CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
 				 ,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId
