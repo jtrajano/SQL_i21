@@ -127,7 +127,7 @@ SELECT
 		,strBillOfLadding			= NULL
 		,intCurrencyId				= SC.intCurrencyId
 		,intLocationId				= SC.intProcessingLocationId
-		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityVendorId = @intEntityId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 
