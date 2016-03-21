@@ -277,24 +277,6 @@ BEGIN
 	ON C.intAccountId = A.intAccountId
 	WHERE C.strCardNumber = @strCardId
 
-	--FIND IN NETWORK ITEM--
-	IF(@intProductId = 0)
-	BEGIN
-		SELECT TOP 1 
-			 @intProductId = intItemId
-			,@intARItemId = intARItemId
-		FROM tblCFItem 
-		WHERE strProductNumber = @strProductId
-		ORDER BY intSiteId
-
-		IF(@intProductId != 0)
-		BEGIN
-			SET @ysnSiteItemUsed = 0
-			SET @ysnNetworkItemUsed = 1
-		END
-
-	END
-
 	--FIND IN SITE ITEM--
 	IF(@intProductId = 0)
 	BEGIN
@@ -303,13 +285,31 @@ BEGIN
 			,@intARItemId = intARItemId
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
-		ORDER BY intNetworkId
+		AND intNetworkId IS NULL
 
 		IF(@intProductId != 0)
 		BEGIN
 			SET @ysnSiteItemUsed = 1
 			SET @ysnNetworkItemUsed = 0
 		END
+	END
+
+	--FIND IN NETWORK ITEM--
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = @strProductId
+		AND intSiteId IS NULL
+
+		IF(@intProductId != 0)
+		BEGIN
+			SET @ysnSiteItemUsed = 0
+			SET @ysnNetworkItemUsed = 1
+		END
+
 	END
 
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
