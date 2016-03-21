@@ -22,7 +22,10 @@ SELECT	CD.intContractDetailId,
 		ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM,
 		CY.strCurrency	strMainCurrency,
 		CU.ysnSubCurrency,
-		ISNULL(CD.dblQuantity,0) - ISNULL(CD.dblBalance,0)	AS	dblAppliedQty
+		CASE	WHEN	CH.ysnLoad = 1
+					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
+					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
+		END		AS	dblAppliedQty
 
 FROM	tblCTContractDetail			CD	
 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId		LEFT
