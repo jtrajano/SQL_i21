@@ -3556,6 +3556,7 @@
     <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspARSplitInvoice.sql" />
+    <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
