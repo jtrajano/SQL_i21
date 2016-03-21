@@ -37,6 +37,7 @@ DECLARE @tblFinalDetail TABLE (
 	DECLARE @#tempSummary TABLE (
 							intRowNum INT,
 							intConcurrencyId INT,	
+							intContractHeaderId INT,	
 							intContractDetailId INT,	
 							strContractOrInventoryType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 							strContractSeq NVARCHAR(50) COLLATE Latin1_General_CI_AS,

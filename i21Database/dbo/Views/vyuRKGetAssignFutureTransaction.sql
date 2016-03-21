@@ -21,7 +21,8 @@ SELECT
 		,scl.strLocationName,ot.dblPrice
 		,b.strBook
 		,sb.strSubBook
-		,fmh.ysnExpired      		   
+		,fmh.ysnExpired
+		,ot.intFutOptTransactionHeaderId      		   
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 JOIN tblRKFuturesMonth fmh on ot.intFutureMonthId=fmh.intFutureMonthId and ot.intFutureMarketId=fmh.intFutureMarketId

@@ -222,7 +222,7 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 				AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
 				)t) AS OpenSalQty,				
 
-			(SELECT ISNULL(dblTotal,0) dblTotal FROM 
+			(SELECT sum(ISNULL(dblTotal,0)) dblTotal FROM 
 			(SELECT 
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0)) AS dblTotal
 			FROM tblLGDeliveryPickDetail Del
