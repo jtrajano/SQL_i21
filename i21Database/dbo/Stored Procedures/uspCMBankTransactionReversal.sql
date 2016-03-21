@@ -320,7 +320,7 @@ WHERE	F.intBankTransactionTypeId IN (@ACH)
 
 IF @intPrintedTransaction > 0
 BEGIN
-	RAISERROR('Unable to unpost printed/commited transaction.', 11, 1)
+	RAISERROR(70028, 11, 1)
 	GOTO Exit_BankTransactionReversal_WithErrors
 END
 

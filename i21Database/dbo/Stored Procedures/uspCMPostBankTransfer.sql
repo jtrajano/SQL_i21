@@ -116,7 +116,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 IF @intTransactionId IS NULL
 BEGIN 
 	-- Cannot find the transaction.
-	RAISERROR(50004, 11, 1)
+	RAISERROR(70004, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -124,7 +124,7 @@ END
 IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0
 BEGIN 
 	-- Unable to find an open fiscal year period to match the transaction date.
-	RAISERROR(50005, 11, 1)
+	RAISERROR(70005, 11, 1)
 	GOTO Post_Rollback
 END
 
@@ -134,12 +134,14 @@ BEGIN
 	-- Unable to find an open fiscal year period to match the transaction date and the given module.
 	IF @ysnPost = 1
 	BEGIN
-		RAISERROR('You cannot Post transaction under a closed module.', 11, 1)
+		--You cannot %s transaction under a closed module.
+		RAISERROR(70029, 11, 1, 'Post')
 		GOTO Post_Rollback
 	END
 	ELSE
 	BEGIN
-		RAISERROR('You cannot Unpost transaction under a closed module.', 11, 1)
+		--You cannot %s transaction under a closed module.
+		RAISERROR(70029, 11, 1, 'Unpost')
 		GOTO Post_Rollback
 	END
 END
@@ -148,7 +150,7 @@ END
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN 
 	-- The transaction is already posted.
-	RAISERROR(50007, 11, 1)
+	RAISERROR(70007, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -156,7 +158,7 @@ END
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
-	RAISERROR(50008, 11, 1)
+	RAISERROR(70008, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -183,17 +185,17 @@ BEGIN
 		-- 'The transaction is already cleared.'
 		IF @clearedTransactionCount = 2
 		BEGIN
-			RAISERROR(50009, 11, 1)
+			RAISERROR(70009, 11, 1)
 			GOTO Post_Rollback
 		END
 
 		IF @intBankTransactionTypeId = @BANK_TRANSFER_WD
 		BEGIN
-			RAISERROR('Transfer From transaction is already cleared.', 11, 1)
+			RAISERROR(70030, 11, 1, 'From')
 			GOTO Post_Rollback
 		END
 		ELSE
-			RAISERROR('Transfer To transaction is already cleared.', 11, 1)
+			RAISERROR(70030, 11, 1, 'To')
 			GOTO Post_Rollback
 		
 	END
@@ -210,7 +212,7 @@ BEGIN
 	IF @ysnBankAccountIdInactive = 1
 	BEGIN
 		-- 'The bank account is inactive.'
-		RAISERROR(50010, 11, 1)
+		RAISERROR(70010, 11, 1)
 		GOTO Post_Rollback
 	END
 END 
@@ -221,12 +223,12 @@ BEGIN
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
 	BEGIN 
-		RAISERROR(50013, 11, 1, 'Post')
+		RAISERROR(70013, 11, 1, 'Post')
 		GOTO Post_Rollback
 	END 
 	IF @ysnPost = 0
 	BEGIN
-		RAISERROR(50013, 11, 1, 'Unpost')
+		RAISERROR(70013, 11, 1, 'Unpost')
 		GOTO Post_Rollback		
 	END
 END 
@@ -235,7 +237,7 @@ END
 IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
 BEGIN 
 	-- Cannot post a zero-value transaction.
-	RAISERROR(50020, 11, 1)
+	RAISERROR(70020, 11, 1)
 	GOTO Post_Rollback
 END 
 

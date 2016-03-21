@@ -172,7 +172,7 @@ BEGIN
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
 	IF (LTRIM(RTRIM(ISNULL(@loop_CheckNumber, ''))) = '')
 	BEGIN 
-		RAISERROR(50014, 11, 1)
+		RAISERROR(70014, 11, 1)
 		
 		GOTO _ROLLBACK
 	END 
