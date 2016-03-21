@@ -175,6 +175,13 @@ BEGIN
 
 			DELETE FROM @ItemsToPost
 
+			--IF @strBatchId IN ('BATCH-7302', 'BATCH-7309', 'BATCH-7310', 'BATCH-7311')
+			--BEGIN 					
+			--	SELECT 'DEBUG 1', @strBatchId, dblQty, dblLastCost, * FROM tblICLot WHERE intLotId IN (3168, 3171)
+			--	SELECT 'DEBUG 1', @strBatchId, * FROM tblICInventoryTransaction WHERE intLotId IN (3168, 3171)
+			--	SELECT 'DEBUG 1', @strBatchId, * FROM @ItemsToPost
+			--END 
+
 			--IF @strTransactionForm IN ('Consume', 'Produce') 
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
 			BEGIN 
@@ -206,7 +213,11 @@ BEGIN
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
 						,dblCost  = 
 							dbo.fnMultiply(
-								(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
+								CASE WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
+										ELSE 
+											Lot.dblLastCost
+								END 
 								,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 							)
 						,ICTrans.dblSalesPrice  
@@ -220,7 +231,9 @@ BEGIN
 						,ICTrans.intSubLocationId
 						,ICTrans.intStorageLocationId
 						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICItemUOM ItemUOM
+				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICLot Lot
+							ON ICTrans.intLotId = Lot.intLotId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	strBatchId = @strBatchId
@@ -228,6 +241,27 @@ BEGIN
 							strTransactionForm = 'Consume'
 							OR intTransactionTypeId = 8 
 						)
+
+				-- Check if lot is involved in an item change. 
+				-- If it is, then update the consume to the new lot id, item id, and item uom id. 
+				BEGIN 
+					UPDATE	ItemsToConsume
+					SET		ItemsToConsume.intItemId = Lot.intItemId
+							,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
+							,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
+							,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
+							,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
+							,ItemsToConsume.intLotId = Lot.intLotId 
+					FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
+								ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
+					WHERE	EXISTS (
+								SELECT	TOP 1 1
+								FROM	#tmpICInventoryTransaction InvTrans
+								WHERE	InvTrans.intLotId = Lot.intLotId 
+										AND InvTrans.intTransactionTypeId = 15
+							)
+							AND Lot.intLotId IS NOT NULL
+				END 
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -420,14 +454,16 @@ BEGIN
 			END
 			
 			ELSE 
-			BEGIN			
+			BEGIN 
+								
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
-				SET		dblCost =	dbo.fnMultiply(				
-										ISNULL(
-											Lot.dblLastCost
-											, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
-										)
+				SET		dblCost =	dbo.fnMultiply(
+										CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+													(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
+												ELSE
+													ISNULL(Lot.dblLastCost, 0) 
+										END								
 										,ItemUOM.dblUnitQty 
 									)
 				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
@@ -558,6 +594,13 @@ BEGIN
 							ON RebuilInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	strBatchId = @strBatchId
+
+				--IF @strBatchId IN ('BATCH-7302', 'BATCH-7309', 'BATCH-7310', 'BATCH-7311')
+				--BEGIN 					
+				--	SELECT 'DEBUG 2', @strBatchId, dblQty, dblLastCost, * FROM tblICLot WHERE intLotId IN (3168, 3171)
+				--	SELECT 'DEBUG 2', @strBatchId, * FROM tblICInventoryTransaction WHERE intLotId IN (3168, 3171)
+				--	SELECT 'DEBUG 2', @strBatchId, * FROM @ItemsToPost
+				--END 
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
