@@ -199,7 +199,7 @@ BEGIN
 	
 	DECLARE @Ids AS Id
 	INSERT INTO @Ids
-	SELECT intPaymentId FROM #tmpPayables
+	SELECT DISTINCT intPaymentId FROM #tmpPayables
 
 	INSERT INTO @GLEntries
 	--SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)

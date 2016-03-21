@@ -36,44 +36,46 @@ BEGIN
 END
 ELSE IF @post = 1
 BEGIN
-	INSERT INTO tblCMBankTransaction(
-		[strTransactionId],
-		[intBankTransactionTypeId],
-		[intBankAccountId],
-		[intCurrencyId],
-		[dblExchangeRate],
-		[dtmDate],
-		[strPayee],
-		[intPayeeId],
-		[strAddress],
-		[strZipCode],
-		[strCity],
-		[strState],
-		[strCountry],
-		[dblAmount],
-		[strAmountInWords],
-		[strMemo],
-		[strReferenceNo],
-		[ysnCheckToBePrinted],
-		[ysnCheckVoid],
-		[ysnPosted],
-		[strLink],
-		[ysnClr],
-		[dtmDateReconciled],
-		[intEntityId],
-		[intCreatedUserId],
-		[dtmCreated],
-		[intLastModifiedUserId],
-		[dtmLastModified],
-		[intConcurrencyId]
+
+	DECLARE @bankTransaction AS BankTransactionTable;
+	INSERT INTO @bankTransaction(
+		[strTransactionId]         
+		,[intBankTransactionTypeId] 
+		,[intBankAccountId]         
+		,[intCurrencyId]            
+		,[dblExchangeRate]          
+		,[dtmDate]                  
+		,[strPayee]                 
+		,[intPayeeId]               
+		,[strAddress]               
+		,[strZipCode]               
+		,[strCity]                  
+		,[strState]                 
+		,[strCountry]               
+		,[dblAmount]                
+		,[strAmountInWords]         
+		,[strMemo]                  
+		,[strReferenceNo]           
+		,[ysnCheckToBePrinted]      
+		,[ysnCheckVoid]             
+		,[ysnPosted]                
+		,[strLink]                  
+		,[ysnClr]                   
+		,[dtmDateReconciled]        
+		,[intEntityId]			   
+		,[intCreatedUserId]         
+		,[dtmCreated]               
+		,[intLastModifiedUserId]    
+		,[dtmLastModified]          
+		,[intConcurrencyId]         
 	)
 	SELECT
 		[strTransactionId] = A.strPaymentRecordNum,
-		[intBankTransactionTypeID] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'echeck' THEN 20 
+		[intBankTransactionTypeId] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'echeck' THEN 20 
 										WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'ach' THEN 22 
 										ELSE (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment') END,
-		[intBankAccountID] = A.intBankAccountId,
-		[intCurrencyID] = A.intCurrencyId,
+		[intBankAccountId] = A.intBankAccountId,
+		[intCurrencyId] = A.intCurrencyId,
 		[dblExchangeRate] = 0,
 		[dtmDate] = A.dtmDatePaid,
 		[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityVendorId),
@@ -94,7 +96,7 @@ BEGIN
 		[ysnClr] = 0,
 		[dtmDateReconciled] = NULL,
 		[intEntityId] = A.intEntityId,
-		[intCreatedUserID] = @userId,
+		[intCreatedUserId] = @userId,
 		[dtmCreated] = GETDATE(),
 		[intLastModifiedUserID] = NULL,
 		[dtmLastModified] = GETDATE(),
@@ -103,4 +105,6 @@ BEGIN
 		INNER JOIN tblAPVendor B
 			ON A.intEntityVendorId = B.intEntityVendorId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+
+	EXEC uspCMCreateBankTransactionEntries @BankTransactionEntries = @bankTransaction
 END
