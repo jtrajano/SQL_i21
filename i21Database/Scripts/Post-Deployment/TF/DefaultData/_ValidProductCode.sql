@@ -39,27 +39,12 @@ INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComp
 INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1352, 27, NULL, N'E00', N'', 1)
 INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1353, 28, NULL, N'065', N'', 1)
 INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1354, 29, NULL, N'142', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1358, 32, NULL, N'142', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1359, 31, NULL, N'065', N'', 1)
 INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1360, 30, NULL, N'E00', N'', 1)
 INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1361, 37, NULL, N'065', N'', 1)
 INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1362, 38, NULL, N'142', N'', 1)
 INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1363, 39, NULL, N'E00', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1364, 36, NULL, N'E00', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1365, 35, NULL, N'124', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1366, 34, NULL, N'065', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1367, 40, NULL, N'065', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1368, 41, NULL, N'142', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1369, 42, NULL, N'E00', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1370, 43, NULL, N'065', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1371, 44, NULL, N'124', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1372, 45, NULL, N'E00', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1373, 46, NULL, N'065', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1374, 47, NULL, N'124', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1375, 48, NULL, N'E00', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1376, 49, NULL, N'065', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1377, 50, NULL, N'142', N'', 1)
-INSERT [dbo].[tblTFValidProductCode] ([intValidProductCodeId], [intReportingComponentDetailId], [intProductCode], [strProductCode], [strFilter], [intConcurrencyId]) VALUES (1378, 51, NULL, N'E00', N'', 1)
+
+
 SET IDENTITY_INSERT [dbo].[tblTFValidProductCode] OFF
 END
 
