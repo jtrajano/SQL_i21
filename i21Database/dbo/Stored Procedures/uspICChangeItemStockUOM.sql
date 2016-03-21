@@ -249,6 +249,11 @@ BEGIN
 			,dblSalePrice = dbo.fnMultiply(dblSalePrice, @dblNewStockUnit_UnitQty) 
 	FROM	dbo.tblICItemPricing ItemPricing 
 	WHERE	ItemPricing.intItemId = @intItemId
+
+	UPDATE	Lot
+	SET		dblLastCost = dbo.fnMultiply(dblLastCost, @dblNewStockUnit_UnitQty) 			
+	FROM	dbo.tblICLot Lot 
+	WHERE	Lot.intItemId = @intItemId
 END 
 
 -- Update the UOM Qty on all transactions to the new Unit Qty. 
