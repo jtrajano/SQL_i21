@@ -170,7 +170,7 @@ SELECT DISTINCT c.intCommodityId,
 	WHERE ft.intCommodityId = ft.intCommodityId AND intFutOptTransactionId NOT IN (
 			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired))t
 	) DeltaOption,
-	(select (dblTotal) dblTotal from(
+	(select sum(dblTotal) dblTotal from(
 		SELECT 
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0)) AS dblTotal
 		FROM tblLGDeliveryPickDetail Del

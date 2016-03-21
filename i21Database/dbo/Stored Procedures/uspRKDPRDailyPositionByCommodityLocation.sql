@@ -185,7 +185,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired))t
 	) DeltaOption,
 	
-	(select (dblTotal) dblTotal from(
+	(select sum(dblTotal) dblTotal from(
 		SELECT 
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0)) AS dblTotal
 		FROM tblLGDeliveryPickDetail Del
@@ -248,5 +248,3 @@ FROM #temp t
 	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 	WHERE t.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) 
 	ORDER BY strCommodityCode
-
-
