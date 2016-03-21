@@ -227,10 +227,11 @@ BEGIN TRY
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))	
+		--,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))),1) ELSE @SubCurrencyCents END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
 		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
-		,[dtmShipDate]					= @ShipDate
+		,[dtmShipDate]					= ISNULL(@ShipDate, DATEADD(month, 1, ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))) 
 		,[dtmPostDate]					= CASE WHEN @PostDate IS NULL THEN CAST(@InvoiceDate AS DATE) ELSE @PostDate END
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
 		,[dblShipping]					= @ZeroDecimal

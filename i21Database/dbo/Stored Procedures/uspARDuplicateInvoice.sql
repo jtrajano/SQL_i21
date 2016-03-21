@@ -1,451 +1,476 @@
-﻿CREATE PROCEDURE dbo.uspARDuplicateInvoice
+﻿CREATE PROCEDURE [dbo].[uspARDuplicateInvoice]
 	 @InvoiceId			INT
 	,@InvoiceDate		DATETIME		= NULL
 	,@UserId			INT				= NULL
-	,@SplitDetailId		INT				= NULL	
-	,@NewInvoiceNumber	NVARCHAR(25)	= NULL OUTPUT
-	,@NewInvoiceId		INT				= NULL OUTPUT
+	,@NewInvoiceNumber	NVARCHAR(25)	= NULL	OUTPUT
+	,@NewInvoiceId		INT				= NULL	OUTPUT
+	,@RaiseError		BIT				= 0
+	,@ErrorMessage		NVARCHAR(250)	= NULL	OUTPUT	
 AS
 
 BEGIN
 
-	DECLARE @EntityId				INT
-		  , @intSplitEntityId		INT
-		  , @dblSplitPercent		NUMERIC(18,6)
-		  , @ZeroDecimal			NUMERIC(18,6)
-		  , @InvoiceType			NVARCHAR(50)
-		  , @TransactionType		NVARCHAR(50)
-		  , @DistributionHeaderId	INT
-		  , @errorMsg				NVARCHAR(500)
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT ON  
+SET ANSI_WARNINGS OFF
 
-	SET @ZeroDecimal	= 0.000000
-	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), 0)
-	SET @InvoiceDate	= ISNULL(@InvoiceDate, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GETDATE()))))
-
-	IF ISNULL(@SplitDetailId, 0) > 0 
-		BEGIN
-			SELECT @intSplitEntityId = intEntityId
-			      ,@dblSplitPercent = dblSplitPercent/100
-			FROM tblEntitySplitDetail 
-			WHERE intSplitDetailId = @SplitDetailId
-		END
-
-	IF ISNULL(@InvoiceId, 0) = 0
-		BEGIN
-			RAISERROR('Invoice Id is required.', 11, 1)
-			RETURN 0
-		END
-
-	IF ISNULL(@EntityId, 0) = 0
-		BEGIN
-			RAISERROR('Invalid User Id.', 11, 1)
-			RETURN 0
-		END
-	
-	SELECT TOP 1 
-		  @InvoiceType			= strType
-		, @TransactionType		= strTransactionType
-		, @DistributionHeaderId	= ISNULL(intDistributionHeaderId, intLoadDistributionHeaderId)
-	FROM tblARInvoice
-	WHERE intInvoiceId = @InvoiceId
-	
-	--VALIDATE INVOICE TYPES
-	IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @InvoiceType NOT IN ('Standard', 'Credit Memo')  AND ISNULL(@SplitDetailId, 0) = 0
-		BEGIN			
-			SET @errorMsg = 'Unable to duplicate ' + @InvoiceType + ' Invoice Type.'
-
-			RAISERROR(@errorMsg, 11, 1)
-			RETURN 0
-		END
-
-	IF ISNULL(@DistributionHeaderId, 0) > 0 OR @InvoiceType = 'Transport Delivery'
-		BEGIN
-			RAISERROR('Duplicating of Transport Delivery Invoice type is not allowed.', 11, 1)
-			RETURN 0
-		END
-
-	--VALIDATE INVOICES THAT HAS CONTRACTS
-	IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID 
-				INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
-				INNER JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
-				WHERE ID.intInvoiceId = @InvoiceId
-					AND CH.ysnUnlimitedQuantity = 0
-					AND ISNULL(CD.dblBalance, @ZeroDecimal) - ID.dblQtyShipped < @ZeroDecimal)
-		BEGIN
-			RAISERROR('There are items that will exceed the contract quantity.', 11, 1)
-			RETURN 0
-		END
-
-	--VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY
-	IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
-				INNER JOIN tblICInventoryShipmentItem ISHI ON ID.intInventoryShipmentItemId = ISHI.intInventoryShipmentItemId AND ID.intSalesOrderDetailId = ISHI.intLineNo
-				WHERE ID.intInvoiceId = @InvoiceId
-				  AND ((ID.dblQtyShipped + ID.dblQtyShipped) * @dblSplitPercent) > ISNULL(ISHI.dblQuantity, @ZeroDecimal)) AND ISNULL(@SplitDetailId, 0) = 0
-		BEGIN
-			RAISERROR('There are items that will exceed the shipped quantity.', 11, 1)
-			RETURN 0
-		END
-
-	INSERT INTO tblARInvoice(
-		strInvoiceOriginId
-		,intEntityCustomerId
-		,dtmDate
-		,dtmDueDate
-		,intCurrencyId
-		,intCompanyLocationId
-		,intEntitySalespersonId
-		,dtmShipDate
-		,intShipViaId
-		,strPONumber
-		,intTermId
-		,dblInvoiceSubtotal
-		,dblShipping
-		,dblTax
-		,dblInvoiceTotal
-		,dblDiscount
-		,dblAmountDue
-		,dblPayment
-		,strTransactionType
-		,strType
-		,intPaymentMethodId
-		,strComments
-		,intAccountId
-		,intSplitId
-		,dtmPostDate
-		,ysnPosted
-		,ysnPaid
-		,ysnSplitted
-		,intFreightTermId
-		,strDeliverPickup 
-		,intShipToLocationId
-		,strShipToLocationName
-		,strShipToAddress
-		,strShipToCity
-		,strShipToState
-		,strShipToZipCode
-		,strShipToCountry
-		,intBillToLocationId
-		,strBillToLocationName 
-		,strBillToAddress
-		,strBillToCity
-		,strBillToState
-		,strBillToZipCode
-		,strBillToCountry
-		,strBOLNumber
-		,intConcurrencyId
-		,intEntityId)
-	SELECT 
-		 strInvoiceNumber
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN @intSplitEntityId ELSE intEntityCustomerId END
-		,@InvoiceDate
-		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
-		,intCurrencyId
-		,intCompanyLocationId
-		,[intEntitySalespersonId]
-		,@InvoiceDate
-		,intShipViaId
-		,strPONumber
-		,intTermId
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceSubtotal * @dblSplitPercent ELSE dblInvoiceSubtotal END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblShipping * @dblSplitPercent ELSE dblShipping END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblTax * @dblSplitPercent ELSE dblTax END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceTotal * @dblSplitPercent ELSE dblInvoiceTotal END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblDiscount * @dblSplitPercent ELSE dblDiscount END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceTotal * @dblSplitPercent ELSE dblInvoiceTotal END 
-		,0
-		,strTransactionType
-		,strType
-		,intPaymentMethodId
-		,strComments + ' DUP: ' + strInvoiceNumber
-		,intAccountId
-		,intSplitId
-		,@InvoiceDate
-		,0
-		,0
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN 1 ELSE 0 END
-		,intFreightTermId
-		,strDeliverPickup 
-		,intShipToLocationId
-		,strShipToLocationName
-		,strShipToAddress
-		,strShipToCity
-		,strShipToState
-		,strShipToZipCode
-		,strShipToCountry
-		,intBillToLocationId
-		,strBillToLocationName 
-		,strBillToAddress
-		,strBillToCity
-		,strBillToState
-		,strBillToZipCode
-		,strBillToCountry
-		,strBOLNumber
-		,0
-		,@EntityId
-	FROM 
-		tblARInvoice
-	WHERE
-		intInvoiceId = @InvoiceId
-				
-	SET @NewInvoiceId = SCOPE_IDENTITY()
-	
-	DECLARE @InvoiceDetails TABLE(intInvoiceDetailId INT)
+DECLARE @CurrentErrorMessage NVARCHAR(250)
+		,@ZeroDecimal NUMERIC(18, 6)
 		
-	INSERT INTO @InvoiceDetails
-		([intInvoiceDetailId])
-	SELECT 	
-		 [intInvoiceDetailId]
+SET @ZeroDecimal = 0.000000
+
+		
+IF ISNULL(@RaiseError,0) = 0
+	BEGIN TRANSACTION
+	
+
+DECLARE	 @OriginalInvoiceId			INT
+		,@CreatedInvoiceId			INT
+		,@InvoiceNumber				NVARCHAR(25)
+		,@TransactionType			NVARCHAR(25)
+		,@Type						NVARCHAR(100)
+		,@EntityCustomerId			INT
+		,@CompanyLocationId			INT
+		,@CurrencyId				INT
+		,@SubCurrencyCents			INT
+		,@TermId					INT
+		,@Date						DATETIME
+		,@DueDate					DATETIME
+		,@ShipDate					DATETIME
+		,@PostDate					DATETIME
+		,@EntitySalespersonId		INT
+		,@FreightTermId				INT
+		,@ShipViaId					INT
+		,@PaymentMethodId			INT
+		,@InvoiceOriginId			NVARCHAR(8)
+		,@PONumber					NVARCHAR(25)
+		,@BOLNumber					NVARCHAR(50)
+		,@DeliverPickup				NVARCHAR(100)
+		,@Comments					NVARCHAR(MAX)
+		,@FooterComments			NVARCHAR(MAX)
+		,@ShipToLocationId			INT
+		,@BillToLocationId			INT
+		,@Template					BIT
+		,@Forgiven					BIT
+		,@Calculated				BIT
+		,@Splitted					BIT
+		,@PaymentId					INT
+		,@SplitId					INT
+		,@DistributionHeaderId		INT
+		,@LoadDistributionHeaderId	INT
+		,@ActualCostId				NVARCHAR(50)
+		,@ShipmentId				INT
+		,@TransactionId				INT
+		,@EntityId					INT
+		
+SELECT 
+	 @InvoiceNumber					= [strInvoiceNumber]
+	,@TransactionType				= [strTransactionType]
+	,@Type							= [strType]
+	,@EntityCustomerId				= [intEntityCustomerId]
+	,@CompanyLocationId				= [intCompanyLocationId]
+	,@CurrencyId					= [intCurrencyId]
+	--,@SubCurrencyCents				= [intSubCurrencyCents]
+	,@TermId						= [intTermId]
+	,@Date							= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
+	,@DueDate						= NULL	--[dtmDueDate]
+	,@ShipDate						= NULL	--[dtmShipDate]
+	,@PostDate						= NULL	--[dtmPostDate]
+	,@EntitySalespersonId			= [intEntitySalespersonId]
+	,@FreightTermId					= [intFreightTermId]
+	,@ShipViaId						= [intShipViaId]
+	,@PaymentMethodId				= [intPaymentMethodId]
+	,@InvoiceOriginId				= ''	--[strInvoiceOriginId]
+	,@PONumber						= [strPONumber]
+	,@BOLNumber						= [strBOLNumber]
+	,@DeliverPickup					= [strDeliverPickup]
+	,@Comments						= [strComments] + ' DUP: ' + [strInvoiceNumber]
+	,@FooterComments				= [strFooterComments]
+	,@ShipToLocationId				= [intShipToLocationId]
+	,@Template						= 0		--[ysnTemplate]
+	,@Forgiven						= 0		--[ysnForgiven]
+	,@Calculated					= 0		--[ysnCalculated]
+	,@Splitted						= 0		--[ysnSplitted]
+	,@PaymentId						= NULL	--[intPaymentId]
+	,@SplitId						= NULL	--[intSplitId]
+	,@DistributionHeaderId			= NULL	--[intDistributionHeaderId]
+	,@LoadDistributionHeaderId		= NULL	--[intLoadDistributionHeaderId]
+	,@ActualCostId					= NULL	--[strActualCostId]
+	,@ShipmentId					= NULL	--[intShipmentId]
+	,@TransactionId					= NULL	--[intTransactionId]
+	,@OriginalInvoiceId				= NULL	--[intOriginalInvoiceId]
+	,@EntityId						= @UserId
+FROM
+	tblARInvoice
+WHERE
+	[intInvoiceId] = @InvoiceId
+	
+	
+--VALIDATE INVOICE TYPES
+IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standard', 'Credit Memo')
+	BEGIN			
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = 'Unable to duplicate ' + @Type + ' Invoice Type.'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1)
+		RETURN 0;
+	END
+
+IF ISNULL(@DistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
+	BEGIN	
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = 'Duplicating of Transport Delivery Invoice type is not allowed.'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1)
+		RETURN 0;
+	END
+
+--VALIDATE INVOICES THAT HAS CONTRACTS
+IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID 
+			INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
+			INNER JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
+			WHERE ID.intInvoiceId = @InvoiceId
+				AND CH.ysnUnlimitedQuantity = 0
+				AND ISNULL(CD.dblBalance, @ZeroDecimal) - ID.dblQtyShipped < @ZeroDecimal)
+	BEGIN
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = 'There are items that will exceed the contract quantity.'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1)
+		RETURN 0;
+	END
+
+--VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY
+IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
+			INNER JOIN tblICInventoryShipmentItem ISHI ON ID.intInventoryShipmentItemId = ISHI.intInventoryShipmentItemId AND ID.intSalesOrderDetailId = ISHI.intLineNo
+			WHERE ID.intInvoiceId = @InvoiceId
+			  AND ((ID.dblQtyShipped + ID.dblQtyShipped)) > ISNULL(ISHI.dblQuantity, @ZeroDecimal))
+	BEGIN
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = 'There are items that will exceed the shipped quantity.'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1)
+		RETURN 0;
+	END
+
+
+BEGIN TRY
+	EXEC [dbo].[uspARCreateCustomerInvoice]
+		 @EntityCustomerId						= @EntityCustomerId
+		,@CompanyLocationId						= @CompanyLocationId
+		,@CurrencyId							= @CurrencyId
+		--,@SubCurrencyCents						= @SubCurrencyCents
+		,@TermId								= @TermId
+		,@EntityId								= @EntityId
+		,@InvoiceDate							= @Date
+		,@DueDate								= @DueDate
+		,@ShipDate								= @ShipDate
+		,@PostDate								= @PostDate
+		,@TransactionType						= @TransactionType
+		,@Type									= @Type
+		,@NewInvoiceId							= @CreatedInvoiceId		OUTPUT
+		,@ErrorMessage							= @CurrentErrorMessage	OUTPUT
+		,@RaiseError							= @RaiseError
+		,@EntitySalespersonId					= @EntitySalespersonId
+		,@FreightTermId							= @FreightTermId
+		,@ShipViaId								= @ShipViaId
+		,@PaymentMethodId						= @PaymentMethodId
+		,@InvoiceOriginId						= @InvoiceOriginId
+		,@PONumber								= @PONumber
+		,@BOLNumber								= @BOLNumber
+		,@DeliverPickUp							= @DeliverPickup
+		,@Comment								= @Comments
+		,@ShipToLocationId						= @ShipToLocationId
+		,@BillToLocationId						= @BillToLocationId
+		,@Template								= @Template
+		,@Forgiven								= @Forgiven
+		,@Calculated							= @Calculated		
+		,@Splitted								= @Splitted	
+		,@PaymentId								= @PaymentId
+		,@SplitId								= @SplitId
+		,@DistributionHeaderId					= @LoadDistributionHeaderId
+		,@ActualCostId							= @ActualCostId		
+		,@ShipmentId							= @ShipmentId
+		,@TransactionId							= @TransactionId
+		,@OriginalInvoiceId						= @OriginalInvoiceId
+		
+		,@ItemId								= NULL
+		,@ItemIsInventory						= 0
+		,@ItemDocumentNumber					= NULL			
+		,@ItemDescription						= NULL
+		,@ItemUOMId								= NULL
+		,@ItemQtyOrdered						= 0.000000
+		,@ItemQtyShipped						= 0.000000
+		,@ItemDiscount							= 0.000000
+		,@ItemPrice								= 0.000000	
+		,@RefreshPrice							= 0
+		,@ItemMaintenanceType					= NULL
+		,@ItemFrequency							= NULL
+		,@ItemMaintenanceDate					= NULL
+		,@ItemMaintenanceAmount					= 0.000000
+		,@ItemLicenseAmount						= 0.000000
+		,@ItemTaxGroupId						= NULL
+		,@RecomputeTax							= 0
+		,@ItemSCInvoiceId						= NULL
+		,@ItemSCInvoiceNumber					= NULL
+		,@ItemInventoryShipmentItemId			= NULL
+		,@ItemShipmentNumber					= NULL
+		,@ItemSalesOrderDetailId				= NULL												
+		,@ItemSalesOrderNumber					= NULL
+		,@ItemContractHeaderId					= NULL
+		,@ItemContractDetailId					= NULL			
+		,@ItemShipmentPurchaseSalesContractId	= NULL	
+		,@ItemShipmentUOMId						= NULL	
+		,@ItemShipmentQtyShipped				= 0.000000		
+		,@ItemShipmentGrossWt					= 0.000000		
+		,@ItemShipmentTareWt					= 0.000000		
+		,@ItemShipmentNetWt						= 0.000000			
+		,@ItemTicketId							= NULL		
+		,@ItemTicketHoursWorkedId				= NULL		
+		,@ItemOriginalInvoiceDetailId			= NULL		
+		,@ItemSiteId							= NULL												
+		,@ItemBillingBy							= NULL
+		,@ItemPercentFull						= 0.000000
+		,@ItemNewMeterReading					= 0.000000
+		,@ItemPreviousMeterReading				= 0.000000
+		,@ItemConversionFactor					= 0.00000000
+		,@ItemPerformerId						= NULL
+		,@ItemLeaseBilling						= 0
+		,@ItemVirtualMeterReading				= 0
+		--,@SubCurrency							= 0
+
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = @CurrentErrorMessage
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
+
+SET @NewInvoiceId = @CreatedInvoiceId
+
+
+BEGIN TRY
+	INSERT INTO tblARInvoiceDetail
+		([intInvoiceId]
+		,[strDocumentNumber]
+		,[intItemId]
+		,[strItemDescription]
+		,[intItemUOMId]
+		,[dblQtyOrdered]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblItemTermDiscount]
+		,[dblPrice]
+		,[strPricing]
+		,[dblTotalTax]
+		,[dblTotal]
+		--,[ysnSubCurrency]
+		,[intAccountId]
+		,[intCOGSAccountId]
+		,[intSalesAccountId]
+		,[intInventoryAccountId]
+		,[intServiceChargeAccountId]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[intTaxGroupId]
+		,[intSCInvoiceId]
+		,[intSCBudgetId]
+		,[strSCInvoiceNumber]
+		,[strSCBudgetDescription]
+		,[intInventoryShipmentItemId]
+		--,[intInventoryShipmentChargeId]
+		,[strShipmentNumber]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intShipmentId]
+		,[intShipmentPurchaseSalesContractId]
+		,[intShipmentItemUOMId]
+		,[dblShipmentQtyShipped]
+		,[dblShipmentGrossWt]
+		,[dblShipmentTareWt]
+		,[dblShipmentNetWt]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intOriginalInvoiceDetailId]
+		,[intEntitySalespersonId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[intConcurrencyId])
+	SELECT 
+		 [intInvoiceId]					= @CreatedInvoiceId
+		,[strDocumentNumber]			= ''
+		,[intItemId]					= [intItemId]
+		,[strItemDescription]			= CONVERT(NVARCHAR(100), [intInvoiceDetailId])
+		,[intItemUOMId]					= [intItemUOMId]
+		,[dblQtyOrdered]				= @ZeroDecimal
+		,[dblQtyShipped]				= [dblQtyShipped]
+		,[dblDiscount]					= [dblDiscount]
+		,[dblItemTermDiscount]			= [dblItemTermDiscount]
+		,[dblPrice]						= [dblPrice]
+		,[strPricing]					= [strPricing]
+		,[dblTotalTax]					= [dblTotalTax]
+		,[dblTotal]						= [dblTotal]
+		--,[ysnSubCurrency]				= [ysnSubCurrency]
+		,[intAccountId]					= [intAccountId]
+		,[intCOGSAccountId]				= [intCOGSAccountId]
+		,[intSalesAccountId]			= [intSalesAccountId]
+		,[intInventoryAccountId]		= [intInventoryAccountId]
+		,[intServiceChargeAccountId]	= [intServiceChargeAccountId]
+		,[strMaintenanceType]			= [strMaintenanceType]
+		,[strFrequency]					= [strFrequency]
+		,[dtmMaintenanceDate]			= [dtmMaintenanceDate]
+		,[dblMaintenanceAmount]			= [dblMaintenanceAmount]
+		,[dblLicenseAmount]				= [dblLicenseAmount]
+		,[intTaxGroupId]				= [intTaxGroupId]
+		,[intSCInvoiceId]				= NULL
+		,[intSCBudgetId]				= NULL
+		,[strSCInvoiceNumber]			= ''
+		,[strSCBudgetDescription]		= ''
+		,[intInventoryShipmentItemId]	= NULL
+		--,[intInventoryShipmentChargeId]	= NULL
+		,[strShipmentNumber]			= ''
+		,[intSalesOrderDetailId]		= NULL
+		,[strSalesOrderNumber]			= ''
+		,[intContractHeaderId]			= [intContractHeaderId]
+		,[intContractDetailId]			= [intContractDetailId]
+		,[intShipmentId]				= NULL
+		,[intShipmentPurchaseSalesContractId] = NULL
+		,[intShipmentItemUOMId]			= [intShipmentItemUOMId]
+		,[dblShipmentQtyShipped]		= [dblShipmentQtyShipped]
+		,[dblShipmentGrossWt]			= [dblShipmentGrossWt]
+		,[dblShipmentTareWt]			= [dblShipmentTareWt]
+		,[dblShipmentNetWt]				= [dblShipmentNetWt]
+		,[intTicketId]					= NULL
+		,[intTicketHoursWorkedId]		= NULL
+		,[intOriginalInvoiceDetailId]	= NULL
+		,[intEntitySalespersonId]		= [intEntitySalespersonId]
+		,[intSiteId]					= NULL
+		,[strBillingBy]					= ''
+		,[dblPercentFull]				= @ZeroDecimal
+		,[dblNewMeterReading]			= @ZeroDecimal
+		,[dblPreviousMeterReading]		= @ZeroDecimal
+		,[dblConversionFactor]			= @ZeroDecimal
+		,[intPerformerId]				= NULL
+		,[ysnLeaseBilling]				= 0
+		,[ysnVirtualMeterReading]		= 0
+		,[intConcurrencyId]				= 1
 	FROM
 		tblARInvoiceDetail
 	WHERE
 		[intInvoiceId] = @InvoiceId
-	ORDER BY
-		[intInvoiceDetailId]
-						
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceDetails)
-		BEGIN
-			DECLARE @InvoiceDetailId				INT
-					,@NewInvoiceDetailId			INT
-					,@ErrorMessage					NVARCHAR(MAX)
-					,@ItemId						INT
-					,@ItemUOMId						INT
-					,@ItemQtyOrdered				NUMERIC(18,6)
-					,@ItemQtyShipped				NUMERIC(18,6)
-					,@ItemPrice						NUMERIC(18,6)					
-					,@ItemDescription				NVARCHAR(500)
-					,@ItemSiteId					INT
-					,@ItemBillingBy					NVARCHAR(200)
-					,@ItemPercentFull				NUMERIC(18,6)
-					,@ItemNewMeterReading			NUMERIC(18,6)
-					,@ItemPreviousMeterReading		NUMERIC(18,6)
-					,@ItemConversionFactor			NUMERIC(18,8)
-					,@ItemPerformerId				INT
-					,@ItemLeaseBilling				BIT
-					,@ItemContractHeaderId			INT
-					,@ItemContractDetailId			INT
-					,@ItemMaintenanceType			NVARCHAR(50)
-					,@ItemFrequency					NVARCHAR(50)
-					,@ItemMaintenanceDate			DATETIME
-					,@ItemMaintenanceAmount			NUMERIC(18,6)
-					,@ItemLicenseAmount				NUMERIC(18,6)
-					,@ItemTaxGroupId				INT
-					,@ItemDocumentNumber			NVARCHAR(100)
-					,@ItemInventoryShipmentItemId	INT
-					,@ItemShipmentNumber			NVARCHAR(50)
-					,@ItemSalesOrderDetailId		INT
-					,@ItemSalesOrderNumber			NVARCHAR(50)
-					,@ItemShipmentQtyShipped		NUMERIC(18,6)
-					,@EntitySalespersonId			INT
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
-			SELECT TOP 1 @InvoiceDetailId = [intInvoiceDetailId] FROM @InvoiceDetails ORDER BY [intInvoiceDetailId]
-			
-			IF ISNULL(@SplitDetailId, 0) > 0 
-				BEGIN
-					INSERT INTO [tblARInvoiceDetail]
-								([intInvoiceId]
-								,[intItemId]
-								,[strItemDescription]
-								,[intItemUOMId]
-								,[dblQtyOrdered]
-								,[dblQtyShipped]
-								,[dblDiscount]
-								,[dblPrice]
-								,[dblTotalTax]
-								,[dblTotal]
-								,[intAccountId]
-								,[intCOGSAccountId]
-								,[intSalesAccountId]
-								,[intInventoryAccountId]
-								,[intServiceChargeAccountId]
-								,[intInventoryShipmentItemId]
-								,[strShipmentNumber]
-								,[intSalesOrderDetailId]
-								,[strSalesOrderNumber]
-								,[intSiteId]
-								,[strBillingBy]
-								,[dblPercentFull]
-								,[dblNewMeterReading]
-								,[dblPreviousMeterReading]
-								,[dblConversionFactor]
-								,[intPerformerId]
-								,[intContractHeaderId]
-								,[strMaintenanceType]
-								,[strFrequency]
-								,[dtmMaintenanceDate]
-								,[dblMaintenanceAmount]
-								,[dblLicenseAmount]
-								,[intContractDetailId]
-								,[intTicketId]
-								,[ysnLeaseBilling]
-								,[intTaxGroupId] 
-								,[intConcurrencyId])
-							SELECT
-								 @NewInvoiceId
-								,[intItemId] 
-								,[strItemDescription]
-								,[intItemUOMId]
-								,[dblQtyShipped] * @dblSplitPercent
-								,[dblQtyShipped] * @dblSplitPercent
-								,[dblDiscount]	  * @dblSplitPercent
-								,[dblPrice]      * @dblSplitPercent
-								,[dblTotalTax]   * @dblSplitPercent
-								,[dblTotal]      * @dblSplitPercent
-								,[intAccountId] 
-								,[intCOGSAccountId] 
-								,[intSalesAccountId]
-								,[intInventoryAccountId]
-								,[intServiceChargeAccountId]
-								,[intInventoryShipmentItemId]
-								,[strShipmentNumber]
-								,[intSalesOrderDetailId]
-								,[strSalesOrderNumber]
-								,[intSiteId]
-								,[strBillingBy]
-								,[dblPercentFull]
-								,[dblNewMeterReading]
-								,[dblPreviousMeterReading]
-								,[dblConversionFactor]
-								,[intPerformerId]
-								,[intContractHeaderId]
-								,[strMaintenanceType]
-								,[strFrequency]
-								,[dtmMaintenanceDate]
-								,[dblMaintenanceAmount]
-								,[dblLicenseAmount]
-								,[intContractDetailId]
-								,[intTicketId]
-								,[ysnLeaseBilling]
-								,[intTaxGroupId]
-								,1
-							FROM
-								tblARInvoiceDetail
-							WHERE
-								[intInvoiceDetailId] = @InvoiceDetailId
-												
-							SET @NewInvoiceDetailId = SCOPE_IDENTITY()
 
-							INSERT INTO tblARInvoiceDetailTax
-								([intInvoiceDetailId]
-								,[intTaxGroupId]
-								,[intTaxCodeId]
-								,[intTaxClassId]
-								,[strTaxableByOtherTaxes]
-								,[strCalculationMethod]
-								,[dblRate]
-								,[intSalesTaxAccountId]
-								,[dblTax]
-								,[dblAdjustedTax]
-								,[ysnTaxAdjusted]
-								,[ysnSeparateOnInvoice]
-								,[ysnCheckoffTax]
-								,[ysnTaxExempt]
-								,[strNotes] 
-								,[intConcurrencyId])
-							SELECT @NewInvoiceDetailId
-								,[intTaxGroupId]
-								,[intTaxCodeId]
-								,[intTaxClassId]
-								,[strTaxableByOtherTaxes]
-								,[strCalculationMethod]
-								,[dblRate]
-								,[intSalesTaxAccountId]
-								,[dblTax] * @dblSplitPercent
-								,[dblAdjustedTax] * @dblSplitPercent
-								,[ysnTaxAdjusted]
-								,[ysnSeparateOnInvoice]
-								,[ysnCheckoffTax]
-								,[ysnTaxExempt]
-								,[strNotes] 
-								,1
-							FROM tblARInvoiceDetailTax 
-							WHERE intInvoiceDetailId = @InvoiceDetailId
-				END
-			ELSE
-				BEGIN
-					SELECT
-						 @ItemId						= [intItemId]			
-						,@ItemUOMId						= [intItemUOMId]
-						,@ItemQtyOrdered				= [dblQtyOrdered]
-						,@ItemQtyShipped				= [dblQtyShipped]
-						,@ItemDescription				= [strItemDescription]
-						,@ItemPrice						= [dblPrice]						
-						,@ItemSiteId					= [intSiteId]
-						,@ItemBillingBy					= [strBillingBy]
-						,@ItemPercentFull				= [dblPercentFull]
-						,@ItemNewMeterReading			= [dblNewMeterReading]
-						,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
-						,@ItemConversionFactor			= [dblConversionFactor]
-						,@ItemPerformerId				= [intPerformerId]
-						,@ItemLeaseBilling				= [ysnLeaseBilling]
-						,@ItemContractHeaderId			= [intContractHeaderId]
-						,@ItemContractDetailId			= [intContractDetailId]
-						,@ItemMaintenanceType			= [strMaintenanceType]
-						,@ItemFrequency					= [strFrequency]
-						,@ItemMaintenanceDate			= [dtmMaintenanceDate]
-						,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
-						,@ItemLicenseAmount				= [dblLicenseAmount]
-						,@ItemTaxGroupId				= [intTaxGroupId]
-						,@ItemDocumentNumber			= [strDocumentNumber]
-						,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
-						,@ItemShipmentNumber			= [strShipmentNumber]
-						,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
-						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
-						,@ItemShipmentQtyShipped		= [dblShipmentQtyShipped]
-						,@EntitySalespersonId			= [intEntitySalespersonId]
-					FROM
-						tblARInvoiceDetail
-					WHERE
-						[intInvoiceDetailId] = @InvoiceDetailId
+BEGIN TRY
+	INSERT INTO [tblARInvoiceDetailTax]
+		([intInvoiceDetailId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[dblRate]
+		,[intSalesTaxAccountId]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[ysnTaxAdjusted]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[ysnTaxExempt]
+		,[strNotes]
+		,[intConcurrencyId])
+	SELECT 
+		 [intInvoiceDetailId]		= ARID1.[intInvoiceDetailId]
+		,[intTaxGroupId]			= ARIDT.[intTaxGroupId]
+		,[intTaxCodeId]				= ARIDT.[intTaxCodeId]
+		,[intTaxClassId]			= ARIDT.[intTaxClassId]
+		,[strTaxableByOtherTaxes]	= ARIDT.[strTaxableByOtherTaxes]
+		,[strCalculationMethod]		= ARIDT.[strCalculationMethod]
+		,[dblRate]					= ARIDT.[dblRate]
+		,[intSalesTaxAccountId]		= ARIDT.[intSalesTaxAccountId]
+		,[dblTax]					= ARIDT.[dblTax]
+		,[dblAdjustedTax]			= ARIDT.[dblAdjustedTax]
+		,[ysnTaxAdjusted]			= ARIDT.[ysnTaxAdjusted]
+		,[ysnSeparateOnInvoice]		= ARIDT.[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]			= ARIDT.[ysnCheckoffTax]
+		,[ysnTaxExempt]				= ARIDT.[ysnTaxExempt]
+		,[strNotes]					= ARIDT.[strNotes]
+		,[intConcurrencyId]			= 1
+	FROM
+		tblARInvoiceDetailTax ARIDT
+	INNER JOIN
+		tblARInvoiceDetail ARID
+			ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+	INNER JOIN
+		tblARInvoiceDetail ARID1
+			ON ARID.[intInvoiceDetailId] = CAST(ARID1.[strItemDescription] AS INT)
+	WHERE
+		ARID.[intInvoiceId] = @InvoiceId
+		AND ARID1.[intInvoiceId] = @CreatedInvoiceId
+		
+		
+	UPDATE
+		ARID
+	SET
+		ARID.[strItemDescription] = ARID1.[strItemDescription]
+	FROM
+		tblARInvoiceDetail ARID
+	INNER JOIN
+		tblARInvoiceDetail ARID1
+			ON CAST(ARID.[strItemDescription] AS INT) = ARID1.[intInvoiceDetailId]
+	WHERE
+		ARID.[intInvoiceId] = @CreatedInvoiceId
+		AND ARID1.[intInvoiceId] = @InvoiceId
+		
+		
+	EXEC [dbo].[uspARReComputeInvoiceAmounts]
+		@InvoiceId = @CreatedInvoiceId
+				
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
-					BEGIN TRY
-					EXEC [dbo].[uspARAddItemToInvoice]
-						 @InvoiceId						= @NewInvoiceId	
-						,@ItemId						= @ItemId
-						,@NewInvoiceDetailId			= @NewInvoiceDetailId	OUTPUT 
-						,@ErrorMessage					= @ErrorMessage	OUTPUT
-						,@ItemUOMId						= @ItemUOMId
-						,@ItemQtyOrdered				= @ItemQtyOrdered
-						,@ItemQtyShipped				= @ItemQtyShipped
-						,@ItemPrice						= @ItemPrice
-						,@ItemDescription				= @ItemDescription
-						,@ItemSiteId					= @ItemSiteId
-						,@ItemBillingBy					= @ItemBillingBy
-						,@ItemPercentFull				= @ItemPercentFull
-						,@ItemNewMeterReading			= @ItemNewMeterReading
-						,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
-						,@ItemConversionFactor			= @ItemConversionFactor
-						,@ItemPerformerId				= @ItemPerformerId
-						,@ItemLeaseBilling				= @ItemLeaseBilling
-						,@ItemContractHeaderId			= @ItemContractHeaderId
-						,@ItemContractDetailId			= @ItemContractDetailId
-						,@ItemMaintenanceType			= @ItemMaintenanceType
-						,@ItemFrequency					= @ItemFrequency
-						,@ItemMaintenanceDate			= @ItemMaintenanceDate
-						,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
-						,@ItemLicenseAmount				= @ItemLicenseAmount
-						,@ItemTaxGroupId				= @ItemTaxGroupId		
-						IF LEN(ISNULL(@ErrorMessage,'')) > 0
-							BEGIN
-								RAISERROR(@ErrorMessage, 11, 1);
-								RETURN 0;
-							END				
-					END TRY
-					BEGIN CATCH
-						SET @ErrorMessage = ERROR_MESSAGE();
-						RAISERROR(@ErrorMessage, 11, 1);
-						RETURN 0;
-					END CATCH									   	
-           		END
 
-			DELETE FROM @InvoiceDetails WHERE [intInvoiceDetailId] = @InvoiceDetailId
-		END		
+
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION 
 	
-	IF ISNULL(@SplitDetailId, 0) = 0 
-		EXEC dbo.uspARReComputeInvoiceAmounts @NewInvoiceId
-	
-	EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId
-	EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId		
-
-	SET  @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId)
+RETURN 1;
 
 END
