@@ -24,6 +24,7 @@
 			,ts.strFontColor
 			,ts.strIcon
 			,ts.strStatus
+			,strTicketType = tt.strType
 		from
 			tblHDTicket t
 			/*
@@ -35,3 +36,4 @@
 			left outer join tblEntity assEnt on assEnt.intEntityId = t.intAssignedToEntity
 			left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId
 			left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
+			left outer join tblHDTicketType tt on tt.intTicketTypeId = t.intTicketTypeId
