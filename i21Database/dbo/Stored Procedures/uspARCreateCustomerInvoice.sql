@@ -311,7 +311,7 @@ BEGIN TRY
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		tblEntityLocation BL1
-			ON C.intShipToId = BL1.intEntityLocationId
+			ON C.intBillToId = BL1.intEntityLocationId
 	WHERE C.[intEntityCustomerId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()

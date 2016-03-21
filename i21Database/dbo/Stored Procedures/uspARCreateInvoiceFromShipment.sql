@@ -151,7 +151,7 @@ LEFT OUTER JOIN
 		ON S.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN
 	tblEntityLocation BL
-		ON C.intShipToId = BL.intEntityLocationId
+		ON C.[intBillToId] = BL.intEntityLocationId
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON S.strReferenceNumber = SO.strSalesOrderNumber
