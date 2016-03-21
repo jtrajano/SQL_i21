@@ -133,7 +133,7 @@ SELECT
 
 		--Detail
 		,intItemId					= SC.intItemId
-		,intItemLocationId			= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
+		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
 		--,intCostUOMId				= (SELECT intUnitMeasureId FROM tblSCScaleSetup WHERE intTicketPoolId = SC.intTicketPoolId)	   
 		,intContractHeaderId		= CASE 
