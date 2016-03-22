@@ -3557,6 +3557,7 @@
     <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspARSplitInvoice.sql" />
     <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
