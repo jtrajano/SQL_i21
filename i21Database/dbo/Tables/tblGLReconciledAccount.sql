@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblGLReconcileAccount]
+﻿CREATE TABLE [dbo].[tblGLReconciledAccount]
 (
 	[intId] INT NOT NULL PRIMARY KEY, 
     [intConcurrencyId] INT NOT NULL, 
