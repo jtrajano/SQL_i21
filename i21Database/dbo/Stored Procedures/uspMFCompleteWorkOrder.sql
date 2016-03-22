@@ -70,6 +70,7 @@ BEGIN TRY
 		,@dtmBusinessDate datetime
 		,@strInstantConsumption nvarchar(50)
 		,@ysnConsumptionRequired bit
+		,@ysnPostConsumption bit
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -487,6 +488,7 @@ BEGIN TRY
 	If @strInstantConsumption='True' and @intProductionTypeId=2
 	Begin
 		Select @intProductionTypeId=3
+		Select @ysnPostConsumption=1
 	End
 
 	Select @ysnConsumptionRequired=ysnConsumptionRequired from dbo.tblMFWorkOrderRecipeItem Where intRecipeItemTypeId=2 and intItemId=@intItemId and intWorkOrderId=@intWorkOrderId
@@ -511,6 +513,7 @@ BEGIN TRY
 				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@intBatchId = @intBatchId
+				,@ysnPostConsumption=@ysnPostConsumption
 		End
 		Else
 		Begin
@@ -529,6 +532,7 @@ BEGIN TRY
 				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@intBatchId = @intBatchId
+				,@ysnPostConsumption=@ysnPostConsumption
 		End
 
 		EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
@@ -596,7 +600,7 @@ BEGIN TRY
 			,@intInputLotId =@intInputLotId
 			,@intInputStorageLocationId =@intInputLotStorageLocationId 
 	
-		IF @intLotStatusId IS NOT NULL
+		IF @intLotStatusId IS NOT NULL AND NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND intLotStatusId = @intLotStatusId)
 		BEGIN
 			--UPDATE dbo.tblICLot
 			--SET intLotStatusId = @intLotStatusId
