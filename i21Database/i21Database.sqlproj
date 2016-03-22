@@ -3496,7 +3496,6 @@
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutItemMovementReport.sql" />
-    <Build Include="dbo\Functions\fnARGetInvoiceItemsTermTotalDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
@@ -3504,7 +3503,6 @@
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckPayable.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceCompact.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspSMResolveContactRoleMenus.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
