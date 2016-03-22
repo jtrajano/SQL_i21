@@ -45,7 +45,9 @@ BEGIN TRY
 		,@strAllInputItemsMandatoryforConsumption NVARCHAR(50)
 		,@intManufacturingCellId INT 
 		,@intPackagingCategoryId INT
-		,@strPackagingCategory NVARCHAR(50) 
+		,@strPackagingCategory NVARCHAR(50)
+		,@strReqQty NVARCHAR(50)
+		,@strQty NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -726,6 +728,7 @@ BEGIN TRY
 				,@ysnSubstituteItem = ysnSubstituteItem
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 				,@dblSubstituteRatio = dblSubstituteRatio
+				,@intItemUOMId=intItemUOMId
 			FROM @tblLot
 			WHERE intLotRecordKey = @intLotRecordKey
 
@@ -742,15 +745,34 @@ BEGIN TRY
 			BEGIN
 				IF @ysnExcessConsumptionAllowed = 0
 				BEGIN
+
+					SELECT @strQty=SUM(dblQty) FROM @tblLot
+					SELECT @strReqQty=@dblReqQty
+
 					SELECT @strItemNo = strItemNo
 					FROM dbo.tblICItem
 					WHERE intItemId = @intItemId
+
+					Declare @intUnitMeasureId int
+							,@strUnitMeasure nvarchar(50)
+
+					SELECT @intUnitMeasureId =intUnitMeasureId 
+					FROM dbo.tblICItemUOM
+					WHERE intItemUOMId=@intItemUOMId
+
+					SELECT @strUnitMeasure =' '+strUnitMeasure
+					FROM dbo.tblICUnitMeasure 
+					WHERE intUnitMeasureId=@intUnitMeasureId
 
 					RAISERROR (
 							51096
 							,11
 							,1
 							,@strItemNo
+							,@strQty
+							,@strUnitMeasure
+							,@strReqQty
+							,@strUnitMeasure
 							)
 				END
 				ELSE
