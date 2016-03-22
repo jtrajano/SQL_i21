@@ -14,9 +14,13 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal		DECIMAL(18,6)
 	  , @ARAccountId		INT
 	  , @EntityId			INT
-	  , @intFreightItemId	INT
-	  , @intLocationId		INT
-	  , @intItemUOMId		INT
+	  , @intFreightItemId		INT
+	  , @intSurchargeItemId		INT
+	  , @ysnItemizeSurcharge	BIT
+	  , @intLocationId			INT
+	  , @intFreightItemUOMId	INT
+	  , @intSurchargeItemUOMId	INT
+	  ,	@intItemUOMId			INT
 
 SET @ZeroDecimal = 0.000000
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
@@ -418,7 +422,12 @@ FROM
 	 		ON IE.[intItemId] = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
 				
-SELECT @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
+--VALIDATE FREIGHT AND SURCHARGE ITEM				
+SELECT TOP 1
+	   @intFreightItemId	= intItemForFreightId
+     , @intSurchargeItemId	= intSurchargeItemId
+	 , @ysnItemizeSurcharge = ysnItemizeSurcharge
+FROM tblTRCompanyPreference
 
 IF ISNULL(@intFreightItemId, 0) > 0
 	BEGIN
