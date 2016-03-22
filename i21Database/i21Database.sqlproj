@@ -3525,6 +3525,7 @@
     <Build Include="dbo\Views\vyuQMSampleTypeControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
     <Build Include="dbo\Views\vyuEME2C2Role.sql" />
+    <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

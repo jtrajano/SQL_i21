@@ -113,6 +113,9 @@ BEGIN TRY
 		END
 
 	END
+
+	-- Update group if role is for contact admin.
+	EXEC uspSMResolveContactRoleMenus @UserRoleID
 	
 	---- Iterate through all affected user securities and apply Master Menus
 	--WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)

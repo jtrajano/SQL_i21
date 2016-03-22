@@ -482,3 +482,26 @@ GO
 		VALUES('System Manager', 'Migrate All Entity Roles - tblEntityToContact', 'Migrate All Entity Roles - tblEntityToContact', GETDATE())
 	END	
 GO
+	-- UPDATE ALL CONTACTS BASED ON THEIR CONTACT ADMINISTRATOR
+	DECLARE @currentRow INT
+	DECLARE @totalRows INT
+
+	SET @currentRow = 1
+	SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserRole] WHERE [strRoleType] = 'Contact Admin'
+
+	WHILE (@currentRow <= @totalRows)
+	BEGIN
+
+	Declare @roleId INT
+	SELECT @roleId = intUserRoleID FROM (  
+		SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
+		FROM [dbo].[tblSMUserRole] WHERE [strRoleType] = 'Contact Admin'
+	) a
+	WHERE ROWID = @currentRow
+
+	PRINT N'Executing uspSMResolveContactRoleMenus'
+	Exec uspSMResolveContactRoleMenus @roleId
+
+	SET @currentRow = @currentRow + 1
+	END
+GO

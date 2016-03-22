@@ -1230,6 +1230,7 @@ ELSE
 /* Start of Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Paid Bills History' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Open Payable Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'AP Transaction By GLAccount' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 /* End of Delete */
 
 /* RENAME COMMAND - ACCOUNTS PAYABLE */
@@ -4076,7 +4077,9 @@ SELECT  @CustomerMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Cu
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CustomerMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CustomerMenuId)
+		INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CustomerMenuId, 1)
+	ELSE
+		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @CustomerMenuId
 END
 
 /* Purchasing */
@@ -4094,7 +4097,9 @@ SELECT  @VendorMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Ven
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @VendorMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@VendorMenuId)
+		INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@VendorMenuId, 1)
+	ELSE
+		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @VendorMenuId
 END
 
 DECLARE @VouchersMenuId INT
@@ -4116,7 +4121,9 @@ SELECT  @VendorContactListMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuN
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @VendorContactListMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@VendorContactListMenuId)
+		INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@VendorContactListMenuId, 1)
+	ELSE
+		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @VendorContactListMenuId
 END
 
 /* Scale */
@@ -4140,7 +4147,9 @@ SELECT  @StorageSettleMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @StorageSettleMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@StorageSettleMenuId)
+		INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@StorageSettleMenuId, 1)
+	ELSE
+		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @StorageSettleMenuId
 END
 
 /* Logistic */
