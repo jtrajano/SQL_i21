@@ -514,6 +514,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
+                                                        ormat: '0.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             validateOnChange: false,
