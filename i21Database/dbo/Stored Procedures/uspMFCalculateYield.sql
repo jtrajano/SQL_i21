@@ -423,9 +423,10 @@ BEGIN TRY
 
 			IF EXISTS(SELECT *FROM tblICLot Where intLotId=@intLotId and dblQty=0)
 			BEGIN
-				UPDATE dbo.tblICLot
-				SET intLotStatusId = 3
-				WHERE intLotId = @intLotId
+				--UPDATE dbo.tblICLot
+				--SET intLotStatusId = 3
+				--WHERE intLotId = @intLotId
+				EXEC uspMFSetLotStatus @intLotId,3,@intUserId
 			END
 		END
 
