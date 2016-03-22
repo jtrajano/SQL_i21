@@ -105,7 +105,7 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 							intFromCommodityUnitMeasureId,intCommodityId,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot)		
 	SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge',strLocationName, strFutureMonth,HedgedQty,intUnitMeasureId,@intCommodityId,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot
 	FROM (
-		SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,(ISNULL(intNoOfContract, 0) - isnull(dblMatchQty, 0)) * m.dblContractSize AS HedgedQty,
+		SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,(ISNULL(intNoOfContract, 0) -  isnull((SELECT sum(dblMatchQty) FROM tblRKMatchFuturesPSDetail s WHERE s.intSFutOptTransactionId = f.intFutOptTransactionId), 0)) * m.dblContractSize AS HedgedQty,
 		l.strLocationName,left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth,m.intUnitMeasureId,
 		e.strName + '-' + ba.strAccountNumber strAccountNumber,strBuySell as strTranType,f.intBrokerageAccountId,
 		case when f.intInstrumentTypeId = 1 then 'Futures' else 'Options ' end as strInstrumentType,
@@ -120,14 +120,14 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 		INNER JOIN tblSMCompanyLocation l on f.intLocationId=l.intCompanyLocationId
 		INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
 		INNER JOIN tblEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
-		LEFT JOIN tblRKMatchFuturesPSDetail psd ON f.intFutOptTransactionId = psd.intLFutOptTransactionId
+		--LEFT JOIN tblRKMatchFuturesPSDetail psd ON f.intFutOptTransactionId = psd.intLFutOptTransactionId
 		WHERE f.strBuySell = 'Buy'
 			AND ic.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 			AND f.intLocationId= case when isnull(@intLocationId,0)=0 then f.intLocationId else @intLocationId end	
 		
-		UNION ALL
+		UNION 
 		
-		SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,-(ISNULL(intNoOfContract, 0) - isnull(dblMatchQty, 0)) * m.dblContractSize AS HedgedQty,
+		SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,-(ISNULL(intNoOfContract, 0) -  isnull((SELECT sum(dblMatchQty) FROM tblRKMatchFuturesPSDetail s WHERE s.intSFutOptTransactionId = f.intFutOptTransactionId), 0)) * m.dblContractSize AS HedgedQty,
 		l.strLocationName,left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth,m.intUnitMeasureId,
 		e.strName + '-' + ba.strAccountNumber strAccountNumber,strBuySell as strTranType,f.intBrokerageAccountId,
 		case when f.intInstrumentTypeId = 1 then 'Futures' else 'Options ' end as strInstrumentType,
@@ -142,7 +142,7 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 		INNER JOIN tblSMCompanyLocation l on f.intLocationId=l.intCompanyLocationId
 		INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
 		INNER JOIN tblEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
-		LEFT JOIN tblRKMatchFuturesPSDetail psd ON f.intFutOptTransactionId = psd.intLFutOptTransactionId
+		--LEFT JOIN tblRKMatchFuturesPSDetail psd ON f.intFutOptTransactionId = psd.intLFutOptTransactionId
 		WHERE f.strBuySell = 'Sell'
 			AND ic.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 			AND f.intLocationId= case when isnull(@intLocationId,0)=0 then f.intLocationId else @intLocationId end
@@ -742,5 +742,5 @@ UPDATE @Final set intSeqNo = 14 where strType='Avail for Spot Sale'
 
 SELECT intSeqNo,intRow, strCommodityCode ,intContractHeaderId,strContractNumber,strInternalTradeNo,intFutOptTransactionHeaderId, strType,strContractEndMonth,dblTotal,strUnitMeasure 
 			,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType 			
-FROM @Final
+FROM @Final where dblTotal <> 0 
  ORDER BY intSeqNo ASC
