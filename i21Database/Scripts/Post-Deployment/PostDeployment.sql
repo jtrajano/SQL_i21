@@ -13,6 +13,9 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
+-- Card Fueling
+:r .\CF\1_ImportMapping.sql
+
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
@@ -330,5 +333,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Common
 :r .\Common\ErrorMessages.sql 
+
 
 print 'END POST DEPLOYMENT'
