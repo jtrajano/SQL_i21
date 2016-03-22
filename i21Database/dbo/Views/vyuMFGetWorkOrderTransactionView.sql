@@ -190,7 +190,7 @@ WHERE WI.ysnConsumptionReversed = 1
 UNION
 SELECT W.intWorkOrderId,
 	W.strWorkOrderNo
-	,W.dtmOrderDate
+	,ISNULL(W.dtmOrderDate,W.dtmCreated) AS dtmOrderDate
 	,I.intItemId as intTargetItemId
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
@@ -220,8 +220,8 @@ SELECT W.intWorkOrderId,
 	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [strFromTo]
-	,M.intMachineId
-	,M.strName AS strMachineName
+	,ISNULL(M.intMachineId,0) AS intMachineId
+	,ISNULL(M.strName,'') AS strMachineName
 	,WP.strReferenceNo
 	,WP.dtmLastModified
 	,C.intContainerId
@@ -254,8 +254,8 @@ SELECT W.intWorkOrderId,
 		,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias
-	,S.intShiftId 
-	,S.strShiftName 
+	,ISNULL(S.intShiftId,0) AS  intShiftId
+	,ISNULL(S.strShiftName,'') AS strShiftName
 	,WP.dtmProductionDate 
 	,3 as intSequenceNo
 FROM dbo.tblMFWorkOrder W
@@ -274,7 +274,7 @@ JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WP.intShiftId
 LEFT JOIN dbo.tblMFShift PS ON PS.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocationId
-JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
+LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
@@ -284,7 +284,7 @@ WHERE WP.ysnProductionReversed = 0
 UNION
 SELECT W.intWorkOrderId,
 	W.strWorkOrderNo
-	,W.dtmOrderDate
+	,ISNULL(W.dtmOrderDate,W.dtmCreated) AS dtmOrderDate
 	,I.intItemId as intTargetItemId
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
@@ -314,8 +314,8 @@ SELECT W.intWorkOrderId,
 	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [FROM/To]
-	,M.intMachineId
-	,M.strName AS strMachineName
+	,ISNULL(M.intMachineId,0) AS intMachineId
+	,ISNULL(M.strName,'') AS strMachineName
 	,WP.strReferenceNo
 	,WP.dtmLastModified
 	,C.intContainerId
@@ -348,8 +348,8 @@ SELECT W.intWorkOrderId,
 	,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias
-	,S.intShiftId 
-	,S.strShiftName 
+	,ISNULL(S.intShiftId,0) AS  intShiftId
+	,ISNULL(S.strShiftName,'') AS strShiftName 
 	,WP.dtmProductionDate 
 	,4 as intSequenceNo
 FROM dbo.tblMFWorkOrder W
@@ -368,7 +368,7 @@ JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WP.intShiftId
 LEFT JOIN dbo.tblMFShift PS ON PS.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocationId
-JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
+LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
