@@ -2,7 +2,6 @@
 (
 	-- Add the parameters for the function here
 	 @dtmDateFrom NVARCHAR(50),
-	 @dtmDateTo NVARCHAR(50),
 	 @strCteName NVARCHAR(20),
 	 @Where NVARCHAR(MAX)
 	 

@@ -231,7 +231,7 @@ WHERE ISNULL(A.ysnIsUnposted ,0) = 0
 DELETE FROM @filterTable WHERE fieldname = 'dtmDate'
 DECLARE @Where1 NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filterTable)
 
-DECLARE @sqlRetain NVARCHAR(MAX) = dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,@dtmDateTo,'cteRetain2',@Where1)
+DECLARE @sqlRetain NVARCHAR(MAX) = dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,'cteRetain2',@Where1)
 
 IF @sqlRetain <> 'Retained Earnings Activity Not Displayed'
 	SELECT @sqlCte += @sqlRetain
