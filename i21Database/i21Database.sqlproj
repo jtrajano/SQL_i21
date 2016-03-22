@@ -3503,7 +3503,6 @@
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
-    <Build Include="dbo\Views\vyuCTContractChart.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckPayable.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
