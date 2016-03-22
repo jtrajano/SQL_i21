@@ -40,191 +40,191 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\Autofac.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\Autofac.dll</HintPath>
     </Reference>
     <Reference Include="Autofac.Integration.Mvc">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\Autofac.Integration.Mvc.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\Autofac.Integration.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="Autofac.Integration.WebApi">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\Autofac.Integration.WebApi.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\Autofac.Integration.WebApi.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.Charts.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Charts.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Charts.v15.1.Core.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.Dashboard.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Dashboard.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Dashboard.v15.1.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Dashboard.v15.1.Web, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Dashboard.v15.1.Web.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Dashboard.v15.1.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Dashboard.v15.1.Web.Mvc, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Dashboard.v15.1.Web.Mvc.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Dashboard.v15.1.Web.Mvc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Data.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Data.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Data.v15.1.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.DataAccess.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.DataAccess.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.DataAccess.v15.1.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.Office.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Office.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Office.v15.1.Core.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.PivotGrid.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.PivotGrid.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.PivotGrid.v15.1.Core.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.Printing.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Printing.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Printing.v15.1.Core.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.RichEdit.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.RichEdit.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.RichEdit.v15.1.Core.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.Sparkline.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Sparkline.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Sparkline.v15.1.Core.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.SpellChecker.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.SpellChecker.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.SpellChecker.v15.1.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Spreadsheet.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Spreadsheet.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Spreadsheet.v15.1.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Utils.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Utils.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Utils.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxGauges.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxGauges.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxGauges.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxHtmlEditor.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxHtmlEditor.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxHtmlEditor.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxPivotGrid.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxPivotGrid.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxPivotGrid.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxRichEdit.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxRichEdit.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxRichEdit.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxScheduler.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxScheduler.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxScheduler.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxSpellChecker.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxSpellChecker.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxSpellChecker.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxSpreadsheet.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxSpreadsheet.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxSpreadsheet.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxThemes.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxThemes.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxThemes.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.ASPxTreeList.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.ASPxTreeList.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.ASPxTreeList.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.Mvc.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.Mvc.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.Mvc.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Web.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Web.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Web.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Xpo.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.Xpo.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.Xpo.v15.1.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.XtraCharts.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraCharts.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraCharts.v15.1.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.XtraCharts.v15.1.Web, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraCharts.v15.1.Web.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraCharts.v15.1.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.XtraGauges.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraGauges.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraGauges.v15.1.Core.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.XtraGauges.v15.1.Presets, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraGauges.v15.1.Presets.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraGauges.v15.1.Presets.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.XtraPivotGrid.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraPivotGrid.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraPivotGrid.v15.1.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.XtraReports.v15.1, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraReports.v15.1.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraReports.v15.1.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.XtraReports.v15.1.Web, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraReports.v15.1.Web.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraReports.v15.1.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.XtraScheduler.v15.1.Core, Version=15.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\DevExpress.XtraScheduler.v15.1.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\DevExpress.XtraScheduler.v15.1.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="FluentValidation">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\FluentValidation.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\FluentValidation.dll</HintPath>
     </Reference>
     <Reference Include="FluentValidation.Mvc">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\FluentValidation.Mvc.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\FluentValidation.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Core">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\IdeaBlade.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\IdeaBlade.Core.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Linq">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\IdeaBlade.Linq.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\IdeaBlade.Linq.dll</HintPath>
     </Reference>
     <Reference Include="iRely.Common">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\iRely.Common.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\iRely.Common.dll</HintPath>
     </Reference>
     <Reference Include="iRely.Reports.Helper">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\iRely.Reports.Helper.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\iRely.Reports.Helper.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp">
       <Private>True</Private>
@@ -273,20 +273,20 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\EntityFramework.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.4.0.20710.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest">
@@ -294,49 +294,49 @@
     </Reference>
     <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.Helpers.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.4.0.20710.0\lib\net40\System.Web.Http.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.4.0.20710.0\lib\net40\System.Web.Http.WebHost.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.Http.WebHost.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\System.Web.Mvc.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Optimization">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\System.Web.Optimization.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.Optimization.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Providers">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\System.Web.Providers.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.Providers.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.AspNet.Razor.2.0.20710.0\lib\net40\System.Web.Razor.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.WebPages.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.WebPages.Deployment.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\WebGrease.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\WebGrease.dll</HintPath>
     </Reference>
     <Reference Include="Antlr3.Runtime">
       <Private>True</Private>
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\Antlr3.Runtime.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\Antlr3.Runtime.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -405,15 +405,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reports\BillOfLading.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Reports\BillOfLading.cs" />
     <Compile Include="Reports\BillOfLading.Designer.cs">
       <DependentUpon>BillOfLading.cs</DependentUpon>
     </Compile>
-    <Compile Include="Reports\WorkingInstruction.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Reports\WorkingInstruction.cs" />
     <Compile Include="Reports\WorkingInstruction.Designer.cs">
       <DependentUpon>WorkingInstruction.cs</DependentUpon>
     </Compile>

@@ -34,31 +34,31 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\EntityFramework.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="FluentValidation">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\FluentValidation.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\FluentValidation.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Core">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\IdeaBlade.Core.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\IdeaBlade.Core.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Linq">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\IdeaBlade.Linq.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\IdeaBlade.Linq.dll</HintPath>
     </Reference>
     <Reference Include="iRely.Common">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\iRely.Common.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\iRely.Common.dll</HintPath>
     </Reference>
     <Reference Include="iRely.GlobalComponentEngine.BusinessLayer">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\iRely.GlobalComponentEngine.BusinessLayer.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\iRely.GlobalComponentEngine.BusinessLayer.dll</HintPath>
     </Reference>
     <Reference Include="iRely.GlobalComponentEngine.Model">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\iRely.GlobalComponentEngine.Model.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\iRely.GlobalComponentEngine.Model.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
