@@ -5,6 +5,7 @@ AS
 			intContractDetailId,
 			strSampleNumber,
 			strSampleTypeName,
-			dblSampleQty,
+			dbo.fnCTConvertQuantityToTargetItemUOM(QS.intItemId,QS.intSampleUOMId,LP.intWeightUOMId,dblSampleQty) dblSampleQty,
 			strStatus
-	FROM	vyuQMSampleList
+	FROM	vyuQMSampleList			QS	CROSS	
+	APPLY	tblLGCompanyPreference	LP 	
