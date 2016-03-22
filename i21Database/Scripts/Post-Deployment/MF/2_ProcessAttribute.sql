@@ -1440,3 +1440,23 @@ BEGIN
 		,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 69
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 69
+		,'Display actual consumption in WM'
+		,5
+		,5
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
