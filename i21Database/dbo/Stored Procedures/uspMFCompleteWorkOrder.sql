@@ -69,6 +69,7 @@ BEGIN TRY
 		,@intCategoryId int
 		,@dtmBusinessDate datetime
 		,@strInstantConsumption nvarchar(50)
+		,@ysnConsumptionRequired bit
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -488,7 +489,9 @@ BEGIN TRY
 		Select @intProductionTypeId=3
 	End
 
-	IF @intProductionTypeId in (1,3) 
+	Select @ysnConsumptionRequired=ysnConsumptionRequired from dbo.tblMFWorkOrderRecipeItem Where intRecipeItemTypeId=2 and intItemId=@intItemId and intWorkOrderId=@intWorkOrderId
+	
+	IF @intProductionTypeId in (1,3) AND @ysnConsumptionRequired=1
 	BEGIN
 
 		If exists(Select *from tblMFWorkOrder Where intWorkOrderId = @intWorkOrderId and intItemUOMId=@intProduceUnitMeasureId)
