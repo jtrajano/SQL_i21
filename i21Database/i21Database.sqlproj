@@ -3494,7 +3494,6 @@
     <Build Include="dbo\Views\vyuAPBillPaymentActual.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
-    <Build Include="dbo\Views\vyuEME2C2Role.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
     <Build Include="dbo\Functions\fnDivide.sql" />
     <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
@@ -3525,6 +3524,7 @@
     <Build Include="dbo\Tables\tblMFUserPrinterMap.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
+    <Build Include="dbo\Views\vyuEME2C2Role.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
