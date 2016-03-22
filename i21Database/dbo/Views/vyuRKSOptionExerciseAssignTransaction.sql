@@ -1,4 +1,4 @@
-﻿CREATE View vyuRKSOptionExerciseAssignTransaction
+﻿CREATE VIEW vyuRKSOptionExerciseAssignTransaction
 AS
 SELECT m.intOptionsPnSExercisedAssignedId,
 	   strTranNo,
@@ -19,6 +19,7 @@ SELECT m.intOptionsPnSExercisedAssignedId,
 	   scl.strLocationName,
 	   cb.strBook,
 	   csb.strSubBook
+	   ,t.intFutOptTransactionHeaderId
 FROM tblRKOptionsPnSExercisedAssigned m
 Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
 Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId

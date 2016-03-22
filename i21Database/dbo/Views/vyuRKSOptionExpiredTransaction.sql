@@ -18,7 +18,7 @@ SELECT m.intOptionsPnSExpiredId,
 	   strCommodityCode,
 	   scl.strLocationName,
 	   cb.strBook,
-	   csb.strSubBook
+	   csb.strSubBook,t.intFutOptTransactionHeaderId
 FROM tblRKOptionsPnSExpired m
 Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
 Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
