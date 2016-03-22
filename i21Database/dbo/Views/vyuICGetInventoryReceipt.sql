@@ -54,7 +54,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.intEntityId
 	, strEntityName = Entity.strName
 	, Receipt.strActualCostId
-	, WeightLoss.dblClaimableWt
+	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation Transferor ON Transferor.intCompanyLocationId = Receipt.intTransferorId
@@ -66,4 +66,4 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuEMEntity Entity ON Entity.intEntityId = Receipt.intEntityId AND Entity.strType = 'User'
 	LEFT JOIN tblEntityLocation ShipFrom ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
-	LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	--LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId
