@@ -4326,6 +4326,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnInsertLot": {
                 click: this.onInsertChargeClick
             },
+            "#btnReplicateBalanceLots": {
+                click: this.onReplicateBalanceLotsClick
+            },
             "#btnPrintLabel": {
                 click: this.onPrintLabelClick
             },
