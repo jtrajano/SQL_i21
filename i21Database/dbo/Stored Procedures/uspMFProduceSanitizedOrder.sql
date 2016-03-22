@@ -218,9 +218,12 @@ BEGIN TRY
 			FROM tblICLotStatus
 			WHERE strSecondaryStatus = @strDefaultStatusForSanitizedLot
 
-			UPDATE tblICLot
-			SET intLotStatusId = @intLotStatusId
-			WHERE intLotId = @intOutputLotId
+			--UPDATE tblICLot
+			--SET intLotStatusId = @intLotStatusId
+			--WHERE intLotId = @intOutputLotId
+			
+			EXEC uspMFSetLotStatus intOutputLotId,@intLotStatusId,@intUserId
+
 		END
 	END
 	ELSE
