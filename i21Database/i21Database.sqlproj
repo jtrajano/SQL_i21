@@ -3524,7 +3524,6 @@
     <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponentConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFields.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transactions.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
