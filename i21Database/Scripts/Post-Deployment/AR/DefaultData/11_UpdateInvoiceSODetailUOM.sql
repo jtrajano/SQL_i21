@@ -17,6 +17,24 @@ GO
 print('/*******************  END Update tblARInvoiceDetail.intItemUOMId  *******************/')
 
 
+print('/*******************  BEGIN Update tblARInvoiceDetail.intOrderUOMId  *******************/')
+GO
+
+UPDATE
+	tblARInvoiceDetail
+SET
+	intOrderUOMId = CASE WHEN ISNULL(intContractDetailId,0) <> 0
+						THEN (SELECT TOP 1 intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = tblARInvoiceDetail.intContractDetailId)
+						ELSE (SELECT TOP 1 intItemUOMId FROM tblSOSalesOrderDetail WHERE intSalesOrderDetailId = tblARInvoiceDetail.intSalesOrderDetailId)
+					END							
+WHERE
+	ISNULL(intOrderUOMId,0) = 0
+	AND (ISNULL(intSalesOrderDetailId,0) <> 0 OR ISNULL(intContractDetailId,0) <> 0)
+	
+GO
+print('/*******************  END Update tblARInvoiceDetail.intOrderUOMId  *******************/')
+
+
 
 print('/*******************  BEGIN Update tblSOSalesOrderDetail.intItemUOMId  *******************/')
 GO

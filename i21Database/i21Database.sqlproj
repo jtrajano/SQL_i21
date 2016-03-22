@@ -3212,9 +3212,11 @@
     <Build Include="dbo\Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspWHLotMerge.sql" />
+    <Build Include="dbo\Views\vyuAROrderUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentItemChange.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

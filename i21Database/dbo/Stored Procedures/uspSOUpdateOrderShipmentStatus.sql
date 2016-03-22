@@ -81,9 +81,9 @@ FROM
 			 ISD.[intOrderId]
 			,ISD.[intLineNo]
 			,SUM(ISNULL((CASE WHEN @ForDelete = 0 THEN
-								CASE WHEN ISH.ysnPosted = 1 THEN ISD.dblQuantity ELSE SOD.[dblQtyShipped] END
+								CASE WHEN ISH.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ISD.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ISD.[dblQuantity],0)) ELSE SOD.[dblQtyShipped] END
 							ELSE 
-								CASE WHEN ISH.ysnPosted = 1 THEN ISD.dblQuantity ELSE SOD.[dblQtyShipped] END * -1 
+								CASE WHEN ISH.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ISD.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ISD.[dblQuantity],0)) ELSE SOD.[dblQtyShipped] END * -1 
 						  END
 			 ), 0.00)) [dblQuantity]
 		FROM
@@ -112,9 +112,9 @@ FROM
 		SELECT
 			 ID.[intSalesOrderDetailId]
 			,SUM(ISNULL((CASE WHEN @ForDelete = 0 THEN 
-								CASE WHEN I.ysnPosted = 1 THEN ID.[dblQtyShipped] ELSE SOD.[dblQtyShipped] END
+								CASE WHEN I.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ID.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ID.[dblQtyShipped],0)) ELSE SOD.[dblQtyShipped] END
 							  ELSE 
-								CASE WHEN I.ysnPosted = 1 THEN ID.[dblQtyShipped] ELSE SOD.[dblQtyShipped] END * -1 
+								CASE WHEN I.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ID.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ID.[dblQtyShipped],0)) ELSE SOD.[dblQtyShipped] END * -1 
 						  END
 			), 0.00)) [dblQuantity]
 		FROM
@@ -126,7 +126,7 @@ FROM
 			tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 		WHERE
 			ISNULL(ID.[intSalesOrderDetailId], 0) <> 0
-			AND ID.intSalesOrderDetailId NOT IN (SELECT intLineNo FROM tblICInventoryShipmentItem)
+			AND ID.intSalesOrderDetailId NOT IN (SELECT intLineNo FROM tblICInventoryShipmentItem WHERE ISNULL(intLineNo, 0) > 0)
 		GROUP BY
 			ID.[intSalesOrderDetailId]
 	) SHP

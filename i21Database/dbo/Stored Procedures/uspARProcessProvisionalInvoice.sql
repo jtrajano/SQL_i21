@@ -132,8 +132,9 @@ BEGIN TRY
 		,[ysnInventory]
 		,[strDocumentNumber]
 		,[strItemDescription]
-		,[intItemUOMId]
+		,[intOrderUOMId]
 		,[dblQtyOrdered]
+		,[intItemUOMId]
 		,[dblQtyShipped]
 		,[dblDiscount]
 		,[dblPrice]
@@ -215,8 +216,9 @@ BEGIN TRY
 		,[ysnInventory]						= 1
 		,[strDocumentNumber]				= @InvoiceNumber
 		,[strItemDescription]				= ARSID.[strItemDescription] 
-		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
+		,[intOrderUOMId]					= ARSID.[intShipmentItemUOMId]
 		,[dblQtyOrdered]					= ARSID.[dblNetWt] 
+		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
 		,[dblQtyShipped]					= ARSID.[dblNetWt]
 		,[dblDiscount]						= ARSID.[dblDiscount]
 		,[dblPrice]							= ARSID.[dblShipmentUnitPrice] 
@@ -316,8 +318,9 @@ SELECT
 		,[ysnInventory]						= 1
 		,[strDocumentNumber]				= @InvoiceNumber
 		,[strItemDescription]				= I.[strDescription] 
-		,[intItemUOMId]						= ISI.[intItemUOMId] 
+		,[intOrderUOMId]					= ISI.[intItemUOMId]		
 		,[dblQtyOrdered]					= ISI.[dblQuantity] 
+		,[intItemUOMId]						= ISI.[intItemUOMId] 
 		,[dblQtyShipped]					= ISI.[dblQuantity]  
 		,[dblDiscount]						= 0.00
 		,[dblPrice]							= ISI.[dblUnitPrice]
