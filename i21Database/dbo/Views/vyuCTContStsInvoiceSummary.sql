@@ -8,16 +8,29 @@ AS
 			UP.strValue
 	FROM	(
 				SELECT	CD.intContractDetailId,
-						LTRIM(dblTotal) + ' ' + strCurrency AS [Invoiced(P)] 
+						CAST(LTRIM(VI.dblTotal) + ' ' + VI.strCurrency AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced(P)],
+						CAST(LTRIM(CI.dblTotal) + ' ' + CI.strCurrency AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced(S)],
+						CAST(CI.dblNetWeight AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [Invoiced Wt(S)],
+						CAST(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity) - CI.dblNetWeight AS NUMERIC(18,2))  AS NVARCHAR(MAX))collate Latin1_General_CI_AS AS [To be Invoiced(S)]
 				FROM	tblCTContractDetail CD LEFT
 				JOIN	(
 							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18,2)) AS dblTotal,MAX(strCurrency)  strCurrency
 							FROM		vyuCTContStsVendorInvoice 
 							Group By	intContractDetailId
 						)	VI	  ON	VI.intContractDetailId		=	CD.intContractDetailId
+				JOIN	(
+							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18,2)) AS dblTotal,MAX(strCurrency)  strCurrency,CAST(ISNULL(SUM(dblNetWeight),0)AS NUMERIC(18,2)) dblNetWeight
+							FROM		vyuCTContStsCustomerInvoice 
+							Group By	intContractDetailId
+						)	CI	  ON	CI.intContractDetailId		=	CD.intContractDetailId	
+				JOIN	tblICItemUOM	QU	ON	QU.intItemUOMId	=	CD.intItemUOMId			CROSS	
+				APPLY	tblLGCompanyPreference	LP
 			) s
-					UNPIVOT	(strValue FOR strName IN 
-								(
-									[Invoiced(P)] 
-								)
-							) UP
+			UNPIVOT	(strValue FOR strName IN 
+						(
+							[Invoiced(P)],
+							[Invoiced(S)],
+							[Invoiced Wt(S)],
+							[To be Invoiced(S)] 
+						)
+			) UP
