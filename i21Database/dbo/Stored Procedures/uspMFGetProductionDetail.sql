@@ -6,10 +6,10 @@ BEGIN
 		,L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
-		,W.dblQuantity
-		,IU.intItemUOMId
-		,U.intUnitMeasureId
-		,U.strUnitMeasure
+		,CASE WHEN IU.ysnStockUnit =1 THEN W.dblQuantity ELSE W.dblPhysicalCount END AS dblQuantity
+		,CASE WHEN IU.ysnStockUnit =1 THEN IU.intItemUOMId ELSE IU1.intItemUOMId END AS intItemUOMId
+		,CASE WHEN IU.ysnStockUnit =1 THEN U.intUnitMeasureId ELSE U1.intUnitMeasureId END AS intUnitMeasureId
+		,CASE WHEN IU.ysnStockUnit =1 THEN U.strUnitMeasure ELSE U1.strUnitMeasure END AS strUnitMeasure
 		,W.dtmCreated
 		,W.intCreatedUserId
 		,US.strUserName
@@ -29,6 +29,8 @@ BEGIN
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = W.intPhysicalItemUOMId 
+	JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 	JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
