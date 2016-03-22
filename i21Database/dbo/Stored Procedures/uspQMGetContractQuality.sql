@@ -47,6 +47,7 @@ BEGIN TRY
 	SET @SQL = 'SELECT TOP ' + @strLimit + '   
   strContractNumber  
   ,strName  
+  ,strBundleItemNo
   ,strItemNo  
   ,strDescription  
   ,strContainerNumber  
@@ -59,6 +60,7 @@ BEGIN TRY
   SELECT DENSE_RANK() OVER (ORDER BY S.intSampleId DESC) intRankNo  
    ,CH.strContractNumber  
    ,E.strName  
+   ,I1.strItemNo AS strBundleItemNo
    ,I.strItemNo  
    ,I.strDescription  
    ,C.strContainerNumber  
@@ -73,6 +75,7 @@ BEGIN TRY
   JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
   JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId  
   JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId  
+  LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
   JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
   JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
   JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  

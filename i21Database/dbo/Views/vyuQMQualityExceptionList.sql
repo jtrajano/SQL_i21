@@ -2,6 +2,7 @@
 AS
 SELECT TR.intTestResultId
 	,ST.strSampleTypeName
+	,I1.strItemNo AS strBundleItemNo
 	,I.strItemNo
 	,I.strDescription
 	,C.strCategoryCode
@@ -27,6 +28,7 @@ JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
 JOIN dbo.tblICItem AS I ON I.intItemId = S.intItemId
+LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
 JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblEntity AS E ON E.intEntityId = S.intEntityId
 LEFT JOIN dbo.tblICLot AS L ON L.intLotId = S.intProductValueId

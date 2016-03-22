@@ -5,8 +5,8 @@ SELECT ST.intControlPointId
 	,ST.strSampleTypeName
 	,ST.strDescription
 	,PC.intProductId
-	,ROW_NUMBER() OVER (
-		ORDER BY PC.intProductId
-		) AS intRowNo
+	,CAST(ROW_NUMBER() OVER (
+			ORDER BY PC.intProductId
+			) AS INT) AS intRowNo
 FROM tblQMProductControlPoint PC
 JOIN tblQMSampleType ST ON ST.intControlPointId = PC.intControlPointId

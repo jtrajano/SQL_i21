@@ -5,6 +5,7 @@ SELECT S.intSampleId
 	,ST.strSampleTypeName
 	,CH.strContractNumber
 	,IC.strContractItemName
+	,I1.strItemNo AS strBundleItemNo
 	,I.strItemNo
 	,I.strDescription
 	,C.strContainerNumber
@@ -31,6 +32,7 @@ JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+LEFT JOIN dbo.tblICItem I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN dbo.tblLGShipmentBLContainer C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId
 LEFT JOIN dbo.tblLGShipment SH ON SH.intShipmentId = S.intShipmentId
 LEFT JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = S.intTestedById

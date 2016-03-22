@@ -27,14 +27,32 @@ BEGIN
 		,@intProductValueId AS intProductValueId
 		,C.intContractHeaderId
 		,C.intContractDetailId
-		,C.intItemId
-		,C.strItemDescription AS strDescription
+		--,C.intItemId
+		--,C.strItemDescription AS strDescription
+		,CAST(CASE 
+				WHEN I.strType = 'Bundle'
+					THEN NULL
+				ELSE C.intItemId
+				END AS INT) AS intItemId
+		,(
+			CASE 
+				WHEN I.strType = 'Bundle'
+					THEN NULL
+				ELSE C.strItemDescription
+				END
+			) AS strDescription
+		,CAST(CASE 
+				WHEN I.strType = 'Bundle'
+					THEN C.intItemId
+				ELSE NULL
+				END AS INT) AS intItemBundleId
 		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 	FROM vyuCTContractDetailView C
+	JOIN tblICItem I ON I.intItemId = C.intItemId
 	WHERE C.intContractDetailId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 9 -- Container Line Item  
