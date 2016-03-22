@@ -1,4 +1,4 @@
-﻿ALTER VIEW vyuRKSOptionMatchedTransaction
+﻿CREATE VIEW vyuRKSOptionMatchedTransaction
 AS
 SELECT *,((isnull(dblSPrice,0)-isnull(dblLPrice,0))*intMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblImpact FROM(
 SELECT m.intMatchOptionsPnSId,strTranNo,dtmMatchDate,intMatchQty,e.strName,b.strAccountNumber,t.strInternalTradeNo,scl.strLocationName,t.dblPrice as dblLPrice,
