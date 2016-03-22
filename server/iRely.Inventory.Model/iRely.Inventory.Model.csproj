@@ -31,16 +31,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
-      <HintPath>..\..\..\Resources\references\EntityFramework.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\..\..\Resources\references\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="InteractivePreGeneratedViews">
-      <HintPath>..\..\..\Resources\references\InteractivePreGeneratedViews.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\InteractivePreGeneratedViews.dll</HintPath>
     </Reference>
     <Reference Include="iRely.Common">
-      <HintPath>..\..\..\Resources\references\iRely.Common.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\i21\Server\Resources\resources\references\iRely.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
