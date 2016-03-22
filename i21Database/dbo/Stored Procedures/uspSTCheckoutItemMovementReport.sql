@@ -26,7 +26,7 @@ FROM
 SELECT DISTINCT CASE WHEN UOM.strUpcCode is not null then UOM.strUpcCode else UOM.strLongUPCCode end [strUPCNumber]
 , I.strDescription [strDescription]
 , V.strVendorId [strVendor]
-, ISNULL(CIM.dblItemStandardCost, 0) [dblItemCost]
+, ISNULL(CIM.dblCurrentPrice, 0) [dblItemCost]
 , CASE WHEN (SP.dtmBeginDate < CH.dtmCheckoutDate AND SP.dtmEndDate > CH.dtmCheckoutDate) 
 		THEN ISNULL(SP.dblUnit,0) 
 		ELSE ISNULL(Pr.dblSalePrice,0) 
