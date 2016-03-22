@@ -119,21 +119,31 @@ BEGIN TRY
 	SET dblWeightPerQty = @dblNewLotWeightPerUnit
 	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 	
-	UPDATE tblICLot
-	SET dblWeight = dblQty
-	WHERE dblQty <> dblWeight
-		AND intItemUOMId = intWeightUOMId
-	AND intLotId=@intLotId
+	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
+	BEGIN
+		DECLARE @dblLotQty NUMERIC(38,20)
+		SELECT @dblLotQty = dblQty FROM tblICLot WHERE intLotId = @intLotId
+
+		EXEC dbo.uspMFLotAdjustQty
+			@intLotId = @intLotId,       
+			@dblNewLotQty = @dblLotQty,
+			@intUserId = @intUserId ,
+			@strReasonCode = 'Weight qty same',
+			@strNotes = 'Weight qty same'
+	END
 
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
 	BEGIN
-		--EXEC dbo.uspMFLotAdjustQty
-		-- @intLotId =@intLotId,       
-		-- @dblNewLotQty =0,
-		-- @intUserId=@intUserId ,
-		-- @strReasonCode ='Residue qty clean up',
-		-- @strNotes ='Residue qty clean up'
-		UPDATE tblICLot SET dblWeight=0,dblQty=0 WHERE intLotId = @intLotId
+		EXEC dbo.uspMFLotAdjustQty
+		 @intLotId =@intLotId,       
+		 @dblNewLotQty =0,
+		 @intUserId=@intUserId ,
+		 @strReasonCode ='Residue qty clean up',
+		 @strNotes ='Residue qty clean up'
+		--UPDATE tblICLot
+		--SET dblWeight = 0
+		--	,dblQty = 0
+		--WHERE intLotId = @intLotId
 	END
 
 

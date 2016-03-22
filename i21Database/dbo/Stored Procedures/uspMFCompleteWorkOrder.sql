@@ -600,9 +600,12 @@ BEGIN TRY
 	
 		IF @intLotStatusId IS NOT NULL
 		BEGIN
-			UPDATE dbo.tblICLot
-			SET intLotStatusId = @intLotStatusId
-			WHERE intLotId = @intLotId
+			--UPDATE dbo.tblICLot
+			--SET intLotStatusId = @intLotStatusId
+			--WHERE intLotId = @intLotId
+
+			EXEC uspMFSetLotStatus @intLotId,@intLotStatusId,@intUserId
+
 		END
 
 		SELECT @strOutputLotNumber = strLotNumber,@intParentLotId=intParentLotId
