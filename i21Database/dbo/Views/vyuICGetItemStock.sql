@@ -111,7 +111,8 @@ SELECT
 	Item.intGradeId,
 	strGrade = Grade.strDescription,
 	Item.intLifeTime,
-	Item.strLifeTimeType
+	Item.strLifeTimeType,
+	Item.ysnListBundleSeparately 
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId

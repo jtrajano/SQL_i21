@@ -63,17 +63,30 @@ BEGIN
 
 			
 			--CHECK FOR MISSING VENDOR IN i21
-			DECLARE @missingVendor NVARCHAR(100), @missingVendorError NVARCHAR(200);
-			SELECT TOP 1 @missingVendor = dbo.fnTrim(apivc_vnd_no) FROM (
+			DECLARE @missingVendor TABLE(strVendorId NVARCHAR(100));
+			DECLARE @missingVendorId NVARCHAR(100);
+			DECLARE @missingVendorError NVARCHAR(500);
+			INSERT INTO @missingVendor
+			SELECT dbo.fnTrim(apivc_vnd_no) FROM (
 					SELECT apivc_vnd_no FROM apivcmst A
 						LEFT JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 						WHERE B.strVendorId IS NULL
 			) MissingVendors
 
-			IF @missingVendor IS NOT NULL
+			IF EXISTS(SELECT 1 FROM @missingVendor)
 			BEGIN
-				SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
-				RAISERROR(@missingVendorError, 16, 1);
+				--SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
+				--RAISERROR(@missingVendorError, 16, 1);
+				WHILE EXISTS(SELECT 1 FROM @missingVendor)
+				BEGIN
+					SELECT TOP 1 @missingVendorId = strVendorId FROM @missingVendor;
+					EXEC uspEMCreateEntityById @Id = @missingVendorId, @Type = ''Vendor'', @UserId = @UserId, @Message = @missingVendorError OUTPUT
+					IF (@missingVendorError IS NOT NULL)
+					BEGIN
+						RAISERROR(@missingVendorError, 16, 1);
+					END
+					DELETE FROM @missingVendor WHERE strVendorId = @missingVendorId;
+				END
 			END
 
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A

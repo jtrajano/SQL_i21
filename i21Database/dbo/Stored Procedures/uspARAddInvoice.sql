@@ -11,16 +11,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal		DECIMAL(18,6)
-	  , @ARAccountId		INT
-	  , @EntityId			INT
+DECLARE @ZeroDecimal			DECIMAL(18,6)
+	  , @ARAccountId			INT
+	  , @EntityId				INT
 	  , @intFreightItemId		INT
 	  , @intSurchargeItemId		INT
 	  , @ysnItemizeSurcharge	BIT
 	  , @intLocationId			INT
 	  , @intFreightItemUOMId	INT
 	  , @intSurchargeItemUOMId	INT
-	  ,	@intItemUOMId			INT
 
 SET @ZeroDecimal = 0.000000
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
@@ -206,7 +205,7 @@ LEFT OUTER JOIN (SELECT [intEntityLocationId]
 LEFT OUTER JOIN tblEntityLocation SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN tblEntityLocation BL
-		ON AC.intShipToId = BL.intEntityLocationId	
+		ON AC.[intBillToId] = BL.intEntityLocationId	
 WHERE IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
 GROUP BY TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber,IE.strSourceScreenName;				
 
@@ -291,7 +290,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN tblEntityLocation SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN tblEntityLocation BL
-		ON AC.intShipToId = BL.intEntityLocationId	
+		ON AC.[intBillToId] = BL.intEntityLocationId	
 WHERE IE.intInvoiceId IS NOT NULL AND IE.intInvoiceId <> 0
 	
 DECLARE @InvoicesForUpdate AS TABLE(intInvoiceID INT)
@@ -363,8 +362,9 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intItemId]
 	,[strItemDescription]
 	,[strDocumentNumber]
-	,[intItemUOMId]
+	,[intOrderUOMId]
 	,[dblQtyOrdered]
+	,[intItemUOMId]
 	,[dblQtyShipped]
 	,[dblPrice]
 	,[dblTotal]
@@ -383,6 +383,7 @@ SELECT
 	,IE.strSourceId												--[strDocumentNumber]
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
+	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty  												--[dblQtyShipped]		
 	,dblPrice = CASE WHEN IE.ysnFreightInPrice = 0  
 	                   THEN IE.[dblPrice]					
@@ -421,7 +422,7 @@ FROM
 	 	vyuARGetItemAccount Acct
 	 		ON IE.[intItemId] = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
-				
+
 --VALIDATE FREIGHT AND SURCHARGE ITEM				
 SELECT TOP 1
 	   @intFreightItemId	= intItemForFreightId
@@ -429,19 +430,36 @@ SELECT TOP 1
 	 , @ysnItemizeSurcharge = ysnItemizeSurcharge
 FROM tblTRCompanyPreference
 
-IF ISNULL(@intFreightItemId, 0) > 0
-	BEGIN
-		SELECT TOP 1 @intLocationId = intLocationId FROM @InvoiceEntries 
-		SELECT TOP 1 @intItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intLocationId = @intLocationId
+SELECT TOP 1 @intLocationId = intLocationId FROM @InvoiceEntries 
 
-		IF ISNULL(@intItemUOMId, 0) = 0
+IF ISNULL(@intFreightItemId, 0) > 0
+	BEGIN		
+		SELECT TOP 1 @intFreightItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intLocationId = @intLocationId
+
+		IF ISNULL(@intFreightItemUOMId, 0) = 0
 			BEGIN
-				SELECT TOP 1 @intItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+				SELECT TOP 1 @intFreightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
 			END
 
-		IF ISNULL(@intItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
+		IF ISNULL(@intFreightItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
 			BEGIN
 				RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+				RETURN 0
+			END
+	END
+
+IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
+	BEGIN
+		SELECT TOP 1 @intSurchargeItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intSurchargeItemId AND intLocationId = @intLocationId
+
+		IF ISNULL(@intSurchargeItemUOMId, 0) = 0
+			BEGIN
+				SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+			END
+
+		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblSurcharge, @ZeroDecimal) > @ZeroDecimal)
+			BEGIN
+				RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 				RETURN 0
 			END
 	END
@@ -452,8 +470,9 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intItemId]
 	,[strItemDescription]
 	,[strDocumentNumber]
-	,[intItemUOMId]
+	,[intOrderUOMId]
 	,[dblQtyOrdered]
+	,[intItemUOMId]
 	,[dblQtyShipped]
 	,[dblPrice]
 	,[dblTotal]
@@ -470,13 +489,14 @@ SELECT
 	,@intFreightItemId										    --[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
 	,IE.strSourceId
-	,@intItemUOMId												--[intItemUOMId]
+	,@intFreightItemUOMId										--[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
+	,@intFreightItemUOMId										--[intItemUOMId]
 	,IE.dblQty  												--[dblQtyShipped]
 	,dblPrice = CASE		
-					WHEN ISNULL(IE.dblSurcharge,0) != 0
+					WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0
 					   THEN	ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
-					WHEN ISNULL(IE.dblSurcharge,0) = 0
+					WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1
 					   THEN	 ISNULL(IE.[dblFreightRate],0) 
 			        END 
 	,0          												--[dblTotal]
@@ -603,7 +623,9 @@ BEGIN
 		AND I.intInvoiceId = @InvoiceId
 		
 	IF ISNULL(@intNewInvoiceId,0) <> 0	
-    BEGIN                                
+    BEGIN
+		EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @intUserId
+
         EXEC dbo.uspSMAuditLog 
 			 @keyValue			= @intNewInvoiceId                  -- Primary Key Value of the Invoice. 
 			,@screenName		= 'AccountsReceivable.view.Invoice' -- Screen Namespace

@@ -62,7 +62,8 @@ DECLARE @temp_aging_table TABLE(
 	,[dblAmountPaid]			NUMERIC(18,6)
 	,[dblCredits]				NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME	
+	,[dtmAsOfDate]				DATETIME
+	,[strSalespersonName]		NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -143,7 +144,7 @@ ELSE
 	END
 
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateWithCurrentReport] @dtmDateFrom, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 
@@ -164,7 +165,7 @@ END
 
 SET @query = 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber
-	 , I.strTransactionType
+	 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
 	 , I.intEntityCustomerId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'') THEN NULL ELSE I.dtmDueDate END
 	 , I.dtmPostDate
@@ -177,7 +178,7 @@ SET @query = 'SELECT * FROM
 						ELSE 0
 					END
 	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
-	 , IC.strDescription
+	 , strDescription = CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE IC.strDescription END
 	 , IC.strItemNo
 	 , ID.dblQtyOrdered
 	 , ID.dblQtyShipped
@@ -199,7 +200,7 @@ FROM tblARInvoice I
 	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 WHERE I.ysnPosted = 1
   AND I.ysnPaid = 0
-  AND I.ysnForgiven = 0
+  AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
   '+ @innerQuery +'
 ) MainQuery'
 

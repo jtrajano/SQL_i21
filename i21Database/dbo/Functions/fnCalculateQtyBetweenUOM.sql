@@ -25,7 +25,7 @@ CREATE FUNCTION [dbo].[fnCalculateQtyBetweenUOM](
 RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
-	DECLARE	@result AS FLOAT 
+	DECLARE	@result AS NUMERIC(38,20)
 
 	SELECT	@result = 
 			CASE	WHEN ISNULL(ItemUOMFrom.dblUnitQty, 0) = 0 OR ISNULL(ItemUOMTo.dblUnitQty, 0) = 0 THEN 
@@ -34,7 +34,10 @@ BEGIN
 						@dblQty 
 					ELSE 
 						CASE	WHEN ItemUOMTo.dblUnitQty <> 0 THEN 
-									CAST(@dblQty AS FLOAT) * CAST(ItemUOMFrom.dblUnitQty AS FLOAT) / CAST(ItemUOMTo.dblUnitQty AS FLOAT) 
+									dbo.fnDivide(
+										dbo.fnMultiply(@dblQty, ItemUOMFrom.dblUnitQty)
+										,ItemUOMTo.dblUnitQty 
+									)
 								ELSE 
 									NULL 
 						END
@@ -50,5 +53,5 @@ BEGIN
 				WHERE	ItemUOM.intItemUOMId = @intItemUOMIdTo
 			) ItemUOMTo
 
-	RETURN dbo.fnConvertFloatToNumeric(@result);		
+	RETURN @result;		
 END

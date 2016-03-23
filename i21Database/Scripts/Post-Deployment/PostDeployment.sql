@@ -13,6 +13,9 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
+-- Card Fueling
+:r .\CF\1_ImportMapping.sql
+
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
@@ -133,6 +136,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- General Ledger
 :r .\GL\DefaultData\1_AccountStructure.sql
+:r .\GL\DefaultData\1_AccountType.sql
 :r .\GL\DefaultData\2_AccountGroup.sql
 :r .\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql
 :r .\GL\DefaultData\3_AccountCategory.sql
@@ -180,6 +184,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\13_FixOnOrderCommittedQuantity.sql
 :r .\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql
 :r .\AR\DefaultData\15_FixInvoiceDateForCredits.sql
+:r .\AR\DefaultData\16_FixInvoicePostDate.sql
+:r .\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql
+:r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
+:r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -199,6 +207,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\RemoveBillTemplate.sql
 :r .\AP\UpdateVoucherForApproval.sql
 :r .\AP\UpdateBillPayToAddress.sql
+:r .\AP\UpdateBillGLEntriesRecords.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
@@ -255,6 +264,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\Reports\SubReports\PaycheckEarningSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckTaxSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckDeductionSubReport.sql
+:r .\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql
 :r .\PR\Reports\PaycheckTop.sql
 :r .\PR\Reports\PaycheckMiddle.sql
 :r .\PR\Reports\PaycheckBottom.sql
@@ -287,6 +297,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEntityPreferences
 
 :r .\EM\022_DefaultDataForContactTypeAndImport.sql
+:r .\EM\023_RenameEntityContactEmailDistribution.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
@@ -309,6 +320,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
+:r .\TF\DefaultData\_ScheduleFields.sql
+:r .\TF\DefaultData\_TaxReportTemplate.sql
+:r .\TF\DefaultData\_Transactions.sql
+:r .\TF\DefaultData\_ValidProductCode.sql
+
 
 
 --Transports
@@ -319,5 +335,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Common
 :r .\Common\ErrorMessages.sql 
+
 
 print 'END POST DEPLOYMENT'

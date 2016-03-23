@@ -44,7 +44,10 @@ AS
 			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
 			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
 			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)											AS	dblAvailableQty,
-			ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												AS	dblAppliedQty,
+			CASE	WHEN	CH.ysnLoad = 1
+					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
+					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
+			END																									AS	dblAppliedQty,
 			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)												AS	strSequenceNumber,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInQtyUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity)				AS	dblQtyInPriceUOM,
@@ -65,9 +68,11 @@ AS
 			SP.intRackPriceSupplyPointId,		IM.intOriginId,					CA.strDescription				AS	strItemOrigin,
 			RV.dblReservedQuantity,				IM.intLifeTime,					IC.intCountryId					AS	intItemContractOriginId,
 			IM.strLifeTimeType,													CG.strCountry					AS	strItemContractOrigin,
-			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0) AS dblUnReservedQuantity,
-			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS dblAllocatedQty,
-			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)				AS	dblUnAllocatedQty,
+			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0)											AS	dblUnReservedQuantity,
+			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)											AS	dblAllocatedQty,
+			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)				AS	dblUnAllocatedQty,
+			ISNULL(PA.intAllocationUOMId,SA.intAllocationUOMId)													AS	intAllocationUOMId,
+			ISNULL(U5.strUnitMeasure,U6.strUnitMeasure)                                                         AS  strAllocationUOM,
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)							AS	ysnAllowedToShow,
 			CASE	WHEN	CD.intPricingTypeId = 2
 					THEN	CASE	WHEN	ISNULL(PF.intTotalLots,0) = 0 
@@ -85,7 +90,9 @@ AS
 							THEN	'Priced'
 					ELSE	''
 			END		AS strPricingStatus,
-			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)	AS intLoadReceived,
+			CAST(ISNULL(PF.intTotalLots - ISNULL(PF.intLotsFixed,0),CD.dblNoOfLots)	AS NUMERIC(18,0))			AS	dblUnpricedLots,
+			CAST(ISNULL(PF.intTotalLots - ISNULL(PF.intLotsHedged,0),CD.dblNoOfLots)	AS NUMERIC(18,0))		AS	dblUnhedgedLots,
+			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT)										AS	intLoadReceived,
 			CAST(
 				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),CD.dtmStartDate) AND CH.intContractTypeId = 1 
 						THEN	1
@@ -94,7 +101,7 @@ AS
 						ELSE	0
 				END		AS BIT
 			)	AS		ysnEarlyDayPassed,
-			CAST(CASE WHEN IM.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) AS ysnBundleItem,
+
 			--Header Detail
 
 			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,
@@ -176,12 +183,14 @@ AS
 				Group By	intContractDetailId
 			)								RV	ON	RV.intContractDetailId		=	CD.intContractDetailId		LEFT	
 	JOIN	(
-				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty
+				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
 				FROM		tblLGAllocationDetail 
 				Group By	intPContractDetailId
 			)								PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId		LEFT	
 	JOIN	(
-				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty
+				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty,MIN(intSUnitMeasureId) intAllocationUOMId
 				FROM		tblLGAllocationDetail 
 				Group By	intSContractDetailId
-			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId	
+			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT
+	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
+	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId

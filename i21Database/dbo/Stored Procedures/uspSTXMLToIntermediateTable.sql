@@ -1,43 +1,43 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTXMLToIntermediateTable]
-	@intImportFileHeaderId Int
+  @intImportFileHeaderId Int
 , @intCheckoutId Int
-, @XML XML
+, @strSPName nvarchar(100) 
+, @strXML nvarchar(max)
 AS
 BEGIN
 
-	DECLARE @strXML nvarchar(max), @strSPName nvarchar(200)
+
+
+	DECLARE @XML XML --,  @strXML nvarchar(max)
+
+	--SET @XML = CAST(@XML1 as xml)
 
 	If(ISNULL(@intCheckoutId, 0) = 0)
 	BEGIN
 		RAISERROR('Checkout transaction needs to be carried out first.',16,1)
 	END
 
-	Select @strSPName = RFC.strStoredProcedure 
-	FROM dbo.tblSTRegisterFileConfiguration RFC
-	JOIN dbo.tblSTRegister R ON R.intRegisterId = RFC.intRegisterId
-	JOIN dbo.tblSTStore S ON S.intStoreId = R.intStoreId
-	JOIN dbo.tblSTCheckoutHeader CH ON CH.intStoreId = S.intStoreId
-	Where CH.intCheckoutId = @intCheckoutId AND RFC.intImportFileHeaderId = @intImportFileHeaderId
+	--DECLARE @intStoreId Int
+	--Select @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
 
-	If(ISNULL(@strSPName, '') = '')
-	BEGIN
-		RAISERROR('Please set Stored Procedure in Register configuration.',16,1)
-	END
+	--Select @strSPName = RFC.strStoredProcedure 
+	--FROM dbo.tblSTRegisterFileConfiguration RFC
+	--JOIN dbo.tblSTRegister R ON R.intRegisterId = RFC.intRegisterId
+	----JOIN dbo.tblSTStore S ON S.intStoreId = R.intStoreId
+	----JOIN dbo.tblSTCheckoutHeader CH ON CH.intStoreId = S.intStoreId
+	--Where R.intStoreId = @intStoreId AND RFC.intImportFileHeaderId = @intImportFileHeaderId
 
-	SET @strXML = CAST(@XML as nvarchar(max))
+	--If(ISNULL(@strSPName, '') = '')
+	--BEGIN
+	--	RAISERROR('Please set Stored Procedure in Register configuration.',16,1)
+	--END
+
+	--SET @strXML = @XML1 -- CAST(@XML as nvarchar(max))
 
 	--SELECT LEN(@strXML) 'Len of strXML'
  
 	IF (CHARINDEX(':' ,@strXML) > 0	)		
-		SET @strXML = REPLACE(@strXML, ':', '') --REPLACE(SUBSTRING(@strXML, CHARINDEX(':', @strXML), LEN(@strXML)), ':', '')
-
-	--DECLARE @strFirstTag nvarchar(200)
-	--Select @strFirstTag = strXMLTag from dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = 16 AND intLevel = 1
-
-	--IF ((LEN(@strXML)-LEN(REPLACE(@strXML, @strFirstTag, ''))) / LEN(@strFirstTag) ) <> 2
-	--	SET @strXML = '<' + @strFirstTag + ' ' + @strXML
-
-	
+		SET @strXML = REPLACE(@strXML, ':', '')
 	--SELECT @strXML
 
 	SET @XML = CAST(@strXML as XML)

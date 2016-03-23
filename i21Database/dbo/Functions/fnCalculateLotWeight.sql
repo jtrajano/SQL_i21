@@ -21,8 +21,10 @@ BEGIN
 						-- @dblCostingQty is in Lot UOM. Need to convert the Qty into weight value. 
 						ISNULL(@dblLotWeight, 0) 
 						+ ( 
-							@dblCostingQty 
-							* ISNULL(@dblLotWeightPerQty, 0)
+							dbo.fnMultiply(							
+								@dblCostingQty 
+								,ISNULL(@dblLotWeightPerQty, 0)
+							)
 						) 
 			END
 END

@@ -872,7 +872,7 @@ BEGIN
 					,dtmDate = 'March 15, 2014'
 					,dblStockIn = 0
 					,dblStockOut = 30
-					,dblCost = 20.50
+					,dblCost = 20.9166670
 					,intCreatedEntityId = @intEntityUserSecurityId
 					,intConcurrencyId = 2
 
@@ -1197,7 +1197,7 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1					
 
-			-- 6TH expected: The Auto Variance
+			-- 6TH expected: The Auto Negative
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]

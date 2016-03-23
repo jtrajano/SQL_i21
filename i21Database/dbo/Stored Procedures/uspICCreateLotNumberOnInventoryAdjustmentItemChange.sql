@@ -123,7 +123,7 @@ BEGIN
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
 			,[dblWeight]				= SourceLot.dblWeight
-			,[intWeightUOMId]			= SourceLot.intWeightUOMId
+			,[intWeightUOMId]			= NewWeightUOM.intItemUOMId
 			,[intOriginId]				= SourceLot.intOriginId
 			,[strBOLNo]					= SourceLot.strBOLNo
 			,[strVessel]				= SourceLot.strVessel
@@ -155,6 +155,10 @@ BEGIN
 				ON NewItemUOM.intItemId = Detail.intNewItemId
 				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceLot.intItemUOMId)
 
+			LEFT JOIN dbo.tblICItemUOM NewWeightUOM
+				ON NewWeightUOM.intItemId = Detail.intNewItemId
+				AND NewWeightUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceLot.intWeightUOMId)
+
 			--LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 			--	ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
@@ -167,6 +171,8 @@ BEGIN
 	EXEC @intErrorFoundOnCreateUpdateLotNumber = dbo.uspICCreateUpdateLotNumber 
 		@ItemsThatNeedLotId
 		,@intEntityUserSecurityId
+		,NULL
+		,1
 
 	IF @intErrorFoundOnCreateUpdateLotNumber <> 0
 		RETURN @intErrorFoundOnCreateUpdateLotNumber;

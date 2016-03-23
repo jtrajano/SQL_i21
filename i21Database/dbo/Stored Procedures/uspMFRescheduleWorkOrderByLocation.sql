@@ -18,7 +18,6 @@ BEGIN TRY
 		,@tblMFScheduleConstraint AS ScheduleConstraintTable
 		,@intCalendarId int
 
-
 	DECLARE @tblMFSequence TABLE (
 		intWorkOrderId INT
 		,intExecutionOrder INT

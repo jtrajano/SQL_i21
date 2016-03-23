@@ -2,7 +2,9 @@
 	@intEntityId			int,
 	@intEntityContactId		int,
 	@ysnEnablePortalAccess	bit,
-	@message				nvarchar(200) output
+	@message				nvarchar(200) output,
+	@intUserRoleId			int output,
+	@strPassword			nvarchar(100) = ''
 AS
 BEGIN
 	if @ysnEnablePortalAccess = 0 
@@ -29,12 +31,19 @@ BEGIN
 			 where intEntityId = @intEntityId and b.ysnAdmin = 1
 		declare @userName nvarchar(200)
 		select @userName = strEmail from tblEntity where intEntityId = @intEntityContactId
-
+				
 		if(@roleId is null or @roleId < 0)
 		begin
 			set @message =  'User role is not yet created'
 			return 0
 		end
+
+		if exists( select top 1 1 from tblEntityToContact where intEntityRoleId = @roleId and intEntityContactId = @intEntityContactId and ysnPortalAccess = 1)
+		begin
+			return 0;
+		end
+
+		set @intUserRoleId = @roleId
 
 		if(@userName is null or @userName = '')
 		begin
@@ -52,8 +61,11 @@ BEGIN
 
 		if not exists(select top 1 1 from tblEntityCredential where intEntityId = @intEntityContactId)
 		begin
+			if(@strPassword = '')
+				set @strPassword = '1234'
+
 			insert into tblEntityCredential(intEntityId,strUserName,strPassword)
-			select @intEntityContactId, @userName, '1234'
+			select @intEntityContactId, @userName, @strPassword
 		end
 		
 

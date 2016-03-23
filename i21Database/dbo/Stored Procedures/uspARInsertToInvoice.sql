@@ -311,8 +311,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					([intInvoiceId]
 					,[intItemId]
 					,[strItemDescription]
-					,[intItemUOMId]
+					,[intOrderUOMId]
 					,[dblQtyOrdered]
+					,[intItemUOMId]					
 					,[dblQtyShipped]
 					,[dblDiscount]
 					,[dblPrice]
@@ -336,8 +337,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
 					,[strItemDescription]		--[strItemDescription]
-					,[intItemUOMId]				--[intItemUOMId]
+					,[intItemUOMId]				--[intOrderUOMId]					
 					,[dblQtyOrdered]			--[dblQtyOrdered]
+					,[intItemUOMId]				--[intItemUOMId]					
 					,[dblQtyOrdered]			--[dblQtyShipped]
 					,0							--[dblDiscount]
 					,[dblMaintenanceAmount]		--[dblPrice]
@@ -428,6 +430,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemIsInventory		BIT,
 						@NewDetailId			INT,
 						@ItemDescription		NVARCHAR(100),
+						@OrderUOMId				INT,
 						@ItemUOMId				INT,
 						@ItemContractHeaderId	INT,
 						@ItemContractDetailId	INT,
@@ -445,7 +448,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@intItemToInvoiceId		= intItemToInvoiceId,
 						@ItemId					= intItemId,
 						@ItemIsInventory		= ysnIsInventory,
-						@ItemDescription		= strItemDescription,						
+						@ItemDescription		= strItemDescription,
+						@OrderUOMId				= intItemUOMId,	
 						@ItemUOMId				= intItemUOMId,
 						@ItemContractHeaderId	= intContractHeaderId,
 						@ItemContractDetailId	= intContractDetailId,
@@ -469,6 +473,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@RaiseError					= @RaiseError
 							,@ItemDescription				= @ItemDescription
 							,@ItemDocumentNumber			= @ItemSalesOrderNumber
+							,@OrderUOMId					= @OrderUOMId
 							,@ItemUOMId						= @ItemUOMId
 							,@ItemContractHeaderId			= @ItemContractHeaderId
 							,@ItemContractDetailId		    = @ItemContractDetailId
@@ -502,6 +507,23 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 --UPDATE OTHER TABLE INTEGRATIONS
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN
+
+		IF ISNULL(@NewInvoiceId, 0) <> 0
+		BEGIN
+			DECLARE @InvoiceNumber NVARCHAR(250)
+					,@SourceScreen NVARCHAR(250)
+			SELECT @InvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId
+			SET	@SourceScreen = 'Sales Order to Invoice'
+			EXEC dbo.uspSMAuditLog 
+				 @keyValue			= @NewInvoiceId						-- Primary Key Value of the Invoice. 
+				,@screenName		= 'AccountsReceivable.view.Invoice'	-- Screen Namespace
+				,@entityId			= @UserId							-- Entity Id.
+				,@actionType		= 'Processed'						-- Action Type
+				,@changeDescription	= @SourceScreen						-- Description
+				,@fromValue			= @SalesOrderNumber					-- Previous Value
+				,@toValue			= @InvoiceNumber					-- New Value	
+		END	
+
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId

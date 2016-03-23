@@ -87,6 +87,8 @@ DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(38,20)
 
+DECLARE @TransactionType_InventoryReceipt AS INT = 4
+
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
@@ -96,8 +98,11 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblQty, 0)
 
-		SELECT @dblCost = AverageCost
-		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId, @intItemUOMId)
+		-- Get the average cost when reducing stock. 
+		-- Except if doing vendor stock returns using Inventory Receipt. 
+		SELECT	@dblCost = AverageCost
+		FROM	dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId, @intItemUOMId)
+		WHERE	@intTransactionTypeId <> @TransactionType_InventoryReceipt
 
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -231,7 +236,7 @@ BEGIN
 			IF @QtyOffset IS NOT NULL
 			BEGIN 				
 				-- Add Write-Off Sold				
-				SELECT @dblValue = @QtyOffset * ISNULL(@CostUsed, 0) --dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
+				SELECT @dblValue = dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0)) --dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
@@ -261,7 +266,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
 				-- Add Revalue sold
-				SET @dblValue =  @QtyOffset * @dblCost * -1
+				SET @dblValue = dbo.fnMultiply(dbo.fnMultiply(@QtyOffset, @dblCost), -1)
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
@@ -322,11 +327,14 @@ BEGIN
 					AND @NewFifoId IS NOT NULL  	
 
 		SET @dblValue = 0
-		SELECT	@dblValue = (((@dblQty * @dblUOMQty) + Stock.dblUnitOnHand) * (@dblCost / @dblUOMQty)) 
+		SELECT	@dblValue = dbo.fnMultiply(
+								(dbo.fnMultiply(@dblQty, @dblUOMQty) + Stock.dblUnitOnHand) 								
+								,dbo.fnDivide(@dblCost, @dblUOMQty)
+							) 
 							- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId)
 		FROM	[dbo].[tblICItemStock] Stock
-		WHERE	(@dblQty * @dblUOMQty) + Stock.dblUnitOnHand < 0 
-				AND (@dblQty * @dblUOMQty) > 0 
+		WHERE	dbo.fnMultiply(@dblQty, @dblUOMQty) + Stock.dblUnitOnHand < 0 
+				AND dbo.fnMultiply(@dblQty, @dblUOMQty) > 0 
 				AND Stock.intItemId = @intItemId
 				AND Stock.intItemLocationId = @intItemLocationId				
 

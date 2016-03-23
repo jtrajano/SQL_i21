@@ -357,29 +357,27 @@ BEGIN TRY
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
-						EXEC uspCTUpdateScheduleQuantity @intDPContractId, @dblDPContractUnits, @intUserId, @intTicketId, 'Scale'
-				   
-						INSERT INTO @ItemsForItemReceipt (
-						intItemId
-						,intItemLocationId
-						,intItemUOMId
-						,dtmDate
-						,dblQty
-						,dblUOMQty
-						,dblCost
-						,dblSalesPrice
-						,intCurrencyId
-						,dblExchangeRate
-						,intTransactionId
-						,intTransactionDetailId
-						,strTransactionId
-						,intTransactionTypeId
-						,intLotId
-						,intSubLocationId
-						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-						,ysnIsStorage 
-						)
-						EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							INSERT INTO @ItemsForItemReceipt (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage 
+							)
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
 						--EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
 
 						-- Attempt to fetch next row from cursor

@@ -174,3 +174,15 @@ BEGIN
 	
 	print 'end updating vehicle data'
 END
+
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFAccount')
+BEGIN
+	print 'begin updating account data'
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFAccount'AND COLUMN_NAME = 'intFeeProfileId')
+	BEGIN
+		EXEC ('update tblCFAccount set intFeeProfileId = NULL where intFeeProfileId = 0')
+	END
+	
+	print 'end updating account data'
+END

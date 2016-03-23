@@ -112,10 +112,6 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId
-	
-	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblWeightPerQty
-	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 	UPDATE dbo.tblICLot
 	SET dblWeightPerQty = @dblWeightPerQty
@@ -156,7 +152,11 @@ BEGIN TRY
 			@strNotes = 'Weight qty same'
 	END
 
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
+	IF (
+			SELECT dblWeight
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+			) < 0.01
 	BEGIN
 		EXEC dbo.uspMFLotAdjustQty
 		 @intLotId =@intLotId,       

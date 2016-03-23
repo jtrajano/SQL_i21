@@ -26,6 +26,7 @@ SELECT S.intSampleId
 	,I.intItemId
 	,SH.intShipmentId
 	,ISNULL(L.intLotId, (SELECT TOP 1 intLotId FROM tblICLot WHERE intParentLotId = PL.intParentLotId)) AS intLotId
+	,S.intSampleUOMId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId

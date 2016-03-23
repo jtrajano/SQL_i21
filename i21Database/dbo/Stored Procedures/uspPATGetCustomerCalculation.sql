@@ -64,8 +64,8 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 				    dblTotalPurchases = SUM(CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END),
 					dblTotalSales = SUM(CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END),
 					(CASE WHEN SUM(RRD.dblRate * dblVolume) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
-					(SUM(RRD.dblRate * dblVolume) * (SUM(RR.dblCashPayout)/100)) AS dblCashRefund,
-					(((SUM(RRD.dblRate * dblVolume)) * (RR.dblCashPayout/100)) * (@FWT/100)) AS dbLessFWT,
+					SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund,
+					SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (@FWT/100)) AS dbLessFWT,
 					@LessService AS dblLessServiceFee,
 					dblVolume = SUM(dblVolume),
 					dblTotalRefund = SUM(RRD.dblRate)
@@ -83,12 +83,9 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 		 INNER JOIN tblPATPatronageCategory PC
 				 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 			   WHERE B.intCustomerPatronId = B.intCustomerPatronId
-		   GROUP BY B.intCustomerPatronId,
-					RR.dblCashPayout,
-					AC.ysnSubjectToFWT,
-					RRD.dblRate
+		   GROUP BY B.intCustomerPatronId
 			) Total
-	   LEFT JOIN tblPATCustomerVolume CV
+	 INNER JOIN tblPATCustomerVolume CV
 		    ON CV.intCustomerPatronId = Total.intCustomerId
      INNER JOIN tblPATRefundRateDetail RRD
 			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
@@ -108,15 +105,14 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 				ENT.strName, 
 				AC.strStockStatus, 
 				TC.strTaxCode, 
-				Total.dblTotalPurchases,
-				Total.dblTotalSales,
-				Total.dblRefundAmount,
-				Total.dblCashRefund,
-				Total.dbLessFWT,
-				Total.dblLessServiceFee,
+				dblTotalPurchases,
+				dblTotalSales,
+				dblRefundAmount,
+				dblCashRefund,
+				dbLessFWT,
+				dblLessServiceFee,
 				Total.dblVolume,
-				Total.dblTotalRefund,
-				Total.intCustomerId
+				Total.dblTotalRefund
 	   
 
 	   DROP TABLE #statusTable

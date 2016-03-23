@@ -31,7 +31,7 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_InboundShipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
--- Allocate cost by 'Unit' on cost methods using 'Per Unit' and 'Percentage'
+-- Allocate cost by 'Unit' regardless if there are contracts and cost methods used are 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
 	MERGE	

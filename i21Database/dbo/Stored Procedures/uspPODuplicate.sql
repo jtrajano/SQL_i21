@@ -12,8 +12,8 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-BEGIN TRANSACTION #duplicatePO
-SAVE TRANSACTION #duplicatePO
+DECLARE @transCount INT = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
 
 	DECLARE @generatedPurchaseRecordId NVARCHAR(50);
 	DECLARE @startingNumId INT = (SELECT TOP 1 intStartingNumberId FROM tblSMStartingNumber WHERE strTransactionType = 'Purchase Order')
@@ -31,7 +31,7 @@ SAVE TRANSACTION #duplicatePO
 		,intEntityId = @userId
 		,strReference = A.strReference + ' Duplicate of ' + A.strPurchaseOrderNumber
 		,ysnApproved = 0
-		,ysnForApproval = CASE WHEN A.ysnForApprovalSubmitted = 1 OR dtmApprovalDate IS NOT NULL THEN 1 ELSE 0 END
+		--,ysnForApproval = CASE WHEN A.ysnForApprovalSubmitted = 1 OR dtmApprovalDate IS NOT NULL THEN 1 ELSE 0 END
 		,A.ysnForApprovalSubmitted = 0
 		,dtmApprovalDate = NULL
 	FROM #tmpDuplicatePO A
@@ -50,7 +50,8 @@ SAVE TRANSACTION #duplicatePO
 	FROM tblPOPurchaseDetail A 
 	LEFT JOIN tblCTContractDetail B ON A.intContractDetailId = B.intContractDetailId
 	WHERE A.intPurchaseId = @poId
-	AND 1 = (CASE WHEN B.intContractDetailId IS NOT NULL AND ((B.dblQuantity - B.dblScheduleQty) <= 0) THEN 0 ELSE 1 END) --Exclude the contract if no available balance
+	AND 1 = (CASE WHEN B.intContractDetailId IS NOT NULL AND ((B.dblBalance - B.dblScheduleQty) <= 0) THEN 0 ELSE 1 END) --Exclude the contract if no available balance
+	AND NOT EXISTS(SELECT 1 FROM tblPOPurchase WHERE intOrderStatusId IN (4, 6) AND intPurchaseId = @poId) --Make sure PO is not short closed or cancelled
 	--ALTER TABLE #tmpDuplicateBillDetail DROP COLUMN intBillDetailId
 
 	UPDATE A
@@ -162,7 +163,8 @@ SAVE TRANSACTION #duplicatePO
 
 	EXEC uspPOUpdateOnOrder @poId, 0
 
-	COMMIT TRANSACTION #duplicatePO
+	IF @transCount = 0 COMMIT TRANSACTION
+
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
@@ -170,7 +172,7 @@ BEGIN CATCH
             @ErrorMessage nvarchar(4000),
             @ErrorState INT,
             @ErrorLine  INT,
-            @ErrorProc nvarchar(200)
+            @ErrorProc nvarchar(200);
         -- Grab error information from SQL functions
     SET @ErrorSeverity = ERROR_SEVERITY()
     SET @ErrorNumber   = ERROR_NUMBER()
@@ -178,17 +180,14 @@ BEGIN CATCH
     SET @ErrorState    = ERROR_STATE()
     SET @ErrorLine     = ERROR_LINE()
     SET @ErrorProc     = ERROR_PROCEDURE()
-    SET @ErrorMessage  = 'Problem duplicate purchase order.' + CHAR(13) + 
+    SET @ErrorMessage  = 'Problem duplicating po.' + CHAR(13) + 
 			'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
 			' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
     -- Not all errors generate an error state, to set to 1 if it's zero
     IF @ErrorState  = 0
     SET @ErrorState = 1
     -- If the error renders the transaction as uncommittable or we have open transactions, we may want to rollback
-    IF @@TRANCOUNT > 0
-    BEGIN
-		ROLLBACK TRANSACTION #duplicatePO
-		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-    END
+    IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+    RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
 

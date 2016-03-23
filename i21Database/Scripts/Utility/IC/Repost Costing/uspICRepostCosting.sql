@@ -8,7 +8,7 @@ GO
 CREATE PROCEDURE [dbo].[uspICRepostCosting]
 	@strBatchId AS NVARCHAR(20)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
-	,@intUserId AS INT
+	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 	,@ItemsToPost AS ItemCostingTableType READONLY 
 AS
@@ -16,7 +16,7 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
+SET XACT_ABORT ON 
 SET ANSI_WARNINGS OFF
 
 -- Declare the variables to use for the cursor
@@ -25,12 +25,12 @@ DECLARE @intId AS INT
 		,@intItemLocationId AS INT 
 		,@intItemUOMId AS INT 
 		,@dtmDate AS DATETIME
-		,@dblQty AS NUMERIC(18, 6) 
-		,@dblUOMQty AS NUMERIC(18, 6)
-		,@dblCost AS NUMERIC(18, 6)
-		,@dblSalesPrice AS NUMERIC(18, 6)
+		,@dblQty AS NUMERIC(38, 20) 
+		,@dblUOMQty AS NUMERIC(38, 20)
+		,@dblCost AS NUMERIC(38, 20)
+		,@dblSalesPrice AS NUMERIC(38, 20)
 		,@intCurrencyId AS INT 
-		,@dblExchangeRate AS DECIMAL (38, 20) 
+		,@dblExchangeRate AS NUMERIC (38, 20) 
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
@@ -161,7 +161,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId;
+			,@intEntityUserSecurityId;
 	END
 
 	-- FIFO 
@@ -186,7 +186,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId;
+			,@intEntityUserSecurityId;
 	END
 
 	-- LIFO 
@@ -211,7 +211,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId;
+			,@intEntityUserSecurityId;
 	END
 
 	-- LOT 
@@ -237,33 +237,150 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@strTransactionForm
-			,@intUserId;
+			,@intEntityUserSecurityId;
 	END
 
 	-- ACTUAL COST 
 	IF (@strActualCostId IS NOT NULL)
 	BEGIN 
-		EXEC dbo.uspICPostActualCost
-			@strActualCostId 
-			,@intItemId 
-			,@intItemLocationId 
-			,@intItemUOMId 
-			,@intSubLocationId 
-			,@intStorageLocationId 
-			,@dtmDate 
-			,@dblQty 
-			,@dblUOMQty 
-			,@dblCost 
-			,@dblSalesPrice 
-			,@intCurrencyId 
-			,@dblExchangeRate 
-			,@intTransactionId 
-			,@intTransactionDetailId 
-			,@strTransactionId 
-			,@strBatchId 
-			,@intTransactionTypeId 
-			,@strTransactionForm 
-			,@intUserId;
+		-- Check if there is enough stock to reduce an actual stock.
+		-- If it is not enought then use the default costing method of the item-location. 
+		IF (ISNULL(@dblQty, 0) < 0) AND NOT EXISTS (
+			SELECT	TOP 1 1 
+			FROM	dbo.tblICInventoryActualCost
+			WHERE	strActualCostId = @strActualCostId
+					AND intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+					AND intItemUOMId = @intItemUOMId
+					AND (dblStockIn - dblStockOut) > 0 
+					AND dbo.fnDateGreaterThanEquals(@dtmDate, dtmDate) = 1
+		)
+		BEGIN 
+			DECLARE @intCostingMethod AS INT
+			SELECT @intCostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) 
+
+			IF @intCostingMethod = @AVERAGECOST
+			BEGIN 
+				EXEC dbo.uspICPostAverageCosting
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId
+			END 
+
+			ELSE IF @intCostingMethod = @FIFO
+			BEGIN 
+				EXEC dbo.uspICPostFIFO
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId;
+			END 
+
+			ELSE IF @intCostingMethod = @LIFO
+			BEGIN
+				EXEC dbo.uspICPostLIFO
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId;
+			END 
+
+			ELSE IF @intCostingMethod = @LOTCOST
+			BEGIN 
+				EXEC dbo.uspICPostLot
+					@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@intLotId
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@dblExchangeRate
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId;
+			END 
+		END 
+		ELSE 
+		BEGIN 
+			EXEC dbo.uspICPostActualCost
+				@strActualCostId 
+				,@intItemId 
+				,@intItemLocationId 
+				,@intItemUOMId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dtmDate 
+				,@dblQty 
+				,@dblUOMQty 
+				,@dblCost 
+				,@dblSalesPrice 
+				,@intCurrencyId 
+				,@dblExchangeRate 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@strTransactionForm 
+				,@intEntityUserSecurityId 
+				;
+		END 
 	END
 
 	-- Update the Lot's Qty and Weights. 
@@ -282,8 +399,8 @@ BEGIN
 	--------------------------------------------------
 	BEGIN 
 		-- Get the current average cost and stock qty 
-		DECLARE @CurrentStockQty AS NUMERIC(18,6) = NULL 
-		DECLARE @CurrentStockAveCost AS NUMERIC(18,6) = NULL 
+		DECLARE @CurrentStockQty AS NUMERIC(38, 20) = NULL 
+		DECLARE @CurrentStockAveCost AS NUMERIC(38, 20) = NULL 
 
 		SELECT	@CurrentStockAveCost = dblAverageCost
 		FROM	dbo.tblICItemPricing ItemPricing
@@ -509,7 +626,7 @@ BEGIN
 				,[strRelatedTransactionId]				= NULL 
 				,[strTransactionForm]					= @strTransactionForm
 				,[dtmCreated]							= GETDATE()
-				,[intCreatedUserId]						= @intUserId
+				,[intCreatedUserId]						= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId

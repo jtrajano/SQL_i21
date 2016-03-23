@@ -42,7 +42,7 @@ AS
 BEGIN
 
 	DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
-	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Voucher'
+	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 
 	DECLARE @tmpTransacions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
@@ -57,9 +57,9 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
 												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 THEN A.dblAmountDue / Rate.dblRate 
-											 ELSE A.dblAmountDue END),
+											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -69,7 +69,7 @@ BEGIN
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Voucher'
+		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
 												WHEN intTransactionType = 2 THEN 'Posted Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Posted Debit Memo'
 											ELSE 'NONE' END,
@@ -79,7 +79,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -97,7 +97,7 @@ BEGIN
 				ON A.intEntityVendorId = C.intEntityVendorId
 			CROSS APPLY
 			(
-				SELECT TOP 1 dblRate FROM dbo.tblAPBillDetail A WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+				SELECT TOP 1 dblRate,ysnSubCurrency FROM dbo.tblAPBillDetail A WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 			) Rate
 			--CROSS APPLY
 			--(
@@ -154,15 +154,28 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 THEN B.dblTotal / B.dblRate * dblQtyReceived
-												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
-														ELSE 
-															(CASE WHEN B.dblOldCost != 0 THEN CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) --COST ADJUSTMENT
-																ELSE B.dblTotal END)
-															+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
-														END) --IC Tax
-												END), --Bill Detail
+		[dblDebit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
+												  --WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate 
+												  --WHEN A.intTransactionType IN (1) AND B.ysnSubCurrency > 0 THEN B.dblTotal + CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
+												ELSE 
+													CASE WHEN B.dblRate > 0 THEN 
+															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															ELSE 
+																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
+																	  ELSE B.dblTotal END)
+																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
+															END) / B.dblRate 
+													ELSE 
+															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															ELSE 
+																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
+																	  ELSE B.dblTotal END)
+																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
+															END)
+													END
+												END) AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -180,7 +193,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -215,7 +228,8 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
 		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2))
-												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / B.dblRate * dblQtyReceived
+												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / B.dblRate
+												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency > 0  THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / B.dblRate
 											 ELSE 0 END), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -234,7 +248,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -268,7 +282,8 @@ BEGIN
 		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.intAccountId
 												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
 		[dblDebit]						=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
-												 WHEN B.dblRate > 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / dblRate  * dblQtyReceived
+												 WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
+												 WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
 												ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
 														ELSE D.dblAmount
 													END)
@@ -290,7 +305,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Voucher'
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 											ELSE 'NONE' END,
@@ -346,7 +361,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Voucher',
+		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      

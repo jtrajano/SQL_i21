@@ -18,6 +18,7 @@ SELECT
 	Item.strLocationName,
 	Item.strLocationType,
 	ItemUOM.intItemUOMId as intItemUnitMeasureId,
+	ItemUOM.intItemUOMId, 
 	UOM.intUnitMeasureId,
 	UOM.strUnitMeasure,
 	UOM.strUnitType,

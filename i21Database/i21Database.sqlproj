@@ -174,6 +174,7 @@
     <Folder Include="Scripts\Post-Deployment\TR" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports\SubReports" />
+    <Folder Include="Scripts\Post-Deployment\CF" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3196,7 +3197,6 @@
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Tables\tblEntityGroup.sql" />
     <Build Include="dbo\Tables\tblEntityGroupDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCustomerAgingAsOfDateWithCurrentReport.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfMISC.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfTransmitter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUnpostCostAdjustmentGL.sql" />
@@ -3518,9 +3518,54 @@
     <Build Include="dbo\Views\vyuEME2C2Role.sql" />
     <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Functions\fnDivide.sql" />
     <Build Include="dbo\Views\vyuQMBundleItemsList.sql" />
+    <Build Include="dbo\Stored Procedures\uspICChangeItemStockUOM.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceItemsTermTotalDiscount.sql" />
+    <Build Include="dbo\Views\vyuCTContractChart.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckPayable.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceCompact.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckTimeOff.sql" />
+    <Build Include="dbo\Tables\tblPRForm941.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRInsertPaycheckTimeOff.sql" />
+    <Build Include="dbo\Tables\tblTFTaxReportSummary.sql" />
+    <Build Include="dbo\Tables\tblTFTaxReportTemplate.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponentConfiguration.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFields.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_Transactions.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
+        <Build Include="dbo\Views\vyuEMUserSecurityEntityToRole.sql" />
+        <Build Include="dbo\Stored Procedures\uspCTReassignSave.sql" />
+        <Build Include="dbo\Stored Procedures\uspCTGetStartingNumber.sql" />
+        <Build Include="dbo\Tables\tblSMEventInvitees.sql" />
+        <Build Include="dbo\Views\vyuRKGetOptionMonths.sql" />
+        <Build Include="dbo\Views\vyuRKGetFutureMonthAndYears.sql" />
+        <Build Include="dbo\Views\vyuRKGetCommodityUnitMeasure.sql" />
+        <Build Include="dbo\Tables\tblRKFutOptTransactionImport.sql" />
+        <Build Include="dbo\Functions\fnAPValidatePrepay.sql" />
+        <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentAmountDue.sql" />
+        <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
+        <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
+        <Build Include="dbo\Stored Procedures\uspARDuplicateQuotePage.sql" />
+        <Build Include="dbo\Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
+        <Build Include="dbo\User Defined Types\BankTransactionTable.sql" />
+        <Build Include="dbo\User Defined Types\BankTransactionDetailTable.sql" />
+        <Build Include="dbo\Stored Procedures\uspARCustomerStatementPaymentActivityReport.sql" />
+        <Build Include="dbo\Tables\tblTRTransactionDetailLog.sql" />
+        <Build Include="dbo\Stored Procedures\uspTRLogTransactionDetail.sql" />
+        <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />
+        <Build Include="dbo\Stored Procedures\uspARSplitInvoice.sql" />
+        <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
+        <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
+        <Build Include="dbo\Views\vyuAROrderUOM.sql" />
+        <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
+    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3623,6 +3668,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\16_FixInvoicePostDate.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql" />
+    <None Include="Scripts\Post-Deployment\CF\1_ImportMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -3654,5 +3701,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\16_PaymentMethod.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountType.sql" />
   </ItemGroup>
 </Project>

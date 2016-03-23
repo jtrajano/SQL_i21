@@ -20,19 +20,14 @@ SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
    AS CompanyTitledNonDP,   
     isnull(OpenSalQty,0) OpenSalQty, 
 	  
-           (isnull(invQty,0)-isnull(ReserveQty,0)) +             
-            (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))+              
-   Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then isnull(OffSite,0) else 0 end +  
-   Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end +   
-   isnull(dblCollatralSales,0)  + isnull(SlsBasisDeliveries,0)  AS CashExposure, 
-   
-   
+    (isnull(invQty,0) - isnull(PurBasisDelivary,0)) + (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))+    isnull(dblCollatralSales,0)  + isnull(SlsBasisDeliveries,0)  AS CashExposure,   
+      
     (((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1)) + isnull(DeltaOption,0)   DeltaOption,                       
    isnull(ReceiptProductQty,0) ReceiptProductQty,
    isnull(OpenPurchasesQty,0) OpenPurchasesQty,
    isnull(OpenSalesQty,0) OpenSalesQty,
    isnull(OpenPurQty,0) OpenPurQty,
-      isnull(invQty,0) + isnull(dblGrainBalance,0)  AS InHouse     
+      isnull(invQty,0) + isnull(dblGrainBalance,0)+CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end   AS InHouse     
 FROM(  
 SELECT DISTINCT c.intCommodityId,              
   strCommodityCode,              
@@ -174,7 +169,28 @@ SELECT DISTINCT c.intCommodityId,
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 	WHERE ft.intCommodityId = ft.intCommodityId AND intFutOptTransactionId NOT IN (
 			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired))t
-	) DeltaOption       
+	) DeltaOption,
+	(select sum(dblTotal) dblTotal from(
+		SELECT 
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0)) AS dblTotal
+		FROM tblLGDeliveryPickDetail Del
+		INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
+		INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
+		INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CT.intCommodityId AND CT.intUnitMeasureId=ium.intUnitMeasureId 
+		INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=CT.intCompanyLocationId
+		WHERE CT.intPricingTypeId = 2 AND CT.intCommodityId = c.intCommodityId 
+		UNION 
+		SELECT
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(ri.dblReceived, 0))  AS dblTotal
+		FROM tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
+		INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
+		INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
+		WHERE cd.intCommodityId = c.intCommodityId 	
+		)t) AS PurBasisDelivary	       
 FROM tblICCommodity c              
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId and ysnDefault=1                
 JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId          

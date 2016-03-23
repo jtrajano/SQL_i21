@@ -16,6 +16,8 @@
     [dtmCreated]            DATETIME       NULL,
     [intLastModifiedUserId] INT            NULL,
     [dtmLastModified]       DATETIME       NULL,
+	[ysnDelete]				BIT            NULL,
+	[dtmDateDeleted]		DATETIME	   NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([intBankId] ASC),
     UNIQUE NONCLUSTERED ([strBankName] ASC)

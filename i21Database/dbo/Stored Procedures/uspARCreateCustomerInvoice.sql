@@ -2,6 +2,7 @@
 	 @EntityCustomerId				INT
 	,@CompanyLocationId				INT
 	,@CurrencyId					INT				= NULL
+	,@SubCurrencyCents				INT				= NULL
 	,@TermId						INT				= NULL
 	,@EntityId						INT
 	,@InvoiceDate					DATETIME	
@@ -40,8 +41,9 @@
 	,@ItemIsInventory				BIT				= 0
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@ItemUOMId						INT				= NULL
+	,@OrderUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
@@ -79,6 +81,7 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -99,6 +102,7 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 SET @ZeroDecimal = 0.000000	
 SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
 	SET @DeliverPickUp = ISNULL((SELECT TOP 1 strDeliverPickupDefault FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
@@ -170,6 +174,7 @@ BEGIN TRY
 		,[intCompanyLocationId]
 		,[intAccountId]
 		,[intCurrencyId]
+		,[intSubCurrencyCents]
 		,[intTermId]
 		,[dtmDate]
 		,[dtmDueDate]
@@ -227,11 +232,12 @@ BEGIN TRY
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))	
+		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))),1) ELSE @SubCurrencyCents END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
-		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
-		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
-		,[dtmShipDate]					= @ShipDate
-		,[dtmPostDate]					= CASE WHEN @PostDate IS NULL THEN CAST(@InvoiceDate AS DATE) ELSE @PostDate END
+		,[dtmDate]						= ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
+		,[dtmShipDate]					= ISNULL(@ShipDate, DATEADD(month, 1, ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)))
+		,[dtmPostDate]					= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
 		,[dblShipping]					= @ZeroDecimal
 		,[dblTax]						= @ZeroDecimal
@@ -310,7 +316,7 @@ BEGIN TRY
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		tblEntityLocation BL1
-			ON C.intShipToId = BL1.intEntityLocationId
+			ON C.intBillToId = BL1.intEntityLocationId
 	WHERE C.[intEntityCustomerId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
@@ -369,8 +375,9 @@ BEGIN TRY
 		,@RaiseError					= @RaiseError
 		,@ItemDocumentNumber			= @ItemDocumentNumber
 		,@ItemDescription				= @ItemDescription
-		,@ItemUOMId						= @ItemUOMId
+		,@OrderUOMId					= @OrderUOMId
 		,@ItemQtyOrdered				= @ItemQtyShipped
+		,@ItemUOMId						= @ItemUOMId
 		,@ItemQtyShipped				= @ItemQtyShipped
 		,@ItemDiscount					= @ItemDiscount
 		,@ItemPrice						= @ItemPrice
@@ -409,6 +416,7 @@ BEGIN TRY
 		,@ItemPerformerId				= @ItemPerformerId
 		,@ItemLeaseBilling				= @ItemLeaseBilling
 		,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
+		,@SubCurrency					= @SubCurrency
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

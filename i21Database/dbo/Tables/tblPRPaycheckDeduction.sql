@@ -14,11 +14,13 @@
 	[intExpenseAccountId] INT NULL,
 	[strPaidBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSet] [bit] NOT NULL,
+	[intBillId] INT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRPaycheckDeduction] PRIMARY KEY ([intPaycheckDeductionId]),
 	CONSTRAINT [FK_tblPRPaycheckDeduction_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPRPaycheckDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [dbo].[tblPRTypeDeduction] ([intTypeDeductionId]),
+	CONSTRAINT [FK_tblPRPaycheckDeduction_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
 ) ON [PRIMARY]
 GO
 /****** Object:  Default [DF__tblPRPayc__dblAm__2FBF612A]    Script Date: 08/14/2014 10:50:11 ******/

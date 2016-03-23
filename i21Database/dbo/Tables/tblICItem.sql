@@ -85,7 +85,7 @@ Type the overview for the table here.
 		[dblOverReceiveTolerance] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[strMaintenanceCalculationMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[dblMaintenanceRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[ysnListBundleSeparately] BIT NULL DEFAULT ((0)),
+		[ysnListBundleSeparately] BIT NULL DEFAULT ((1)),
 		[intModuleId] INT NULL,
 		[strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

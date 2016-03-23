@@ -2,6 +2,7 @@
 	@ItemsForLot ItemLotTableType READONLY 
 	,@intEntityUserSecurityId AS INT 
 	,@intLotStatusId AS INT = NULL -- (1: is Active, 2: is On Hold, 3: Quarantine) 
+	,@ysnItemChange AS BIT = 0  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -234,7 +235,8 @@ BEGIN
 		-- 1. Lot id is NULL. 
 		-- 2. Lot Number is blank. 
 		-- 3. and Lot Number was never used before for that item. If it was used, then user must be doing a lot move or merge for that serial number
-		IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICLot WHERE strLotNumber = @strLotNumber AND intItemId = @intItemId) 
+		-- 4. if changing the item id of an existing lot. 
+		IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICLot WHERE strLotNumber = @strLotNumber AND intItemId = @intItemId ) AND @ysnItemChange = 0
 		BEGIN 
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
 		END 

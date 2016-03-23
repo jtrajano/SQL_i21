@@ -9,6 +9,7 @@ SELECT
 	A.strVendorOrderNumber,
 	A.intBillId,
 	A.dtmDate,
+	A.ysnPosted,
 	B.intBillDetailId,
 	A.intEntityVendorId,
 	C.strItemNo,
@@ -18,6 +19,7 @@ SELECT
 	CASE WHEN (A.intTransactionType NOT IN (1,9,10)) THEN B.dblTotal * -1 ELSE B.dblTotal END AS dblTotal,
 	B.dblTax,
 	B.dblRate,
+	B.ysnSubCurrency,
 	B.strMiscDescription,
 	C.strDescription AS strItemDescription,
 	H.strAccountId,
@@ -28,10 +30,14 @@ SELECT
 		WHEN 3 THEN '1099 B'
 		ELSE 'NONE' END AS str1099Form,
 	CASE WHEN D.int1099CategoryId IS NULL THEN 'NONE' ELSE D.strCategory END AS str1099Category,
-	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup
+	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
+	IR.strReceiptNumber,
+	ISNULL(IR.intInventoryReceiptId,0) AS intInventoryReceiptId
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEntity G2 ON G.intEntityVendorId = G2.intEntityId) ON G.intEntityVendorId = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B ON A.intBillId = B.intBillId
+LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON B.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
+LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRE.intInventoryReceiptId
 LEFT JOIN dbo.tblGLAccount H ON B.intAccountId = H.intAccountId
 LEFT JOIN dbo.tblICItem C ON B.intItemId = C.intItemId
 LEFT JOIN dbo.tblAP1099Category D ON D.int1099CategoryId = B.int1099Category

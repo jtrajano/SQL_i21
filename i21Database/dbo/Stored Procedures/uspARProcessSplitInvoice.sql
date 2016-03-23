@@ -42,7 +42,7 @@ BEGIN
 					GOTO UPDATE_CURRENT_INVOICE;
 				END
 
-			EXEC dbo.uspARDuplicateInvoice @intInvoiceId, @dtmDate, @intUserId, @intSplitDetailId, @newInvoiceNumber OUT
+			EXEC dbo.uspARSplitInvoice @intInvoiceId, @dtmDate, @intUserId, @intSplitDetailId, @newInvoiceNumber OUT
 
 			IF ISNULL(@newInvoiceNumber, '') <> ''
 				BEGIN

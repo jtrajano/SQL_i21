@@ -125,7 +125,7 @@ SELECT
 	,[intShipViaId]							= NULL 
 	,[intPaymentMethodId]					= NULL
 	,[strInvoiceOriginId]					= ''
-	,[strPONumber]							= ''
+	,[strPONumber]							= cfTrans.strPONumber
 	,[strBOLNumber]							= ''
 	,[strDeliverPickup]						= cfTrans.strDeliveryPickupInd
 	,[strComments]							= ''
@@ -188,7 +188,7 @@ SELECT
 	,[intPerformerId]						= NULL
 	,[ysnLeaseBilling]						= NULL
 	,[ysnVirtualMeterReading]				= NULL
-	,[ysnClearDetailTaxes]					= 0
+	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @TransactionId
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
@@ -221,7 +221,7 @@ INNER JOIN (SELECT  icfSite.*
 			ON iicItemLoc.intLocationId = icfSite.intARLocationId 
 			AND iicItemLoc.intItemId = icfItem.intARItemId)
 			AS cfSiteItem
-ON (cfTrans.intSiteId = cfSiteItem.intSiteId OR cfTrans.intNetworkId = cfSiteItem.intNetworkId)
+ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
 AND cfSiteItem.intARItemId = cfTrans.intARItemId
 AND cfSiteItem.intItemId = cfTrans.intProductId
 INNER JOIN (SELECT * 
@@ -234,7 +234,7 @@ ON cfTrans.intContractId = ctContracts.intContractDetailId
 WHERE cfTrans.intTransactionId = @TransactionId
 
 
-SELECT * FROM @EntriesForInvoice
+--SELECT * FROM @EntriesForInvoice
 
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
@@ -259,7 +259,7 @@ BEGIN
 		,[strNotes]
 		,[intTempDetailIdForTaxes])
 	SELECT
-	[intDetailId]				= NULL
+	[intDetailId]				= (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 	,[intTaxGroupId]			= NULL
 	,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 	,[intTaxClassId]			= cfTaxCode.intTaxClassId
@@ -320,5 +320,4 @@ BEGIN
 	UPDATE tblCFTransaction 
 	SET ysnPosted = @Post 
 	WHERE intTransactionId = @TransactionId 
-	AND intInvoiceId = @UpdatedIvoices
 END

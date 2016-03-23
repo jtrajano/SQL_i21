@@ -11,7 +11,7 @@ END
 
 UPDATE tblGLFiscalYearPeriod
 SET ysnOpen = 1
-
+	,ysnINVOpen = 1
 GO
 
 BEGIN TRANSACTION 
@@ -97,8 +97,10 @@ SET dblLastCost = 0
 	,dblAverageCost = 0 
 	,dblStandardCost = 0 
 
-UPDATE dbo.tblICLot
-SET dblLastCost = 0 
+UPDATE	dbo.tblICLot
+SET		dblLastCost = 0 
+		--,dblQty = 0 
+		--,dblWeight = 0 
 
 -- Execute the repost stored procedure
 BEGIN 
@@ -165,11 +167,20 @@ BEGIN
 										ELSE 
 											'Inventory In-Transit'
 									END 									
+								WHEN @strTransactionForm IN ('Consume', 'Produce') THEN 
+									'Work in Progress'
 								ELSE 
 									NULL 
 						END
 
 			DELETE FROM @ItemsToPost
+
+			--IF @strBatchId IN ('BATCH-7302', 'BATCH-7309', 'BATCH-7310', 'BATCH-7311')
+			--BEGIN 					
+			--	SELECT 'DEBUG 1', @strBatchId, dblQty, dblLastCost, * FROM tblICLot WHERE intLotId IN (3168, 3171)
+			--	SELECT 'DEBUG 1', @strBatchId, * FROM tblICInventoryTransaction WHERE intLotId IN (3168, 3171)
+			--	SELECT 'DEBUG 1', @strBatchId, * FROM @ItemsToPost
+			--END 
 
 			--IF @strTransactionForm IN ('Consume', 'Produce') 
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
@@ -194,31 +205,63 @@ BEGIN
 						,intStorageLocationId
 						,strActualCostId
 				)
-				SELECT 	intItemId  
-						,intItemLocationId 
-						,intItemUOMId  
-						,dtmDate  
-						,dblQty  
-						,dblUOMQty  
-						,dblCost  = (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId and intItemLocationId = #tmpICInventoryTransaction.intItemLocationId) * dblUOMQty  
-						,dblSalesPrice  
-						,intCurrencyId  
-						,dblExchangeRate  
-						,intTransactionId  
-						,intTransactionDetailId  
-						,strTransactionId  
-						,intTransactionTypeId  
-						,intLotId 
-						,intSubLocationId
-						,intStorageLocationId
+				SELECT 	ICTrans.intItemId  
+						,ICTrans.intItemLocationId 
+						,ICTrans.intItemUOMId  
+						,ICTrans.dtmDate  
+						,ICTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
+						,dblCost  = 
+							dbo.fnMultiply(
+								CASE WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
+										ELSE 
+											Lot.dblLastCost
+								END 
+								,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
+							)
+						,ICTrans.dblSalesPrice  
+						,ICTrans.intCurrencyId  
+						,ICTrans.dblExchangeRate  
+						,ICTrans.intTransactionId  
+						,ICTrans.intTransactionDetailId  
+						,ICTrans.strTransactionId  
+						,ICTrans.intTransactionTypeId  
+						,ICTrans.intLotId 
+						,ICTrans.intSubLocationId
+						,ICTrans.intStorageLocationId
 						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction
+				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICLot Lot
+							ON ICTrans.intLotId = Lot.intLotId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON ICTrans.intItemId = ItemUOM.intItemId
+							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	strBatchId = @strBatchId
 						AND (
 							strTransactionForm = 'Consume'
 							OR intTransactionTypeId = 8 
 						)
 
+				-- Check if lot is involved in an item change. 
+				-- If it is, then update the consume to the new lot id, item id, and item uom id. 
+				BEGIN 
+					UPDATE	ItemsToConsume
+					SET		ItemsToConsume.intItemId = Lot.intItemId
+							,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
+							,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
+							,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
+							,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
+							,ItemsToConsume.intLotId = Lot.intLotId 
+					FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
+								ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
+					WHERE	EXISTS (
+								SELECT	TOP 1 1
+								FROM	#tmpICInventoryTransaction InvTrans
+								WHERE	InvTrans.intLotId = Lot.intLotId 
+										AND InvTrans.intTransactionTypeId = 15
+							)
+							AND Lot.intLotId IS NOT NULL
+				END 
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -249,29 +292,33 @@ BEGIN
 						,intStorageLocationId		
 						,strActualCostId
 				)
-				SELECT 	intItemId  
-						,intItemLocationId 
-						,intItemUOMId  
-						,dtmDate  
-						,dblQty  
-						,dblUOMQty  
-						,dblCost = ISNULL(
-								(SELECT SUM( -1 * dblQty * dblCost ) FROM dbo.tblICInventoryTransaction WHERE strTransactionId = @strTransactionId AND strBatchId = @strBatchId) 
-								/ dblQty
+				SELECT 	ICTrans.intItemId  
+						,ICTrans.intItemLocationId 
+						,ICTrans.intItemUOMId  
+						,ICTrans.dtmDate  
+						,ICTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
+						,dblCost = ISNULL (
+								dbo.fnDivide(
+									(SELECT SUM( dbo.fnMultiply(-1, dbo.fnMultiply(dblQty, dblCost)) ) FROM dbo.tblICInventoryTransaction WHERE strTransactionId = @strTransactionId AND strBatchId = @strBatchId) 
+									, ICTrans.dblQty
+								) 
 								, 0
 							)
-						,dblSalesPrice  
-						,intCurrencyId  
-						,dblExchangeRate  
+						,ICTrans.dblSalesPrice  
+						,ICTrans.intCurrencyId  
+						,ICTrans.dblExchangeRate  
 						,intTransactionId  
-						,intTransactionDetailId  
-						,strTransactionId  
-						,intTransactionTypeId  
-						,intLotId 
-						,intSubLocationId
-						,intStorageLocationId
+						,ICTrans.intTransactionDetailId  
+						,ICTrans.strTransactionId  
+						,ICTrans.intTransactionTypeId  
+						,ICTrans.intLotId 
+						,ICTrans.intSubLocationId
+						,ICTrans.intStorageLocationId
 						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction
+				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON ICTrans.intItemId = ItemUOM.intItemId
+							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	strBatchId = @strBatchId
 						AND (
 							strTransactionForm = 'Produce'
@@ -308,25 +355,31 @@ BEGIN
 						,intStorageLocationId
 						,strActualCostId
 				)
-				SELECT 	intItemId  
-						,intItemLocationId 
-						,intItemUOMId  
-						,dtmDate  
-						,dblQty  
-						,dblUOMQty  
-						,dblCost  = (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId and intItemLocationId = #tmpICInventoryTransaction.intItemLocationId) * dblUOMQty  
-						,dblSalesPrice  
-						,intCurrencyId  
-						,dblExchangeRate  
-						,intTransactionId  
-						,intTransactionDetailId  
-						,strTransactionId  
-						,intTransactionTypeId  
-						,intLotId 
-						,intSubLocationId
-						,intStorageLocationId
+				SELECT 	ICTrans.intItemId  
+						,ICTrans.intItemLocationId 
+						,ICTrans.intItemUOMId  
+						,ICTrans.dtmDate  
+						,ICTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
+						,dblCost  = 
+								dbo.fnMultiply(
+									(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
+									,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
+								)
+						,ICTrans.dblSalesPrice  
+						,ICTrans.intCurrencyId  
+						,ICTrans.dblExchangeRate  
+						,ICTrans.intTransactionId  
+						,ICTrans.intTransactionDetailId  
+						,ICTrans.strTransactionId  
+						,ICTrans.intTransactionTypeId  
+						,ICTrans.intLotId 
+						,ICTrans.intSubLocationId
+						,ICTrans.intStorageLocationId
 						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction 
+				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON ICTrans.intItemId = ItemUOM.intItemId
+							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	strBatchId = @strBatchId
 						AND dblQty < 0 
 					
@@ -363,8 +416,8 @@ BEGIN
 						,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
 						,TransferSource.intItemUOMId  
 						,TransferSource.dtmDate  
-						,TransferSource.dblQty * -1 
-						,TransferSource.dblUOMQty  
+						,dbo.fnMultiply(TransferSource.dblQty, -1) 
+						,ISNULL(ItemUOM.dblUnitQty, TransferSource.dblUOMQty)
 						,TransferSource.dblCost 
 						,0
 						,NULL
@@ -373,9 +426,9 @@ BEGIN
 						,Detail.intInventoryTransferDetailId
 						,Header.strTransferNo
 						,TransferSource.intTransactionTypeId  
-						,Detail.intLotId 
-						,Detail.intFromSubLocationId
-						,Detail.intFromStorageLocationId
+						,Detail.intNewLotId 
+						,Detail.intToSubLocationId
+						,Detail.intToStorageLocationId
 						,strActualCostId = NULL 
 				FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 							ON Header.intInventoryTransferId = Detail.intInventoryTransferId
@@ -386,6 +439,9 @@ BEGIN
 							AND TransferSource.strTransactionId = Header.strTransferNo
 							AND TransferSource.strBatchId = @strBatchId
 							AND TransferSource.dblQty < 0
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON TransferSource.intItemId = ItemUOM.intItemId
+							AND TransferSource.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	Header.strTransferNo = @strTransactionId
 						AND TransferSource.strBatchId = @strBatchId
 
@@ -397,70 +453,27 @@ BEGIN
 					,@ItemsToPost
 			END
 			
-			---- Process Credit Memo
-			--ELSE IF (@strTransactionId LIKE 'SI%' AND @dblQty > 0)
-			--BEGIN 			
-			--	INSERT INTO @ItemsToPost (
-			--			intItemId  
-			--			,intItemLocationId 
-			--			,intItemUOMId  
-			--			,dtmDate  
-			--			,dblQty  
-			--			,dblUOMQty  
-			--			,dblCost  
-			--			,dblSalesPrice  
-			--			,intCurrencyId  
-			--			,dblExchangeRate  
-			--			,intTransactionId  
-			--			,intTransactionDetailId  
-			--			,strTransactionId  
-			--			,intTransactionTypeId  
-			--			,intLotId 
-			--			,intSubLocationId
-			--			,intStorageLocationId	
-			--			,strActualCostId 	
-			--	)
-			--	SELECT 	RebuilInvTrans.intItemId  
-			--			,RebuilInvTrans.intItemLocationId 
-			--			,RebuilInvTrans.intItemUOMId  
-			--			,RebuilInvTrans.dtmDate  
-			--			,RebuilInvTrans.dblQty  
-			--			,RebuilInvTrans.dblUOMQty  
-			--			,dblCost = CASE		WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-			--									dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) 
-			--								ELSE 
-			--									(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId) * RebuilInvTrans.dblUOMQty  
-			--						END 
-			--			,RebuilInvTrans.dblSalesPrice  
-			--			,RebuilInvTrans.intCurrencyId  
-			--			,RebuilInvTrans.dblExchangeRate  
-			--			,RebuilInvTrans.intTransactionId  
-			--			,RebuilInvTrans.intTransactionDetailId  
-			--			,RebuilInvTrans.strTransactionId  
-			--			,RebuilInvTrans.intTransactionTypeId  
-			--			,RebuilInvTrans.intLotId 
-			--			,RebuilInvTrans.intSubLocationId
-			--			,RebuilInvTrans.intStorageLocationId
-			--			,strActualCostId = ISNULL(Receipt.strActualCostId, Invoice.strActualCostId) 
-			--	FROM	#tmpICInventoryTransaction RebuilInvTrans LEFT JOIN dbo.tblICInventoryReceipt Receipt
-			--				ON Receipt.intInventoryReceiptId = RebuilInvTrans.intTransactionId
-			--				AND Receipt.strReceiptNumber = RebuilInvTrans.strTransactionId
-			--			LEFT JOIN dbo.tblARInvoice Invoice
-			--				ON Invoice.intInvoiceId = RebuilInvTrans.intTransactionId
-			--				AND Invoice.strInvoiceNumber = RebuilInvTrans.strTransactionId
-			--	WHERE	strBatchId = @strBatchId
-
-			--	SELECT 'DEBUG @ItemsToPost', * FROM @ItemsToPost WHERE strTransactionId = ''
-
-			--	EXEC dbo.uspICRepostCosting
-			--		@strBatchId
-			--		,@strAccountToCounterInventory
-			--		,@intUserId
-			--		,@strGLDescription
-			--		,@ItemsToPost
-			--END 
 			ELSE 
 			BEGIN 
+								
+				-- Update the cost used in the adjustment 
+				UPDATE	AdjDetail
+				SET		dblCost =	dbo.fnMultiply(
+										CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+													(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
+												ELSE
+													ISNULL(Lot.dblLastCost, 0) 
+										END								
+										,ItemUOM.dblUnitQty 
+									)
+				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+						LEFT JOIN dbo.tblICLot Lot
+							ON AdjDetail.intLotId = Lot.intLotId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
+				WHERE	Adj.strAdjustmentNo = @strTransactionId
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -486,17 +499,60 @@ BEGIN
 						,RebuilInvTrans.intItemUOMId  
 						,RebuilInvTrans.dtmDate  
 						,RebuilInvTrans.dblQty  
-						,RebuilInvTrans.dblUOMQty  
+						,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
 						,dblCost  = CASE WHEN dblQty < 0 THEN 
-											CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+											CASE	WHEN Receipt.intInventoryReceiptId IS NOT NULL THEN 
+														CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
+																WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+									
+																		CASE	
+																				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
+																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
+																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+													
+																				ELSE 
+																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
+																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																		END
+
+																-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
+																ELSE 
+
+																		CASE	
+																				-- It is an non-Lot item. 
+																				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
+																					-- Convert the Cost UOM to Item UOM. 
+																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intUnitMeasureId, ReceiptItem.dblUnitCost) 
+																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+													
+																				-- It is a Lot item. 
+																				ELSE 
+																					-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
+																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.dblUnitCost) 
+																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																		END 
+
+														END
+
+													WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) 
 													ELSE 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId) * dblUOMQty  
+														dbo.fnMultiply(
+															(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId) 
+															,dblUOMQty
+														)
 											END 
 											
-										 WHEN (dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0 AND AdjDetail.dblNewCost IS NULL) THEN 
-											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId) * dblUOMQty  
-
+										 WHEN (dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
+											dbo.fnMultiply (
+												dbo.fnDivide(
+													ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
+													,AdjItemUOM.dblUnitQty
+												)
+												,ItemUOM.dblUnitQty
+											)
+											
+											
 										 WHEN (dblQty > 0 AND strTransactionId LIKE 'SI%' AND dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST) THEN 
 											dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) 
 
@@ -516,7 +572,12 @@ BEGIN
 						,strActualCostId = ISNULL(Receipt.strActualCostId, Invoice.strActualCostId) 
 				FROM	#tmpICInventoryTransaction RebuilInvTrans LEFT JOIN dbo.tblICInventoryReceipt Receipt
 							ON Receipt.intInventoryReceiptId = RebuilInvTrans.intTransactionId
-							AND Receipt.strReceiptNumber = RebuilInvTrans.strTransactionId
+							AND Receipt.strReceiptNumber = RebuilInvTrans.strTransactionId			
+						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+							AND ReceiptItem.intInventoryReceiptItemId = RebuilInvTrans.intTransactionDetailId 
+						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
+							ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
 						LEFT JOIN dbo.tblARInvoice Invoice
 							ON Invoice.intInvoiceId = RebuilInvTrans.intTransactionId
 							AND Invoice.strInvoiceNumber = RebuilInvTrans.strTransactionId
@@ -526,7 +587,20 @@ BEGIN
 						LEFT JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 							AND AdjDetail.intInventoryAdjustmentDetailId = RebuilInvTrans.intTransactionDetailId 
+						LEFT JOIN dbo.tblICItemUOM AdjItemUOM
+							ON AdjDetail.intItemId = AdjItemUOM.intItemId
+							AND AdjDetail.intItemUOMId = AdjItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON RebuilInvTrans.intItemId = ItemUOM.intItemId
+							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	strBatchId = @strBatchId
+
+				--IF @strBatchId IN ('BATCH-7302', 'BATCH-7309', 'BATCH-7310', 'BATCH-7311')
+				--BEGIN 					
+				--	SELECT 'DEBUG 2', @strBatchId, dblQty, dblLastCost, * FROM tblICLot WHERE intLotId IN (3168, 3171)
+				--	SELECT 'DEBUG 2', @strBatchId, * FROM tblICInventoryTransaction WHERE intLotId IN (3168, 3171)
+				--	SELECT 'DEBUG 2', @strBatchId, * FROM @ItemsToPost
+				--END 
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -534,19 +608,6 @@ BEGIN
 					,@intUserId
 					,@strGLDescription
 					,@ItemsToPost
-
-				UPDATE	AdjDetail
-				SET		dblCost =	CASE	WHEN ISNULL(Lot.intLotId, 0) <> 0 THEN Lot.dblLastCost 
-											ELSE (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId)) --AdjDetail.dblCost 
-									END 
-									* ItemUOM.dblUnitQty 
-				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
-							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
-						LEFT JOIN dbo.tblICLot Lot
-							ON AdjDetail.intLotId = Lot.intLotId
-						LEFT JOIN dbo.tblICItemUOM ItemUOM
-							ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
-				WHERE	Adj.strAdjustmentNo = @strTransactionId
 			END 
 
 			-- Re-create the Post g/l entries 
@@ -597,7 +658,7 @@ BEGIN
 				GOTO STOP_QUERY
 			END 
 				
-			-- For Post
+			-- Fix discrepancies when posting Consume and Produce. 
 			IF ISNULL(@ysnPost, 1) = 1
 			BEGIN 
 				PRINT 'Update decimal issue for Produce'
@@ -605,7 +666,14 @@ BEGIN
 				UPDATE	@GLEntries 
 				SET		dblDebit = (SELECT SUM(dblCredit) FROM @GLEntries WHERE strTransactionType = 'Consume') 
 				WHERE	strTransactionType = 'Produce'
+						--AND dblDebit <> 0 
+
+				UPDATE	@GLEntries 
+				SET		dblCredit = (SELECT SUM(dblDebit) FROM @GLEntries WHERE strTransactionType = 'Consume') 
+				WHERE	strTransactionType = 'Produce'
+						--AND dblCredit <> 0 
 			END 							
+
 		END 
 
 		-- Book the G/L Entries
@@ -645,11 +713,35 @@ GO
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Re-close the fiscal year periods
 ------------------------------------------------------------------------------------------------------------------------------------
-UPDATE FYPeriod
-SET ysnOpen = FYPeriodOriginal.ysnOpen
+UPDATE	FYPeriod
+SET		ysnOpen = FYPeriodOriginal.ysnOpen
+		,ysnINVOpen = FYPeriodOriginal.ysnINVOpen
 FROM	tblGLFiscalYearPeriod FYPeriod INNER JOIN tblGLFiscalYearPeriodOriginal FYPeriodOriginal
 			ON FYPeriod.intGLFiscalYearPeriodId = FYPeriodOriginal.intGLFiscalYearPeriodId
 
 DROP TABLE tblGLFiscalYearPeriodOriginal
+
+GO
+
+------------------------------------------------------------------------------------------------------------------------------------
+-- Update the GL Summary 
+------------------------------------------------------------------------------------------------------------------------------------
+
+DELETE [dbo].[tblGLSummary]
+
+INSERT INTO tblGLSummary
+SELECT
+		intAccountId
+		,dtmDate
+		,SUM(ISNULL(dblDebit,0)) as dblDebit
+		,SUM(ISNULL(dblCredit,0)) as dblCredit
+		,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
+		,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
+		,strCode
+		,0 as intConcurrencyId
+FROM
+	tblGLDetail
+WHERE ysnIsUnposted = 0	
+GROUP BY intAccountId, dtmDate, strCode
 
 GO

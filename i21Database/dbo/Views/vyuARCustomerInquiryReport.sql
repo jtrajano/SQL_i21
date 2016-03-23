@@ -3,6 +3,7 @@ AS
 SELECT 
   CAR.strCustomerName
 , CAR.intEntityCustomerId
+, CAR.dbl0Days
 , CAR.dbl10Days
 , CAR.dbl30Days
 , CAR.dbl60Days

@@ -21,6 +21,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dtmReceiptDate
 	, Receipt.intCurrencyId
 	, Currency.strCurrency
+	, Receipt.intSubCurrencyCents 
 	, Receipt.intBlanketRelease
 	, Receipt.strVendorRefNo
 	, Receipt.strBillOfLading

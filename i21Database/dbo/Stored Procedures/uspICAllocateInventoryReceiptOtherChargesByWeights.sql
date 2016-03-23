@@ -81,7 +81,7 @@ BEGIN
 	END 
 END
 
--- Allocate by cost by 'Weight' on cost methods using 'Per Unit' and 'Percentage' 
+-- Allocate cost by 'Weight' regardless if there are contracts and cost methods used are 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
 	MERGE	

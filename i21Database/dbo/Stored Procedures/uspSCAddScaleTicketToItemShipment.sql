@@ -134,6 +134,7 @@ BEGIN
 			,intSubLocationId
 			,dblQuantity
 			,intItemUOMId
+			,intWeightUOMId
 			,dblUnitPrice
 			,intDockDoorId
 			,strNotes
@@ -151,7 +152,8 @@ BEGIN
 			,intItemId				= SC.intItemId
 			,intSubLocationId		= SC.intSubLocationId
 			,dblQuantity			= LI.dblQty
-			,intItemUOMId			= ItemUOM.intItemUOMId
+			,intItemUOMId			= LI.intItemUOMId
+			,intWeightUOMId			= (SELECT intUnitMeasureId from tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
 			--,dblUnitPrice			= LI.dblCost
 			,dblUnitPrice			= SC.dblUnitPrice + SC.dblUnitBasis
 			,intDockDoorId			= NULL

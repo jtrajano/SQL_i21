@@ -7,5 +7,6 @@
     [dtmValidFromDate] DATETIME NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMCurrencyExchangeRateDetail_tblSMCurrencyExchangeRate] FOREIGN KEY (intCurrencyExchangeRateId) REFERENCES tblSMCurrencyExchangeRate(intCurrencyExchangeRateId) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblSMCurrencyExchangeRateDetail_tblSMCurrencyExchangeRateType] FOREIGN KEY (intRateTypeId) REFERENCES tblSMCurrencyExchangeRateType(intCurrencyExchangeRateTypeId)
+    CONSTRAINT [FK_tblSMCurrencyExchangeRateDetail_tblSMCurrencyExchangeRateType] FOREIGN KEY (intRateTypeId) REFERENCES tblSMCurrencyExchangeRateType(intCurrencyExchangeRateTypeId), 
+    CONSTRAINT [AK_tblSMCurrencyExchangeRateDetail_CurrencyExchangeRateTypeValidFromDate] UNIQUE ([intCurrencyExchangeRateId], [intRateTypeId], [dtmValidFromDate])
 )

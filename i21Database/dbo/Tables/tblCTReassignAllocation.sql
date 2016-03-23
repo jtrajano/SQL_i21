@@ -2,6 +2,7 @@
 (
 	intReassignAllocationId	INT IDENTITY (1, 1) NOT NULL,
     intReassignId			INT NOT NULL,
+	intAllocationDetailId	INT,
     intContractDetailId		INT,
     intAllocationUOMId		INT,
     intReassignUOMId		INT,
@@ -12,6 +13,7 @@
     strReassignUOM			NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
     strAllocationUOM		NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
     intConcurrencyId		INT NOT NULL,
+	intReassignUnitMeasureId INT,
     
     PRIMARY KEY CLUSTERED (intReassignAllocationId ASC),
     CONSTRAINT [FK_tblCTReassignAllocation_tblCTReassign_intReassignId] FOREIGN KEY (intReassignId) REFERENCES tblCTReassign(intReassignId) ON DELETE CASCADE,

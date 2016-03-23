@@ -6,6 +6,7 @@ SELECT
 	,[strShippedItemDetailId]				= 'lgis:' + CAST(LGSPS.[intShipmentPurchaseSalesContractId] AS NVARCHAR(250))
 	,[intShipmentId]						= LGSPS.[intShipmentId]
 	,[intShipmentPurchaseSalesContractId]	= LGSPS.[intShipmentPurchaseSalesContractId] 
+	,[intCurrencyId]						= ISNULL(CTCD.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderDetailId]				= NULL
 	,[intInventoryShipmentId]				= NULL	
 	,[intInventoryShipmentItemId]			= NULL	

@@ -1,16 +1,55 @@
 ﻿CREATE VIEW [dbo].[vyuHDSalesRepSummary]
 	AS
-		Select
+with types as
+(
+	select
+		tblHDProject.intInternalSalesPerson
+		,tblHDTicket.strTicketNumber
+		,tblHDTicketType.strType
+	from
+		tblHDProject
+		,tblHDProjectTask
+		,tblHDTicket
+		,tblHDTicketType
+	where
+		tblHDProject.strType = 'CRM'
+		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
+		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+		and tblHDTicketType.intTicketTypeId = tblHDTicket.intTicketTypeId
+),
+so as
+(
+	select
+		tblHDProject.intInternalSalesPerson
+		,tblSOSalesOrder.strSalesOrderNumber
+		,tblSOSalesOrder.strTransactionType
+		,tblSOSalesOrder.strType
+		,tblSOSalesOrder.strOrderStatus
+		,tblSOSalesOrder.dblSalesOrderTotal
+		,tblSOSalesOrder.dblSalesOrderSubtotal
+		,tblSOSalesOrder.dblTax
+		,tblSOSalesOrder.dblAmountDue
+	from
+		tblHDProject
+		,tblHDOpportunityQuote
+		,tblSOSalesOrder
+	where
+		tblHDProject.strType = 'CRM'
+		and tblHDOpportunityQuote.intProjectId = tblHDProject.intProjectId
+		and tblSOSalesOrder.intSalesOrderId = tblHDOpportunityQuote.intSalesOrderId
+)
+
+		Select distinct
 			intId = ROW_NUMBER() over(order by RepName)
 			,RepId
 			,RepName
-			,Calls = count(Calls)
-			,Tasks = count(Tasks)
-			,Meetings = count(Meetings)
-			,Quotes = count(QuoteType)
-			,DollarValueOfQuotes = sum(QuoteAmountDue)
-			,Orders = count(OrderTransactionType)
-			,DollarValueOfOrders = sum(OrderAmountDue)
+			,Calls = (select count(strType) from types where intInternalSalesPerson = RepId and strType = 'Call')
+			,Tasks = (select count(strType) from types where intInternalSalesPerson = RepId and strType = 'Task')
+			,Meetings = (select count(strType) from types where intInternalSalesPerson = RepId and strType = 'Meeting')
+			,Quotes = (select count(strType) from so where intInternalSalesPerson = RepId and strTransactionType = 'Quote')
+			,DollarValueOfQuotes = (select (case when sum(dblAmountDue) is null then 0 else sum(dblAmountDue) end) from so where intInternalSalesPerson = RepId and strTransactionType = 'Quote')
+			,Orders = (select count(strType) from so where intInternalSalesPerson = RepId and strTransactionType = 'Order')
+			,DollarValueOfOrders = (select (case when sum(dblAmountDue) is null then 0 else sum(dblAmountDue) end) from so where intInternalSalesPerson = RepId and strTransactionType = 'Order')
 		From
 		(
 		select
@@ -19,42 +58,11 @@
 			,tblHDProject.intProjectId
 			,tblHDProject.strProjectName
 			,tblHDProject.strProjectStatus
-			,tblHDTicket.strTicketNumber
-			,Calls = calls.strType
-			,Tasks = tasks.strType
-			,Meetings = meetings.strType
-
-			,QuoteSalesOrderId = quotes.intSalesOrderId
-			,QuoteOrderNumber = quotes.strSalesOrderNumber
-			,QuoteTransactionType = quotes.strTransactionType
-			,QuoteType = quotes.strType
-			,QuoteOrderStatus = quotes.strOrderStatus
-			,QuoteOrderTotal = quotes.dblSalesOrderTotal
-			,QuoteOrderSubtotal = quotes.dblSalesOrderSubtotal
-			,QuoteTax = quotes.dblTax
-			,QuoteAmountDue = quotes.dblAmountDue
-
-			,OrderSalesOrderId = orders.intSalesOrderId
-			,OrderOrderNumber = orders.strSalesOrderNumber
-			,OrderTransactionType = orders.strTransactionType
-			,OrderType = orders.strType
-			,OrderOrderStatus = orders.strOrderStatus
-			,OrderOrderTotal = orders.dblSalesOrderTotal
-			,OrderOrderSubtotal = orders.dblSalesOrderSubtotal
-			,OrderTax = orders.dblTax
-			,OrderAmountDue = orders.dblAmountDue
 		from
 			tblHDProject
 			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblHDProject.intInternalSalesPerson
 			left outer join tblEntity on tblEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
-			left outer join tblHDProjectTask on tblHDProjectTask.intProjectId = tblHDProject.intProjectId
-			left outer join tblHDTicket on tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
-			left outer join tblHDTicketType calls on calls.intTicketTypeId = tblHDTicket.intTicketTypeId and calls.strType = 'Call'
-			left outer join tblHDTicketType tasks on tasks.intTicketTypeId = tblHDTicket.intTicketTypeId and tasks.strType = 'Task'
-			left outer join tblHDTicketType meetings on meetings.intTicketTypeId = tblHDTicket.intTicketTypeId and meetings.strType = 'Meeting'
 			left outer join tblHDOpportunityQuote on tblHDOpportunityQuote.intProjectId = tblHDProject.intProjectId
-			left outer join tblSOSalesOrder quotes on quotes.intSalesOrderId = tblHDOpportunityQuote.intSalesOrderId and quotes.strTransactionType = 'Quote'
-			left outer join tblSOSalesOrder orders on orders.intSalesOrderId = tblHDOpportunityQuote.intSalesOrderId and orders.strTransactionType = 'Order'
 		where
 			tblHDProject.strType = 'CRM'
 		) as q1

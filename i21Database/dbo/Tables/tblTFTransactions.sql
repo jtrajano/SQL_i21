@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFTransactions](
 	[intTransactionId] [int] IDENTITY(1,1) NOT NULL,
+	[uniqTransactionGuid] [uniqueidentifier] NULL,
 	[intReportingComponentDetailId] [int] NULL,
 	[pxrpt_trans_rev_dt] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[pxrpt_ord_no] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
@@ -18,7 +19,7 @@
 	[pxrpt_pur_gross_un] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[pxrpt_pur_net_un] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[pxrpt_pur_bal_un] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[pxrpt_sls_trans_gals] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[pxrpt_sls_trans_gals] NUMERIC(18, 6) NULL,
 	[pxpxrpt_sls_sst_exempt_pct] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxAuthorityId] [int] NULL,
 	[strTaxAuthority] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
@@ -28,6 +29,7 @@
 	[strScheduleName] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intProductCodeId] [int] NULL,
 	[strProductCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strProductCodeDescription] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strType] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxClass] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,

@@ -16,7 +16,9 @@ SELECT m.intMatchOptionsPnSId,strTranNo,dtmMatchDate,intMatchQty,e.strName,b.str
 	    JOIN tblCTSubBook scb on scb.intBookId= t1.intBookId ) as  strMSSubBook,
 	    (SELECT TOP 1 dblPrice FROM tblRKOptionsMatchPnS om
 	    JOIN tblRKFutOptTransaction t1 on m.intSFutOptTransactionId= t1.intFutOptTransactionId) as  dblSPrice
-		,c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency
+		,c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,
+		(select Top 1 intFutOptTransactionHeaderId from tblRKFutOptTransaction fft where fft.intFutOptTransactionId=m.intLFutOptTransactionId) intLFutOptTransactionHeaderId,
+		(select Top 1 intFutOptTransactionHeaderId from tblRKFutOptTransaction fft where fft.intFutOptTransactionId=m.intSFutOptTransactionId) intSFutOptTransactionHeaderId
 FROM tblRKOptionsMatchPnS m
 join tblRKFutOptTransaction t on m.intLFutOptTransactionId= t.intFutOptTransactionId
 Join tblEntity e on e.intEntityId=t.intEntityId

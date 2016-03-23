@@ -55,7 +55,9 @@ SELECT
 	C.intFreightTermId,
 	H.strPaymentMethod,
 	B.ysnOneBillPerPayment,
-	B.strFLOId
+	B.strFLOId,
+	E.intCent,
+	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0)
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B

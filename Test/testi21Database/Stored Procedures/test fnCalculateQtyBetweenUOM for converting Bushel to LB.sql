@@ -11,7 +11,7 @@ BEGIN
 	DECLARE @dblQty AS FLOAT = 1
 
 	DECLARE @result AS NUMERIC(38,20) 
-	DECLARE @expected AS NUMERIC(38,20) = 55.99999999999999000000 -- One bushel is 56 LBS but calculations can only compute it as 55.99999999999999000000 lb
+	DECLARE @expected AS NUMERIC(38,20) = 56.00 -- One bushel is 56 LBS 
 	
 	-- Act
 	SELECT @result = dbo.[fnCalculateQtyBetweenUOM](@BUSHEL, @LB, @dblQty)

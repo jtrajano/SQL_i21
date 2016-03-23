@@ -96,7 +96,7 @@ BEGIN
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
 				-- and also compute the Qty if it has weights. 
-				SELECT	@dblReduceQty =	Lot.dblWeightPerQty * @dblQty
+				SELECT	@dblReduceQty =	dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
 						,@intItemUOMId = Lot.intWeightUOMId 
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
@@ -112,7 +112,7 @@ BEGIN
 				WHERE intItemUOMId = @intItemUOMId
 
 				-- Adjust the cost to the new UOM
-				SET @dblCost = @dblCost * @dblUOMQty
+				SET @dblCost = dbo.fnMultiply(@dblCost, @dblUOMQty)
 			END 
 		END 
 

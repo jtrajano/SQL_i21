@@ -18,7 +18,6 @@
 
     PRIMARY KEY CLUSTERED (intReassignPricingId ASC),
     CONSTRAINT [FK_tblCTReassignPricing_tblCTReassign_intReassignId] FOREIGN KEY (intReassignId) REFERENCES tblCTReassign(intReassignId) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblCTReassignPricing_tblCTPriceFixationDetail_intPriceFixationDetailId] FOREIGN KEY (intPriceFixationDetailId) REFERENCES [tblCTPriceFixationDetail](intPriceFixationDetailId),
 	CONSTRAINT [FK_tblCTReassignPricing_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 	CONSTRAINT [FK_tblCTReassignPricing_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),    
 	CONSTRAINT [FK_tblCTReassignPricing_tblICCommodityUnitMeasure_intPriceUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intPriceUOMId]) REFERENCES [tblICCommodityUnitMeasure](intCommodityUnitMeasureId)

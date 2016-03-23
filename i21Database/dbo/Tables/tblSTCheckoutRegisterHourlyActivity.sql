@@ -11,5 +11,5 @@
 	[dblFuelOnlyCustomersSalesAmount] DECIMAL(18, 6) NULL , 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutRegisterHourlyActivity] PRIMARY KEY ([intRegisterHourlyActivityId]), 
-    CONSTRAINT [FK_tblSTCheckoutRegisterHourlyActivity_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) 
+    CONSTRAINT [FK_tblSTCheckoutRegisterHourlyActivity_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE 
 )

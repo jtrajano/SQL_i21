@@ -117,7 +117,10 @@ BEGIN
 		[intTransactionType],
 		[dblDiscount],
 		[dblWithheld],
-		[intStoreLocationId]
+		[intStoreLocationId],
+		[intPayToAddressId],
+		[intSubCurrencyCents]
+		
 	)
 	OUTPUT inserted.intBillId, @receiptId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId)
 	SELECT
@@ -143,7 +146,9 @@ BEGIN
 		[intTransactionType]	=	1,
 		[dblDiscount]			=	0,
 		[dblWithheld]			=	0,
-		[intStoreLocationId]	=	A.intLocationId
+		[intStoreLocationId]	=	A.intLocationId,
+		[intPayToAddressId]		=	A.intShipFromId,
+		[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
 	FROM tblICInventoryReceipt A
 	OUTER APPLY 
 	(
@@ -165,6 +170,8 @@ BEGIN
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[dblTax],
+		[dblRate],
+		[ysnSubCurrency],
 		[intTaxGroupId],
 		[intAccountId],
 		[dblTotal],
@@ -173,6 +180,7 @@ BEGIN
 		[dblNetWeight],
 		[intContractDetailId],
 		[intContractHeaderId],
+		[intUnitOfMeasureId],
 		[intCostUOMId],
 		[intWeightUOMId],
 		[intLineNo]
@@ -187,10 +195,20 @@ BEGIN
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
 		[dblTax]					=	B.dblTax,
+		[dblRate]					=	ISNULL(G.dblRate,0),
+		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
-		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
-		[dblTotal]					=	CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2)),
+		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 --SubCur True
+											 THEN (CASE WHEN B.dblNet > 0 
+														THEN CAST(B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1)  * B.dblNet * ItemCostUOM.dblUnitQty AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1) AS DECIMAL(18,2))  --Calculate Sub-Cur 
+												   END) 
+											 ELSE (CASE WHEN B.dblNet > 0 --SubCur False
+														THEN CAST(B.dblUnitCost * B.dblNet * ItemCostUOM.dblUnitQty  AS DECIMAL(18,2)) --Base Gross/Net UOM 
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost AS DECIMAL(18,2))  --Orig Calculation
+												   END)
+										END,
 		[dblCost]					=	B.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
@@ -200,6 +218,7 @@ BEGIN
 		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
 											ELSE NULL END,
+		[intUnitOfMeasureId]		=	B.intUnitMeasureId,
 		[intCostUOMId]				=	B.intCostUOMId,
 		[intWeightUOMId]			=	B.intWeightUOMId,
 		[intLineNo]					=	ISNULL(B.intSort,0)
@@ -214,6 +233,11 @@ BEGIN
 		ON E.intEntityId = A.intEntityVendorId 
 				AND E.intContractHeaderId = B.intOrderId 
 				AND E1.intContractDetailId = B.intLineNo
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
+	LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A.intCurrencyId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intWeightUOMId
 	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
@@ -233,6 +257,8 @@ BEGIN
 		[dblQtyOrdered]				=	1,
 		[dblQtyReceived]			=	1,
 		[dblTax]					=	0,
+		[dblRate]					=	ISNULL(G.dblRate,0),
+		[ysnSubCurrency]			=	0,
 		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
@@ -241,12 +267,16 @@ BEGIN
 		[dblNetWeight]				=	0,
 		[intContractDetailId]		=	NULL,
 		[intContractHeaderId]		=	A.intContractHeaderId,
+		[intUnitOfMeasureId]		=	NULL,
 		[intCostUOMId]				=	NULL,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = B.intCurrencyId) 
+											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = B.intCurrencyId)
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
@@ -330,4 +360,3 @@ BEGIN
 END
 
 SELECT * FROM #tmpReceiptBillIds
-

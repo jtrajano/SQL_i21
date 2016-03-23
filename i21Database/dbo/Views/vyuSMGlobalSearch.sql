@@ -292,6 +292,22 @@ FROM
 		'' as strSearchCommand
 	from [dbo].[tblICItem] as item
 
+	--Master Menu--
+	union
+	select 
+		'SM' + CONVERT(NVARCHAR, mm.[intMenuID]) as Id,
+		CASE WHEN (CHARINDEX('searchCommand', strCommand, 0) > 0) THEN 
+		SUBSTRING(strCommand,0, CHARINDEX('?searchCommand=', strCommand, 0)) ELSE
+		strCommand END as strNamespace,
+		'Master Menu' as strDisplayTitle,			
+		'' as strValueField,
+		strCommand as strValueData,
+		CONVERT(NVARCHAR(MAX), ISNULL([strMenuName],'')) as strDisplayData,
+		CONVERT(NVARCHAR(MAX), ISNULL([strMenuName],'')) as strTag,		
+		CASE WHEN (CHARINDEX('searchCommand', strCommand, 0) > 0) THEN 
+		REPLACE(SUBSTRING(strCommand, CHARINDEX('searchCommand=', strCommand, 0), LEN(strCommand)) COLLATE Latin1_General_BIN,'searchCommand=','') ELSE
+		'' END as strSearchCommand
+	from [dbo].[tblSMMasterMenu] as mm where strType = 'Screen'
 
 		
 )

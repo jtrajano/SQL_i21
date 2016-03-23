@@ -18,7 +18,7 @@ BEGIN
 	DECLARE @dblCost AS FLOAT = 25.00
 
 	DECLARE @result AS NUMERIC(38,20) 
-	DECLARE @expected AS NUMERIC(38,20) = CAST((@dblCost / @20KGBag_UnitQty * @LBS_UnitQty) AS NUMERIC(38, 16)) -- Equals 0.5669898508816692. (Rounded to 16 decimal places to match windows standard calculator result.)
+	DECLARE @expected AS NUMERIC(38,20) = 0.566989850881669 --- 25.00 * 1 / 44.0925 
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostBetweenUOM(@20KG_BAG, @LBS, @dblCost)

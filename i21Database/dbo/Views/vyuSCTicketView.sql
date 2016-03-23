@@ -103,19 +103,40 @@
        tblSCListTicketTypes.strTicketType,
 	   tblSMCompanyLocation.strLocationName,
 	   tblSMCompanyLocationSubLocation.strSubLocationName,
-	   tblGRStorageType.strStorageTypeDescription
+	   ISNULL(tblGRStorageType.strStorageTypeDescription, 
+	   CASE 
+			WHEN tblSCTicket.strDistributionOption = 'CNT' THEN 'Contract'
+			WHEN tblSCTicket.strDistributionOption = 'LOD' THEN 'Load'
+			WHEN tblSCTicket.strDistributionOption = 'SPT' THEN 'Spot Sale'
+			WHEN tblSCTicket.strDistributionOption = 'SPL' THEN 'Split'
+			WHEN tblSCTicket.strDistributionOption = 'HLD' THEN 'Hold'
+		END) AS strStorageTypeDescription,
+	   tblSCScaleSetup.strStationShortDescription,
+	   tblEntitySplit.strSplitNumber,
+	   tblSCTicketPool.strTicketPool,
+	   tblGRDiscountId.strDiscountId,
+	   tblICStorageLocation.strDescription,
+	   tblGRStorageScheduleRule.strScheduleId
   from ((dbo.tblSCTicket tblSCTicket
-  left join dbo.tblEntity tblEntity
+	left join dbo.tblEntity tblEntity
        on (tblEntity.intEntityId = tblSCTicket.intEntityId)
-  left join dbo.tblSMCompanyLocation
-       tblSMCompanyLocation
+	left join dbo.tblEntitySplit tblEntitySplit
+       on (tblEntitySplit.intSplitId = tblSCTicket.intSplitId)
+	left join dbo.tblSCScaleSetup tblSCScaleSetup
+       on (tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId)
+	left join dbo.tblSMCompanyLocation tblSMCompanyLocation
        on (tblSMCompanyLocation.intCompanyLocationId = tblSCTicket.intProcessingLocationId))
-  left join dbo.tblSCListTicketTypes
-       tblSCListTicketTypes
+	left join dbo.tblSCListTicketTypes tblSCListTicketTypes
        on (tblSCListTicketTypes.intTicketType = tblSCTicket.intTicketType AND tblSCListTicketTypes.strInOutIndicator = tblSCTicket.strInOutFlag)
-  left join dbo.tblGRStorageType
-       tblGRStorageType
+	left join dbo.tblGRStorageType tblGRStorageType
        on (tblGRStorageType.strStorageTypeCode = tblSCTicket.strDistributionOption)
-  left join dbo.tblSMCompanyLocationSubLocation
-       tblSMCompanyLocationSubLocation
+	left join dbo.tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation
        on (tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = tblSCTicket.intSubLocationId))
+	left join dbo.tblSCTicketPool tblSCTicketPool
+       on (tblSCTicketPool.intTicketPoolId = tblSCTicket.intTicketPoolId)
+	left join dbo.tblGRDiscountId tblGRDiscountId
+       on (tblGRDiscountId.intDiscountId = tblSCTicket.intDiscountId)
+	left join dbo.tblICStorageLocation tblICStorageLocation
+       on (tblICStorageLocation.intStorageLocationId = tblSCTicket.intStorageLocationId)
+	left join dbo.tblGRStorageScheduleRule tblGRStorageScheduleRule
+       on (tblGRStorageScheduleRule.intStorageScheduleRuleId = tblSCTicket.intStorageScheduleId)

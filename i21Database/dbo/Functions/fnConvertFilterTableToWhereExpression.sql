@@ -56,8 +56,7 @@ BEGIN
 				 @Condition like '%Period' or
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
-				 @Condition = 'Between' or
-				 @Condition = 'As Of' THEN 'Between'
+				 @Condition = 'Between' THEN 'Between'
 			END + ' '
 			
 		Select @Result +=
@@ -70,11 +69,10 @@ BEGIN
 				 @Condition like '%Period' or
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
-				 @Condition = 'As Of' or
 				 @Condition = 'Between' or
 				 (@Condition = 'Custom' AND @From <> '' AND @To <> '') 
 			THEN '''' + @From + '''' + ' AND ' + '''' + @To + ''''
-			WHEN @Condition = 'Starts With' THEN '''' + @From + '%' + ''''
+			WHEN @Condition = 'Starts With' THEN ' ' + @From + '%' + ''''
 			WHEN @Condition = 'Ends With' THEN '''' + '%' + @From + ''''
 			END + ' '
 		SET @Counter +=1
