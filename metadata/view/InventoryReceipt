@@ -2221,7 +2221,7 @@
                                                                         "dataType": "numeric",
                                                                         "format": "0,000.##",
                                                                         "itemId": "colReceived",
-                                                                        "text": "Received",
+                                                                        "text": "Received so far",
                                                                         "width": 75
                                                                     },
                                                                     "name": "MyNumberColumn2",

@@ -1209,7 +1209,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 75,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblQtyOrdered',
-                                                                                text: 'Received',
+                                                                                text: 'Received so far',
                                                                                 format: '0,000.##'
                                                                             },
                                                                             {
