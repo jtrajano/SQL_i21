@@ -17,9 +17,9 @@ SELECT
 	,[intItemId]							= LGSPS.[intPItemId]
 	,[strItemNo]							= ICI.[strItemNo]
 	,[strItemDescription]					= ICI.[strDescription]
-	,[intItemUOMId]							= CTCD.[intItemUOMId]
-	,[strUnitMeasure]						= ICUM1.[strUnitMeasure]
-	,[intShipmentItemUOMId]					= CTCD.[intPriceItemUOMId]
+	,[intItemUOMId]							= ICUOM.[intItemUOMId]
+	,[strUnitMeasure]						= ICUM.[strUnitMeasure]
+	,[intShipmentItemUOMId]					= ICUOM.[intItemUOMId] 
 	,[strShipmentUnitMeasure]				= ICUM.[strUnitMeasure]
 	,[dblQtyShipped]						= LGSPS.[dblSAllocatedQty]
 	,[dblQtyOrdered]						= LGSPS.[dblSAllocatedQty]
@@ -27,10 +27,10 @@ SELECT
 	,[dblShipmentQtyShippedTotal]			= LGSPS.[dblSAllocatedQty]
 	,[dblQtyRemaining]						= LGSPS.[dblSAllocatedQty]
 	,[dblDiscount]							= 0.00
-	,[dblPrice]								= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],1) * CTCD.[dblCashPrice]
+	,[dblPrice]								= [dbo].[fnCalculateQtyBetweenUOM](ICUOM.[intItemUOMId],CTCD.[intPriceItemUOMId],1) * CTCD.[dblCashPrice]
 	,[dblShipmentUnitPrice]					= CTCD.[dblCashPrice]
 	,[dblTotalTax]							= 0.00
-	,[dblTotal]								= [dbo].[fnCalculateQtyBetweenUOM](CTCD.[intItemUOMId],CTCD.[intPriceItemUOMId],LGSPS.[dblSAllocatedQty]) * CTCD.[dblCashPrice]
+	,[dblTotal]								= [dbo].[fnCalculateQtyBetweenUOM](ICUOM.[intItemUOMId],CTCD.[intPriceItemUOMId],LGSPS.[dblSAllocatedQty]) * CTCD.[dblCashPrice]
 	,[intAccountId]							= ARIA.[intAccountId]
 	,[intCOGSAccountId]						= ARIA.[intCOGSAccountId]
 	,[intSalesAccountId]					= ARIA.[intSalesAccountId]
@@ -39,6 +39,9 @@ SELECT
 	,[strStorageLocationName]				= NULL	
 	,[intTaxGroupId]						= NULL
 	,[strTaxGroup]							= NULL
+	,[dblWeight]							= ICUOM.[dblWeight]
+	,[intWeightUOMId]						= LGSPS.[intWeightUnitMeasureId]
+	,[strWeightUnitMeasure]					= LGSPS.[strWeightUOM] 
 	,[dblGrossWt]							= LGSPS.[dblGrossWt] 
 	,[dblTareWt]							= LGSPS.[dblTareWt] 
 	,[dblNetWt]								= LGSPS.[dblNetWt] 
@@ -51,17 +54,15 @@ INNER JOIN
 	tblICItem ICI
 		ON LGSPS.[intPItemId] = ICI.[intItemId]
 LEFT JOIN
-	tblICItemUOM ICIU
-		ON CTCD.[intPriceItemUOMId] = ICIU.[intItemUOMId]
-LEFT JOIN
 	tblICUnitMeasure ICUM
-		ON ICUM.[intUnitMeasureId] = ICIU.[intUnitMeasureId]		
+		ON LGSPS.[intSUnitMeasureId] = ICUM.[intUnitMeasureId]
+LEFT OUTER JOIN
+	tblICItemUOM ICUOM
+		ON 	LGSPS.[intSItemId] = ICUOM.[intItemId] 
+		AND LGSPS.[intSUnitMeasureId] = ICUOM.[intUnitMeasureId] 
 LEFT JOIN
 	tblICItemUOM ICIU1
-		ON CTCD.[intItemUOMId] = ICIU1.[intItemUOMId]
-LEFT JOIN
-	tblICUnitMeasure ICUM1
-		ON ICUM1.[intUnitMeasureId] = ICIU1.[intUnitMeasureId]				
+		ON CTCD.[intPriceItemUOMId] = ICIU1.[intItemUOMId]						
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
 		ON LGSPS.[intPItemId] = ARIA.[intItemId]

@@ -8,6 +8,8 @@
 	[intOrderUOMId]							INT												NULL,    
     [dblQtyShipped]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intItemUOMId]							INT												NULL,    
+	[dblItemWeight]							NUMERIC(18, 6)									NULL DEFAULT 0,
+	[intItemWeightUOMId]					INT												NULL,    
 	[dblDiscount]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblItemTermDiscount]					NUMERIC(18, 6)									NULL DEFAULT 0,	
     [dblPrice]								NUMERIC(18, 6)									NULL DEFAULT 0,
