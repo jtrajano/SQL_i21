@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFTaxReportSummary](
 	[intTaxReportSummary] [int] IDENTITY(1,1) NOT NULL,
-	[uniqGuid] [uniqueidentifier] NULL,
+	[uniqGuid] [uniqueidentifier] NOT NULL,
 	[intTaxAuthorityId] [int] NOT NULL,
 	[strTaxAuthority] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strFormCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
