@@ -241,6 +241,7 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'dblTotal,','0 as dblTotal,')
 	SELECT @cols1 = REPLACE (@cols1,'strTransactionId,',''''' as strTransactionId,')
 	SELECT @cols1 = REPLACE (@cols1,'intTransactionId,','0 as intTransactionId,')
+	
 
 	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
 	BEGIN
@@ -259,14 +260,16 @@ BEGIN
 		)
 		SELECT ' + @cols1 + ' FROM cte1 union all select ' + @cols + ' from cteBase '
 	END
-
 	IF @strAccountIdFrom IS NOT NULL  AND @strPrimaryCodeFrom IS NULL
 	BEGIN
 	SET @sqlCte +=
 		',cteInactive (accountid, id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + ISNULL(@strAccountIdTo,'') + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
+			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND ''' +
+			ISNULL(@strAccountIdTo,@strAccountIdFrom) + '''
+
+			
 			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
 			GROUP BY strAccountId
 		),
@@ -284,7 +287,7 @@ BEGIN
 		',cteInactive (accountid, id)AS
 		(
 			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + ISNULL(@strPrimaryCodeTo,'') + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
+			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND ''' + ISNULL(@strPrimaryCodeTo,@strPrimaryCodeFrom)  + '''
 			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
 			GROUP BY strAccountId
 		),
