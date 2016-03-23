@@ -27,7 +27,7 @@ BEGIN TRY
 	WHILE (@intMinId IS NOT NULL)
 	BEGIN
 		SET @intLotId = 0
-		SET @intShipmentItemId = 0
+		SET @intShipmentItemId = NULL
 		SET @dblLotQty = 0
 		SET @intLotItemId = 0
 
