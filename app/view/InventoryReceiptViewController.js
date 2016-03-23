@@ -840,7 +840,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{vendor}'
                     }
                 },
-                colChargeAmount: 'dblAmount',
+                 colChargeAmount: {
+                    dataIndex: 'dblAmount',
+                    editor:{
+                        disabled:'{disableAmount}'
+                    }
+                },
                 colAllocateCostBy: {
                     dataIndex: 'strAllocateCostBy',
                     editor: {
