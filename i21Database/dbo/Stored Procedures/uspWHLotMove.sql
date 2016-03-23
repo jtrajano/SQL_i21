@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @strNewLotNumber NVARCHAR(50)
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
+	DECLARE @dblLotQty INT 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@dblWeightPerQty NUMERIC(38, 20)
 		,@intWeightUOMId INT
