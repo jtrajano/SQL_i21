@@ -10,11 +10,11 @@ AS
 
 BEGIN
 
-	DECLARE @TransactionType_TransportLoad NVARCHAR = 'Transport Load'
+	DECLARE @TransactionType_TransportLoad NVARCHAR(50) = 'Transport Load'
 
-	DECLARE @SourceType_InventoryReceipt NVARCHAR = 'Inventory Receipt'
-	DECLARE @SourceType_InventoryTransfer NVARCHAR = 'Inventory Transfer'
-	DECLARE @SourceType_Invoice NVARCHAR = 'Invoice'
+	DECLARE @SourceType_InventoryReceipt NVARCHAR(50) = 'Inventory Receipt'
+	DECLARE @SourceType_InventoryTransfer NVARCHAR(50) = 'Inventory Transfer'
+	DECLARE @SourceType_Invoice NVARCHAR(50) = 'Invoice'
 
 	IF (@TransactionType = @TransactionType_TransportLoad)
 	BEGIN
