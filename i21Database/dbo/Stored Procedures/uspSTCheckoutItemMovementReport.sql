@@ -1,6 +1,4 @@
-﻿<<<<<<< HEAD
-
-CREATE PROCEDURE [dbo].[uspSTCheckoutItemMovementReport]
+﻿CREATE PROCEDURE [dbo].[uspSTCheckoutItemMovementReport]
 	@BeginDate Datetime,
 	@EndDate Datetime
 AS

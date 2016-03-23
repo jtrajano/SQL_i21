@@ -127,6 +127,7 @@ BEGIN TRY
 		,strMarks
 		,intCompanyLocationSubLocationId
 		,strCountry
+		,intItemBundleId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -169,6 +170,7 @@ BEGIN TRY
 		,strMarks
 		,intCompanyLocationSubLocationId
 		,strCountry
+		,intItemBundleId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -209,6 +211,7 @@ BEGIN TRY
 			,strMarks NVARCHAR(100)
 			,intCompanyLocationSubLocationId INT
 			,strCountry NVARCHAR(100)
+			,intItemBundleId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
