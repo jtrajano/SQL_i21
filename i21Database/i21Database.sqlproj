@@ -3012,7 +3012,6 @@
     <Build Include="dbo\Tables\tblTRLoadHeader.sql" />
     <Build Include="dbo\Tables\tblTRLoadReceipt.sql" />
     <Build Include="dbo\Views\vyuTRLoadHeader.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponents.sql" />
@@ -3040,7 +3039,6 @@
     <Build Include="dbo\Tables\tblSTCheckoutImportSapphireData.sql" />
     <Build Include="dbo\Views\vyuMFGetItemStockDetail.sql" />
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRDeleteTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
@@ -3157,7 +3155,6 @@
     <Build Include="dbo\Views\vyuCFInvoiceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
     <Build Include="dbo\Views\vyuTRLinkedReceipts.sql" />
     <Build Include="dbo\Views\vyuTMETExportConsumptionSite.sql" />
     <Build Include="dbo\Views\vyuTMETExportConsumptionSiteInstruction.sql" />
@@ -3201,7 +3198,6 @@
     <Build Include="dbo\Stored Procedures\uspAPUnpostCostAdjustmentGL.sql" />
     <Build Include="dbo\Stored Procedures\uspCTShipped.sql" />
     <Build Include="dbo\Views\vyuMFGetParentLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRDeleteLoadHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerTotalAR.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDirectDeposit.sql" />
