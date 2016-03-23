@@ -586,6 +586,8 @@ SELECT
 	,[strItemDescription]				= ICI.[strDescription] 
 	,[intItemUOMId]						= ICISC.[intCostUOMId]
 	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
+	,[strOrderUnitMeasure]				= ''
+	,[intShipmentItemUOMId]				= NULL		
 	,[intShipmentItemUOMId]				= ICISC.[intCostUOMId]
 	,[strShipmentUnitMeasure]			= ICUM.[strUnitMeasure]
 	,[dblQtyShipped]					= 1 	
