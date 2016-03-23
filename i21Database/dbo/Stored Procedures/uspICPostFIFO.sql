@@ -210,7 +210,7 @@ BEGIN
 			IF @QtyOffset IS NOT NULL
 			BEGIN 				
 				-- Add Write-Off Sold				
-				SET @dblValue = (@QtyOffset * ISNULL(@CostUsed, 0))
+				SET @dblValue = dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
@@ -240,7 +240,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
 				-- Add Revalue sold
-				SET @dblValue = (@QtyOffset * ISNULL(@dblCost, 0) * -1) 
+				SET @dblValue = dbo.fnMultiply(dbo.fnMultiply(@QtyOffset, ISNULL(@dblCost, 0)), -1) 
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId

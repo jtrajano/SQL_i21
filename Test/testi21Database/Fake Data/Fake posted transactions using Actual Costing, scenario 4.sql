@@ -298,23 +298,23 @@ BEGIN
 		)
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = 1
-				,dblAverageCost = 2.00
+				,dblAverageCost = 0.00 -- Actual costing does not compute average cost. 
 		UNION ALL 
 		SELECT 	intItemId = @StickyGrains
 				,intItemLocationId = 2
-				,dblAverageCost = 2.00
+				,dblAverageCost = 0.00 -- Actual costing does not compute average cost. 
 		UNION ALL 
 		SELECT 	intItemId = @PremiumGrains
 				,intItemLocationId = 3
-				,dblAverageCost = 2.00
+				,dblAverageCost = 0.00 -- Actual costing does not compute average cost. 
 		UNION ALL 
 		SELECT 	intItemId = @ColdGrains
 				,intItemLocationId = 4
-				,dblAverageCost = 2.00
+				,dblAverageCost = 0.00 -- Actual costing does not compute average cost. 
 		UNION ALL 
 		SELECT 	intItemId = @HotGrains
 				,intItemLocationId = 5
-				,dblAverageCost = 2.00
+				,dblAverageCost = 0.00 -- Actual costing does not compute average cost. 
 
 		------------------------------
 		-- Add the ActualCost out records
@@ -728,13 +728,13 @@ BEGIN
 		----------------------------------------------------------------
 		-- Fake data for tblICItemPricing 
 		----------------------------------------------------------------
-		UPDATE	tblICItemPricing
-		SET		dblAverageCost = 2.15
-		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemStock.intItemId = ItemLocation.intItemId
-					AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
-		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
+		--UPDATE	tblICItemPricing
+		--SET		dblAverageCost = 0.00
+		--FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
+		--			ON ItemStock.intItemId = ItemLocation.intItemId
+		--			AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
+		--WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+		--		AND ItemLocation.intLocationId = @Default_Location
 
 		----------------------------------------------------------------
 		-- Fake data for tblICInventoryActualCost

@@ -155,6 +155,7 @@ BEGIN
 				,intFreightUOMId		= IntegrationData.intFreightUOMId
 				,ysnPosted				= 0
 				,intEntityId			= @intEntityUserSecurityId
+				,strActualCostId		= IntegrationData.strActualCostId
 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -172,6 +173,7 @@ BEGIN
 				,intFreightUOMId	
 				,ysnPosted			
 				,intEntityId
+				,strActualCostId
 			)
 			VALUES (
 				/*strTransferNo*/			@inventoryTransferNumber		
@@ -188,6 +190,7 @@ BEGIN
 				/*intFreightUOMId*/			,IntegrationData.intFreightUOMId
 				/*ysnPosted*/				,0
 				/*intEntityId*/				,@intEntityUserSecurityId
+				/*strActualCostId*/			,IntegrationData.strActualCostId
 			)			
 		;
 				

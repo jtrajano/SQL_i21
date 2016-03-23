@@ -167,8 +167,9 @@ DECLARE  @Id									INT
 		,@Inventory								BIT
 		,@ItemDocumentNumber					NVARCHAR(100)
 		,@ItemDescription						NVARCHAR(250)
-		,@ItemUOMId								INT
+		,@OrderUOMId							INT
 		,@ItemQtyOrdered						NUMERIC(18, 6)
+		,@ItemUOMId								INT
 		,@ItemQtyShipped						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemTermDiscount						NUMERIC(18, 6)
@@ -285,8 +286,9 @@ BEGIN
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
 		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL([strDocumentNumber],[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
-		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
+		,@OrderUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
 		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
+		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
 		,@ItemQtyShipped				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyShipped] ELSE NULL END)
 		,@ItemDiscount					= (CASE WHEN @GroupingOption = 0 THEN [dblDiscount] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
@@ -437,8 +439,9 @@ BEGIN
 			,@ItemIsInventory				= @Inventory
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
-			,@ItemUOMId						= @ItemUOMId
+			,@OrderUOMId					= @OrderUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
+			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
@@ -550,8 +553,9 @@ BEGIN
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
-					,@ItemUOMId						= [intItemUOMId]
+					,@OrderUOMId					= [intOrderUOMId]					
 					,@ItemQtyOrdered				= [dblQtyOrdered]
+					,@ItemUOMId						= [intItemUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
@@ -608,8 +612,9 @@ BEGIN
 						,@RaiseError					= @RaiseError
 						,@ItemDocumentNumber			= @ItemDocumentNumber
 						,@ItemDescription				= @ItemDescription
-						,@ItemUOMId						= @ItemUOMId
+						,@OrderUOMId					= @OrderUOMId
 						,@ItemQtyOrdered				= @ItemQtyShipped
+						,@ItemUOMId						= @ItemUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
 						,@ItemPrice						= @ItemPrice
@@ -1062,8 +1067,9 @@ BEGIN TRY
 						,@Inventory						= [ysnInventory]
 						,@ItemDocumentNumber			= [strDocumentNumber]
 						,@ItemDescription				= [strItemDescription]
-						,@ItemUOMId						= [intItemUOMId]
+						,@OrderUOMId					= [intOrderUOMId]
 						,@ItemQtyOrdered				= [dblQtyOrdered]
+						,@ItemUOMId						= [intItemUOMId]
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
@@ -1119,8 +1125,9 @@ BEGIN TRY
 							,@RaiseError					= @RaiseError
 							,@ItemDocumentNumber			= @ItemDocumentNumber
 							,@ItemDescription				= @ItemDescription
-							,@ItemUOMId						= @ItemUOMId
+							,@OrderUOMId					= @OrderUOMId
 							,@ItemQtyOrdered				= @ItemQtyShipped
+							,@ItemUOMId						= @ItemUOMId
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
@@ -1273,8 +1280,9 @@ BEGIN TRY
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
-					,@ItemUOMId						= [intItemUOMId]
+					,@OrderUOMId					= [intOrderUOMId]
 					,@ItemQtyOrdered				= [dblQtyOrdered]
+					,@ItemUOMId						= [intItemUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
@@ -1372,8 +1380,9 @@ BEGIN TRY
 						 [intItemId]							= @ItemId
 						,[strDocumentNumber]					= @ItemDocumentNumber
 						,[strItemDescription]					= @ItemDescription
-						,[intItemUOMId]							= @ItemUOMId
+						,[intOrderUOMId]						= @OrderUOMId
 						,[dblQtyOrdered]						= @ItemQtyOrdered
+						,[intItemUOMId]							= @ItemUOMId
 						,[dblQtyShipped]						= @ItemQtyShipped
 						,[dblDiscount]							= @ItemDiscount
 						,[dblItemTermDiscount]					= @ItemTermDiscount

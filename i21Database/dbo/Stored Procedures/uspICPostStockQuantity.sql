@@ -56,7 +56,7 @@ BEGIN
 			SELECT	intItemId = @intItemId
 					,intItemLocationId = @intItemLocationId
 					,Qty =	CASE	WHEN @intLotWeightUOMId IS NOT NULL AND @intItemUOMId <> @intLotWeightUOMId THEN 
-										dbo.fnCalculateStockUnitQty(@dblQty * @dblWeightPerQty, @dblWeightUnitQty) 
+										dbo.fnCalculateStockUnitQty(dbo.fnMultiply(@dblQty, @dblWeightPerQty), @dblWeightUnitQty) 
 									ELSE 
 										dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
 							END 
@@ -159,7 +159,7 @@ BEGIN
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
 							,intStorageLocationId = @intStorageLocationId
-							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN @dblQty / Lot.dblWeightPerQty -- Stock is in weights, then convert it to packs. 
+							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN dbo.fnDivide(@dblQty, Lot.dblWeightPerQty) -- Stock is in weights, then convert it to packs. 
 											ELSE @dblQty
 									END 
 					FROM	dbo.tblICLot Lot 
@@ -177,7 +177,7 @@ BEGIN
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
 							,intStorageLocationId = @intStorageLocationId
-							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert packs to weight. 
+							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN dbo.fnMultiply(@dblQty, Lot.dblWeightPerQty) -- Stock is in packs, then convert packs to weight. 
 											ELSE @dblQty
 									END 
 					FROM	dbo.tblICLot Lot 
@@ -195,7 +195,7 @@ BEGIN
 							,intSubLocationId = @intSubLocationId 
 							,intStorageLocationId = @intStorageLocationId
 							,Qty =	dbo.fnCalculateStockUnitQty(
-										CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert the qty to weight. 
+										CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN dbo.fnMultiply(@dblQty, Lot.dblWeightPerQty) -- Stock is in packs, then convert the qty to weight. 
 												ELSE @dblQty -- else it is in weights. Keep using the weight qty. 
 										END 
 										,LotWeightUOM.dblUnitQty								

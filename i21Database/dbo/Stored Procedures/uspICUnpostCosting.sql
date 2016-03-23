@@ -55,6 +55,7 @@ DECLARE @intItemId AS INT
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS DECIMAL (38, 20) 
 		,@strTransactionForm AS NVARCHAR(255)
+		,@intCostingMethod AS INT
 
 -- Get the list of items to unpost
 BEGIN 
@@ -70,17 +71,19 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			,intInventoryTransactionId
+			,intCostingMethod
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
 			,ItemTrans.intItemUOMId
 			,ItemTrans.intLotId
-			,-1 * ISNULL(ItemTrans.dblQty, 0) 
+			,dbo.fnMultiply(-1, ISNULL(ItemTrans.dblQty, 0)) 
 			,ItemTrans.dblCost
 			,ItemTrans.dblUOMQty		
 			,ItemTrans.intSubLocationId
 			,ItemTrans.intStorageLocationId
 			,ItemTrans.intInventoryTransactionId
+			,ItemTrans.intCostingMethod
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
@@ -241,10 +244,10 @@ BEGIN
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
 			,[dtmDate]								= ActualTransaction.dtmDate
-			,[dblQty]								= ActualTransaction.dblQty * -1
+			,[dblQty]								= dbo.fnMultiply(ActualTransaction.dblQty, -1) 
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
-			,[dblValue]								= ActualTransaction.dblValue * -1
+			,[dblValue]								= dbo.fnMultiply(ActualTransaction.dblValue, -1)
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
@@ -299,7 +302,7 @@ BEGIN
 			,[intSubLocationId]			= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
 			,[dtmDate]					= ActualTransaction.dtmDate
-			,[dblQty]					= ActualTransaction.dblQty * -1
+			,[dblQty]					= dbo.fnMultiply(ActualTransaction.dblQty, -1) 
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost
 			,[intTransactionId]			= ActualTransaction.intTransactionId
@@ -355,6 +358,7 @@ BEGIN
 					,dblUOMQty 
 					,dblCost
 					,intLotId 
+					,intCostingMethod
 			FROM	@ItemsToUnpost
 
 			OPEN loopItemsToUnpost;	
@@ -369,7 +373,8 @@ BEGIN
 				,@dblQty 
 				,@dblUOMQty 
 				,@dblCost
-				,@intLotId;
+				,@intLotId
+				,@intCostingMethod;
 
 			-----------------------------------------------------------------------------------------------------------------------------
 			-- Start of the loop
@@ -378,14 +383,16 @@ BEGIN
 			BEGIN 
 
 				-- Recalculate the average cost from the inventory transaction table. 
+				-- Except on Actual Costing. Do not compute the average cost when doing actual costing.
 				UPDATE	ItemPricing
 				SET		dblAverageCost = ISNULL(
 							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
 							, dblAverageCost
 						) 
-				FROM	dbo.tblICItemPricing AS ItemPricing 
+				FROM	dbo.tblICItemPricing ItemPricing	
 				WHERE	ItemPricing.intItemId = @intItemId
-						AND ItemPricing.intItemLocationId = @intItemLocationId			
+						AND ItemPricing.intItemLocationId = @intItemLocationId
+						AND ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				EXEC [dbo].[uspICPostStockQuantity]
@@ -407,7 +414,8 @@ BEGIN
 					,@dblQty 
 					,@dblUOMQty 
 					,@dblCost
-					,@intLotId;
+					,@intLotId
+					,@intCostingMethod;
 			END;
 
 			-----------------------------------------------------------------------------------------------------------------------------
@@ -453,7 +461,7 @@ BEGIN
 				,intStorageLocationId
 				,intInventoryTransactionId
 		FROM	@ItemsToUnpost
-		WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST				
+		WHERE	ISNULL(intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) = @AVERAGECOST
 				AND dblQty > 0 
 
 		SELECT	TOP 1 
@@ -517,7 +525,8 @@ BEGIN
 					,[dblQty]								= 0
 					,[dblUOMQty]							= 0
 					,[dblCost]								= 0
-					,[dblValue]								= (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+					,[dblValue]								=	dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
+																- dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) 
 					,[dblSalesPrice]						= 0
 					,[intCurrencyId]						= @intCurrencyId
 					,[dblExchangeRate]						= @dblExchangeRate
@@ -548,7 +557,7 @@ BEGIN
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 			WHERE	ItemPricing.intItemId = @intItemId
 					AND ItemPricing.intItemLocationId = @intItemLocationId			
-					AND ROUND((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
+					AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
 
 			-- Delete the item and item-location from the table variable. 
 			DELETE FROM	@ItemsForAutoNegative

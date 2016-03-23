@@ -7,8 +7,9 @@
 	,@RaiseError					BIT				= 0		
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@ItemUOMId						INT				= NULL
+	,@OrderUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
@@ -81,8 +82,9 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@RaiseError					= @RaiseError
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
-			,@ItemUOMId						= @ItemUOMId
+			,@OrderUOMId					= @OrderUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
+			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
@@ -152,6 +154,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[intItemId]
 				,[strItemDescription]
 				,[strDocumentNumber]
+				,[intOrderUOMId]
 				,[intItemUOMId]
 				,[intContractHeaderId]
 				,[intContractDetailId]
@@ -174,6 +177,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,intItemId
 				,@ItemDescription
 				,@ItemDocumentNumber
+				,@OrderUOMId
 				,@ItemUOMId
 				,@ItemContractHeaderId
 				,@ItemContractDetailId

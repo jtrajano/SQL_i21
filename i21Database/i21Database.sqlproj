@@ -3558,6 +3558,8 @@
     <Build Include="dbo\Stored Procedures\uspARSplitInvoice.sql" />
     <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
+    <Build Include="dbo\Views\vyuAROrderUOM.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3693,5 +3695,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\16_PaymentMethod.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountType.sql" />
   </ItemGroup>
 </Project>

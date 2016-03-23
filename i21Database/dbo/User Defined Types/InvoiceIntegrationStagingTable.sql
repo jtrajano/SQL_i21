@@ -63,8 +63,9 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
     ,[ysnInventory]							BIT												NULL		-- Indicate whether the line item is a inventory item or a miscellaneous item
 	,[strDocumentNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Document Number (Transaction Number(Provisional Invoice/Inbound Shipment/Inventory Shipment))
     ,[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Line Item Description(If NULL the item's description will be used)
-	,[intItemUOMId]							INT												NULL		-- The UOM Id
+	,[intOrderUOMId]						INT												NULL		-- The order UOM Id
     ,[dblQtyOrdered]						NUMERIC(18, 6)									NULL		-- The quantity ordered
+	,[intItemUOMId]							INT												NULL		-- The UOM Id
     ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price

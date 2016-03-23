@@ -136,6 +136,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- General Ledger
 :r .\GL\DefaultData\1_AccountStructure.sql
+:r .\GL\DefaultData\1_AccountType.sql
 :r .\GL\DefaultData\2_AccountGroup.sql
 :r .\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql
 :r .\GL\DefaultData\3_AccountCategory.sql
@@ -186,6 +187,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\16_FixInvoicePostDate.sql
 :r .\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql
 :r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
+:r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
