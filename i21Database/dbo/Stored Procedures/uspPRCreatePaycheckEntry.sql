@@ -202,8 +202,8 @@ FROM
 intEmployeeEarningId = CASE WHEN (intEmployeeEarningLinkId IS NULL) 
 								THEN intEmployeeEarningId 
 							ELSE 
-								(SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
-								 WHERE intTypeEarningId = E.intEmployeeEarningLinkId AND [intEntityEmployeeId] = @intEmployee) 
+								ISNULL((SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+								 WHERE intTypeEarningId = E.intEmployeeEarningLinkId AND [intEntityEmployeeId] = @intEmployee), intEmployeeEarningId)
 							END
 ,dblAmount = dblRateAmount
 ,strCalculationType
