@@ -644,6 +644,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblWeight]						= 0.00
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= ''
 	,[dblGrossWt]						= 0
 	,[dblTareWt]						= 0
 	,[dblNetWt]							= 0
