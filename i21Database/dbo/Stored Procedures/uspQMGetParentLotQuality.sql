@@ -2,6 +2,8 @@
 	@strStart NVARCHAR(10) = '0'
 	,@strLimit NVARCHAR(10) = '1'
 	,@strFilterCriteria NVARCHAR(MAX) = ''
+	,@strSortField NVARCHAR(MAX) = 'intSampleId'
+	,@strSortDirection NVARCHAR(5) = 'DESC'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -109,6 +111,8 @@ BEGIN TRY
 
 	IF (LEN(@strFilterCriteria) > 0)
 		SET @SQL = @SQL + ' and ' + @strFilterCriteria
+
+	SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
 
 	EXEC sp_executesql @SQL
 END TRY
