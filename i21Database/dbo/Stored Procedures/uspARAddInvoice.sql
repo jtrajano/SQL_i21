@@ -491,7 +491,7 @@ SELECT
 	,IE.strSourceId
 	,@intFreightItemUOMId										--[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
-	,@intItemUOMId												--[intItemUOMId]
+	,@intFreightItemUOMId										--[intItemUOMId]
 	,IE.dblQty  												--[dblQtyShipped]
 	,dblPrice = CASE		
 					WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0

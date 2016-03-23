@@ -173,7 +173,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[dblQtyShipped]
 	,[intItemUOMId]
 	,[dblDiscount]
-	,[dblDiscountAmount]
+	,[dblItemTermDiscount]
 	,[dblPrice]
 	,[strPricing]
 	,[dblTotalTax]
@@ -230,7 +230,7 @@ SELECT
 	,[dblQtyShipped]						= ARSI.[dblShipmentQuantity] 
 	,[intItemUOMId]							= ARSI.[intShipmentItemUOMId] 
 	,[dblDiscount]							= ARSI.[dblDiscount]
-	,[dblDiscountAmount]					= @ZeroDecimal 
+	,[dblItemTermDiscount]					= @ZeroDecimal 
 	,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
 	,[strPricing]							= 'Inventory Shipment'
 	,[dblTotalTax]							= ARSI.[dblTotalTax] 
