@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspWHStagePickForKitting 
 				@intPickListDetailId INT, 
 				@intPickedLotId INT, 
-				@dblPickedQty NUMERIC(18, 6), 
+				@dblPickedQty NUMERIC(38,20), 
 				@intUserId INT, 
 				@intLocationId INT
 AS
@@ -51,7 +51,7 @@ BEGIN TRY
 
 	IF @intItemUOMId = @intItemIssuedUOMId
 	BEGIN
-		SET @dblPickedQty = @dblPickedQty/@dblPickedLotWeightPerUnit
+		SET @dblPickedQty = dbo.fnDivide(@dblPickedQty,@dblPickedLotWeightPerUnit)
 	END
 
 	INSERT INTO tblWHPickForKitting (intPickListId, strPickListNo, intPickListDetailId, intPickListLotId, intPickedLotId, dblPickListQty, dblPickedQty, intUserId)
