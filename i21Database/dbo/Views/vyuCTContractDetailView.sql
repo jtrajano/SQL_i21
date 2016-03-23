@@ -101,6 +101,7 @@ AS
 						ELSE	0
 				END		AS BIT
 			)	AS		ysnEarlyDayPassed,
+			CAST(CASE WHEN IM.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) AS ysnBundleItem,
 
 			--Header Detail
 
