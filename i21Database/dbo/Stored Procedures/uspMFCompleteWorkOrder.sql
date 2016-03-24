@@ -71,6 +71,7 @@ BEGIN TRY
 		,@strInstantConsumption nvarchar(50)
 		,@ysnConsumptionRequired bit
 		,@ysnPostConsumption bit
+		,@strInputQuantityReadOnly nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -427,6 +428,31 @@ BEGIN TRY
 			,@intDepartmentId
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
+
+		SELECT @intAttributeId = NULL
+
+		SELECT @intAttributeId = intAttributeId
+		FROM dbo.tblMFAttribute
+		WHERE strAttributeName = 'Is Input Quantity Read Only'
+
+		SELECT @strInputQuantityReadOnly = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = @intAttributeId
+	
+		IF @strInputQuantityReadOnly = 'True'
+		BEGIN
+			
+			SELECT @dblInputWeight = ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)
+			FROM dbo.tblMFRecipeItem ri
+			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			LEFT JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+			WHERE r.intItemId = @intItemId
+				AND r.intLocationId = @intLocationId
+				AND r.ysnActive = 1
+				AND (ri.intItemId = @intInputLotItemId OR rs.intSubstituteItemId=@intInputLotItemId)
+		END
 
 		INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 			intWorkOrderId
