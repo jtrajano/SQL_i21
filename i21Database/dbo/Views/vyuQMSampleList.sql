@@ -8,7 +8,8 @@ SELECT S.intSampleId
 	,I1.strItemNo AS strBundleItemNo
 	,I.strItemNo
 	,I.strDescription
-	,C.strContainerNumber
+	--,C.strContainerNumber
+	,S.strContainerNumber
 	,SH.intTrackingNumber
 	,S.strLotNumber
 	,SS.strStatus
@@ -19,7 +20,17 @@ SELECT S.intSampleId
 	,S.strSamplingMethod
 	,S.dtmTestedOn
 	,U.strUserName AS strTestedUserName
+	,LS.strSecondaryStatus AS strLotStatus
+	,S.strCountry
 	,S.dblSampleQty
+	,UM.strUnitMeasure AS strSampleUOM
+	,S.dblRepresentingQty
+	,UM1.strUnitMeasure AS strRepresentingUOM
+	,S.strMarks
+	,CS.strSubLocationName
+	,S.dtmTestingStartDate
+	,S.dtmTestingEndDate
+	,S.dtmSamplingEndDate
 	,S.intContractDetailId
 	,ST.intSampleTypeId
 	,CH.intContractHeaderId
@@ -27,6 +38,7 @@ SELECT S.intSampleId
 	,SH.intShipmentId
 	,ISNULL(L.intLotId, (SELECT TOP 1 intLotId FROM tblICLot WHERE intParentLotId = PL.intParentLotId)) AS intLotId
 	,S.intSampleUOMId
+	,S.intRepresentingUOMId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -40,3 +52,7 @@ LEFT JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = S.intTestedBy
 LEFT JOIN dbo.tblEntity E ON E.intEntityId = S.intEntityId
 LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId = 6
 LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = S.intProductValueId AND S.intProductTypeId = 11
+LEFT JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = S.intLotStatusId
+LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+LEFT JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intSampleUOMId
+LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUOMId
