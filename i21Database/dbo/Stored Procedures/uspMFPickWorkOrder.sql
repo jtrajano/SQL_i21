@@ -48,6 +48,8 @@ BEGIN TRY
 		,@strPackagingCategory NVARCHAR(50)
 		,@strReqQty NVARCHAR(50)
 		,@strQty NVARCHAR(50)
+		,@dtmBusinessDate datetime
+		,@intBusinessShiftId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -121,7 +123,16 @@ BEGIN TRY
 		,ysnSubstituteItem BIT
 		,dblSubstituteRatio NUMERIC(18, 6)
 		,dblMaxSubstituteRatio NUMERIC(18, 6)
+		,intStorageLocationId int
 		)
+
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime,@intLocationId) 
+
+	SELECT @intBusinessShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
+					AND @dtmBusinessDate+dtmShiftEndTime + intEndOffset
 
 	SELECT @intRecipeId = intRecipeId
 	FROM dbo.tblMFWorkOrderRecipe a
@@ -141,6 +152,9 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmLastModified
 		,intLastModifiedUserId
+		,intShiftId 
+		,dtmActualInputDateTime
+		,intStorageLocationId 
 		)
 	SELECT WI.intWorkOrderId
 		,WI.intItemId
@@ -155,6 +169,9 @@ BEGIN TRY
 		,WI.intCreatedUserId
 		,WI.dtmLastModified
 		,WI.intLastModifiedUserId
+		,WI.intShiftId 
+		,WI.dtmProductionDate 
+		,WI.intStorageLocationId 
 	FROM dbo.tblMFWorkOrderInputLot WI
 	JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
@@ -346,6 +363,7 @@ BEGIN TRY
 				,ysnSubstituteItem
 				,dblSubstituteRatio
 				,dblMaxSubstituteRatio
+				,intStorageLocationId
 				)
 			SELECT L.strLotNumber
 				,L.intLotId
@@ -387,6 +405,7 @@ BEGIN TRY
 				,1 AS ysnSubstituteItem
 				,SI.dblSubstituteRatio
 				,SI.dblMaxSubstituteRatio
+				,L.intStorageLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
@@ -422,6 +441,7 @@ BEGIN TRY
 			,intItemUOMId
 			,intItemIssuedUOMId
 			,ysnSubstituteItem
+			,intStorageLocationId
 			)
 		SELECT L.strLotNumber
 			,L.intLotId
@@ -461,6 +481,7 @@ BEGIN TRY
 				END
 			,L.intItemUOMId
 			,0 AS ysnSubstituteItem
+			,L.intStorageLocationId
 		FROM dbo.tblICLot L
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			AND SL.ysnAllowConsume = 1
@@ -654,6 +675,7 @@ BEGIN TRY
 				,intItemUOMId
 				,intItemIssuedUOMId
 				,ysnSubstituteItem
+				,intStorageLocationId
 				)
 			SELECT L.strLotNumber
 				,L.intLotId
@@ -693,6 +715,7 @@ BEGIN TRY
 					END
 				,L.intItemUOMId
 				,0 AS ysnSubstituteItem
+				,L.intStorageLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
@@ -848,6 +871,9 @@ BEGIN TRY
 					,intCreatedUserId
 					,dtmLastModified
 					,intLastModifiedUserId
+					,intShiftId 
+					,dtmActualInputDateTime
+					,intStorageLocationId 
 					)
 				SELECT @intWorkOrderId
 					,@intItemId
@@ -869,6 +895,9 @@ BEGIN TRY
 					,@intUserId
 					,@dtmCurrentDateTime
 					,@intUserId
+					,@intBusinessShiftId
+					,@dtmBusinessDate
+					,intStorageLocationId 
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
 
@@ -946,6 +975,9 @@ BEGIN TRY
 					,intCreatedUserId
 					,dtmLastModified
 					,intLastModifiedUserId
+					,intShiftId 
+					,dtmActualInputDateTime
+					,intStorageLocationId 
 					)
 				SELECT @intWorkOrderId
 					,@intItemId
@@ -967,6 +999,9 @@ BEGIN TRY
 					,@intUserId
 					,@dtmCurrentDateTime
 					,@intUserId
+					,@intBusinessShiftId
+					,@dtmBusinessDate
+					,intStorageLocationId 
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
 

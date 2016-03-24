@@ -16,7 +16,7 @@ BEGIN
 
 	IF @strAttributeValue='True'
 	BEGIN
-		SELECT W.intWorkOrderConsumedLotId,
+		SELECT W.intWorkOrderConsumedLotId As intWorkOrderInputLotId,
 			L.intLotId 
 			,L.strLotNumber
 			,I.strItemNo
@@ -31,8 +31,8 @@ BEGIN
 			,W.intWorkOrderId
 			,SL.intStorageLocationId
 			,SL.strName AS strStorageLocationName
-			,W.intMachineId
-			,M.strName AS strMachineName
+			,ISNULL(W.intMachineId,0)intMachineId
+			,ISNULL(M.strName,'') AS strMachineName
 			,W.ysnConsumptionReversed
 			,W.strReferenceNo
 			,W.dtmActualInputDateTime
