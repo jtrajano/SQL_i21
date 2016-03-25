@@ -89,6 +89,8 @@ BEGIN TRY
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@ysnPostConsumption = 1
 				,@intBatchId = @intBatchId
+
+			EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
 		End
 	End
 
