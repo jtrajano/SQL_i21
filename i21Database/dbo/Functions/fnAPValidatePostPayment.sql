@@ -317,7 +317,7 @@ BEGIN
 		INNER JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
 		WHERE C.intEntityVendorId <> A.intEntityVendorId
-		AND A.[intPaymentId] IN (SELECT A.[intPaymentId] FROM @paymentIds)
+		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 
 		--DO NOT ALLOW TO POST DEBIT MEMOS AND PAYMENTS IF AMOUNT PAID IS NOT EQUAL TO ZERO
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
