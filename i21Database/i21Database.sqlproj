@@ -3567,6 +3567,7 @@
     <Build Include="dbo\Tables\tblLGLoadContainer.sql" />
     <Build Include="dbo\Tables\tblLGLoadDocuments.sql" />
     <Build Include="dbo\Tables\tblLGLoadWarehouseServices.sql" />
+    <Build Include="dbo\Functions\fnQMGetShipperName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

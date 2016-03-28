@@ -21,6 +21,8 @@ SELECT TR.intTestResultId
 	,E.strName
 	,SS.strStatus
 	,S.intSampleId
+	,(SELECT strShipperCode from dbo.fnQMGetShipperName(S.strMarks)) AS strShipperCode
+	,(SELECT strShipperName from dbo.fnQMGetShipperName(S.strMarks)) AS strShipperName
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
