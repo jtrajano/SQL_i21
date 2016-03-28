@@ -22,7 +22,7 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblCost', text: 'Cost', allowSort: false, flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblBeginningBalance', text: 'Beginning Balance', allowSort: false, flex: 1.2, dataType: 'float' },
                 { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblValue', text: 'Value', allowSort: false, flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblRunningBalance', text: 'Running Balance', allowSort: false, flex: 1.2, dataType: 'float' },
+                { xtype: 'numbercolumn', format: '#,##0.00', summaryType: 'sum', dataIndex: 'dblRunningBalance', text: 'Running Balance', allowSort: false, flex: 1.2, dataType: 'float' },
                 { dataIndex: 'strBatchId', text: 'Batch Id', flex: 1, dataType: 'string' }
             ],
             showNew: false,
