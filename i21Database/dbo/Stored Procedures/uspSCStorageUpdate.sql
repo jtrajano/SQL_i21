@@ -42,7 +42,7 @@ DECLARE @intCommodityId AS INT
 DECLARE @matchStorageType AS INT
 DECLARE @ysnIsStorage AS INT
 DECLARE @intContractHeaderId INT
-
+DECLARE @strLotTracking NVARCHAR(4000)
 
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
@@ -735,29 +735,33 @@ BEGIN TRY
 	CONTINUEISH:
 
 	IF @PostShipment = 2
-	BEGIN
-			-- Validate the items to shipment 
-		EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
+		BEGIN
+				-- Validate the items to shipment 
+			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
-		---- Add the items into inventory shipment > sales order type. 
-		IF @strSourceType = @SALES_ORDER
-		BEGIN 
-			EXEC dbo.uspSCAddScaleTicketToItemShipment 
-				  @intTicketId
-				 ,@intUserId
-				 ,@ItemsForItemShipment
-				 ,@intEntityId
-				 ,4
-				 ,@InventoryShipmentId OUTPUT;
+			---- Add the items into inventory shipment > sales order type. 
+			IF @strSourceType = @SALES_ORDER
+			BEGIN 
+				EXEC dbo.uspSCAddScaleTicketToItemShipment 
+					  @intTicketId
+					 ,@intUserId
+					 ,@ItemsForItemShipment
+					 ,@intEntityId
+					 ,4
+					 ,@InventoryShipmentId OUTPUT;
+			END
+			BEGIN 
+			SELECT	@strTransactionId = ship.strShipmentNumber
+			FROM	dbo.tblICInventoryShipment ship	        
+			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+			END
+			SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+			IF @strLotTracking = 'No'
+			BEGIN
+				EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			END
+		
 		END
-		BEGIN 
-		SELECT	@strTransactionId = ship.strShipmentNumber
-		FROM	dbo.tblICInventoryShipment ship	        
-		WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
-		END
-		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
-	END
-
 	END
 
 END TRY

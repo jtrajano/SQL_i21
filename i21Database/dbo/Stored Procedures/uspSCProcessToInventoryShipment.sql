@@ -44,6 +44,7 @@ DECLARE @intScaleStationId AS INT
 DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
+DECLARE @strLotTracking AS NVARCHAR(100)
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -287,9 +288,11 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	END
-
-	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
-
+	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+	if @strLotTracking = 'No'
+		BEGIN
+			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+		END
 	_Exit:
 
 END TRY
