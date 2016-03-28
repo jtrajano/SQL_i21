@@ -2036,7 +2036,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
     <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
-    <Build Include="dbo\Views\vyuTRTansportReceipt.sql" />
+    <Build Include="dbo\Views\vyuTRTransportReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignFutureTransaction.sql" />
