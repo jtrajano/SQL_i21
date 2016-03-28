@@ -708,6 +708,20 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             else {
                 return 'Weight Gain/Loss: 0.00';
             }
+        },
+        
+        disableAmount: function (get) {
+            switch (get('grdCharges.selection.strCostMethod')) {
+                case 'Per Unit':
+                    return true;
+                    break;
+                case 'Percentage':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
         }
     }
 
