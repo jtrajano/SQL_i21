@@ -55,7 +55,7 @@ BEGIN
 		(
 			SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference
 		) BaseCurrency
-		WHERE A.intPaymentId IN (SELECT intPaymentId FROM @paymentIds) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId
+		WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
@@ -328,7 +328,7 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
-		WHERE A.[intPaymentId] IN (SELECT [intPaymentId] FROM @paymentIds)
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.dblAmountPaid = 0
 		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
 
