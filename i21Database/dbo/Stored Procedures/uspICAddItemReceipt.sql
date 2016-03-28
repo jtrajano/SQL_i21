@@ -213,6 +213,7 @@ BEGIN
 				,intShipFromId			= IntegrationData.intShipFromId
 				,intReceiverId			= @intUserId 
 				,intCurrencyId			= IntegrationData.intCurrencyId
+				,intSubCurrencyCents	= IntegrationData.intSubCurrencyCents
 				,strVessel				= NULL
 				,intFreightTermId		= NULL
 				,intShiftNumber			= NULL 
@@ -248,6 +249,7 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
+				,intSubCurrencyCents
 				,strVessel
 				,intFreightTermId
 				,intShiftNumber
@@ -283,6 +285,7 @@ BEGIN
 				/*intShipFromId*/				,IntegrationData.intShipFromId
 				/*intReceiverId*/				,@intUserId 
 				/*intCurrencyId*/				,IntegrationData.intCurrencyId
+				/*intSubCurrencyCents*/			,IntegrationData.intSubCurrencyCents
 				/*strVessel*/					,NULL
 				/*intFreightTermId*/			,NULL
 				/*intShiftNumber*/				,NULL 
@@ -351,6 +354,7 @@ BEGIN
 				,dblNet
 				,intCostUOMId
 				,intDiscountSchedule
+				,ysnSubCurrency
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -384,6 +388,7 @@ BEGIN
 				,dblNet					= RawData.dblNet
 				,intCostUOMId			= RawData.intCostUOMId
 				,intDiscountSchedule	= RawData.intDiscountSchedule
+				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0) 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -413,6 +418,7 @@ BEGIN
 				,[strAllocateCostBy]
 				,[ysnAccrue]
 				,[ysnPrice]
+				,[ysnSubCurrency]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -427,6 +433,7 @@ BEGIN
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
 				,[ysnAccrue]				= RawData.ysnAccrue
 				,[ysnPrice]					= RawData.ysnPrice
+				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -685,8 +692,16 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
-		SET		dblTax = ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0), 2) 
-		FROM	dbo.tblICInventoryReceiptItem ReceiptItem LEFT JOIN (
+		SET		dblTax = ROUND(
+					dbo.fnDivide(
+						ISNULL(Taxes.dblTaxPerLineItem, 0)
+						,ISNULL(Receipt.intSubCurrencyCents, 1) 
+					)
+				, 2) 
+
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN (
 					SELECT	dblTaxPerLineItem = SUM(ReceiptItemTax.dblTax) 
 							,ReceiptItemTax.intInventoryReceiptItemId
 					FROM	dbo.tblICInventoryReceiptItemTax ReceiptItemTax INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -695,13 +710,53 @@ BEGIN
 					GROUP BY ReceiptItemTax.intInventoryReceiptItemId
 				) Taxes
 					ON ReceiptItem.intInventoryReceiptItemId = Taxes.intInventoryReceiptItemId
-		WHERE	ReceiptItem.intInventoryReceiptId = @inventoryReceiptId
+		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
-		SET		dblLineTotal = ROUND(ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0), 2)
-		FROM	dbo.tblICInventoryReceiptItem ReceiptItem
-		WHERE	intInventoryReceiptId = @inventoryReceiptId
+		SET		dblLineTotal = 
+					ROUND(
+						ISNULL(dblTax, 0) + 
+						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+									dbo.fnMultiply(
+										ISNULL(ReceiptItem.dblNet, 0)
+										,dbo.fnMultiply(
+											dbo.fnDivide(
+												ISNULL(dblUnitCost, 0) 
+												,ISNULL(Receipt.intSubCurrencyCents, 1) 
+											)
+											,dbo.fnDivide(
+												GrossNetUOM.dblUnitQty
+												,CostUOM.dblUnitQty 
+											)
+										)
+									)								 
+								ELSE 
+									dbo.fnMultiply(
+										ISNULL(ReceiptItem.dblOpenReceive, 0)
+										,dbo.fnMultiply(
+											dbo.fnDivide(
+												ISNULL(dblUnitCost, 0) 
+												,ISNULL(Receipt.intSubCurrencyCents, 1) 
+											)
+											,dbo.fnDivide(
+												ReceiveUOM.dblUnitQty
+												,CostUOM.dblUnitQty 
+											)
+										)
+									)
+						END 
+						, 2
+					) 
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN dbo.tblICItemUOM ReceiveUOM 
+					ON ReceiveUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+				LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
+					ON GrossNetUOM.intItemUOMId = ReceiptItem.intWeightUOMId
+				LEFT JOIN dbo.tblICItemUOM CostUOM
+					ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 					
+		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
 		-- Re-update the total cost 
 		UPDATE	Receipt

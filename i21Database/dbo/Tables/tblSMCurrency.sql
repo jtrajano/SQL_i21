@@ -15,7 +15,11 @@
     CONSTRAINT [PK_SMCurrency_CurrencyID] PRIMARY KEY CLUSTERED ([intCurrencyID] ASC),
     CONSTRAINT [AK_tblSMCurrency_strCurrencyID] UNIQUE NONCLUSTERED ([strCurrency] ASC)
 );
+GO 
 
+CREATE NONCLUSTERED INDEX [IX_tblSMCurrency_intMainCurrencyId]
+    ON [dbo].[tblSMCurrency]([intMainCurrencyId] ASC);
+GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

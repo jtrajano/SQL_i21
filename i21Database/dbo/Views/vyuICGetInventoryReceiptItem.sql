@@ -48,9 +48,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, strCostUOM = CostUOM.strUnitMeasure
 	, dblCostUOMConvFactor = ISNULL(ItemCostUOM.dblUnitQty, 0)
 	, ReceiptItem.ysnSubCurrency
-	--, ReceiptItem.intCurrencyId
-	--, Currency.strCurrency
-	--, ReceiptItem.intCent
+	, strSubCurrency = SubCurrency.strCurrency
 	, dblGrossMargin = (
 		CASE	WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
 				ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
@@ -82,4 +80,4 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItem.intGradeId
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ReceiptItem.intDiscountSchedule
-	--LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ReceiptItem.intCurrencyId
+	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = Receipt.intCurrencyId
