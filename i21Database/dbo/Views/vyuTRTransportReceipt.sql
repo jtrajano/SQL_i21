@@ -4,9 +4,7 @@ CREATE VIEW [dbo].[vyuTRTransportReceipt]
 SELECT    
 	TL.intTransportLoadId,
 	TR.intTransportReceiptId,
-    CT.intContractHeaderId,
 	TR.intContractDetailId,
-	CT.strContractNumber,
 	TL.strTransaction,
 	dblOrderedQuantity  = CASE
 								  WHEN isNull(LG.dblQuantity,0) = 0 and SP.strGrossOrNet = 'Net'
@@ -29,17 +27,13 @@ FROM
 		ON TL.intTransportLoadId = TR.intTransportLoadId 
     JOIN dbo.tblTRSupplyPoint SP
 	     ON SP.intSupplyPointId = TR.intSupplyPointId
-	LEFT JOIN dbo.vyuCTContractDetailView CT 
-	    on TR.intContractDetailId = CT.intContractDetailId
-    LEFT JOIN dbo.vyuLGLoadView LG
+	LEFT JOIN dbo.tblLGLoad LG
 	    on LG.intLoadId = TL.intLoadId
 UNION ALL
 SELECT    
 	TL.intLoadHeaderId "intTransportLoadId",
 	TR.intLoadReceiptId "intTransportReceiptId",
-    CT.intContractHeaderId,
 	TR.intContractDetailId,
-	CT.strContractNumber,
 	TL.strTransaction,
 	dblOrderedQuantity  = CASE
 								  WHEN isNull(LG.dblQuantity,0) = 0 and SP.strGrossOrNet = 'Net'
@@ -56,17 +50,11 @@ SELECT
 								  THEN TR.dblNet
 								  END
 FROM
-    
-	 dbo.tblTRLoadHeader TL
+	dbo.tblTRLoadHeader TL
 	JOIN dbo.tblTRLoadReceipt TR
 		ON TL.intLoadHeaderId = TR.intLoadHeaderId 
     JOIN dbo.tblTRSupplyPoint SP
 	     ON SP.intSupplyPointId = TR.intSupplyPointId
-	LEFT JOIN dbo.vyuCTContractDetailView CT 
-	    on TR.intContractDetailId = CT.intContractDetailId
-    LEFT JOIN dbo.vyuLGLoadView LG
+	LEFT JOIN dbo.tblLGLoad LG
 	    on LG.intLoadId = TL.intLoadId		
 	
-	
-
-
