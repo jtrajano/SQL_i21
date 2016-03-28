@@ -32,6 +32,9 @@
 	[ysnUpdateLoadDirections] [bit] NULL,
 	[ysnPrintLoadDirections] [bit] NULL,
 
+	[strVendorReference] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strCustomerReference] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblLGLoadDetail_tblEntity_intVendorEntityId] FOREIGN KEY ([intVendorEntityId]) REFERENCES [tblEntity]([intEntityId]),
