@@ -93,7 +93,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblQtyToReceive = dblDetailQuantity - (dblDetailQuantity - dblBalance)
 		, intLoadToReceive = intNoOfLoad - intLoadReceived
 		, dblCashPrice
-		, 0
+		, dblTax = 0
 		, dblLineTotal = 0
 		, strLotTracking
 		, intCommodityId
@@ -169,7 +169,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblQtyToReceive = dblQuantity - dblReceivedQty
 		, intLoadToReceive = 0
 		, dblCost
-		, 0
+		, dblTax = 0
 		, dblLineTotal = 0
 		, strLotTracking
 		, intCommodityId
@@ -248,7 +248,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblQtyToReceive = dblQuantity
 		, intLoadToReceive = 0
 		, dblCost = dblLastCost
-		, 0
+		, dblTax = 0
 		, dblLineTotal = 0
 		, strLotTracking
 		, intCommodityId
