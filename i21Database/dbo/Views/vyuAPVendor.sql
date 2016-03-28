@@ -56,8 +56,9 @@ SELECT
 	H.strPaymentMethod,
 	B.ysnOneBillPerPayment,
 	B.strFLOId,
-	E.intCent,
-	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0)
+	intCent = CASE WHEN (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId) IS NOT NULL THEN 0 ELSE E.intCent END,
+	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0),
+	intSubCurrencyCent = (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId)
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B
