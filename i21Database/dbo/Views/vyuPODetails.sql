@@ -5,6 +5,7 @@ SELECT
  ,B.intPurchaseDetailId
  ,B.intPurchaseId
  ,A.strPurchaseOrderNumber
+ ,A.intCurrencyId
  ,B.intItemId
  ,B.intUnitOfMeasureId
  ,B.intAccountId
