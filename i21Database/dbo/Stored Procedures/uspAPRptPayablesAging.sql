@@ -134,6 +134,8 @@ BEGIN
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 	END  
+	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
+	SET @dateTo = @dtmDateTo;
 END
 ELSE
 BEGIN
@@ -295,7 +297,7 @@ SET @query = '
 ) MainQuery'
 
 
-SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), GETDATE(), 110) + '''');
+SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF ISNULL(@filter,'') != ''
 BEGIN
