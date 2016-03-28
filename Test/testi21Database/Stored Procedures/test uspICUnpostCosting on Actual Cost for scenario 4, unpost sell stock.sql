@@ -302,26 +302,26 @@ BEGIN
 	---------------------------------------------------------------------------------
 	-- Expect the original revalue and write-off transactions to be marked as unposted
 	UNION ALL 
-	SELECT	intItemId 
-			,intItemLocationId 
-			,intItemUOMId
-			,dtmDate 
-			,dblQty 
-			,dblUOMQty
-			,dblCost 
-			,dblValue 
-			,dblSalesPrice 
-			,intTransactionId 
-			,strTransactionId 
-			,strBatchId
-			,tblICInventoryTransaction.intTransactionTypeId 
+	SELECT	InvTrans.intItemId 
+			,InvTrans.intItemLocationId 
+			,InvTrans.intItemUOMId
+			,InvTrans.dtmDate 
+			,InvTrans.dblQty 
+			,InvTrans.dblUOMQty
+			,InvTrans.dblCost 
+			,InvTrans.dblValue 
+			,InvTrans.dblSalesPrice 
+			,InvTrans.intTransactionId 
+			,InvTrans.strTransactionId 
+			,InvTrans.strBatchId
+			,InvTrans.intTransactionTypeId 
 			,ysnIsUnposted = 1
-			,intRelatedInventoryTransactionId 
-			,intRelatedTransactionId 
-			,strRelatedTransactionId 
-			,ICType.strTransactionForm 
-	FROM	dbo.tblICInventoryTransaction INNER JOIN dbo.tblICInventoryTransactionType ICType
-				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
+			,InvTrans.intRelatedInventoryTransactionId 
+			,InvTrans.intRelatedTransactionId 
+			,InvTrans.strRelatedTransactionId 
+			,InvTrans.strTransactionForm
+	FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICInventoryTransactionType ICType
+				ON InvTrans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
 			AND strRelatedTransactionId = @strTransactionId
 			AND ICType.strName <> 'Inventory Auto Variance'			
@@ -343,14 +343,14 @@ BEGIN
 			,intTransactionId 
 			,strTransactionId 
 			,strBatchId = @strBatchId
-			,tblICInventoryTransaction.intTransactionTypeId 
+			,InvTrans.intTransactionTypeId 
 			,ysnIsUnposted = 1
 			,intRelatedInventoryTransactionId = intInventoryTransactionId
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,ICType.strTransactionForm 
-	FROM	dbo.tblICInventoryTransaction INNER JOIN dbo.tblICInventoryTransactionType ICType
-				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
+			,InvTrans.strTransactionForm 
+	FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICInventoryTransactionType ICType
+				ON InvTrans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
 			AND strRelatedTransactionId = @strTransactionId
 			AND ICType.strName <> 'Inventory Auto Variance'
@@ -365,27 +365,27 @@ BEGIN
 	)
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = 1
-			,dblAverageCost = 2.15
+			,dblAverageCost = 0.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @StickyGrains
 			,intItemLocationId = 2
-			,dblAverageCost = 2.15
+			,dblAverageCost = 0.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @PremiumGrains
 			,intItemLocationId = 3
-			,dblAverageCost = 2.15
+			,dblAverageCost = 0.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @ColdGrains
 			,intItemLocationId = 4
-			,dblAverageCost = 2.15
+			,dblAverageCost = 0.00
 			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @HotGrains
 			,intItemLocationId = 5
-			,dblAverageCost = 2.15
+			,dblAverageCost = 0.00
 			,dblUnitOnHand = 100
 			
 	-- Setup the expected ActualCost data
@@ -642,7 +642,7 @@ BEGIN
 			,intRelatedInventoryTransactionId 
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,ICType.strTransactionForm 
+			,Trans.strTransactionForm
 	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType ICType
 				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	(

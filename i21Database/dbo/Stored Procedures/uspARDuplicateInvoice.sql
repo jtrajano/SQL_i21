@@ -72,7 +72,7 @@ SELECT
 	,@EntityCustomerId				= [intEntityCustomerId]
 	,@CompanyLocationId				= [intCompanyLocationId]
 	,@CurrencyId					= [intCurrencyId]
-	--,@SubCurrencyCents				= [intSubCurrencyCents]
+	,@SubCurrencyCents				= [intSubCurrencyCents]
 	,@TermId						= [intTermId]
 	,@Date							= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
 	,@DueDate						= NULL	--[dtmDueDate]
@@ -165,7 +165,7 @@ BEGIN TRY
 		 @EntityCustomerId						= @EntityCustomerId
 		,@CompanyLocationId						= @CompanyLocationId
 		,@CurrencyId							= @CurrencyId
-		--,@SubCurrencyCents						= @SubCurrencyCents
+		,@SubCurrencyCents						= @SubCurrencyCents
 		,@TermId								= @TermId
 		,@EntityId								= @EntityId
 		,@InvoiceDate							= @Date
@@ -243,7 +243,7 @@ BEGIN TRY
 		,@ItemPerformerId						= NULL
 		,@ItemLeaseBilling						= 0
 		,@ItemVirtualMeterReading				= 0
-		--,@SubCurrency							= 0
+		,@SubCurrency							= 0
 
 END TRY
 BEGIN CATCH
@@ -274,7 +274,7 @@ BEGIN TRY
 		,[strPricing]
 		,[dblTotalTax]
 		,[dblTotal]
-		--,[ysnSubCurrency]
+		,[ysnSubCurrency]
 		,[intAccountId]
 		,[intCOGSAccountId]
 		,[intSalesAccountId]
@@ -291,7 +291,7 @@ BEGIN TRY
 		,[strSCInvoiceNumber]
 		,[strSCBudgetDescription]
 		,[intInventoryShipmentItemId]
-		--,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeId]
 		,[strShipmentNumber]
 		,[intSalesOrderDetailId]
 		,[strSalesOrderNumber]
@@ -332,7 +332,7 @@ BEGIN TRY
 		,[strPricing]					= [strPricing]
 		,[dblTotalTax]					= [dblTotalTax]
 		,[dblTotal]						= [dblTotal]
-		--,[ysnSubCurrency]				= [ysnSubCurrency]
+		,[ysnSubCurrency]				= [ysnSubCurrency]
 		,[intAccountId]					= [intAccountId]
 		,[intCOGSAccountId]				= [intCOGSAccountId]
 		,[intSalesAccountId]			= [intSalesAccountId]
@@ -349,7 +349,7 @@ BEGIN TRY
 		,[strSCInvoiceNumber]			= ''
 		,[strSCBudgetDescription]		= ''
 		,[intInventoryShipmentItemId]	= NULL
-		--,[intInventoryShipmentChargeId]	= NULL
+		,[intInventoryShipmentChargeId]	= NULL
 		,[strShipmentNumber]			= ''
 		,[intSalesOrderDetailId]		= NULL
 		,[strSalesOrderNumber]			= ''

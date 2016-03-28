@@ -92,7 +92,7 @@ BEGIN
 		,dtmDate
 		,dtmDueDate
 		,intCurrencyId
-		--,intSubCurrencyCents
+		,intSubCurrencyCents
 		,intCompanyLocationId
 		,intEntitySalespersonId
 		,dtmShipDate
@@ -142,7 +142,7 @@ BEGIN
 		,@InvoiceDate
 		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
 		,intCurrencyId
-		--,(CASE WHEN ISNULL(intSubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = intCurrencyId),1) ELSE 1 END)
+		,(CASE WHEN ISNULL(intSubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = intCurrencyId),1) ELSE 1 END)
 		,intCompanyLocationId
 		,[intEntitySalespersonId]
 		,@InvoiceDate
@@ -257,7 +257,7 @@ BEGIN
 								,[dblPrice]
 								,[dblTotalTax]
 								,[dblTotal]
-								--,[ysnSubCurrency]
+								,[ysnSubCurrency]
 								,[intAccountId]
 								,[intCOGSAccountId]
 								,[intSalesAccountId]
@@ -296,7 +296,7 @@ BEGIN
 								,[dblPrice]      * @dblSplitPercent
 								,[dblTotalTax]   * @dblSplitPercent
 								,[dblTotal]      * @dblSplitPercent
-								--,@SubCurrency
+								,@SubCurrency
 								,[intAccountId] 
 								,[intCOGSAccountId] 
 								,[intSalesAccountId]
@@ -399,7 +399,7 @@ BEGIN
 						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 						,@ItemShipmentQtyShipped		= [dblShipmentQtyShipped]
 						,@EntitySalespersonId			= [intEntitySalespersonId]
-						--,@SubCurrency					= [ysnSubCurrency]
+						,@SubCurrency					= [ysnSubCurrency]
 					FROM
 						tblARInvoiceDetail
 					WHERE
@@ -432,7 +432,7 @@ BEGIN
 						,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 						,@ItemLicenseAmount				= @ItemLicenseAmount
 						,@ItemTaxGroupId				= @ItemTaxGroupId		
-						--,@SubCurrency					= @SubCurrency		
+						,@SubCurrency					= @SubCurrency		
 						IF LEN(ISNULL(@ErrorMessage,'')) > 0
 							BEGIN
 								RAISERROR(@ErrorMessage, 11, 1);

@@ -295,6 +295,30 @@ SET @batchIdUsed = @batchId
 				WHERE
 					B.intPaymentId IS NULL
 					AND A.dblAmountPaid = 0
+
+				--Unposted Invoice(s)
+				INSERT INTO   
+					@ARReceivableInvalidData  
+				SELECT  
+					'Invoice ' + ARI.strInvoiceNumber + ' is not posted!'  
+					,'Receivable'  
+					,ARP.strRecordNumber  
+					,@batchId  
+					,ARP.intPaymentId  
+				FROM  
+					tblARPaymentDetail ARPD   
+				INNER JOIN   
+					tblARPayment ARP  
+						ON ARPD.intPaymentId = ARP.intPaymentId  
+				INNER JOIN
+					tblARInvoice ARI
+						ON ARPD.intInvoiceId = ARI.intInvoiceId
+				INNER JOIN  
+					@ARReceivablePostData P  
+						ON ARP.intPaymentId = ARP.intPaymentId
+				WHERE
+					ISNULL(ARPD.dblPayment,0.00) <> 0.00
+					AND ISNULL(ARI.ysnPosted,0) = 0
 					
 				--Return Payment not allowed
 				INSERT INTO

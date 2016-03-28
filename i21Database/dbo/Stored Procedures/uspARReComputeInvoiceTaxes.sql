@@ -15,11 +15,12 @@ DECLARE @ZeroDecimal	DECIMAL(18,6)
 
 SET @ZeroDecimal = 0.000000	
 
-DECLARE @CustomerId					INT
+DECLARE  @CustomerId				INT
 		,@LocationId				INT
 		,@TransactionDate			DATETIME
 		,@DistributionHeaderId		INT
-		,@CustomerLocationId			INT
+		,@CustomerLocationId		INT
+		,@SubCurrencyCents			INT
 						
 SELECT
 	@CustomerId				= I.[intEntityCustomerId]
@@ -27,6 +28,7 @@ SELECT
 	,@TransactionDate		= I.[dtmDate]
 	,@DistributionHeaderId	= I.[intDistributionHeaderId]
 	,@CustomerLocationId	= (CASE WHEN ISNULL(F.[strFobPoint],'Destination') = 'Origin ' THEN I.[intBillToLocationId] ELSE I.[intShipToLocationId] END)
+	,@SubCurrencyCents		= ISNULL(I.[intSubCurrencyCents],1)
 FROM
 	tblARInvoice I
 LEFT OUTER JOIN
@@ -65,7 +67,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@TaxGroupId		INT
 				,@ItemType			NVARCHAR(100)
 				,@SiteId			INT
-				
+				,@SubCurrency		BIT
 
 		SELECT TOP 1
 			 @InvoiceDetailId		= [intInvoiceDetailId]
@@ -79,7 +81,8 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@ItemPrice				= tblARInvoiceDetail.[dblPrice]
 			,@QtyShipped			= tblARInvoiceDetail.[dblQtyShipped]
 			,@TaxGroupId			= tblARInvoiceDetail.[intTaxGroupId]
-			,@SiteId				= tblARInvoiceDetail.intSiteId 
+			,@SiteId				= tblARInvoiceDetail.[intSiteId]
+			,@SubCurrency			= ISNULL(tblARInvoiceDetail.[ysnSubCurrency],0)
 		FROM
 			tblARInvoiceDetail
 		WHERE
@@ -97,7 +100,10 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				UPDATE tblARInvoiceDetail SET dblTotalTax = @ZeroDecimal WHERE [intInvoiceDetailId] = @InvoiceDetailId					
 				DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
 				CONTINUE
-			END			
+			END
+			
+		IF @SubCurrency = 1
+			SET @ItemPrice = @ItemPrice / @SubCurrencyCents		
 										
 		
 	INSERT INTO [tblARInvoiceDetailTax]

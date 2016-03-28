@@ -17,6 +17,8 @@
     [dtmCreated]               DATETIME        NULL,
     [intLastModifiedUserId]    INT             NULL,
     [dtmLastModified]          DATETIME        NULL,
+	[ysnDelete]				   BIT             NULL,
+	[dtmDateDeleted]		   DATETIME		   NULL,
     [intConcurrencyId]         INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_From] FOREIGN KEY ([intBankAccountIdFrom]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),

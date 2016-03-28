@@ -7,10 +7,10 @@ ysnPayeeEFTInfoActive = ISNULL((
 		SELECT TOP 1 ysnActive FROM tblEntityEFTInformation EFTInfo 
 		WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 ),0),
-ysnPayeeEFTInfoExpired = ISNULL((
-		SELECT TOP 1 (CASE WHEN dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END)  FROM tblEntityEFTInformation EFTInfo 
+strPayeeEFTInfoEffective = ISNULL((
+		SELECT TOP 1 (CASE WHEN dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) THEN 'EFFECTIVE' ELSE 'INEFFECTIVE' END)  FROM tblEntityEFTInformation EFTInfo 
 		WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),0),
+),'INVALID'),
 ysnPrenoteSent = ISNULL((
 		SELECT TOP 1 ysnPrenoteSent FROM tblEntityEFTInformation EFTInfo 
 		WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc

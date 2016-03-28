@@ -7,6 +7,7 @@
     [intCompanyLocationId]			INT												NULL,
     [intAccountId]					INT												NOT NULL,
     [intCurrencyId]					INT												NOT NULL,
+	[intSubCurrencyCents]			INT												NULL DEFAULT 1,
     [intTermId]						INT												NOT NULL,
 	[intSourceId]					INT												NULL DEFAULT 0,
 	[intPeriodsToAccrue]			INT												NULL DEFAULT 1,

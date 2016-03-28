@@ -457,7 +457,7 @@ BEGIN
 		IF (@CostingMethod = @AVERAGECOST) AND ISNULL(@strActualCostId, '') = ''
 		BEGIN 
 			SELECT	@AutoNegativeAmount = 
-						(Stock.dblUnitOnHand * ItemPricing.dblAverageCost) 
+						dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
 						- dbo.fnGetItemTotalValueFromTransactions(
 							Stock.intItemId, 
 							Stock.intItemLocationId

@@ -8,7 +8,6 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
 DECLARE @isReversingSuccessful BIT = 0
 
@@ -27,6 +26,19 @@ EXEC dbo.uspCMBankTransactionReversal @intUserId, @dtmReverseDate, @isReversingS
 --If reversal succeeds, Void the Paycheck.
 IF (@isReversingSuccessful = 1)
 BEGIN
+
+	--Check if Paycheck has Payables created, if so, create Debit Memos for those
+	DECLARE @intPaycheckId INT
+	DECLARE @intPaycheckIds NVARCHAR(MAX)
+	SELECT TOP 1 @intPaycheckId = intPaycheckId FROM tblPRPaycheck WHERE strPaycheckId = @strTransactionId
+
+	IF (EXISTS(SELECT TOP 1 1 FROM tblPRPaycheckTax WHERE intPaycheckId = @intPaycheckId AND intBillId IS NOT NULL)
+		OR EXISTS(SELECT TOP 1 1 FROM tblPRPaycheckDeduction WHERE intPaycheckId = @intPaycheckId AND intBillId IS NOT NULL))
+	BEGIN
+		SELECT @intPaycheckIds = CAST(@intPaycheckId AS NVARCHAR(MAX)) FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
+		EXEC uspPRCreatePaycheckPayable @intPaycheckIds, '', @intUserId, 1
+	END
+
 	UPDATE tblPRPaycheck
 	SET ysnVoid = 1
 		,strReferenceNo = CASE WHEN (CHARINDEX('Voided', strReferenceNo) > 0) THEN strReferenceNo ELSE 'Voided-' + strReferenceNo END

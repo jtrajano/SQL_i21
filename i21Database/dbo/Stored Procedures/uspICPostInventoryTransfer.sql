@@ -215,6 +215,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,strActualCostId
 		) 
 		SELECT	Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
@@ -233,6 +234,7 @@ BEGIN
 				,Detail.intLotId 
 				,Detail.intFromSubLocationId
 				,Detail.intFromStorageLocationId
+				,Header.strActualCostId 
 		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 				LEFT JOIN dbo.tblICItemUOM ItemUOM
@@ -280,6 +282,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,strActualCostId
 		) 
 		SELECT Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
@@ -298,6 +301,7 @@ BEGIN
 				,Detail.intNewLotId
 				,Detail.intToSubLocationId
 				,Detail.intToStorageLocationId
+				,Header.strActualCostId
 		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 				INNER JOIN dbo.tblICInventoryTransaction FromStock

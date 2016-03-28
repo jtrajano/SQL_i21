@@ -76,6 +76,7 @@ DECLARE
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
+	,@GLEntries AS RecapTableType
 	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
 	
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -120,7 +121,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 IF @intTransactionId IS NULL
 BEGIN 
 	-- Cannot find the transaction.
-	RAISERROR(50004, 11, 1)
+	RAISERROR(70004, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -128,15 +129,33 @@ END
 IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0
 BEGIN 
 	-- Unable to find an open fiscal year period to match the transaction date.
-	RAISERROR(50005, 11, 1)
+	RAISERROR(70005, 11, 1)
 	GOTO Post_Rollback
+END
+
+-- Validate the date against the FY Periods per module
+IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0) AND @ysnRecap = 0
+BEGIN 
+	-- Unable to find an open fiscal year period to match the transaction date and the given module.
+	IF @ysnPost = 1
+	BEGIN
+		--You cannot %s transaction under a closed module.
+		RAISERROR(70029, 11, 1, 'Post')
+		GOTO Post_Rollback
+	END
+	ELSE
+	BEGIN
+		--You cannot %s transaction under a closed module.
+		RAISERROR(70029, 11, 1, 'Unpost')
+		GOTO Post_Rollback
+	END
 END
 
 -- Check the amount in Misc Check. See if it is balanced. 
 IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0) AND @ysnRecap = 0
 BEGIN
 	-- The debit and credit amounts are not balanced.
-	RAISERROR(50006, 11, 1)
+	RAISERROR(70006, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -144,7 +163,7 @@ END
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN 
 	-- The transaction is already posted.
-	RAISERROR(50007, 11, 1)
+	RAISERROR(70007, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -152,7 +171,7 @@ END
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
-	RAISERROR(50008, 11, 1)
+	RAISERROR(70008, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -160,7 +179,7 @@ END
 IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionClearedFlag = 1
 BEGIN
 	-- 'The transaction is already cleared.'
-	RAISERROR(50009, 11, 1)
+	RAISERROR(70009, 11, 1)
 	GOTO Post_Rollback
 END
 
@@ -168,7 +187,7 @@ END
 IF @ysnRecap = 0 AND @ysnCheckVoid = 1
 BEGIN
 	-- 'Check is already voided.'
-	RAISERROR(50012, 11, 1)
+	RAISERROR(70012, 11, 1)
 	GOTO Post_Rollback
 END
 
@@ -183,7 +202,7 @@ BEGIN
 	IF @ysnBankAccountIdInactive = 1
 	BEGIN
 		-- 'The bank account is inactive.'
-		RAISERROR(50010, 11, 1)
+		RAISERROR(70010, 11, 1)
 		GOTO Post_Rollback
 	END
 END 
@@ -194,12 +213,12 @@ BEGIN
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
 	BEGIN 
-		RAISERROR(50013, 11, 1, 'Post')
+		RAISERROR(70013, 11, 1, 'Post')
 		GOTO Post_Rollback
 	END 
 	IF @ysnPost = 0
 	BEGIN
-		RAISERROR(50013, 11, 1, 'Unpost')
+		RAISERROR(70013, 11, 1, 'Unpost')
 		GOTO Post_Rollback		
 	END
 END 
@@ -208,7 +227,7 @@ END
 IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
 BEGIN 
 	-- Cannot post a zero-value transaction.
-	RAISERROR(50020, 11, 1)
+	RAISERROR(70020, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -222,7 +241,7 @@ IF EXISTS (
 	)
 BEGIN
 	-- Unable to unpost while check printing is in progress.
-	RAISERROR(50026, 11, 1)
+	RAISERROR(70026, 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -357,8 +376,66 @@ END
 --=====================================================================================================================================
 -- 	Book the G/L ENTRIES to tblGLDetail (The G/L Ledger detail table)
 ---------------------------------------------------------------------------------------------------------------------------------------
-EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
-IF @isSuccessful = 0 GOTO Post_Rollback
+--EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
+--IF @isSuccessful = 0 GOTO Post_Rollback
+INSERT INTO @GLEntries(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	
+			) 
+SELECT
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[strReference]	
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]	
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intUserId]
+			,[intEntityId]			
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]			
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]	 
+FROM #tmpGLDetail
+
+EXEC uspGLBookEntries @GLEntries, @ysnPost
+		
+IF @@ERROR <> 0	GOTO Post_Rollback
 
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP
@@ -431,6 +508,7 @@ Post_Commit:
 	SET @message_id = 10000
 	SET @isSuccessful = 1
 	COMMIT TRANSACTION
+	GOTO Audit_Log
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
@@ -444,6 +522,21 @@ Recap_Rollback:
 	ROLLBACK TRANSACTION 
 	EXEC uspCMPostRecap @RecapTable
 	GOTO Post_Exit
+
+Audit_Log:
+	DECLARE @strDescription AS NVARCHAR(100) 
+			,@actionType AS NVARCHAR(50)
+
+	SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+   
+	EXEC uspSMAuditLog 
+	   @keyValue = @intTransactionId       -- Primary Key Value of the Bank Deposit. 
+	   ,@screenName = 'CashManagement.view.MiscellaneousChecks'        -- Screen Namespace
+	   ,@entityId = @intUserId     -- Entity Id.
+	   ,@actionType = @actionType                             -- Action Type
+	   ,@changeDescription = @strDescription     -- Description
+	   ,@fromValue = ''          -- Previous Value
+	   ,@toValue = ''           -- New Value
 	
 -- Clean-up routines:
 -- Delete all temporary tables used during the post transaction. 

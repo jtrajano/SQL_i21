@@ -20,7 +20,12 @@
     strType				NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
     strPriceUOM			NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
     intConcurrencyId	INT NOT NULL,
-    
+    ysnVoucherExist		BIT,
+	ysnInvoiceExist		BIT,
+	intQtyUOMId			INT,
+	strQtyUOM			NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
+	strUnitType			NVARCHAR (50)  COLLATE Latin1_General_CI_AS,
+
     PRIMARY KEY CLUSTERED ([intReassignDetailId] ASC),
     CONSTRAINT [FK_tblCTReassignDetail_tblCTReassign_intReassignId] FOREIGN KEY (intReassignId) REFERENCES tblCTReassign(intReassignId) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCTReassignDetail_tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),

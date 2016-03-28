@@ -6,8 +6,9 @@
 	,@RaiseError					BIT				= 0	
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL		
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@ItemUOMId						INT				= NULL
+	,@OrderUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
@@ -48,6 +49,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -64,6 +66,7 @@ DECLARE @ZeroDecimal		NUMERIC(18, 6)
 		,@CompanyLocationId	INT
 		,@InvoiceDate		DATETIME
 		,@TermDiscount		NUMERIC(18, 6)
+		,@SubCurrencyCents	INT
 
 SET @ZeroDecimal = 0.000000
 
@@ -79,6 +82,7 @@ SELECT
 	 @EntityCustomerId	= [intEntityCustomerId]
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
+	,@SubCurrencyCents	= ISNULL([intSubCurrencyCents], 1)
 FROM
 	tblARInvoice
 WHERE
@@ -178,8 +182,9 @@ BEGIN TRY
 				,[intItemId]
 				,[strDocumentNumber]
 				,[strItemDescription]
-				,[intItemUOMId]
+				,[intOrderUOMId]
 				,[dblQtyOrdered]
+				,[intItemUOMId]
 				,[dblQtyShipped]
 				,[dblDiscount]
 				,[dblItemTermDiscount]
@@ -187,6 +192,7 @@ BEGIN TRY
 				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
+				,[ysnSubCurrency]
 				,[intAccountId]
 				,[intCOGSAccountId]
 				,[intSalesAccountId]
@@ -232,15 +238,17 @@ BEGIN TRY
 				,[intItemId]						= IC.[intItemId] 
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
+				,[intOrderUOMId]					= @OrderUOMId
+				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
-				,[dblQtyOrdered]					= ISNULL(@ItemQtyShipped,@ZeroDecimal)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblItemTermDiscount]				= ISNULL(@TermDiscount, @ZeroDecimal)
-				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
+				,[dblPrice]							= (CASE WHEN (ISNULL(@SubCurrency,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @SubCurrency ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
+				,[ysnSubCurrency]					= @SubCurrency
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
 				,[intSalesAccountId]				= Acct.[intSalesAccountId]

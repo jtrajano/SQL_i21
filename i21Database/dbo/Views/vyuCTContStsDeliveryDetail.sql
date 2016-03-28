@@ -9,7 +9,7 @@ AS
 						SH.dtmShipDate,
 						EY.strName	AS strCustomer,
 						LTRIM(CAST(SUM(SI.dblQuantity) AS NUMERIC(18,2))) + ' ' + UM.strUnitMeasure AS strQuantity,
-						SUM(IL.dblGrossWeight - IL.dblTareWeight) dblNetWeight,
+						dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(IL.dblGrossWeight - IL.dblTareWeight)) dblNetWeight,
 						SI.intWeightUOMId
 				FROM	tblLGPickLotDetail				PL
 				JOIN	tblLGPickLotHeader				LH	ON	LH.intPickLotHeaderId			=	PL.intPickLotHeaderId
@@ -19,14 +19,19 @@ AS
 				JOIN	tblEntity						EY	ON	EY.intEntityId					=	SH.intEntityCustomerId
 				JOIN	tblICInventoryShipmentItemLot	IL	ON	IL.intInventoryShipmentItemId	=	SI.intInventoryShipmentItemId
 				JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId					=	SI.intItemUOMId
-				JOIN	tblICUnitMeasure				UM	ON	UM.intUnitMeasureId				=	IU.intUnitMeasureId
+				JOIN	tblICUnitMeasure				UM	ON	UM.intUnitMeasureId				=	IU.intUnitMeasureId		
+				JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId					=	SI.intWeightUOMId		CROSS	
+				APPLY	tblLGCompanyPreference			LP 	
 				GROUP 
 				BY		AD.intPContractDetailId,
 						SH.strShipmentNumber,
 						SH.dtmShipDate,
 						EY.strName,
 						SI.intWeightUOMId,
-						UM.strUnitMeasure
+						UM.strUnitMeasure,
+						SI.intItemId,
+						WU.intUnitMeasureId,
+						LP.intWeightUOMId
 			UNION ALL
 				
 			SELECT		AD.intSContractDetailId intContractDetailId,
@@ -34,7 +39,7 @@ AS
 						SH.dtmShipDate,
 						EY.strName	AS strCustomer,
 						LTRIM(CAST(SUM(SI.dblQuantity) AS NUMERIC(18,2))) + ' ' + UM.strUnitMeasure AS strQuantity,
-						SUM(IL.dblGrossWeight - IL.dblTareWeight) dblNetWeight,
+						dbo.fnCTConvertQuantityToTargetItemUOM(SI.intItemId,WU.intUnitMeasureId,LP.intWeightUOMId,SUM(IL.dblGrossWeight - IL.dblTareWeight)) dblNetWeight,
 						SI.intWeightUOMId
 				FROM	tblLGPickLotDetail				PL
 				JOIN	tblLGPickLotHeader				LH	ON	LH.intPickLotHeaderId			=	PL.intPickLotHeaderId
@@ -44,12 +49,17 @@ AS
 				JOIN	tblEntity						EY	ON	EY.intEntityId					=	SH.intEntityCustomerId
 				JOIN	tblICInventoryShipmentItemLot	IL	ON	IL.intInventoryShipmentItemId	=	SI.intInventoryShipmentItemId
 				JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId					=	SI.intItemUOMId
-				JOIN	tblICUnitMeasure				UM	ON	UM.intUnitMeasureId				=	IU.intUnitMeasureId
+				JOIN	tblICUnitMeasure				UM	ON	UM.intUnitMeasureId				=	IU.intUnitMeasureId		
+				JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId					=	SI.intWeightUOMId		CROSS	
+				APPLY	tblLGCompanyPreference			LP 	
 				GROUP 
 				BY		AD.intSContractDetailId,
 						SH.strShipmentNumber,
 						SH.dtmShipDate,
 						EY.strName,
 						SI.intWeightUOMId,
-						UM.strUnitMeasure
+						UM.strUnitMeasure,
+						SI.intItemId,
+						WU.intUnitMeasureId,
+						LP.intWeightUOMId
 		)t

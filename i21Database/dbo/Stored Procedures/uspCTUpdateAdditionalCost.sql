@@ -28,7 +28,7 @@ BEGIN TRY
 				@dblAdditionalCost	=	dblAdditionalCost,
 				@dblFinalPrice		=	dblFinalPrice
 		FROM	tblCTPriceFixation 
-		WHERE	intContractHeaderId = @intContractHeaderId
+		WHERE	intContractDetailId = @intContractDetailId
 		
 		IF ISNULL(@intPriceFixationId,0) > 0
 		BEGIN
@@ -42,10 +42,11 @@ BEGIN TRY
 			LEFT JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CC.intItemUOMId
 			LEFT JOIN tblICCommodityUnitMeasure CM	ON	CM.intUnitMeasureId =	IM.intUnitMeasureId AND 
 														CM.intCommodityId	=	@intCommodityId
-			
+			WHERE	CC.intContractDetailId = @intContractDetailId
+
 			UPDATE	tblCTPriceFixation 
 			SET		dblAdditionalCost	=	@dblNewAdditionalCost,
-					dblFinalPrice		=	@dblFinalPrice - @dblAdditionalCost + @dblNewAdditionalCost
+					dblFinalPrice		=	@dblFinalPrice - ISNULL(@dblAdditionalCost,0) + ISNULL(@dblNewAdditionalCost,0)
 			WHERE	intPriceFixationId	=	@intPriceFixationId
 		END
 		

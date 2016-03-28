@@ -35,7 +35,8 @@ AS
             A.dblCreditForeign,
             A.dblCreditReport,
             A.dblReportingRate,
-            A.dblForeignRate
+            A.dblForeignRate,
+			A.intJournalLineNo
      FROM tblGLDetail AS A
           LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
           LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
