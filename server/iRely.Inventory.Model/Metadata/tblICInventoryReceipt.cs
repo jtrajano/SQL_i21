@@ -229,7 +229,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmExportedDate { get; set; }
         public int? intSort { get; set; }
         public bool? ysnSubCurrency { get; set; }
-
+        
         private string _orderNumber;
         [NotMapped]
         public string strOrderNumber
@@ -783,6 +783,37 @@ namespace iRely.Inventory.Model
                 _containerWeightPerQty = value;
             }
         }
+        private string _subSubCurrency;
+        [NotMapped]
+        public string strSubCurrency
+        {
+            get
+            {
+                if (!ysnSubCurrency.HasValue)
+                {
+                    _subSubCurrency = null;
+                    return _subSubCurrency;
+                }
+
+                if (ysnSubCurrency == false)
+                {
+                    _subSubCurrency = null;
+                    return _subSubCurrency;
+                }
+                                
+                if (string.IsNullOrEmpty(_subSubCurrency))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strSubCurrency;
+                    else
+                        return null;
+                else
+                    return _subSubCurrency;
+            }
+            set
+            {
+                _subSubCurrency = value;
+            }
+        }
         
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
@@ -855,6 +886,7 @@ namespace iRely.Inventory.Model
         public decimal? dblFranchise { get; set; }
         public decimal? dblContainerWeightPerQty { get; set; }
         public bool? ysnSubCurrency { get; set; }
+        public string strSubCurrency { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
@@ -1474,6 +1506,8 @@ namespace iRely.Inventory.Model
         public decimal? dblFranchise { get; set; }
         public decimal? dblContainerWeightPerQty { get; set; }
         public bool? ysnSubCurrency { get; set; }
+        public int intCurrencyId { get; set; }
+        public string strSubCurrency { get; set; }
     }
 
     public class vyuICGetInventoryReceiptVoucher

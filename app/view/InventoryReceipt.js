@@ -30,10 +30,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Check',
         'Ext.grid.column.Number',
-        'Ext.form.field.Checkbox',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.column.Date',
+        'Ext.form.field.Checkbox',
         'Ext.form.field.Time',
         'Ext.toolbar.Paging'
     ],
@@ -1294,13 +1294,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                xtype: 'checkcolumn',
+                                                                                xtype: 'gridcolumn',
                                                                                 itemId: 'colItemSubCurrency',
-                                                                                text: 'Sub Currency',
-                                                                                editor: {
-                                                                                    xtype: 'checkboxfield',
-                                                                                    itemId: 'chkItemSubCurrency'
-                                                                                }
+                                                                                text: 'Sub Currency'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
