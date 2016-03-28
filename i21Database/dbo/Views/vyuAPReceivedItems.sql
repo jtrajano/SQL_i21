@@ -134,11 +134,11 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) 
 				ON G1.intEntityId = D1.intEntityVendorId AND B.intItemId = G2.intItemId AND B.intContractDetailId = G2.intContractDetailId
-		WHERE EXISTS(
-			SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = tblReceived.intInventoryReceiptItemId AND H.intPurchaseDetailId = B.intPurchaseDetailId
+		OUTER APPLY (
+			SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = tblReceived.intInventoryReceiptItemId AND H.intPurchaseDetailId = B.intPurchaseDetailId
 			GROUP BY H.intInventoryReceiptItemId, H.intPurchaseDetailId
-			HAVING SUM(H.dblQtyReceived) < tblReceived.dblOpenReceive
-		)
+		) Billed
+		WHERE ((Billed.dblQty < tblReceived.dblOpenReceive) OR Billed.dblQty IS NULL)
 	UNION ALL
 	--Miscellaneous items
 	SELECT
@@ -198,13 +198,14 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitOfMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		OUTER APPLY
+		(
+			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
+			GROUP BY G.intPurchaseDetailId
+		) Billed
 	WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 	AND B.dblQtyOrdered != B.dblQtyReceived
-	AND EXISTS(
-		SELECT 1 FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
-		GROUP BY G.intPurchaseDetailId
-		HAVING SUM(G.dblQtyReceived) < B.dblQtyReceived
-	)
+	AND ((Billed.dblQty < B.dblQtyReceived) OR Billed.dblQty IS NULL)
 	UNION ALL
 	--DIRECT TYPE
 	SELECT
@@ -275,16 +276,17 @@ FROM
 											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
+	OUTER APPLY 
+	(
+		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
+		GROUP BY H.intInventoryReceiptItemId
+	) Billed
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
-	AND EXISTS(
-		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
-		GROUP BY H.intInventoryReceiptItemId
-		HAVING SUM(H.dblQtyReceived) < B.dblOpenReceive
-	)
+	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
 	UNION ALL
 
 	--OTHER CHARGES
@@ -337,11 +339,12 @@ FROM
 		,[strgrossNetUOM]							=	NULL
 		,[dblUnitQty]								=	0   
 	FROM [vyuAPChargesForBilling] A
-	WHERE EXISTS(
-		SELECT 1 FROM tblAPBillDetail H WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	OUTER APPLY 
+	(
+		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 		GROUP BY H.intInventoryReceiptChargeId
-		HAVING SUM(H.dblQtyReceived) < A.dblOpenReceive
-	)
+	) Billed
+	WHERE ((Billed.dblQty < A.dblOpenReceive) OR Billed.dblQty IS NULL)
 	UNION ALL
 	SELECT
 		[intEntityVendorId]							=	A.intVendorEntityId
