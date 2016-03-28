@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFTransactions](
 	[intTransactionId] [int] IDENTITY(1,1) NOT NULL,
+	[uniqTransactionGuid] [uniqueidentifier] NULL,
 	[intReportingComponentDetailId] [int] NULL,
 	[pxrpt_trans_rev_dt] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[pxrpt_ord_no] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,

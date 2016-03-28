@@ -16,4 +16,5 @@ CREATE TYPE [dbo].[UnpostItemsTableType] AS TABLE
 	,[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0 
 	,[intTransactionTypeId] INT NULL
 	,[intInventoryTransactionId] INT NOT NULL 	
+	,[intCostingMethod] INT NULL 	
 )

@@ -130,6 +130,7 @@ DECLARE  @Id									INT
 		,@EntityCustomerId						INT
 		,@CompanyLocationId						INT
 		,@CurrencyId							INT
+		,@SubCurrencyCents						INT
 		,@TermId								INT
 		,@Date									DATETIME
 		,@DueDate								DATETIME
@@ -166,8 +167,9 @@ DECLARE  @Id									INT
 		,@Inventory								BIT
 		,@ItemDocumentNumber					NVARCHAR(100)
 		,@ItemDescription						NVARCHAR(250)
-		,@ItemUOMId								INT
+		,@OrderUOMId							INT
 		,@ItemQtyOrdered						NUMERIC(18, 6)
+		,@ItemUOMId								INT
 		,@ItemQtyShipped						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemTermDiscount						NUMERIC(18, 6)
@@ -208,7 +210,8 @@ DECLARE  @Id									INT
 		,@ItemLeaseBilling						BIT
 		,@ItemVirtualMeterReading				BIT
 		,@ClearDetailTaxes						BIT
-		,@TempDetailIdForTaxes					INT			
+		,@TempDetailIdForTaxes					INT
+		,@SubCurrency							BIT			
 		
 
 --INSERT
@@ -246,6 +249,7 @@ BEGIN
 		,@EntityCustomerId				= [intEntityCustomerId]
 		,@CompanyLocationId				= [intCompanyLocationId]
 		,@CurrencyId					= [intCurrencyId]
+		,@SubCurrencyCents				= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = [intCurrencyId]),1) ELSE 1 END)
 		,@TermId						= [intTermId]
 		,@Date							= [dtmDate]
 		,@DueDate						= [dtmDueDate]
@@ -282,8 +286,9 @@ BEGIN
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
 		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL([strDocumentNumber],[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
-		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
+		,@OrderUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
 		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
+		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
 		,@ItemQtyShipped				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyShipped] ELSE NULL END)
 		,@ItemDiscount					= (CASE WHEN @GroupingOption = 0 THEN [dblDiscount] ELSE NULL END)
 		,@ItemPrice						= (CASE WHEN @GroupingOption = 0 THEN [dblPrice] ELSE NULL END)
@@ -322,6 +327,7 @@ BEGIN
 		,@ItemPerformerId				= (CASE WHEN @GroupingOption = 0 THEN [intPerformerId] ELSE NULL END)
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
+		,@SubCurrency					= (CASE WHEN @GroupingOption = 0 THEN [ysnSubCurrency] ELSE 0 END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -391,9 +397,10 @@ BEGIN
 
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
-			@EntityCustomerId				= @EntityCustomerId
+			 @EntityCustomerId				= @EntityCustomerId
 			,@CompanyLocationId				= @CompanyLocationId
 			,@CurrencyId					= @CurrencyId
+			,@SubCurrencyCents				= @SubCurrencyCents
 			,@TermId						= @TermId
 			,@EntityId						= @EntityId
 			,@InvoiceDate					= @Date
@@ -432,8 +439,9 @@ BEGIN
 			,@ItemIsInventory				= @Inventory
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
-			,@ItemUOMId						= @ItemUOMId
+			,@OrderUOMId					= @OrderUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
+			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
@@ -471,6 +479,7 @@ BEGIN
 			,@ItemPerformerId				= @ItemPerformerId
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
+			,@SubCurrency					= @SubCurrency
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -544,8 +553,9 @@ BEGIN
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
-					,@ItemUOMId						= [intItemUOMId]
+					,@OrderUOMId					= [intOrderUOMId]					
 					,@ItemQtyOrdered				= [dblQtyOrdered]
+					,@ItemUOMId						= [intItemUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
@@ -586,6 +596,7 @@ BEGIN
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 					,@ClearDetailTaxes				= [ysnClearDetailTaxes]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+					,@SubCurrency					= [ysnSubCurrency]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -601,8 +612,9 @@ BEGIN
 						,@RaiseError					= @RaiseError
 						,@ItemDocumentNumber			= @ItemDocumentNumber
 						,@ItemDescription				= @ItemDescription
-						,@ItemUOMId						= @ItemUOMId
+						,@OrderUOMId					= @OrderUOMId
 						,@ItemQtyOrdered				= @ItemQtyShipped
+						,@ItemUOMId						= @ItemUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
 						,@ItemPrice						= @ItemPrice
@@ -641,6 +653,7 @@ BEGIN
 						,@ItemConversionFactor			= @ItemConversionFactor
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
+						,@SubCurrency					= @SubCurrency
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -795,9 +808,7 @@ DECLARE	@successfulCount INT
 		,@batchIdUsed NVARCHAR(40)
 		,@recapId NVARCHAR(250)
 
-
 DECLARE @TempInvoiceIdTable AS TABLE ([intInvoiceId] INT)
-
 
 --UnPosting posted Invoices for update
 BEGIN TRY
@@ -813,7 +824,6 @@ BEGIN TRY
 		AND ISNULL([ysnProcessed],0) = 0
 		AND ISNULL([intInvoiceId],0) <> 0
 		AND [ysnPost] IS NOT NULL AND [ysnPost] = 0	
-
 
 	SELECT
 		@IdsForUnPosting = COALESCE(@IdsForUnPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
@@ -868,6 +878,7 @@ BEGIN TRY
 			,@EntityCustomerId				= [intEntityCustomerId]
 			,@CompanyLocationId				= [intCompanyLocationId]
 			,@CurrencyId					= [intCurrencyId]
+			,@SubCurrencyCents				= [intSubCurrencyCents]
 			,@TermId						= [intTermId]
 			,@Date							= [dtmDate]
 			,@DueDate						= [dtmDueDate]
@@ -947,7 +958,8 @@ BEGIN TRY
 		SET 
 			 [intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
-			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])	
+			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])
+			,[intSubCurrencyCents]		= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, C.[intCurrencyId])),1) ELSE 1 END) 	
 			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
 			,[dtmDate]					= @Date
 			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
@@ -1055,8 +1067,9 @@ BEGIN TRY
 						,@Inventory						= [ysnInventory]
 						,@ItemDocumentNumber			= [strDocumentNumber]
 						,@ItemDescription				= [strItemDescription]
-						,@ItemUOMId						= [intItemUOMId]
+						,@OrderUOMId					= [intOrderUOMId]
 						,@ItemQtyOrdered				= [dblQtyOrdered]
+						,@ItemUOMId						= [intItemUOMId]
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
@@ -1095,6 +1108,8 @@ BEGIN TRY
 						,@ItemPerformerId				= [intPerformerId]
 						,@ItemLeaseBilling				= [ysnLeaseBilling]
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
+						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+						,@SubCurrency					= [ysnSubCurrency]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1110,8 +1125,9 @@ BEGIN TRY
 							,@RaiseError					= @RaiseError
 							,@ItemDocumentNumber			= @ItemDocumentNumber
 							,@ItemDescription				= @ItemDescription
-							,@ItemUOMId						= @ItemUOMId
+							,@OrderUOMId					= @OrderUOMId
 							,@ItemQtyOrdered				= @ItemQtyShipped
+							,@ItemUOMId						= @ItemUOMId
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
@@ -1145,6 +1161,7 @@ BEGIN TRY
 							,@ItemConversionFactor			= @ItemConversionFactor
 							,@ItemPerformerId				= @ItemPerformerId
 							,@ItemLeaseBilling				= @ItemLeaseBilling
+							,@SubCurrency					= @SubCurrency
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -1263,8 +1280,9 @@ BEGIN TRY
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
-					,@ItemUOMId						= [intItemUOMId]
+					,@OrderUOMId					= [intOrderUOMId]
 					,@ItemQtyOrdered				= [dblQtyOrdered]
+					,@ItemUOMId						= [intItemUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
@@ -1303,6 +1321,8 @@ BEGIN TRY
 					,@ItemPerformerId				= [intPerformerId]
 					,@ItemLeaseBilling				= [ysnLeaseBilling]
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
+					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+					,@SubCurrency					= [ysnSubCurrency]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1316,7 +1336,7 @@ BEGIN TRY
 								,@InvoiceType		NVARCHAR(200)
 
 						BEGIN TRY
-						SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
+						SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId, @SubCurrencyCents = intSubCurrencyCents FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 						EXEC dbo.[uspARGetItemPrice]  
 							 @ItemId					= @ItemId
 							,@CustomerId				= @EntityCustomerId
@@ -1360,12 +1380,13 @@ BEGIN TRY
 						 [intItemId]							= @ItemId
 						,[strDocumentNumber]					= @ItemDocumentNumber
 						,[strItemDescription]					= @ItemDescription
-						,[intItemUOMId]							= @ItemUOMId
+						,[intOrderUOMId]						= @OrderUOMId
 						,[dblQtyOrdered]						= @ItemQtyOrdered
+						,[intItemUOMId]							= @ItemUOMId
 						,[dblQtyShipped]						= @ItemQtyShipped
 						,[dblDiscount]							= @ItemDiscount
 						,[dblItemTermDiscount]					= @ItemTermDiscount
-						,[dblPrice]								= @ItemPrice							
+						,[dblPrice]								= (CASE WHEN (ISNULL(@RefreshPrice,0) = 1 AND ISNULL(@SubCurrency,0) = 1) THEN @ItemPrice / ISNULL(@SubCurrencyCents,1) ELSE @ItemPrice END)
 						,[strPricing]							= @ItemPricing							
 						,[strMaintenanceType]					= @ItemMaintenanceType
 						,[strFrequency]							= @ItemFrequency					
@@ -1400,6 +1421,7 @@ BEGIN TRY
 						,[intPerformerId]						= @ItemPerformerId
 						,[ysnLeaseBilling]						= @ItemLeaseBilling
 						,[ysnVirtualMeterReading]				= @ItemVirtualMeterReading
+						,[ysnSubCurrency]						= @SubCurrency
 						,[intConcurrencyId]						= [intConcurrencyId] + 1
 					WHERE
 						[intInvoiceId] = @ExistingInvoiceId
@@ -1526,6 +1548,8 @@ BEGIN TRY
 			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
 		ELSE
 			EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId
+
+		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 0, @UserId = @UserId
 			
 		UPDATE #EntriesForProcessing SET [ysnRecomputed] = 1 WHERE [intInvoiceId] = @InvoiceId
 	END	
@@ -1540,6 +1564,7 @@ BEGIN CATCH
 END CATCH
 
 SET @batchIdUsed = ''
+
 		
 --Posting newly added Invoices
 DECLARE @IdsForPosting VARCHAR(MAX)
@@ -1555,13 +1580,12 @@ BEGIN TRY
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceId],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
-		AND ISNULL([ysnRecap],0) <> 1			
-
-	SELECT
+		AND ISNULL([ysnRecap],0) <> 1	
+		
+	SELECT 
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
-	
 		
 	IF LEN(RTRIM(LTRIM(@IdsForPosting))) > 0
 		BEGIN		
@@ -1604,9 +1628,9 @@ BEGIN TRY
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceId],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
-		AND ISNULL([ysnRecap],0) = 1
+		AND ISNULL([ysnRecap],0) = 1	
 
-	SELECT --DISTINCT
+	SELECT
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
@@ -1666,8 +1690,8 @@ BEGIN TRY
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceId],0) <> 0
 		AND ISNULL([ysnPost],0) = 1
-		AND ISNULL([ysnRecap],0) <> 1
-			
+		AND ISNULL([ysnRecap],0) <> 1	
+
 	SELECT
 		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
@@ -1704,6 +1728,7 @@ BEGIN TRY
 	SET @batchIdUsed = ''
 	SET @successfulCount = 0
 
+
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
@@ -1717,7 +1742,7 @@ BEGIN TRY
 		AND ISNULL([ysnPost],0) = 1
 		AND ISNULL([ysnRecap],0) = 1
 
-	SELECT --DISTINCT
+	SELECT
 		@IdsForPostingUpdated = COALESCE(@IdsForPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
@@ -1765,7 +1790,7 @@ END CATCH
 
 --UnPosting Updated Invoices
 DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
-BEGIN TRY	
+BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
@@ -1779,13 +1804,12 @@ BEGIN TRY
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap],0) <> 1
-
+			
 	SELECT
 		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
-	
-		
+			
 		
 	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
 		BEGIN			
@@ -1830,11 +1854,11 @@ BEGIN TRY
 		AND [ysnPost] = 0
 		AND ISNULL([ysnRecap],0) = 1
 
-	SELECT --DISTINCT
+	SELECT
 		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
-		@TempInvoiceIdTable
-			
+		@TempInvoiceIdTable	
+		
 		
 	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
 		BEGIN			

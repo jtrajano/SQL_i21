@@ -13,6 +13,9 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
+-- Card Fueling
+:r .\CF\1_ImportMapping.sql
+
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
@@ -133,6 +136,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- General Ledger
 :r .\GL\DefaultData\1_AccountStructure.sql
+:r .\GL\DefaultData\1_AccountType.sql
 :r .\GL\DefaultData\2_AccountGroup.sql
 :r .\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql
 :r .\GL\DefaultData\3_AccountCategory.sql
@@ -182,6 +186,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\15_FixInvoiceDateForCredits.sql
 :r .\AR\DefaultData\16_FixInvoicePostDate.sql
 :r .\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql
+:r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
+:r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -315,7 +321,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
 :r .\TF\DefaultData\_ScheduleFields.sql
-:r .\TF\DefaultData\_TaxReportSummary.sql
 :r .\TF\DefaultData\_TaxReportTemplate.sql
 :r .\TF\DefaultData\_Transactions.sql
 :r .\TF\DefaultData\_ValidProductCode.sql
@@ -330,5 +335,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Common
 :r .\Common\ErrorMessages.sql 
+
 
 print 'END POST DEPLOYMENT'

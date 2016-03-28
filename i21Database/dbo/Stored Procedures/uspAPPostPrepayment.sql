@@ -14,11 +14,28 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN TRANSACTION
+BEGIN TRY
+
+DECLARE @transCount INT = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
+
+DECLARE @ErrorSeverity INT,
+            @ErrorNumber   INT,
+            @ErrorMessage nvarchar(4000),
+            @ErrorState INT,
+            @ErrorLine  INT,
+            @ErrorProc nvarchar(200);
 
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
+
+CREATE TABLE #tmpPrepayInvalidData (
+	[strError] [NVARCHAR](100),
+	[strTransactionType] [NVARCHAR](50),
+	[strTransactionId] [NVARCHAR](50),
+	[intTransactionId] INT
+);
 
 --SET BatchId
 IF(@batchId IS NULL)
@@ -28,15 +45,21 @@ END
 
 SET @batchIdUsed = @batchId
 
+--INSERT INTO #tmpPrepayInvalidData 
+--SELECT * FROM [fnAPValidatePrepay](@paymentIds, @post, @userId)
+DECLARE @Ids Id
+INSERT INTO @Ids
+SELECT @prepaymentId
+
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.[fnAPCreatePrepaymentGLEntries](@prepaymentId, @userId, @batchId)
+	SELECT * FROM dbo.[fnAPCreatePrepaymentGLEntries](@Ids, @userId, @batchId)
 END
 ELSE
 BEGIN
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(CAST(@prepaymentId AS NVARCHAR(10)), 'Payable', DEFAULT, @userId, @batchId)
+	SELECT * FROM dbo.fnAPReverseGLEntries(@Ids, 'Payable', DEFAULT, @userId, @batchId)
 END
 
 --=====================================================================================================================================
@@ -45,23 +68,7 @@ END
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
-	BEGIN TRY
-		--GROUP GL ENTRIES (NOTE: ASK THE DEVELOPER TO DO THIS ON uspGLBookEntries
-		EXEC uspGLBookEntries @GLEntries, @post
-	END TRY
-	BEGIN CATCH
-		DECLARE
-		  @ErrorMessage   varchar(2000)
-		 ,@ErrorSeverity  tinyint
-		 ,@ErrorState     tinyint;
-
-		 SET @ErrorMessage  = ERROR_MESSAGE()
-		SET @ErrorSeverity = ERROR_SEVERITY()
-		SET @ErrorState    = ERROR_STATE()
-		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
-
-		GOTO Post_Rollback;
-	END CATCH
+	EXEC uspGLBookEntries @GLEntries, @post
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -88,6 +95,11 @@ BEGIN
 		-- Calling the stored procedure
 		EXEC dbo.uspCMBankTransactionReversal @userId, DEFAULT, @isSuccessful OUTPUT
 
+		IF @isSuccessful = 0
+		BEGIN
+			RAISERROR('Failed to reverse bank transaction.', 16, 1);
+		END
+
 		--update payment record based on record from tblCMBankTransaction
 		UPDATE tblAPPayment
 			SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
@@ -103,11 +115,11 @@ BEGIN
 		WHERE intPaymentId IN (@prepaymentId)
 
 		--UPDATE POSTED PREPAYMENT
-		UPDATE A
-			SET A.ysnPosted = 0
-		FROM tblAPBill A
-		INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
-		WHERE B.intPaymentId IN (@prepaymentId)
+		--UPDATE A
+		--	SET A.ysnPosted = 0
+		--FROM tblAPBill A
+		--INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+		--WHERE B.intPaymentId IN (@prepaymentId)
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -120,8 +132,6 @@ BEGIN
 		FROM tblAPPayment A
 		WHERE intPaymentId IN (@prepaymentId)
 
-		IF @@ERROR <> 0 OR @isSuccessful = 0 GOTO Post_Rollback;
-
 	END
 	ELSE
 	BEGIN
@@ -133,11 +143,11 @@ BEGIN
 		WHERE	intPaymentId IN (@prepaymentId)
 
 		--UPDATE POSTED PREPAYMENT
-		UPDATE A
-			SET A.ysnPosted = 1
-		FROM tblAPBill A
-		INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
-		WHERE B.intPaymentId IN (@prepaymentId)
+		--UPDATE A
+		--	SET A.ysnPosted = 1
+		--FROM tblAPBill A
+		--INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+		--WHERE B.intPaymentId IN (@prepaymentId)
 		
 		--Insert to bank transaction
 		INSERT INTO tblCMBankTransaction(
@@ -219,8 +229,6 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		WHERE intPaymentId IN (@prepaymentId)
-
-		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 END
 ELSE
@@ -290,19 +298,29 @@ ELSE
 			ON B.intAccountGroupId = C.intAccountGroupId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit;
-
-		IF @@ERROR <> 0	GOTO Post_Rollback;
-
-		GOTO Post_Commit;
 	END
 
-Post_Commit:
-	COMMIT TRANSACTION
-	SET @success = 1
-	RETURN;
+IF @transCount = 0 COMMIT TRANSACTION
+SET @success = 1
 
-Post_Rollback:
-	ROLLBACK TRANSACTION		            
-	SET @success = 0
-	RETURN;
+END TRY
+BEGIN CATCH
+        -- Grab error information from SQL functions
+    SET @ErrorSeverity = ERROR_SEVERITY()
+    SET @ErrorNumber   = ERROR_NUMBER()
+    SET @ErrorMessage  = ERROR_MESSAGE()
+    SET @ErrorState    = ERROR_STATE()
+    SET @ErrorLine     = ERROR_LINE()
+    SET @ErrorProc     = ERROR_PROCEDURE()
+    SET @ErrorMessage  = 'Problem duplicating bill.' + CHAR(13) + 
+			'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
+			' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
+    -- Not all errors generate an error state, to set to 1 if it's zero
+    IF @ErrorState  = 0
+    SET @ErrorState = 1
+    -- If the error renders the transaction as uncommittable or we have open transactions, we may want to rollback
+    IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+	SET @success = 0;
+    RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+END CATCH
 

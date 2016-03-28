@@ -76,6 +76,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
@@ -93,6 +94,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 SELECT	intBankAccountId	= F.intBankAccountId
 		,intTransactionId	= F.intTransactionId
 		,strTransactionId	= F.strTransactionId
+		,intBankTransactionTypeId = F.intBankTransactionTypeId
 		,strBatchId			= F.strLink
 		,strCheckNo			= ISNULL(F.strReferenceNo,'')
 		,dtmPrintJobCreated	= GETDATE()
@@ -170,7 +172,7 @@ BEGIN
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
 	IF (LTRIM(RTRIM(ISNULL(@loop_CheckNumber, ''))) = '')
 	BEGIN 
-		RAISERROR(50014, 11, 1)
+		RAISERROR(70014, 11, 1)
 		
 		GOTO _ROLLBACK
 	END 
@@ -199,6 +201,7 @@ INSERT INTO tblCMCheckPrintJobSpool(
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
@@ -211,6 +214,7 @@ SELECT
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated

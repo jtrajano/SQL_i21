@@ -194,17 +194,20 @@ BEGIN
 	END 
 
 	-- Compute the new transaction value. 
-	SELECT	@NewTransactionValue = @dblQty * @dblNewCost
+	SELECT	@NewTransactionValue = dbo.fnMultiply(@dblQty, @dblNewCost)
 
 	-- Compute the original transaction value. 
-	SELECT	@OriginalTransactionValue = @dblQty * @OriginalCost
+	SELECT	@OriginalTransactionValue = dbo.fnMultiply(@dblQty, @OriginalCost) 
 
 	-- Compute the new cost. 
 	SELECT @dblNewCalculatedCost =	@CostBucketCost 
-									+ ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
+									+ dbo.fnDivide(
+										(@NewTransactionValue - @OriginalTransactionValue)
+										, @CostBucketStockInQty
+									)
 
 	-- Compute value to adjust the item valuation. 
-	SELECT @CostAdjustmentValue = @dblQty * (@dblNewCost - @OriginalCost)
+	SELECT @CostAdjustmentValue = dbo.fnMultiply(@dblQty, (@dblNewCost - @OriginalCost)) 
 
 	-- Determine the transaction type to use. 
 	SELECT @CostAdjustmentTransactionType =		
@@ -395,13 +398,17 @@ BEGIN
 			AND @InvTranId IS NOT NULL 
 		BEGIN 
 			-- Calculate the revalue amount for the inventory transaction. 
-			SELECT @InvTranValue =	-1 	
-									* CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
-											@StockQtyToRevalue
-										ELSE 
-											ISNULL(@StockQtyAvailableToRevalue, 0)
-									END 																								
-									* (@dblNewCost - @InvTranCost) 
+			SELECT @InvTranValue =	dbo.fnMultiply(
+										dbo.fnMultiply( 
+											-1 	
+											, CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
+													@StockQtyToRevalue
+												ELSE 
+													ISNULL(@StockQtyAvailableToRevalue, 0)
+											END 																								
+										) 
+										, (@dblNewCost - @InvTranCost) 
+									) 
 
 			----------------------------------------------------------
 			-- 7. If stock was sold, then do the "Revalue Sold". 
@@ -514,7 +521,10 @@ BEGIN
 						,[dtmDate]						= @dtmDate
 						,[dblQty]						= InvTran.dblQty
 						,[dblUOMQty]					= InvTran.dblUOMQty
-						,[dblNewCost]					= ((InvTran.dblQty * InvTran.dblCost) + (-1 * @InvTranValue)) / InvTran.dblQty
+						,[dblNewCost]					= dbo.fnDivide( 
+															(dbo.fnMultiply(InvTran.dblQty, InvTran.dblCost) + dbo.fnMultiply(-1, @InvTranValue))
+															,InvTran.dblQty
+														) 
 						,[intCurrencyId]				= InvTran.intCurrencyId
 						,[dblExchangeRate]				= InvTran.dblExchangeRate
 						,[intTransactionId]				= @intTransactionId
@@ -579,16 +589,17 @@ DEALLOCATE loopActualCostOut;
 -----------------------------------------------------------------------------------------------------------------------------
 -- 6. Update the average cost 
 -----------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	EXEC dbo.uspICRecalcAveCostOnCostAdjustment
-		@intItemId
-		,@intItemLocationId
-		,@StockQtyToRevalue
-		,@CostBucketUOMQty
-		,@dblNewCost
-		,@CostBucketCost
-	;
-END 
+-- Do not recalculate the average cost on Actual Costing. 
+--BEGIN 
+--	EXEC dbo.uspICRecalcAveCostOnCostAdjustment
+--		@intItemId
+--		,@intItemLocationId
+--		,@StockQtyToRevalue
+--		,@CostBucketUOMQty
+--		,@dblNewCost
+--		,@CostBucketCost
+--	;
+--END 
 
 -- Immediate exit
 Post_Exit: 

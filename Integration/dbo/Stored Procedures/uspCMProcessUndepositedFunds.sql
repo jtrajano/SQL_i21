@@ -66,7 +66,7 @@ BEGIN
 
 			IF (ISNULL(@isValid, 1) = 0)  
 			BEGIN   
-				RAISERROR(50022,11,1)  
+				RAISERROR(70022,11,1)  
 				IF @@ERROR <> 0 GOTO Exit_WithErrors   
 			END  
 
@@ -101,7 +101,7 @@ BEGIN
 
 			IF (ISNULL(@isValid, 1) = 0)  
 			BEGIN   
-				RAISERROR(50023,11,1)  
+				RAISERROR(70023,11,1)  
 				IF @@ERROR <> 0 GOTO Exit_WithErrors   
 			END  
 
@@ -124,7 +124,7 @@ BEGIN
 
 			IF (ISNULL(@strInvalidTransactionId, '''') <> '''')  
 			BEGIN   
-				RAISERROR(50024,11,1, @strInvalidTransactionId)  
+				RAISERROR(70024,11,1, @strInvalidTransactionId)  
 				IF @@ERROR <> 0 GOTO Exit_WithErrors   
 			END 
 		END   

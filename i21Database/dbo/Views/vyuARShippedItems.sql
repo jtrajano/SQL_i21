@@ -7,12 +7,14 @@ SELECT
 	,[strShippedItemId]					= 'arso:' + CAST(SO.[intSalesOrderId] AS NVARCHAR(250))
 	,[intEntityCustomerId]				= SO.[intEntityCustomerId]
 	,[strCustomerName]					= E.[strName]
+	,[intCurrencyId]					= ISNULL(ISNULL(SO.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderId]					= SO.[intSalesOrderId]
 	,[intSalesOrderDetailId]			= SOD.[intSalesOrderDetailId]
 	,[strSalesOrderNumber]				= SO.[strSalesOrderNumber]
 	,[dtmProcessDate]					= SO.[dtmDate]
 	,[intInventoryShipmentId]			= NULL
 	,[intInventoryShipmentItemId]		= NULL
+	,[intInventoryShipmentChargeId]		= NULL
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
@@ -27,6 +29,8 @@ SELECT
 	,[strItemDescription]				= SOD.[strItemDescription]
 	,[intItemUOMId]						= SOD.[intItemUOMId]
 	,[strUnitMeasure]					= U.[strUnitMeasure]
+	,[intOrderUOMId]					= SOD.[intItemUOMId]
+	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
 	,[intShipmentItemUOMId]				= SOD.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
 	,[dblQtyShipped]					= SOD.[dblQtyShipped]	
@@ -53,6 +57,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
+	,[dblWeight]						= IU.[dblWeight]
+	,[intWeightUOMId]					= IU.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
 	,[dblGrossWt]						= 0.00
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
@@ -94,6 +101,9 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT JOIN
+	tblICUnitMeasure U2
+		ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -120,12 +130,14 @@ SELECT
 	,[strShippedItemId]					= 'arso:' + CAST(SO.[intSalesOrderId] AS NVARCHAR(250))
 	,[intEntityCustomerId]				= SO.[intEntityCustomerId]
 	,[strCustomerName]					= E.[strName]
+	,[intCurrencyId]					= ISNULL(ISNULL(SO.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderId]					= SO.[intSalesOrderId]
 	,[intSalesOrderDetailId]			= SOD.[intSalesOrderDetailId]
 	,[strSalesOrderNumber]				= SO.[strSalesOrderNumber]
 	,[dtmProcessDate]					= SO.[dtmDate]
 	,[intInventoryShipmentId]			= NULL
 	,[intInventoryShipmentItemId]		= NULL
+	,[intInventoryShipmentChargeId]		= NULL
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
@@ -140,6 +152,8 @@ SELECT
 	,[strItemDescription]				= SOD.[strItemDescription]
 	,[intItemUOMId]						= SOD.[intItemUOMId]
 	,[strUnitMeasure]					= U.[strUnitMeasure]
+	,[intOrderUOMId]					= SOD.[intItemUOMId]
+	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
 	,[intShipmentItemUOMId]				= SOD.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= U.[strUnitMeasure]
 	,[dblQtyShipped]					= SOD.[dblQtyShipped]
@@ -166,7 +180,10 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
-	,[dblGrossWt]						= 0.00
+	,[dblWeight]						= IU.[dblWeight]
+	,[intWeightUOMId]					= IU.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
+	,[dblGrossWt]						= 0.00	
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
 	,[strPONumber]						= SO.[strPONumber]
@@ -205,6 +222,9 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT JOIN
+	tblICUnitMeasure U2
+		ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -228,12 +248,14 @@ SELECT
 	,[strShippedItemId]					= 'icis:' + CAST(SHP.[intInventoryShipmentId] AS NVARCHAR(250))
 	,[intEntityCustomerId]				= SO.[intEntityCustomerId]
 	,[strCustomerName]					= E.[strName]
+	,[intCurrencyId]					= ISNULL(ISNULL(SO.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderId]					= SO.[intSalesOrderId]
 	,[intSalesOrderDetailId]			= SOD.[intSalesOrderDetailId]
 	,[strSalesOrderNumber]				= SO.[strSalesOrderNumber]
 	,[dtmProcessDate]					= SHP.[dtmShipDate]
 	,[intInventoryShipmentId]			= SHP.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]		= SHP.[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]		= NULL
 	,[strInventoryShipmentNumber]		= SHP.[strShipmentNumber] 	
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
@@ -246,14 +268,16 @@ SELECT
 	,[intItemId]						= SOD.[intItemId]	
 	,[strItemNo]						= I.[strItemNo] 
 	,[strItemDescription]				= SOD.[strItemDescription]
-	,[intItemUOMId]						= SOD.[intItemUOMId]
-	,[strUnitMeasure]					= U.[strUnitMeasure]
+	,[intItemUOMId]						= SHP.[intItemUOMId]
+	,[strUnitMeasure]					= SHP.[strUnitMeasure]
+	,[intOrderUOMId]					= SOD.[intItemUOMId]
+	,[strOrderUnitMeasure]				= U.[strUnitMeasure]
 	,[intShipmentItemUOMId]				= SHP.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= SHP.[strUnitMeasure]
-	,[dblQtyShipped]					= SOD.[dblQtyShipped]	
+	,[dblQtyShipped]					= SHP.[dblQuantity]	
 	,[dblQtyOrdered]					= SOD.[dblQtyOrdered] 
 	,[dblShipmentQuantity]				= SHP.[dblQuantity]	
-	,[dblShipmentQtyShippedTotal]		= SOD.[dblQtyShipped]
+	,[dblShipmentQtyShippedTotal]		= SHP.[dblQuantity]
 	,[dblQtyRemaining]					= SOD.[dblQtyOrdered]
 	,[dblDiscount]						= SOD.[dblDiscount] 
 	,[dblPrice]							= SOD.[dblPrice]
@@ -274,6 +298,9 @@ SELECT
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblWeight]						= IU1.[dblWeight]
+	,[intWeightUOMId]					= IU1.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
 	,[dblGrossWt]						= ISISIL.dblGrossWeight 
 	,[dblTareWt]						= ISISIL.dblTareWeight 
 	,[dblNetWt]							= ISISIL.dblNetWeight
@@ -393,6 +420,15 @@ LEFT OUTER JOIN
 			intInventoryShipmentItemId
 	) ISISIL
 		ON SHP.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
+LEFT JOIN
+	tblICItemUOM IU1
+		ON SHP.[intItemUOMId] = IU1.[intItemUOMId]
+LEFT JOIN
+	tblICUnitMeasure U1
+		ON IU1.[intUnitMeasureId] = U1.[intUnitMeasureId]	
+LEFT JOIN
+	tblICUnitMeasure U2
+		ON IU1.[intWeightUOMId] = U2.[intUnitMeasureId]	
 	
 UNION ALL
 
@@ -402,12 +438,14 @@ SELECT
 	,[strShippedItemId]					= 'icis:' + CAST(ICIS.[intInventoryShipmentId] AS NVARCHAR(250))
 	,[intEntityCustomerId]				= ICIS.[intEntityCustomerId]
 	,[strCustomerName]					= EME.[strName]
+	,[intCurrencyId]					= ISNULL(ISNULL(CTCD.[intCurrencyId], ARC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderId]					= NULL
 	,[intSalesOrderDetailId]			= NULL
 	,[strSalesOrderNumber]				= ''
 	,[dtmProcessDate]					= ICIS.[dtmShipDate] 
 	,[intInventoryShipmentId]			= ICIS.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]		= ICISI.[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]		= NULL
 	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
 	,[intShipmentId]					= LGICShipment.[intShipmentId]
 	,[strShipmentNumber]				= NULL
@@ -422,10 +460,12 @@ SELECT
 	,[strItemDescription]				= ICI.[strDescription] 
 	,[intItemUOMId]						= ICISI.[intItemUOMId]
 	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
-	,[intShipmentItemUOMId]				= ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId])
+	,[intOrderUOMId]					= CTCD.[intItemUOMId]
+	,[strOrderUnitMeasure]				= ISNULL(ICUM2.[strUnitMeasure],'')
+	,[intShipmentItemUOMId]				= ICISI.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
 	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
-	,[dblQtyOrdered]					= 0 
+	,[dblQtyOrdered]					= CASE WHEN CTCD.[intContractDetailId] IS NOT NULL THEN CTCD.dblDetailQuantity ELSE 0 END 
 	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
 	,[dblShipmentQtyShippedTotal]		= ICISI.[dblQuantity]
 	,[dblQtyRemaining]					= ICISI.[dblQuantity]
@@ -448,6 +488,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblWeight]						= ICIU1.[dblWeight]
+	,[intWeightUOMId]					= ICIU1.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= ICUM3.[strUnitMeasure]
 	,[dblGrossWt]						= ISISIL.dblGrossWeight 
 	,[dblTareWt]						= ISISIL.dblTareWeight 
 	,[dblNetWt]							= ISISIL.dblNetWeight
@@ -515,10 +558,16 @@ LEFT JOIN
 		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]	
 LEFT JOIN
 	tblICItemUOM ICIU1
-		ON ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]) = ICIU1.[intItemUOMId] 
+		ON ICISI.[intItemUOMId] = ICIU1.[intItemUOMId] 
 LEFT JOIN
 	tblICUnitMeasure ICUM1
-		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]				
+		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]
+LEFT JOIN
+	tblICUnitMeasure ICUM2
+		ON CTCD.[intUnitMeasureId] = ICUM2.[intUnitMeasureId]		
+LEFT JOIN
+	tblICUnitMeasure ICUM3
+		ON ICIU1.[intWeightUOMId] = ICUM3.[intUnitMeasureId]					
 INNER JOIN
 	tblEntity EME
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
@@ -540,17 +589,124 @@ WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 UNION ALL
 
 SELECT
+	 [strTransactionType]				= 'Inventory Shipment'
+	,[strTransactionNumber]				= ICIS.[strShipmentNumber] 
+	,[strShippedItemId]					= 'icis:' + CAST(ICIS.[intInventoryShipmentId] AS NVARCHAR(250))
+	,[intEntityCustomerId]				= ICIS.[intEntityCustomerId]
+	,[strCustomerName]					= EME.[strName]
+	,[intCurrencyId]					= ISNULL(ISNULL(ISNULL(ICISC.[intCurrencyId], CTCD.[intCurrencyId]),ARC.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+	,[intSalesOrderId]					= NULL
+	,[intSalesOrderDetailId]			= NULL
+	,[strSalesOrderNumber]				= ''
+	,[dtmProcessDate]					= ICIS.[dtmShipDate] 
+	,[intInventoryShipmentId]			= ICIS.[intInventoryShipmentId]
+	,[intInventoryShipmentItemId]		= NULL
+	,[intInventoryShipmentChargeId]		= ICISC.[intInventoryShipmentChargeId]
+	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
+	,[intShipmentId]					= NULL
+	,[strShipmentNumber]				= NULL
+	,[intContractHeaderId]				= CTCD.[intContractHeaderId]
+	,[intContractDetailId]				= CTCD.[intContractDetailId]
+	,[intCompanyLocationId]				= ICIS.[intShipFromLocationId]
+	,[strLocationName]					= SMCL.[strLocationName] 
+	,[intShipToLocationId]				= ICIS.[intShipToLocationId]
+	,[intFreightTermId]					= ICIS.[intFreightTermId]
+	,[intItemId]						= ICISC.[intChargeId]	
+	,[strItemNo]						= ICI.[strItemNo] 
+	,[strItemDescription]				= ICI.[strDescription] 
+	,[intItemUOMId]						= ICISC.[intCostUOMId]
+	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
+	,[strOrderUnitMeasure]				= ''
+	,[intShipmentItemUOMId]				= NULL		
+	,[intShipmentItemUOMId]				= ICISC.[intCostUOMId]
+	,[strShipmentUnitMeasure]			= ICUM.[strUnitMeasure]
+	,[dblQtyShipped]					= 1 	
+	,[dblQtyOrdered]					= 0 
+	,[dblShipmentQuantity]				= 1
+	,[dblShipmentQtyShippedTotal]		= 1
+	,[dblQtyRemaining]					= 1
+	,[dblDiscount]						= 0 
+	,[dblPrice]							= ICISC.[dblAmount]
+	,[dblShipmentUnitPrice]				= ICISC.[dblAmount]
+	,[dblTotalTax]						= 0
+	,[dblTotal]							= 1 * ICISC.[dblAmount]
+	,[intAccountId]						= ARIA.[intAccountId]
+	,[intCOGSAccountId]					= ARIA.[intCOGSAccountId]
+	,[intSalesAccountId]				= ARIA.[intSalesAccountId]
+	,[intInventoryAccountId]			= ARIA.[intInventoryAccountId]
+	,[intStorageLocationId]				= NULL
+	,[strStorageLocationName]			= ''
+	,[intTermID]						= NULL
+	,[strTerm]							= ''
+	,[intEntityShipViaId]				= NULL
+	,[strShipVia]						= ''
+	,[strTicketNumber]					= ''
+	,[intTicketId]						= NULL
+	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
+	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblWeight]						= 0.00
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= ''
+	,[dblGrossWt]						= 0
+	,[dblTareWt]						= 0
+	,[dblNetWt]							= 0
+	,[strPONumber]						= ''
+	,[strBOLNumber]						= ''
+	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= ''
+FROM
+	tblICInventoryShipmentCharge ICISC
+INNER JOIN
+	tblICInventoryShipment ICIS
+		ON ICISC.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
+		AND ICIS.[ysnPosted] = 1
+LEFT OUTER JOIN 
+	vyuCTContractDetailView CTCD	
+		ON ICISC.[intContractId] = CTCD.[intContractHeaderId]
+INNER JOIN
+	tblARCustomer ARC
+		ON ICIS.[intEntityCustomerId] = ARC.[intEntityCustomerId]
+INNER JOIN
+	tblICItem ICI
+		ON ICISC.[intChargeId] = ICI.[intItemId]
+LEFT JOIN
+	tblICItemUOM ICIU
+		ON ICISC.[intCostUOMId] = ICIU.[intItemUOMId] 
+LEFT JOIN
+	tblICUnitMeasure ICUM
+		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
+INNER JOIN
+	tblEntity EME
+		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
+LEFT OUTER JOIN
+	vyuARGetItemAccount ARIA
+		ON ICISC.[intChargeId] = ARIA.[intItemId]
+		AND ICIS.[intShipFromLocationId] = ARIA.[intLocationId]			
+LEFT OUTER JOIN
+	tblARInvoiceDetail ARID
+		ON ICISC.intInventoryShipmentChargeId = ARID.[intInventoryShipmentChargeId]
+LEFT OUTER JOIN
+	[tblSMCompanyLocation] SMCL
+		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
+WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+
+UNION ALL
+
+SELECT
 	 [strTransactionType]				= 'Inbound Shipment'
 	,[strTransactionNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
 	,[strShippedItemId]					= 'lgis:' + CAST(LGS.intShipmentId AS NVARCHAR(250))
 	,[intEntityCustomerId]				= LGS.[intCustomerEntityId] 
 	,[strCustomerName]					= E.[strName]
+	,[intCurrencyId]					= ISNULL(ISNULL(ARSID.[intCurrencyId], C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderId]					= NULL
 	,[intSalesOrderDetailId]			= NULL
 	,[strSalesOrderNumber]				= ''
 	,[dtmProcessDate]					= ISNULL(LGS.dtmShipmentDate, ISNULL(LGS.[dtmInventorizedDate], GETDATE()))
 	,[intInventoryShipmentId]			= NULL
 	,[intInventoryShipmentItemId]		= NULL	
+	,[intInventoryShipmentChargeId]		= NULL
 	,[strInventoryShipmentNumber]		= ''	
 	,[intShipmentId]					= LGS.[intShipmentId]
 	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
@@ -565,6 +721,8 @@ SELECT
 	,[strItemDescription]				= ''
 	,[intItemUOMId]						= NULL
 	,[strUnitMeasure]					= ''
+	,[intOrderUOMId]					= NULL
+	,[strOrderUnitMeasure]				= ''
 	,[intShipmentItemUOMId]				= NULL
 	,[strShipmentUnitMeasure]			= ''
 	,[dblQtyShipped]					= 0.00
@@ -591,6 +749,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL
 	,[strTaxGroup]						= NULL
+	,[dblWeight]						= 0.00
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= ''
 	,[dblGrossWt]						= 0.00
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
@@ -600,7 +761,10 @@ SELECT
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= NULL
 FROM
+	vyuARShippedItemDetail ARSID
+INNER JOIN
 	vyuLGShipmentHeader LGS		
+		ON ARSID.[intShipmentId] = LGS.[intShipmentId]
 INNER JOIN
 	tblARCustomer C
 		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 

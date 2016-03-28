@@ -12,6 +12,7 @@
 	,@ItemSalesOrderDetailId		INT				= NULL	
 	,@ItemTaxGroupId				INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -79,6 +80,7 @@ BEGIN TRY
 		,[dblPrice]
 		,[dblTotalTax]
 		,[dblTotal]
+		,[ysnSubCurrency]
 		,[intAccountId]
 		,[intCOGSAccountId]
 		,[intSalesAccountId]
@@ -125,6 +127,7 @@ BEGIN TRY
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
 		,[dblTotalTax]						= @ZeroDecimal
 		,[dblTotal]							= @ZeroDecimal
+		,[ysnSubCurrency]					= @SubCurrency
 		,[intAccountId]						= NULL 
 		,[intCOGSAccountId]					= NULL
 		,[intSalesAccountId]				= NULL

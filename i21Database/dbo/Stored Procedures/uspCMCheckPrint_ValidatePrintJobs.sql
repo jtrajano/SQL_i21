@@ -2,7 +2,8 @@
 CREATE PROCEDURE uspCMCheckPrint_ValidatePrintJobs
 	@intBankAccountId INT = NULL,
 	@intUserId INT = NULL,
-	@ysnPrintJobExists INT = NULL OUTPUT 
+	@ysnPrintJobExists INT = NULL OUTPUT,
+	@intBankTransactionTypeId INT = NULL OUTPUT  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -35,9 +36,11 @@ DECLARE @BANK_DEPOSIT INT = 1
 
 -- Check if there are any print jobs for the specified bank account. 
 SELECT	TOP 1 
-		@ysnPrintJobExists = 1
+		@ysnPrintJobExists = 1,
+		@intBankTransactionTypeId = intBankTransactionTypeId
 FROM	[dbo].[tblCMCheckPrintJobSpool]
 WHERE	intBankAccountId = @intBankAccountId
 		AND intCreatedUserId = @intUserId
 
 SET @ysnPrintJobExists = ISNULL(@ysnPrintJobExists, 0)
+SET @intBankTransactionTypeId = ISNULL(@intBankTransactionTypeId, 0)

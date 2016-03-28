@@ -2,6 +2,7 @@
 	@intPaycheckIds NVARCHAR(MAX)
 	,@strInvoiceNo NVARCHAR(100)
 	,@intUserId AS INT
+	,@ysnVoid BIT = 0
 	,@isSuccessful BIT = 1 OUTPUT 
 AS
 
@@ -13,11 +14,13 @@ SET XACT_ABORT ON
 /* Localize Parameters */
 DECLARE @intUser INT
 		,@strInvoice NVARCHAR(100)
+		,@isVoid BIT
 		,@xmlPaychecks XML
 
 SELECT @xmlPaychecks = CAST('<A>'+ REPLACE(@intPaycheckIds, ',', '</A><A>')+ '</A>' AS XML) 
 	  ,@strInvoice = @strInvoiceNo
 	  ,@intUser = @intUserId
+	  ,@isVoid = @ysnVoid
 
 --Parse the Paychecks Parameter to Temporary Table
 SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intPaycheckId
@@ -28,12 +31,18 @@ WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 /* Get all Vendor Ids from Payable Taxes and Deductions */
 SELECT DISTINCT intVendorId INTO #tmpVendors FROM
 (SELECT intVendorId FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
-	WHERE PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId IS NOT NULL AND PT.intBillId IS NULL
+	WHERE PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId IS NOT NULL 
+	AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
  UNION ALL
  SELECT intVendorId FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL AND PD.intBillId IS NULL
+	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL 
+	AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 ) PayableTaxesAndDeductions
 
+/* Set Invoice Number as Paycheck Id + Void for Void entries */
+IF (@ysnVoid = 1) 
+	SELECT @strInvoice = 'VOID-' + strPaycheckId FROM tblPRPaycheck 
+	WHERE intPaycheckId IN (SELECT TOP 1 intPaycheckId FROM #tmpPaychecks)
 
 /* Validate Vendor Invoice No */
 DECLARE @strMsg NVARCHAR(200) = ''
@@ -52,14 +61,16 @@ DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory
 DECLARE @intBillId INT
 DECLARE @intBillIds AS Id;
 DECLARE @billRecordNumber NVARCHAR(50)
+DECLARE @intStartingNumberId INT
 
 /* Loop through each vendor and create Vouchers */
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmpVendors)
 BEGIN
 	SELECT TOP 1 @intVendorEntityId = intVendorId FROM #tmpVendors
 
-	EXEC uspSMGetStartingNumber 9, @billRecordNumber OUTPUT
-
+	SET @intStartingNumberId = CASE WHEN (@ysnVoid = 1) THEN 18 ELSE 9 END
+	EXEC uspSMGetStartingNumber @intStartingNumberId, @billRecordNumber OUTPUT
+	
 	/* Get Voucher Header */
 	SELECT 
 		[intTermsId]			=	A.[intTermsId],
@@ -90,7 +101,7 @@ BEGIN
 		[intOrderById]			=	A.[intOrderById],
 		[intCurrencyId]			=	A.[intCurrencyId]
 	INTO #tmpBillData
-	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, 1, DEFAULT, DEFAULT, DEFAULT, DEFAULT, NULL) A
+	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, DEFAULT, DEFAULT, NULL) A
 
 	/* Insert Voucher Header */
 	INSERT INTO tblAPBill
@@ -170,13 +181,13 @@ BEGIN
 		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intExpenseAccountId, strItem = TT.strTax, dblTotal = SUM(PT.dblTotal)
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
 			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) 
-			  AND TT.intVendorId = @intVendorEntityId AND PT.intBillId IS NULL
+			  AND TT.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
 			GROUP BY TT.intVendorId, PT.intExpenseAccountId, TT.strTax
 		 UNION ALL
 		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intExpenseAccountId, strItem = TD.strDeduction, dblTotal = SUM(PD.dblTotal)
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
 			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) 
-			  AND TD.intVendorId = @intVendorEntityId AND PD.intBillId IS NULL
+			  AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 			GROUP BY TD.intVendorId, PD.intExpenseAccountId, TD.strDeduction
 		) A
 		INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
@@ -191,11 +202,13 @@ BEGIN
 	UPDATE tblPRPaycheckTax SET intBillId = @intBillId 
 	FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax ON TT.intTypeTaxId = tblPRPaycheckTax.intTypeTaxId
 	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId = @intVendorEntityId
+	  AND ((@isVoid = 0 AND tblPRPaycheckTax.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckTax.intBillId IS NOT NULL))
 
 	/* Update Paycheck Deductions Bill Id */
 	UPDATE tblPRPaycheckDeduction SET intBillId = @intBillId 
 	FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction ON TD.intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId
 	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId = @intVendorEntityId
+	  AND ((@isVoid = 0 AND tblPRPaycheckDeduction.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckDeduction.intBillId IS NOT NULL))
 
 	DELETE FROM #tmpVendors WHERE intVendorId = @intVendorEntityId
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillData')) DROP TABLE #tmpBillData

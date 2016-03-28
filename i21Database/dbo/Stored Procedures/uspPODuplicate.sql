@@ -51,6 +51,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	LEFT JOIN tblCTContractDetail B ON A.intContractDetailId = B.intContractDetailId
 	WHERE A.intPurchaseId = @poId
 	AND 1 = (CASE WHEN B.intContractDetailId IS NOT NULL AND ((B.dblBalance - B.dblScheduleQty) <= 0) THEN 0 ELSE 1 END) --Exclude the contract if no available balance
+	AND NOT EXISTS(SELECT 1 FROM tblPOPurchase WHERE intOrderStatusId IN (4, 6) AND intPurchaseId = @poId) --Make sure PO is not short closed or cancelled
 	--ALTER TABLE #tmpDuplicateBillDetail DROP COLUMN intBillDetailId
 
 	UPDATE A

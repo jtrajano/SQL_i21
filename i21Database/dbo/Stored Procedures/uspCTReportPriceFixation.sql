@@ -98,7 +98,7 @@ BEGIN TRY
 			CD.dblRate,
 			LTRIM(
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
-				dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)
+				dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)/CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(CY.intCent,1) ELSE 1 END
 			) +  ' ' + 
 			CASE WHEN CD.intCurrencyId = TY.intCurrencyID THEN FY.strCurrency ELSE TY.strCurrency END + 
 			' per ' + FM.strUnitMeasure AS strFXFinalPrice,

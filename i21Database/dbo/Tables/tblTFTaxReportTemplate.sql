@@ -3,6 +3,7 @@
 	[intReportingComponentDetailId] [int] NULL,
 	[intTaxReportSummaryItemId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[strSummaryFormCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intSummaryTaxAuthorityId] [int] NULL,
 	[strSummaryTaxAuthority] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strSummarySection] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intSummaryItemSequenceNumber] [int] NULL,

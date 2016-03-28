@@ -4,7 +4,7 @@ GO
 UPDATE tblICItemStock SET dblOrderCommitted = 0
 
 UPDATE tblICItemStock 
-SET dblOrderCommitted = SALES.dblCommitted
+SET dblOrderCommitted = ISNULL(SALES.dblCommitted, 0)
 FROM (
 	SELECT SO.intItemId
 		 , IIL.intItemLocationId
@@ -21,7 +21,13 @@ FROM (
 			FROM tblSOSalesOrderDetail SOD INNER JOIN tblSOSalesOrder SO 
 					ON SOD.intSalesOrderId = SO.intSalesOrderId
 				LEFT JOIN (tblARInvoiceDetail ID INNER JOIN tblARInvoice I 
-								ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1)
+								ON ID.intInvoiceId = I.intInvoiceId 
+								AND I.ysnPosted = 1
+								AND ID.intSalesOrderDetailId NOT IN (SELECT ISHI.intLineNo FROM tblICInventoryShipmentItem ISHI
+												INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
+											WHERE dbo.fnIsStockTrackingItem(ISHI.intItemId) = 1
+												AND ISH.ysnPosted = 1
+												AND ISNULL(ISHI.intLineNo, 0) > 0))
 					ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
 				LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
 								ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId AND ISH.ysnPosted = 1) 

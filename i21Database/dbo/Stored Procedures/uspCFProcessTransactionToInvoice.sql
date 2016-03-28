@@ -125,7 +125,7 @@ SELECT
 	,[intShipViaId]							= NULL 
 	,[intPaymentMethodId]					= NULL
 	,[strInvoiceOriginId]					= ''
-	,[strPONumber]							= ''
+	,[strPONumber]							= cfTrans.strPONumber
 	,[strBOLNumber]							= ''
 	,[strDeliverPickup]						= cfTrans.strDeliveryPickupInd
 	,[strComments]							= ''

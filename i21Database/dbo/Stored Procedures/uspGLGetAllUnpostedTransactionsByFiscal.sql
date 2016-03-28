@@ -64,7 +64,7 @@ BEGIN
 			SELECT  strTransactionId,strTransactionType, dtmDate,@strModule  from [vyuCMUnpostedTransaction]
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 			
-	ELSE
+	ELSE IF @strModule = 'GL'
 	BEGIN
 		-- BEGIN SHOW CM,INV, PR (I21) AND AP,GL (ORIGIN) TRANSACTIONS
 		DECLARE @blnLegacyIntegration BIT = 0
@@ -100,9 +100,9 @@ BEGIN
 		
 		
 		;WITH I21Transactions (strTransactionId,strTransactionType,dtmDate,strModule) AS(
-			SELECT strTransactionId,strTransactionType, dtmDate ,'INV' from [vyuICGetUnpostedTransactions] UNION ALL
-			SELECT strTransactionId,strTransactionType, dtmDate ,'PR' from vyuPRUnpostedTransactions UNION ALL
-			SELECT strTransactionId, strTransactionType, dtmDate,'CM' from [vyuCMUnpostedTransaction]) 
+			 SELECT strTransactionId COLLATE Latin1_General_CI_AS,strTransactionType COLLATE Latin1_General_CI_AS, dtmDate ,'INV' from [vyuICGetUnpostedTransactions] UNION ALL
+			SELECT strTransactionId COLLATE Latin1_General_CI_AS,strTransactionType COLLATE Latin1_General_CI_AS, dtmDate ,'PR' from vyuPRUnpostedTransactions UNION ALL
+			SELECT strTransactionId COLLATE Latin1_General_CI_AS, strTransactionType COLLATE Latin1_General_CI_AS, dtmDate,'CM' from [vyuCMUnpostedTransaction])
 		INSERT INTO @tblOriginTransactions SELECT strTransactionId,strTransactionType,dtmDate,strModule FROM I21Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		-- END SHOW CM,INV, PR (I21) AND AP,GL (ORIGIN) TRANSACTIONS
 	END
@@ -165,12 +165,14 @@ BEGIN
 			END
 
 			SELECT @msg = CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END  
+			SELECT TransactionType = @transactionType , message = @msg ,batchGUID = @guid 
 		END
+
 		-- END OPEN BATCH POSTING SCREEN
 		ELSE
 		BEGIN
 			-- ANY SCREEN IS NOT OPENED.
-			SELECT  @transactionType ='Empty' 
+			SELECT TransactionType = 'Empty'  , message = '' ,batchGUID = '' 
 		END
-		SELECT TransactionType = @transactionType , message = @msg ,batchGUID = @guid 
+
 END

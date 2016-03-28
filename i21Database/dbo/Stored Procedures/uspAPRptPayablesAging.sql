@@ -134,8 +134,14 @@ BEGIN
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 	END  
+	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
+	SET @dateTo = @dtmDateTo;
 END
-
+ELSE
+BEGIN
+	SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
+	SET @dateTo = GETDATE();
+END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 
@@ -290,6 +296,8 @@ SET @query = '
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 
+
+SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF ISNULL(@filter,'') != ''
 BEGIN

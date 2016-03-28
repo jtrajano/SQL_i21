@@ -7,8 +7,9 @@
 	,@RaiseError					BIT				= 0		
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@ItemUOMId						INT				= NULL
+	,@OrderUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
@@ -49,6 +50,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -80,8 +82,9 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@RaiseError					= @RaiseError
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
-			,@ItemUOMId						= @ItemUOMId
+			,@OrderUOMId					= @OrderUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
+			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemPrice						= @ItemPrice
@@ -122,6 +125,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
+			,@SubCurrency					= @SubCurrency
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -150,6 +154,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[intItemId]
 				,[strItemDescription]
 				,[strDocumentNumber]
+				,[intOrderUOMId]
 				,[intItemUOMId]
 				,[intContractHeaderId]
 				,[intContractDetailId]
@@ -165,12 +170,14 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[intTaxGroupId]
 				,[intEntitySalespersonId]
 				,[intSalesOrderDetailId]
-				,[strSalesOrderNumber])
+				,[strSalesOrderNumber]
+				,[ysnSubCurrency])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
 				,@ItemDescription
 				,@ItemDocumentNumber
+				,@OrderUOMId
 				,@ItemUOMId
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
@@ -187,6 +194,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@EntitySalespersonId					
 				,@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber
+				,@SubCurrency
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -229,6 +237,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
+			,@SubCurrency					= @SubCurrency
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
