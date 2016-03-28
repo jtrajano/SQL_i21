@@ -36,6 +36,16 @@ DECLARE @ysnIsStorage AS BIT
 DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @strInOutFlag AS NVARCHAR(100)
+DECLARE @strLotTracking AS NVARCHAR(100)
+DECLARE @intItemId AS INT
+
+BEGIN
+	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
+	FROM	dbo.tblSCTicket SC	        
+			--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+			JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
+	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+END
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -259,9 +269,13 @@ SELECT	@strTransactionId = IR.strReceiptNumber
 FROM	dbo.tblICInventoryReceipt IR	        
 WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 END
-EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 
-	_Exit:
+	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+	IF @strLotTracking = 'No'
+		BEGIN
+			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		END
+_Exit:
 	
 END TRY
 BEGIN CATCH

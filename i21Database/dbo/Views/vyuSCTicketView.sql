@@ -1,6 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketView]
 	AS select tblSCTicket.intTicketId,
-       tblSCTicket.strTicketStatus,
+	   (CASE 
+			WHEN tblSCTicket.strTicketStatus = 'O' THEN 'OPEN'
+			WHEN tblSCTicket.strTicketStatus = 'A' THEN 'PRINTED'
+			WHEN tblSCTicket.strTicketStatus = 'C' THEN 'COMPLETED'
+			WHEN tblSCTicket.strTicketStatus = 'V' THEN 'VOID'
+			WHEN tblSCTicket.strTicketStatus = 'R' THEN 'REOPENED'
+		END) AS strTicketStatusDescription,
+	   tblSCTicket.strTicketStatus,
        tblSCTicket.strTicketNumber,
        tblSCTicket.intScaleSetupId,
        tblSCTicket.intTicketPoolId,
