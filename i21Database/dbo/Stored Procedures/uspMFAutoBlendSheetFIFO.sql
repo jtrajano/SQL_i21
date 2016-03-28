@@ -1161,6 +1161,11 @@ BEGIN TRY
 				AND @intConsumptionMethodId=1 --By Lot 
 			BEGIN
 				SET @dblPartialQuantity = 0
+
+				Select TOP 1 @dblWeightPerQty=dblWeightPerQty From tblICLot 
+				where intItemId=@intRawItemId AND intStorageLocationId=@intPartialQuantityStorageLocationId 
+				ORDER By intLotId DESC
+
 				if @dblOriginalRequiredQty < @dblWeightPerQty
 					SET @dblPartialQuantity=@dblOriginalRequiredQty
 				ELSE
