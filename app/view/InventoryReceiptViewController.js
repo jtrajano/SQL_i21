@@ -624,6 +624,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        readOnly: '{readOnlyLotUOM}',
                         store: '{lotUOM}',
                         defaultFilters: [
                             {
@@ -3538,88 +3539,88 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onLotGridColumnBeforeRender: function (column) {
-        "use strict";
-        if (!column) return false;
-        var me = this,
-            win = column.up('window');
-
-        // Show or hide the editor based on the selected Field type.
-        column.getEditor = function (record) {
-
-            var vm = win.viewModel,
-                currentReceiptItem = vm.data.currentReceiptItem;
-
-            if (!record) return false;
-
-            var UOMType = currentReceiptItem.get('strUnitType');
-            var columnId = column.itemId;
-
-            switch (UOMType) {
-                case 'Weight':
-                    switch (columnId) {
-                        case 'colLotUOM' :
-                            return Ext.create('Ext.grid.CellEditor', {
-                                field: Ext.widget({
-                                    xtype: 'gridcombobox',
-                                    matchFieldWidth: false,
-                                    columns: [
-                                        {
-                                            dataIndex: 'intItemUOMId',
-                                            dataType: 'numeric',
-                                            text: 'Unit Of Measure Id',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strUnitMeasure',
-                                            dataType: 'string',
-                                            text: 'Unit Measure',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strUnitType',
-                                            dataType: 'string',
-                                            text: 'Unit Type',
-                                            flex: 1
-                                        },
-                                        {
-                                            xtype: 'checkcolumn',
-                                            dataIndex: 'ysnStockUnit',
-                                            dataType: 'boolean',
-                                            text: 'Stock Unit',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'dblUnitQty',
-                                            dataType: 'float',
-                                            text: 'Unit Qty',
-                                            hidden: true
-                                        }
-                                    ],
-                                    itemId: 'cboLotUOM',
-                                    displayField: 'strUnitMeasure',
-                                    valueField: 'strUnitMeasure',
-                                    store: win.viewModel.storeInfo.lotUOM,
-                                    defaultFilters: [
-                                        {
-                                            column: 'intItemId',
-                                            value: currentReceiptItem.get('intItemId'),
-                                            conjunction: 'and'
-                                        }
-                                    ]
-                                })
-                            });
-                            break;
-                    }
-                    break;
-                default:
-                    switch (columnId) {
-                        case 'colLotUOM' :
-                            return false;
-                            break;
-                    }
-                    break;
-            }
-        };
+        //"use strict";
+        //if (!column) return false;
+        //var me = this,
+        //    win = column.up('window');
+        //
+        //// Show or hide the editor based on the selected Field type.
+        //column.getEditor = function (record) {
+        //
+        //    var vm = win.viewModel,
+        //        currentReceiptItem = vm.data.currentReceiptItem;
+        //
+        //    if (!record) return false;
+        //
+        //    var UOMType = currentReceiptItem.get('strUnitType');
+        //    var columnId = column.itemId;
+        //
+        //    switch (UOMType) {
+        //        case 'Weight':
+        //            switch (columnId) {
+        //                case 'colLotUOM' :
+        //                    return Ext.create('Ext.grid.CellEditor', {
+        //                        field: Ext.widget({
+        //                            xtype: 'gridcombobox',
+        //                            matchFieldWidth: false,
+        //                            columns: [
+        //                                {
+        //                                    dataIndex: 'intItemUOMId',
+        //                                    dataType: 'numeric',
+        //                                    text: 'Unit Of Measure Id',
+        //                                    hidden: true
+        //                                },
+        //                                {
+        //                                    dataIndex: 'strUnitMeasure',
+        //                                    dataType: 'string',
+        //                                    text: 'Unit Measure',
+        //                                    flex: 1
+        //                                },
+        //                                {
+        //                                    dataIndex: 'strUnitType',
+        //                                    dataType: 'string',
+        //                                    text: 'Unit Type',
+        //                                    flex: 1
+        //                                },
+        //                                {
+        //                                    xtype: 'checkcolumn',
+        //                                    dataIndex: 'ysnStockUnit',
+        //                                    dataType: 'boolean',
+        //                                    text: 'Stock Unit',
+        //                                    flex: 1
+        //                                },
+        //                                {
+        //                                    dataIndex: 'dblUnitQty',
+        //                                    dataType: 'float',
+        //                                    text: 'Unit Qty',
+        //                                    hidden: true
+        //                                }
+        //                            ],
+        //                            itemId: 'cboLotUOM',
+        //                            displayField: 'strUnitMeasure',
+        //                            valueField: 'strUnitMeasure',
+        //                            store: win.viewModel.storeInfo.lotUOM,
+        //                            defaultFilters: [
+        //                                {
+        //                                    column: 'intItemId',
+        //                                    value: currentReceiptItem.get('intItemId'),
+        //                                    conjunction: 'and'
+        //                                }
+        //                            ]
+        //                        })
+        //                    });
+        //                    break;
+        //            }
+        //            break;
+        //        default:
+        //            switch (columnId) {
+        //                case 'colLotUOM' :
+        //                    return false;
+        //                    break;
+        //            }
+        //            break;
+        //    }
+        //};
     },
 
     onSpecialKeyTab: function (component, e, eOpts) {
