@@ -351,6 +351,7 @@ BEGIN
 				,intSourceId
 				,intItemId
 				,intSubLocationId
+				,intStorageLocationId
 				,dblOrderQty
 				,dblOpenReceive
 				,dblReceived
@@ -372,7 +373,8 @@ BEGIN
 				,intOrderId				= RawData.intContractHeaderId
 				,intSourceId			= RawData.intSourceId
 				,intItemId				= RawData.intItemId
-				,intSubLocationId		= NULL
+				,intSubLocationId		= RawData.intSubLocationId
+				,intStorageLocationId	= RawData.intStorageLocationId
 				,dblOrderQty			= ISNULL(RawData.dblQty, 0)
 				,dblOpenReceive			= ISNULL(RawData.dblQty, 0)
 				,dblReceived			= ISNULL(RawData.dblQty, 0)
