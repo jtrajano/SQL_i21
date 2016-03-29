@@ -1,4 +1,15 @@
-﻿CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
+﻿/*
+
+Important Notes:
+
+Accepted values for ReceiptStagingTable.intGrossNetUOMId:
+	1. -1 (or any negative value) means NULL gross/net uom
+	2. NULL means it will use the stock uom of the item as the gross/net uom
+	3. or provide a [valid gross/net uom id]
+	4. If you provided an invalid gross/net uom id, it will use the stock unit of the item. 
+*/
+
+CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
 	@ReceiptEntries ReceiptStagingTable READONLY
 	,@OtherCharges ReceiptOtherChargesTableType READONLY 
 	,@intUserId AS INT	
@@ -366,16 +377,23 @@ BEGIN
 				,dblOpenReceive			= ISNULL(RawData.dblQty, 0)
 				,dblReceived			= ISNULL(RawData.dblQty, 0)
 				,intUnitMeasureId		= ItemUOM.intItemUOMId
-				,intWeightUOMId			= (
-												SELECT	TOP 1 
-														tblICItemUOM.intItemUOMId 
-												FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
-															ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
-												WHERE	tblICItemUOM.intItemId = RawData.intItemId 
-														AND tblICItemUOM.ysnStockUnit = 1 
-														AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
-														--AND dbo.fnGetItemLotType(RawData.intItemId) IN (1,2)
-										)
+				,intWeightUOMId			= 
+										CASE	WHEN RawData.intGrossNetUOMId < 1 THEN NULL 
+												ELSE ISNULL(
+														GrossNetUOM.intItemUOMId
+														,(
+															SELECT	TOP 1 
+																	tblICItemUOM.intItemUOMId 
+															FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
+																		ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
+															WHERE	tblICItemUOM.intItemId = RawData.intItemId 
+																	AND tblICItemUOM.ysnStockUnit = 1 
+																	AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
+														)
+													)
+										END 
+				
+										
 				,dblUnitCost			= RawData.dblCost
 				--,dblLineTotal			= RawData.dblQty * RawData.dblCost
 				,intSort				= 1
@@ -401,7 +419,10 @@ BEGIN
 					ON ItemUOM.intItemId = RawData.intItemId  
 					AND ItemUOM.intItemUOMId = RawData.intItemUOMId			
 				INNER JOIN dbo.tblICUnitMeasure UOM
-					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+				LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
+					ON GrossNetUOM.intItemUOMId = RawData.intGrossNetUOMId
+
 		WHERE RawHeaderData.intId = @intId
 
 		-- Insert the Other Charges
