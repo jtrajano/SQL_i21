@@ -2358,7 +2358,7 @@ BEGIN
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType])
-		VALUES(@intTaxAuthorityId, 'MF-360',	'Consolidated Gasoline Monthly Tax Return',	'','','Form MF-360', 520, '')
+		VALUES(@intTaxAuthorityId, 'MF-360',	'Consolidated Gasoline Monthly Tax Return',	'','Main Form','Form MF-360', 520, '')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 		INSERT INTO [tblTFFilingPacket]([intTaxAuthorityId],[intReportingComponentId],[ysnStatus],[intFrequency])
 		VALUES(@intTaxAuthorityId, @MasterPk,1,2)
