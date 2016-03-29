@@ -43,7 +43,20 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
-		
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 'Posting different Currency are not yet implemented.',
+				'Payable',
+			   A.strPaymentRecordNum,
+			   A.intPaymentId
+		FROM dbo.tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+		INNER JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+		CROSS APPLY
+		(
+			SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference
+		) BaseCurrency
+		WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId
+
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
 			'Please setup user default location.',
@@ -304,7 +317,7 @@ BEGIN
 		INNER JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
 		WHERE C.intEntityVendorId <> A.intEntityVendorId
-		AND A.[intPaymentId] IN (SELECT A.[intPaymentId] FROM @paymentIds)
+		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 
 		--DO NOT ALLOW TO POST DEBIT MEMOS AND PAYMENTS IF AMOUNT PAID IS NOT EQUAL TO ZERO
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -315,7 +328,7 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
-		WHERE A.[intPaymentId] IN (SELECT [intPaymentId] FROM @paymentIds)
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.dblAmountPaid = 0
 		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
 

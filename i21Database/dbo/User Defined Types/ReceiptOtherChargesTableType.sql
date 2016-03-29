@@ -13,7 +13,7 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[intLocationId] INT NOT NULL															-- Company Location	
 	,[intShipViaId] INT NULL																-- ShipVia
 	,[intShipFromId] INT NOT NULL															-- The Vendor Location. 
-	,[intCurrencyId] INT NULL																-- The currency id used in a tranaction. 	
+	,[intCurrencyId] INT NULL																-- The currency id used in a transaction. 	
 
 	-- Other Charges Fields		
 	,[intChargeId] INT NOT NULL																-- The item id of Other Charge type. 
@@ -29,4 +29,5 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[ysnPrice] BIT NULL 
 	,[intContractHeaderId] INT NULL															-- Contract Header
 	,[intContractDetailId] INT NULL															-- Contract Detail
+	,[ysnSubCurrency] BIT NULL 
 )

@@ -45,6 +45,7 @@ SELECT
  ,G.strName AS strStorageName
  ,ysnCompleted = CAST((CASE WHEN A.intOrderStatusId IN (1, 2, 7) AND B.dblQtyOrdered != B.dblQtyReceived THEN 0 ELSE 1 END) AS BIT)
  ,D.strType
+ ,A.intCurrencyId
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
  INNER JOIN (tblAPVendor C INNER JOIN tblEntity C2 ON C.intEntityVendorId = C2.intEntityId) ON A.[intEntityVendorId] = C.intEntityVendorId
