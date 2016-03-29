@@ -286,7 +286,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
-		WHERE  A.[intPaymentId] IN (13)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND B.dblPayment != 0
 		GROUP BY A.strPaymentRecordNum, A.intPaymentId
 		HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
