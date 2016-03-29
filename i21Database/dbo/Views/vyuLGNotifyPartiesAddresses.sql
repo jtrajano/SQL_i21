@@ -16,15 +16,30 @@ AS
 
 	UNION ALL
 
-	SELECT	intCompanySetupID	AS			intEntityId, 
-			-1					AS			intEntityLocationId, 
-			strCompanyName AS strLocationName,
+	SELECT	(SELECT Top(1) intCompanySetupID FROM tblSMCompanySetup)		AS intEntityId, 
+			L.intCompanyLocationId											AS intEntityLocationId, 
+			L.strLocationName,
+			L.strAddress, 
+			L.strCity, 
+			L.strCountry, 
+			L.strStateProvince												AS strState, 
+			L.strZipPostalCode												AS strZipCode, 
+			L.strPhone, 
+			L.strFax,
+			'Company'														AS strType
+	FROM	tblSMCompanyLocation L
+
+	UNION ALL
+
+	SELECT	intBankId	AS			intEntityId, 
+			-1					AS	intEntityLocationId, 
+			strBankName			AS	strLocationName,
 			strAddress, 
 			strCity, 
 			strCountry, 
 			strState, 
-			strZip				AS			strZipCode, 
+			''				AS			strZipCode, 
 			strPhone, 
 			strFax,
-			'Company'			AS			strType
-	FROM	tblSMCompanySetup
+			'Bank'			AS			strType
+	FROM	tblCMBank
