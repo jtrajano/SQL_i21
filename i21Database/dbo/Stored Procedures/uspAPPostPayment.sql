@@ -169,10 +169,20 @@ BEGIN
 		SET @invalidCount = @totalInvalid
 
 		--DELETE Invalid Transaction From temp table
-		DELETE #tmpPayablePostData
-			FROM #tmpPayablePostData A
-				INNER JOIN #tmpPayableInvalidData
-					ON A.intPaymentId = #tmpPayableInvalidData.intTransactionId
+		DELETE A
+		FROM @payments A
+		INNER JOIN #tmpPayableInvalidData
+			ON A.intId = #tmpPayableInvalidData.intTransactionId
+
+		DELETE A
+		FROM @prepayIds A
+		INNER JOIN #tmpPayableInvalidData
+			ON A.intId = #tmpPayableInvalidData.intTransactionId
+
+		DELETE A
+		FROM #tmpPayablePostData A
+		INNER JOIN #tmpPayableInvalidData
+			ON A.intPaymentId = #tmpPayableInvalidData.intTransactionId
 
 	END
 
@@ -335,9 +345,9 @@ BEGIN
 		WHILE (@payId IS NOT NULL)
 		BEGIN
 			EXEC uspAPCreateOverpayment @payId, @userId;
-			DELETE FROM #tmpPayableIds WHERE intPaymentId = @payId;
+			DELETE FROM #tmpPayableIds WHERE intId = @payId;
 			SET @payId = NULL;
-			SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
+			SELECT TOP 1 @payId = intId FROM #tmpPayableIds
 		END
 	END
 	ELSE IF @post = 0
@@ -353,17 +363,22 @@ BEGIN
 	EXEC [uspAPUpdateBill1099] @param
 
 	DECLARE @strDescription AS NVARCHAR(100),@actionType AS NVARCHAR(50),@PaymentId AS NVARCHAR(50);
+	DECLARE @paymentCounter INT = 0;
 	SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
-	SELECT @PaymentId = (SELECT intPaymentId FROM #tmpPayablePostData)
-	EXEC dbo.uspSMAuditLog 
-	   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
-	  ,@keyValue = @PaymentId								-- Primary Key Value of the Voucher. 
-	  ,@entityId = @userId									-- Entity Id.
-	  ,@actionType = @actionType                        -- Action Type
-	  ,@changeDescription = @strDescription				-- Description
-	  ,@fromValue = ''									-- Previous Value
-	  ,@toValue = ''
 
+	WHILE(@paymentCounter != (@totalRecords -1))
+	BEGIN
+		SELECT @PaymentId = (SELECT TOP(@paymentCounter) intPaymentId FROM #tmpPayablePostData)
+		EXEC dbo.uspSMAuditLog 
+		   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
+		  ,@keyValue = @PaymentId								-- Primary Key Value of the Voucher. 
+		  ,@entityId = @userId									-- Entity Id.
+		  ,@actionType = @actionType                        -- Action Type
+		  ,@changeDescription = @strDescription				-- Description
+		  ,@fromValue = ''									-- Previous Value
+		  ,@toValue = ''
+		SET @paymentCounter = @paymentCounter + 1
+	END
 END
 ELSE
 	BEGIN
