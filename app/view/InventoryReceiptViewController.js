@@ -1839,18 +1839,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     },
 
+    convertLotUOMToGross: function(lotCF, weightCF, lotQty){
+        var result = 0;
+        if (lotCF === weightCF) {
+            result = lotQty;
+        }
+        else if (weightCF !== 0){
+            result = (lotCF * lotQty) / weightCF;
+        }
+
+        return result;
+    },
+
     calculateGrossWeight: function (record) {
+        var me = this;
         if (!record) return;
 
         if (record.tblICInventoryReceiptItemLots()) {
             Ext.Array.each(record.tblICInventoryReceiptItemLots().data.items, function (lot) {
                 if (!lot.dummy) {
-                    var qty = lot.get('dblQuantity');
+                    var lotQty = lot.get('dblQuantity');
                     var lotCF = lot.get('dblLotUOMConvFactor');
                     var itemUOMCF = record.get('dblItemUOMConvFactor');
                     var weightCF = record.get('dblWeightUOMConvFactor');
 
-                    if (iRely.Functions.isEmpty(qty)) qty = 0.00;
+                    if (iRely.Functions.isEmpty(lotQty)) lotQty = 0.00;
                     if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
                     if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
                     if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
@@ -1859,20 +1872,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         weightCF = itemUOMCF;
                     }
 
-                    var total = 0;
-                    if (lotCF === weightCF) {
-                        total = qty;
-                    }
-                    else if (lotCF > weightCF) {
-                        total = (lotCF * qty) * weightCF;
-                    }
-                    else {
-                        total = (weightCF * qty) / lotCF;
-                    }
+                    var grossQty;
+                    grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
 
-                    lot.set('dblGrossWeight', total);
+                    lot.set('dblGrossWeight', grossQty);
                     var tare = lot.get('dblTareWeight');
-                    var netTotal = total - tare;
+                    var netTotal = grossQty - tare;
                     lot.set('dblNetWeight', netTotal);
                 }
             });
@@ -2489,14 +2494,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onEditLots: function (editor, context, eOpts) {
+        var me = this;
+
         if (context.field === 'dblQuantity') {
             var win = editor.grid.up('window');
-            var qty = context.value;
+            var lotQty = context.value;
             var lotCF = context.record.get('dblLotUOMConvFactor');
             var itemUOMCF = win.viewModel.data.currentReceiptItem.get('dblItemUOMConvFactor');
             var weightCF = win.viewModel.data.currentReceiptItem.get('dblWeightUOMConvFactor');
 
-            if (iRely.Functions.isEmpty(qty)) qty = 0.00;
+            if (iRely.Functions.isEmpty(lotQty)) lotQty = 0.00;
             if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
             if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
             if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
@@ -2505,20 +2512,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 weightCF = itemUOMCF;
             }
 
-            var total = 0;
-            if (lotCF === weightCF) {
-                total = qty;
-            }
-            else if (lotCF > weightCF) {
-                total = (lotCF * qty) * weightCF;
-            }
-            else {
-                total = (lotCF * qty) / weightCF;
-            }
+            var grossQty;
+            grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
 
-            context.record.set('dblGrossWeight', total);
+            context.record.set('dblGrossWeight', grossQty);
             var tare = context.record.get('dblTareWeight');
-            var netTotal = total - tare;
+            var netTotal = grossQty - tare;
             context.record.set('dblNetWeight', netTotal);
         }
         else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
@@ -4021,6 +4020,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onReplicateBalanceLotClick: function(button) {
+        var me = this;
         var win = button.up('window');
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var lineItemQty = currentReceiptItem.get('dblOpenReceive');
@@ -4038,20 +4038,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     return;
                 }
 
+                var lotCF = currentLot.get('dblLotUOMConvFactor');
+                var grossCF = currentReceiptItem.get('dblWeightUOMConvFactor');
+
                 var lastQty = (lineItemQty % lotQty) > 0 ? lineItemQty % lotQty : currentLot.get('dblQuantity');
                 var replicaCount = (lineItemQty - lastQty) / lotQty;
                 var lastGrossWgt = currentLot.get('dblGrossWeight');
                 var lastTareWgt = currentLot.get('dblTareWeight');
                 var lastNetWgt = currentLot.get('dblNetWeight');
                 if ((replicaCount * lotQty) < lineItemQty ) {
+                    // Compute the last gross qty.
                     if (lastGrossWgt > 0) {
-                        lastGrossWgt = (lotQty / lastGrossWgt) * lastQty;
+                        lastGrossWgt = me.convertLotUOMToGross(lotCF, grossCF, lastQty);
                     }
-                    if (lastTareWgt > 0) {
-                        lastTareWgt = (lotQty / lastTareWgt) * lastQty;
-                    }
-                    if (lastNetWgt > 0) {
-                        lastNetWgt = (lotQty / lastNetWgt) * lastQty;
+
+                    // Compute the last net weight.
+                    {
+                        lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
+                        lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt : 0;
+                        lastNetWgt = lastGrossWgt - lastTareWgt;
                     }
                 }
                 else {
@@ -4089,7 +4094,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dtmCertified: currentLot.get('dtmCertified'),
                         dtmExpiryDate: currentLot.get('dtmExpiryDate'),
                         intSort: currentLot.get('intSor:'),
-                        dblNetWeight: currentLot.get('dblNetWeight'),
                         strWeightUOM: currentLot.get('strWeightUOM'),
                         intParentLotId: currentLot.get('intParentLotId'),
                         strParentLotNumber: currentLot.get('strParentLotNumber'),
