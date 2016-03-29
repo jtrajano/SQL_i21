@@ -927,10 +927,6 @@ IF (@isSuccessful <> 0)
 						/* Update Paycheck Direct Deposit Distribution */
 						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
 							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
-
-						/* Create Paycheck Payables */
-						EXEC uspPRCreatePaycheckPayable @intPaycheckId, @intUserId
-
 					END
 			END
 		ELSE
