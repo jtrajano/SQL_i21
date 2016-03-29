@@ -379,18 +379,16 @@ BEGIN
 				,intUnitMeasureId		= ItemUOM.intItemUOMId
 				,intWeightUOMId			= 
 										CASE	WHEN RawData.intGrossNetUOMId < 1 THEN NULL 
-												ELSE ISNULL(
-														GrossNetUOM.intItemUOMId
-														,(
-															SELECT	TOP 1 
-																	tblICItemUOM.intItemUOMId 
-															FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
-																		ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
-															WHERE	tblICItemUOM.intItemId = RawData.intItemId 
-																	AND tblICItemUOM.ysnStockUnit = 1 
-																	AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
-														)
-													)
+												WHEN GrossNetUnitMeasure.intUnitMeasureId IS NOT NULL THEN GrossNetUOM.intItemUOMId
+												ELSE (
+														SELECT	TOP 1 
+																tblICItemUOM.intItemUOMId 
+														FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
+																	ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
+														WHERE	tblICItemUOM.intItemId = RawData.intItemId 
+																AND tblICItemUOM.ysnStockUnit = 1 
+																AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
+													)											
 										END 
 				
 										
@@ -422,6 +420,9 @@ BEGIN
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
 					ON GrossNetUOM.intItemUOMId = RawData.intGrossNetUOMId
+                LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure    
+                    ON GrossNetUOM.intUnitMeasureId = GrossNetUnitMeasure.intUnitMeasureId
+                    AND GrossNetUnitMeasure.strUnitType IN ('Weight', 'Volume')
 
 		WHERE RawHeaderData.intId = @intId
 
