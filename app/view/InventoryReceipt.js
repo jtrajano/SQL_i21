@@ -1872,6 +1872,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'string',
                                                                                             text: 'Unit Type',
                                                                                             flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'checkcolumn',
+                                                                                            dataIndex: 'ysnStockUnit',
+                                                                                            dataType: 'boolean',
+                                                                                            text: 'Stock Unit',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblUnitQty',
+                                                                                            dataType: 'float',
+                                                                                            text: 'Unit Qty',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboLotUOM',

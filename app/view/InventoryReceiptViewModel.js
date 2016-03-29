@@ -714,6 +714,21 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             else {
                 return 'Wgt or Vol Gain/Loss: 0.00';
             }
+        },
+        readOnlyLotUOM: function (get) {
+            var currentReceiptItem = this.data.currentReceiptItem;
+            if (currentReceiptItem){
+                switch(currentReceiptItem.get('strUnitType')){
+                    case 'Weight':
+                        return false;
+                        break;
+                    default:
+                        return true;
+                        break;
+                }
+            }
+
+            return false;
         }
     }
 
