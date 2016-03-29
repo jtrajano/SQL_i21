@@ -413,7 +413,7 @@ BEGIN
 			,intCostUOMId = NULL  
 			,dblUnitCost = 12.00
 			,dblUnitRetail = NULL 
-			,dblLineTotal = 132.00
+			,dblLineTotal = ROUND(12.00 * 22 * @PoundUnitQty / @KgUnitQty, 2) 
 			,intGradeId = NULL 
 			,dblGross = 21.00 
 			,dblNet = 22.00
@@ -441,7 +441,7 @@ BEGIN
 			,intCostUOMId = NULL  
 			,dblUnitCost = 12.00
 			,dblUnitRetail = NULL 
-			,dblLineTotal = 132.00
+			,dblLineTotal = ROUND(12.00 * 22 * @PoundUnitQty / @BushelUnitQty, 2) 
 			,intGradeId = NULL 
 			,dblGross = 21.00 
 			,dblNet = 22.00
@@ -469,7 +469,7 @@ BEGIN
 			,intCostUOMId = NULL  
 			,dblUnitCost = 12.00
 			,dblUnitRetail = NULL 
-			,dblLineTotal = 132.00
+			,dblLineTotal = ROUND(12.00 * 22 * @PoundUnitQty / @BushelUnitQty, 2) 
 			,intGradeId = NULL 
 			,dblGross = 21.00 
 			,dblNet = 22.00

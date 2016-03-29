@@ -22,6 +22,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
 	,[strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Vendor Reference No. 
 	,[intTaxGroupId] INT NULL								-- Overriding Tax Group Id, if you want to override the Tax Group that will be used from the Ship From Location setup.
+	,[intSubCurrencyCents] INT NULL DEFAULT 1
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 
@@ -38,6 +39,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[ysnFreightInPrice] BIT NULL DEFAULT 0				-- Freight should be included In Price
 	,[intCostUOMId] INT NULL							-- Cost UOM
 	,[intDiscountSchedule] INT NULL						-- Discount Schedule field. (Quality module).
+	,[ysnSubCurrency] BIT NULL 
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
