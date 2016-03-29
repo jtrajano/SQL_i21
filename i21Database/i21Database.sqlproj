@@ -3570,6 +3570,7 @@
     <Build Include="dbo\Functions\fnQMGetShipperName.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalancePrintEach.sql" />
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
