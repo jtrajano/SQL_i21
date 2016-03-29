@@ -1265,7 +1265,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (current) {
             var subCurrencyCents = records[0].get('intSubCurrencyCent');
-            subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents != 0 ? subCurrencyCents : 1;
+            subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
             current.set('intSubCurrencyCents', subCurrencyCents);
         }
     },
@@ -1284,7 +1284,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
 
             var subCurrencyCents =  records[0].get('intSubCurrencyCent');
-            subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents != 0 ? subCurrencyCents : 1;
+            subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
             current.set('intSubCurrencyCents', subCurrencyCents);
 
             current.set('intShipFromId', null);
