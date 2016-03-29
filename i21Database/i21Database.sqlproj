@@ -3568,6 +3568,7 @@
     <Build Include="dbo\Tables\tblLGLoadDocuments.sql" />
     <Build Include="dbo\Tables\tblLGLoadWarehouseServices.sql" />
     <Build Include="dbo\Functions\fnQMGetShipperName.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDTrialBalancePrintEach.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
