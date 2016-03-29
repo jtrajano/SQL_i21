@@ -36,7 +36,8 @@ BEGIN
 		OR EXISTS(SELECT TOP 1 1 FROM tblPRPaycheckDeduction WHERE intPaycheckId = @intPaycheckId AND intBillId IS NOT NULL))
 	BEGIN
 		SELECT @intPaycheckIds = CAST(@intPaycheckId AS NVARCHAR(MAX)) FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
-		EXEC uspPRCreatePaycheckPayable @intPaycheckIds, '', @intUserId, 1
+		SET @strTransactionId = @strTransactionId + 'V'
+		EXEC uspPRCreatePaycheckPayable @intPaycheckIds, @strTransactionId, @intUserId, 1
 	END
 
 	UPDATE tblPRPaycheck
