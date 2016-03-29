@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using IdeaBlade.Linq;
+using System;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -523,7 +524,7 @@ namespace iRely.Inventory.BusinessLayer
                 // Calculate beginning and running balance
                 row.dblBeginningBalance = dblBeginningBalance;
                 dblRunningBalance = dblBeginningBalance + row.dblValue;
-                row.dblRunningBalance = dblRunningBalance;
+                row.dblRunningBalance = Convert.ToDecimal(Math.Round(Convert.ToDouble(dblRunningBalance), 2));
                 dblBeginningBalance = dblRunningBalance;
 
                 // Calculate the beginning and running quantity
