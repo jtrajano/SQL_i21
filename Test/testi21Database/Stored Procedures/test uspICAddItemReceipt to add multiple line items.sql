@@ -400,8 +400,8 @@ BEGIN
 			,intSourceId = 20
 			,intItemId = @ManualLotGrains
 			,intContainerId = NULL 
-			,intSubLocationId = NULL 
-			,intStorageLocationId = NULL 
+			,intSubLocationId = 16 
+			,intStorageLocationId = 17
 			,intOwnershipType = 1
 			,dblOrderQty = 11.00
 			,dblBillQty = NULL 
@@ -428,8 +428,8 @@ BEGIN
 			,intSourceId = 20
 			,intItemId = @WetGrains
 			,intContainerId = NULL 
-			,intSubLocationId = NULL 
-			,intStorageLocationId = NULL 
+			,intSubLocationId = 16
+			,intStorageLocationId = 17
 			,intOwnershipType = 1
 			,dblOrderQty = 11.00
 			,dblBillQty = NULL 
@@ -456,8 +456,8 @@ BEGIN
 			,intSourceId = 20
 			,intItemId = @WetGrains
 			,intContainerId = NULL 
-			,intSubLocationId = NULL 
-			,intStorageLocationId = NULL 
+			,intSubLocationId = 16
+			,intStorageLocationId = 17
 			,intOwnershipType = 2
 			,dblOrderQty = 11.00
 			,dblBillQty = NULL 
