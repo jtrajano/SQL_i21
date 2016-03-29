@@ -124,7 +124,7 @@ END
 
 -- Get the next check number from the bank account table
 SELECT TOP 1 
-		@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo)		
+		@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo,intCheckNoLength)		
 FROM	dbo.tblCMBankAccount
 WHERE	intBankAccountId = @intBankAccountId
 
