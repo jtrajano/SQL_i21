@@ -304,4 +304,9 @@ END
 delete from tblTRTransportLoad
 
 
+GO
 
+	-- Run Fixes for Jobber Price calculations on 16.1
+	EXEC uspTRFixRackPrices
+
+GO
