@@ -204,9 +204,7 @@ BEGIN TRY
 							ON ScaleTicket.intItemId = ItemLocation.intItemId
 							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	ScaleTicket.intTicketId = @intTicketId
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 
 			-- Validate the items to shipment 
 			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
@@ -227,8 +225,11 @@ BEGIN TRY
 			FROM	dbo.tblICInventoryShipment ship	        
 			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 			END
-
-			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+			IF @strLotTracking = 'No'
+				BEGIN
+					EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+				END
 		END
 		IF (@dblRemainingUnits = @dblNetUnits)
 		RETURN
@@ -289,7 +290,7 @@ BEGIN TRY
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	END
 	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	if @strLotTracking = 'No'
+	IF @strLotTracking = 'No'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 		END
