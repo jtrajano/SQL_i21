@@ -129,10 +129,18 @@ BEGIN
 
 		IF (@strTransactionType = @SourceType_InventoryReceipt)
 		BEGIN
+			UPDATE tblTRLoadReceipt
+			SET intInventoryReceiptId = NULL
+			WHERE intInventoryReceiptId = @intTransactionId
+
 			EXEC uspICDeleteInventoryReceipt @intTransactionId, @UserId
 		END
 		ELSE IF (@strTransactionType = @SourceType_InventoryTransfer)
 		BEGIN
+			UPDATE tblTRLoadReceipt
+			SET intInventoryTransferId = NULL
+			WHERE intInventoryTransferId = @intTransactionId
+
 			EXEC uspICDeleteInventoryTransfer @intTransactionId, @UserId
 		END
 		ELSE IF (@strTransactionType = @SourceType_Invoice)
