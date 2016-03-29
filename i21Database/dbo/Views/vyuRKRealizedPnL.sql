@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKRealizedPnL  
 AS  
-
+SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,* from (
 SELECT *,(dblGrossPL1-dblFutCommission1) / case when ysnSubCurrency = 'true' then intCent else 1 end AS dblNetPL,-dblFutCommission1/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblFutCommission FROM(  
 SELECT   
 ((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize) as dblGrossPL1,((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL,* FROM  
@@ -42,3 +42,4 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=psh.intFutureMarketId AND psh.intBrokerageAccountId=bc.intBrokerageAccountId   
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId AND ot.intInstrumentTypeId =1
   )t)t1
+  )t ORDER BY RowNum ASC
