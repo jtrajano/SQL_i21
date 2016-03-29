@@ -1,13 +1,13 @@
 ﻿
 -- This function add zero prefixes to a numeric string. This is commonly used on check numbers. 
-CREATE FUNCTION [dbo].[fnAddZeroPrefixes](@strCheckNumber AS NVARCHAR(MAX))
+CREATE FUNCTION [dbo].[fnAddZeroPrefixes](@strCheckNumber AS NVARCHAR(MAX), @PREFIX_COUNT AS INT = 8)
 RETURNS NVARCHAR(20)
 AS
 BEGIN 
 
 -- As per Joe Kohnen, the acceptable number of check numbers is 8 characters. (March 2014)
 -- You can increase @PREFIX_COUNT in case future check number requirement increases. 
-DECLARE @PREFIX_COUNT AS INT = 8
+--DECLARE @PREFIX_COUNT AS INT = 8
 
 -- Localize parameter to optimize function
 DECLARE @strCheckNumberLocal AS NVARCHAR(MAX)
