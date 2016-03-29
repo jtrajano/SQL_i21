@@ -15,7 +15,7 @@ WHILE EXISTS (SELECT NULL FROM @tblARQuoteTemplate)
 	BEGIN		
 		SELECT TOP 1 @intQuoteTemplateId = ISNULL(intQuoteTemplateId, 0) FROM @tblARQuoteTemplate
 
-		INSERT INTO tblARQuoteTemplateDetail VALUES (@intQuoteTemplateId, 'Quote Order', NULL, NULL, NULL, 0, 1, 0)
+		INSERT INTO tblARQuoteTemplateDetail VALUES (@intQuoteTemplateId, 'Quote Order', 0, NULL, 1, 0)
 
 		DELETE FROM @tblARQuoteTemplate WHERE intQuoteTemplateId = @intQuoteTemplateId
 	END
