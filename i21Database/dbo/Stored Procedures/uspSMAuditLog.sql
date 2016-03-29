@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE [dbo].[uspSMAuditLog]
 	@screenName			AS NVARCHAR(100),
-	@keyValue			AS NVARCHAR(50),
+	@keyValue			AS NVARCHAR(MAX),
 	@entityId			AS INT,
 	@actionType			AS NVARCHAR(50),
 	@actionIcon			AS NVARCHAR(50) = 'small-menu-maintenance', -- 'small-new-plus', 'small-new-minus',
@@ -27,6 +27,14 @@ SET XACT_ABORT ON
 
 DECLARE @children AS NVARCHAR(MAX) = ''
 DECLARE @jsonData AS NVARCHAR(MAX) = ''
+DECLARE @singleValue AS NVARCHAR(MAX) = ''
+
+--=====================================================================================================================================
+-- 	DECLARE TEMPORARY TABLES
+---------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE #tmpAuditEntries (
+	[intId] INT
+);
 
 --=====================================================================================================================================
 -- 	COMPOSE JSON DATA
@@ -47,23 +55,38 @@ SET @jsonData = '{"action":"' + @actionType + '","change":"Updated - Record: 115
 --=====================================================================================================================================
 -- 	INSERT AUDIT ENTRY
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO tblSMAuditLog (
-	strActionType,
-	strDescription,
-	strJsonData,
-	strRecordNo,
-	strTransactionType,
-	intEntityId,
-	intConcurrencyId,
-	dtmDate
-) SELECT 
-	@actionType,
-	'',
-	@jsonData,
-	@keyValue,
-	@screenName,
-	@entityId,
-	1,
-	GETDATE()
+
+
+INSERT INTO #tmpAuditEntries
+SELECT [intID] FROM fnGetRowsFromDelimitedValues(@keyValue)
+
+
+WHILE EXISTS (SELECT TOP (1) 1 FROM #tmpAuditEntries)
+BEGIN
+	SELECT TOP 1 @singleValue = CAST([intId] AS NVARCHAR(50)) FROM #tmpAuditEntries
+
+	INSERT INTO tblSMAuditLog (
+		strActionType,
+		strDescription,
+		strJsonData,
+		strRecordNo,
+		strTransactionType,
+		intEntityId,
+		intConcurrencyId,
+		dtmDate
+	) SELECT 
+		@actionType,
+		'',
+		@jsonData,
+		@singleValue,
+		@screenName,
+		@entityId,
+		1,
+		GETDATE()
+
+	DELETE TOP (1) FROM #tmpAuditEntries
+END
+
+DROP TABLE #tmpAuditEntries
 	
 GO
