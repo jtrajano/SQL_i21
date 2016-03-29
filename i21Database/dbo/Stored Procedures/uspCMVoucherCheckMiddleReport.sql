@@ -155,10 +155,11 @@ SELECT	CHK.dtmDate
 		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
 		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
 		,strVendorAddress = CASE	
-									WHEN ISNULL(dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode), '') <> ''  THEN 
-										dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
-									ELSE 
+									WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
 										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
+									ELSE 
+										dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
+										
 							END
 		-- Used to change the sub-report during runtime. 
 		,CHK.intBankTransactionTypeId
