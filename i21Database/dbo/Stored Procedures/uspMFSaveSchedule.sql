@@ -206,6 +206,7 @@ BEGIN TRY
 			,intExecutionOrder =x.intExecutionOrder 
 			,dtmEarliestDate=x.dtmEarliestDate
 			,dtmLatestDate=x.dtmLatestDate
+			,dtmExpectedDate =x.dtmExpectedDate
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 				intWorkOrderId INT
 				,intStatusId int
@@ -216,6 +217,7 @@ BEGIN TRY
 				,intExecutionOrder int
 				,dtmEarliestDate datetime
 				,dtmLatestDate datetime
+				,dtmExpectedDate datetime
 				) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
 	END
 	
