@@ -24,19 +24,16 @@ BEGIN TRY
 			@intContractHeaderId	INT,
 			@ysnAllowedToShow		BIT,
 			@ysnUnlimitedQuantity	BIT,
-			@strContractStatus		NVARCHAR(MAX)
+			@strContractStatus		NVARCHAR(MAX),
+			@intScaleUOMId			INT,
+			@intScaleUnitMeasureId	INT,
+			@intItemUOMId			INT
 
 	DECLARE @Processed TABLE
 	(
 			intContractDetailId INT,
 			dblUnitsDistributed NUMERIC(18,6),
 			dblUnitsRemaining	NUMERIC(18,6),
-			dblOldQuantity		NUMERIC(18,6),
-			dblOldBalance		NUMERIC(18,6),			
-			dblAdjAmount		NUMERIC(18,6),			
-			dblNewBalance		NUMERIC(18,6),				
-			dblNewQuantity		NUMERIC(18,6),	
-			strAdjustmentNo		NVARCHAR(50),
 			dblCost				NUMERIC(18,6)
 	)			
 	
@@ -48,8 +45,17 @@ BEGIN TRY
 	SELECT	@intItemId		=	intItemId,
 			@strInOutFlag	=	strInOutFlag 
 	FROM	tblSCTicket
-	WHERE	intTicketId = @intTicketId
+	WHERE	intTicketId		=	@intTicketId
 	
+	SELECT	@intScaleUOMId			=	IU.intItemUOMId,
+			@intScaleUnitMeasureId	=	IU.intUnitMeasureId
+	FROM	tblSCTicket					SC	        
+	JOIN	tblICCommodityUnitMeasure	CU	ON	SC.intCommodityId	=	CU.intCommodityId	AND 
+												CU.ysnStockUnit		=	1	
+	JOIN	tblICItemUOM				IU	ON	SC.intItemId		=	IU.intItemId		AND
+												IU.intUnitMeasureId =	CU.intUnitMeasureId
+	WHERE	SC.intTicketId = @intTicketId
+
 	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
 	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
 
@@ -124,48 +130,31 @@ BEGIN TRY
 				@ysnUnlimitedQuantity = NULL
 
 		SELECT	@intContractHeaderId = CD.intContractHeaderId,
-				@dblBalance		=	CD.dblBalance,
-				@dblQuantity	=	CD.dblQuantity,
+				@dblBalance		=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
+				@dblQuantity	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
 				@dblCost		=	ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0),
-				@dblAvailable	=	ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0),
-				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity
+				@dblAvailable	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)),
+				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
+				@intItemUOMId	=	CD.intItemUOMId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader CH	ON CH.intContractHeaderId = CD.intContractHeaderId 
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		IF @ysnDP = 1
 		BEGIN
+
+			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
 			
-			SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
-			FROM	tblSMStartingNumber 
-			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost
 
-			UPDATE	tblSMStartingNumber
-			SET		intNumber = intNumber+1
-			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
-			
-
-			UPDATE	tblCTContractDetail 
-			SET		dblBalance	= dblBalance + @dblNetUnits,
-					dblQuantity = dblQuantity + @dblNetUnits
-			WHERE	intContractDetailId = @intContractDetailId
-			
-			UPDATE	tblCTContractHeader
-			SET		dblQuantity = dblQuantity + @dblNetUnits
-			WHERE	intContractHeaderId = @intContractHeaderId
-
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
-
-			SELECT	@dblNetUnits = 0
-
-			UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
-			
-			EXEC	uspCTUpdateSequenceBalance 
+			EXEC	uspCTUpdateSequenceQuantity 
 					@intContractDetailId	=	@intContractDetailId,
 					@dblQuantityToUpdate	=	@dblNetUnits,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intTicketId,
 					@strScreenName			=	'Scale'
+
+			SELECT	@dblNetUnits = 0
 
 			BREAK
 		END
@@ -177,7 +166,7 @@ BEGIN TRY
 
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblAvailable,@dblNetUnits,@dblAvailable - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost
 
 			SELECT	@dblNetUnits = 0
 
@@ -185,7 +174,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblQuantity,@dblAvailable,@dblAvailable,0,@dblQuantity,@strAdjustmentNo,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost
 
 			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
 		END
@@ -228,11 +217,14 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 	
-	SELECT	intContractDetailId,
-			dblUnitsDistributed,
-			dblUnitsRemaining,
-			dblCost
-	FROM	@Processed
+	SELECT	PR.intContractDetailId,
+			PR.dblUnitsDistributed,
+			PR.dblUnitsRemaining,
+			PR.dblCost--,
+			--dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,CD.intItemUOMId,PR.dblUnitsDistributed) dblUnitsDistributedInContractUOM,
+			--dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,CD.intItemUOMId,PR.dblUnitsRemaining) dblUnitsRemainingInContractUOM
+	FROM	@Processed	PR
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
 	
 END TRY
 
