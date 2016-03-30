@@ -143,8 +143,8 @@ BEGIN TRY
 				   -- uses a PRINT statement as that action (not a very good
 				   -- example).
 				   IF	ISNULL(@intLoopContractId,0) != 0
-				   EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
-
+				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
