@@ -22,8 +22,8 @@ DECLARE @intScaleStationId AS INT
 DECLARE @strGRStorage AS nvarchar(3)
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @intDirectType AS INT = 3
+DECLARE @intCommodityUOMId INT
 DECLARE @intCommodityUnitMeasureId INT
-DECLARE @intTicketUnitMeasureId INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @InventoryReceiptId AS INT
@@ -98,26 +98,25 @@ BEGIN TRY
 	BEGIN
 		SET @PostShipment = 2
 		BEGIN 
-			SELECT	@intCommodityUnitMeasureId = UOM.intUnitMeasureId
+			SELECT	@intCommodityUnitMeasureId = CommodityUOM.intUnitMeasureId
 			FROM	dbo.tblSCTicket SC	        
-					JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+					INNER JOIN dbo.tblICCommodityUnitMeasure CommodityUOM On SC.intCommodityId  = CommodityUOM.intCommodityId
+			WHERE	SC.intTicketId = @intTicketId AND CommodityUOM.ysnStockUnit = 1		
 		END
 		BEGIN 
-			SELECT	@intTicketItemUOMId = UM.intItemUOMId
-				FROM	dbo.tblICItemUOM UM	
+			SELECT	@intCommodityUOMId = UM.intItemUOMId
+				FROM dbo.tblICItemUOM UM	
 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-			WHERE	UM.intUnitMeasureId = @intCommodityUnitMeasureId AND SC.intTicketId = @intTicketId
+			WHERE UM.intUnitMeasureId = @intCommodityUnitMeasureId AND SC.intTicketId = @intTicketId
 		END
-		IF @intTicketItemUOMId IS NULL 
+		IF @intCommodityUOMId IS NULL 
 		BEGIN 
 			-- Raise the error:
 			RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
 			RETURN;
 		END
-
 		BEGIN 
-			SELECT  @intTicketUnitMeasureId = ItemUOM.intUnitMeasureId, @intTicketItemUOMId = ItemUOM.intItemUOMId
+			SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId
 			FROM    dbo.tblICItemUOM ItemUOM
 			WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
 		END
@@ -270,8 +269,8 @@ BEGIN TRY
 				BEGIN
 				UPDATE tblGRCustomerStorage 
 				SET dblOpenBalance = CASE 
-				WHEN @intCommodityUnitMeasureId != @intTicketUnitMeasureId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketUnitMeasureId, @intCommodityUnitMeasureId, @dblRunningBalance - @dblUnits)
-				WHEN @intCommodityUnitMeasureId = @intTicketUnitMeasureId THEN @dblRunningBalance - @dblUnits
+				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance - @dblUnits)
+				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance - @dblUnits
 				END 
 				WHERE intCustomerStorageId = @intStorageTicketId
 				INSERT INTO [dbo].[tblGRStorageHistory]
@@ -297,8 +296,8 @@ BEGIN TRY
 				   ,NULL
 				   --,@dblUnits
 				   ,CASE 
-						WHEN @intCommodityUnitMeasureId != @intTicketUnitMeasureId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketUnitMeasureId, @intCommodityUnitMeasureId, @dblUnits)
-						WHEN @intCommodityUnitMeasureId = @intTicketUnitMeasureId THEN @dblUnits
+						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits)
+						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits
 					END 
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
@@ -361,8 +360,8 @@ BEGIN TRY
 				WHERE intCustomerStorageId = @intStorageTicketId
 				SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
 				SET @dblUnits = CASE 
-									WHEN @intCommodityUnitMeasureId != @intTicketUnitMeasureId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketUnitMeasureId, @intCommodityUnitMeasureId, @dblUnits - @dblRunningBalance)
-									WHEN @intCommodityUnitMeasureId = @intTicketUnitMeasureId THEN @dblUnits - @dblRunningBalance
+									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits - @dblRunningBalance)
+									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits - @dblRunningBalance
 								END 
 				INSERT INTO [dbo].[tblGRStorageHistory]
 				   ([intConcurrencyId]
@@ -387,8 +386,8 @@ BEGIN TRY
 				   ,NULL
 				   --,@dblRunningBalance
 				   ,CASE 
-						WHEN @intCommodityUnitMeasureId != @intTicketUnitMeasureId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketUnitMeasureId, @intCommodityUnitMeasureId, @dblRunningBalance)
-						WHEN @intCommodityUnitMeasureId = @intTicketUnitMeasureId THEN @dblRunningBalance
+						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance)
+						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance
 					END 
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
@@ -491,17 +490,18 @@ BEGIN TRY
 		RETURN;
 	END
 	BEGIN 
-		SELECT	@intCommodityUnitMeasureId = UOM.intUnitMeasureId
+		SELECT	@intCommodityUnitMeasureId = CommodityUOM.intUnitMeasureId
 		FROM	dbo.tblSCTicket SC	        
-				JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-		WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+				INNER JOIN dbo.tblICCommodityUnitMeasure CommodityUOM On SC.intCommodityId  = CommodityUOM.intCommodityId
+		WHERE	SC.intTicketId = @intTicketId AND CommodityUOM.ysnStockUnit = 1		
 	END
 	BEGIN 
-		SELECT TOP 1 @intTicketItemUOMId = UM.intItemUOMId
-			FROM dbo.tblICItemUOM UM	INNER JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-		WHERE	UM.intUnitMeasureId = @intCommodityUnitMeasureId AND SC.intTicketId = @intTicketId
+		SELECT	@intCommodityUOMId = UM.intItemUOMId
+			FROM dbo.tblICItemUOM UM	
+				JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+		WHERE UM.intUnitMeasureId = @intCommodityUnitMeasureId AND SC.intTicketId = @intTicketId
 	END
-	IF @intTicketItemUOMId IS NULL 
+	IF @intCommodityUOMId IS NULL 
 	BEGIN 
 		-- Raise the error:
 		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
@@ -509,7 +509,7 @@ BEGIN TRY
 	END
 
 	BEGIN 
-		SELECT  @intTicketUnitMeasureId = ItemUOM.intUnitMeasureId, @intTicketItemUOMId = ItemUOM.intItemUOMId
+		SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId
 		FROM    dbo.tblICItemUOM ItemUOM
 		WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
 	END
@@ -558,12 +558,12 @@ BEGIN TRY
 			,[dblTotalPriceShrink]= 0
 			,[dblTotalWeightShrink]= 0 
 			,[dblOriginalBalance]= CASE 
-									WHEN @intCommodityUnitMeasureId != @intTicketUnitMeasureId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketUnitMeasureId, @intCommodityUnitMeasureId, @dblNetUnits)
-									WHEN @intCommodityUnitMeasureId = @intTicketUnitMeasureId THEN @dblNetUnits
+									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
+									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
 								END  
 			,[dblOpenBalance]= CASE 
-									WHEN @intCommodityUnitMeasureId != @intTicketUnitMeasureId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketUnitMeasureId, @intCommodityUnitMeasureId, @dblNetUnits)
-									WHEN @intCommodityUnitMeasureId = @intTicketUnitMeasureId THEN @dblNetUnits
+									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
+									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
 								END 
 			,[dtmDeliveryDate]= GETDATE()
 			,[dtmZeroBalanceDate]= NULL
@@ -621,8 +621,8 @@ BEGIN TRY
 		   ,@intContractHeaderId
 		   --,@dblNetUnits
 		   ,CASE 
-				WHEN @intCommodityUnitMeasureId != @intTicketUnitMeasureId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketUnitMeasureId, @intCommodityUnitMeasureId, @dblNetUnits)
-				WHEN @intCommodityUnitMeasureId = @intTicketUnitMeasureId THEN @dblNetUnits
+				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
+				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
 			END 
 		   ,dbo.fnRemoveTimeOnDate(GETDATE())
 		   ,0
