@@ -576,3 +576,110 @@ GO
 GO
 UPDATE tblQMReportProperty SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
+
+-- Cupping Report Property Mapping
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Volume')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Volume','Volume')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Moisture')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Moisture','Moisture')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Color')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Color','Color')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Uniformity')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Uniformity','Uniformity')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Acidity')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Acidity','Acidity')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Body')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Body','Body')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Flavor')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Flavor','Flavor')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Taints/Defects')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Taints/Defects','Taints/Defects')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Rate (1-100)')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Rate (1-100)','Rate (1-100)')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Screen size (16)')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Screen size (16)','Screen size (16)')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Screen size (15)')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Screen size (15)','Screen size (15)')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Screen size (14)')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Screen size (14)','Screen size (14)')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Screen size (13)')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Screen size (13)','Screen size (13)')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Screen size (12)')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Screen size (12)','Screen size (12)')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Screen size (PAN)')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Screen size (PAN)','Screen size (PAN)')
+END
+GO

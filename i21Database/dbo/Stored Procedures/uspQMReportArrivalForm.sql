@@ -15,6 +15,36 @@ BEGIN TRY
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
+	IF (@xmlParam IS NULL)
+	BEGIN
+		SELECT NULL intSampleId
+			,NULL strSampleNumber
+			,NULL strItemShortNameDescription
+			,NULL strPONo
+			,NULL strContractNumber
+			,NULL strContainerNumber
+			,NULL strVendor
+			,NULL strMarks
+			,NULL blbHeaderLogo
+			,NULL Volume
+			,NULL Moisture
+			,NULL Color
+			,NULL Uniformity
+			,NULL Acidity
+			,NULL Body
+			,NULL Flavor
+			,NULL [Taints/Defects]
+			,NULL [Rate (1-100)]
+			,NULL [Screen size (16)]
+			,NULL [Screen size (15)]
+			,NULL [Screen size (14)]
+			,NULL [Screen size (13)]
+			,NULL [Screen size (12)]
+			,NULL [Screen size (PAN)]
+
+		RETURN
+	END
+
 	DECLARE @temp_xml_table TABLE (
 		[fieldname] NVARCHAR(50)
 		,condition NVARCHAR(20)
@@ -46,13 +76,39 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intSampleId'
 
-	SELECT pvt.*
-		,pvt.[Rate (1-100)] AS Rate1to100
-		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-	FROM (
+	DECLARE @strFieldNames NVARCHAR(MAX) = ''
+	DECLARE @strFieldNamesWithAlias NVARCHAR(MAX) = ''
+	DECLARE @SQL NVARCHAR(MAX)
+
+	SELECT @strFieldNames = @strFieldNames + '[' + strActualPropertyName + ']' + ','
+		,@strFieldNamesWithAlias = @strFieldNamesWithAlias + '[' + strActualPropertyName + '] AS [' + strPropertyName + '],'
+	FROM tblQMReportCuppingPropertyMapping
+
+	IF LEN(@strFieldNames) > 0
+		SET @strFieldNames = LEFT(@strFieldNames, CASE 
+					WHEN ISNULL(@strFieldNames, '') = ''
+						THEN 0
+					ELSE LEN(@strFieldNames) - 1
+					END)
+
+	IF LEN(@strFieldNamesWithAlias) > 0
+		SET @strFieldNamesWithAlias = LEFT(@strFieldNamesWithAlias, CASE 
+					WHEN ISNULL(@strFieldNamesWithAlias, '') = ''
+						THEN 0
+					ELSE LEN(@strFieldNamesWithAlias) - 1
+					END)
+	SET @SQL = 'SELECT intSampleId,
+		strSampleNumber,
+		strItemShortNameDescription,
+		strPONo,
+		strContractNumber,
+		strContainerNumber,
+		strVendor,
+		strMarks,
+		dbo.fnSMGetCompanyLogo(''Header'') AS blbHeaderLogo,' + @strFieldNamesWithAlias + ' FROM (
 		SELECT S.intSampleId
 			,S.strSampleNumber
-			,I.strShortName + ', ' + I.strDescription AS strItemShortNameDescription
+			,I.strShortName + '', '' + I.strDescription AS strItemShortNameDescription
 			,CH.strCustomerContract AS strPONo
 			,CH.strContractNumber
 			,S.strContainerNumber
@@ -62,29 +118,15 @@ BEGIN TRY
 			,TR.strPropertyValue
 		FROM tblQMSample S
 		JOIN tblICItem I ON I.intItemId = S.intItemId
-			AND S.intSampleId = @intSampleId
-		JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
+			AND S.intSampleId = ' + CONVERT(NVARCHAR, @intSampleId) + 
+		'JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 		LEFT JOIN vyuCTEntity E ON E.intEntityId = S.intEntityId
 		) AS s
-	PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (
-				[Volume]
-				,[Moisture]
-				,[Color]
-				,[Uniformity]
-				,[Acidity]
-				,[Body]
-				,[Flavor]
-				,[Taints]
-				,[Rate (1-100)]
-				,[16]
-				,[15]
-				,[14]
-				,[13]
-				,[12]
-				,[PAN]
-				)) AS pvt
+	PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @strFieldNames + ')) AS pvt'
+
+	EXEC sp_executesql @SQL
 END TRY
 
 BEGIN CATCH
