@@ -5,8 +5,9 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwtax
 	DROP VIEW vwtaxmst
 GO
 -- AG VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and
-	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'agtaxmst') = 1
+IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and
+	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'agtaxmst') = 1)
+BEGIN
 	EXEC ('
 		CREATE VIEW [dbo].[vwtaxmst]  
 		AS  
@@ -94,10 +95,12 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		, dtmEffectiveDate = CONVERT(DATETIME,''1900/01/01'' , 101) -- yyy/mm/dd
 		FROM [agtaxmst]
 		')
+END
 GO
 -- PT VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and
-	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'pttaxmst') = 1
+IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and
+	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'pttaxmst') = 1)
+BEGIN
 	EXEC ('
 		CREATE VIEW [dbo].[vwtaxmst]  
 		AS  
@@ -190,4 +193,5 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 								END)
 		FROM [pttaxmst]
 		')
+END
 GO

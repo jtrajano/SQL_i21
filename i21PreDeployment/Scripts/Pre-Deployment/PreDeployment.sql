@@ -24,6 +24,7 @@
 :r .\1_TM\4_1420_to_1430.sql
 :r .\1_TM\5_1430_to_1440.sql
 :r .\1_TM\6_1510_to_1520.sql
+:r .\1_TM\7_DropView.sql
 
 -- CM
 :r .\2_CM\1_CM.sql

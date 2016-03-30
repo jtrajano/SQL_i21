@@ -257,4 +257,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\9_FRD\3_1540_to_1610.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\1_TM\7_DropView.sql" />
+  </ItemGroup>
 </Project>
