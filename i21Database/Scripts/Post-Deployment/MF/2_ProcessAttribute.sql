@@ -1459,4 +1459,28 @@ BEGIN
 		,5
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
+ELSE
+BEGIN
+	UPDATE dbo.tblMFAttribute SET strAttributeName='Display Actual Consumption in WM' WHERE intAttributeId =69
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 70
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 70
+		,'Status for Newly Created Work Order'
+		,5
+		,5
+		,'Select strName As ValueMember, strName As DisplayMember From tblMFWorkOrderStatus Where intStatusId in (1,9,10)'
+END
 GO
