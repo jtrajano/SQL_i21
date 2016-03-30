@@ -1,18 +1,21 @@
 ﻿CREATE VIEW [dbo].[vyuGRStorageSearchView]
 AS    
 SELECT TOP 100 PERCENT  
-  s.intCustomerStorageId
- ,E.strName  
+ s.intCustomerStorageId
+,s.intEntityId
+,E.strName  
 ,strStorageTicketNumber
+,s.intCompanyLocationId
 ,loc.strLocationName
 ,st.strStorageTypeDescription  
-,s.dtmDeliveryDate  
+,s.dtmDeliveryDate
+,s.intItemId  
 ,i.strItemNo  
 ,ISNULL(s.strCustomerReference,'')strCustomerReference  
 ,s.dblOpenBalance
 ,s.dtmLastStorageAccrueDate
 ,s.intStorageScheduleId
-,SR.strScheduleId 
+,SR.strScheduleId
 FROM tblGRCustomerStorage s  
 JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId=s.intCompanyLocationId  
 LEFT JOIN tblGRStorageType st ON st.intStorageScheduleTypeId=s.intStorageTypeId  
