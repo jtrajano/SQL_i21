@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [uspTRFixRackPrices]
-	 
 AS
 
 BEGIN
@@ -11,6 +10,7 @@ BEGIN
 	INTO #tmpRackPrices
 	FROM tblTRRackPriceHeader Header
 	LEFT JOIN tblTRRackPriceDetail Detail ON Detail.intRackPriceHeaderId = Header.intRackPriceHeaderId
+	WHERE ISNULL(Detail.intRackPriceDetailId, '') <> ''
 
 	DECLARE @RackPriceDetailId INT
 		, @SupplyPointId INT
