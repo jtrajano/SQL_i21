@@ -111,6 +111,9 @@ BEGIN
 		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
+	IF @intShiftId =0 
+	SELECT @intShiftId=NULL
+
 	INSERT INTO dbo.tblMFWorkOrderProducedLot (
 		intWorkOrderId
 		,intItemId
