@@ -19,8 +19,6 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strDateFrom				AS NVARCHAR(50)
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
-		,@innerQuery				AS NVARCHAR(MAX) = ''
-		,@joinQuery                 AS NVARCHAR(MAX) = ''
 		,@filter					AS NVARCHAR(MAX) = ''
 		,@fieldname					AS NVARCHAR(50)
 		,@condition					AS NVARCHAR(20)
@@ -49,9 +47,9 @@ DECLARE @temp_SOA_table TABLE(
 	 [intEntityCustomerId]	 INT
 	,[strCustomerNumber]	 NVARCHAR(100)
 	,[strCustomerName]		 NVARCHAR(100)
-	,[strStatementFormat]	 NVARCHAR(100)
-	,[strXmlParam]			 NVARCHAR(MAX)
-	,[dtmAsOfDate]			 DATETIME
+	,[strStatementFormat]	 NVARCHAR(100)	
+	,[dtmDateFrom]			 DATETIME
+	,[dtmDateTo]			 DATETIME
 )
 
 -- Prepare the XML 
@@ -72,6 +70,27 @@ WITH (
 	, [datatype]   NVARCHAR(50)
 )
 
+-- Gather the variables values from the xml table.
+SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
+ 	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
+       ,@condition	 = [condition]
+FROM	@temp_xml_table 
+WHERE	[fieldname] = 'dtmAsOfDate'
+
+-- SANITIZE THE DATE AND REMOVE THE TIME.
+IF @dtmDateTo IS NOT NULL
+	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
+ELSE 			  
+	SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+
+IF @dtmDateFrom IS NOT NULL
+	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
+ELSE 			  
+	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+	
+SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
+SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
+
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmAsOfDate'
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
@@ -91,9 +110,9 @@ SET @query = 'SELECT * FROM
 (SELECT C.intEntityCustomerId
       , C.strCustomerNumber
       , strCustomerName		= E.strName
-	  , C.strStatementFormat
-	  , strXmlParam			= '''+@xmlParam+'''
-      , dtmAsOfDate			= CONVERT(DATE, GETDATE())
+	  , C.strStatementFormat	  
+      , dtmDateFrom			= ' + @strDateFrom + '
+	  , dtmDateTo			= ' + @strDateTo + '
 FROM tblARCustomer C INNER JOIN
        tblEntity E ON C.intEntityCustomerId = E.intEntityId
 ) MainQuery'
