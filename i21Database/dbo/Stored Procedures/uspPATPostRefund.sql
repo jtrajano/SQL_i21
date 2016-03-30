@@ -109,7 +109,7 @@ BEGIN CATCH
 END CATCH
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
-BEGIN TRANSACTION
+--BEGIN TRANSACTION
 
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER EQUITY TABLE
@@ -119,7 +119,7 @@ BEGIN TRY
 DECLARE @strCutoffTo NVARCHAR(50) = (SELECT TOP 1 strCutoffTo from tblPATCompanyPreference)
 
 MERGE tblPATCustomerEquity AS EQ
-USING #tmpRefundData AS B
+USING (SELECT * FROM #tmpRefundData WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)) AS B
 	ON (EQ.intCustomerId = B.intCustomerId AND EQ.intFiscalYearId = B.intFiscalYearId)
 	WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
 		THEN DELETE
