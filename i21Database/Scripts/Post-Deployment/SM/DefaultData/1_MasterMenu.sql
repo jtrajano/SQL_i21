@@ -2611,7 +2611,7 @@ ELSE
 
 /* Start of Delete */
 DELETE tblSMMasterMenu WHERE strMenuName = 'Storage Transfer' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
---DELETE tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+DELETE tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
 /* End of Delete */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'OffSite' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
@@ -4217,6 +4217,17 @@ BEGIN
 		INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@StorageSettleMenuId, 1)
 	ELSE
 		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @StorageSettleMenuId
+END
+DELETE FROM tblSMContactMenu WHERE  intMasterMenuId IN(SELECT intMenuID FROM tblSMMasterMenu WHERE intParentMenuID=@GrainParentMenuId AND strMenuName NOT IN ('Storage'))
+
+DECLARE @StorageMenuId INT
+SELECT  @StorageMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Storage' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @StorageMenuId)
+		INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@StorageMenuId, 1)
+	ELSE
+		UPDATE tblSMContactMenu SET ysnContactOnly = 1 WHERE intMasterMenuId = @StorageMenuId
 END
 
 /* Logistic */
