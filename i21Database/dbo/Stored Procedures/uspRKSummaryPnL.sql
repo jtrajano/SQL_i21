@@ -1,5 +1,6 @@
 ﻿CREATE PROC uspRKSummaryPnL    
-    @dtmToDate datetime
+    @dtmToDate datetime,
+	@intCommodityId int = null
  AS  
   
 SELECT *
@@ -64,7 +65,7 @@ FROM (
 				,MatchLong
 				,MatchShort
 				,NetPnL
-			FROM vyuRKUnrealizedPnL
+			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end
 			) t
 		) u
 	GROUP BY intFutureMonthId
@@ -72,5 +73,3 @@ FROM (
 		,strFutMarketName
 		,strFutureMonth
 	) t
-	
-
