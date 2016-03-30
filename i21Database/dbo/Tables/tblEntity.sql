@@ -12,7 +12,7 @@
     [dtmW9Signed]      DATETIME        NULL,
     [imgPhoto]         VARBINARY (MAX) NULL,
 	[strContactNumber]               NVARCHAR (20)   COLLATE Latin1_General_CI_AS NOT NULL,
-    [strTitle]         NVARCHAR (35)  COLLATE Latin1_General_CI_AS NULL,
+    [strTitle]         NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [strDepartment]    NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [strMobile]        NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
     [strPhone]         NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
