@@ -5,7 +5,9 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwctl
 GO
 
 -- AG VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
+IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
+	AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'agctlmst') = 1)
+BEGIN
 	EXEC ('
 		CREATE VIEW [dbo].[vwctlmst]
 		AS
@@ -22,9 +24,12 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		,vwctl_stmt_close_rev_dt =(SELECT agctl_stmt_close_rev_dt FROM agctlmst WHERE agctl_key=1)
 		FROM agctlmst
 		')
+END
 GO
 -- PT VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1
+IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1
+	AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'ptctlmst') = 1)
+BEGIN
 	EXEC ('
 		CREATE VIEW [dbo].[vwctlmst]
 		AS
@@ -41,4 +46,5 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 			,vwctl_stmt_close_rev_dt =pt3cf_eom_business_rev_dt
 			FROM ptctlmst
 		')
+END
 GO
