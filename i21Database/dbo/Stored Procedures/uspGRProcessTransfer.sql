@@ -57,6 +57,10 @@ BEGIN TRY
 	DECLARE @ActionContractHeaderId INT
 	DECLARE @ActionontractDetailId INT
 
+	DECLARE @intUnitMeasureId INT
+	DECLARE @intSourceItemUOMId INT
+	DECLARE @ItemId INT
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
 	DECLARE @ItemsToMove AS TABLE 
@@ -167,8 +171,25 @@ BEGIN TRY
 			,intCompanyLocationId INT
 			,intContractHeaderId INT
 	)
-  
-  
+    SELECT @ItemId=intItemId from tblGRCustomerStorage WHERE intCustomerStorageId=(SELECT Top 1 intCustomerStorageId FROM @ItemsToMove)
+	
+	SELECT @intUnitMeasureId=a.intUnitMeasureId 
+	FROM tblICCommodityUnitMeasure a 
+	JOIN tblICItem b ON b.intCommodityId=a.intCommodityId
+	WHERE b.intItemId=@ItemId AND a.ysnStockUnit=1
+		
+    IF @intUnitMeasureId IS NULL 
+	BEGIN
+		RAISERROR('The stock UOM of the commodity must be set for item', 16, 1);
+		RETURN;
+	END	
+	
+	IF NOT EXISTS(SELECT 1 FROM tblICItemUOM WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId)
+	BEGIN
+		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
+	END
+	 			
+	SELECT @intSourceItemUOMId=intItemUOMId FROM tblICItemUOM UOM  WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId
 
 	SELECT @ItemsToMoveKey = MIN(intItemsToMoveKey)
 	FROM @ItemsToMove
@@ -254,12 +275,13 @@ BEGIN TRY
 		SELECT @ItemContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ItemContractHeaderId
 		SET @ItemContractBalance = -@ItemBalance
 
-			EXEC uspCTUpdateSequenceQuantity 
+			EXEC uspCTUpdateSequenceQuantityUsingUOM 
 				  @intContractDetailId=@ItemContractDetailId
 				 ,@dblQuantityToUpdate=@ItemContractBalance
 				 ,@intUserId=@UserKey
 				 ,@intExternalId=@intCustomerStorageId
 				 ,@strScreenName='Transfer Storage'
+				 ,@intSourceItemUOMId=@intSourceItemUOMId
 
 		END
 
@@ -1457,12 +1479,13 @@ BEGIN TRY
 			BEGIN
 			SELECT @ActionontractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ActionContractHeaderId
 
-				EXEC uspCTUpdateSequenceQuantity 
+				EXEC uspCTUpdateSequenceQuantityUsingUOM 
 					  @intContractDetailId=@ActionontractDetailId
 					 ,@dblQuantityToUpdate=@ActionOpenBalance
 					 ,@intUserId=@UserKey
 					 ,@intExternalId=@intCustomerStorageId
-					 ,@strScreenName='Transfer Storage'			
+					 ,@strScreenName='Transfer Storage'
+					 ,@intSourceItemUOMId=@intSourceItemUOMId			
 			END
 
 			SELECT @ActionKey = MIN(intActionKey)

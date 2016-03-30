@@ -12,6 +12,8 @@ BEGIN TRY
 	---Header Variables	
 	DECLARE @Entityid INT
 	DECLARE @ItemId INT
+	DECLARE @intUnitMeasureId INT
+	DECLARE @intSourceItemUOMId INT
 	DECLARE @TicketNo NVARCHAR(20)
 	DECLARE @UserKey INT
 	DECLARE @UserName NVARCHAR(100)	
@@ -196,7 +198,25 @@ BEGIN TRY
 			,dblSpotPrice DECIMAL(24, 10)
 			,dblSpotBasis DECIMAL(24, 10)
 			,dblSpotCashPrice DECIMAL(24, 10)
-	)		
+	)
+	
+	SELECT @intUnitMeasureId=a.intUnitMeasureId 
+	FROM tblICCommodityUnitMeasure a 
+	JOIN tblICItem b ON b.intCommodityId=a.intCommodityId
+	WHERE b.intItemId=@ItemId AND a.ysnStockUnit=1
+	
+	IF @intUnitMeasureId IS NULL 
+	BEGIN
+		RAISERROR('The stock UOM of the commodity must be set for item', 16, 1);
+		RETURN;
+	END	
+	
+	IF NOT EXISTS(SELECT 1 FROM tblICItemUOM WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId)
+	BEGIN
+		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
+	END
+				
+	SELECT @intSourceItemUOMId=intItemUOMId FROM tblICItemUOM UOM  WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId
 		
 	SELECT @SettleStorageKey = MIN(intSettleStorageKey)	FROM #SettleStorage	WHERE dblStorageUnits > 0
 	
@@ -248,12 +268,13 @@ BEGIN TRY
 			SELECT @ContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ContractHeaderId
 			SET @dblDPStorageUnits= - @dblStorageUnits
 
-			 EXEC uspCTUpdateSequenceQuantity 
+			 EXEC uspCTUpdateSequenceQuantityUsingUOM 
 			 @intContractDetailId=@ContractDetailId
 			,@dblQuantityToUpdate=@dblDPStorageUnits
 			,@intUserId=@UserKey
 			,@intExternalId=@intCustomerStorageId
 			,@strScreenName='Settle Storage'
+			,@intSourceItemUOMId=@intSourceItemUOMId
 
 		END	
 		
@@ -295,12 +316,13 @@ BEGIN TRY
 															
 					UPDATE #SettleStorage SET dblStorageUnits = 0 WHERE intSettleStorageKey = @SettleStorageKey
 					
-					EXEC uspCTUpdateSequenceQuantity 
+					EXEC uspCTUpdateSequenceQuantityUsingUOM 
 						 @intContractDetailId=@intContractDetailId
 						,@dblQuantityToUpdate=@dblNegativeStorageUnits
 						,@intUserId=@UserKey
 						,@intExternalId=@intCustomerStorageId
 						,@strScreenName='Settle Storage'
+						,@intSourceItemUOMId=@intSourceItemUOMId
 										
 					Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblStorageUnits Where intCustomerStorageId=@intCustomerStorageId
 
@@ -344,12 +366,13 @@ BEGIN TRY
 
 					UPDATE #SettleStorage SET dblStorageUnits = 0 WHERE intSettleStorageKey = @SettleStorageKey
 
-					EXEC uspCTUpdateSequenceQuantity 
+					EXEC uspCTUpdateSequenceQuantityUsingUOM 
 						 @intContractDetailId=@intContractDetailId
 						,@dblQuantityToUpdate=@dblNegativeStorageUnits
 						,@intUserId=@UserKey
 						,@intExternalId=@intCustomerStorageId
 						,@strScreenName='Settle Storage'
+						,@intSourceItemUOMId=@intSourceItemUOMId
 						
 					Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblContractUnits Where intCustomerStorageId=@intCustomerStorageId
 						
