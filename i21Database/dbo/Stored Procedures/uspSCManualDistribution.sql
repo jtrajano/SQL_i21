@@ -42,9 +42,15 @@ DECLARE @intItemId AS INT
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
 	FROM	dbo.tblSCTicket SC	        
-			--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
 			JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+END
+
+BEGIN 
+	SELECT	@intTicketItemUOMId = UM.intItemUOMId
+	FROM	dbo.tblICItemUOM UM	
+			JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
 END
 
 BEGIN TRY
@@ -138,7 +144,8 @@ OPEN intListCursor;
 							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 							BEGIN
 								IF	ISNULL(@intLoopContractId,0) != 0
-								EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+								--EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
 						INSERT INTO @ItemsForItemReceipt (
 								intItemId
