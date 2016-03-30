@@ -51,5 +51,5 @@ GROUP BY A.intBillId,
 	A.dblAmountDue,
     A.ysnPosted,
 	B1.strPaymentInfo,
-	B1.intPaymentId
-
+	B1.intPaymentId,
+	A.intTransactionType
