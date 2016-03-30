@@ -136,14 +136,12 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= (
-											SELECT	ItemUOM.intItemUOMId
-											FROM	dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup
-														ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
-											WHERE	SCSetup.intTicketPoolId = SC.intTicketPoolId
-													AND ItemUOM.intItemId = SC.intItemId
-									)
-
+		,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
+											FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
+												ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
+											WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
+												AND ItemUOM.intItemId = SC.intItemId
+									 )
 		--,intCostUOMId				= (SELECT intUnitMeasureId FROM tblSCScaleSetup WHERE intTicketPoolId = SC.intTicketPoolId)	   
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN 
