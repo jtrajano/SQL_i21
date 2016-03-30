@@ -3556,6 +3556,7 @@
     <Build Include="dbo\Stored Procedures\uspARStatementofAccountReport.sql" />
     <Build Include="dbo\Views\vyuAROrderUOM.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSyncTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
