@@ -516,7 +516,7 @@ BEGIN TRY
 	If @strInstantConsumption='True' and @intProductionTypeId=2
 	Begin
 		Select @intProductionTypeId=3
-		Select @ysnPostConsumption=1
+		Select @ysnPostProduction=0
 	End
 
 	Select @ysnConsumptionRequired=ysnConsumptionRequired from dbo.tblMFWorkOrderRecipeItem Where intRecipeItemTypeId=2 and intItemId=@intItemId and intWorkOrderId=@intWorkOrderId
