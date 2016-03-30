@@ -3557,6 +3557,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateScheduleQuantityUsingUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
