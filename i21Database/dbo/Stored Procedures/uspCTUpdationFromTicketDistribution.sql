@@ -49,12 +49,11 @@ BEGIN TRY
 	
 	SELECT	@intScaleUOMId			=	IU.intItemUOMId,
 			@intScaleUnitMeasureId	=	IU.intUnitMeasureId
-	FROM	tblSCTicket					SC	        
-	JOIN	tblICCommodityUnitMeasure	CU	ON	SC.intCommodityId	=	CU.intCommodityId	AND 
-												CU.ysnStockUnit		=	1	
-	JOIN	tblICItemUOM				IU	ON	SC.intItemId		=	IU.intItemId		AND
-												IU.intUnitMeasureId =	CU.intUnitMeasureId
-	WHERE	SC.intTicketId = @intTicketId
+	FROM	tblSCTicket     SC         
+	JOIN	tblSCScaleSetup SS	ON	SS.intScaleSetupId	=	SC.intScaleSetupId
+	JOIN	tblICItemUOM    IU	ON	IU.intItemId		=	SC.intItemId AND
+									IU.intUnitMeasureId =	SS.intUnitMeasureId
+	WHERE SC.intTicketId = @intTicketId
 
 	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
 	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
@@ -220,9 +219,7 @@ BEGIN TRY
 	SELECT	PR.intContractDetailId,
 			PR.dblUnitsDistributed,
 			PR.dblUnitsRemaining,
-			PR.dblCost--,
-			--dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,CD.intItemUOMId,PR.dblUnitsDistributed) dblUnitsDistributedInContractUOM,
-			--dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,CD.intItemUOMId,PR.dblUnitsRemaining) dblUnitsRemainingInContractUOM
+			PR.dblCost
 	FROM	@Processed	PR
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
 	
