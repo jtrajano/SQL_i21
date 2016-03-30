@@ -3559,6 +3559,7 @@
     <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateScheduleQuantityUsingUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantityUsingUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
