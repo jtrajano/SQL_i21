@@ -57,7 +57,7 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
-	,[dblWeight]						= IU.[dblWeight]
+	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](IU2.[intItemUOMId],SOD.[intItemUOMId],1) --IU.[dblWeight]
 	,[intWeightUOMId]					= IU.[intWeightUOMId]
 	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
 	,[dblGrossWt]						= 0.00
@@ -104,6 +104,10 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U2
 		ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
+LEFT JOIN
+	tblICItemUOM IU2
+		ON IU.[intWeightUOMId] = IU2.[intUnitMeasureId]
+		AND  SOD.[intItemId] = IU2.[intItemId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -180,7 +184,7 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
-	,[dblWeight]						= IU.[dblWeight]
+	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](IU2.[intItemUOMId],SOD.[intItemUOMId],1) --IU.[dblWeight]
 	,[intWeightUOMId]					= IU.[intWeightUOMId]
 	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
 	,[dblGrossWt]						= 0.00	
@@ -225,6 +229,10 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U2
 		ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
+LEFT JOIN
+	tblICItemUOM IU2
+		ON IU.[intWeightUOMId] = IU2.[intUnitMeasureId]
+		AND  SOD.[intItemId] = IU2.[intItemId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -298,8 +306,8 @@ SELECT
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
-	,[dblWeight]						= IU1.[dblWeight]
-	,[intWeightUOMId]					= IU1.[intWeightUOMId]
+	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](IU2.[intItemUOMId],SOD.[intItemUOMId],1) --IU1.[dblWeight]
+	,[intWeightUOMId]					= IU2.[intUnitMeasureId]
 	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
 	,[dblGrossWt]						= ISISIL.dblGrossWeight 
 	,[dblTareWt]						= ISISIL.dblTareWeight 
@@ -366,6 +374,7 @@ CROSS APPLY
 		,ISH.[dtmShipDate]
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
+		,ISI.[intWeightUOMId]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -403,6 +412,7 @@ CROSS APPLY
 		,ISH.[dtmShipDate]
 		,CL.[strLocationName]
 		,ISH.[intFreightTermId]
+		,ISI.[intWeightUOMId]
 	) SHP
 LEFT OUTER JOIN
 	tblSCTicket SCT
@@ -427,8 +437,11 @@ LEFT JOIN
 	tblICUnitMeasure U1
 		ON IU1.[intUnitMeasureId] = U1.[intUnitMeasureId]	
 LEFT JOIN
+	tblICItemUOM IU2
+		ON SHP.[intWeightUOMId] = IU2.[intItemUOMId]
+LEFT JOIN
 	tblICUnitMeasure U2
-		ON IU1.[intWeightUOMId] = U2.[intUnitMeasureId]	
+		ON IU2.[intUnitMeasureId] = U2.[intUnitMeasureId]	
 	
 UNION ALL
 
@@ -488,9 +501,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
-	,[dblWeight]						= ICIU1.[dblWeight]
-	,[intWeightUOMId]					= ICIU1.[intWeightUOMId]
-	,[strWeightUnitMeasure]				= ICUM3.[strUnitMeasure]
+	,[dblWeight]						= [dbo].[fnCalculateQtyBetweenUOM](ICISI.[intWeightUOMId],ICISI.[intItemUOMId],1) --ICIU1.[dblWeight]
+	,[intWeightUOMId]					= ICIU2.[intUnitMeasureId]
+	,[strWeightUnitMeasure]				= ICIU2.[strUnitMeasure]
 	,[dblGrossWt]						= ISISIL.dblGrossWeight 
 	,[dblTareWt]						= ISISIL.dblTareWeight 
 	,[dblNetWt]							= ISISIL.dblNetWeight
@@ -564,10 +577,13 @@ LEFT JOIN
 		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]
 LEFT JOIN
 	tblICUnitMeasure ICUM2
-		ON CTCD.[intUnitMeasureId] = ICUM2.[intUnitMeasureId]		
+		ON CTCD.[intUnitMeasureId] = ICUM2.[intUnitMeasureId]
 LEFT JOIN
-	tblICUnitMeasure ICUM3
-		ON ICIU1.[intWeightUOMId] = ICUM3.[intUnitMeasureId]					
+	tblICItemUOM ICUM3
+		ON ICISI.[intWeightUOMId] = ICUM3.[intItemUOMId]				
+LEFT JOIN
+	tblICUnitMeasure ICIU2
+		ON ICUM3.[intUnitMeasureId] = ICIU2.[intUnitMeasureId]					
 INNER JOIN
 	tblEntity EME
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
@@ -635,7 +651,7 @@ SELECT
 	,[intSalesAccountId]				= ARIA.[intSalesAccountId]
 	,[intInventoryAccountId]			= ARIA.[intInventoryAccountId]
 	,[intStorageLocationId]				= NULL
-	,[strStorageLocationName]			= ''
+	,[strStorageLocationName]			= NULL
 	,[intTermID]						= NULL
 	,[strTerm]							= ''
 	,[intEntityShipViaId]				= NULL

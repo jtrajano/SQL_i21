@@ -14,7 +14,7 @@ SELECT
 	,[strContractNumber]					= CTCD.[strContractNumber] 
 	,[intContractDetailId]					= CTCD.[intContractDetailId] 
 	,[intContractSeq]						= CTCD.[intContractSeq] 
-	,[intItemId]							= LGSPS.[intPItemId]
+	,[intItemId]							= LGSPS.[intSItemId]
 	,[strItemNo]							= ICI.[strItemNo]
 	,[strItemDescription]					= ICI.[strDescription]
 	,[intItemUOMId]							= ICUOM.[intItemUOMId]
@@ -39,7 +39,7 @@ SELECT
 	,[strStorageLocationName]				= NULL	
 	,[intTaxGroupId]						= NULL
 	,[strTaxGroup]							= NULL
-	,[dblWeight]							= ICUOM.[dblWeight]
+	,[dblWeight]							= [dbo].[fnCalculateQtyBetweenUOM](ICUOM2.[intItemUOMId],ICUOM.[intItemUOMId],1) --ICUOM.[dblWeight]
 	,[intWeightUOMId]						= LGSPS.[intWeightUnitMeasureId]
 	,[strWeightUnitMeasure]					= LGSPS.[strWeightUOM] 
 	,[dblGrossWt]							= LGSPS.[dblGrossWt] 
@@ -52,7 +52,7 @@ INNER JOIN
 		ON LGSPS.intSContractDetailId = CTCD.intContractDetailId
 INNER JOIN
 	tblICItem ICI
-		ON LGSPS.[intPItemId] = ICI.[intItemId]
+		ON LGSPS.[intSItemId] = ICI.[intItemId]
 LEFT JOIN
 	tblICUnitMeasure ICUM
 		ON LGSPS.[intSUnitMeasureId] = ICUM.[intUnitMeasureId]
@@ -62,10 +62,14 @@ LEFT OUTER JOIN
 		AND LGSPS.[intSUnitMeasureId] = ICUOM.[intUnitMeasureId] 
 LEFT JOIN
 	tblICItemUOM ICIU1
-		ON CTCD.[intPriceItemUOMId] = ICIU1.[intItemUOMId]						
+		ON CTCD.[intPriceItemUOMId] = ICIU1.[intItemUOMId]	
+LEFT OUTER JOIN
+	tblICItemUOM ICUOM2
+		ON 	LGSPS.[intSItemId] = ICUOM2.[intItemId] 
+		AND LGSPS.[intWeightUnitMeasureId] = ICUOM2.[intUnitMeasureId]							
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
-		ON LGSPS.[intPItemId] = ARIA.[intItemId]
+		ON LGSPS.[intSItemId] = ARIA.[intItemId]
 		AND CTCD.[intCompanyLocationId] = ARIA.[intLocationId]
 LEFT OUTER JOIN
 	tblSMTerm SMT

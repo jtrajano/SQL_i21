@@ -221,7 +221,7 @@ BEGIN TRY
 		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
 		,[dblQtyShipped]					= ARSID.[dblNetWt]
 		,[dblDiscount]						= ARSID.[dblDiscount]
-		,[dblPrice]							= ARSID.[dblShipmentUnitPrice] 
+		,[dblPrice]							= ARSID.[dblPrice] 
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]
