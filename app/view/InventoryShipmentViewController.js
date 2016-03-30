@@ -2179,6 +2179,31 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onPrintClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var vm = win.viewModel;
+        var current = vm.data.current;
+
+        var filters = [{
+            Name: 'strShipmentNo',
+            Type: 'string',
+            Condition: 'EQUAL TO',
+            From: current.get('strShipmentNumber'),
+            Operator: 'AND'
+        }];
+
+        // Save has data changes first before doing the post.
+        win.context.data.saveRecord({
+            callbackFn: function() {
+                iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+                    selectedReport: 'InventoryShipment',
+                    selectedGroup: 'Manufacturing',
+                    selectedParameters: filters
+                });
+            }
+        });
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -2252,6 +2277,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboOrderType": {
                 select: this.onOrderTypeSelect
+            },
+            "#btnPrint": {
+                click: this.onPrintClick
             }
         })
     }
