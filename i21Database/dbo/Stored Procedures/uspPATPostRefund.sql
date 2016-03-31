@@ -137,6 +137,8 @@ USING (SELECT * FROM #tmpRefundData WHERE intRefundId = (SELECT MAX(intRefundId)
 																	(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
 																B.dblRefundAmount - (B.dblRefundAmount * .25) END, GETDATE(), 1);
 
+	DELETE FROM tblPATCustomerVolume;
+
 END TRY
 BEGIN CATCH
 SET @error = ERROR_MESSAGE()
