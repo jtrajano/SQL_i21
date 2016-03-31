@@ -31,8 +31,8 @@
 	,@ItemContractDetailId			INT				= NULL			
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
-	,@ItemShipmentUOMId				INT				= NULL	
-	,@ItemShipmentQtyShipped		NUMERIC(18,6)	= 0.000000		
+	,@ItemWeightUOMId				INT				= NULL	
+	,@ItemWeight					NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentGrossWt			NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000		
@@ -214,8 +214,8 @@ BEGIN TRY
 				,[intContractDetailId]
 				,[intShipmentId]
 				,[intShipmentPurchaseSalesContractId]
-				,[intShipmentItemUOMId]
-				,[dblShipmentQtyShipped]
+				,[intItemWeightUOMId]
+				,[dblItemWeight]
 				,[dblShipmentGrossWt]
 				,[dblShipmentTareWt]
 				,[dblShipmentNetWt]
@@ -270,8 +270,8 @@ BEGIN TRY
 				,[intContractDetailId]				= @ItemContractDetailId
 				,[intShipmentId]					= @ItemShipmentId
 				,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
-				,[intShipmentItemUOMId]				= @ItemShipmentUOMId
-				,[dblShipmentQtyShipped]			= @ItemShipmentQtyShipped
+				,[intItemWeightUOMId]				= @ItemWeightUOMId
+				,[dblItemWeight]					= @ItemWeight
 				,[dblShipmentGrossWt]				= @ItemShipmentGrossWt
 				,[dblShipmentTareWt]				= @ItemShipmentTareWt
 				,[dblShipmentNetWt]					= @ItemShipmentNetWt
