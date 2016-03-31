@@ -200,8 +200,10 @@ SELECT
 FROM tblTMLease A
 INNER JOIN tblTMLeaseCode B
 	ON A.intLeaseCodeId = B.intLeaseCodeId
+LEFT JOIN tblTMLeaseDevice CC
+	ON A.intLeaseId = CC.intLeaseId
 LEFT JOIN tblTMDevice C
-	ON A.intLeaseId = C.intLeaseId
+	ON CC.intDeviceId = C.intDeviceId
 LEFT JOIN tblTMSiteDevice D
 	ON C.intDeviceId = D.intDeviceId
 LEFT JOIN tblTMSite E
