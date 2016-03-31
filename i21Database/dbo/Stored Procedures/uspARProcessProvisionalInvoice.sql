@@ -155,8 +155,8 @@ BEGIN TRY
 		,[intContractHeaderId]
 		,[intContractDetailId]
 		,[intShipmentPurchaseSalesContractId]
-		,[intShipmentItemUOMId]
-		,[dblShipmentQtyShipped]
+		,[intItemWeightUOMId]
+		,[dblItemWeight]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
@@ -217,9 +217,9 @@ BEGIN TRY
 		,[strDocumentNumber]				= @InvoiceNumber
 		,[strItemDescription]				= ARSID.[strItemDescription] 
 		,[intOrderUOMId]					= ARSID.[intShipmentItemUOMId]
-		,[dblQtyOrdered]					= ARSID.[dblNetWt] 
+		,[dblQtyOrdered]					= ARSID.dblShipmentQuantity 
 		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
-		,[dblQtyShipped]					= ARSID.[dblNetWt]
+		,[dblQtyShipped]					= ARSID.dblShipmentQuantity
 		,[dblDiscount]						= ARSID.[dblDiscount]
 		,[dblPrice]							= ARSID.[dblPrice] 
 		,[ysnRefreshPrice]					= 0
@@ -239,8 +239,8 @@ BEGIN TRY
 		,[intContractHeaderId]				= ARSID.[intContractHeaderId] 
 		,[intContractDetailId]				= ARSID.[intContractDetailId] 
 		,[intShipmentPurchaseSalesContractId]	= ARSID.[intShipmentPurchaseSalesContractId] 
-		,[intShipmentItemUOMId]				= ARSID.[intItemUOMId]
-		,[dblShipmentQtyShipped]			= ARSID.[dblQtyShipped] 
+		,[intItemWeightUOMId]				= ARSID.[intWeightUOMId]
+		,[dblItemWeight]					= ARSID.[dblWeight] 
 		,[dblShipmentGrossWt]				= ARSID.[dblGrossWt]
 		,[dblShipmentTareWt]				= ARSID.[dblTareWt]
 		,[dblShipmentNetWt]					= ARSID.[dblNetWt]
@@ -341,8 +341,8 @@ SELECT
 		,[intContractHeaderId]				= ARID.[intContractHeaderId] 
 		,[intContractDetailId]				= ARID.[intContractDetailId] 
 		,[intShipmentPurchaseSalesContractId]	= NULL
-		,[intShipmentItemUOMId]				= NULL
-		,[dblShipmentQtyShipped]			= 0.00
+		,[intItemWeightUOMId]				= NULL
+		,[dblItemWeight]					= 0.00
 		,[dblShipmentGrossWt]				= 0.00
 		,[dblShipmentTareWt]				= 0.00
 		,[dblShipmentNetWt]					= 0.00

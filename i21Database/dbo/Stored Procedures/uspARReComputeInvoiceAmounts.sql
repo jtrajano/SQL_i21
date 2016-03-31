@@ -40,6 +40,8 @@ SET
 	 [dblQtyOrdered]	 = ISNULL([dblQtyOrdered], @ZeroDecimal)
 	,[dblQtyShipped]	 = ISNULL([dblQtyShipped], @ZeroDecimal)
 	,[dblDiscount]		 = ISNULL([dblDiscount], @ZeroDecimal)
+	,[dblItemWeight]	 = ISNULL([dblItemWeight], 1.00)
+	,[dblShipmentNetWt]	 = ISNULL([dblShipmentNetWt], [dblQtyShipped])
 	,[dblPrice]			 = ISNULL([dblPrice], @ZeroDecimal)
 	,[dblTotalTax]		 = ISNULL([dblTotalTax], @ZeroDecimal)
 	,[dblTotal]			 = ISNULL([dblTotal], @ZeroDecimal)
@@ -83,30 +85,27 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	[dblTotal]		= ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
+	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
+							THEN
+								ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()) 								
+							ELSE
+								ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
+						END							
+					  )
 WHERE
 	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId
-	
---UPDATE
---	tblARInvoiceDetail
---SET
---	[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
---WHERE
---	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId	
-	
+		
 	
 UPDATE
 	tblARInvoice
 SET
 	 [dblTax]				= T.[dblTotalTax]
 	,[dblInvoiceSubtotal]	= T.[dblTotal]
-	--,[dblDiscount]			= T.[dblDiscount]
 FROM
 	(
 		SELECT 
 			 SUM([dblTotalTax])		AS [dblTotalTax]
 			,SUM([dblTotal])		AS [dblTotal]
-			--,SUM((([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))) AS [dblDiscount]
 			,[intInvoiceId]
 		FROM
 			tblARInvoiceDetail
