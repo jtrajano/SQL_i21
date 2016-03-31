@@ -94,6 +94,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\EfficiencyReport.sql
 :r .\TM\Reports\Layout\WorkOrder.sql
 :r .\TM\Reports\DataSource\CallEntryPrintOut.sql
+:r .\TM\Reports\Layout\CallEntryPrintOut.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"

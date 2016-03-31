@@ -3572,6 +3572,8 @@
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\CallEntryPrintOut.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateScheduleQuantityUsingUOM.sql" />
     <Build Include="dbo\Tables\tblQMReportCuppingPropertyMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantityUsingUOM.sql" />
