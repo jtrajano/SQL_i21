@@ -937,6 +937,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         });
 
+        //'vyuICGetInventoryReceipt,' +
+
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
             store: store,
@@ -947,8 +949,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             enableComment: true,
             enableAudit: true,
             include: 'tblICInventoryReceiptInspections,' +
-            'vyuICGetInventoryReceipt,' +
-            'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem,' +
+            'vyuICInventoryReceiptLookUp,' +
+            'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
             'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
             'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
             'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
