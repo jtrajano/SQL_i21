@@ -211,7 +211,7 @@ BEGIN TRY
 	    SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
 	               ChangeDescription,OldData,NewData)
                       select e.strLocationName, b.strUpcCode, c.strDescription, ''Rebate Amount'',
-		            CAST(a.dblUnitAfterDiscount as NVARCHAR(250)),
+		            CAST(a.dblDiscount as NVARCHAR(250)),
 		            ''' + CAST(@RebateAmount as NVARCHAR(250)) + ''' from 
 					tblICItemSpecialPricing a JOIN tblICItemUOM b ON
                       a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId 
@@ -586,9 +586,9 @@ AND(@UpdateCount > 0))
 	           BEGIN
 	               IF ((@BeginDate IS NOT NULL)
 		           OR (@EndDate IS NOT NULL))
-                       set @SQL1 = @SQL1 + ' , dblUnitAfterDiscount = ''' + LTRIM(@RebateAmount) + ''''
+                       set @SQL1 = @SQL1 + ' , dblDiscount = ''' + LTRIM(@RebateAmount) + ''''
                    else
-                       set @SQL1 = @SQL1 + ' dblUnitAfterDiscount = ''' + LTRIM(@RebateAmount) + '''' 
+                       set @SQL1 = @SQL1 + ' dblDiscount = ''' + LTRIM(@RebateAmount) + '''' 
 	           END
 
 	           IF (@AccumAmount IS NOT NULL)
