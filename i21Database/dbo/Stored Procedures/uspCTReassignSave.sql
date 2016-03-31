@@ -153,7 +153,8 @@ BEGIN TRY
 		
 	SELECT	@ysnFullyPricingReassign = MIN(ysnFullyPricingReassign),@intPriceFixationId = MIN(intPriceFixationId),@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing
 
-	EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId,@intNewPriceFixationId OUTPUT
+	IF ISNULL(@intPriceFixationId,0) > 0
+		EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId,@intNewPriceFixationId OUTPUT
 
 	UPDATE	tblCTPriceFixation 
 	SET		intContractDetailId =	@intRecipientId,
