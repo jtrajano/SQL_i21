@@ -110,6 +110,8 @@ AS
 		ON A.intSiteID = D.intSiteID
 	LEFT JOIN tblTMDevice E
 		ON D.intDeviceId = E.intDeviceId
+	LEFT JOIN tblTMLeaseDevice EE
+		ON E.intDeviceId = EE.intDeviceId
 	LEFT JOIN tblTMDeviceType F
 		ON E.intDeviceTypeId = F.intDeviceTypeId
 	LEFT JOIN tblTMInventoryStatusType G
@@ -119,7 +121,7 @@ AS
 	LEFT JOIN tblTMRegulatorType I
 		ON E.intRegulatorTypeId = I.intRegulatorTypeId
 	LEFT JOIN tblTMLease J
-		ON E.intLeaseId = J.intLeaseId
+		ON EE.intLeaseId = J.intLeaseId
 	LEFT JOIN tblTMTankType K
 		ON E.intTankTypeId = K.intTankTypeId
 	----Start Getting Site Driver	

@@ -726,7 +726,8 @@ INSERT INTO #TempCannedPanels VALUES (1260, 0, 20, 100, 250, 0, 0, 0, 0, 0, 1, 0
 	,tblTMLease.dtmStartDate as ''Lease Start Date''
 	,tblTMLease.dtmLastLeaseBillingDate as ''Last Lease Billing Date''
 from tblTMLease
-left outer join tblTMDevice on tblTMLease.intLeaseId = tblTMDevice.intLeaseId
+left join tblTMLeaseDevice on tblTMLease.intLeaseId = tblTMLeaseDevice.intLeaseId
+left outer join tblTMDevice on tblTMLeaseDevice.intDeiviceId = tblTMDevice.intDeiviceId
 left outer join tblTMLeaseCode on tblTMLease.intLeaseCodeId = tblTMLeaseCode.intLeaseCodeId
 left outer join vwcusmst on tblTMLease.intBillToCustomerId = vwcusmst.A4GLIdentity', N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.2', NULL, 1, 116, NULL)
  

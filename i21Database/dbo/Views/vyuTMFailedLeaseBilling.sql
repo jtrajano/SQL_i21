@@ -49,8 +49,10 @@ SELECT
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId
+INNER JOIN tblTMLeaseDevice BB
+	ON B.intDeviceId = BB.intDeviceId
 INNER JOIN tblTMLease C
-	ON B.intLeaseId = C.intLeaseId
+	ON BB.intLeaseId = C.intLeaseId
 INNER JOIN tblTMSite D
 	ON A.intSiteID = D.intSiteID
 INNER JOIN tblTMCustomer E
