@@ -42,7 +42,7 @@
 	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityEmployeeId]),
     CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEntityEmployeeId]),
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
-	CONSTRAINT [FK_tblPREmployee_tblEntity] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPREmployee_tblEMEntity] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId]),
 	CONSTRAINT [FK_tblPREmployee_tblSMuserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])

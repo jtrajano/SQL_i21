@@ -1,5 +1,5 @@
 ﻿--This script will fix the data from entity schema changes.
---1. Transfer data from tblEntityToContact to tblAPVendorToContact
+--1. Transfer data from tblEMEntityToContact to tblAPVendorToContact
 --2. Update intVendorId from tblAPVendorToContact
 --3. Update intContactId from tblAPVendorToContact
 --4. Update intDefaultContactId from tblAPVendor
@@ -18,7 +18,7 @@ BEGIN
 		FROM [tblEMEntityToContact] A
 		INNER JOIN tblAPVendor B
 			ON A.intEntityId = B.[intEntityVendorId]
-		INNER JOIN tblEntityContact C
+		INNER JOIN tblEMEntityContact C
 			ON A.[intEntityContactId] = C.[intEntityContactId]
 	PRINT 'END Inserting data to tblAPVendorToContact'		
 
@@ -26,7 +26,7 @@ BEGIN
 	UPDATE tblAPVendor
 	SET intDefaultContactId = B.[intEntityContactId]
 	FROM tblAPVendor A
-	INNER JOIN tblEntityContact B
+	INNER JOIN tblEMEntityContact B
 		ON A.intDefaultContactId = B.[intEntityContactId]
 	PRINT 'END Updating tblAPVendor default contact and location'	
 
@@ -56,12 +56,12 @@ BEGIN
 	DECLARE @invalidContact INT
 	SELECT @invalidContact = COUNT(*)
 	FROM tblAPVendorToContact A
-		WHERE A.[intEntityContactId] NOT IN (SELECT [intEntityContactId] FROM tblEntityContact)
+		WHERE A.[intEntityContactId] NOT IN (SELECT [intEntityContactId] FROM tblEMEntityContact)
 
 	DECLARE @invalidDefaultContact INT
 	SELECT @invalidDefaultContact = COUNT(*)
 	FROM tblAPVendor A
-		WHERE A.intDefaultContactId NOT IN (SELECT [intEntityContactId] FROM tblEntityContact)
+		WHERE A.intDefaultContactId NOT IN (SELECT [intEntityContactId] FROM tblEMEntityContact)
 
 	DECLARE @invalidBillVendor INT
 	SELECT @invalidBillVendor = COUNT(*)

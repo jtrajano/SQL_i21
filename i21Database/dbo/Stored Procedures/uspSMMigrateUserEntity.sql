@@ -37,7 +37,7 @@ BEGIN
 			@ContactNumber = strPhone
 		FROM #tmpUsers
 		
-		--IF NOT EXISTS(SELECT * FROM tblEntity WHERE strName = @FullName AND strEmail = @Email)
+		--IF NOT EXISTS(SELECT * FROM tblEMEntity WHERE strName = @FullName AND strEmail = @Email)
 		--BEGIN
 			INSERT INTO tblEMEntity(strName, strEmail, strContactNumber)
 			VALUES (@FullName, @Email, @ContactNumber)
@@ -45,7 +45,7 @@ BEGIN
 		--END
 		--ELSE
 		--BEGIN
-		--	SELECT @NewId = intEntityId FROM tblEntity WHERE strName = @FullName AND strEmail = @Email
+		--	SELECT @NewId = intEntityId FROM tblEMEntity WHERE strName = @FullName AND strEmail = @Email
 		--END
 		
 		UPDATE tblSMUserSecurity

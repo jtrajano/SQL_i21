@@ -8,11 +8,11 @@
 	[ysnDefaultContact] BIT NOT NULL DEFAULT ((0)), 
 	[intEntityRoleId] INT NULL, 
     [intConcurrencyId]     INT DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblEntity2Contact1] PRIMARY KEY CLUSTERED ([intEntityToContactId] ASC),
-    --CONSTRAINT [FK_tblEntityToContact_tblEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityId]) ON DELETE CASCADE
-	CONSTRAINT [FK_tblEntityToContact_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,    
-    CONSTRAINT [FK_tblEntityToContact_tblEntityContact] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT [FK_tblEntityToContact_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
+    CONSTRAINT [PK_tblEMEntity2Contact1] PRIMARY KEY CLUSTERED ([intEntityToContactId] ASC),
+    --CONSTRAINT [FK_tblEMEntityToContact_tblEMEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEMEntityContact] ([intEntityId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblEMEntityToContact_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,    
+    CONSTRAINT [FK_tblEMEntityToContact_tblEMEntityContact] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT [FK_tblEMEntityToContact_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
 );
 
 

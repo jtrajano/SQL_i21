@@ -36,12 +36,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				agsls_phone = SUBSTRING(F.strPhone,1,15),
 				agsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
-			FROM tblEntity E
-				JOIN tblEntityToContact C
+			FROM tblEMEntity E
+				JOIN tblEMEntityToContact C
 					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
-				JOIN tblEntity F
+				JOIN tblEMEntity F
 					on C.intEntityContactId = F.intEntityId
-				JOIN tblEntityLocation D
+				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = UPPER(@SalespersonId)
@@ -77,12 +77,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				SUBSTRING(F.strPhone,1,15),
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
-			FROM tblEntity E
-				JOIN tblEntityToContact C
+			FROM tblEMEntity E
+				JOIN tblEMEntityToContact C
 					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
-				JOIN tblEntity F
+				JOIN tblEMEntity F
 					on C.intEntityContactId = F.intEntityId
-				JOIN tblEntityLocation D
+				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId
@@ -147,21 +147,21 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			WHERE agsls_slsmn_id = @originSalespersonId
 		
 			--INSERT Entity record for Salesperson
-			INSERT [dbo].[tblEntity]	
+			INSERT [dbo].[tblEMEntity]	
 			([strEntityNo], [strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])					
 			SELECT @strSalespersonId, @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, ''''
 				
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
 
-			INSERT [dbo].[tblEntity]	
+			INSERT [dbo].[tblEMEntity]	
 			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber], [strPhone])
 			SELECT @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''', ISNULL(LTRIM(RTRIM(@strPhone)),'''')
 			
 			DECLARE @EntityContactId INT
 			SET @EntityContactId = SCOPE_IDENTITY()
 
-			INSERT INTO tblEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, strCountry, ysnDefaultLocation)
+			INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, strCountry, ysnDefaultLocation)
 			SELECT @EntityId, @strSalespersonId + '' Location'', 
 			ISNULL(LTRIM(RTRIM(@strAddress)),''''), 
 			ISNULL(LTRIM(RTRIM(@strZipCode)),''''), 
@@ -169,10 +169,10 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			ISNULL(LTRIM(RTRIM(@strState)),''''), 
 			ISNULL(LTRIM(RTRIM(@strCountry)),''''), 1
 			
-			insert into tblEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
+			insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
 			select @EntityId, @EntityContactId, 0, 1, 1
 
-			insert into tblEntityType(intEntityId, strType, intConcurrencyId)
+			insert into tblEMEntityType(intEntityId, strType, intConcurrencyId)
 			select @EntityId, ''Salesperson'', 0
 		
 			--INSERT Salesperson
@@ -287,12 +287,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				ptsls_phone = SUBSTRING(F.strPhone,1,15),
 				ptsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
-			FROM tblEntity E
-				JOIN tblEntityToContact C
+			FROM tblEMEntity E
+				JOIN tblEMEntityToContact C
 					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
-				JOIN tblEntity F
+				JOIN tblEMEntity F
 					on C.intEntityContactId = F.intEntityId
-				JOIN tblEntityLocation D
+				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = UPPER(@SalespersonId)
@@ -328,12 +328,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				SUBSTRING(F.strPhone,1,15),
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
-			FROM tblEntity E
-				JOIN tblEntityToContact C
+			FROM tblEMEntity E
+				JOIN tblEMEntityToContact C
 					on E.intEntityId = C.intEntityId AND ysnDefaultContact = 1
-				JOIN tblEntity F
+				JOIN tblEMEntity F
 					on C.intEntityContactId = F.intEntityId
-				JOIN tblEntityLocation D
+				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId
@@ -398,28 +398,28 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			WHERE ptsls_slsmn_id = @originSalespersonId
 		
 			--INSERT Entity record for Salesperson			
-			INSERT [dbo].[tblEntity]	
+			INSERT [dbo].[tblEMEntity]	
 			([strEntityNo], [strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])					
 			SELECT @strSalespersonId, @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, ''''
 				
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
 
-			INSERT [dbo].[tblEntity]	
+			INSERT [dbo].[tblEMEntity]	
 			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber], [strPhone])
 			SELECT @strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''', ISNULL(LTRIM(RTRIM(@strPhone)),'''')
 			
 			DECLARE @EntityContactId INT
 			SET @EntityContactId = SCOPE_IDENTITY()
 
-			INSERT INTO tblEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, strCountry, ysnDefaultLocation)
+			INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, strCountry, ysnDefaultLocation)
 			SELECT @EntityId, @strSalespersonId + '' Location'', ISNULL(LTRIM(RTRIM(@strAddress)),''''), ISNULL(LTRIM(RTRIM(@strZipCode)),''''), ISNULL(LTRIM(RTRIM(@strCity)),''''), ISNULL(LTRIM(RTRIM(@strState)),''''), ISNULL(LTRIM(RTRIM(@strCountry)),''''), 1
 
 			
-			insert into tblEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
+			insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
 			select @EntityId, @EntityContactId, 0, 1, 1
 
-			insert into tblEntityType(intEntityId, strType, intConcurrencyId)
+			insert into tblEMEntityType(intEntityId, strType, intConcurrencyId)
 			select @EntityId, ''Salesperson'', 0
 		
 			--INSERT Salesperson

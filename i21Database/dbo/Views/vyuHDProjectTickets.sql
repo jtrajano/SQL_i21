@@ -29,7 +29,7 @@
 			tblHDTicket t
 			/*
 			left outer join tblARCustomer cus on cus.intCustomerId = t.intCustomerId
-			left outer join tblEntity cusEnt on cusEnt.intEntityId = cus.intEntityId
+			left outer join tblEMEntity cusEnt on cusEnt.intEntityId = cus.intEntityId
 			*/
 			left outer join tblEMEntity conEnt on conEnt.intEntityId = t.intCustomerContactId
 			left outer join tblHDModule m on m.intModuleId = t.intModuleId

@@ -7,9 +7,9 @@
     [dblAcres]            NUMERIC(18, 6),
 	[intCategoryId]			INT			NULL,
     [intConcurrencyId]    INT           NOT NULL,
-    CONSTRAINT [PK_tblEntitySplit] PRIMARY KEY CLUSTERED ([intSplitId] ASC),
-	CONSTRAINT [FK_tblEntitySplit_tblARCustomer] FOREIGN KEY([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-	CONSTRAINT [UK_tblEntitySplit_strSplitNumber] UNIQUE NONCLUSTERED ([strSplitNumber] ASC, [intEntityId] ASC),
-	CONSTRAINT [FK_dbo_tblEntitySplit_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId])
+    CONSTRAINT [PK_tblEMEntitySplit] PRIMARY KEY CLUSTERED ([intSplitId] ASC),
+	CONSTRAINT [FK_tblEMEntitySplit_tblARCustomer] FOREIGN KEY([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	CONSTRAINT [UK_tblEMEntitySplit_strSplitNumber] UNIQUE NONCLUSTERED ([strSplitNumber] ASC, [intEntityId] ASC),
+	CONSTRAINT [FK_dbo_tblEMEntitySplit_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId])
 
 )

@@ -14,7 +14,7 @@
 
     CONSTRAINT [PK_tblLGPickLotHeader_intPickLotHeaderId] PRIMARY KEY ([intPickLotHeaderId]), 
 	CONSTRAINT [UK_tblLGPickLotHeader_intReferenceNumber] UNIQUE ([intReferenceNumber]),
-	CONSTRAINT [FK_tblLGPickLotHeader_tblEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblLGPickLotHeader_tblEMEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES tblEMEntity([intEntityId]),
     CONSTRAINT [FK_tblLGPickLotHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
     CONSTRAINT [FK_tblLGPickLotHeader_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 	CONSTRAINT [FK_tblLGPickLotHeader_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),

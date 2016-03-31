@@ -166,17 +166,17 @@ SELECT
 	FROM tblPRPaycheck 
 		 -- Join to Employee
 		 LEFT JOIN (SELECT tblPREmployee.*, 
-							tblEntity.strName, 
-							tblEntityLocation.strAddress, 
-							tblEntityLocation.strCity, 
-							tblEntityLocation.strState, 
-							tblEntityLocation.strZipCode 
+							tblEMEntity.strName, 
+							tblEMEntityLocation.strAddress, 
+							tblEMEntityLocation.strCity, 
+							tblEMEntityLocation.strState, 
+							tblEMEntityLocation.strZipCode 
 					  FROM tblPREmployee 
-						LEFT JOIN tblEntity 
-						ON tblPREmployee.intEntityEmployeeId = tblEntity.intEntityId
-						LEFT JOIN tblEntityLocation
-						ON tblPREmployee.intEntityEmployeeId = tblEntityLocation.intEntityId
-							AND tblEntityLocation.ysnDefaultLocation = 1) tblPREmployeeInfo
+						LEFT JOIN tblEMEntity 
+						ON tblPREmployee.intEntityEmployeeId = tblEMEntity.intEntityId
+						LEFT JOIN tblEMEntityLocation
+						ON tblPREmployee.intEntityEmployeeId = tblEMEntityLocation.intEntityId
+							AND tblEMEntityLocation.ysnDefaultLocation = 1) tblPREmployeeInfo
 				ON tblPRPaycheck.intEntityEmployeeId = tblPREmployeeInfo.intEntityEmployeeId 
 		 -- Join to Paycheck Summary (YTD)
 		 LEFT JOIN vyuPRPaycheckYTD

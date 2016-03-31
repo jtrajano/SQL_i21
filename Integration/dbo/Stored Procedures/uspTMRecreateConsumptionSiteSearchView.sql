@@ -92,16 +92,16 @@ BEGIN
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
-				INNER JOIN tblEntity C
+				INNER JOIN tblEMEntity C
 					ON B.intCustomerNumber = C.intEntityId
 				INNER JOIN tblARCustomer D
 					ON C.intEntityId = D.intEntityCustomerId
 				LEFT JOIN tblSMCompanyLocation E
 					ON A.intLocationId = E.intCompanyLocationId
-				INNER JOIN tblEntityToContact F
+				INNER JOIN tblEMEntityToContact F
 					ON D.intEntityCustomerId = F.intEntityId 
 						and F.ysnDefaultContact = 1
-				INNER JOIN tblEntity G 
+				INNER JOIN tblEMEntity G 
 					ON F.intEntityContactId = G.intEntityId
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')

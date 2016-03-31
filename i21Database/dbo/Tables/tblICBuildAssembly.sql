@@ -21,7 +21,7 @@
     CONSTRAINT [FK_tblICBuildAssembly_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICBuildAssembly_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
     CONSTRAINT [FK_tblICBuildAssembly_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-    CONSTRAINT [FK_tblICBuildAssembly_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
+    CONSTRAINT [FK_tblICBuildAssembly_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
 )
 
 GO

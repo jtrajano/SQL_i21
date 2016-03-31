@@ -7,7 +7,7 @@
 	[ysnVisibleOnWeb] [bit] NOT NULL DEFAULT 1,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblHDLineOfBusiness] PRIMARY KEY CLUSTERED ([intLineOfBusinessId] ASC),
- CONSTRAINT [FK_tblHDLineOfBusiness_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+ CONSTRAINT [FK_tblHDLineOfBusiness_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
  CONSTRAINT [UNQ_tblHDLineOfBusiness_SalesPersonEntity] UNIQUE ([strLineOfBusiness],[intEntityId])
 )
 

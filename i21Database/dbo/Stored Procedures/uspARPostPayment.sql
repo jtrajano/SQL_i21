@@ -2077,7 +2077,7 @@ IF @recap = 0
 			--	intCurrencyID = A.intCurrencyId,
 			--	dblExchangeRate = 0,
 			--	dtmDate = A.dtmDatePaid,
-			--	strPayee = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.[intEntityCustomerId]),
+			--	strPayee = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.[intEntityCustomerId]),
 			--	intPayeeID = B.[intEntityCustomerId],
 			--	strAddress = '',
 			--	strZipCode = '',

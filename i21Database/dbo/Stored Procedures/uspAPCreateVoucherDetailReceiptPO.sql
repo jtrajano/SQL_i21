@@ -113,7 +113,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	--INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
 	--LEFT JOIN tblICItemLocation D ON C.intLocationId = D.intLocationId AND D.intItemId = B.intItemId
-	--INNER JOIN (tblAPVendor E INNER JOIN tblEntity E2 ON E.intEntityVendorId = E2.intEntityId ) ON C.intEntityVendorId = E.intEntityVendorId
+	--INNER JOIN (tblAPVendor E INNER JOIN tblEMEntity E2 ON E.intEntityVendorId = E2.intEntityId ) ON C.intEntityVendorId = E.intEntityVendorId
 	--LEFT JOIN tblAP1099Category F ON E2.str1099Type = F.strCategory
 	--LEFT JOIN tblPOPurchaseDetail G ON B.intLineNo = G.intPurchaseDetailId
 	--WHERE C.ysnPosted = 1 AND B.dblOpenReceive != B.dblBillQty AND C.strReceiptType = 'Purchase Order'

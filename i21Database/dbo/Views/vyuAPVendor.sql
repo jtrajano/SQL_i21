@@ -64,7 +64,7 @@ FROM
 		ON A.intEntityId = B.[intEntityVendorId]
 	INNER JOIN dbo.[tblEMEntityLocation] C
 		ON B.intEntityVendorId = C.intEntityId and C.ysnDefaultLocation = 1
-	--INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
+	--INNER JOIN (dbo.tblEMEntityContact D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
 	--	ON B.intDefaultContactId = D.[intEntityContactId]
 	INNER JOIN dbo.[tblEMEntityToContact] G
 		ON G.intEntityId = A.intEntityId

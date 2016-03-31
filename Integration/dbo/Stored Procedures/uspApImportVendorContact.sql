@@ -68,7 +68,7 @@ BEGIN
 				)			
 			AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
 			not in (
-				select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEntity E
+				select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E
 			)
 
 	END
@@ -89,7 +89,7 @@ BEGIN
 		BEGIN
 			
 			BEGIN -- Create Contact record				
-				INSERT INTO tblEntity (
+				INSERT INTO tblEMEntity (
 					strName
 					, strEmail
 					, strContactNumber
@@ -110,7 +110,7 @@ BEGIN
 				
 				set @ContactId = @@IDENTITY
 				
-				INSERT INTO [dbo].[tblEntityToContact]([intEntityId],[intEntityContactId],[intEntityLocationId],[ysnDefaultContact],[ysnPortalAccess],[strUserType])
+				INSERT INTO [dbo].[tblEMEntityToContact]([intEntityId],[intEntityContactId],[intEntityLocationId],[ysnDefaultContact],[ysnPortalAccess],[strUserType])
 				VALUES( @EntityId, @ContactId, NULL, 0 ,0 , 'User')
 			END			
 		END

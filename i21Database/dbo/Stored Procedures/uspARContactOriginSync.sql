@@ -76,8 +76,8 @@
 				INNER JOIN tblEMEntity E ON E.intEntityId = EntToCon.intEntityId
 				INNER JOIN tblARCustomer C on C.intEntityCustomerId = EntToCon.intEntityId
 				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND C.strCustomerNumber <> ''
-			--FROM tblEntityContact Contact
-			--	INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityContactId
+			--FROM tblEMEntityContact Contact
+			--	INNER JOIN tblEMEntity E ON E.intEntityId = Contact.intEntityContactId
 			--	INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intEntityContactId = CusToCon.intEntityContactId
 			--	INNER JOIN tblARCustomer Cus ON CusToCon.intEntityContactId = Cus.[intEntityCustomerId]
 			--	WHERE Contact.strContactNumber = @ContactNumber			

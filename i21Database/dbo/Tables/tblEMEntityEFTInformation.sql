@@ -17,6 +17,6 @@
 	[dblAmount]				   NUMERIC(18, 6) NULL,
 	[intOrder]				   INT			  NULL, 
     [intConcurrencyId]         INT            NOT NULL,
-    CONSTRAINT [PK_tblEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC)
+    CONSTRAINT [PK_tblEMEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC)
 );
 

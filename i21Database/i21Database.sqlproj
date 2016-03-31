@@ -1670,7 +1670,6 @@
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
-    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithGasCheckSubReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithLeakCheckSubReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithoutGasCheckSubReport.sql" />
@@ -3679,6 +3678,7 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql" />
     <None Include="Scripts\Post-Deployment\CF\1_ImportMapping.sql" />
+    <None Include="Scripts\Post-Deployment\EM\024_delete_old_entity_table.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

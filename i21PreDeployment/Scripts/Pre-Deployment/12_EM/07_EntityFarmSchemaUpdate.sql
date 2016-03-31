@@ -2,10 +2,10 @@
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerFarm')
 BEGIN
 	
-	IF NOT EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityFarm' )
+	IF NOT EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityFarm' )
 	BEGIN
 		EXEC( '
-			CREATE TABLE [dbo].[tblEntityFarm]
+			CREATE TABLE [dbo].[tblEMEntityFarm]
 			(	
 				[intFarmFieldId]		INT            NOT NULL,
 				[intEntityId]			INT            NOT NULL,
@@ -33,9 +33,9 @@ BEGIN
 		IF EXISTS  (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerFarm'  and [COLUMN_NAME] = 'intEntityCustomerId' )
 		BEGIN
 			EXEC('
-				DELETE FROM tblEntityFarm
+				DELETE FROM tblEMEntityFarm
 
-				INSERT INTO tblEntityFarm (
+				INSERT INTO tblEMEntityFarm (
 					intFarmFieldId					,intEntityId				,strFarmNumber
 					,strFarmDescription				,strFieldNumber
 					,strFieldDescription			,strDefaultLocation			,dblAcres
@@ -62,9 +62,9 @@ BEGIN
 		ELSE
 		BEGIN
 			EXEC('
-				DELETE FROM tblEntityFarm
+				DELETE FROM tblEMEntityFarm
 
-				INSERT INTO tblEntityFarm (
+				INSERT INTO tblEMEntityFarm (
 					intFarmFieldId					,intEntityId				,strFarmNumber
 					,strFarmDescription				,strFieldNumber
 					,strFieldDescription			,strDefaultLocation			,dblAcres

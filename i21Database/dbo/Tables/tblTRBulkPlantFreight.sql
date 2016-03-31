@@ -16,7 +16,7 @@
 	CONSTRAINT [FK_tblTRBulkPlantFreight_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]),		
 	CONSTRAINT [FK_tblTRBulkPlantFreight_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [UK_tblTRBulkPlantFreight_reference_columns] UNIQUE NONCLUSTERED ([strZipCode] ASC, [intCategoryId] ASC,[intCompanyLocationId] ASC),		
-	CONSTRAINT [FK_tblTRBulkPlantFreight_tblEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
+	CONSTRAINT [FK_tblTRBulkPlantFreight_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
     
 );
 

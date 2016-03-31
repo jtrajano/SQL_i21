@@ -13,7 +13,7 @@
 	CONSTRAINT [PK_tblHDProjectContactInfo] PRIMARY KEY CLUSTERED ([intProjectContactInfoId] ASC),
 	CONSTRAINT [UNQ_intProjectId_intEnityId] UNIQUE ([intProjectId],[intEntityId]),
     CONSTRAINT [FK_tblHDProjectContactInfo_tblHDProject] FOREIGN KEY ([intProjectId]) REFERENCES [dbo].[tblHDProject] ([intProjectId]) on delete cascade,
-	CONSTRAINT [FK_tblHDProjectContactInfo_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
+	CONSTRAINT [FK_tblHDProjectContactInfo_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )
 
 GO

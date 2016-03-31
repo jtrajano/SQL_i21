@@ -28,12 +28,12 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.Entity') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId]) 
-			VALUES (N'Entity', N'Entity', N'EntityManagement.view.Entity', N'Entity Management', N'tblEntity', 0)
+			VALUES (N'Entity', N'Entity', N'EntityManagement.view.Entity', N'Entity Management', N'tblEMEntity', 0)
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
-			SET strTableName = N'tblEntity'
+			SET strTableName = N'tblEMEntity'
 			WHERE strNamespace = 'EntityManagement.view.Entity'
 		END
 		
@@ -53,12 +53,12 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.EntityContact') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId]) 
-			VALUES (N'Entity Contact', N'Entity Contact', N'EntityManagement.view.EntityContact', N'Entity Management', N'tblEntity', 0)
+			VALUES (N'Entity Contact', N'Entity Contact', N'EntityManagement.view.EntityContact', N'Entity Management', N'tblEMEntity', 0)
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
-			SET strTableName = N'tblEntity', strScreenId = N'Entity Contact', strScreenName = 'Entity Contact'
+			SET strTableName = N'tblEMEntity', strScreenId = N'Entity Contact', strScreenName = 'Entity Contact'
 			WHERE strNamespace = 'EntityManagement.view.EntityContact'
 		END
 

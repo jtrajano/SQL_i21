@@ -325,7 +325,7 @@ GO
 	END
 	
 GO
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate All Entity Roles - tblEntityToContact')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate All Entity Roles - tblEMEntityToContact')
 	BEGIN
 		-- Loop through customers
 		DECLARE @currentRow INT
@@ -498,12 +498,12 @@ GO
 		--WHERE intUserRoleID IN (SELECT intUserRoleID FROM tblSMUserRole 
 		--					  WHERE strRoleType IN ('Contact Admin', 'Contact') 
 		--					  AND intUserRoleID NOT IN (SELECT intEntityRoleId
-		--												FROM tblEntityToContact 
+		--												FROM tblEMEntityToContact 
 		--												WHERE intEntityRoleId IS NOT NULL))
 				
 		PRINT N'ADD LOG TO tblMigrationLog'
 		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
-		VALUES('System Manager', 'Migrate All Entity Roles - tblEntityToContact', 'Migrate All Entity Roles - tblEntityToContact', GETDATE())
+		VALUES('System Manager', 'Migrate All Entity Roles - tblEMEntityToContact', 'Migrate All Entity Roles - tblEMEntityToContact', GETDATE())
 	END	
 GO
 	-- UPDATE ALL CONTACTS BASED ON THEIR CONTACT ADMINISTRATOR

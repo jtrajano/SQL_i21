@@ -87,7 +87,7 @@ BEGIN
 					[intEntityVendorId]			=	D.intEntityVendorId,
 					[strVendorOrderNumber] 		=	(CASE WHEN DuplicateData.strVendorOrderNumber IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-DUP'' + CAST(A.A4GLIdentity AS NVARCHAR(MAX)) ELSE A.aptrx_ivc_no END),
 					[strVendorOrderNumberOrig] 	=	A.aptrx_ivc_no,
-					[intTermsId] 				=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+					[intTermsId] 				=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation
 															WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
 																WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 					[dtmDate] 					=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -121,7 +121,7 @@ BEGIN
 						ON A.aptrx_cbk_no = B.apcbk_no
 					INNER JOIN tblAPVendor D
 						ON A.aptrx_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
-					LEFT JOIN tblEntityLocation loc
+					LEFT JOIN tblEMEntityLocation loc
 						ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 					OUTER APPLY (
 						SELECT strVendorOrderNumber, strVendorId FROM tblAPBill F --CHECK ONLY FOR DUPLICATE IF IT IS EXISTS IN i21 BILLS

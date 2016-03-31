@@ -9,7 +9,7 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
-
+:r .\12_EM\17_MoveDataFromOldTableToNewTable.sql --this needs to be here so the scripts below will not be affected due to schema change
 -- Validate Origin records
 -- --coctlmst
 :r .\UpdateValidation\1_CheckCoctlmst.sql
@@ -142,3 +142,8 @@
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
+
+
+--EM
+
+:r .\12_EM\16_Drop_tblEntity_related_constraints.sql -- THIS IS ON THE OUTSKIRT OF SCRIPT DUE TO ITS SENSITIVITY

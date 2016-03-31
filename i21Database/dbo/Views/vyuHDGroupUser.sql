@@ -15,7 +15,7 @@
 			tblHDTicketGroup g
 			,tblHDGroupUserConfig gc
 			,tblSMUserSecurity u
-			--,tblEntity e
+			--,tblEMEntity e
 			,vyuEMEntityContact e
 			,[tblEMEntityCredential] c
 		where

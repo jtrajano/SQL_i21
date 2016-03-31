@@ -4,7 +4,7 @@ BEGIN
 	PRINT '*** Updating Contact Type ***'
 	EXEC(
 		'
-			UPDATE tblEntity set strContactType = ''General'' where intEntityId in (SELECT DISTINCT intEntityContactId from tblEntityToContact) 
+			UPDATE tblEMEntity set strContactType = ''General'' where intEntityId in (SELECT DISTINCT intEntityContactId from tblEMEntityToContact) 
 				and (strContactType = '''' OR strContactType is null)
 	')
 	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)

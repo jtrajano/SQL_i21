@@ -68,7 +68,7 @@ BEGIN
 		--			,strCountry
 		--			,strState
 		--			,strCity
-		--		FROM tblEntityLocation
+		--		FROM tblEMEntityLocation
 		--		WHERE ysnDefaultLocation = 1
 		--	) EntityLocation 
 		--	ON Customer.intEntityCustomerId = EntityLocation.intEntityId

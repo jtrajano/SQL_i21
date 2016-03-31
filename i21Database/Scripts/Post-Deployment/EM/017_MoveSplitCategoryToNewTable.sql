@@ -1,10 +1,10 @@
 ﻿
 PRINT '*** Start Moving Split Category***'
-IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntitySplitExceptionCategory' and [COLUMN_NAME] = 'intSplitId')
-	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntitySplitExceptionCategory' and [COLUMN_NAME] = 'intCategoryId')
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntitySplitExceptionCategory' and [COLUMN_NAME] = 'intSplitId')
+	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntitySplitExceptionCategory' and [COLUMN_NAME] = 'intCategoryId')
 	
-	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntitySplit' and [COLUMN_NAME] = 'intCategoryId')
-	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntitySplit' and [COLUMN_NAME] = 'intSplitId')
+	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntitySplit' and [COLUMN_NAME] = 'intCategoryId')
+	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntitySplit' and [COLUMN_NAME] = 'intSplitId')
 
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICCategory' and [COLUMN_NAME] = 'intCategoryId')
 	
@@ -13,11 +13,11 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 BEGIN
 	PRINT '*** EXECUTING  Moving Split Category***'
 	Exec('
-			insert into tblEntitySplitExceptionCategory(intSplitId, intCategoryId)
-			select a.intSplitId, b.intCategoryId from tblEntitySplit a
+			insert into tblEMEntitySplitExceptionCategory(intSplitId, intCategoryId)
+			select a.intSplitId, b.intCategoryId from tblEMEntitySplit a
 				join tblICCategory b
 					on a.intCategoryId = b.intCategoryId
-				where a.intSplitId not in (select intSplitId from tblEntitySplitExceptionCategory)
+				where a.intSplitId not in (select intSplitId from tblEMEntitySplitExceptionCategory)
 	')
 
 	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)

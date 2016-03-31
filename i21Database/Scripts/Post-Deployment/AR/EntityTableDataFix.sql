@@ -1,4 +1,4 @@
-﻿--IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblEntityContacts]') AND type in (N'U')) 
+﻿--IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblEMEntityContacts]') AND type in (N'U')) 
 --BEGIN	
 	
 --	DECLARE @intEntityId as int
@@ -7,7 +7,7 @@
 --	DECLARE @intDefaultContactId as int
 --	DECLARE @strDefaultContactName as nvarchar(50)
 --	DECLARE @strContactName as nvarchar(50)
---	--Declare temporary table for table tblEntityContacts
+--	--Declare temporary table for table tblEMEntityContacts
 --	DECLARE @tempEntityContacts table (
 --		intEntityId int,
 --		strName nvarchar(50),
@@ -39,8 +39,8 @@
 --	strNotes,
 --	intEntityContactId
 --	from 
---	tblEntity A
---	inner join tblEntityContacts B on A.intEntityId = B.intEntityId
+--	tblEMEntity A
+--	inner join tblEMEntityContacts B on A.intEntityId = B.intEntityId
 	
 	
 --	WHILE EXISTS (SELECT TOP 1 1 FROM @tempEntityContacts)
@@ -60,8 +60,8 @@
 --		@intEntityId = intEntityId
 --		from @tempEntityContacts
 
---		--Insert the Contact Person in tblEntity
---		INSERT INTO tblEntity 
+--		--Insert the Contact Person in tblEMEntity
+--		INSERT INTO tblEMEntity 
 --		(strName, strWebsite, strInternalNotes)
 --		SELECT TOP 1
 --		strName,
@@ -72,8 +72,8 @@
 --		--Get the Id created on the insert above
 --		set @intContactId = @@IDENTITY
 		
---		--Insert other data to tblEntityContact
---		INSERT INTO tblEntityContact
+--		--Insert other data to tblEMEntityContact
+--		INSERT INTO tblEMEntityContact
 --		(intEntityId,
 --		strTitle,
 --		strDepartment,
@@ -98,7 +98,7 @@
 --		FROM @tempEntityContacts
 		
 --		--Insert the associated contact to the entity
---		INSERT INTO tblEntityToContact
+--		INSERT INTO tblEMEntityToContact
 --		(intEntityId, intContactId)
 --		VALUES
 --		(@intEntityId, @intContactId)
@@ -109,11 +109,11 @@
 --		--This is to update the intDefaultContactId of tblAPVendor
 --		IF @strDefaultContactName != ''
 --		BEGIN
---			--Get the default id from tblEntityToContact
+--			--Get the default id from tblEMEntityToContact
 --			SELECT 
 --			@intDefaultContactId = B.intEntityToContactId 
---			FROM tblEntity A
---			INNER JOIN tblEntityToContact B ON A.intEntityId = B.intContactId
+--			FROM tblEMEntity A
+--			INNER JOIN tblEMEntityToContact B ON A.intEntityId = B.intContactId
 --			WHERE A.strName = @strDefaultContactName 
 			
 --			IF @intDefaultContactId IS NOT NULL
@@ -126,5 +126,5 @@
 --	END
 	
 --	--Drop the table once data were transfered
---	DROP TABLE tblEntityContacts
+--	DROP TABLE tblEMEntityContacts
 --END

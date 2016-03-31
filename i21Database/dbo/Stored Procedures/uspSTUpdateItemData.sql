@@ -1837,7 +1837,7 @@
 			               ChangeDescription,OldData,NewData)
 						   select c.strLocationName, b.strUpcCode, 
 						   d.strDescription, ''Vendor '', 
-						   ( select strName from tblEntity where intEntityId = a.intVendorId ),
+						   ( select strName from tblEMEntity where intEntityId = a.intVendorId ),
 						   ''' + @VendorId +'''
 						   from tblICItemLocation a JOIN 
 						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN

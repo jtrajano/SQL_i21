@@ -21,9 +21,9 @@
 	[intCategoryId]		INT				NULL,
     [intConcurrencyId]  INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerSpecialPrice] PRIMARY KEY CLUSTERED ([intSpecialPriceId] ASC),
-	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
-	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEntityLocation_Rack] FOREIGN KEY ([intRackLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
-	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEntityLocation_Customer] FOREIGN KEY ([intCustomerLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId])    
+	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
+	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Rack] FOREIGN KEY ([intRackLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
+	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Customer] FOREIGN KEY ([intCustomerLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId])    
 );
 
 

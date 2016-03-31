@@ -20,7 +20,7 @@
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]),
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
     CONSTRAINT [UK_tblRKMatchFuturesPSHeader_intMatchNo] UNIQUE (intMatchNo)
 )
 

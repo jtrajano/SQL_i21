@@ -40,7 +40,7 @@
 		intEntityId = us.[intEntityUserSecurityId],
 		ysnDisabled = us.ysnDisabled
 	from
-		tblSMUserSecurity us, vyuEMEntityContact en, tblEntityCredential ec
+		tblSMUserSecurity us, vyuEMEntityContact en, tblEMEntityCredential ec
 	where
 		us.[intEntityUserSecurityId] is not null
 		and en.intEntityId = us.[intEntityUserSecurityId]

@@ -118,9 +118,9 @@
 	   tblICStorageLocation.strDescription,
 	   tblGRStorageScheduleRule.strScheduleId
   from ((dbo.tblSCTicket tblSCTicket
-	left join dbo.tblEMEntity tblEntity
+	left join dbo.tblEMEntity tblEMEntity
        on (tblEMEntity.intEntityId = tblSCTicket.intEntityId)
-	left join dbo.[tblEMEntitySplit] tblEntitySplit
+	left join dbo.[tblEMEntitySplit] tblEMEntitySplit
        on ([tblEMEntitySplit].intSplitId = tblSCTicket.intSplitId)
 	left join dbo.tblSCScaleSetup tblSCScaleSetup
        on (tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId)

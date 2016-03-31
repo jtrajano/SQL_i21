@@ -21,7 +21,7 @@
 	[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblICInventoryTransfer] PRIMARY KEY ([intInventoryTransferId]), 
     CONSTRAINT [AK_tblICInventoryTransfer_strTransferNo] UNIQUE ([strTransferNo]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_tblEntity] FOREIGN KEY ([intTransferredById]) REFERENCES tblEMEntity([intEntityId]), 
+    CONSTRAINT [FK_tblICInventoryTransfer_tblEMEntity] FOREIGN KEY ([intTransferredById]) REFERENCES tblEMEntity([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_FromLocation] FOREIGN KEY ([intFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_ToLocation] FOREIGN KEY ([intToLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblICUnitMeasure] FOREIGN KEY ([intFreightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 

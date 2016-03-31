@@ -4,7 +4,7 @@
 	[intEntityTariffId]						INT,
 	[dblFuelSurcharge]						NUMERIC(18, 6),
 	[dtmEffectiveDate]						DATETIME,
-	[intConcurrencyId]						INT            CONSTRAINT [DF_tblEntityTariffFuelSurcharge_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblEntityTariffFuelSurcharge] PRIMARY KEY CLUSTERED ([intEntityTariffFuelSurchargeId] ASC),     
-	CONSTRAINT [FK_dbo_tblEntityTariffFuelSurcharge_tblEntityTariff_intEntityTariffId] FOREIGN KEY ([intEntityTariffId]) REFERENCES [dbo].[tblEMEntityTariff] ([intEntityTariffId]) ON DELETE CASCADE
+	[intConcurrencyId]						INT            CONSTRAINT [DF_tblEMEntityTariffFuelSurcharge_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [PK_tblEMEntityTariffFuelSurcharge] PRIMARY KEY CLUSTERED ([intEntityTariffFuelSurchargeId] ASC),     
+	CONSTRAINT [FK_dbo_tblEMEntityTariffFuelSurcharge_tblEMEntityTariff_intEntityTariffId] FOREIGN KEY ([intEntityTariffId]) REFERENCES [dbo].[tblEMEntityTariff] ([intEntityTariffId]) ON DELETE CASCADE
 )

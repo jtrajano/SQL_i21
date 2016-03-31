@@ -64,16 +64,16 @@ BEGIN
 
 			--PRINT ''BEGIN Adding Constraint''
 			--ALTER TABLE dbo.tblAPPayment
-			--ADD CONSTRAINT [FK_dbo.tblAPPayment_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId)
-			--REFERENCES tblEntity(intEntityId)
+			--ADD CONSTRAINT [FK_dbo.tblAPPayment_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId)
+			--REFERENCES tblEMEntity(intEntityId)
 	
 			--ALTER TABLE dbo.tblAPBill
-			--ADD CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId)
-			--REFERENCES tblEntity(intEntityId)
+			--ADD CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId)
+			--REFERENCES tblEMEntity(intEntityId)
 
 			--ALTER TABLE dbo.tblAPBillBatch
-			--ADD CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId)
-			--REFERENCES tblEntity(intEntityId)
+			--ADD CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId)
+			--REFERENCES tblEMEntity(intEntityId)
 			--PRINT ''END Adding Constraint''
 		END
 

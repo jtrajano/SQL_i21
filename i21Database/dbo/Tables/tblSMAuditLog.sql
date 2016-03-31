@@ -9,7 +9,7 @@
     [dtmDate]			 DATETIME         NOT NULL,
     [intEntityId]        INT              NULL,
     [intConcurrencyId]   INT              NOT NULL,
-    CONSTRAINT [FK_dbo.tblSMAuditLog_dbo.tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+    CONSTRAINT [FK_dbo.tblSMAuditLog_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [PK_dbo.tblSMAuditLog] PRIMARY KEY CLUSTERED ([intAuditLogId] ASC)
 );
 

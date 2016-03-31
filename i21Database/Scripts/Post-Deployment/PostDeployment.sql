@@ -294,10 +294,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\019_RemoveEmailToParentEntity.sql
 :r .\EM\020_DefaultDataForEntityImportSchemaCSV.sql
 :r .\EM\021_MoveCustomerMessageToEntity.sql
-:r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEntityPreferences
+:r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEMEntityPreferences
 
 :r .\EM\022_DefaultDataForContactTypeAndImport.sql
 :r .\EM\023_RenameEntityContactEmailDistribution.sql
+:r .\EM\024_delete_old_entity_table.sql
+
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

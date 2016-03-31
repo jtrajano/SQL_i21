@@ -70,7 +70,7 @@ DECLARE @Contacts TABLE
 					sscon_email not in 
 					(
 						select isnull(strEmail, '') COLLATE SQL_Latin1_General_CP1_CS_AS 
-						from tblEntity E inner join tblEntityContact EC on E.intEntityId = EC.intEntityContactId
+						from tblEMEntity E inner join tblEMEntityContact EC on E.intEntityId = EC.intEntityContactId
 						WHERE isnull(strEmail, '') like '%[a-z0-9]%' 
 					) 
 					OR isnull(sscon_email, '') = ''
@@ -78,7 +78,7 @@ DECLARE @Contacts TABLE
 			AND sscon_cus_no in (select strCustomerNumber collate SQL_Latin1_General_CP1_CS_AS from tblARCustomer)
 			AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
 			not in (
-				select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEntity E inner join tblEntityContact EC on E.intEntityId = EC.intEntityContactId
+				select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E inner join tblEMEntityContact EC on E.intEntityId = EC.intEntityContactId
 			)
 
 	END
@@ -145,12 +145,12 @@ DECLARE @Contacts TABLE
 
 			END
 			
-			----TODO1: remove this select and delete tblEntity and tblEntityContact
-			--	select * from tblEntity where intEntityId = @intEntityId
-			--	select * from tblEntityContact where intContactId = @intContactId 
+			----TODO1: remove this select and delete tblEMEntity and tblEMEntityContact
+			--	select * from tblEMEntity where intEntityId = @intEntityId
+			--	select * from tblEMEntityContact where intContactId = @intContactId 
 				
-			--	delete from tblEntityContact where intContactId = @intContactId 
-			--	delete from tblEntity where intEntityId = @intEntityId
+			--	delete from tblEMEntityContact where intContactId = @intContactId 
+			--	delete from tblEMEntity where intEntityId = @intEntityId
 			---- End of TODO1
 			
 				delete from @Entity
@@ -164,10 +164,10 @@ IF(@Checking = 1)
 BEGIN
 	SELECT @Total =  count(sscon_contact_id) 
 	FROM ssconmst
-	LEFT JOIN tblEntityContact Con ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Con.strContactNumber COLLATE Latin1_General_CI_AS
+	LEFT JOIN tblEMEntityContact Con ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Con.strContactNumber COLLATE Latin1_General_CI_AS
 	WHERE Con.strContactNumber IS NULL AND ssconmst.sscon_contact_id  = UPPER(ssconmst.sscon_contact_id ) COLLATE Latin1_General_CS_AS
 	AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
-	NOT IN (select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEntity E inner join tblEntityContact EC on E.intEntityId = EC.intEntityContactId)
+	NOT IN (select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E inner join tblEMEntityContact EC on E.intEntityId = EC.intEntityContactId)
 	
 END
 END
@@ -189,7 +189,7 @@ GO
 
 
 
---tblEntityContact
+--tblEMEntityContact
 
 ---- TEST
 --declare @EntityContact as EntityContact
@@ -211,7 +211,7 @@ GO
 --declare @intContactId int
 --exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
 --select @intContactId
---select * from tblEntityContact where intContactId = @intContactId
+--select * from tblEMEntityContact where intContactId = @intContactId
 
---delete from tblEntityContact where intContactId = @intContactId
+--delete from tblEMEntityContact where intContactId = @intContactId
 

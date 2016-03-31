@@ -19,7 +19,7 @@
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intEntityShipViaId] ASC), 
     CONSTRAINT [AK_tblSMShipVia_strShipVia] UNIQUE ([strShipVia]),
-	CONSTRAINT [FK_dbo_tblSMShipVia_tblEntity_intEntityId] FOREIGN KEY ([intEntityShipViaId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_dbo_tblSMShipVia_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityShipViaId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 
 );
 

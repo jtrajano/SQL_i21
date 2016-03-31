@@ -243,13 +243,13 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intShipToLocationId' AND object_id = object_id('tblICInventoryShipment'))
 BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intEntityLocationId' AND object_id = object_id('tblEntityLocation'))
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intEntityLocationId' AND object_id = object_id('tblEMEntityLocation'))
 	BEGIN
 		EXEC ('ALTER TABLE tblICInventoryShipment ALTER COLUMN intShipToLocationId INT NULL')
 		EXEC('
 		UPDATE tblICInventoryShipment
 		SET intShipToLocationId = NULL
-		WHERE intShipToLocationId NOT IN (SELECT intEntityLocationId FROM tblEntityLocation)
+		WHERE intShipToLocationId NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation)
 		')
 	END
 END

@@ -9,7 +9,7 @@ BEGIN
 	Exec('
 		INSERT INTO tblEMEntityMessage(intEntityId, strMessageType, strAction, strMessage, intConcurrencyId)
 		select intEntityCustomerId, strMessageType, strAction, strMessage, intConcurrencyId 
-			from tblARCustomerMessage where intEntityCustomerId in (select intEntityId from tblEntity)
+			from tblARCustomerMessage where intEntityCustomerId in (select intEntityId from tblEMEntity)
 	')
 
 	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)

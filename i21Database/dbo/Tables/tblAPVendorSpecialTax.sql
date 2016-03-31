@@ -30,7 +30,7 @@
 	
 	--CONSTRAINT FK_tblAPVendorSpecialTax_tblSMTaxGroupMaster		FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 	
-	CONSTRAINT FK_tblAPVendorSpecialTax_tblEntityLocation		FOREIGN KEY ([intEntityVendorLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
+	CONSTRAINT FK_tblAPVendorSpecialTax_tblEMEntityLocation		FOREIGN KEY ([intEntityVendorLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 
 	CONSTRAINT FK_tblAPVendorSpecialTax_tblSMTaxGroup FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
 

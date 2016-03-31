@@ -22,7 +22,7 @@ BEGIN
 			
 			--	select top 1 @name = name, @email = email from @Entity
 
-			--	IF exists (select top 1 1 from tblEntity where strEmail = @email and strName = @name)
+			--	IF exists (select top 1 1 from tblEMEntity where strEmail = @email and strName = @name)
 			--	BEGIN
 			--		RAISERROR('Entity with the same name and email already exists', 16,1)
 			--	END
