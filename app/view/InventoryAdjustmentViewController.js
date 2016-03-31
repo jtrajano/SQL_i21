@@ -520,6 +520,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
             store: store,
+            enableComment: true,
+            enableAudit: true,
             include: 'tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
             createRecord: me.createRecord,
             validateRecord: me.validateRecord,
