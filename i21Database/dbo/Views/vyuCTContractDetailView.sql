@@ -36,14 +36,16 @@ AS
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
 			IX.strIndexType,					EF.strFieldNumber,				LP.strCity						AS	strLoadingPoint,	
 			SR.strScheduleDescription,			IM.strShortName,				DP.strCity						AS	strDestinationPoint,
-																				DC.strCity						AS	strDestinationCity,
-																				PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
+			SK.intStockUOMId,					SK.strStockUnitMeasure,			DC.strCity						AS	strDestinationCity,
+			SK.intStockUnitMeasureId,											PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
 																				U4.strUnitMeasure				AS	strStockItemUOM,
 			CU.intMainCurrencyId,				CU.strCurrency,					CY.strCurrency					AS	strMainCurrency,
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)															AS	ysnSubCurrency,
 			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
 			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
 			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)											AS	dblAvailableQty,
+			dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,
+												ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))			AS	dblAvailableQtyInItemStockUOM,
 			CASE	WHEN	CH.ysnLoad = 1
 					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
 					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
@@ -169,11 +171,18 @@ AS
 	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
 	JOIN	tblEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
 	JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId	=	CD.intStorageScheduleRuleId	LEFT
-	JOIN(
-			SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
-			FROM	tblICItemUOM			IU	LEFT 
-			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
-			WHERE	ysnStockUnit = 1)		SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
+	JOIN	(
+				SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
+				FROM	tblICItemUOM		IU	LEFT 
+				JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
+				WHERE	ysnStockUnit = 1
+			)								SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
+	JOIN	(
+				SELECT  intItemUOMId AS intStockUOMId,strUnitMeasure AS strStockUnitMeasure,IU.intItemId,IU.intUnitMeasureId AS intStockUnitMeasureId
+				FROM	tblICItemUOM		IU	 
+				JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
+				WHERE	IU.ysnStockUnit = 1
+			)								SK	ON	SK.intItemId				=	CD.intItemId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= IL.intSubLocationId 	LEFT
 	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND 
 													SP.intEntityLocationId = IX.intVendorLocationId				LEFT
