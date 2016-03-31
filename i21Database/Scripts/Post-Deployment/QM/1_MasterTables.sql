@@ -683,3 +683,24 @@ BEGIN
 	VALUES('Screen size (PAN)','Screen size (PAN)')
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Overall Cup Analysis')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('Overall Cup Analysis','Overall Cup Analysis')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'HUMIDITY')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('HUMIDITY','HUMIDITY')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'TOTAL DEFECTS')
+BEGIN
+	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
+	VALUES('TOTAL DEFECTS','TOTAL DEFECTS')
+END
+GO
