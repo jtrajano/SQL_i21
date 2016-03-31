@@ -175,9 +175,9 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
 			ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
-		LEFT JOIN tblEntity ENTITY
+		LEFT JOIN tblEMEntity ENTITY
 			ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
-		LEFT JOIN tblEntityLocation LOCATION
+		LEFT JOIN [tblEMEntityLocation] LOCATION
 			ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 		LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 WHERE	CHK.intBankAccountId = @intBankAccountId

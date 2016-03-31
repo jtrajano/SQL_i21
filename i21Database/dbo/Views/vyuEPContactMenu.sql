@@ -6,13 +6,13 @@ intEntityUserSecurityId = Contact.[intEntityId],
 intMenuId = Menu.intEntityPortalMenuId,    
 intParentMenuId = ISNULL((CASE WHEN Menu.intPortalParentMenuId = 0 THEN 0 ELSE (  
      SELECT intEntityPortalPermissionId  
-     FROM tblEntityPortalPermission  
-     LEFT JOIN tblEntityToContact  ON tblEntityPortalPermission.intEntityToContactId = tblEntityToContact.intEntityToContactId       
-     LEFT JOIN tblEntity  ON tblEntityToContact.[intEntityContactId] = tblEntity.[intEntityId]       
-     WHERE tblEntity.[intEntityId] = Contact.[intEntityId]  
+     FROM [tblEMEntityPortalPermission]  
+     LEFT JOIN [tblEMEntityToContact]  ON [tblEMEntityPortalPermission].intEntityToContactId = [tblEMEntityToContact].intEntityToContactId       
+     LEFT JOIN tblEMEntity  ON [tblEMEntityToContact].[intEntityContactId] = tblEMEntity.[intEntityId]       
+     WHERE tblEMEntity.[intEntityId] = Contact.[intEntityId]  
   
        
-     AND tblEntityPortalPermission.intEntityPortalMenuId = Menu.intPortalParentMenuId  
+     AND [tblEMEntityPortalPermission].intEntityPortalMenuId = Menu.intPortalParentMenuId  
      ) END), 0),  
 strMenuName = Menu.strPortalMenuName,    
 strModuleName = 'Customer Portal',    
@@ -27,14 +27,14 @@ expanded = CAST(0 AS BIT),
 ysnVisible = (CASE WHEN ISNULL(Permission.intEntityPortalMenuId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END),    
 ysnIsLegacy = CAST(0 AS BIT),    
 intSort = Menu.intEntityPortalMenuId    
-FROM tblEntityPortalMenu Menu    
-	JOIN tblEntityPortalPermission Permission 
+FROM [tblEMEntityPortalMenu] Menu    
+	JOIN [tblEMEntityPortalPermission] Permission 
 		ON Menu.intEntityPortalMenuId = Permission.intEntityPortalMenuId  
-	JOIN tblEntityToContact EntityToContact 
+	JOIN [tblEMEntityToContact] EntityToContact 
 		ON Permission.intEntityToContactId = EntityToContact.intEntityToContactId  
-	JOIN tblEntity Contact 
+	JOIN tblEMEntity Contact 
 		ON EntityToContact.[intEntityContactId] = Contact.[intEntityId]
-	JOIN tblEntityType EntType
+	JOIN [tblEMEntityType] EntType
 		ON EntType.intEntityId =  EntityToContact.intEntityId 
 			and (
 					EntType.strType = Menu.strEntityType

@@ -7,6 +7,6 @@
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblRKBrokerageAccount_intBrokerageAccountId] PRIMARY KEY ([intBrokerageAccountId]), 
-	CONSTRAINT [FK_tblRKBrokerageAccount_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblRKBrokerageAccount_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
     CONSTRAINT [UK_tblRKBrokerageAccount_intBrokerId_strAccountNumber] UNIQUE ([intEntityId], [strAccountNumber])
 )

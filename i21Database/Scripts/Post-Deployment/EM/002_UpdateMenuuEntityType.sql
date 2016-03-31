@@ -1,6 +1,6 @@
 ﻿--002_UpdateMenuuEntityType
 PRINT 'BEGIN UPDATE CONTACT MENU'
-IF EXISTS (SELECT TOP 1 1 FROM tblEntityPortalMenu)
+IF EXISTS (SELECT TOP 1 1 FROM [tblEMEntityPortalMenu])
 BEGIN
 	EXEC('
 	update tblEntityPortalMenu set strEntityType = '''' where intEntityPortalMenuId = 1 and strPortalMenuName = ''Help Desk''

@@ -19,9 +19,9 @@ BEGIN
 				SELECT TOP 1 @intTableId = intTableId FROM @tmpTable ORDER BY intTableId
 				
 				IF (SELECT COUNT(*) FROM @tmpTable) > 1
-					SELECT @strValues = ISNULL(@strValues, '') + LTRIM(RTRIM(strEntityNo)) + ', ' FROM tblEntity WHERE intEntityId = @intTableId
+					SELECT @strValues = ISNULL(@strValues, '') + LTRIM(RTRIM(strEntityNo)) + ', ' FROM tblEMEntity WHERE intEntityId = @intTableId
 				ELSE
-					SELECT @strValues = ISNULL(@strValues, '') + LTRIM(RTRIM(strEntityNo)) FROM tblEntity WHERE intEntityId = @intTableId
+					SELECT @strValues = ISNULL(@strValues, '') + LTRIM(RTRIM(strEntityNo)) FROM tblEMEntity WHERE intEntityId = @intTableId
 
 				DELETE FROM @tmpTable WHERE intTableId = @intTableId
 			END

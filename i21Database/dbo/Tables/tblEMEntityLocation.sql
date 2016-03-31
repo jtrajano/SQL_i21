@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityLocation] (
+﻿CREATE TABLE [dbo].[tblEMEntityLocation] (
     [intEntityLocationId] INT            IDENTITY (1, 1) NOT NULL,
     [intEntityId]         INT            NOT NULL,
     [strLocationName]     NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
@@ -22,7 +22,7 @@
 	[ysnActive]				BIT			 NOT NULL DEFAULT(1),
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
-    CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [dbo].[tblSMFreightTerms] ([intFreightTermId]),
 	--CONSTRAINT [FK_tblEntityLocation_tblSMTaxCode_taxCode] FOREIGN KEY([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
@@ -35,5 +35,5 @@
 
 GO
 CREATE NONCLUSTERED INDEX [IX_intEntityId]
-    ON [dbo].[tblEntityLocation]([intEntityId] ASC);
+    ON [dbo].[tblEMEntityLocation]([intEntityId] ASC);
 

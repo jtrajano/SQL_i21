@@ -29,7 +29,7 @@ SELECT
 	FROM dbo.tblAPBill APB
 	LEFT JOIN dbo.tblAPVendor APV
 		ON APV.[intEntityVendorId] = APB.[intEntityVendorId]
-	LEFT JOIN dbo.tblEntity E
+	LEFT JOIN dbo.tblEMEntity E
 		ON E.intEntityId = APV.intEntityVendorId
 	OUTER APPLY
 	(

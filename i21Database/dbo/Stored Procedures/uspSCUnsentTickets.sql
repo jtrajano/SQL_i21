@@ -50,7 +50,7 @@ BEGIN TRY
 	JOIN tblSCTicketType TT ON (SELECT intTicketTypeId FROM tblSCListTicketTypes WHERE intTicketTypeId = TT.intListTicketTypeId)=T.intTicketType
 	LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId=T.intProcessingLocationId
 	LEFT JOIN tblARCustomer ARC ON ARC.intEntityCustomerId=T.intCustomerId
-	LEFT JOIN tblEntity en ON en.intEntityId=ARC.intEntityCustomerId
+	LEFT JOIN tblEMEntity en ON en.intEntityId=ARC.intEntityCustomerId
 	LEFT JOIN tblICItem TI ON TI.intItemId=T.intItemId
 	Where
 	T.dtmTicketTransferDateTime IS  NULL AND T.dtmTicketVoidDateTime IS  NULL

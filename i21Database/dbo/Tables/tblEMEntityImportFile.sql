@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityImportFile]
+﻿CREATE TABLE [dbo].[tblEMEntityImportFile]
 (
 	[intUploadCSV]    INT             IDENTITY (1, 1) NOT NULL,
     [strFilename]     NVARCHAR (150)  COLLATE Latin1_General_CI_AS NULL,

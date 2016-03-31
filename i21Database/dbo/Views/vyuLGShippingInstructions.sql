@@ -29,5 +29,5 @@ SELECT
 
 FROM tblLGShippingInstruction SI
 LEFT JOIN tblLGShipment SH ON SH.intShippingInstructionId = SI.intShippingInstructionId
-LEFT JOIN tblEntity VEN ON VEN.intEntityId = SI.intVendorEntityId
-LEFT JOIN tblEntity CEN ON CEN.intEntityId = SI.intCustomerEntityId
+LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = SI.intVendorEntityId
+LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = SI.intCustomerEntityId

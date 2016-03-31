@@ -74,7 +74,7 @@ BEGIN TRY
 		LEFT JOIN tblICItem I ON I.intItemId = SI.intItemId
 		LEFT JOIN tblICItemUOM U ON SI.intItemUOMId = U.intItemUOMId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
-		LEFT JOIN tblEntityLocation E ON E.intEntityLocationId = S.intShipToLocationId
+		LEFT JOIN [tblEMEntityLocation] E ON E.intEntityLocationId = S.intShipToLocationId
 		LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = S.intShipFromLocationId
 		LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SI.intOrderId
 		WHERE S.strShipmentNumber = @strShipmentNo

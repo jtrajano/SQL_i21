@@ -13,7 +13,7 @@ SET
 FROM
 	tblARInvoice ARI
 LEFT OUTER JOIN
-	tblEntityLocation EMEL
+	[tblEMEntityLocation] EMEL
 		ON ARI.intBillToLocationId = EMEL.intEntityLocationId 	
 WHERE
 	ARI.intShipToLocationId <> ARI.intBillToLocationId

@@ -44,6 +44,6 @@
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=w.intLocationId
 	JOIN tblICItemUOM iu2 on iu2.intItemUOMId=w.intItemUOMId
 	JOIN tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId
-	LEFT JOIN tblEntity e1 ON l1.intCreatedEntityId=e1.intEntityId
-	LEFT JOIN tblEntityType et1 ON e1.intEntityId=et1.intEntityId AND et1.strType='User'
+	LEFT JOIN tblEMEntity e1 ON l1.intCreatedEntityId=e1.intEntityId
+	LEFT JOIN [tblEMEntityType] et1 ON e1.intEntityId=et1.intEntityId AND et1.strType='User'
 	WHERE w.intStatusId=13

@@ -1,6 +1,6 @@
 ﻿GO
 MERGE INTO tblPOPurchase AS PO
-USING tblEntityLocation AS Loc
+USING [tblEMEntityLocation] AS Loc
 ON (PO.intShipFromId = Loc.intEntityLocationId AND (PO.strShipFromState != Loc.strState OR PO.strShipFromZipCode != Loc.strZipCode))
 WHEN MATCHED THEN
 	UPDATE SET PO.strShipFromState = Loc.strState, PO.strShipFromZipCode = Loc.strZipCode;

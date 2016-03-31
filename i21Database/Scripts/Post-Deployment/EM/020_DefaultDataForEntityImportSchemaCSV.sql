@@ -1,8 +1,8 @@
-﻿DELETE FROM tblEntityImportSchemaCSV
+﻿DELETE FROM [tblEMEntityImportSchemaCSV]
 
-SET IDENTITY_INSERT tblEntityImportSchemaCSV ON
+SET IDENTITY_INSERT [tblEMEntityImportSchemaCSV] ON
 
-INSERT INTO tblEntityImportSchemaCSV(intEntityImportSchemaCSV,strObject, strProperty, strCSVProp)
+INSERT INTO [tblEMEntityImportSchemaCSV](intEntityImportSchemaCSV,strObject, strProperty, strCSVProp)
 
 SELECT 1001, 'tblEntity', 'strName', 'name'
 UNION
@@ -53,4 +53,4 @@ SELECT 1403, 'tblEntity.tblCustomer', 'dblCreditLimit', 'cus_creditlimit'
 UNION	
 SELECT 1405, 'tblEntity.tblCustomer', 'ysnPORequired', 'cus_porequired'
 
-SET IDENTITY_INSERT tblEntityImportSchemaCSV OFF
+SET IDENTITY_INSERT [tblEMEntityImportSchemaCSV] OFF

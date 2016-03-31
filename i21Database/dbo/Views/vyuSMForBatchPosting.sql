@@ -20,7 +20,7 @@ FROM
 	SELECT strTransactionType, intTransactionId, strTransactionId, dblAmount, strVendorInvoiceNumber, intEntityVendorId, intEntityId, dtmDate, strDescription, strBatchId
 	FROM tblSMForBatchPosting
 ) ForBatchPosting
-LEFT JOIN tblEntity Entity ON ForBatchPosting.intEntityVendorId = Entity.intEntityId
+LEFT JOIN tblEMEntity Entity ON ForBatchPosting.intEntityVendorId = Entity.intEntityId
 INNER JOIN tblSMUserSecurity UserSecurity ON ForBatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
 GO
 

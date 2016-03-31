@@ -15,7 +15,7 @@ BEGIN
 	PRINT 'BEGIN Inserting data to tblAPVendorToContact'
 	INSERT INTO tblAPVendorToContact([intEntityVendorId], [intEntityContactId], intEntityLocationId)
 	SELECT B.[intEntityVendorId], C.[intEntityContactId], intLocationId 
-		FROM tblEntityToContact A
+		FROM [tblEMEntityToContact] A
 		INNER JOIN tblAPVendor B
 			ON A.intEntityId = B.[intEntityVendorId]
 		INNER JOIN tblEntityContact C

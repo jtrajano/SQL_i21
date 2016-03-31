@@ -8,7 +8,7 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICCategory' and [COLUMN_NAME] = 'intCategoryId')
 	
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Moving Split Category')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Moving Split Category')
 
 BEGIN
 	PRINT '*** EXECUTING  Moving Split Category***'
@@ -20,7 +20,7 @@ BEGIN
 				where a.intSplitId not in (select intSplitId from tblEntitySplitExceptionCategory)
 	')
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Moving Split Category', 1)
 
 END

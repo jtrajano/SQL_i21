@@ -21,6 +21,6 @@ AS
 	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId	LEFT
 	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
 	JOIN	tblCTContractBasis	CB	ON	CB.intContractBasisId	=	CH.intContractBasisId	LEFT
-	JOIN	tblEntity			EY	ON	EY.intEntityId			=	CH.intEntityId
+	JOIN	tblEMEntity			EY	ON	EY.intEntityId			=	CH.intEntityId
 
 	

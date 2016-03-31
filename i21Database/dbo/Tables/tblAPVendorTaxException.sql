@@ -28,5 +28,5 @@
 
 	CONSTRAINT [FK_tblAPVendorTaxException_tblAPVendor]		FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]),
 
-	CONSTRAINT FK_ttblAPVendorTaxExceptiontblEntityLocation FOREIGN KEY (intEntityVendorLocationId) REFERENCES [tblEntityLocation]([intEntityLocationId])
+	CONSTRAINT FK_ttblAPVendorTaxExceptiontblEntityLocation FOREIGN KEY (intEntityVendorLocationId) REFERENCES [tblEMEntityLocation]([intEntityLocationId])
 )

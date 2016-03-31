@@ -11,7 +11,7 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDReminder] PRIMARY KEY CLUSTERED ([intReminderId] ASC),
     CONSTRAINT [FK_tblHDReminder_tblHDTicket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]),
-    CONSTRAINT [FK_tblHDReminder_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+    CONSTRAINT [FK_tblHDReminder_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )
 
 GO

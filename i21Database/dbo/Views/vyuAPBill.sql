@@ -45,7 +45,7 @@ SELECT
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
-		(dbo.tblAPVendor B INNER JOIN dbo.tblEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
+		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
 	ON A.[intEntityVendorId] = B.[intEntityVendorId]
 	INNER JOIN dbo.tblGLAccount C
 		ON A.intAccountId = C.intAccountId
@@ -64,7 +64,7 @@ FROM
 		WHERE A.intBillId = D.intBillId
 		ORDER BY D.intPaymentId DESC --get only the latest payment
 	) Payment
-	LEFT JOIN dbo.tblEntityCredential F ON A.intEntityId = F.intEntityId
+	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId
 	LEFT JOIN dbo.tblSMApprovalList G ON G.intApprovalListId = ISNULL(B.intApprovalListId , (SELECT intApprovalListId FROM dbo.tblAPCompanyPreference))
 	OUTER APPLY 
 	(

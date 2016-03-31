@@ -49,7 +49,7 @@ BEGIN
 		select @CurMergeId = SUBSTRING(@CurMergeItem,0,CHARINDEX('.',@CurMergeItem))
 		,@CurMergeType = SUBSTRING(@CurMergeItem, CHARINDEX('.',@CurMergeItem)+ 1 , LEN(@CurMergeItem))
 
-		if exists(select top 1 1 from tblEntityType where intEntityId = @PrimaryKey and strType = @CurMergeType)
+		if exists(select top 1 1 from [tblEMEntityType] where intEntityId = @PrimaryKey and strType = @CurMergeType)
 			goto GoHere
 
 		if @CurMergeType = 'Customer' or @CurMergeType = 'Prospect'

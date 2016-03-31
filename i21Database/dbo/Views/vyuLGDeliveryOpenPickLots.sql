@@ -21,7 +21,7 @@ AS
 						END
 	FROM tblLGPickLotHeader 		PL
 	LEFT JOIN vyuICGetInventoryShipmentItem InvShip ON InvShip.intSourceId = PL.intPickLotHeaderId AND InvShip.strSourceType='Pick Lot'
-	JOIN tblEntity EN ON EN.intEntityId = PL.intCustomerEntityId
+	JOIN tblEMEntity EN ON EN.intEntityId = PL.intCustomerEntityId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = PL.intCompanyLocationId
 	JOIN tblICCommodity CO ON CO.intCommodityId = PL.intCommodityId
 	JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PL.intSubLocationId

@@ -1831,7 +1831,7 @@
  IF (@NewVendor  IS NOT NULL)
  BEGIN
        
-	    SELECT @VendorId = strName from tblEntity where intEntityId = @NewVendor
+	    SELECT @VendorId = strName from tblEMEntity where intEntityId = @NewVendor
 
         SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
 			               ChangeDescription,OldData,NewData)

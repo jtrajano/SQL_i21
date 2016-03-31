@@ -8,7 +8,7 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARAccountStatus' and [COLUMN_NAME] = 'intAccountStatusId')
 
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Moving Customer Account Status')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Moving Customer Account Status')
 
 BEGIN
 	PRINT '*** EXECUTING  Moving Customer Account Status***'
@@ -20,7 +20,7 @@ BEGIN
 				where a.intEntityCustomerId not in ( select intEntityCustomerId from tblARCustomerAccountStatus)	
 	')
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Moving Customer Account Status', 1)
 
 END

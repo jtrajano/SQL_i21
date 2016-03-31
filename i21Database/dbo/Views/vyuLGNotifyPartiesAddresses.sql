@@ -11,8 +11,8 @@ AS
 			ENLOC.strPhone, 
 			ENLOC.strFax,
 			ENTYPE.strType
-	FROM	tblEntityLocation ENLOC
-	JOIN	tblEntityType ENTYPE ON ENTYPE.intEntityId = ENLOC.intEntityId  
+	FROM	[tblEMEntityLocation] ENLOC
+	JOIN	[tblEMEntityType] ENTYPE ON ENTYPE.intEntityId = ENLOC.intEntityId  
 
 	UNION ALL
 

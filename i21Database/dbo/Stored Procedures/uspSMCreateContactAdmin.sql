@@ -8,7 +8,7 @@ BEGIN
 	DECLARE @contactAdminRoleId INT
 	DECLARE @helpDeskRoleId INT
 	
-	SELECT @entityName = RTRIM(strName) FROM tblEntity where intEntityId = @entityId
+	SELECT @entityName = RTRIM(strName) FROM tblEMEntity where intEntityId = @entityId
 
 	SELECT @roleName = @entityName + '-' + CAST(@entityId AS NVARCHAR)
 

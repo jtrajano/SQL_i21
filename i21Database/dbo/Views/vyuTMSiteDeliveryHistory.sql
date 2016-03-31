@@ -106,12 +106,12 @@ AS
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B	
 		ON A.intCustomerID = B.intCustomerID
-	INNER JOIN tblEntity C
+	INNER JOIN tblEMEntity C
 		ON B.intCustomerNumber = C.intEntityId
 	INNER JOIN tblTMDeliveryHistory D
 		ON A.intSiteID = D.intSiteID
 	----Start Getting Will call Driver	
-	LEFT JOIN tblEntity E
+	LEFT JOIN tblEMEntity E
 		ON D.intWillCallDriverId = E.intEntityId	
 	----End Getting Driver
 	LEFT JOIN tblICItem G
@@ -123,7 +123,7 @@ AS
 	LEFT JOIN tblSMUserSecurity J
 		ON D.intUserID = J.[intEntityUserSecurityId]
 	----Start Getting will call Driver	
-	LEFT JOIN tblEntity L
+	LEFT JOIN tblEMEntity L
 		ON A.intDriverID = L.intEntityId	
 	----End Getting Driver
 	LEFT JOIN tblTMRoute N

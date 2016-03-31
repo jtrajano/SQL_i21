@@ -12,5 +12,5 @@
 	from tblARCustomerGroup a
 		join tblARCustomerGroupDetail  b
 			on a.intCustomerGroupId = b.intCustomerGroupId
-		join tblEntity c
+		join tblEMEntity c
 			on b.intEntityId = c.intEntityId

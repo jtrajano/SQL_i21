@@ -27,9 +27,9 @@ FROM
      dbo.tblCCVendorDefault A
 	INNER JOIN dbo.tblAPVendor B
 		ON A.intVendorId = B.intEntityVendorId
-	INNER JOIN dbo.tblEntity C
+	INNER JOIN dbo.tblEMEntity C
 		ON B.intEntityVendorId = C.intEntityId
-	LEFT JOIN dbo.tblEntityLocation D
+	LEFT JOIN dbo.[tblEMEntityLocation] D
 		ON B.intDefaultLocationId = D.intEntityLocationId    
     LEFT Join dbo.tblSMTerm E
 	    on D.intTermsId = E.intTermID

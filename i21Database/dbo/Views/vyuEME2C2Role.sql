@@ -12,12 +12,12 @@
 		strRoleName				=	b.strName,
 		ysnAdmin				=	b.ysnAdmin,
 		strPassword				=	e.strPassword
-	from tblEntityToContact a
+	from [tblEMEntityToContact] a
 		join tblSMUserRole b
 			on a.intEntityRoleId = b.intUserRoleID
-		join tblEntity c
+		join tblEMEntity c
 			on a.intEntityId = c.intEntityId
-		join tblEntity d
+		join tblEMEntity d
 			on a.intEntityContactId = d.intEntityId
-		left join tblEntityCredential e
+		left join [tblEMEntityCredential] e
 			on a.intEntityContactId = e.intEntityId

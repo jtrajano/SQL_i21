@@ -34,7 +34,7 @@ BEGIN
 			
 			
 			BEGIN -- DML: Insert Entity
-				insert into tblEntity
+				insert into tblEMEntity
 				(
 					strName
 					, strEmail

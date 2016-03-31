@@ -29,15 +29,15 @@ SELECT
 	D.strEmailDistributionOption,
 	B.imgPhoto,
 	papit = g.strPassword
-FROM dbo.tblEntity AS B 			
-	INNER JOIN dbo.tblEntityToContact AS C 
+FROM dbo.tblEMEntity AS B 			
+	INNER JOIN dbo.[tblEMEntityToContact] AS C 
 			ON B.[intEntityId] = C.[intEntityId] 
-	INNER JOIN dbo.tblEntity AS D 
+	INNER JOIN dbo.tblEMEntity AS D 
 			ON C.[intEntityContactId] = D.[intEntityId] 
-	LEFT OUTER JOIN dbo.tblEntityLocation AS E 
+	LEFT OUTER JOIN dbo.[tblEMEntityLocation] AS E 
 			ON C.intEntityLocationId = E.intEntityLocationId
 	JOIN vyuEMSearch F
 		ON F.intEntityId = B.intEntityId
-	LEFT JOIN tblEntityCredential g
+	LEFT JOIN [tblEMEntityCredential] g
 		on g.intEntityId = D.intEntityId
 

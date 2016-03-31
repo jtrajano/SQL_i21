@@ -16,14 +16,14 @@ AS
 		,pro.strProduct
 		,smmo.strModule
 		,ver.strVersionNo
-		,strCreateBy = (select top 1 strName from tblEntity where intEntityId = tic.intCreatedUserEntityId)
+		,strCreateBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intCreatedUserEntityId)
 		,tic.dtmCreated
 		,tic.dtmLastModified
 		,strCustomer = tic.strCustomerNumber
-		,strAssignedTo = (select top 1 strName from tblEntity where intEntityId = tic.intAssignedToEntity)
+		,strAssignedTo = (select top 1 strName from tblEMEntity where intEntityId = tic.intAssignedToEntity)
 		,tic.intConcurrencyId
 		,intAssignToEntity = tic.intAssignedToEntity
-		,strContactName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerContactId)
+		,strContactName = (select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerContactId)
 		,tic.intCustomerContactId
 		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
 		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
@@ -35,10 +35,10 @@ AS
 		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101)
 		,tic.intTicketProductId
 		,strTicketType = tic.strType
-		,strCustomerName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerId)
+		,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerId)
 		,tic.dtmLastCommented
 		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
-		,strLastCommentedBy = (select top 1 strName from tblEntity where intEntityId = tic.intLastCommentedByEntityId)
+		,strLastCommentedBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId

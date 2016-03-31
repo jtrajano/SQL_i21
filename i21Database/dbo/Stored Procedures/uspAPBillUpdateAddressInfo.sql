@@ -36,7 +36,7 @@ BEGIN
 		,A.strShipFromState = B.strState
 		,A.strShipFromZipCode = B.strZipCode
 	FROM tblAPBill A
-	INNER JOIN tblEntityLocation B ON A.intShipFromId = B.intEntityLocationId
+	INNER JOIN [tblEMEntityLocation] B ON A.intShipFromId = B.intEntityLocationId
 	WHERE A.intBillId = @billId AND B.intEntityLocationId = @shipFromId
 END
 

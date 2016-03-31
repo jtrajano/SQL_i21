@@ -23,7 +23,7 @@ BEGIN
 		SELECT @strShipperCode = SUBSTRING(@strMarks, @intFirstIndex + 1, (@intSecondIndex - @intFirstIndex - 1))
 
 		SELECT TOP 1 @strShipperName = strName
-		FROM dbo.tblEntity
+		FROM dbo.tblEMEntity
 		WHERE strEntityNo = @strShipperCode
 	END
 	ELSE

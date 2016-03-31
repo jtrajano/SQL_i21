@@ -129,8 +129,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShippingLineId_intEntityId] FOREIGN KEY ([intShippingLineId]) REFERENCES [tblEntity]([intEntityId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShippingLineId_intEntityId] FOREIGN KEY ([intShippingLineId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
@@ -147,5 +147,5 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategory_intCategoryId] FOREIGN KEY([intCategoryId])REFERENCES [tblICCategory] ([intCategoryId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEntityFarm]([intFarmFieldId])
+	CONSTRAINT [FK_tblCTContractDetail_tblEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId])
 ) 

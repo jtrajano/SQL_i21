@@ -11,7 +11,7 @@
 		ent.strEntityNo
 
 	from tblARCustomerRackQuoteHeader quote_header
-		inner join tblEntity ent
+		inner join tblEMEntity ent
 			on quote_header.intEntityCustomerId = ent.intEntityId		
 		--left join tblARCustomerRackQuoteCategory quote_category
 		--	on quote_header.intCustomerRackQuoteHeaderId = quote_category.intCustomerRackQuoteHeaderId		
@@ -19,7 +19,7 @@
 		--	on quote_header.intCustomerRackQuoteHeaderId = quote_item.intCustomerRackQuoteHeaderId
 		left join tblARCustomerRackQuoteVendor quote_vendor
 			on quote_header.intCustomerRackQuoteHeaderId = quote_vendor.intCustomerRackQuoteHeaderId
-		left join tblEntityLocation cus_location
+		left join [tblEMEntityLocation] cus_location
 			on cus_location.intEntityId = quote_header.intEntityCustomerId
 				and cus_location.intEntityLocationId = quote_vendor.intEntityCustomerLocationId
 		--left join tblICItem item

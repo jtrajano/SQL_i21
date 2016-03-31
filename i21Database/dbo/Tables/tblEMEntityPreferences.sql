@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityPreferences]
+﻿CREATE TABLE [dbo].[tblEMEntityPreferences]
 (
 	[intEntityPreferences]			INT IDENTITY (1, 1) NOT NULL,
 	[strPreference]					NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,  

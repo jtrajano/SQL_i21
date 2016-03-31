@@ -53,7 +53,7 @@ BEGIN
 		ON A.intItemId = C.intItemId
 	INNER JOIN tblTMSite D
 		ON A.intSiteId = D.intSiteID
-	INNER JOIN tblEntity E
+	INNER JOIN tblEMEntity E
 		ON B.intEntityCustomerId = E.intEntityId
 	INNER JOIN tblSMCompanyLocation F
 		ON B.intCompanyLocationId = F.intCompanyLocationId

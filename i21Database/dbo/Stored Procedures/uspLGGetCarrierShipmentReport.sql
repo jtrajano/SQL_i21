@@ -43,11 +43,11 @@ BEGIN
 	WHERE	[fieldname] = 'strLoadNumber' 
 
 	SELECT
-		@strHaulerAddress = (SELECT EL.strAddress from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerCity = (SELECT EL.strCity from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerCountry = (SELECT EL.strCountry from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerState = (SELECT EL.strState from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerZip = (SELECT EL.strZipCode from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId)
+		@strHaulerAddress = (SELECT EL.strAddress from [tblEMEntityLocation] EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerCity = (SELECT EL.strCity from [tblEMEntityLocation] EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerCountry = (SELECT EL.strCountry from [tblEMEntityLocation] EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerState = (SELECT EL.strState from [tblEMEntityLocation] EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerZip = (SELECT EL.strZipCode from [tblEMEntityLocation] EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId)
 	FROM vyuLGLoadView L WHERE L.[strLoadNumber] = @strLoadNumber
 
 SELECT DISTINCT 

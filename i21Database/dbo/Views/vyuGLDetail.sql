@@ -41,4 +41,4 @@ AS
           LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
           LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
           LEFT JOIN tblSMCurrency AS D ON D.intCurrencyID = A.intCurrencyId
-          LEFT JOIN tblEntityCredential AS E ON E.intEntityId = A.intEntityId
+          LEFT JOIN [tblEMEntityCredential] AS E ON E.intEntityId = A.intEntityId

@@ -31,9 +31,9 @@
 			left outer join tblARCustomer cus on cus.intCustomerId = t.intCustomerId
 			left outer join tblEntity cusEnt on cusEnt.intEntityId = cus.intEntityId
 			*/
-			left outer join tblEntity conEnt on conEnt.intEntityId = t.intCustomerContactId
+			left outer join tblEMEntity conEnt on conEnt.intEntityId = t.intCustomerContactId
 			left outer join tblHDModule m on m.intModuleId = t.intModuleId
-			left outer join tblEntity assEnt on assEnt.intEntityId = t.intAssignedToEntity
+			left outer join tblEMEntity assEnt on assEnt.intEntityId = t.intAssignedToEntity
 			left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId
 			left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
 			left outer join tblHDTicketType tt on tt.intTicketTypeId = t.intTicketTypeId

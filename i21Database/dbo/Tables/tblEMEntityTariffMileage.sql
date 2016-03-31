@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityTariffMileage]
+﻿CREATE TABLE [dbo].[tblEMEntityTariffMileage]
 (
 	[intEntityTarifffMileageId]			INT IDENTITY(1,1) NOT NULL,
 	[intEntityTariffId]					INT,
@@ -8,5 +8,5 @@
 	[dblInvoiceRatePerUnit]				NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[intConcurrencyId]						INT            CONSTRAINT [DF_tblEntityTariffMileage_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntityTariffMileage] PRIMARY KEY CLUSTERED ([intEntityTarifffMileageId] ASC),     
-	CONSTRAINT [FK_dbo_tblEntityTariffMileage_tblEntityTariff_intEntityTariffId] FOREIGN KEY ([intEntityTariffId]) REFERENCES [dbo].[tblEntityTariff] ([intEntityTariffId]) ON DELETE CASCADE
+	CONSTRAINT [FK_dbo_tblEntityTariffMileage_tblEntityTariff_intEntityTariffId] FOREIGN KEY ([intEntityTariffId]) REFERENCES [dbo].[tblEMEntityTariff] ([intEntityTariffId]) ON DELETE CASCADE
 )

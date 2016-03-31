@@ -29,15 +29,15 @@ select
 	b.dblPercent,
 	b.strDispatchNotification,
 	b.strTextMessage
-from tblEntity a
+from tblEMEntity a
 	join tblARSalesperson b on
 		a.intEntityId = b.intEntitySalespersonId
-	left join tblEntityToContact c
+	left join [tblEMEntityToContact] c
 		on a.intEntityId = c.intEntityId	
 			and c.ysnDefaultContact = 1
-	left join tblEntity d
+	left join tblEMEntity d
 		on c.intEntityContactId = d.intEntityId
-	left join tblEntityLocation e
+	left join [tblEMEntityLocation] e
 		on a.intEntityId = e.intEntityId 
 			and e.ysnDefaultLocation = 1
 

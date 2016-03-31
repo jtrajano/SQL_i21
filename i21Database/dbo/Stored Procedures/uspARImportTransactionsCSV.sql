@@ -78,7 +78,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		IF @IsTank = 1
 			BEGIN
 				SELECT 
-					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEntity WHERE strEntityNo = D.strCustomerNumber)
+					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = D.strCustomerNumber)
 					,@Date							= D.dtmDate
 					,@ShipDate						= D.dtmDate		
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
@@ -122,7 +122,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					BEGIN
 						SELECT TOP 1 @TermId = intDeliveryTermID FROM tblTMSite WHERE intSiteID = @SiteId
 						SELECT @DueDate = CAST(dbo.fnGetDueDateBasedOnTerm(@Date, @TermId) AS DATE)
-						SELECT TOP 1 @TaxGroupId = ISNULL(intTaxGroupId, 0) FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1					
+						SELECT TOP 1 @TaxGroupId = ISNULL(intTaxGroupId, 0) FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1					
 						SELECT TOP 1 @BillingBy				= TMS.strBillingBy
 									,@ItemId				= TMS.intProduct 
 									,@ItemDescription		= I.strDescription
@@ -161,12 +161,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		ELSE
 			BEGIN
 				SELECT 
-					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEntity WHERE strEntityNo = D.strCustomerNumber)
+					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = D.strCustomerNumber)
 					,@Date							= D.dtmDate
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
 					,@EntityId						= ISNULL(@UserEntityId, H.intEntityId)
 					,@TermId						= CASE WHEN ISNULL(D.strTerms, '') <> '' THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = D.strTerms) ELSE 0 END
-					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 intEntitySalespersonId FROM tblARSalesperson SP INNER JOIN tblEntity E ON SP.intEntitySalespersonId = E.intEntityId WHERE E.strEntityNo = D.strSalespersonNumber) ELSE 0 END
+					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 intEntitySalespersonId FROM tblARSalesperson SP INNER JOIN tblEMEntity E ON SP.intEntitySalespersonId = E.intEntityId WHERE E.strEntityNo = D.strSalespersonNumber) ELSE 0 END
 					,@DueDate						= D.dtmDueDate		
 					,@ShipDate						= D.dtmShipDate
 					,@PostDate						= D.dtmPostDate 
@@ -221,7 +221,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
 		ELSE IF @TermId = 0 AND @IsTank = 0
 			BEGIN
-				SELECT TOP 1 @TermId = intTermsId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+				SELECT TOP 1 @TermId = intTermsId FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
 				IF ISNULL(@TermId, 0) = 0
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The customer provided doesn''t have default terms. '				
 			END
@@ -229,12 +229,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		IF @FreightTermId IS NULL AND @IsTank = 0
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Freight Term provided does not exists. '
 		ELSE IF @FreightTermId = 0
-			SELECT TOP 1 @FreightTermId = intFreightTermId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+			SELECT TOP 1 @FreightTermId = intFreightTermId FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
 
 		IF @ShipViaId IS NULL AND @IsTank = 0
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Ship Via provided does not exists. '
 		ELSE IF @ShipViaId = 0
-			SELECT TOP 1 @ShipViaId = intShipViaId FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+			SELECT TOP 1 @ShipViaId = intShipViaId FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
 
 		IF @EntitySalespersonId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Salesperson provided does not exists. '
@@ -438,7 +438,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							 , @shipToState		= strState
 							 , @shipToZipCode	= strZipCode
 							 , @shipToCountry	= strCountry
-						FROM tblEntityLocation WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
+						FROM [tblEMEntityLocation] WHERE intEntityId = @EntityCustomerId AND ysnDefaultLocation = 1
 						SET @DueDate = ISNULL(@DueDate, @computedDueDate)
 
 						INSERT INTO tblSOSalesOrder 

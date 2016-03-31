@@ -328,7 +328,7 @@ BEGIN
 	FROM
 		tblAPVendor P
 	INNER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON P.[intEntityVendorId] = EL.[intEntityId] 
 	WHERE
 		P.[intEntityVendorId] = @VendorId

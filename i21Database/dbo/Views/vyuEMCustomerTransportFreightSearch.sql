@@ -19,9 +19,9 @@
 		ent.strEntityNo
 
 		from tblARCustomerFreightXRef xref
-			inner join tblEntity ent
+			inner join tblEMEntity ent
 				on xref.intEntityCustomerId = ent.intEntityId
-			left join tblEntityLocation cus_location
+			left join [tblEMEntityLocation] cus_location
 				on cus_location.intEntityId = xref.intEntityCustomerId	
 					and cus_location.intEntityLocationId = xref.intEntityLocationId				
 			left join tblICCategory category

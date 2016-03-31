@@ -36,7 +36,7 @@ from
 	left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
 	left outer join tblHDModule m on m.intModuleId = t.intModuleId
 	left outer join tblSMModule smm on smm.intModuleId = m.intSMModuleId
-	left outer join tblEntity conEntity on conEntity.intEntityId = t.intCustomerContactId
+	left outer join tblEMEntity conEntity on conEntity.intEntityId = t.intCustomerContactId
 	--left outer join tblEntityContact con on con.intEntityContactId = conEntity.intEntityId
-	left outer join tblEntity assEntity on assEntity.intEntityId = t.intAssignedToEntity
+	left outer join tblEMEntity assEntity on assEntity.intEntityId = t.intAssignedToEntity
 	left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId

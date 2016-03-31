@@ -46,12 +46,12 @@ SELECT
  ,D.strType
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
- INNER JOIN (tblAPVendor C INNER JOIN tblEntity C2 ON C.intEntityVendorId = C2.intEntityId) ON A.[intEntityVendorId] = C.intEntityVendorId
+ INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityVendorId = C2.intEntityId) ON A.[intEntityVendorId] = C.intEntityVendorId
  LEFT JOIN tblICItem D ON B.intItemId = D.intItemId
  LEFT JOIN tblICItemUOM E ON B.intUnitOfMeasureId = E.intItemUOMId
  LEFT JOIN tblICUnitMeasure H ON E.intUnitMeasureId = H.intUnitMeasureId
  LEFT JOIN tblSMCompanyLocationSubLocation F ON B.intSubLocationId = F.intCompanyLocationSubLocationId
  LEFT JOIN tblICStorageLocation G ON B.intStorageLocationId = G.intStorageLocationId
  INNER JOIN dbo.tblSMCompanyLocation I ON A.intShipToId = I.intCompanyLocationId
- LEFT JOIN tblEntityLocation J ON A.intEntityVendorId = J.intEntityId
+ LEFT JOIN [tblEMEntityLocation] J ON A.intEntityVendorId = J.intEntityId
  WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')

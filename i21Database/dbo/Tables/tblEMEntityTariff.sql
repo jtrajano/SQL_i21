@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityTariff]
+﻿CREATE TABLE [dbo].[tblEMEntityTariff]
 (
 	[intEntityTariffId]				INT IDENTITY(1,1) NOT NULL,
 	[intEntityId]					INT,
@@ -7,6 +7,6 @@
 	[intEntityTariffTypeId]			INT NULL,
 	[intConcurrencyId]    INT            CONSTRAINT [DF_tblEntityTariff_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntityTariff] PRIMARY KEY CLUSTERED ([intEntityTariffId] ASC),     
-	CONSTRAINT [FK_dbo_tblEntityTariff_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_dbo_tblEntityTariff_tblEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEntityTariffType] ([intEntityTariffTypeId])
+	CONSTRAINT [FK_dbo_tblEntityTariff_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_dbo_tblEntityTariff_tblEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
 )

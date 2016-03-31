@@ -67,7 +67,7 @@ AS
 	JOIN	tblICUnitMeasure					U5	ON	U5.intUnitMeasureId					=		CH.intLoadCategoryUnitMeasureId		LEFT
 	JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
 	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId			LEFT
-	JOIN	tblEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
-	JOIN	tblEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
+	JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
+	JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
 	JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
 	JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId				

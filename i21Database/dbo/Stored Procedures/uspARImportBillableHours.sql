@@ -50,7 +50,7 @@ SELECT
 FROM
 	@TicketHoursWorked THW
 INNER JOIN 
-	tblEntityLocation EL 
+	[tblEMEntityLocation] EL 
 		ON THW.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1		
 WHERE
 	EL.intTermsId IS NULL

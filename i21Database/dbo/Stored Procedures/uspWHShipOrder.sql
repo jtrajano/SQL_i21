@@ -131,7 +131,7 @@ BEGIN TRY
 	--Get the ship to phone number              
 	SELECT TOP 1 @strShipFromPhoneNo = a.strPhone
 	FROM tblWHOrderHeader h
-	INNER JOIN tblEntity a ON a.intEntityId = h.intShipToAddressId
+	INNER JOIN tblEMEntity a ON a.intEntityId = h.intShipToAddressId
 	WHERE h.intOrderHeaderId = @intOrderHeaderId;
 
 	--Get the carrier contact              
@@ -140,7 +140,7 @@ BEGIN TRY
 	FROM tblWHOrderHeader h
 	INNER JOIN tblWHOrderHeader o ON o.intOrderHeaderId = h.intOrderHeaderId
 	INNER JOIN tblWHTruck t ON t.intTruckId = o.intTruckId
-	INNER JOIN tblEntity a ON a.intEntityId = t.intCarrierAddressID
+	INNER JOIN tblEMEntity a ON a.intEntityId = t.intCarrierAddressID
 	WHERE h.intOrderHeaderId = @intOrderHeaderId;
 
 	DECLARE @intLocAddress AS INT

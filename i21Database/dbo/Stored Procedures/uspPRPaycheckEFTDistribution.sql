@@ -35,7 +35,7 @@ SET ANSI_WARNINGS OFF
 		,strDistributionType
 		,dblAmount
 	INTO #tmpEFTInfo
-	FROM tblEntityEFTInformation
+	FROM [tblEMEntityEFTInformation]
 	WHERE intEntityId = @intEntityEmployeeId
 		AND ysnActive = 1
 	ORDER BY 

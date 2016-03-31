@@ -104,7 +104,7 @@ AS
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B	
 		ON A.intCustomerID = B.intCustomerID
-	INNER JOIN tblEntity C
+	INNER JOIN tblEMEntity C
 		ON B.intCustomerNumber = C.intEntityId
 	LEFT JOIN tblTMEvent D
 		ON A.intSiteID = D.intSiteID
@@ -123,7 +123,7 @@ AS
 	LEFT JOIN tblTMTankType K
 		ON E.intTankTypeId = K.intTankTypeId
 	----Start Getting Site Driver	
-	LEFT JOIN tblEntity L
+	LEFT JOIN tblEMEntity L
 		ON A.intDriverID = L.intEntityId	
 	----End Getting Driver
 	LEFT JOIN tblTMRoute N
@@ -153,7 +153,7 @@ AS
 	LEFT JOIN tblTMEventType Y
 		ON D.intEventTypeID = Y.intEventTypeID
 	----Start Getting Event Performer	
-	LEFT JOIN tblEntity Z
+	LEFT JOIN tblEMEntity Z
 		ON D.intPerformerID = Z.intEntityId	
 	----End Getting Event Performer
 	LEFT JOIN tblSMUserSecurity AB

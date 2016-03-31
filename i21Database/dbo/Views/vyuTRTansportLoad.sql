@@ -40,7 +40,7 @@ SELECT
 	TL.strTransaction,
 	'Distribution' as strRecordType,
 	(select  top 1 CS.strName from vyuEMEntity CS where CS.intEntityId = DH.intEntityCustomerId) as strCustomer,
-	(select  top 1 EL.strLocationName from tblEntityLocation EL where EL.intEntityLocationId = DH.intShipToLocationId) as strCustomerLocation,
+	(select  top 1 EL.strLocationName from [tblEMEntityLocation] EL where EL.intEntityLocationId = DH.intShipToLocationId) as strCustomerLocation,
 	(select top 1 SM.strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = DH.intCompanyLocationId) as strCustomerCompanyLocation,
 	SP.strFuelSupplier,
 	SP.strSupplyPoint,

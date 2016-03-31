@@ -23,7 +23,7 @@ dblInboundPrice = CASE
                                   )  
 						END,
 LG.strVendor as strTerminalName,
-(select strLocationName from tblEntityLocation EM where EM.intEntityLocationId = LG.intVendorEntityLocationId) as strSupplyPoint,
+(select strLocationName from [tblEMEntityLocation] EM where EM.intEntityLocationId = LG.intVendorEntityLocationId) as strSupplyPoint,
 LG.strPLocationName strLocationName,
 IsNull(LG.strItemNo,(select strItemNo from tblICItem IC where IC.intItemId = LG.intItemId)) as strInboundItemNo,
 LG.strPContractNumber as strInboundContractNumber,
@@ -51,7 +51,7 @@ LG.strTruckNo as strTractor,
 LG.strTrailerNo1 as strTrailer,
 LG.strHauler as strShipVia,
 (select top 1 EM.strName from tblTRCompanyPreference CP 
-                               join tblEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
+                               join tblEMEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
 LG.strDriver as strSalespersonId,
 LG.intSContractDetailId as intOutboundContractDetailId,
 ysnDirectShip = CASE
@@ -67,7 +67,7 @@ LG.strExternalLoadNumber as strSupplierLoadNumber,
 (select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intPContractDetailId )  as dblInboundAdjustment,
 (select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intSContractDetailId )  as dblOutboundAdjustment,
 (select top 1 strZipCode from dbo.tblTRSupplyPoint SP
-                                    join dbo.tblEntityLocation EL on SP.intEntityLocationId = EL.intEntityLocationId and SP.intEntityVendorId = EL.intEntityId
+                                    join dbo.[tblEMEntityLocation] EL on SP.intEntityLocationId = EL.intEntityLocationId and SP.intEntityVendorId = EL.intEntityId
 									where SP.intEntityLocationId = LG.intVendorEntityLocationId) as strZipCode,
 (select top 1 SP.intRackPriceSupplyPointId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intVendorEntityLocationId) as intRackPriceSupplyPointId,
 (select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId,
@@ -89,8 +89,8 @@ intOutboundIndexRackPriceSupplyPointId  = CASE
 (select top 1 TX.strTaxGroup from dbo.tblTRSupplyPoint SP 
                                      LEFT JOIN tblSMTaxGroup TX on SP.intTaxGroupId = TX.intTaxGroupId
 									 where SP.intEntityLocationId = LG.intVendorEntityLocationId) as strInboundTaxGroup,
-(select top 1 EM.intTaxGroupId from tblEntityLocation EM where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as intOutboundTaxGroupId,
-(select top 1 strTaxGroup from tblEntityLocation EM
+(select top 1 EM.intTaxGroupId from [tblEMEntityLocation] EM where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as intOutboundTaxGroupId,
+(select top 1 strTaxGroup from [tblEMEntityLocation] EM
                                LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
                                where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as strOutboundTaxGroup
 from dbo.vyuLGLoadView LG
@@ -123,7 +123,7 @@ LG.intCustomerEntityLocationId as intShipToLocationId,
 (select top 1 SP.strName from tblARCustomer AR 
                                     Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCustomerEntityId) as strOutboundSalespersonId,
-(select strLocationName from tblEntityLocation EML where EML.intEntityLocationId = LG.intCustomerEntityLocationId) as strShipTo,
+(select strLocationName from [tblEMEntityLocation] EML where EML.intEntityLocationId = LG.intCustomerEntityLocationId) as strShipTo,
 LG.intItemId as intOutboundItemId,
 LG.dblQuantity as dblOutboundQuantity,
 LG.dblSCashPrice as dblOutboundPrice,
@@ -138,7 +138,7 @@ LG.strTruckNo as strTractor,
 LG.strTrailerNo1 as strTrailer,
 LG.strHauler as strShipVia,
 (select top 1 EM.strName from tblTRCompanyPreference CP 
-                               join tblEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
+                               join tblEMEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
 LG.strDriver as strSalespersonId,
 LG.intSContractDetailId as intOutboundContractDetailId,
 ysnDirectShip = CASE
@@ -167,8 +167,8 @@ intOutboundIndexRackPriceSupplyPointId  = CASE
 								  END,
 NULL as intInboundTaxGroupId ,
 NULL as strInboundTaxGroup,
-(select top 1 EM.intTaxGroupId from tblEntityLocation EM where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as intOutboundTaxGroupId,
-(select top 1 strTaxGroup from tblEntityLocation EM
+(select top 1 EM.intTaxGroupId from [tblEMEntityLocation] EM where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as intOutboundTaxGroupId,
+(select top 1 strTaxGroup from [tblEMEntityLocation] EM
                                LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
                                where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as strOutboundTaxGroup
 

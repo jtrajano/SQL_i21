@@ -108,16 +108,16 @@ AS
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
-	INNER JOIN tblEntity C
+	INNER JOIN tblEMEntity C
 		ON B.intCustomerNumber = C.intEntityId
 	INNER JOIN tblARCustomer D
 		ON C.intEntityId = D.intEntityCustomerId
-	INNER JOIN tblEntityToContact F
+	INNER JOIN [tblEMEntityToContact] F
 		ON D.intEntityCustomerId = F.intEntityId 
 			AND F.ysnDefaultContact = 1
-	INNER JOIN tblEntity G 
+	INNER JOIN tblEMEntity G 
 		ON F.intEntityContactId = G.intEntityId
-	INNER JOIN tblEntityLocation H 
+	INNER JOIN [tblEMEntityLocation] H 
 		ON C.intEntityId = H.intEntityId 
 			AND H.ysnDefaultLocation = 1
 	LEFT JOIN tblARSalesperson I
@@ -129,7 +129,7 @@ AS
 	LEFT JOIN tblARAccountStatus K
 		ON D.intAccountStatusId = K.intAccountStatusId
 	----Start Getting Site Driver	
-	LEFT JOIN tblEntity L
+	LEFT JOIN tblEMEntity L
 		ON A.intDriverID = L.intEntityId	
 	----End Getting Driver
 	LEFT JOIN tblTMRoute N

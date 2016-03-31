@@ -1,8 +1,8 @@
-﻿IF EXISTS(SELECT TOP 1 1 FROM tblEntityLocation WHERE intTermsId IS NULL)
+﻿IF EXISTS(SELECT TOP 1 1 FROM [tblEMEntityLocation] WHERE intTermsId IS NULL)
 BEGIN
 	PRINT '*** Fixing null tblEntityLocation intTermsId ***'
 	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMTerm' and [COLUMN_NAME] = 'strTerm')
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Fix null tblEntityLocation intTermsId')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Fix null tblEntityLocation intTermsId')
 
 	BEGIN
 		PRINT '*** Check Due on Receipt Terms ***'
@@ -28,10 +28,10 @@ BEGIN
 	
 		PRINT '*** Update Due on Receipt Terms ***'	
 
-		UPDATE tblEntityLocation SET intTermsId = @TermsId WHERE intTermsId IS NULL
+		UPDATE [tblEMEntityLocation] SET intTermsId = @TermsId WHERE intTermsId IS NULL
 
 
-		INSERT INTO tblEntityPreferences ( strPreference, strValue)
+		INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 		VALUES('Fix null tblEntityLocation intTermsId' , '1' )
 
 	END

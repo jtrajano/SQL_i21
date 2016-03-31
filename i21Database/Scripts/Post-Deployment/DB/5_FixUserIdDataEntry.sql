@@ -7,7 +7,7 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblDBPanelFormat' and [COLUMN_NAME] = 'intUserId')	
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblDBPanelTab' and [COLUMN_NAME] = 'intUserId')	
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblDBPanelUser' and [COLUMN_NAME] = 'intUserId')	
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Update DB UserId From Parent Entity')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Update DB UserId From Parent Entity')
 
 BEGIN
 	PRINT '*** EXECUTING  Update DB UserId From Parent Entity***'
@@ -128,7 +128,7 @@ BEGIN
 		END		
 		
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Update DB UserId From Parent Entity', 1)
 
 END

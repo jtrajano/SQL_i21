@@ -168,7 +168,7 @@ AS
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
-	JOIN	tblEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
+	JOIN	[tblEMEntityFarm]					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
 	JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId	=	CD.intStorageScheduleRuleId	LEFT
 	JOIN(
 			SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 

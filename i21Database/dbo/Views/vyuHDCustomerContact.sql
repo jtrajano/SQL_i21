@@ -19,13 +19,13 @@
 		,ysnActiveContact = ec.ysnActive
 		,ec.imgPhoto
 		,ysnBillable = c.ysnHDBillableSupport
-		,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = c.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
+		,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = c.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
 	  from
 	  	tblARCustomer c
-		inner join tblEntityToContact etc on etc.intEntityId = c.intEntityCustomerId
-		inner join tblEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
-		inner join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
-		left outer join tblEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
+		inner join [tblEMEntityToContact] etc on etc.intEntityId = c.intEntityCustomerId
+		inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
+		inner join tblEMEntity e on e.intEntityId = c.[intEntityCustomerId]
+		left outer join [tblEMEntityLocation] el on el.intEntityLocationId = etc.intEntityLocationId
 		/*
 		--tblEntityContact ec
 		tblARCustomerToContact etc 		

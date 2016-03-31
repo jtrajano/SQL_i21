@@ -33,7 +33,7 @@ INNER JOIN
 	tblARInvoice I
 		ON D.intInvoiceId = I.intInvoiceId
 LEFT OUTER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON I.intEntityCustomerId = E.intEntityId 
 LEFT OUTER JOIN
 	tblICItem IC

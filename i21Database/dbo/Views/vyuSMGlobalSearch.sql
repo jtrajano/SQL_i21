@@ -14,7 +14,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityVendor' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Vendor'
 	union	
 	select 
@@ -27,7 +27,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityCustomer' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Customer'
 	union
 	select 
@@ -40,7 +40,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntitySalesperson' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Salesperson'
 	union
 	select 
@@ -53,7 +53,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityFuturesBroker' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'FuturesBroker'
 	union
 	select 
@@ -66,7 +66,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityForwardingAgent' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'ForwardingAgent'
 	union
 	select 
@@ -79,7 +79,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityTerminal' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Terminal'
 	union
 	select 
@@ -92,7 +92,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityShippingLine' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'ShippingLine'
 	union
 	select 
@@ -105,7 +105,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityTrucker' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Trucker'
 	union
 	select 
@@ -118,7 +118,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityShipVia' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'ShipVia'
 	union
 	select 
@@ -131,7 +131,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityInsurer' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Insurer'
 	union
 	select 
@@ -144,7 +144,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityEmployee' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Employee'
 	union
 	select 
@@ -157,7 +157,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityProducer' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'Producer'
 	union
 	select 
@@ -170,7 +170,7 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strName],'')) + ', ' + 
 		CONVERT(NVARCHAR(MAX), ISNULL([strEntityNo],'')) as strTag,
 		'searchEntityUser' as strSearchCommand
-	from [dbo].[tblEntity] as entity join [dbo].[tblEntityType] as entityType 
+	from [dbo].tblEMEntity as entity join [dbo].[tblEMEntityType] as entityType 
 	on entity.intEntityId = entityType.intEntityId and entityType.strType = 'User'
 	union
 

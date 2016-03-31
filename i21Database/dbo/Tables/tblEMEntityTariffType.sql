@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityTariffType]
+﻿CREATE TABLE [dbo].[tblEMEntityTariffType]
 (
 	[intEntityTariffTypeId] INT NOT NULL Identity(1,1),
 	[strTariffType]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,		

@@ -48,7 +48,7 @@ FROM
 	, dblAvailableCredit = 0
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
 WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -85,7 +85,7 @@ SELECT dtmDate					= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
@@ -129,7 +129,7 @@ SELECT dtmDate				= I.dtmPostDate
 	 , dblAvailableCredit	= 0 
 FROM tblARInvoice I 
 	 INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
-	 INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
+	 INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId    
 	 INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
 	 LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1) ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted  = 1

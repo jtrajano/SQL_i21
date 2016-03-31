@@ -35,18 +35,18 @@
 		select
 			strCustomer = cus.strCustomerNumber
 			,intCustomerId = cus.[intEntityCustomerId]
-			,strCompanyName = (select top 1 strName from tblEntity where intEntityId = cus.[intEntityCustomerId])
+			,strCompanyName = (select top 1 strName from tblEMEntity where intEntityId = cus.[intEntityCustomerId])
 			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
 			,strTimeZone = ec.strTimezone
-			,strLocation = (select top 1 el.strLocationName from tblEntityLocation el where el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId]))
+			,strLocation = (select top 1 el.strLocationName from [tblEMEntityLocation] el where el.intEntityLocationId = (select top 1 et.intEntityLocationId from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId]))
 			,strSLAPlan = ''
 			,strReplyDue = ''
 			,intUserId = ec.[intEntityId]
 			,intEntityId = ec.[intEntityId]
 			,strName = ec.strEmail
-			,strUserName = case when (select top 1 strUserName from tblEntityCredential where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from tblEntityCredential where intEntityId = ec.[intEntityId]) end
+			,strUserName = case when (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) end
 			,strFirstName = ec.strEmail
 			,strMiddleName = ec.strEmail
 			,strLastName = ec.strEmail
@@ -55,10 +55,10 @@
 			,imgPhoto = ec.imgPhoto
 			,intConcurrencyId = 1
 			,strFullName2 = ec.strName
-			,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = cus.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
+			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cus.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
 		from
-			tblEntity ec
-			inner join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityId] from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			tblEMEntity ec
+			inner join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
 		
 		union all
 
@@ -70,13 +70,13 @@
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
 			,strTimeZone = ec.strTimezone
-			,strLocation = (select top 1 el.strLocationName from tblEntityLocation el where el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId]))
+			,strLocation = (select top 1 el.strLocationName from [tblEMEntityLocation] el where el.intEntityLocationId = (select top 1 et.intEntityLocationId from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId]))
 			,strSLAPlan = ''
 			,strReplyDue = ''
 			,intUserId = ec.[intEntityId]
 			,intEntityId = ec.[intEntityId]
 			,strName = ec.strEmail
-			,strUserName = case when (select top 1 strUserName from tblEntityCredential where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from tblEntityCredential where intEntityId = ec.[intEntityId]) end
+			,strUserName = case when (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) end
 			,strFirstName = ec.strEmail
 			,strMiddleName = ec.strEmail
 			,strLastName = ec.strEmail
@@ -87,5 +87,5 @@
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.intEntitySalespersonId and ysnDefaultContact = 1)
 			,strEntityType = 'Agent'
 		from
-			tblEntity ec
-			inner join tblARSalesperson sp on sp.intEntitySalespersonId = (select top 1 et.[intEntityId] from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			tblEMEntity ec
+			inner join tblARSalesperson sp on sp.intEntitySalespersonId = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])

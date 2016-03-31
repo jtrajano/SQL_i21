@@ -161,7 +161,7 @@ BEGIN TRY
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
 				JOIN		tblSMCity				LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 				JOIN		tblSMCity				DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
-				JOIN		tblEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
+				JOIN		tblEMEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
 				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId
 			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1			
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId

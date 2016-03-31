@@ -1,5 +1,5 @@
 ﻿print 'Fix Vendor Bad Data '
-if not exists(select top 1 1 from tblEntityPreferences where strPreference = 'Fix Vendor Bad Data' and strValue = '1')
+if not exists(select top 1 1 from [tblEMEntityPreferences] where strPreference = 'Fix Vendor Bad Data' and strValue = '1')
 begin
 	print 'Fix Vendor Bad Data Starting '
 	exec('update b set b.ysnDefaultContact = 1

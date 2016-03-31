@@ -90,7 +90,7 @@ AS
 				strSourceScreenName			=	'Contract'
 				
 		FROM	vyuCTContractDetailView		CD	
-		JOIN	tblEntityLocation			EL	ON	EL.intEntityId			=	CD.intEntityId	AND
+		JOIN	[tblEMEntityLocation]			EL	ON	EL.intEntityId			=	CD.intEntityId	AND
 													EL.ysnDefaultLocation	=	1				LEFT
 		JOIN	vyuICGetItemStock			SK	ON	SK.intItemId			=	CD.intItemId	AND		
 													SK.intLocationId		=	CD.intCompanyLocationId
@@ -133,7 +133,7 @@ AS
 				CC.ysnPrice
 	   FROM		vyuCTContractCostView	CC
 	   JOIN		vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
-	   JOIN		tblEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
+	   JOIN		[tblEMEntityLocation]		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
 												EL.ysnDefaultLocation	=	1
 	   WHERE	CC.intContractDetailId	=	@intContractDetailId
 

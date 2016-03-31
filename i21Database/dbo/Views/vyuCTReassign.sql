@@ -20,5 +20,5 @@ AS
 	JOIN	tblCTContractHeader	DH	ON	DH.intContractHeaderId	=	DO.intContractHeaderId
 	JOIN	tblCTContractDetail RE	ON	RE.intContractDetailId	=	RN.intRecipientId
 	JOIN	tblCTContractHeader	RH	ON	RH.intContractHeaderId	=	RE.intContractHeaderId
-	JOIN	tblEntity			EY	ON	EY.intEntityId			=	RN.intEntityId
-	JOIN	tblEntity			UR	ON	UR.intEntityId			=	RN.intCreatedById
+	JOIN	tblEMEntity			EY	ON	EY.intEntityId			=	RN.intEntityId
+	JOIN	tblEMEntity			UR	ON	UR.intEntityId			=	RN.intCreatedById

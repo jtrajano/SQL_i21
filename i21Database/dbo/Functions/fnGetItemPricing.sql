@@ -492,7 +492,7 @@ DECLARE @CustomerSpecialPricing TABLE(
 							FROM
 								tblICItemPricingLevel PL
 							INNER JOIN
-								tblEntityLocation CL
+								[tblEMEntityLocation] CL
 									ON PL.strPriceLevel = CL.strPricingLevel
 							INNER JOIN
 								tblARCustomer C									

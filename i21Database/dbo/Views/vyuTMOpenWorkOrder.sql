@@ -34,13 +34,13 @@ AS
 		ON A.intLocationId = E.intCompanyLocationId
 	INNER JOIN tblTMCustomer F
 		ON A.intCustomerID = F.intCustomerID
-	INNER JOIN tblEntity G
+	INNER JOIN tblEMEntity G
 		ON F.intCustomerNumber = G.intEntityId
 	LEFT JOIN tblTMWorkCloseReason H
 		ON B.intCloseReasonID = H.intCloseReasonID
-	LEFT JOIN tblEntity I
+	LEFT JOIN tblEMEntity I
 		ON B.intPerformerID = I.intEntityId
-	LEFT JOIN tblEntity J
+	LEFT JOIN tblEMEntity J
 		ON B.intEnteredByID = J.intEntityId
 	LEFT JOIN tblSMUserSecurity K
 		ON J.intEntityId = K.intEntityUserSecurityId

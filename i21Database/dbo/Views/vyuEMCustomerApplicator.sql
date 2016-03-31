@@ -14,7 +14,7 @@
 	from tblARCustomerApplicatorLicense A
 		join tblARCustomer B
 			on A.intEntityCustomerId = B.intEntityCustomerId
-		join tblEntity E
+		join tblEMEntity E
 			on A.intEntityCustomerId = E.intEntityId
 
 

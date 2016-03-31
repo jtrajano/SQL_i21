@@ -35,7 +35,7 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  
  JOIN tblICCommodity icc on icc.intCommodityId=ot.intCommodityId  
  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=ot.intLocationId  
- JOIN tblEntity e on e.intEntityId=ot.intEntityId  
+ JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId  

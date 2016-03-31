@@ -1,5 +1,5 @@
 ﻿
-IF NOT EXISTS( SELECT TOP 1 1 FROM tblEntityPortalMenu)
+IF NOT EXISTS( SELECT TOP 1 1 FROM [tblEMEntityPortalMenu])
 BEGIN
 	print 'Creating Menus'
 	EXEC(N'
@@ -117,40 +117,40 @@ END
 
 
 
-IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPTickets')
+IF exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPTickets')
 BEGIN
 	exec('update tblEntityPortalMenu set strCommand = ''HelpDesk.view.TicketList'' where strPortalMenuName = ''Tickets'' and strType = ''Screen'' and strCommand = ''HelpDesk.controller.CPTickets''')
 END
 
-IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Open Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPOpenTicket')
+IF exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Open Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPOpenTicket')
 BEGIN
 	exec('update tblEntityPortalMenu set strCommand = ''HelpDesk.view.TicketList'' where strPortalMenuName = ''Open Tickets'' and strType = ''Screen'' and strCommand = ''HelpDesk.controller.CPOpenTicket''')
 END
 
-IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Tickets Reported by Me' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPTicketsReported')
+IF exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Tickets Reported by Me' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPTicketsReported')
 BEGIN
 	exec('update tblEntityPortalMenu set strCommand = ''HelpDesk.view.TicketList'' where strPortalMenuName = ''Tickets Reported by Me'' and strType = ''Screen'' and strCommand = ''HelpDesk.controller.CPTicketsReported''')
 END
 
 
-IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 29 AND strPortalMenuName <> 'Reminder Lists')
+IF EXISTS( select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 29 AND strPortalMenuName <> 'Reminder Lists')
 BEGIN
 	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 29 ')
 END
-IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 29) 
-	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Reminder Lists' and strType = 'Screen' and strCommand = 'HelpDesk.view.ReminderList' and intEntityPortalMenuId = 29)
+IF NOT EXISTS(select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 29) 
+	AND not exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Reminder Lists' and strType = 'Screen' and strCommand = 'HelpDesk.view.ReminderList' and intEntityPortalMenuId = 29)
 begin
-	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] ON
 	EXEC('
 	
 	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
 	select 29,''Reminder Lists'',intEntityPortalMenuId,''Screen'',''HelpDesk.view.ReminderList'','''' from tblEntityPortalMenu where strPortalMenuName = ''Help Desk'' and intPortalParentMenuId = 0
 	')
-	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] OFF
 end
 
 
-IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.view.TicketList')
+IF exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.view.TicketList')
 BEGIN
 	EXEC( '
 	UPDATE tblEntityPortalMenu 
@@ -161,72 +161,72 @@ BEGIN
 END
 --Last Count for automated is 28
 
-IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 30  AND strPortalMenuName <> 'Customer')
+IF EXISTS( select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 30  AND strPortalMenuName <> 'Customer')
 BEGIN
 	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 30 ')
 END
-IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 30) 
-	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Customer' and intEntityPortalMenuId = 30)
+IF NOT EXISTS(select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 30) 
+	AND not exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Customer' and intEntityPortalMenuId = 30)
 begin
-	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] ON
 	EXEC('
 	
 	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
 	select 30, ''Customer'', 0, ''Folder'', null, ''Customer''
 	')
-	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] OFF
 end
 
-IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 31  AND strPortalMenuName <> 'Invoice')
+IF EXISTS( select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 31  AND strPortalMenuName <> 'Invoice')
 BEGIN
 	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 31 ')
 END
-IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 31) 
-	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Invoice' and intEntityPortalMenuId = 31)
+IF NOT EXISTS(select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 31) 
+	AND not exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Invoice' and intEntityPortalMenuId = 31)
 begin
-	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] ON
 	EXEC('
 	
 	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
 	select 31, ''Invoice'', 30, ''Screen'', ''AccountsReceivable.view.Invoice'', ''Customer''
 	')
-	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] OFF
 end
 
-IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 32  AND strPortalMenuName <> 'Receive Payment Details')
+IF EXISTS( select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 32  AND strPortalMenuName <> 'Receive Payment Details')
 BEGIN
 	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 32 ')
 END
-IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 32) 
-	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Receive Payment Details' and  intEntityPortalMenuId = 32)
+IF NOT EXISTS(select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 32) 
+	AND not exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Receive Payment Details' and  intEntityPortalMenuId = 32)
 begin
-	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] ON
 	EXEC('
 	
 	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
 	select 32, ''Receive Payment Details'', 30, ''Screen'', ''AccountsReceivable.view.ReceivePaymentsDetail'', ''Customer''
 	')
-	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] OFF
 end
 
-IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 33   AND strPortalMenuName <> 'Customer')
+IF EXISTS( select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 33   AND strPortalMenuName <> 'Customer')
 BEGIN
 	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 33 ')
 END
-IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 33) 
-	AND not exists(select 1 from tblEntityPortalMenu where  strPortalMenuName = 'Customer' and intEntityPortalMenuId = 33)
+IF NOT EXISTS(select 1 from [tblEMEntityPortalMenu] where intEntityPortalMenuId = 33) 
+	AND not exists(select 1 from [tblEMEntityPortalMenu] where  strPortalMenuName = 'Customer' and intEntityPortalMenuId = 33)
 begin
-	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] ON
 	EXEC('
 	
 	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
 	select 33, ''Customer'', 30, ''Screen'', ''EntityManagement.view.Entity'', ''Customer''
 	')
-	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+	SET IDENTITY_INSERT [tblEMEntityPortalMenu] OFF
 end
 
 --Vendor
-IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Bill' and strType = 'Screen' and strCommand = 'AccountsPayable.view.Bill')
+IF exists(select 1 from [tblEMEntityPortalMenu] where strPortalMenuName = 'Bill' and strType = 'Screen' and strCommand = 'AccountsPayable.view.Bill')
 BEGIN
 	exec('update tblEntityPortalMenu set strCommand = ''AccountsPayable.view.Voucher'', strPortalMenuName=''Voucher'' where strPortalMenuName = ''Bill'' and strType = ''Screen'' and strCommand = ''AccountsPayable.view.Bill''')
 END

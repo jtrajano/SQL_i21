@@ -29,7 +29,7 @@ INNER JOIN tblPATCancelEquityDetail CED
 		ON CED.intCancelId = CE.intCancelId
  LEFT JOIN tblGLFiscalYear FY
 		ON FY.intFiscalYearId = CED.intFiscalYearId
-INNER JOIN tblEntity ENT
+INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = CED.intCustomerId
  LEFT JOIN tblPATRefundRate RR
 		ON RR.intRefundTypeId = CED.intRefundTypeId

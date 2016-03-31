@@ -9,7 +9,7 @@ BEGIN
 	
 	DECLARE @str nvarchar(max)
 	DECLARE @Result BIT
-	select @str = strEmailDistributionOption from tblEntity where intEntityId = @intEntityId
+	select @str = strEmailDistributionOption from tblEMEntity where intEntityId = @intEntityId
 
 	IF @str is null or @str = '' RETURN 0
 	if Exists (select top 1 1 from dbo.fnSplitStringWithTrim(@str, ',') where Item = @strSearch)

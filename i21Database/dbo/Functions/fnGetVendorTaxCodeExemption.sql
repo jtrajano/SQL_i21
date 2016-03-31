@@ -54,7 +54,7 @@ BEGIN
 		tblSMTaxCode TC
 			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
@@ -83,7 +83,7 @@ BEGIN
 		tblSMTaxCode TC
 			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
@@ -109,7 +109,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblSMTaxClass SMTC
@@ -138,7 +138,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
@@ -166,7 +166,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblICItem  IC
@@ -197,7 +197,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblICItem  IC
@@ -224,7 +224,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblICCategory ICC
@@ -251,7 +251,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId
@@ -382,7 +382,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblICCategory ICC
@@ -460,7 +460,7 @@ BEGIN
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
 	WHERE
 		[intEntityVendorId] = @VendorId

@@ -4,7 +4,7 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityTariffType' and [COLUMN_NAME] = 'intEntityTariffTypeId')
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityTariff' and [COLUMN_NAME] = 'strDescription')
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityTariff' and [COLUMN_NAME] = 'intEntityTariffTypeId')
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Update Tariff Type')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Update Tariff Type')
 
 BEGIN
 	PRINT '*** EXECUTING Updating Tariff Type***'
@@ -18,7 +18,7 @@ BEGIN
 					on a.strDescription = b.strTariffType
 	')
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Update Tariff Type', 1)
 
 END

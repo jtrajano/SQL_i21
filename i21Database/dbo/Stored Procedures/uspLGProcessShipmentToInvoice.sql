@@ -202,16 +202,16 @@ LEFT OUTER JOIN
 				,[intTermsId]
 				,[intShipViaId]
 			FROM 
-				tblEntityLocation
+				[tblEMEntityLocation]
 			WHERE
 				ysnDefaultLocation = 1
 		) EL
 			ON F.[intEntityCustomerId] = EL.[intEntityId]
 	LEFT OUTER JOIN
-		tblEntityLocation SL1
+		[tblEMEntityLocation] SL1
 			ON F.intShipToId = SL1.intEntityLocationId
 	LEFT OUTER JOIN
-		tblEntityLocation BL1
+		[tblEMEntityLocation] BL1
 			ON F.intShipToId = BL1.intEntityLocationId			
 LEFT OUTER JOIN
 	tblARInvoiceDetail G

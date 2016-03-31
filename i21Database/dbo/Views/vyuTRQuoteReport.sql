@@ -35,7 +35,7 @@ JOIN tblSMCompanySetup CompanySetup ON ISNULL(CompanySetup.intCompanySetupID, ''
 LEFT JOIN dbo.tblTRQuoteDetail QD ON QD.intQuoteHeaderId = QH.intQuoteHeaderId
 JOIN dbo.vyuARCustomer AR ON QH.intEntityCustomerId = AR.intEntityCustomerId
 LEFT JOIN dbo.vyuEMSalesperson SP ON SP.intEntitySalespersonId = AR.intSalespersonId
-LEFT JOIN dbo.tblEntityLocation EL ON EL.intEntityLocationId = QD.intShipToLocationId
+LEFT JOIN dbo.[tblEMEntityLocation] EL ON EL.intEntityLocationId = QD.intShipToLocationId
 	AND EL.intEntityId = QH.intEntityCustomerId
 LEFT JOIN dbo.tblICItem IC ON IC.intItemId = QD.intItemId
 LEFT JOIN dbo.vyuTRSupplyPointView TR ON TR.intSupplyPointId = QD.intSupplyPointId

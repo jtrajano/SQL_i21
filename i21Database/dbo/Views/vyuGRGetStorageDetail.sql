@@ -36,6 +36,6 @@ JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId  
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
-JOIN tblEntity E ON E.intEntityId=a.intEntityId
+JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 Where ISNULL(a.strStorageType,'') <> 'ITR'

@@ -82,7 +82,7 @@ BEGIN
 			,[intCurrencyId]			= BA.intCurrencyId
 			,[dblExchangeRate]			= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = BA.intCurrencyId)
 			,[dtmDate]					= @dtmPayDate
-			,[strPayee]					= (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = @intEmployeeId)
+			,[strPayee]					= (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @intEmployeeId)
 			,[intPayeeId]				= PC.[intEntityEmployeeId]
 			,[strAddress]				= BA.strAddress
 			,[strZipCode]				= BA.strZipCode

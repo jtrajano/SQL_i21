@@ -65,6 +65,6 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Receipt.intShipViaId
 	LEFT JOIN tblSMUserSecurity Receiver ON Receiver.intEntityUserSecurityId = Receipt.intReceiverId
 	LEFT JOIN vyuEMEntity Entity ON Entity.intEntityId = Receipt.intEntityId AND Entity.strType = 'User'
-	LEFT JOIN tblEntityLocation ShipFrom ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
+	LEFT JOIN [tblEMEntityLocation] ShipFrom ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
 	--LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId

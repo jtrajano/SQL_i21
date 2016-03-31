@@ -22,7 +22,7 @@ SELECT
 		ON APP.intPaymentId = APPD.intPaymentId
 	INNER JOIN dbo.tblAPBill APB
 		ON APB.intBillId = APPD.intBillId
-	LEFT JOIN dbo.tblEntity E
+	LEFT JOIN dbo.tblEMEntity E
 		ON E.intEntityId = APV.intEntityVendorId
 	WHERE 
 			APB.ysnForApproval != 1														   --Will not show For Approval Bills

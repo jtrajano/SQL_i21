@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityGroup]
+﻿CREATE TABLE [dbo].[tblEMEntityGroup]
 (
 	[intEntityGroupId]          INT				IDENTITY (1, 1) NOT NULL,    
     [strEntityGroupName]		NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,

@@ -55,13 +55,13 @@ INNER JOIN tblTMSite D
 	ON A.intSiteID = D.intSiteID
 INNER JOIN tblTMCustomer E
 	ON D.intCustomerID = E.intCustomerID
-INNER JOIN tblEntity F
+INNER JOIN tblEMEntity F
 	ON E.intCustomerNumber = F.intEntityId		
 LEFT JOIN tblTMLeaseCode G
 	ON C.intLeaseCodeId = G.intLeaseCodeId
 LEFT JOIN tblSMTaxGroup I
 	ON D.intTaxStateID = I.intTaxGroupId
-LEFT JOIN tblEntity J
+LEFT JOIN tblEMEntity J
 	ON C.intBillToCustomerId = J.intEntityId
 LEFT JOIN tblSMCompanyLocation K
 	ON D.intLocationId = K.intCompanyLocationId

@@ -7,7 +7,7 @@
 	[strMessage] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDOutOfOfficeReply] PRIMARY KEY CLUSTERED ([intOutOfOfficeReplyId] ASC),
-    CONSTRAINT [FK_tblHDOutOfOfficeReply_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+    CONSTRAINT [FK_tblHDOutOfOfficeReply_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )
 
 GO

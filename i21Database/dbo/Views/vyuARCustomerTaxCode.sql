@@ -16,7 +16,7 @@ SELECT
 	--,TC.strCalculationMethod
 	--,TC.numRate
 FROM
-	tblEntityLocation L
+	[tblEMEntityLocation] L
 INNER JOIN
 	tblARCustomer C
 		ON L.intEntityId = C.intEntityCustomerId 

@@ -25,8 +25,8 @@ SELECT intInventoryTransferId
 	, UserEntity.strName
 	, Transfer.intSort
 FROM tblICInventoryTransfer Transfer
-	LEFT JOIN tblEntity Entity ON Entity.intEntityId = Transfer.intTransferredById
+	LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = Transfer.intTransferredById
 	LEFT JOIN tblSMCompanyLocation FromLocation ON FromLocation.intCompanyLocationId = Transfer.intFromLocationId
 	LEFT JOIN tblSMCompanyLocation ToLocation ON ToLocation.intCompanyLocationId = Transfer.intToLocationId
 	LEFT JOIN tblICStatus Status ON Status.intStatusId = Transfer.intStatusId
-	LEFT JOIN tblEntity UserEntity ON UserEntity.intEntityId = Transfer.intEntityId
+	LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = Transfer.intEntityId

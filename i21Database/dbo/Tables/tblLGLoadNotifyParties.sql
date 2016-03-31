@@ -14,9 +14,9 @@
 
 CONSTRAINT [PK_tblLGLoadNotifyParties] PRIMARY KEY ([intLoadNotifyPartyId]), 
 CONSTRAINT [FK_tblLGLoadNotifyParties_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
-CONSTRAINT [FK_tblLGLoadNotifyParties_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
+CONSTRAINT [FK_tblLGLoadNotifyParties_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 CONSTRAINT [FK_tblLGLoadNotifyParties_tblSMCompanySetup_intCompanySetupID] FOREIGN KEY ([intCompanySetupID]) REFERENCES [tblSMCompanySetup]([intCompanySetupID]),
 CONSTRAINT [FK_tblLGLoadNotifyParties_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank]([intBankId]),
-CONSTRAINT [FK_tblLGLoadNotifyParties_tblEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
+CONSTRAINT [FK_tblLGLoadNotifyParties_tblEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 CONSTRAINT [FK_tblLGLoadNotifyParties_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )

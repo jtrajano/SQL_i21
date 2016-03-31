@@ -21,7 +21,7 @@ SELECT m.intMatchOptionsPnSId,strTranNo,dtmMatchDate,intMatchQty,e.strName,b.str
 		(select Top 1 intFutOptTransactionHeaderId from tblRKFutOptTransaction fft where fft.intFutOptTransactionId=m.intSFutOptTransactionId) intSFutOptTransactionHeaderId
 FROM tblRKOptionsMatchPnS m
 join tblRKFutOptTransaction t on m.intLFutOptTransactionId= t.intFutOptTransactionId
-Join tblEntity e on e.intEntityId=t.intEntityId
+Join tblEMEntity e on e.intEntityId=t.intEntityId
 Join tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
 Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
 JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId  

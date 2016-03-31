@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntity] (
+﻿CREATE TABLE [dbo].[tblEMEntity] (
     [intEntityId]      INT             IDENTITY (1, 1) NOT NULL,
     [strName]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strEmail]         NVARCHAR (75)   COLLATE Latin1_General_CI_AS  NULL,

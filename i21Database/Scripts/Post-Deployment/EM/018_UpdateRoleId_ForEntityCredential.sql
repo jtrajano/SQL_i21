@@ -13,7 +13,7 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'intEntityContactId')
 
 	
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Adding User Role For Entity Cred')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Adding User Role For Entity Cred')
 
 BEGIN
 	PRINT '*** EXECUTING  Adding User Role For Entity Cred***'
@@ -28,7 +28,7 @@ BEGIN
 					and intEntityRoleId is null
 	')
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Adding User Role For Entity Cred', 1)
 
 END

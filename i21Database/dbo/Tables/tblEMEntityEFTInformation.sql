@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityEFTInformation] (
+﻿CREATE TABLE [dbo].[tblEMEntityEFTInformation] (
     [intEntityEFTInfoId]       INT            IDENTITY (1, 1) NOT NULL,
     [intEntityId]              INT            NOT NULL,
     [intBankId]                INT            NOT NULL,

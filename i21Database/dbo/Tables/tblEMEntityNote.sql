@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityNote] (
+﻿CREATE TABLE [dbo].[tblEMEntityNote] (
     [intEntityNoteId]  INT            IDENTITY (1, 1) NOT NULL,
     [intEntityId]      INT            NOT NULL,
     [dtmDate]          DATETIME       NOT NULL,

@@ -297,8 +297,8 @@ BEGIN TRY
 	WHERE intCompanyLocationId=@intLocationId
 
 	SELECT @intEntityId = E.intEntityId
-	FROM dbo.tblEntity E
-	JOIN dbo.tblEntityType ET ON E.intEntityId = ET.intEntityId
+	FROM dbo.tblEMEntity E
+	JOIN dbo.[tblEMEntityType] ET ON E.intEntityId = ET.intEntityId
 	WHERE ET.strType = 'Customer'
 		AND E.strName = 'Production'
 

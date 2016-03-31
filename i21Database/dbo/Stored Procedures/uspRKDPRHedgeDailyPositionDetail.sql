@@ -139,7 +139,7 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 		INNER JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=f.intFutureMonthId
 		INNER JOIN tblSMCompanyLocation l on f.intLocationId=l.intCompanyLocationId
 		INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
-		INNER JOIN tblEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
+		INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
 		--LEFT JOIN tblRKMatchFuturesPSDetail psd ON f.intFutOptTransactionId = psd.intLFutOptTransactionId
 		WHERE f.strBuySell = 'Buy'
 			AND ic.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
@@ -161,7 +161,7 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 		INNER JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=f.intFutureMonthId
 		INNER JOIN tblSMCompanyLocation l on f.intLocationId=l.intCompanyLocationId
 		INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
-		INNER JOIN tblEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
+		INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
 		--LEFT JOIN tblRKMatchFuturesPSDetail psd ON f.intFutOptTransactionId = psd.intLFutOptTransactionId
 		WHERE f.strBuySell = 'Sell'
 			AND ic.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
@@ -204,7 +204,7 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 	INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
 	INNER JOIN tblICCommodity ic on ft.intCommodityId=ic.intCommodityId
 	INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
-	INNER JOIN tblEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
+	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 	WHERE ft.intCommodityId = @intCommodityId AND intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end AND intFutOptTransactionId NOT IN (
 			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
@@ -377,7 +377,7 @@ INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,s
 	INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
 	INNER JOIN tblICCommodity ic on ft.intCommodityId=ic.intCommodityId
 	INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
-	INNER JOIN tblEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
+	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 	WHERE ft.intCommodityId = @intCommodityId AND intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end AND intFutOptTransactionId NOT IN (
 			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)

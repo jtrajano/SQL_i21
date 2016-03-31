@@ -65,7 +65,7 @@ BEGIN
 	SELECT TOP 1 @billId = intBillId, @vendorId = intEntityVendorId FROM @tmpBillData
 	EXEC uspAPDuplicateBill @billId, @userId, @createdBillId OUT;
 	--GET DEFAULT SHIP FROM PER VENDOR
-	SET @shipFromId = (SELECT intEntityLocationId FROM tblEntityLocation WHERE intEntityId = @vendorId AND ysnDefaultLocation = 1)
+	SET @shipFromId = (SELECT intEntityLocationId FROM [tblEMEntityLocation] WHERE intEntityId = @vendorId AND ysnDefaultLocation = 1)
 	UPDATE A
 		SET intBillBatchId = @billBatchCreatedId
 		,intShipFromId = CASE WHEN intShipFromId IS NULL OR intShipFromId <= 0 THEN @shipFromId ELSE A.intShipFromId END --SET DEFAULT SHIP FROM

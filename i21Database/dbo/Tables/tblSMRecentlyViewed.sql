@@ -8,5 +8,5 @@
     [dtmDateModified] DATETIME NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSMRecentlyViewed] PRIMARY KEY Clustered ([intRecentlyViewedId] ASC), 
-    CONSTRAINT [FK_tblSMRecentlyViewed_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
+    CONSTRAINT [FK_tblSMRecentlyViewed_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
 )

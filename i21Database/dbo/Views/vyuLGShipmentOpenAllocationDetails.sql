@@ -55,8 +55,8 @@ AS
 	JOIN	tblCTContractHeader		CHP	ON	CHP.intContractHeaderId		=	CDP.intContractHeaderId
 	JOIN	tblCTContractDetail 	CDS	ON CDS.intContractDetailId = AD.intSContractDetailId
 	JOIN	tblCTContractHeader		CHS	ON	CHS.intContractHeaderId		=	CDS.intContractHeaderId
-	JOIN	tblEntity				ENP	ON	ENP.intEntityId				=	CHP.intEntityId
-	JOIN	tblEntity				ENS	ON	ENS.intEntityId				=	CHS.intEntityId
+	JOIN	tblEMEntity				ENP	ON	ENP.intEntityId				=	CHP.intEntityId
+	JOIN	tblEMEntity				ENS	ON	ENS.intEntityId				=	CHS.intEntityId
 	JOIN	tblICUnitMeasure		UP	ON	UP.intUnitMeasureId				=	AD.intPUnitMeasureId
 	JOIN	tblICUnitMeasure		US	ON	US.intUnitMeasureId				=	AD.intSUnitMeasureId
 	JOIN	tblICItem				ITP	ON	ITP.intItemId				= CDP.intItemId

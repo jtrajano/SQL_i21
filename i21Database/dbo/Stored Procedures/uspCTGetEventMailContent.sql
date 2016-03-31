@@ -96,7 +96,7 @@ BEGIN
 		JOIN	tblCTEvent			EV	ON	EV.intEventId			=	CE.intEventId
 		JOIN	tblCTContractDetail CD	ON	CD.intContractDetailId	=	CE.intContractDetailId
 		JOIN	tblCTContractHeader CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		JOIN	tblEntity			EY	ON	EY.intEntityId			=	CH.intEntityId
+		JOIN	tblEMEntity			EY	ON	EY.intEntityId			=	CH.intEntityId
 
 		WHERE	EV.strAlertType = 'Reminder' AND dtmActualEventDate IS NULL AND   
 				DATEADD(d,

@@ -20,12 +20,12 @@
 	A.intSort
 	from 
 		tblSMShipVia A
-			JOIN tblEntity B
+			JOIN tblEMEntity B
 				on A.intEntityShipViaId = B.intEntityId
-			JOIN tblEntityToContact C
+			JOIN [tblEMEntityToContact] C
 				on C.intEntityId = B.intEntityId and C.ysnDefaultContact = 1
-			JOIN tblEntity D
+			JOIN tblEMEntity D
 				ON C.intEntityContactId = D.intEntityId
-			JOIN tblEntityLocation E	
+			JOIN [tblEMEntityLocation] E	
 				ON E.intEntityId = A.intEntityShipViaId
 					AND E.ysnDefaultLocation = 1

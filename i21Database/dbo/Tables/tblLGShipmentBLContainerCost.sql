@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[tblLGShipmentBLContainerCost]
 	CONSTRAINT [PK_tblLGShipmentBLContainerCost] PRIMARY KEY ([intShipmentBLContainerCostId]), 
 	CONSTRAINT [FK_tblLGShipmentBLContainerCost_tblLGShipmentBLContainer_intShipmentBLContainerId] FOREIGN KEY ([intShipmentBLContainerId]) REFERENCES [tblLGShipmentBLContainer]([intShipmentBLContainerId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblLGShipmentBLContainerCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblLGShipmentBLContainerCost_tblEntity_intVendorEntityId] FOREIGN KEY ([intVendorEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblLGShipmentBLContainerCost_tblEntity_intVendorEntityId] FOREIGN KEY ([intVendorEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblLGShipmentBLContainerCost_tblICItemUOM_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblLGShipmentBLContainerCost_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )

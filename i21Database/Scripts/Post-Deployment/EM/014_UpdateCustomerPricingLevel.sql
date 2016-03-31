@@ -4,7 +4,7 @@ IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomer' and [COLUMN_NAME] = 'strLevel')
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCompanyLocationPricingLevel' and [COLUMN_NAME] = 'intCompanyLocationPricingLevelId')
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCompanyLocationPricingLevel' and [COLUMN_NAME] = 'strPricingLevelName')
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Update ARCustomer Level')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Update ARCustomer Level')
 
 BEGIN
 	PRINT '*** EXECUTING Updating Customer Pricing Level***'
@@ -16,7 +16,7 @@ BEGIN
 		where a.intCompanyLocationPricingLevelId is null
 	')
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Update ARCustomer Level', 1)
 
 END

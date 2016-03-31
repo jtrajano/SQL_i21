@@ -27,7 +27,7 @@ BEGIN
 			 FROM tblPATStockClassification SC
 	   INNER JOIN tblPATCustomerStock CS
 			   ON CS.intStockId = SC.intStockId
-	   INNER JOIN tblEntity ENT
+	   INNER JOIN tblEMEntity ENT
 			   ON ENT.intEntityId = CS.intCustomerPatronId
 	   INNER JOIN tblARCustomer ARC
 			   ON ARC.intEntityCustomerId = ENT.intEntityId
@@ -45,7 +45,7 @@ BEGIN
 							 FROM tblPATStockClassification SC
 					   INNER JOIN tblPATCustomerStock B
 							   ON B.intStockId = SC.intStockId
-					   INNER JOIN tblEntity ENT
+					   INNER JOIN tblEMEntity ENT
 							   ON ENT.intEntityId = B.intCustomerPatronId
 					   INNER JOIN tblARCustomer ARC
 							   ON ARC.intEntityCustomerId = ENT.intEntityId

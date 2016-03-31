@@ -23,7 +23,7 @@ INNER JOIN
 			,strLocationName	= LOC.strLocationName
 		FROM
 			tblARInvoice INV
-			LEFT OUTER JOIN tblEntity E ON INV.intEntityId = E.intEntityId								
+			LEFT OUTER JOIN tblEMEntity E ON INV.intEntityId = E.intEntityId								
 			LEFT OUTER JOIN 	dbo.tblSMCompanyLocation AS LOC ON INV.intCompanyLocationId  = LOC.intCompanyLocationId 
 		WHERE
 			INV.ysnPosted = 1
@@ -40,7 +40,7 @@ INNER JOIN
 			,strLocationName	= LOC.strLocationName
 		FROM
 			tblARPayment AR
-			LEFT OUTER JOIN tblEntity E ON AR.intEntityId = E.intEntityId			
+			LEFT OUTER JOIN tblEMEntity E ON AR.intEntityId = E.intEntityId			
 			LEFT OUTER JOIN 	dbo.tblSMCompanyLocation AS LOC ON AR.intLocationId  = LOC.intCompanyLocationId 
 		WHERE
 			AR.ysnPosted = 1

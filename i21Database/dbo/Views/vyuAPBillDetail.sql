@@ -34,7 +34,7 @@ SELECT
 	IR.strReceiptNumber,
 	ISNULL(IR.intInventoryReceiptId,0) AS intInventoryReceiptId
 FROM dbo.tblAPBill A
-INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEntity G2 ON G.intEntityVendorId = G2.intEntityId) ON G.intEntityVendorId = A.intEntityVendorId
+INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.intEntityVendorId = G2.intEntityId) ON G.intEntityVendorId = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B ON A.intBillId = B.intBillId
 LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON B.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRE.intInventoryReceiptId

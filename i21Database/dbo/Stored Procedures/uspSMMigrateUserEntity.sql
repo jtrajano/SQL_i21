@@ -11,7 +11,7 @@ SET ANSI_WARNINGS ON
 BEGIN
 
 	/* Fix user security data that shares one entity */
-	UPDATE tblSMUserSecurity SET [intEntityUserSecurityId] = NULL WHERE strUserName NOT IN (SELECT strUserName FROM tblEntityCredential)
+	UPDATE tblSMUserSecurity SET [intEntityUserSecurityId] = NULL WHERE strUserName NOT IN (SELECT strUserName FROM [tblEMEntityCredential])
 
 	DECLARE @UserName NVARCHAR(100)
 	DECLARE @FullName NVARCHAR(100)
@@ -39,7 +39,7 @@ BEGIN
 		
 		--IF NOT EXISTS(SELECT * FROM tblEntity WHERE strName = @FullName AND strEmail = @Email)
 		--BEGIN
-			INSERT INTO tblEntity(strName, strEmail, strContactNumber)
+			INSERT INTO tblEMEntity(strName, strEmail, strContactNumber)
 			VALUES (@FullName, @Email, @ContactNumber)
 			SELECT @NewId = SCOPE_IDENTITY()
 		--END
@@ -53,9 +53,9 @@ BEGIN
 		WHERE strUserName = @UserName
 		AND ISNULL([intEntityUserSecurityId], 0) = 0
 		
-		IF NOT EXISTS(SELECT * FROM tblEntityCredential WHERE intEntityId = @NewId)
+		IF NOT EXISTS(SELECT * FROM [tblEMEntityCredential] WHERE intEntityId = @NewId)
 		BEGIN
-			INSERT INTO tblEntityCredential(intEntityId, strUserName, strPassword)
+			INSERT INTO [tblEMEntityCredential](intEntityId, strUserName, strPassword)
 			VALUES (@NewId, @UserName, @Password)
 		END
 		

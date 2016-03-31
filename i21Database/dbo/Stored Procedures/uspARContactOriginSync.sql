@@ -24,10 +24,10 @@
 				sscon_fax_ext = (CASE WHEN CHARINDEX('x', Contact.strFax) > 0 THEN SUBSTRING(SUBSTRING(Contact.strFax,1,4),CHARINDEX('x',Contact.strFax) + 1, LEN(Contact.strFax))END),
 
 				sscon_email = E.strEmail
-			FROM tblEntity Contact
-				INNER JOIN tblEntityToContact EntToCon
+			FROM tblEMEntity Contact
+				INNER JOIN [tblEMEntityToContact] EntToCon
 					on EntToCon.intEntityContactId = Contact.intEntityId
-				INNER JOIN tblEntity E ON E.intEntityId = EntToCon.intEntityId
+				INNER JOIN tblEMEntity E ON E.intEntityId = EntToCon.intEntityId
 				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND UPPER(sscon_contact_id) = SUBSTRING(UPPER(@ContactNumber),1,20)
 
 		END
@@ -70,10 +70,10 @@
 				'',
 				'',
 				''
-			FROM tblEntity Contact
-				INNER JOIN tblEntityToContact EntToCon
+			FROM tblEMEntity Contact
+				INNER JOIN [tblEMEntityToContact] EntToCon
 					on EntToCon.intEntityContactId = Contact.intEntityId
-				INNER JOIN tblEntity E ON E.intEntityId = EntToCon.intEntityId
+				INNER JOIN tblEMEntity E ON E.intEntityId = EntToCon.intEntityId
 				INNER JOIN tblARCustomer C on C.intEntityCustomerId = EntToCon.intEntityId
 				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND C.strCustomerNumber <> ''
 			--FROM tblEntityContact Contact

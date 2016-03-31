@@ -60,7 +60,7 @@ SELECT DISTINCT RR.intRefundTypeId,
 			 ON AC.intEntityCustomerId = CV.intCustomerPatronId
 	  LEFT JOIN tblSMTaxCode TC
 			 ON TC.intTaxCodeId = AC.intTaxCodeId
-	 INNER JOIN tblEntity ENT
+	 INNER JOIN tblEMEntity ENT
 			 ON ENT.intEntityId = CV.intCustomerPatronId
 	 INNER JOIN tblPATPatronageCategory PC
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
@@ -79,7 +79,7 @@ SELECT DISTINCT RR.intRefundTypeId,
 					ON AC.intEntityCustomerId = CV.intCustomerPatronId
 			LEFT JOIN tblSMTaxCode TC
 					ON TC.intTaxCodeId = AC.intTaxCodeId
-			INNER JOIN tblEntity ENT
+			INNER JOIN tblEMEntity ENT
 					ON ENT.intEntityId = CV.intCustomerPatronId
 			INNER JOIN tblPATPatronageCategory PC
 					ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
