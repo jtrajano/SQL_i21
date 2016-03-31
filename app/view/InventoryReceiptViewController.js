@@ -235,7 +235,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboCurrency: {
                 value: '{current.intCurrencyId}',
                 store: '{currency}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{current.ysnPosted}',
+                defaultFilters: [
+                    {
+                        column: 'ysnSubCurrency',
+                        value: false
+                    }
+                ]
             },
             txtReceiptNumber: {
                 value: '{current.strReceiptNumber}'
@@ -339,7 +345,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             lblWeightLossMsg: {
-                hidden: false,
                 text: '{getWeightLossText}'
             },
             grdInventoryReceipt: {
@@ -485,10 +490,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'intLoadReceive'
                 },
                 colItemSubCurrency: {
-                    dataIndex: 'ysnSubCurrency',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    dataIndex: 'strSubCurrency'
                 },
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
@@ -524,7 +526,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colUnitCost: {
-                    dataIndex: 'dblUnitCost',
                     dataIndex: 'dblUnitCost',
                     editor: {
                         readOnly: '{readOnlyUnitCost}'
@@ -1263,9 +1264,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            var cents = records[0].get('intCent');
-            cents = cents && Ext.isNumeric(cents) && cents != 0 ? cents : 1;
-            current.set('intSubCurrencyCents', cents);
+            var subCurrencyCents = records[0].get('intSubCurrencyCent');
+            subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
+            current.set('intSubCurrencyCents', subCurrencyCents);
         }
     },
 
@@ -1282,9 +1283,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intVendorEntityId', records[0].get('intEntityVendorId'));
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
 
-            var cents =  records[0].get('intCent');
-            cents = cents && Ext.isNumeric(cents) && cents != 0 ? cents : 1;
-            current.set('intSubCurrencyCents', cents);
+            var subCurrencyCents =  records[0].get('intSubCurrencyCent');
+            subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
+            current.set('intSubCurrencyCents', subCurrencyCents);
 
             current.set('intShipFromId', null);
             current.set('intShipViaId', null);
@@ -1629,9 +1630,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var totalItemTax = 0.00,
             qtyOrdered = currentReceiptItem.get('dblOpenReceive'),
-            itemPrice = currentReceiptItem.get('dblUnitCost');
+            unitCost = currentReceiptItem.get('dblUnitCost');
 
         if (reset !== false) reset = true;
+
+        // Adjust the item price by the sub currency
+        {
+            var isSubCurrency = currentReceiptItem.get('ysnSubCurrency');
+            var costCentsFactor = currentReceipt.get('intSubCurrencyCents');
+
+            // sanitize the value for the sub currency.
+            costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
+
+            // check if there is a need to compute for the sub currency.
+            if (!isSubCurrency) {
+                costCentsFactor = 1;
+            }
+
+            unitCost = unitCost / costCentsFactor;
+        }
 
         currentReceiptItem.tblICInventoryReceiptItemTaxes().removeAll();
 
@@ -1639,7 +1656,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var taxableAmount,
                 taxAmount;
 
-            taxableAmount = me.getTaxableAmount(qtyOrdered, itemPrice, itemDetailTax, itemTaxes);
+            taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
             if (itemDetailTax.strCalculationMethod === 'Percentage') {
                 taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
             } else {
@@ -1679,22 +1696,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
             currentReceiptItem.tblICInventoryReceiptItemTaxes().add(newItemTax);
         });
-
-        // Adjust the tax by the sub currency
-        {
-            var isSubCurrency = currentReceiptItem.get('ysnSubCurrency');
-            var costCentsFactor = currentReceipt.get('intSubCurrencyCents');
-
-            // sanitize the value for the sub currency.
-            costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
-
-            // check if there is a need to compute for the sub currency.
-            if (!isSubCurrency) {
-                costCentsFactor = 1;
-            }
-
-            totalItemTax = totalItemTax / costCentsFactor;
-        }
 
         currentReceiptItem.set('dblTax', totalItemTax);
         currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
@@ -1784,8 +1785,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         lblSubTotal.setText('SubTotal: ' + Ext.util.Format.number(totalAmount, '0,000.00'));
         lblTax.setText('Tax: ' + Ext.util.Format.number(totalTax, '0,000.00'));
-        lblGrossWgt.setText('Gross Wgt: ' + Ext.util.Format.number(totalGross, '0,000.00'));
-        lblNetWgt.setText('Net Wgt: ' + Ext.util.Format.number(totalNet, '0,000.00'));
+        lblGrossWgt.setText('Gross: ' + Ext.util.Format.number(totalGross, '0,000.00'));
+        lblNetWgt.setText('Net: ' + Ext.util.Format.number(totalNet, '0,000.00'));
         lblTotal.setText('Total: ' + Ext.util.Format.number(grandTotal, '0,000.00'));
     },
 
@@ -3827,6 +3828,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var VendorId = null;
         var ReceiptType = currentRecord.get('strReceiptType');
         var SourceType = currentRecord.get('intSourceType').toString();
+        var CurrencyId = currentRecord.get('intCurrencyId').toString();
         var ContractStore = win.viewModel.storeInfo.purchaseContractList;
         if (ReceiptType === 'Transfer Order') {
             VendorId = currentRecord.get('intTransferorId').toString();
@@ -3838,7 +3840,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
-            search.url = '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType;
+            search.url = '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType + '&CurrencyId=' + CurrencyId;
             search.columns = [
                 {dataIndex: 'intKey', text: "Key", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
@@ -3890,6 +3892,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intCostUOMId', text: 'Cost UOM Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'ysnSubCurrency', text: 'Sub Currency', width: 100, dataType: 'boolean', hidden: true},
+                {dataIndex: 'strSubCurrency', text: 'Sub Currency', width: 100, dataType: 'string', hidden: true},
+
                 { xtype: 'numbercolumn', dataIndex: 'dblFranchise', text: 'Franchise', width: 100, dataType: 'float', hidden: true},
                 { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true}
 
@@ -3953,7 +3958,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             strOwnershipType: 'Own',
                             dblFranchise: order.get('dblFranchise'),
                             dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
-                            ysnSubCurrency: order.get('ysnSubCurrency')
+                            ysnSubCurrency: order.get('ysnSubCurrency'),
+                            strSubCurrency: order.get('strSubCurrency')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
                         currentVM.tblICInventoryReceiptItems().add(newRecord);
@@ -4410,9 +4416,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnCalculateCharges": {
                 click: this.onCalculateChargeClick
-            },
-            "#colItemSubCurrency": {
-                beforecheckchange: this.onPostedTransactionBeforeCheckChange
             },
             "#colChargeSubCurrency": {
                 beforecheckchange: this.onPostedTransactionBeforeCheckChange

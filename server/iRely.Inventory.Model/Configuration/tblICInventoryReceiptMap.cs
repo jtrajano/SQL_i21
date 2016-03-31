@@ -235,6 +235,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblFranchise).HasColumnName("dblFranchise").HasPrecision(19, 6);
             this.Property(t => t.dblContainerWeightPerQty).HasColumnName("dblContainerWeightPerQty").HasPrecision(19, 6);
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
+            this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
         }
     }
 
@@ -557,6 +558,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblFranchise).HasColumnName("dblFranchise").HasPrecision(19, 6);
             this.Property(t => t.dblContainerWeightPerQty).HasColumnName("dblContainerWeightPerQty").HasPrecision(19, 6);
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
+            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
         }
     }
 

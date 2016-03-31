@@ -279,10 +279,10 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType)
+        public async Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType, int CurrencyId)
         {
             var query = _db.GetQuery<vyuICGetReceiptAddOrder>()
-                .Where(p => p.intEntityVendorId == VendorId && p.strReceiptType == ReceiptType && p.intSourceType == SourceType)
+                .Where(p => p.intEntityVendorId == VendorId && p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
 

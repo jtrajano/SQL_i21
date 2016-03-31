@@ -2403,7 +2403,7 @@
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Check",
+                                                                    "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
                                                                         "type": "array"
@@ -2413,23 +2413,8 @@
                                                                         "itemId": "colItemSubCurrency",
                                                                         "text": "Sub Currency"
                                                                     },
-                                                                    "name": "MyCheck4",
-                                                                    "designerId": "bf3d5c3c-68e4-4b9e-80d9-b6964192fab9",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.field.Checkbox",
-                                                                            "reference": {
-                                                                                "name": "editor",
-                                                                                "type": "object"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "itemId": "chkItemSubCurrency"
-                                                                            },
-                                                                            "name": "MyCheckbox2",
-                                                                            "designerId": "cb50695c-eb30-40d8-b046-6e606f199de3"
-                                                                        }
-                                                                    ]
+                                                                    "name": "MyColumn48",
+                                                                    "designerId": "bf3d5c3c-68e4-4b9e-80d9-b6964192fab9"
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Number",
@@ -3261,7 +3246,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "itemId": "lblGrossWgt",
-                                                                                "text": "Gross Wgt",
+                                                                                "text": "Gross",
                                                                                 "width": 150
                                                                             },
                                                                             "name": "MyLabel5",
@@ -3279,7 +3264,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "itemId": "lblNetWgt",
-                                                                                "text": "Net Wgt",
+                                                                                "text": "Net",
                                                                                 "width": 150
                                                                             },
                                                                             "name": "MyLabel6",

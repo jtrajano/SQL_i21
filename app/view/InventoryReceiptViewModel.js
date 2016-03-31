@@ -31,14 +31,13 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
         'Logistics.store.BufferedShipmentReceiptContracts'
-        //'AccountsPayable.common.extensions.GridExtension'
+        //'AccountsPayable.common.extensions.GridExtension' -- Removed as per Erick and Lex.
     ],
 
     data: {
         forceSelection: false,
         weightLoss: 0
     },
-
 
     stores: {
         receiptTypes: {
@@ -708,11 +707,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         getWeightLossText: function (get) {
-            if (get('weightLoss') !== 0) {
-                return 'Weight Gain/Loss: ' + Ext.util.Format.number(get('weightLoss'), '0,000.00');
+            var weight = get('weightLoss');
+            if (Ext.isNumeric(weight) && weight !== 0) {
+                return 'Wgt or Vol Gain/Loss: ' + Ext.util.Format.number(weight, '0,000.00');
             }
             else {
-                return 'Weight Gain/Loss: 0.00';
+                return 'Wgt or Vol Gain/Loss: 0.00';
             }
         }
     }
