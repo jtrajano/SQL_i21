@@ -33,6 +33,8 @@ SELECT
 	,ISNULL(A.strMeterStatus,'') MeterStatus
 	,ISNULL(A.dblMeterReading,0) MeterReading
 FROM tblTMDevice A
+LEFT JOIN tblTMLeaseDevice AA
+	ON A.intDeviceId = AA.intDeviceId
 LEFT JOIN tblTMSiteDevice B
 	ON A.intDeviceId = B.intDeviceId
 LEFT JOIN tblTMSite C
@@ -52,7 +54,7 @@ LEFT JOIN tblTMDeviceType F
 LEFT JOIN tblTMDevice G
 	ON A.intLinkedToTankID = G.intDeviceId
 LEFT JOIN tblTMLease H
-	ON H.intLeaseId =A.intLeaseId
+	ON H.intLeaseId =AA.intLeaseId
 LEFT JOIN tblTMTankType I
 	ON I.intTankTypeId = A.intTankTypeId
 LEFT JOIN tblTMRegulatorType J
