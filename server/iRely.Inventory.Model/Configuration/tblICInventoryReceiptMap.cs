@@ -49,7 +49,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
 
-            this.HasOptional(p => p.vyuICGetInventoryReceipt)
+            this.HasOptional(p => p.vyuICInventoryReceiptLookUp)
                 .WithRequired(p => p.tblICInventoryReceipt);
             this.HasMany(p => p.tblICInventoryReceiptItems)
                 .WithRequired(p => p.tblICInventoryReceipt)
@@ -122,6 +122,23 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICInventoryReceiptLookUpMap : EntityTypeConfiguration<vyuICInventoryReceiptLookUp>
+    {
+        public vyuICInventoryReceiptLookUpMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryReceiptId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICInventoryReceiptLookUp");
+            this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
+            this.Property(t => t.strVendorName).HasColumnName("strVendorName");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strFobPoint).HasColumnName("strFobPoint");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+        }
+    }
+
     public class tblICInventoryReceiptItemMap : EntityTypeConfiguration<tblICInventoryReceiptItem>
     {
         public tblICInventoryReceiptItemMap()
@@ -157,7 +174,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
 
-            this.HasOptional(p => p.vyuICGetInventoryReceiptItem)
+            this.HasOptional(p => p.vyuICInventoryReceiptItemLookUp)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
             this.HasMany(p => p.tblICInventoryReceiptItemLots)
                 .WithRequired(p => p.tblICInventoryReceiptItem)
@@ -238,6 +255,53 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
         }
     }
+
+    public class vyuICInventoryReceiptItemLookUpMap : EntityTypeConfiguration<vyuICInventoryReceiptItemLookUp>
+    {
+        public vyuICInventoryReceiptItemLookUpMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intInventoryReceiptItemId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICInventoryReceiptItemLookUp");
+            this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
+            this.Property(t => t.intInventoryReceiptItemId).HasColumnName("intInventoryReceiptItemId");
+            this.Property(t => t.strOrderNumber).HasColumnName("strOrderNumber");
+            this.Property(t => t.dtmDate).HasColumnName("dtmDate");
+            this.Property(t => t.dblOrdered).HasColumnName("dblOrdered").HasPrecision(38, 20);
+            this.Property(t => t.dblReceived).HasColumnName("dblReceived").HasPrecision(19, 6);
+            this.Property(t => t.strSourceNumber).HasColumnName("strSourceNumber");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strContainer).HasColumnName("strContainer");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.strOrderUOM).HasColumnName("strOrderUOM");
+            this.Property(t => t.dblOrderUOMConvFactor).HasColumnName("dblOrderUOMConvFactor").HasPrecision(38, 20);
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.dblItemUOMConvFactor).HasColumnName("dblItemUOMConvFactor").HasPrecision(38, 20);
+            this.Property(t => t.dblWeightUOMConvFactor).HasColumnName("dblWeightUOMConvFactor").HasPrecision(38, 20);
+            this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
+            this.Property(t => t.dblCostUOMConvFactor).HasColumnName("dblCostUOMConvFactor").HasPrecision(38, 20);
+            this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin").HasPrecision(38, 6);
+            this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
+            this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
+            this.Property(t => t.ysnLoad).HasColumnName("ysnLoad");
+            this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(19, 6);
+            this.Property(t => t.strDiscountSchedule).HasColumnName("strDiscountSchedule");
+            this.Property(t => t.dblFranchise).HasColumnName("dblFranchise").HasPrecision(19, 6);
+            this.Property(t => t.dblContainerWeightPerQty).HasColumnName("dblContainerWeightPerQty").HasPrecision(19, 6);
+            this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
+        }
+    }
+
+
 
     public class tblICInventoryReceiptChargeMap : EntityTypeConfiguration<tblICInventoryReceiptCharge>
     {
