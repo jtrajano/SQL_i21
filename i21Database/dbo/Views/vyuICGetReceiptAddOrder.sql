@@ -140,7 +140,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 				ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 
 			LEFT JOIN dbo.tblICItemUOM CostUOM
-				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(intCommodityId, intPriceItemUOMId)
+				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, intPriceItemUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 
