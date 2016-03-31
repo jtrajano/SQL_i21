@@ -3560,6 +3560,10 @@
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateScheduleQuantityUsingUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantityUsingUOM.sql" />
+    <Build Include="dbo\Views\vyuTRTransportReceipt_New.sql" />
+    <Build Include="dbo\Views\vyuTRTransportReceipt_Old.sql" />
+    <Build Include="dbo\Views\vyuICInventoryReceiptLookUp.sql" />
+    <Build Include="dbo\Views\vyuICInventoryReceiptItemLookUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

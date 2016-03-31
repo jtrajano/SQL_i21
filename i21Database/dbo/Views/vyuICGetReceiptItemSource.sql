@@ -46,7 +46,7 @@ SELECT
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 				THEN CAST(ISNULL(LogisticsView.intTrackingNumber, '')AS NVARCHAR(50))
 			WHEN Receipt.intSourceType = 3 -- Transport
-				THEN TransportView.strTransaction
+				THEN ISNULL(TransportView_New.strTransaction, TransportView_Old.strTransaction) 
 			ELSE NULL
 			END
 		),
@@ -113,7 +113,7 @@ SELECT
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblQuantity, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN ISNULL(TransportView.dblOrderedQuantity, 0)
+						THEN ISNULL(ISNULL(TransportView_New.dblOrderedQuantity, TransportView_Old.dblOrderedQuantity), 0) 
 					ELSE NULL
 					END
 				)
@@ -140,7 +140,7 @@ SELECT
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblReceivedQty, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN ISNULL(TransportView.dblReceivedQuantity, 0)
+						THEN ISNULL(ISNULL(TransportView_New.dblReceivedQuantity, TransportView_Old.dblReceivedQuantity), 0) 
 					ELSE NULL
 					END
 				)
@@ -205,9 +205,15 @@ LEFT JOIN vyuLGShipmentContainerReceiptContracts LogisticsView
 		AND intShipmentBLContainerId = ReceiptItem.intContainerId
 		AND strReceiptType = 'Purchase Contract'
 		AND intSourceType = 2
-LEFT JOIN vyuTRTransportReceipt TransportView
-	ON TransportView.intTransportReceiptId = ReceiptItem.intSourceId
+
+LEFT JOIN vyuTRTransportReceipt_New TransportView_New
+	ON TransportView_New.intTransportReceiptId = ReceiptItem.intSourceId
 		AND intSourceType = 3
+
+LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
+	ON TransportView_Old.intTransportReceiptId = ReceiptItem.intSourceId
+	AND intSourceType = 3
+
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Order'
