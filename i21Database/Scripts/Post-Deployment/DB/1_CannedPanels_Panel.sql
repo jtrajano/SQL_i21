@@ -888,12 +888,12 @@ DEALLOCATE db_cursor
 
 print('/*******************  START DELETING OF CUSTOM CANNED PANEL  *******************/')
 DECLARE @intCannedPanelId_custom int
+DECLARE @intPanelId_custom int
 
-DECLARE db_cursor_custom_canned_panel CURSOR FOR SELECT intCannedPanelId FROM [dbo].[tblDBPanel]
+DECLARE db_cursor_custom_canned_panel CURSOR FOR SELECT intCannedPanelId, intPanelId FROM [dbo].[tblDBPanel]
+
 OPEN db_cursor_custom_canned_panel
-
-FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom
-
+FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom, @intPanelId_custom
 WHILE @@FETCH_STATUS = 0   
 BEGIN		
 	IF NOT EXISTS (SELECT TOP 1 1 FROM #TempCannedPanels WHERE intCannedPanelId = @intCannedPanelId_custom) and @intCannedPanelId_custom <> 0
