@@ -886,33 +886,33 @@ END
 CLOSE db_cursor   
 DEALLOCATE db_cursor
 
-print('/*******************  START DELETING OF CUSTOM CANNED PANEL  *******************/')
-DECLARE @intCannedPanelId_custom int
+-- print('/*******************  START DELETING OF CUSTOM CANNED PANEL  *******************/')
+-- DECLARE @intCannedPanelId_custom int
 
-DECLARE db_cursor_custom_canned_panel CURSOR FOR SELECT intCannedPanelId FROM [dbo].[tblDBPanel]
-OPEN db_cursor_custom_canned_panel
+-- DECLARE db_cursor_custom_canned_panel CURSOR FOR SELECT intCannedPanelId FROM [dbo].[tblDBPanel]
+-- OPEN db_cursor_custom_canned_panel
 
-FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom
+-- FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom
 
-WHILE @@FETCH_STATUS = 0   
-BEGIN		
-	--Delete Custom Canned Panel
-	IF NOT EXISTS (SELECT TOP 1 1 FROM #TempCannedPanels WHERE intCannedPanelId = @intCannedPanelId_custom)
-	BEGIN	
-		DELETE FROM [dbo].[tblDBPanelAccess] WHERE intPanelId IN (SELECT top 1 f.intPanelId FROM [dbo].[tblDBPanel] f where f.intCannedPanelId = @intCannedPanelId_custom)
-		delete from [dbo].[tblDBPanelColumn] where intCannedPanelId = @intCannedPanelId_custom
-		delete from [dbo].[tblDBPanelFormat] where intCannedPanelId = @intCannedPanelId_custom
-		DELETE FROM [dbo].[tblDBPanelUser] WHERE intPanelId IN (SELECT top 1 f.intPanelId FROM [dbo].[tblDBPanel] f where f.intCannedPanelId = @intCannedPanelId_custom)
-		delete from [dbo].[tblDBPanel] where intCannedPanelId = @intCannedPanelId_custom
-	END
+-- WHILE @@FETCH_STATUS = 0   
+-- BEGIN		
+	-- --Delete Custom Canned Panel
+	-- IF NOT EXISTS (SELECT TOP 1 1 FROM #TempCannedPanels WHERE intCannedPanelId = @intCannedPanelId_custom)
+	-- BEGIN	
+		-- DELETE FROM [dbo].[tblDBPanelAccess] WHERE intPanelId IN (SELECT top 1 f.intPanelId FROM [dbo].[tblDBPanel] f where f.intCannedPanelId = @intCannedPanelId_custom)
+		-- delete from [dbo].[tblDBPanelColumn] where intCannedPanelId = @intCannedPanelId_custom
+		-- delete from [dbo].[tblDBPanelFormat] where intCannedPanelId = @intCannedPanelId_custom
+		-- DELETE FROM [dbo].[tblDBPanelUser] WHERE intPanelId IN (SELECT top 1 f.intPanelId FROM [dbo].[tblDBPanel] f where f.intCannedPanelId = @intCannedPanelId_custom)
+		-- delete from [dbo].[tblDBPanel] where intCannedPanelId = @intCannedPanelId_custom
+	-- END
 
-FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom
-END
+-- FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom
+-- END
 
-CLOSE db_cursor_custom_canned_panel
-DEALLOCATE db_cursor_custom_canned_panel
+-- CLOSE db_cursor_custom_canned_panel
+-- DEALLOCATE db_cursor_custom_canned_panel
 
-print('/*******************  END DELETING OF CUSTOM CANNED PANEL  *******************/')
+-- print('/*******************  END DELETING OF CUSTOM CANNED PANEL  *******************/')
 
 DROP TABLE #TempCannedPanels
 print('/*******************  END UPDATING canned panels on table Panel  *******************/')
