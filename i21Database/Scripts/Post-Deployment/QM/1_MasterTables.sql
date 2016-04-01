@@ -698,9 +698,15 @@ BEGIN
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'TOTAL DEFECTS')
+IF NOT EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'Bulk Density')
 BEGIN
 	INSERT INTO tblQMReportCuppingPropertyMapping(strPropertyName,strActualPropertyName)
-	VALUES('TOTAL DEFECTS','TOTAL DEFECTS')
+	VALUES('Bulk Density','Bulk Density')
+END
+GO
+GO
+IF EXISTS(SELECT 1 FROM tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'TOTAL DEFECTS')
+BEGIN
+	DELETE tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'TOTAL DEFECTS'
 END
 GO

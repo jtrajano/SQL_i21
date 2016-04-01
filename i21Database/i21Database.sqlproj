@@ -3586,6 +3586,8 @@
     <Build Include="dbo\Views\vyuICInventoryReceiptItemLookUp.sql" />
     <Build Include="dbo\Views\vyuPRMonthlyTaxTotal.sql" />
     <Build Include="dbo\Views\vyuLGLoadView.sql" />
+    <Build Include="dbo\Views\vyuQMCuppingTestResult.sql" />
+    <Build Include="dbo\Views\vyuQMCuppingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
