@@ -344,7 +344,7 @@ BEGIN TRY
 		JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
 		WHERE C.intManufacturingCellId = @intManufacturingCellId
 			AND C.intCalendarId = @intCalendarId
-			--AND CD.dtmShiftEndTime > @dtmCurrentDateTime
+			AND CD.dtmShiftEndTime > @dtmCurrentDateTime
 			AND CD.intNoOfMachine > 0
 
 		--DECLARE @v XML = (SELECT * FROM @tblMFScheduleWorkOrderCalendarDetail FOR XML AUTO)
