@@ -3563,6 +3563,7 @@
     <Build Include="dbo\Views\vyuTRTransportReceipt_Old.sql" />
     <Build Include="dbo\Views\vyuICInventoryReceiptLookUp.sql" />
     <Build Include="dbo\Views\vyuICInventoryReceiptItemLookUp.sql" />
+    <Build Include="dbo\Views\vyuPRMonthlyTaxTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
