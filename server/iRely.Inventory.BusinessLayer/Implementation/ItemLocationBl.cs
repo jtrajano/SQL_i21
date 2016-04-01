@@ -48,6 +48,68 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public override BusinessResult<tblICItemLocation> Validate(IEnumerable<tblICItemLocation> entities, ValidateAction action)
+        {
+            var msg = "";
+            var isValid = false;
+
+            foreach (tblICItemLocation item in entities)
+            {
+                //Check if Stock exists for the item
+                var query = _db.GetQuery<tblICItemStock>()
+                         .Where(t => t.intItemId == item.intItemId && t.intItemLocationId == item.intItemLocationId && t.dblUnitOnHand > 0);
+
+                var totalItemWithStock = query.Count();
+
+                //Stock Exists
+                if (totalItemWithStock > 0)
+                {
+                    //Check if Costing Method is Changed
+                    var query2 = _db.GetQuery<tblICItemLocation>()
+                         .Where(t => t.intItemLocationId == item.intItemLocationId && t.intCostingMethod != item.intCostingMethod);
+
+                    var totalItemCostingMethodChange = query2.Count();
+
+                    //Costing Method is Changed
+                    if (totalItemCostingMethodChange > 0)
+                    {
+                        msg += "Costing Method cannot be changed due to Stock already Exists.";
+                        isValid = false;
+                    }
+
+                    //Costing Method is not changed
+                    else
+                    {
+                        msg = "success";
+                        isValid = true;
+                    }
+                    
+                }
+
+                //Stock Don't Exists
+                else
+                {
+                    msg = "success";
+                    isValid = true;
+                }
+                
+            }
+            goto returnValidate;
+          
+        returnValidate:
+        return new BusinessResult<tblICItemLocation>()
+            {
+                success = isValid,
+                message = new MessageResult()
+                {
+                    statusText = msg,
+                    button = "ok",
+                    status = Error.OtherException
+                }
+            };
+        }
+
+
         public override async Task<BusinessResult<tblICItemLocation>> SaveAsync(bool continueOnConflict)
         {
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
