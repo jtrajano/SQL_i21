@@ -215,12 +215,12 @@ UPDATE [tblARInvoice]
 SET	   
 	 [strInvoiceOriginId]			= IE.strSourceId
 	,[intEntityCustomerId]			= IE.[intEntityCustomerId]
-	,[dtmDate]						= IE.dtmDate
-	,[dtmDueDate]					= dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))
+	,[dtmDate]						= CAST(IE.dtmDate AS DATE)
+	,[dtmDueDate]					= dbo.fnGetDueDateBasedOnTerm(CAST(IE.dtmDate AS DATE), ISNULL(EL.[intTermsId],0))
 	,[intCurrencyId]				= ISNULL(IE.intCurrencyId,AC.[intCurrencyId])
 	,[intCompanyLocationId]			= ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
 	,[intEntitySalespersonId]		= ISNULL(IE.[intSalesPersonId],AC.[intSalespersonId])
-	,[dtmShipDate]					= IE.dtmDate
+	,[dtmShipDate]					= CAST(IE.dtmDate AS DATE)
 	,[intShipViaId]					= ISNULL(IE.intShipViaId,ISNULL(EL.[intShipViaId], 0))
 	,[strPONumber]					= IE.strPurchaseOrder
 	,[intTermId]					= EL.[intTermsId]
