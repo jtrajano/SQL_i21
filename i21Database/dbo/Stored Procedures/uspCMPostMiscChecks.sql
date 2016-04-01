@@ -232,17 +232,20 @@ BEGIN
 END 
 
 -- Check if transaction is under check printing. 
-IF EXISTS (
-		SELECT	TOP 1 1 
-		FROM	tblCMBankTransaction a INNER JOIN tblCMCheckPrintJobSpool b
-					ON a.intBankAccountId = b.intBankAccountId
-					AND a.intTransactionId = b.intTransactionId
-		WHERE	a.intTransactionId = @intTransactionId 
-	)
+IF @ysnPost = 0 AND @ysnRecap = 0
 BEGIN
-	-- Unable to unpost while check printing is in progress.
-	RAISERROR(70026, 11, 1)
-	GOTO Post_Rollback
+	IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblCMBankTransaction a INNER JOIN tblCMCheckPrintJobSpool b
+						ON a.intBankAccountId = b.intBankAccountId
+						AND a.intTransactionId = b.intTransactionId
+			WHERE	a.intTransactionId = @intTransactionId 
+		)
+	BEGIN
+		-- Unable to unpost while check printing is in progress.
+		RAISERROR(70026, 11, 1)
+		GOTO Post_Rollback
+	END
 END 
 
 --=====================================================================================================================================
