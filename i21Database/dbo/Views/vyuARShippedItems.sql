@@ -449,8 +449,10 @@ SELECT
 	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
 	,[intShipmentId]					= LGICShipment.[intShipmentId]
 	,[strShipmentNumber]				= NULL
-	,[intContractHeaderId]				= CTCD.[intContractHeaderId]
-	,[intContractDetailId]				= CTCD.[intContractDetailId]
+	,[intContractHeaderId]				= ISNULL(CTCD.[intContractHeaderId], LGICShipment.[intContractHeaderId])
+	,[strContractNumber]				= ISNULL(CTCD.[strContractNumber], LGICShipment.[strContractNumber])
+	,[intContractDetailId]				= ISNULL(CTCD.[intContractDetailId], LGICShipment.[intContractDetailId])
+	,[intContractSeq]					= ISNULL(CTCD.[intContractSeq], LGICShipment.[intContractSeq])
 	,[intCompanyLocationId]				= ICIS.[intShipFromLocationId]
 	,[strLocationName]					= SMCL.[strLocationName] 
 	,[intShipToLocationId]				= ICIS.[intShipToLocationId]
@@ -525,6 +527,10 @@ LEFT OUTER JOIN
 			 LGSD.[intShipmentId]
 			,LGSD.[intTrackingNumber]
 			,ICISI1.[intInventoryShipmentItemId]
+			,LGSD.[intContractDetailId]
+			,LGSD.[strContractNumber] 
+			,LGSD.[intContractHeaderId]
+			,LGSD.[intContractSeq] 
 		FROM
 			tblICInventoryShipmentItem ICISI1
 		INNER JOIN
