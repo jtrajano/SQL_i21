@@ -45,7 +45,7 @@ FROM
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
-		,[strScaleTicketNumber]		=	NULL
+		,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]			=	0            
 		,[intShipmentContractQtyId]	=	NULL
 		,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
@@ -178,7 +178,7 @@ FROM
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
-	,[strScaleTicketNumber]		=	NULL
+	,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 	,[intShipmentId]			=	0    
 	,[intShipmentContractQtyId]	=	NULL
 	,[intUnitMeasureId]			=	B.intUnitOfMeasureId
@@ -245,7 +245,7 @@ FROM
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
-	,[strScaleTicketNumber]		=	G.strTicketNumber
+	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(50))
 	,[intShipmentId]			=	0
 	,[intShipmentContractQtyId]	=	NULL
   	,[intUnitMeasureId]			=	B.intUnitMeasureId
@@ -290,7 +290,7 @@ FROM
 	UNION ALL
 
 	--OTHER CHARGES
-	SELECT
+	SELECT DISTINCT
 		[intEntityVendorId]							=	A.intEntityVendorId
 		,[dtmDate]									=	A.dtmDate
 		,[strReference]								=	A.strReference
@@ -325,10 +325,10 @@ FROM
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
-		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	A.intContractDetailId
-		,[intShipmentId]			=	0      
+		,[intScaleTicketId]							=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
+		,[intShipmentId]							=	0      
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	NULL
 		,[strCostUOM]								=	NULL
@@ -341,10 +341,20 @@ FROM
 	FROM [vyuAPChargesForBilling] A
 	OUTER APPLY 
 	(
-		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-		GROUP BY H.intInventoryReceiptChargeId
+		SELECT intEntityVendorId FROM tblAPBillDetail BD
+		LEFT JOIN dbo.tblAPBill B ON BD.intBillId = B.intBillId
+		WHERE BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+
 	) Billed
-	WHERE ((Billed.dblQty < A.dblOpenReceive) OR Billed.dblQty IS NULL)
+	OUTER APPLY 
+	(
+		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
+		INNER JOIN dbo.tblAPBill B ON B.intBillId = H.intBillId
+		WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId --  AND B.str = A.inte
+		GROUP BY H.intInventoryReceiptChargeId
+
+	) Qty
+	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (Qty.dblQty IS NULL)
 
 	UNION ALL
 	SELECT
@@ -384,7 +394,7 @@ FROM
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	A.intShipmentId      
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
 		,[intUnitMeasureId]							=	A.intItemUOMId
@@ -438,7 +448,7 @@ FROM
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
 		,[intShipmentContractQtyId]					=	NULL
 		,[intUnitMeasureId]							=	CC.intUnitMeasureId
