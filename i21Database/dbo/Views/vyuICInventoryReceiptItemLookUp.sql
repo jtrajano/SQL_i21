@@ -24,8 +24,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strCostUOM = CostUOM.strUnitMeasure
 		, dblCostUOMConvFactor = ISNULL(ItemCostUOM.dblUnitQty, 0)
 		, strDiscountSchedule = DiscountSchedule.strDiscountId
-		, strSubCurrency = SubCurrency.strCurrency	
-
+		, strSubCurrency = CASE WHEN ReceiptItem.ysnSubCurrency = 1 THEN SubCurrency.strCurrency ELSE TransactionCurrency.strCurrency END
 
 		, strOrderNumber =  (
 				CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
@@ -204,6 +203,8 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON DiscountSchedule.intDiscountId = ReceiptItem.intDiscountSchedule
 		LEFT JOIN tblSMCurrency SubCurrency 
 			ON SubCurrency.intMainCurrencyId = Receipt.intCurrencyId
+		LEFT JOIN tblSMCurrency TransactionCurrency
+			ON TransactionCurrency.intCurrencyID = Receipt.intCurrencyId
 
 		-- Integrations with the other modules: 
 		-- 1. Purchase Order
