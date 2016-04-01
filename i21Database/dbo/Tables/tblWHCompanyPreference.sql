@@ -21,5 +21,5 @@
 	intNumberOfDecimalPlaces INT,
 	ysnCreateLoadTasks BIT,
 	intMaximumPalletsOnForklift INT, 
-    strReportPrinterName NVARCHAR(512) NULL
+    strReportPrinterName NVARCHAR(512) COLLATE Latin1_General_CI_AS NULL
 )
