@@ -159,10 +159,10 @@ BEGIN TRY
 		END
 
 		BEGIN 
-			SELECT	@intTicketItemUOMId = UM.intItemUOMId
+			SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
 				FROM	dbo.tblICItemUOM UM	
 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-			WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
+			WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 		END
 
 	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
