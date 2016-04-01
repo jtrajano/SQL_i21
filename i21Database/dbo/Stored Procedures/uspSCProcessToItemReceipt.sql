@@ -45,6 +45,7 @@ DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @total AS INT
 DECLARE @ysnDPStorage AS BIT
+DECLARE @strLotTracking AS NVARCHAR(100)
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -150,7 +151,7 @@ BEGIN TRY
 			SET @strReceiptType = 'Direct'
 		END
 		BEGIN 
-			SELECT	@intTicketUOM = UOM.intUnitMeasureId
+			SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
 			FROM	dbo.tblSCTicket SC	        
 					--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
 					JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
@@ -425,7 +426,12 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 	END
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+
+	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+	if @strLotTracking = 'No'
+		BEGIN
+			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		END
 
 	--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 	--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;

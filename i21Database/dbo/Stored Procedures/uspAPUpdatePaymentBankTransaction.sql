@@ -80,11 +80,11 @@ BEGIN
 		[dtmDate] = A.dtmDatePaid,
 		[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityVendorId),
 		[intPayeeId] = B.intEntityVendorId,
-		[strAddress] = '',
-		[strZipCode] = '',
-		[strCity] = '',
-		[strState] = '',
-		[strCountry] = '',
+		[strAddress] = PayTo.strAddress,
+		[strZipCode] = PayTo.strZipCode,
+		[strCity] = PayTo.strCity,
+		[strState] = PayTo.strState,
+		[strCountry] = PayTo.strCountry,
 		[dblAmount] = A.dblAmountPaid + A.dblWithheld,
 		[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 		[strMemo] = A.strNotes,
@@ -104,6 +104,20 @@ BEGIN
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
 			ON A.intEntityVendorId = B.intEntityVendorId
+		CROSS APPLY
+		(
+			SELECT 
+				TOP 1 
+				E.strAddress,
+				E.strCity,
+				E.strZipCode,
+				E.strState,
+				E.strCountry
+			FROM tblAPPaymentDetail C
+			INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
+			INNER JOIN tblEntityLocation E ON D.intPayToAddressId = E.intEntityLocationId AND D.intEntityVendorId = E.intEntityId
+			WHERE C.intPaymentId = A.intPaymentId
+		) PayTo
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	EXEC uspCMCreateBankTransactionEntries @BankTransactionEntries = @bankTransaction

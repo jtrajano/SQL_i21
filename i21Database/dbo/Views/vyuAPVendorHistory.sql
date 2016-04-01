@@ -7,15 +7,19 @@ SELECT
 	,strVendorId = tblAPVendor.strVendorId
 	,A.dtmDate
 	,intTransactionId = A.intBillId 
-	,strTransactionType = 'Bill'
+	,strTransactionType = (CASE WHEN A.intTransactionType = 1	THEN 'Bill' 
+								WHEN A.intTransactionType = 2	THEN 'Vendor Prepayment' 
+								WHEN A.intTransactionType = 3	THEN 'Debit Memo' 
+								ELSE 'Not Bill Type'
+						   END)
 	,strBillId = A.strBillId
 	,strInvoiceNumber = strVendorOrderNumber
-	,dblTotal = ISNULL(A.dblTotal,0)
+	,dblTotal = (CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE ISNULL(A.dblTotal,0) END)
 	,dblDiscount = ISNULL(B.dblDiscount, 0)
 	,dblWithheld = ISNULL(B.dblWithheld, 0)
-	,dblAmountPaid = CASE WHEN A.ysnPaid = 1 THEN A.dblTotal ELSE ISNULL(SUM(B.dblPayment),0) END
+	,dblAmountPaid = CASE WHEN A.ysnPaid = 1 THEN A.dblTotal ELSE ISNULL(SUM(B.dblPayment),0) END  
 	,A.ysnPaid
-	,A.dblAmountDue
+	,dblAmountDue = (CASE WHEN A.intTransactionType != 1 AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE ISNULL(A.dblAmountDue,0) END) 
 	,A.ysnPosted
 	,B1.strPaymentInfo
 	,B1.intPaymentId
@@ -47,5 +51,5 @@ GROUP BY A.intBillId,
 	A.dblAmountDue,
     A.ysnPosted,
 	B1.strPaymentInfo,
-	B1.intPaymentId
-
+	B1.intPaymentId,
+	A.intTransactionType

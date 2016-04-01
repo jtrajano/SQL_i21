@@ -636,7 +636,7 @@ BEGIN
 END 
 
 -- Check if amount is zero. 
-IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
+IF @dblAmount <= 0 AND @ysnPost = 1 AND @ysnRecap = 0
 BEGIN 
 	-- Cannot post a zero-value transaction.
 	RAISERROR(50020, 11, 1)
@@ -927,10 +927,6 @@ IF (@isSuccessful <> 0)
 						/* Update Paycheck Direct Deposit Distribution */
 						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
 							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
-
-						/* Create Paycheck Payables */
-						EXEC uspPRCreatePaycheckPayable @intPaycheckId, @intUserId
-
 					END
 			END
 		ELSE

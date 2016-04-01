@@ -101,12 +101,12 @@ BEGIN
 				,strTransactionId					= Receipt.strReceiptNumber
 				,intReceiptItemTaxId				= ReceiptTaxes.intInventoryReceiptItemTaxId
 				,dblTax								=	ReceiptTaxes.dblTax
-														/ 
-														CASE	WHEN ReceiptItem.ysnSubCurrency = 1 THEN 
-																	CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
-																ELSE 
-																	1
-														END
+														--/ 
+														--CASE	WHEN ReceiptItem.ysnSubCurrency = 1 THEN 
+														--			CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
+														--		ELSE 
+														--			1
+														--END
 				,intTransactionTypeId				= @intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
 				,dblExchangeRate					= 1

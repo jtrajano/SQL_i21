@@ -42,7 +42,8 @@ BEGIN
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1)
 	BEGIN
 	-- AG VIEW
-		IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
+		IF  ((SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
+			AND (select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'agcmtmst') = 1)
 		BEGIN
 			EXEC ('
 					CREATE VIEW [dbo].[vwcmtmst]
@@ -80,7 +81,8 @@ BEGIN
 				')
 		END
 		-- PT VIEW
-		IF  (SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
+		IF  ((SELECT TOP 1 ysnUsed FROM #tblTMOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
+			AND (select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'ptcmtmst') = 1)
 		BEGIN
 			EXEC ('
 					CREATE VIEW [dbo].[vwcmtmst]

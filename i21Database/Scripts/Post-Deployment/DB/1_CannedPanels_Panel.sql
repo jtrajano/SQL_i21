@@ -780,27 +780,6 @@ And ''Profit'' Is Not Null
 And @DATE@ 
 Order By [Profit]', N'', N'@DATE@', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4.2', NULL, 3, 115, NULL)
  
-INSERT INTO #TempCannedPanels VALUES (7410, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'testCAnnedPanel', N'Grid', N'', N'testCAnnedPanel', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, N'test', NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4.2', NULL, 2, 119, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9432, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'test canned panel', N'Grid', N'', N'test canned panel', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4.2', NULL, 2, 120, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9452, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'xczxAczzzzzzzzzzzzzzzzzzz', N'Grid', N'', N'xczxAczzzzzzzzzzzzzzzzzzz', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 121, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9453, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'hello new CannedPanel', N'Grid', N'', N'hello new CannedPanel', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 122, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9466, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'canned panel ni axel', N'Grid', N'', N'canned panel ni axel', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', N'', N'', N'', N'', NULL, N'canned panel ni axel', NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 123, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9467, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'Rizza Canned panel', N'Grid', N'', N'Rizza Canned panel', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, N'Rizza Canned panel', NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 124, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9470, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'test', N'Grid', N'', N'test', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 125, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9471, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'my new CannedPanel', N'Grid', N'', N'my new CannedPanel', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, N'my new CannedPanel', NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 126, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9472, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'aaaaaaaaaaaaaaaaaaaa', N'Grid', N'', N'aaaaaaaaaaaaaaaaaaaa', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 127, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (9473, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'aaaaaaaaaaaaaaaaaaaaaaaaaaaa', N'Grid', N'', N'aaaaaaaaaaaaaaaaaaaaaaaaaaaa', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 128, NULL)
- 
-INSERT INTO #TempCannedPanels VALUES (13509, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'asdawdasd', N'Grid', N'', N'asdawdasd', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', NULL, N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4', NULL, 1, 129, NULL)
  
 print('/*******************  END INSERTING canned panels on temporary panel table  *******************/')
 
@@ -907,6 +886,34 @@ END
 
 CLOSE db_cursor   
 DEALLOCATE db_cursor
+
+-- print('/*******************  START DELETING OF CUSTOM CANNED PANEL  *******************/')
+-- DECLARE @intCannedPanelId_custom int
+
+-- DECLARE db_cursor_custom_canned_panel CURSOR FOR SELECT intCannedPanelId FROM [dbo].[tblDBPanel]
+-- OPEN db_cursor_custom_canned_panel
+
+-- FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom
+
+-- WHILE @@FETCH_STATUS = 0   
+-- BEGIN		
+	-- --Delete Custom Canned Panel
+	-- IF NOT EXISTS (SELECT TOP 1 1 FROM #TempCannedPanels WHERE intCannedPanelId = @intCannedPanelId_custom)
+	-- BEGIN	
+		-- DELETE FROM [dbo].[tblDBPanelAccess] WHERE intPanelId IN (SELECT top 1 f.intPanelId FROM [dbo].[tblDBPanel] f where f.intCannedPanelId = @intCannedPanelId_custom)
+		-- delete from [dbo].[tblDBPanelColumn] where intCannedPanelId = @intCannedPanelId_custom
+		-- delete from [dbo].[tblDBPanelFormat] where intCannedPanelId = @intCannedPanelId_custom
+		-- DELETE FROM [dbo].[tblDBPanelUser] WHERE intPanelId IN (SELECT top 1 f.intPanelId FROM [dbo].[tblDBPanel] f where f.intCannedPanelId = @intCannedPanelId_custom)
+		-- delete from [dbo].[tblDBPanel] where intCannedPanelId = @intCannedPanelId_custom
+	-- END
+
+-- FETCH NEXT FROM db_cursor_custom_canned_panel INTO @intCannedPanelId_custom
+-- END
+
+-- CLOSE db_cursor_custom_canned_panel
+-- DEALLOCATE db_cursor_custom_canned_panel
+
+-- print('/*******************  END DELETING OF CUSTOM CANNED PANEL  *******************/')
 
 DROP TABLE #TempCannedPanels
 print('/*******************  END UPDATING canned panels on table Panel  *******************/')

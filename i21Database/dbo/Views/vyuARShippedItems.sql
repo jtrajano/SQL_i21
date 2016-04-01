@@ -57,6 +57,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
+	,[dblWeight]						= IU.[dblWeight]
+	,[intWeightUOMId]					= IU.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
 	,[dblGrossWt]						= 0.00
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
@@ -98,6 +101,9 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT JOIN
+	tblICUnitMeasure U2
+		ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -174,7 +180,10 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= SOD.[intTaxGroupId]
 	,[strTaxGroup]						= TG.[strTaxGroup]
-	,[dblGrossWt]						= 0.00
+	,[dblWeight]						= IU.[dblWeight]
+	,[intWeightUOMId]					= IU.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
+	,[dblGrossWt]						= 0.00	
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00
 	,[strPONumber]						= SO.[strPONumber]
@@ -213,6 +222,9 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT JOIN
+	tblICUnitMeasure U2
+		ON IU.[intWeightUOMId] = U2.[intUnitMeasureId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
@@ -286,6 +298,9 @@ SELECT
 	,[intTicketId]						= SCT.[intTicketId]
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblWeight]						= IU1.[dblWeight]
+	,[intWeightUOMId]					= IU1.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= U2.[strUnitMeasure]
 	,[dblGrossWt]						= ISISIL.dblGrossWeight 
 	,[dblTareWt]						= ISISIL.dblTareWeight 
 	,[dblNetWt]							= ISISIL.dblNetWeight
@@ -405,6 +420,15 @@ LEFT OUTER JOIN
 			intInventoryShipmentItemId
 	) ISISIL
 		ON SHP.[intInventoryShipmentItemId] = ISISIL.[intInventoryShipmentItemId]
+LEFT JOIN
+	tblICItemUOM IU1
+		ON SHP.[intItemUOMId] = IU1.[intItemUOMId]
+LEFT JOIN
+	tblICUnitMeasure U1
+		ON IU1.[intUnitMeasureId] = U1.[intUnitMeasureId]	
+LEFT JOIN
+	tblICUnitMeasure U2
+		ON IU1.[intWeightUOMId] = U2.[intUnitMeasureId]	
 	
 UNION ALL
 
@@ -438,7 +462,7 @@ SELECT
 	,[strUnitMeasure]					= ICUM.[strUnitMeasure]
 	,[intOrderUOMId]					= CTCD.[intItemUOMId]
 	,[strOrderUnitMeasure]				= ISNULL(ICUM2.[strUnitMeasure],'')
-	,[intShipmentItemUOMId]				= ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId])
+	,[intShipmentItemUOMId]				= ICISI.[intItemUOMId]
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
 	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
 	,[dblQtyOrdered]					= CASE WHEN CTCD.[intContractDetailId] IS NOT NULL THEN CTCD.dblDetailQuantity ELSE 0 END 
@@ -464,6 +488,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblWeight]						= ICIU1.[dblWeight]
+	,[intWeightUOMId]					= ICIU1.[intWeightUOMId]
+	,[strWeightUnitMeasure]				= ICUM3.[strUnitMeasure]
 	,[dblGrossWt]						= ISISIL.dblGrossWeight 
 	,[dblTareWt]						= ISISIL.dblTareWeight 
 	,[dblNetWt]							= ISISIL.dblNetWeight
@@ -531,13 +558,16 @@ LEFT JOIN
 		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]	
 LEFT JOIN
 	tblICItemUOM ICIU1
-		ON ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]) = ICIU1.[intItemUOMId] 
+		ON ICISI.[intItemUOMId] = ICIU1.[intItemUOMId] 
 LEFT JOIN
 	tblICUnitMeasure ICUM1
 		ON ICIU1.[intUnitMeasureId] = ICUM1.[intUnitMeasureId]
 LEFT JOIN
 	tblICUnitMeasure ICUM2
-		ON CTCD.[intUnitMeasureId] = ICUM2.[intUnitMeasureId]					
+		ON CTCD.[intUnitMeasureId] = ICUM2.[intUnitMeasureId]		
+LEFT JOIN
+	tblICUnitMeasure ICUM3
+		ON ICIU1.[intWeightUOMId] = ICUM3.[intUnitMeasureId]					
 INNER JOIN
 	tblEntity EME
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
@@ -614,6 +644,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL --SOD.[intTaxGroupId]
 	,[strTaxGroup]						= NULL --TG.[strTaxGroup]
+	,[dblWeight]						= 0.00
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= ''
 	,[dblGrossWt]						= 0
 	,[dblTareWt]						= 0
 	,[dblNetWt]							= 0
@@ -716,6 +749,9 @@ SELECT
 	,[intTicketId]						= NULL
 	,[intTaxGroupId]					= NULL
 	,[strTaxGroup]						= NULL
+	,[dblWeight]						= 0.00
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= ''
 	,[dblGrossWt]						= 0.00
 	,[dblTareWt]						= 0.00
 	,[dblNetWt]							= 0.00

@@ -36,8 +36,7 @@ AS
 	END 
 
 	BEGIN TRY
-
-		INSERT	INTO	@ReceiptStagingTable
+		INSERT INTO	@ReceiptStagingTable
 		(
 				strReceiptType,
 				intEntityVendorId,
@@ -54,6 +53,7 @@ AS
 				dblCost,
 				intCostUOMId,
 				intCurrencyId,
+				intSubCurrencyCents, 
 				dblExchangeRate,
 				intLotId,
 				intSubLocationId,
@@ -62,7 +62,8 @@ AS
 				intSourceId,	
 				intSourceType,		 	
 				strSourceId,
-				strSourceScreenName
+				strSourceScreenName,
+				ysnSubCurrency
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CD.intEntityId,
@@ -78,7 +79,8 @@ AS
 				dblQty						=	CD.dblAvailableQty,
 				dblCost						=	ISNULL(CD.dblCashPrice,0),
 				intCostUOMId				=	CD.intPriceItemUOMId,
-				intCurrencyId				=	CD.intCurrencyId,
+				intCurrencyId				=	ISNULL(CD.intMainCurrencyId, CD.intCurrencyId),
+				intSubCurrencyCents			=	ISNULL(SubCurrency.intCent, 1), 
 				dblExchangeRate				=	1,
 				intLotId					=	NULL ,
 				intSubLocationId			=	NULL,
@@ -87,14 +89,15 @@ AS
 				intSourceId					=	NULL,
 				intSourceType		 		=	0,
 				strSourceId					=	CD.strContractNumber,
-				strSourceScreenName			=	'Contract'
+				strSourceScreenName			=	'Contract',
+				ysnSubCurrency				=	SubCurrency.ysnSubCurrency 
 				
 		FROM	vyuCTContractDetailView		CD	
 		JOIN	tblEntityLocation			EL	ON	EL.intEntityId			=	CD.intEntityId	AND
 													EL.ysnDefaultLocation	=	1				LEFT
 		JOIN	vyuICGetItemStock			SK	ON	SK.intItemId			=	CD.intItemId	AND		
 													SK.intLocationId		=	CD.intCompanyLocationId
-				
+		LEFT JOIN tblSMCurrency				SubCurrency  ON SubCurrency.intCurrencyID = CASE WHEN CD.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		INSERT	INTO	@OtherCharges
@@ -113,10 +116,11 @@ AS
 				[intEntityVendorId],
 				[intShipFromId],
 				[intLocationId],
-				[ysnPrice]
+				[ysnPrice],
+				[ysnSubCurrency]
 		) 
 		
-	   SELECT	CC.intVendorId,
+		SELECT	CC.intVendorId,
 				CC.intItemId,
 				CC.strCostMethod,
 				CC.dblRate,
@@ -126,22 +130,23 @@ AS
 				CC.ysnAccrue,
 				'Purchase Contract',
 				CD.intShipViaId,
-				CD.intCurrencyId,
+				ISNULL(CD.intMainCurrencyId, CD.intCurrencyId),
 				CD.intEntityId,
 				EL.intEntityLocationId,
 				CD.intCompanyLocationId,
-				CC.ysnPrice
-	   FROM		vyuCTContractCostView	CC
-	   JOIN		vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
-	   JOIN		tblEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
+				CC.ysnPrice,
+				SubCurrency.ysnSubCurrency 
+		FROM		vyuCTContractCostView	CC
+		JOIN		vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+		JOIN		tblEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
 												EL.ysnDefaultLocation	=	1
-	   WHERE	CC.intContractDetailId	=	@intContractDetailId
+		LEFT JOIN tblSMCurrency				SubCurrency  ON SubCurrency.intCurrencyID = CASE WHEN CD.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
 
-	
+		WHERE	CC.intContractDetailId	=	@intContractDetailId
 
 		IF NOT EXISTS(SELECT * FROM  @ReceiptStagingTable)
 		BEGIN
-    		RETURN
+			RETURN
 		END
 
 		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId;
@@ -182,10 +187,8 @@ AS
 		BEGIN
 			SELECT 0
 		END
-		
-
-END TRY
-BEGIN CATCH
-	SET @ErrMsg = ERROR_MESSAGE()  
-	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
-END CATCH
+	END TRY
+	BEGIN CATCH
+		SET @ErrMsg = ERROR_MESSAGE()  
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+	END CATCH

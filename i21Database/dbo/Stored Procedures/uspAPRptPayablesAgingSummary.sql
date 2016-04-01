@@ -223,7 +223,7 @@ SET @query = '
 	) MainQuery
 '
 
-SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), GETDATE(), 110) + '''');
+SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF ISNULL(@filter,'') != ''
 BEGIN

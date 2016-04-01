@@ -100,6 +100,7 @@ INSERT into @ReceiptStagingTable(
 		,intItemId
 		,intItemLocationId
 		,intItemUOMId
+		,intGrossNetUOMId
 		--,intCostUOMId				
 		,intContractHeaderId
 		,intContractDetailId
@@ -135,6 +136,12 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
+		,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
+											FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
+												ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
+											WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
+												AND ItemUOM.intItemId = SC.intItemId
+									 )
 		--,intCostUOMId				= (SELECT intUnitMeasureId FROM tblSCScaleSetup WHERE intTicketPoolId = SC.intTicketPoolId)	   
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN 
@@ -1150,14 +1157,14 @@ BEGIN
      SELECT
             [intInventoryReceiptItemId] = @intLoopReceiptItemId
            ,[intLotId] = NULL
-           ,[strLotNumber]  = 'SC-' + CAST(@strTicketNumber  AS VARCHAR(20)) 
-           ,[strLotAlias] = @strTicketNumber 
+           ,[strLotNumber]  = @strTicketNumber 
+           ,[strLotAlias] = RCT.intSourceId 
            ,[intSubLocationId] = RCT.intSubLocationId
            ,[intStorageLocationId] = RCT.intStorageLocationId
-           ,[intItemUnitMeasureId] = @intTicketItemUOMId
+           ,[intItemUnitMeasureId] = RCT.intUnitMeasureId
            ,[dblQuantity] = RCT.dblReceived
-           ,[dblGrossWeight] = NULL
-           ,[dblTareWeight] = NULL
+           ,[dblGrossWeight] = RCT.dblGross
+           ,[dblTareWeight] = RCT.dblGross - RCT.dblNet
            ,[dblCost] = RCT.dblUnitCost
            ,[intUnitPallet] = NULL
            ,[dblStatedGrossPerUnit] = NULL

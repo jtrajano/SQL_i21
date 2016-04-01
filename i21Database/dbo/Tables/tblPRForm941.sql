@@ -17,6 +17,9 @@
     [dblTotalDeposit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[ysnRefundOverpayment] BIT NULL DEFAULT ((0)),
     [intScheduleType] INT NULL DEFAULT ((0)), 
+	[dblMonth1] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblMonth2] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblMonth3] NUMERIC(18, 6) NULL DEFAULT ((0)),
     [ysnStoppedWages] BIT NULL DEFAULT ((0)), 
     [dtmStoppedWages] DATETIME NULL, 
     [ysnSeasonalEmployer] BIT NULL DEFAULT ((0)), 
@@ -422,3 +425,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRForm941',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Month 1',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRForm941',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMonth1'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Month 2',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRForm941',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMonth2'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Month 3',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRForm941',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMonth3'

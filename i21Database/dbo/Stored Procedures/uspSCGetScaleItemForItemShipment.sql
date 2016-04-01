@@ -73,13 +73,10 @@ BEGIN TRY
 				FROM	@LineItems LI 
 				JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
 				JOIN dbo.tblICItemUOM ItemUOM	ON ScaleTicket.intItemId = ItemUOM.intItemId AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-				JOIN dbo.tblICItemLocation ItemLocation
-							ON ScaleTicket.intItemId = ItemLocation.intItemId
-							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	LI.intTicketId = @intTicketId
+				JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId
+				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+				AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				WHERE	LI.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 			END
 		END
 		ELSE IF @strDistributionOption = 'SPT'
@@ -111,9 +108,7 @@ BEGIN TRY
 							ON ScaleTicket.intItemId = ItemLocation.intItemId
 							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	ScaleTicket.intTicketId = @intTicketId
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 			
 			END
 		END
@@ -146,9 +141,7 @@ BEGIN TRY
 							ON ScaleTicket.intItemId = ItemLocation.intItemId
 							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	ScaleTicket.intTicketId = @intTicketId
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 			
 			END
 		END

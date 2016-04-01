@@ -44,6 +44,7 @@ DECLARE @intScaleStationId AS INT
 DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
+DECLARE @strLotTracking AS NVARCHAR(100)
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -142,8 +143,8 @@ BEGIN TRY
 				   -- uses a PRINT statement as that action (not a very good
 				   -- example).
 				   IF	ISNULL(@intLoopContractId,0) != 0
-				   EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
-
+				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -203,9 +204,7 @@ BEGIN TRY
 							ON ScaleTicket.intItemId = ItemLocation.intItemId
 							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	ScaleTicket.intTicketId = @intTicketId
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 
 			-- Validate the items to shipment 
 			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
@@ -226,8 +225,11 @@ BEGIN TRY
 			FROM	dbo.tblICInventoryShipment ship	        
 			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 			END
-
-			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+			IF @strLotTracking = 'No'
+				BEGIN
+					EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+				END
 		END
 		IF (@dblRemainingUnits = @dblNetUnits)
 		RETURN
@@ -287,9 +289,11 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	END
-
-	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
-
+	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+	IF @strLotTracking = 'No'
+		BEGIN
+			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+		END
 	_Exit:
 
 END TRY
