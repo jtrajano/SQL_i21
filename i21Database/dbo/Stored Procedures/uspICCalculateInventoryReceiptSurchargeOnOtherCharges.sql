@@ -96,6 +96,7 @@ BEGIN
 					OR (
 						Surcharge.intContractId IS NOT NULL 
 						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+						AND Surcharge.intContractDetailId = SurchargedOtherCharges.intContractDetailId
 					)
 				)
 	)
@@ -108,6 +109,7 @@ BEGIN
 				,[intEntityVendorId] 
 				,[dblCalculatedAmount] 
 				,[intContractId]
+				,[intContractDetailId]
 				,[strAllocateCostBy]
 				,[ysnAccrue]
 				,[ysnInventoryCost]
@@ -120,6 +122,7 @@ BEGIN
 				,[intEntityVendorId]			= Surcharge.intEntityVendorId
 				,[dblCalculatedAmount]			= (ISNULL(Surcharge.dblRate, 0) / 100) * SurchargedOtherCharges.dblCalculatedAmount
 				,[intContractId]				= Surcharge.intContractId
+				,[intContractDetailId]			= Surcharge.intContractDetailId
 				,[strAllocateCostBy]			= Surcharge.strAllocateCostBy
 				,[ysnAccrue]					= Surcharge.ysnAccrue
 				,[ysnInventoryCost]				= Surcharge.ysnInventoryCost
@@ -143,6 +146,7 @@ BEGIN
 					OR (
 						Surcharge.intContractId IS NOT NULL 
 						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+						AND Surcharge.intContractDetailId = SurchargedOtherCharges.intContractDetailId
 					)
 				)
 

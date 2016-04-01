@@ -56,6 +56,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount]
 			,[intContractId]
+			,[intContractDetailId]
 			,[strAllocateCostBy]
 			,[ysnAccrue]
 			,[ysnPrice]
@@ -72,6 +73,7 @@ BEGIN
 												, 2
 											 )
 			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
@@ -87,6 +89,7 @@ BEGIN
 				OR (
 					Charge.intContractId IS NOT NULL 
 					AND ReceiptItem.intOrderId = Charge.intContractId
+					AND ReceiptItem.intLineNo = Charge.intContractDetailId
 				)	
 			)
 			AND Item.intOnCostTypeId IS NULL 
@@ -132,6 +135,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
 			,[intContractId]
+			,[intContractDetailId]
 			,[strAllocateCostBy]
 			,[ysnAccrue]
 			,[ysnPrice]
@@ -149,6 +153,7 @@ BEGIN
 												, 2
 											)
 			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
@@ -164,6 +169,7 @@ BEGIN
 				OR (
 					Charge.intContractId IS NOT NULL 
 					AND ReceiptItem.intOrderId = Charge.intContractId
+					AND ReceiptItem.intLineNo = Charge.intContractDetailId
 				)
 			)
 			AND Item.intOnCostTypeId IS NULL 
@@ -180,6 +186,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
 			,[intContractId]
+			,[intContractDetailId]
 			,[strAllocateCostBy]
 			,[ysnAccrue]
 			,[ysnPrice]
@@ -192,6 +199,7 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND(Charge.dblAmount, 2)
 			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice

@@ -57,10 +57,11 @@ SELECT
 
 													END 
 
-	,[strName]									=	Entity.strName
-	,[strVendorId]								=	Vendor.strVendorId
-	,[strContractNumber]						=	vReceiptCharge.strContractNumber
-	,[intContractHeaderId]						=	ReceiptCharge.intContractId
+	,[strName]									= Entity.strName
+	,[strVendorId]								= Vendor.strVendorId
+	,[strContractNumber]						= vReceiptCharge.strContractNumber
+	,[intContractHeaderId]						= ReceiptCharge.intContractId
+	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -148,11 +149,11 @@ SELECT
 
 													END 
 
-	,[strName]									=	Entity.strName
-	,[strVendorId]								=	Vendor.strVendorId
-	,[strContractNumber]						=	vReceiptCharge.strContractNumber
-	,[intContractHeaderId]						=	ReceiptCharge.intContractId
-
+	,[strName]									= Entity.strName
+	,[strVendorId]								= Vendor.strVendorId
+	,[strContractNumber]						= vReceiptCharge.strContractNumber
+	,[intContractHeaderId]						= ReceiptCharge.intContractId
+	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId

@@ -432,6 +432,7 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryReceiptCharge (
 				[intInventoryReceiptId]
 				,[intContractId]
+				,[intContractDetailId]
 				,[intChargeId]
 				,[ysnInventoryCost]
 				,[strCostMethod]
@@ -447,6 +448,7 @@ BEGIN
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
 				,[intContractId]			= RawData.intContractHeaderId
+				,[intContractDetailId]		= RawData.intContractDetailId
 				,[intChargeId]				= RawData.intChargeId
 				,[ysnInventoryCost]			= RawData.ysnInventoryCost
 				,[strCostMethod]			= RawData.strCostMethod

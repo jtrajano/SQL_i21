@@ -59,6 +59,7 @@ BEGIN
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
 							,intContractId
+							,intContractDetailId
 							,intEntityVendorId
 							,ysnInventoryCost
 							,intInventoryReceiptId
@@ -67,20 +68,23 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intContractId, intContractDetailId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId
+					AND CalculatedCharges.intContractDetailId = ReceiptItem.intLineNo 
 				LEFT JOIN (
-					SELECT	dblTotalCost = SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0))
+					SELECT	dblTotalCost = SUM(dbo.fnMultiply(ISNULL(ReceiptItem.dblOpenReceive, 0), ISNULL(ReceiptItem.dblUnitCost, 0)))
 							,ReceiptItem.intOrderId 
+							,ReceiptItem.intLineNo
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 								AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 							AND ReceiptItem.intOrderId IS NOT NULL 
-					GROUP BY ReceiptItem.intOrderId 
+					GROUP BY ReceiptItem.intOrderId, ReceiptItem.intLineNo 
 				) TotalCostOfItemsPerContract 
 					ON TotalCostOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
+					AND TotalCostOfItemsPerContract.intLineNo = ReceiptItem.intLineNo 
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
@@ -93,10 +97,13 @@ BEGIN
 		SET		dblAmount = ROUND (
 								ISNULL(dblAmount, 0) 
 								+ (
-									Source_Query.dblTotalOtherCharge
-									* Source_Query.dblOpenReceive 
-									* Source_Query.dblUnitCost
-									/ Source_Query.dblTotalCost 
+									dbo.fnDivide(
+										dbo.fnMultiply(
+											dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.dblOpenReceive)
+											,Source_Query.dblUnitCost
+										)									
+										,Source_Query.dblTotalCost 
+									)
 								)
 								, 2
 							)
@@ -117,11 +124,18 @@ BEGIN
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
-			,ROUND (	Source_Query.dblTotalOtherCharge
-				* Source_Query.dblOpenReceive 
-				* Source_Query.dblUnitCost
-				/ Source_Query.dblTotalCost 
-				, 2
+			,ROUND (
+				dbo.fnDivide(	
+					dbo.fnMultiply(
+						dbo.fnMultiply(
+							Source_Query.dblTotalOtherCharge
+							,Source_Query.dblOpenReceive 
+						)
+						,Source_Query.dblUnitCost
+					)
+					,Source_Query.dblTotalCost 
+				)
+				,2
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost

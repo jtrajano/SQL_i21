@@ -327,7 +327,7 @@ FROM
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intScaleTicketId]							=	NULL
 		,[strScaleTicketNumber]						=	NULL
-		,[intContractDetailId]						=	NULL
+		,[intContractDetailId]						=	A.intContractDetailId
 		,[intShipmentId]			=	0      
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	NULL
@@ -345,6 +345,7 @@ FROM
 		GROUP BY H.intInventoryReceiptChargeId
 	) Billed
 	WHERE ((Billed.dblQty < A.dblOpenReceive) OR Billed.dblQty IS NULL)
+
 	UNION ALL
 	SELECT
 		[intEntityVendorId]							=	A.intVendorEntityId
@@ -459,4 +460,3 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
 ) Items
-GO

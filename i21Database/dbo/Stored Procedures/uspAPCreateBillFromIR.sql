@@ -265,7 +265,7 @@ BEGIN
 		[dblCost]					=	A.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	0,
-		[intContractDetailId]		=	NULL,
+		[intContractDetailId]		=	A.intContractDetailId,
 		[intContractHeaderId]		=	A.intContractHeaderId,
 		[intUnitOfMeasureId]		=	NULL,
 		[intCostUOMId]				=	NULL,
@@ -360,3 +360,4 @@ BEGIN
 END
 
 SELECT * FROM #tmpReceiptBillIds
+
