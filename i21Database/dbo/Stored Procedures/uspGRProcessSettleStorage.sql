@@ -29,6 +29,7 @@ BEGIN TRY
 	DECLARE @intCompanyLocationId INT
 	DECLARE @intStorageTypeId INT
 	DECLARE @intStorageScheduleId INT
+	DECLARE @DPContractHeaderId INT
 	DECLARE @ContractHeaderId INT
 	DECLARE @ContractDetailId INT
 	DECLARE @dblDPStorageUnits DECIMAL(24, 10)
@@ -229,27 +230,9 @@ BEGIN TRY
 	SET @intStorageScheduleId = NULL
 	SET @CurrentItemOpenBalance = NULL
 	SET @dblDPStorageUnits=NULL
-	SET @ContractHeaderId = NULL
+	SET @DPContractHeaderId = NULL
 	SET @ContractDetailId = NULL
-		--SELECT @CurrentItemOpenBalance = dblOpenBalance
-		--FROM tblGRCustomerStorage
-		--WHERE intCustomerStorageId = @intCustomerStorageId
-		
-		--SELECT @intCustomerStorageId
-	
-		--IF @CurrentItemOpenBalance IS NULL
-		--BEGIN
-		--	SET @ErrMsg = 'The ticket ' + LTRIM(@strStorageTicketNumber) + ' has been deleted by another user.  Settle Process cannot proceed.'
-		--	RAISERROR (@ErrMsg,16,1)
-		--END
-		
-		--IF @CurrentItemOpenBalance <> @dblOpenBalance
-		--BEGIN
-		--	SET @ErrMsg = 'The Open balance of ticket ' + LTRIM(@strStorageTicketNumber) + ' has been modified by another user.  Settle Process cannot proceed.'
-		--	RAISERROR (@ErrMsg,16,1)
-		--END
-		
-		
+
 	WHILE @SettleStorageKey > 0
 	BEGIN
 		SELECT @intCustomerStorageId = intCustomerStorageId
@@ -259,13 +242,13 @@ BEGIN TRY
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intStorageTypeId = intStorageTypeId
 			,@intStorageScheduleId = intStorageScheduleId
-			,@ContractHeaderId=intContractHeaderId		
+			,@DPContractHeaderId=intContractHeaderId		
 		FROM #SettleStorage
 		WHERE intSettleStorageKey = @SettleStorageKey
 		
-		IF ISNULL(@ContractHeaderId,0)>0
+		IF ISNULL(@DPContractHeaderId,0)>0
 		BEGIN
-			SELECT @ContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ContractHeaderId
+			SELECT @ContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@DPContractHeaderId
 			SET @dblDPStorageUnits= - @dblStorageUnits
 
 			 EXEC uspCTUpdateSequenceQuantityUsingUOM 
@@ -453,7 +436,7 @@ BEGIN TRY
 						,@intCompanyLocationId
 						,@intStorageTypeId
 						,@intStorageScheduleId
-						,@intContractHeaderId
+						,ISNULL(@DPContractHeaderId,0)
 
 					SET IDENTITY_INSERT [dbo].[#SettleStorage] OFF
 
@@ -478,7 +461,7 @@ BEGIN TRY
 						,intContractHeaderId
 					FROM #SettleStorageCopy
 
-					DELETE FROM #SettleStorageCopy
+					DELETE FROM #SettleStorageCopy				
 					
 					BREAK;
 				END
