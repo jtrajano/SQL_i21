@@ -2411,7 +2411,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "itemId": "colItemSubCurrency",
-                                                                        "text": "Sub Currency"
+                                                                        "text": "Cost Currency"
                                                                     },
                                                                     "name": "MyColumn48",
                                                                     "designerId": "bf3d5c3c-68e4-4b9e-80d9-b6964192fab9"
@@ -4998,7 +4998,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "itemId": "colChargeSubCurrency",
-                                                        "text": "Sub Currency"
+                                                        "text": "Cost Currency"
                                                     },
                                                     "name": "MyCheck3",
                                                     "designerId": "11978d9a-f652-4779-8e35-91f0c65b23c0",

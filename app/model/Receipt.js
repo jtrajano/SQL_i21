@@ -54,13 +54,14 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'ysnPosted', type: 'boolean' },
         { name: 'intCreatedUserId', type: 'int', allowNull: true },
         { name: 'intEntityId', type: 'int', allowNull: true },
-        { name: 'dblClaimableWt', type: 'float' },
+        { name: 'dblClaimableWt', type: 'float' }
     ],
 
     validators: [
         {type: 'presence', field: 'dtmReceiptDate'},
         {type: 'presence', field: 'strReceiptType'},
-        {type: 'presence', field: 'intLocationId'}
+        {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'intCurrencyId'}
     ],
 
     validate: function(options) {

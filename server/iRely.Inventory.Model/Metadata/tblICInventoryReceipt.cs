@@ -799,19 +799,7 @@ namespace iRely.Inventory.Model
         public string strSubCurrency
         {
             get
-            {
-                if (!ysnSubCurrency.HasValue)
-                {
-                    _subSubCurrency = null;
-                    return _subSubCurrency;
-                }
-
-                if (ysnSubCurrency == false)
-                {
-                    _subSubCurrency = null;
-                    return _subSubCurrency;
-                }
-                                
+            {                               
                 if (string.IsNullOrEmpty(_subSubCurrency))
                     if (vyuICInventoryReceiptItemLookUp != null)
                         return vyuICInventoryReceiptItemLookUp.strSubCurrency;

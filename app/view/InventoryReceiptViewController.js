@@ -1385,6 +1385,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var win = combo.up('window');
         var grid = combo.up('grid');
+        var cboCurrency = win.down('#cboCurrency');
         var grdLotTracking = win.down('#grdLotTracking');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
@@ -1407,11 +1408,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strOwnershipType', 'Own');
             current.set('intLifeTime', records[0].get('intLifeTime'));
             current.set('strLifeTimeType', records[0].get('strLifeTimeType'));
-
             current.set('intSubLocationId', records[0].get('intSubLocationId'));
             current.set('strSubLocationName', records[0].get('strSubLocationName'));
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
+            current.set('strSubCurrency', cboCurrency.getDisplayValue());
 
             var intUOM = null;
             var strUOM = '';
@@ -3894,8 +3895,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intCostUOMId', text: 'Cost UOM Id', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'ysnSubCurrency', text: 'Sub Currency', width: 100, dataType: 'boolean', hidden: true},
-                {dataIndex: 'strSubCurrency', text: 'Sub Currency', width: 100, dataType: 'string', hidden: true},
+                {dataIndex: 'ysnSubCurrency', text: 'Cost Currency', width: 100, dataType: 'boolean', hidden: true},
+                {dataIndex: 'strSubCurrency', text: 'Cost Currency', width: 100, dataType: 'string', hidden: true},
 
                 { xtype: 'numbercolumn', dataIndex: 'dblFranchise', text: 'Franchise', width: 100, dataType: 'float', hidden: true},
                 { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true}
