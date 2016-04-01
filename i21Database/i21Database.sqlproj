@@ -3579,6 +3579,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantityUsingUOM.sql" />
     <Build Include="dbo\Tables\tblTMLeaseDevice.sql" />
     <Build Include="dbo\Tables\tblGLCompanyPreferenceOption.sql" />
+    <Build Include="dbo\Tables\tblARCustomerLineOfBusiness.sql" />
     <Build Include="dbo\Views\vyuTRTransportReceipt_New.sql" />
     <Build Include="dbo\Views\vyuTRTransportReceipt_Old.sql" />
     <Build Include="dbo\Views\vyuICInventoryReceiptLookUp.sql" />
