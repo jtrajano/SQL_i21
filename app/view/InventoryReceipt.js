@@ -1296,7 +1296,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colItemSubCurrency',
-                                                                                text: 'Sub Currency'
+                                                                                text: 'Cost Currency'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -2395,7 +2395,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colChargeSubCurrency',
-                                                                text: 'Sub Currency',
+                                                                text: 'Cost Currency',
                                                                 editor: {
                                                                     xtype: 'checkboxfield',
                                                                     itemId: 'chkChargeSubCurrency'
