@@ -121,7 +121,7 @@ BEGIN TRY
 	FROM dbo.tblTRLoadHeader TL
 		JOIN dbo.tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 		JOIN dbo.tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-		LEFT JOIN dbo.vyuLGLoadView LG ON LG.intLoadId = TL.intLoadId
+		LEFT JOIN dbo.vyuLGLoadDetailView LG ON LG.intLoadId = TL.intLoadId
 		LEFT JOIN dbo.vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
 		LEFT JOIN dbo.tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (SELECT Item FROM dbo.fnTRSplit(DD.strReceiptLink,','))
 		LEFT JOIN ( SELECT DISTINCT intLoadDistributionDetailId

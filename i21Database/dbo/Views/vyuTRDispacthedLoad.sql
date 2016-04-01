@@ -93,7 +93,7 @@ intOutboundIndexRackPriceSupplyPointId  = CASE
 (select top 1 strTaxGroup from tblEntityLocation EM
                                LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
                                where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as strOutboundTaxGroup
-from dbo.vyuLGLoadView LG
+from dbo.vyuLGLoadDetailView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and (LG.strType != 'Outbound')
 UNION ALL
@@ -172,6 +172,6 @@ NULL as strInboundTaxGroup,
                                LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
                                where EM.intEntityLocationId = LG.intCustomerEntityLocationId) as strOutboundTaxGroup
 
-from dbo.vyuLGLoadView LG
+from dbo.vyuLGLoadDetailView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and (LG.strType = 'Outbound')

@@ -83,9 +83,9 @@ OPEN intListCursor;
 							END
 							BEGIN
 								IF @strInOutFlag = 'I'
-									SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadView LGL WHERE LGL.intLoadId = @intLoadId
+									SELECT @intLoadContractId = LGL.intPContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadDetailView LGL WHERE LGL.intLoadId = @intLoadId
 								ELSE
-									SELECT @intLoadContractId = LGL.intSContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadView LGL WHERE LGL.intLoadId = @intLoadId
+									SELECT @intLoadContractId = LGL.intSContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM vyuLGLoadDetailView LGL WHERE LGL.intLoadId = @intLoadId
 							END
 							IF @intLoadContractId IS NOT NULL
 							BEGIN

@@ -48,7 +48,7 @@ BEGIN
 		@strHaulerCountry = (SELECT EL.strCountry from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
 		@strHaulerState = (SELECT EL.strState from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
 		@strHaulerZip = (SELECT EL.strZipCode from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId)
-	FROM vyuLGLoadView L WHERE L.[strLoadNumber] = @strLoadNumber
+	FROM vyuLGLoadDetailView L WHERE L.[strLoadNumber] = @strLoadNumber
 
 SELECT DISTINCT 
 		(SELECT TOP(1) C.strCompanyName FROM tblSMCompanySetup C) as strCompanyName,
@@ -78,5 +78,5 @@ SELECT DISTINCT
 		L.strTrailerNo2,
 		L.strTrailerNo3,
 		L.strTruckNo
-	FROM vyuLGLoadView L WHERE L.[strLoadNumber] = @strLoadNumber
+	FROM vyuLGLoadDetailView L WHERE L.[strLoadNumber] = @strLoadNumber
 END

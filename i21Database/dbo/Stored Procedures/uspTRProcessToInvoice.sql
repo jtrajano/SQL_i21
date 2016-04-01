@@ -38,7 +38,7 @@ BEGIN
 	            		JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
 	            		JOIN tblTRDistributionDetail DD on DD.intDistributionHeaderId = DH.intDistributionHeaderId
 	            		LEFT JOIN vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
-	            		LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
+	            		LEFT JOIN vyuLGLoadDetailView LG on LG.intLoadId = TL.intLoadId
                         where TL.intTransportLoadId = @intTransportLoadId and DH.strDestination = 'Customer';
    
    SELECT @total = COUNT(*) FROM @InvoiceOutputTable;
@@ -140,7 +140,7 @@ END
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
 			JOIN tblTRDistributionDetail DD on DD.intDistributionHeaderId = DH.intDistributionHeaderId
 			LEFT JOIN vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
-			LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
+			LEFT JOIN vyuLGLoadDetailView LG on LG.intLoadId = TL.intLoadId
             where TL.intTransportLoadId = @intTransportLoadId and DH.strDestination = 'Customer';
 
 --No Records to process so exit

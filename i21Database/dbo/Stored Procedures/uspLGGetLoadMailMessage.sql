@@ -95,7 +95,7 @@ BEGIN
 		@strTrailerNo3 = L.strTrailerNo3,
 		@strTruckNo = L.strTruckNo
 
-	FROM		vyuLGLoadView L
+	FROM		vyuLGLoadDetailView L
 	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
 	LEFT JOIN		tblEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
 	LEFT JOIN		tblSMUserSecurity	Dispatcher On				Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
@@ -136,7 +136,7 @@ BEGIN
 			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) as strQuantity,
 			L.strItemNo,
 			L.strItemUOM	
-		FROM vyuLGLoadView L 
+		FROM vyuLGLoadDetailView L 
 		where L.[strLoadNumber] = @strLoadNumber
 
 	SET @strMailMessage =	N'<HTML> <BODY> <TABLE cellpadding=2 cellspacing=1 border=1>' + 

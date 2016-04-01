@@ -59,7 +59,7 @@ DECLARE @strOriginFullAddress NVARCHAR(MAX), @strDestinationFullAddress NVARCHAR
 BEGIN
 	SELECT DISTINCT Top(1)
 		@intPurchaseSale = L.intPurchaseSale
-	FROM		vyuLGLoadView L
+	FROM		vyuLGLoadDetailView L
 	WHERE L.[strLoadNumber] = @xmlParam
 
 	Insert into @LoadDetailTable
@@ -99,7 +99,7 @@ BEGIN
 			L.strItemUOM,
 			'' as strOrignFullAddress,
 			'' as strDestinationFullAddress
-		FROM vyuLGLoadView L 
+		FROM vyuLGLoadDetailView L 
 		WHERE L.[strLoadNumber] = @xmlParam
 
 	SELECT @total = count(*) from @LoadDetailTable;
