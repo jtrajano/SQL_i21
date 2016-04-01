@@ -31,6 +31,7 @@
 	[dblActual] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblDifference] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblPrepayPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblUnitQty] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblNetWeight] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblWeight] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblVolume] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
