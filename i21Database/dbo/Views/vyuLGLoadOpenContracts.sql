@@ -32,6 +32,25 @@ AS
 			CD.ysnUnlimitedQuantity,
 			CD.ysnLoad,
 			CD.dblQuantityPerLoad,
-			CD.intNoOfLoad
+			CD.intNoOfLoad,
+
+			Item.strType as strItemType,
+			CD.intPositionId,
+			CD.intLoadingPortId,
+			CD.intDestinationPortId,
+			CD.intDestinationCityId,
+			LoadingPort.strCity as strOriginPort,
+			DestPort.strCity as strDestinationPort,
+			DestCity.strCity as strDestinationCity,
+			CD.strPackingDescription,
+			CD.intShippingLineId as intShippingLineEntityId,
+			CD.intNumberOfContainers,
+			CD.intContainerTypeId,
+			CD.strVessel,
+			CD.intContractTypeId
 
 	FROM vyuCTContractDetailView 		CD
+	JOIN tblICItem Item ON Item.intItemId = CD.intItemId
+	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
+	LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
+	LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
