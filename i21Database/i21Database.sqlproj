@@ -3588,6 +3588,8 @@
     <Build Include="dbo\Views\vyuLGLoadView.sql" />
     <Build Include="dbo\Views\vyuQMCuppingTestResult.sql" />
     <Build Include="dbo\Views\vyuQMCuppingReport.sql" />
+    <Build Include="dbo\Tables\tblLGLoadDetailContainerCost.sql" />
+    <Build Include="dbo\Tables\tblLGLoadContainerCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
