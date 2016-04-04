@@ -36,6 +36,7 @@
 	,@ShipmentId					INT				= NULL
 	,@TransactionId					INT				= NULL
 	,@OriginalInvoiceId				INT				= NULL
+	,@PeriodsToAccrue				INT				= 1
 		
 	,@ItemId						INT				= NULL
 	,@ItemIsInventory				BIT				= 0
@@ -187,6 +188,7 @@ BEGIN TRY
 		,[dblDiscount]
 		,[dblAmountDue]
 		,[dblPayment]
+		,[intPeriodsToAccrue]
 		,[intEntitySalespersonId]
 		,[intFreightTermId]
 		,[intShipViaId]
@@ -245,6 +247,7 @@ BEGIN TRY
 		,[dblDiscount]					= @ZeroDecimal
 		,[dblAmountDue]					= @ZeroDecimal
 		,[dblPayment]					= @ZeroDecimal
+		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
 		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[intFreightTermId]				= @FreightTermId
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
