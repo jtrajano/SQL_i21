@@ -595,6 +595,7 @@ BEGIN TRY
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityUserSecurityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+			JOIN tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
@@ -607,6 +608,7 @@ BEGIN TRY
 					,@intBlendStagingLocationId
 					,@intPartialQuantityStorageLocationId
 					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
+				AND ISNULL(SL.ysnAllowConsume,0)=1
 
 			--Get Either Parent Lot OR Child Lot Based on Setting
 			IF @ysnEnableParentLot = 0
@@ -1202,6 +1204,7 @@ BEGIN TRY
 						,L.intWeightUOMId AS intItemIssuedUOMId
 					FROM tblICLot L
 					JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+					JOIN tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
 					WHERE L.intItemId = @intRawItemId
 						AND L.intStorageLocationId = @intPartialQuantityStorageLocationId
 						AND L.dblWeight >= 0.01
@@ -1209,6 +1212,7 @@ BEGIN TRY
 							Select strStatusName From @tblLotStatus
 							)
 						AND L.dtmExpiryDate >= GETDATE()
+						AND ISNULL(SL.ysnAllowConsume,0)=1
 					ORDER BY L.dtmDateCreated
 
 					Delete From #tblPartialQtyLot Where dblAvailableQty < .01
