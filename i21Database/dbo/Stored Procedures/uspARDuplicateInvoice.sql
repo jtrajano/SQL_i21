@@ -40,6 +40,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@DueDate					DATETIME
 		,@ShipDate					DATETIME
 		,@PostDate					DATETIME
+		,@PeriodsToAccrue			INT
 		,@EntitySalespersonId		INT
 		,@FreightTermId				INT
 		,@ShipViaId					INT
@@ -78,6 +79,7 @@ SELECT
 	,@DueDate						= NULL	--[dtmDueDate]
 	,@ShipDate						= NULL	--[dtmShipDate]
 	,@PostDate						= NULL	--[dtmPostDate]
+	,@PeriodsToAccrue				= [intPeriodsToAccrue]
 	,@EntitySalespersonId			= [intEntitySalespersonId]
 	,@FreightTermId					= [intFreightTermId]
 	,@ShipViaId						= [intShipViaId]
@@ -199,6 +201,7 @@ BEGIN TRY
 		,@ShipmentId							= @ShipmentId
 		,@TransactionId							= @TransactionId
 		,@OriginalInvoiceId						= @OriginalInvoiceId
+		,@PeriodsToAccrue						= @PeriodsToAccrue
 		
 		,@ItemId								= NULL
 		,@ItemIsInventory						= 0
