@@ -192,12 +192,12 @@ SELECT DISTINCT c.intCommodityId,
 		WHERE cd.intCommodityId = c.intCommodityId 	
 		)t) AS PurBasisDelivary,
 		
-		(SELECT	dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal
+		(select sum(dblTotal) from (SELECT	dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal
 				FROM tblSCTicket st
 				JOIN tblICItem i1 on i1.intItemId=st.intItemId and st.strDistributionOption='HLD'
 				JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-				WHERE st.intCommodityId  = c.intCommodityId) OnHold
+				WHERE st.intCommodityId  = c.intCommodityId)t) OnHold
 			       
 FROM tblICCommodity c              
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId and ysnDefault=1                

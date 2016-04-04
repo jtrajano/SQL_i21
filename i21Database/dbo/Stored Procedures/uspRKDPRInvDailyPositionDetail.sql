@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKDPRInvDailyPositionDetail] 
-
 	 @intCommodityId nvarchar(max)  
 	,@intLocationId int = NULL
 as
@@ -101,7 +100,7 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLo
 
 				SELECT distinct 1 AS intSeqId,'In-House',@strDescription,'Receipt' AS [strType],
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((it1.dblUnitOnHand),0))
-				, ic.strLocationName,i.strItemNo,@intCommodityId,@intCommodityUnitMeasureId,'' strReceiptNumber,'' strReceiptType
+				, ic.strLocationName,i.strItemNo,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 				FROM tblICItem i
 				INNER JOIN tblICInventoryReceiptItem ii on ii.intItemId = i.intItemId
 				INNER JOIN tblICInventoryReceipt ir on ir.intInventoryReceiptId=ii.intInventoryReceiptId
@@ -114,7 +113,7 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLo
 				UNION
 				SELECT distinct 1 AS intSeqId,'In-House',@strDescription,[Storage Type] AS [strType],
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(Balance,0))
-				,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId,Ticket,[Storage Type] 
+				,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 				FROM vyuGRGetStorageDetail 
 				WHERE ysnCustomerStorage <> 1 AND
 				intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
@@ -123,7 +122,7 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLo
 
 				(select distinct 1 AS intSeqId,'In-House',@strDescription,StorageType AS [strType],				
 				 CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
-				 ,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId,Ticket,StorageType
+				 ,strLocationName,strItemNo,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 				 FROM (
 				SELECT 
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal,strLocationName,strItemNo
@@ -136,7 +135,7 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLo
 UNION
 				SELECT DISTINCT 1,'In-House',@strDescription,'On-Hold' strType,
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
-				cl.strLocationName,i1.strItemNo,@intCommodityId,@intCommodityUnitMeasureId,strTicketNumber,strDistributionOption
+				cl.strLocationName,i1.strItemNo,@intCommodityId,@intCommodityUnitMeasureId,strTruckName,strDriverName
 				FROM tblSCTicket st
 				JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId and st.strDistributionOption='HLD'
 				JOIN tblICItem i1 on i1.intItemId=st.intItemId
