@@ -20,4 +20,4 @@ FROM tblSMEntityMenuFavorite Favorite
 INNER JOIN tblSMUserSecurity UserSecurity on Favorite.intEntityId = UserSecurity.intEntityUserSecurityId
 LEFT JOIN tblSMUserRoleMenu RoleMenu on UserSecurity.intUserRoleID = RoleMenu.intUserRoleId and Favorite.intMenuId = RoleMenu.intMenuId
 LEFT JOIN tblSMMasterMenu MasterMenu on Favorite.intMenuId = MasterMenu.intMenuID
-WHERE ISNULL(RoleMenu.ysnVisible, 0) = 1
+WHERE (CASE ISNULL(MasterMenu.strType, 'Folder') WHEN 'Folder' THEN 1 ELSE ISNULL(RoleMenu.ysnVisible, 0) END) = 1
