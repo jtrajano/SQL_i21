@@ -935,6 +935,7 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptChargeId { get; set; }
         public int intInventoryReceiptId { get; set; }
         public int? intContractId { get; set; }
+        public int? intContractDetailId { get; set; }
         public int? intChargeId { get; set; }
         public bool? ysnInventoryCost { get; set; }
         public string strCostMethod { get; set; }
@@ -949,6 +950,11 @@ namespace iRely.Inventory.Model
         public decimal? dblAmountPaid { get; set; }
         public decimal? dblAmountPriced { get; set; }
         public int? intSort { get; set; }
+
+        public int? intCurrencyId { get; set; }
+
+        public decimal? dblExchangeRate { get; set; }
+        public int? intCent { get; set; }
         public bool? ysnSubCurrency { get; set; }
 
         private string _contractNo;
@@ -1103,6 +1109,25 @@ namespace iRely.Inventory.Model
                 _vendorName = value;
             }
         }
+        private string _currency;
+        [NotMapped]
+        public string strCurrency
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_currency))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strCurrency;
+                    else
+                        return null;
+                else
+                    return _currency;
+            }
+            set
+            {
+                _currency = value;
+            }
+        }
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
@@ -1131,6 +1156,8 @@ namespace iRely.Inventory.Model
         public string strVendorName { get; set; }
         public bool? ysnPrice { get; set; }
         public bool? ysnSubCurrency { get; set; }
+        public string strCurrency { get; set; }
+        public int? intCent { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }

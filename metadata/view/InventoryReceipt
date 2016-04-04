@@ -4990,31 +4990,80 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.grid.column.Check",
+                                                    "type": "Ext.grid.column.Column",
                                                     "reference": {
                                                         "name": "columns",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "colChargeSubCurrency",
+                                                        "itemId": "colChargeCurrency",
                                                         "text": "Cost Currency"
                                                     },
-                                                    "name": "MyCheck3",
+                                                    "name": "MyColumn35",
                                                     "designerId": "11978d9a-f652-4779-8e35-91f0c65b23c0",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.form.field.ComboBox",
                                                             "reference": {
                                                                 "name": "editor",
                                                                 "type": "object"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "chkChargeSubCurrency"
+                                                                "columns": [
+                                                                    "[",
+                                                                    "{",
+                                                                    "dataIndex: 'intCurrencyID',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'strCurrency',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Currency',",
+                                                                    "flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'strDescription',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Description',",
+                                                                    "flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'ysnSubCurrency',",
+                                                                    "dataType: 'boolean',",
+                                                                    "hidden: true",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'intMainCurrencyId',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "}, ",
+                                                                    "{",
+                                                                    "dataIndex: 'intCent',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "}\t",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strCurrency",
+                                                                "itemId": "cboChargeCurrency",
+                                                                "valueField": "strCurrency"
                                                             },
-                                                            "name": "MyCheckbox1",
-                                                            "designerId": "f2ad2a45-b8ea-4f15-aee9-041ae5687d50"
+                                                            "name": "MyComboBox",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "37a053d5-ab58-4998-aefa-31985f86a6a4",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },

@@ -1879,8 +1879,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'dblUnitQty',
                                                                                             dataType: 'float',
-                                                                                            text: 'Unit Qty',
-                                                                                            hidden: true
+                                                                                            text: 'Unit Unit',
+                                                                                            hidden: 1
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboLotUOM',
@@ -2393,12 +2393,48 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             },
                                                             {
-                                                                xtype: 'checkcolumn',
-                                                                itemId: 'colChargeSubCurrency',
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colChargeCurrency',
                                                                 text: 'Cost Currency',
                                                                 editor: {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkChargeSubCurrency'
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intCurrencyID',
+                                                                            dataType: 'numeric',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strCurrency',
+                                                                            dataType: 'string',
+                                                                            text: 'Currency',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strDescription',
+                                                                            dataType: 'string',
+                                                                            text: 'Description',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'ysnSubCurrency',
+                                                                            dataType: 'boolean',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'intMainCurrencyId',
+                                                                            dataType: 'numeric',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'intCent',
+                                                                            dataType: 'numeric',
+                                                                            hidden: true
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboChargeCurrency',
+                                                                    displayField: 'strCurrency',
+                                                                    valueField: 'strCurrency'
                                                                 }
                                                             },
                                                             {
