@@ -87,28 +87,43 @@ BEGIN
 	---------------------------------------------------------
 
 	--Account
-	SELECT @intAccountId = CFAcc.intAccountId
-	FROM tblARCustomer as ARCus
-	INNER JOIN tblCFAccount as CFAcc
-	ON ARCus.intEntityCustomerId = CFAcc.intCustomerId
-	WHERE strCustomerNumber = @strAccountId
-	IF (@intAccountId = 0)
-	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strVehicleNumber,'Unable to find match for '+ @strAccountId +' on account list')
-		SET @ysnHasError = 1
-	END
+	IF (@strAccountId != '')
+		BEGIN 
+			SELECT @intAccountId = CFAcc.intAccountId
+			FROM tblARCustomer as ARCus
+			INNER JOIN tblCFAccount as CFAcc
+			ON ARCus.intEntityCustomerId = CFAcc.intCustomerId
+			WHERE strCustomerNumber = @strAccountId
+			IF (@intAccountId = 0)
+			BEGIN
+				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+				VALUES (@strVehicleNumber,'Unable to find match for '+ @strAccountId +' on account list')
+				SET @ysnHasError = 1
+			END
+		END
+	ELSE
+		BEGIN
+			SET @intAccountId = NULL
+		END
+
 
 	--Expense Item
-	SELECT @intExpenseItemId = intItemId  
-	FROM tblICItem
-	WHERE strItemNo = @strExpenseItemId
-	IF (@intExpenseItemId = 0)
-	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strVehicleNumber,'Unable to find match for '+ @strExpenseItemId +' on item list')
-		SET @ysnHasError = 1
-	END
+	IF (@strExpenseItemId != '')
+		BEGIN 
+			SELECT @intExpenseItemId = intItemId  
+			FROM tblICItem
+			WHERE strItemNo = @strExpenseItemId
+			IF (@intExpenseItemId = 0)
+			BEGIN
+				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+				VALUES (@strVehicleNumber,'Unable to find match for '+ @strExpenseItemId +' on item list')
+				SET @ysnHasError = 1
+			END
+		END
+	ELSE
+		BEGIN
+			SET @intExpenseItemId = NULL
+		END
 
 	---------------------------------------------------------
 	
@@ -184,7 +199,9 @@ BEGIN
 			RETURN 1
 		END TRY
 		BEGIN CATCH
-
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strVehicleNumber,'Internal Error - ' + ERROR_MESSAGE())
+			SET @ysnHasError = 1
 			ROLLBACK TRANSACTION
 			RETURN 0
 		END CATCH
