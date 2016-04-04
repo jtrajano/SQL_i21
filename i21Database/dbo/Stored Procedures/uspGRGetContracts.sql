@@ -21,7 +21,8 @@ BEGIN TRY
     ,strContractNumber  
     ,intEntityId  
     ,strEntityName       
-    ,dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intUnitMeasureId,'+LTRIM(@intUnitMeasureId)+',dblAvailableQty)dblAvailableQty  
+    ,dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intUnitMeasureId,'+LTRIM(@intUnitMeasureId)+',dblAvailableQty)dblAvailableQty
+	,dblAvailableQtyInItemStockUOM  
     ,strContractType  
     ,dblCashPrice   
     ,dtmStartDate  
@@ -46,7 +47,9 @@ BEGIN TRY
     ,intCommodityId   
     ,ysnEarlyDayPassed   
     ,ysnAllowedToShow   
-    ,intContractStatusId FROM vyuCTContractDetailView WHERE '+@strSearchCriteria+' Order By intContractDetailId'    
+    ,intContractStatusId
+	,dblScheduleQty
+	,intItemUOMId FROM vyuCTContractDetailView WHERE '+@strSearchCriteria+' Order By intContractDetailId'    
  ELSE  
   SET @sql='SELECT * FROM vyuCTContractDetailView Order By intContractDetailId'  
     
