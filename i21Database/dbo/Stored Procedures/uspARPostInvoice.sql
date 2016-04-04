@@ -1721,6 +1721,7 @@ IF @post = 1
 					ON DT.intTaxCodeId = TC.intTaxCodeId	
 			WHERE
 				DT.dblAdjustedTax <> @ZeroDecimal
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				
 			UNION ALL 
 			--DEBIT Discount
