@@ -45,6 +45,7 @@ BEGIN TRY
 		,@strAllInputItemsMandatoryforConsumption NVARCHAR(50)
 		,@intPackagingCategoryId INT
 		,@strPackagingCategory NVARCHAR(50)
+		,@intInputItemId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -1047,10 +1048,46 @@ BEGIN TRY
 					)
 			)
 	BEGIN
+		SELECT @intInputItemId=ri.intItemId
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
+			AND ri.intWorkOrderId = SI.intWorkOrderId
+			AND SI.intRecipeId = ri.intRecipeId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId <> 4
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderConsumedLot WC
+				JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
+				WHERE (
+						L.intItemId = ri.intItemId
+						OR L.intItemId = SI.intSubstituteItemId
+						)
+					AND WC.intWorkOrderId = @intWorkOrderId
+				)
+
+		SELECT @strItemNo = strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId = @intInputItemId
+
 		RAISERROR (
 				51095
 				,11
 				,1
+				,@strItemNo
 				)
 
 		RETURN
