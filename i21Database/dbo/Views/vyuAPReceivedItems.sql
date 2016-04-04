@@ -313,8 +313,8 @@ FROM
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	A.dblTax
 		,[dblRate]									=	0
-		,[ysnSubCurrency]							=	0
-		,[intSubCurrencyCents]						=	0
+		,[ysnSubCurrency]							=	A.ysnSubCurrency
+		,[intSubCurrencyCents]						=	A.intSubCurrencyCents
 		,[intAccountId]								=	A.intAccountId
 		,[strAccountId]								=	A.strAccountId
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = A.intAccountId)

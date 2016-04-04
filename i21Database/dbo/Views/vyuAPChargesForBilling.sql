@@ -62,6 +62,10 @@ SELECT
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
+	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
+	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
+	,[intSubCurrencyCents]						= TransCurrency.intCent
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -81,6 +85,12 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
+
+	LEFT JOIN dbo.tblSMCurrency TransCurrency 
+		ON TransCurrency.intCurrencyID = ReceiptCharge.intCurrencyId
+
+	LEFT JOIN dbo.tblSMCurrency MainCurrency
+		ON MainCurrency.intCurrencyID = TransCurrency.intMainCurrencyId
 
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
@@ -154,6 +164,10 @@ SELECT
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
+	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
+	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
+	,[intSubCurrencyCents]						= TransCurrency.intCent
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -173,6 +187,12 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
+
+	LEFT JOIN dbo.tblSMCurrency TransCurrency 
+		ON TransCurrency.intCurrencyID = ReceiptCharge.intCurrencyId
+
+	LEFT JOIN dbo.tblSMCurrency MainCurrency
+		ON MainCurrency.intCurrencyID = TransCurrency.intMainCurrencyId
 
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
