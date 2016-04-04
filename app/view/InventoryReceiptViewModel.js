@@ -202,10 +202,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         //itemCurrency: {
         //    type: 'currencybuffered'
         //},
-        //chargeCurrency: {
-        //    type: 'currencybuffered'
-        //},
-
+        chargeCurrency: {
+            type: 'currencybuffered'
+        },
         contract: {
             type: 'ctcontractheaderviewbuffered'
         },
@@ -713,6 +712,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             else {
                 return 'Wgt or Vol Gain/Loss: 0.00';
+            }
+        },
+        readOnlyChargeCurrency: function (get) {
+            switch (get('grdCharges.selection.ysnSubCurrency')) {
+                case true:
+                    return true;
+                    break;
+                default:
+                    return false;
             }
         }
     }
