@@ -405,11 +405,15 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reports\BillOfLading.cs" />
+    <Compile Include="Reports\BillOfLading.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Reports\BillOfLading.Designer.cs">
       <DependentUpon>BillOfLading.cs</DependentUpon>
     </Compile>
-    <Compile Include="Reports\WorkingInstruction.cs" />
+    <Compile Include="Reports\WorkingInstruction.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Reports\WorkingInstruction.Designer.cs">
       <DependentUpon>WorkingInstruction.cs</DependentUpon>
     </Compile>
