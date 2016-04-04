@@ -3567,6 +3567,21 @@
     <Build Include="dbo\Views\vyuPRMonthlyTaxTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateInsertForm941.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceDetail.sql" />
+    <Build Include="dbo\Tables\tblIPProcess.sql" />
+    <Build Include="dbo\Tables\tblIPSchedule.sql" />
+    <Build Include="dbo\Tables\tblIPScheduleType.sql" />
+    <Build Include="dbo\Tables\tblIPStep.sql" />
+    <Build Include="dbo\Tables\tblIPLog.sql" />
+    <Build Include="dbo\Tables\tblIPDelimiter.sql" />
+    <Build Include="dbo\Tables\tblIPStepDetail.sql" />
+    <Build Include="dbo\Tables\tblIPDataType.sql" />
+    <Build Include="dbo\Tables\tblIPFileType.sql" />
+    <Build Include="dbo\Tables\tblIPConnection.sql" />
+    <Build Include="dbo\Tables\tblIPServerType.sql" />
+    <Build Include="dbo\Tables\tblIPStepType.sql" />
+    <Build Include="dbo\Views\vyuIPGetLog.sql" />
+    <Build Include="dbo\Views\vyuIPGetProcess.sql" />
+    <Build Include="dbo\Views\vyuIPGetConnection.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
