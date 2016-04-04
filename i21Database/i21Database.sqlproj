@@ -3566,6 +3566,7 @@
     <Build Include="dbo\Views\vyuICInventoryReceiptItemLookUp.sql" />
     <Build Include="dbo\Views\vyuPRMonthlyTaxTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateInsertForm941.sql" />
+    <Build Include="dbo\Views\vyuTRRackPriceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

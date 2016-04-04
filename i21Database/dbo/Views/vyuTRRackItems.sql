@@ -8,7 +8,6 @@ SELECT DISTINCT A.intItemId
 	, D.strLocationName
 	, A.strType
 	, A.strDescription
-	, intRackPriceDetailId = RackPriceDetail.intRackPriceDetailId
 	, strEquation = ISNULL(RackPriceDetail.strEquation, '')
 FROM dbo.tblICItem A
 LEFT JOIN dbo.tblTRSupplyPointRackPriceEquation B ON B.intItemId = A.intItemId
